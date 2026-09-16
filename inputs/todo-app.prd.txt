@@ -1,0 +1,65 @@
+<!-- FROZEN FIXTURE — frozen upstream PRD for the TRD eval suite. Hand-written to
+     be compact but well-formed. Regenerate with the PRD producer if the format
+     drifts: tsx eval/src/run.ts --suite eval/suites/prd.json (then copy a raw
+     output here). Keep requirement IDs stable so historical TRD results compare. -->
+
+# PRD: Personal To-Do Web App
+
+## 1. Problem & Goal
+Individuals need a lightweight place to capture tasks and track what's done
+without signing up for an account. Goal: ship a single-user to-do web app where
+a person can add, edit, complete, delete, and filter tasks, with data persisting
+across browser sessions.
+
+## 2. Users & Stories
+- As a user, I want to add a task with a title (and optional due date), so that I
+  can capture something I need to do.
+- As a user, I want to mark a task complete/incomplete, so that I can track
+  progress.
+- As a user, I want to edit or delete a task, so that I can fix mistakes or
+  remove things I no longer need.
+- As a user, I want to filter tasks by all / active / completed, so that I can
+  focus on what's relevant.
+- As a user, I want my tasks to still be there when I reopen the app, so that I
+  don't lose my list.
+
+## 3. Functional Requirements
+
+### PRD-1 Add task
+User can create a task with a required non-empty `title` and an optional
+`dueDate`.
+- Acceptance: submitting a non-empty title adds the task to the list; the input
+  clears; an empty/whitespace-only title is rejected with a visible message and
+  no task is created.
+
+### PRD-2 Complete / reopen task
+User can toggle a task between active and completed.
+- Acceptance: toggling a task flips its completed state and updates its visual
+  style; the change survives a page reload.
+
+### PRD-3 Edit task
+User can edit an existing task's title and due date.
+- Acceptance: saving an edit updates the task in place; an edit to an empty title
+  is rejected and the original value is kept.
+
+### PRD-4 Delete task
+User can delete a task.
+- Acceptance: deleting a task removes it from the list immediately and it does
+  not reappear after reload.
+
+### PRD-5 Filter tasks
+User can filter the list by all / active / completed.
+- Acceptance: "active" shows only incomplete tasks, "completed" shows only
+  completed tasks, "all" shows every task; the active filter is visually
+  indicated; counts reflect the current filter's dataset.
+
+### PRD-6 Persistence
+Tasks persist across browser sessions on the same device.
+- Acceptance: tasks added/edited/completed/deleted are still in the correct state
+  after fully closing and reopening the browser.
+
+## 4. Non-Goals
+- No user accounts, authentication, or multi-device sync.
+- No collaboration, sharing, reminders, notifications, or recurring tasks.
+- No categories, tags, priorities, or sub-tasks in the MVP.
+- No native mobile app; responsive web only.

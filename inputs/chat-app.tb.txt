@@ -1,0 +1,60 @@
+<!-- FROZEN FIXTURE — compact PRD for the task-breakdown eval suite.
+     Requirement IDs use FR-*/AC-* (NOT PRD-*) on purpose: extractPrdRequirementIndex
+     only recognizes AC-*/FR-*/US-*/IC-*/PAGE-*/CMP-*, so PRD-* IDs would make the
+     task-coverage gate short-circuit to passed:true and void the objective score.
+     Keep the IDs stable so historical task-breakdown results stay comparable. -->
+
+# PRD: Real-Time Group Chat Web App
+
+## 1. Problem & Goal
+Registered users need a place to talk in shared public channels in real time.
+Ship a web app where users create and join public channels, post text messages
+that appear instantly for every channel member, see who is online per channel,
+and read prior message history when they open a channel.
+
+## 2. Functional Requirements
+
+### FR-1 Account registration & sign-in
+A person can register an account and sign in; only signed-in users can use the
+app.
+- AC-1: registering with valid credentials creates an account and signs the user
+  in; invalid or duplicate credentials are rejected with a visible message; an
+  unauthenticated visitor cannot access channels or post messages.
+
+### FR-2 Create public channel
+A signed-in user can create a public channel with a unique name.
+- AC-2: creating a channel with a non-empty, unique name adds it to the public
+  channel list for all users; a blank or duplicate name is rejected with a
+  visible message.
+
+### FR-3 Join channel
+A signed-in user can join any public channel.
+- AC-3: joining a channel adds the user as a member and opens the channel view;
+  the user then receives that channel's new messages in real time.
+
+### FR-4 Post text message (real-time)
+A member can post a text message to a channel and it appears instantly for all
+members.
+- AC-4: submitting a non-empty message broadcasts it to every connected member of
+  that channel within ~1s without a manual refresh; an empty message is not sent.
+
+### FR-5 Online presence per channel
+Each channel shows which of its members are currently online.
+- AC-5: a member appears in the channel's online list when connected and is
+  removed within a few seconds of disconnecting.
+
+### FR-6 Message timestamps
+Every message displays when it was sent.
+- AC-6: each message shows a human-readable timestamp reflecting its send time,
+  consistent across all viewers of the channel.
+
+### FR-7 Load message history
+Opening a channel loads its prior messages.
+- AC-7: opening a channel displays its most recent messages in chronological
+  order before any new real-time message arrives.
+
+## 3. Non-Goals
+- No private/direct messages, no private channels in the MVP.
+- No file uploads, images, reactions, threads, or message editing/deletion.
+- No voice/video, no push notifications, no cross-workspace federation.
+- No native mobile app; responsive web only.
