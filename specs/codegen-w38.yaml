@@ -1,0 +1,59 @@
+# Agent Evaluation Protocol v0.4 — evaluation spec (one workflow step).
+# The saved file is the reproducible source of truth; its sha256 goes in the
+# run manifest. Candidate ids are what judges and records see, never vendor names.
+
+protocol_version: "0.4"
+run_name: codegen-w38
+budget_usd: 10
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: codegen
+      version: "1"
+      test_set:
+        id: code-v1
+        inputs: [code-utils, code-component, code-schema]
+      candidate_ids: [sonnet-5, deepseek-v4-pro, kimi-k3]
+      required_checks: [tsc-noemit]
+      judged_dimensions: [meets-spec, correctness, type-quality, simplicity, robustness]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 180
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.2 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro
+    provider_route: openrouter
+    generation_settings: { temperature: 0.2 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0.2 }
+
+evaluators:
+  required_checks:
+    tsc-noemit:
+      kind: tsc
+      scaffold_dir: scaffold
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/codegen.md
+    methods: [pairwise-swap, absolute-1-5]
+
+execution:
+  trials_per_case: 3
+  concurrency: 3
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null   # not declared → results are directional
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2
