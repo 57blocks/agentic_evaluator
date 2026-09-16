@@ -29,7 +29,7 @@ import type {
   Winner,
 } from "./types.js";
 
-const REPO_ROOT = path.resolve(process.cwd());
+import { REPO_ROOT, inputsDir, runsDir } from "./paths.js";
 
 /** Load KEY=VALUE lines from .env.local into process.env (no dependency). */
 async function loadEnvLocal(): Promise<void> {
@@ -48,7 +48,7 @@ async function loadEnvLocal(): Promise<void> {
 }
 
 function parseArgs(argv: string[]): { suite: string; html: boolean } {
-  let suite = "eval/suite.json";
+  let suite = "suites/prd.json";
   let html = false;
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--suite") suite = argv[++i];
@@ -63,10 +63,7 @@ async function loadSuite(suitePath: string): Promise<Suite> {
 }
 
 function readInput(inputSlug: string): Promise<string> {
-  return fs.readFile(
-    path.join(REPO_ROOT, "eval", "inputs", `${inputSlug}.txt`),
-    "utf-8",
-  );
+  return fs.readFile(path.join(inputsDir(), `${inputSlug}.txt`), "utf-8");
 }
 
 /** Stable run id shared by the output dir and (for run-all) reporting. */
@@ -164,34 +161,11 @@ async function generateOne(params: {
   }
 
   if (producer === "agent") {
-    if (suite.step === "prd") {
-      const { producePrd } = await import("./producers/prd-agent.js");
-      const r = await producePrd(inputText, candidate, { tier: suite.tier });
-      return { ...toGen(r) };
-    }
-    if (suite.step === "trd") {
-      const { produceTrd } = await import("./producers/trd-agent.js");
-      const r = await produceTrd(inputText, candidate, { tier: suite.tier });
-      return { ...toGen(r) };
-    }
-    if (suite.step === "taskbreakdown") {
-      // Unlike prd/trd, this agent producer carries an OBJECTIVE score
-      // (PRD requirement coverage) computed inside the producer, so we keep
-      // checkPassed/checkOutput instead of dropping them via toGen().
-      const { produceTaskBreakdown } = await import("./producers/task-breakdown.js");
-      const r = await produceTaskBreakdown(inputText, candidate, { tier: suite.tier });
-      return {
-        text: r.text,
-        promptTokens: r.promptTokens,
-        completionTokens: r.completionTokens,
-        costUsd: r.costUsd,
-        ms: r.ms,
-        checkPassed: r.checkPassed,
-        checkOutput: r.checkOutput,
-      };
-    }
+    // The real PMAgent / TRDAgent / TaskBreakdownAgent producers live in
+    // agentic-builder and import its src/. They are not available in this
+    // standalone repo; wire them back through a candidate adapter later.
     throw new Error(
-      `agent producer has no mapping for step "${suite.step}" (expected "prd", "trd", or "taskbreakdown")`,
+      `agent producer is not available in this repo (step "${suite.step}"); use "prompt" or "codegen"`,
     );
   }
 
@@ -218,23 +192,6 @@ async function generateOne(params: {
     ms: r.ms,
     checkPassed,
     checkOutput,
-  };
-}
-
-/** Map an agent ProducerResult into the common GenOutput shape. */
-function toGen(r: {
-  text: string;
-  promptTokens: number;
-  completionTokens: number;
-  costUsd: number;
-  ms: number;
-}): GenOutput {
-  return {
-    text: r.text,
-    promptTokens: r.promptTokens,
-    completionTokens: r.completionTokens,
-    costUsd: r.costUsd,
-    ms: r.ms,
   };
 }
 
@@ -307,7 +264,7 @@ async function loadReusable(
   trial: number,
   currentRunId: string,
 ): Promise<RunRecord | null> {
-  const resultsDir = path.join(REPO_ROOT, "eval", "results");
+  const resultsDir = runsDir();
   let dirNames: string[];
   try {
     const entries = await fs.readdir(resultsDir, { withFileTypes: true });
@@ -681,13 +638,6 @@ export async function runSuite(suitePath: string, html: boolean): Promise<Report
   const suite = await loadSuite(suitePath);
   const producer: ProducerKind = suite.producer ?? "prompt";
 
-  // Real-agent producers must route through OpenRouter (candidates are
-  // OpenRouter model ids) — set this BEFORE any producer import so the agent
-  // doesn't fall back to its default DeepSeek-direct gateway.
-  if (producer === "agent") {
-    process.env.USE_OPENROUTER = "1";
-  }
-
   const rubric = await fs.readFile(path.resolve(REPO_ROOT, suite.rubricFile), "utf-8");
   // The prompt template is only meaningful for the "prompt" producer; agent and
   // codegen build their own prompts.
@@ -702,7 +652,7 @@ export async function runSuite(suitePath: string, html: boolean): Promise<Report
   // runId is fixed up front so codegen check work dirs can nest under it.
   const generatedAt = new Date().toISOString();
   const runId = `${suite.suiteId}-${generatedAt.replace(/[:.]/g, "-")}`;
-  const outDir = path.join(REPO_ROOT, "eval", "results", runId);
+  const outDir = path.join(runsDir(), runId);
 
   const limit = resolveConcurrency();
   // Output reuse: when set, already-run (candidate, input, trial) cells load
@@ -781,7 +731,7 @@ export async function runSuite(suitePath: string, html: boolean): Promise<Report
   }
 
   console.log(`\n${md}\n`);
-  console.log(`✔ Written to eval/results/${runId}/${html ? " (+ report.html)" : ""}`);
+  console.log(`✔ Written to runs/${runId}/${html ? " (+ report.html)" : ""}`);
   return report;
 }
 

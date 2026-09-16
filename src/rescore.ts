@@ -22,7 +22,7 @@ import { renderDashboardHtml } from "./dashboard.js";
 import type { RunRecordLite } from "./render.js";
 import type { Report, RunRecord, Suite } from "./types.js";
 
-const REPO_ROOT = path.resolve(process.cwd());
+import { REPO_ROOT, runsDir, suitesDir } from "./paths.js";
 
 /** Steps we know how to map back to `eval/suites/<step>.json`. */
 const STEP_ORDER = ["prd", "trd", "taskbreakdown", "codegen"] as const;
@@ -116,10 +116,10 @@ async function rescoreDir(
     return null;
   }
   const suiteRaw = (await readJson(
-    path.resolve(REPO_ROOT, "eval", "suites", `${step}.json`),
+    path.join(suitesDir(), `${step}.json`),
   )) as Suite | null;
   if (!suiteRaw) {
-    console.error(`  skip ${shortDir}: no eval/suites/${step}.json`);
+    console.error(`  skip ${shortDir}: no suites/${step}.json`);
     return null;
   }
   const lite = (await readJson(path.join(dir, "records.json"))) as
@@ -165,7 +165,7 @@ async function rescoreDir(
 
 async function main(): Promise<void> {
   await loadEnvLocal();
-  const resultsDir = path.join(REPO_ROOT, "eval", "results");
+  const resultsDir = runsDir();
   const targets = await latestRunDirs(resultsDir);
   if (targets.length === 0) {
     console.error(`No run dirs found under ${path.relative(REPO_ROOT, resultsDir)}/.`);

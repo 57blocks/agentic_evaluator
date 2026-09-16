@@ -45,7 +45,7 @@ import { loadEnvLocal } from "./run.js";
 /** Re-exported for `run-all.ts` (its records reader is typed against this). */
 export type { RunRecordLite };
 
-const REPO_ROOT = path.resolve(process.cwd());
+import { REPO_ROOT, runsDir } from "./paths.js";
 
 /** Canonical PDLC ordering for step sections; unknown steps sort last. */
 const STEP_ORDER = ["prd", "trd", "taskbreakdown", "codegen"] as const;
@@ -338,13 +338,13 @@ async function discoverLatestByStep(resultsDir: string): Promise<Discovered[]> {
 }
 
 async function main(): Promise<void> {
-  const resultsDir = path.join(REPO_ROOT, "eval", "results");
+  const resultsDir = runsDir();
   const found = await discoverLatestByStep(resultsDir);
 
   if (found.length === 0) {
     console.log(
       `No report.json found under ${path.relative(REPO_ROOT, resultsDir)}/. ` +
-        "Run an eval first (tsx eval/src/run.ts --suite … or tsx eval/src/run-all.ts).",
+        "Run an eval first (pnpm run run --suite suites/<step>.json).",
     );
     return; // exit 0 — nothing to render is not an error.
   }
