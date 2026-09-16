@@ -29,7 +29,7 @@ import { REPO_ROOT, runsDir } from "./paths.js";
 import { CODEGEN_PREAMBLE, CODEGEN_PRODUCER_VERSION } from "./producers/code-gen.js";
 import { sha256, short, trialHash } from "./canon/hash.js";
 import { classifyCompletion } from "./canon/states.js";
-import { openTrace } from "./canon/trace.js";
+import { openTrace, traceIntegrity } from "./canon/trace.js";
 import { buildManifest } from "./canon/manifest.js";
 import { buildLedger } from "./canon/cost.js";
 import { directionality, ratesFor } from "./canon/rates.js";
@@ -804,15 +804,20 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
   const trials = toTrialRows(adaptInput);
   const evaluations = toEvaluationRows(adaptInput);
   const ledger = buildLedger(trials, evaluations, PAIRWISE_EVALUATOR_ID, ABSOLUTE_EVALUATOR_ID);
+  const traceRows = await trace.close();
+  const integrity = await traceIntegrity(trace.file);
   const summary = {
     run: runId,
     step: suite.step,
     inputs: suite.inputs,
     candidates: suite.candidates.map((c) => ratesFor(c, trials)),
     directionality: directionality(suite.inputs.length, suite.mmd),
+    integrity,
     evaluation_coverage: evaluationCoverage(evaluations),
   };
-  const traceRows = await trace.close();
+  if (integrity.gaps_over_threshold > 0) {
+    console.log(`⚠ ${integrity.gaps_over_threshold} wall-clock gap(s) > ${integrity.threshold_ms / 60000} min in the trace — host suspended? durations unreliable (see GAPS.md)`);
+  }
   await writeCanonBundle(outDir, {
     manifest: { ...manifest, finished_at: new Date().toISOString() },
     trials,
