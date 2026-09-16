@@ -1,0 +1,100 @@
+# PRD: Personal To-Do Web App (MVP)
+
+## 1. Problem Statement & Goal
+
+**Problem:** Individuals need a lightweight way to track personal tasks without the overhead of creating accounts, managing teams, or learning complex project management tools.
+
+**Goal:** Ship a single-user to-do web app where a user can capture tasks, optionally schedule them with a due date, track completion, and filter their list — with data persisting across browser sessions without requiring login.
+
+**Success criteria:**
+- User can perform full task lifecycle (create, edit, complete, delete) in under 5 seconds per action.
+- Tasks and their state survive browser close/reopen on the same device/browser.
+
+---
+
+## 2. User Stories
+
+- **As a user**, I want to add a task with a title and optional due date, so that I can capture things I need to do.
+- **As a user**, I want to mark a task as complete, so that I can track what I've finished.
+- **As a user**, I want to edit a task's title or due date, so that I can correct or update details.
+- **As a user**, I want to delete a task, so that I can remove items I no longer need.
+- **As a user**, I want to filter tasks by all/active/completed, so that I can focus on what matters right now.
+- **As a user**, I want my tasks to persist across sessions, so that I don't lose my list when I close the browser.
+
+---
+
+## 3. Functional Requirements & Acceptance Criteria
+
+### PRD-1: Add Task
+Users can create a new task with a required title and an optional due date.
+
+**Acceptance Criteria:**
+- Given the input field is empty, when the user submits without a title, then the task is not created and an inline validation error is shown.
+- Given a valid title (1–200 chars) is entered, when the user submits, then a new task is added to the list with status "active" and appears immediately without page reload.
+- Given a title and a due date are entered, when the user submits, then the task is created with both fields stored.
+- Given no due date is entered, when the task is created, then the due date field is stored as empty/null and the UI does not show a date.
+- Title longer than 200 characters is rejected with a validation message.
+
+### PRD-2: Mark Task Complete / Incomplete
+Users can toggle a task's completion state.
+
+**Acceptance Criteria:**
+- Given an active task, when the user marks it complete (e.g., checkbox), then its status changes to "completed" and it is visually distinguished (e.g., strikethrough).
+- Given a completed task, when the user unmarks it, then its status reverts to "active".
+- The toggle action updates persisted state immediately (no separate save step).
+
+### PRD-3: Edit Task
+Users can edit an existing task's title and/or due date.
+
+**Acceptance Criteria:**
+- Given an existing task, when the user selects edit, then the title and due date become editable inline or via a form pre-filled with current values.
+- Given the user submits an edited title that is empty, then the edit is rejected and the original title is retained, with a validation error shown.
+- Given the user submits a valid edit, then the task's title/due date are updated and reflected in the list immediately.
+- Given the user cancels an edit in progress, then no changes are saved.
+
+### PRD-4: Delete Task
+Users can permanently remove a task.
+
+**Acceptance Criteria:**
+- Given an existing task, when the user selects delete, then the user is asked to confirm (or given an undo option) before removal.
+- Given deletion is confirmed, then the task is removed from the list and from persisted storage.
+- Deleted tasks do not reappear after page reload.
+
+### PRD-5: Filter Tasks (All / Active / Completed)
+Users can filter the visible task list by status.
+
+**Acceptance Criteria:**
+- Given the "All" filter is selected, then all tasks (active and completed) are shown.
+- Given the "Active" filter is selected, then only tasks with status "active" are shown.
+- Given the "Completed" filter is selected, then only tasks with status "completed" are shown.
+- The selected filter persists during the session (remains applied as tasks are added/edited/completed) but does not need to persist across sessions.
+- If no tasks match the selected filter, an empty-state message is shown (e.g., "No active tasks").
+
+### PRD-6: Persistence Across Sessions
+All task data persists without requiring a user account or login.
+
+**Acceptance Criteria:**
+- Given the user adds, edits, completes, or deletes tasks, when the browser is closed and reopened (same browser/device), then the task list reflects the last saved state.
+- Given the app is loaded with no prior data, then an empty task list is shown (no errors).
+- Data persistence works without any network/backend account creation (e.g., local storage or equivalent single-user storage).
+
+### PRD-7: Task List Display
+The app displays tasks with title, due date (if set), and completion status.
+
+**Acceptance Criteria:**
+- Each task row shows title, due date (formatted, e.g., "Jan 5, 2026") if present, and a completion indicator (checkbox/checkmark).
+- Tasks with no due date show no date text (not "N/A" or blank placeholder clutter).
+- Overdue tasks (due date in the past, not completed) are visually flagged (e.g., red text/badge) — *baseline requirement, minimal styling acceptable.*
+
+---
+
+## 4. Out-of-Scope / Non-Goals
+
+- User accounts, authentication, or login/signup.
+- Multi-user support, sharing, or collaboration.
+- Cross-device sync (persistence is local to the browser/device unless a backend is added in a future phase).
+- Task categories, tags, priorities, subtasks, or reminders/notifications.
+- Recurring tasks.
+- Sorting options beyond default list order.
+- Mobile native app (web-only, responsive design not explicitly required unless specified later).
+- Data export/import or backup.

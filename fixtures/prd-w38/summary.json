@@ -1,0 +1,183 @@
+{
+  "run": "prd-w38-2026-09-16T05-57-03-777Z",
+  "step": "prd",
+  "inputs": [
+    "todo-app",
+    "chat-app"
+  ],
+  "candidates": [
+    {
+      "candidate": "sonnet-5",
+      "valid_attempts": 4,
+      "classified": 0,
+      "task_success_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "reliability": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "evaluation_coverage": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "required_check_pass_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "completion_states": {
+        "success": 4,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 0,
+        "failure": 0,
+        "undetermined": 4
+      },
+      "check_states": {
+        "pass": 0,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": null,
+      "p50_ms": 22460,
+      "p95_ms": 28221
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "valid_attempts": 4,
+      "classified": 0,
+      "task_success_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "reliability": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "evaluation_coverage": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "required_check_pass_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "completion_states": {
+        "success": 4,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 0,
+        "failure": 0,
+        "undetermined": 4
+      },
+      "check_states": {
+        "pass": 0,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": null,
+      "p50_ms": 62056,
+      "p95_ms": 71271
+    },
+    {
+      "candidate": "kimi-k3",
+      "valid_attempts": 4,
+      "classified": 0,
+      "task_success_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "reliability": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "evaluation_coverage": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "required_check_pass_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "completion_states": {
+        "success": 4,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 0,
+        "failure": 0,
+        "undetermined": 4
+      },
+      "check_states": {
+        "pass": 0,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": null,
+      "p50_ms": 49656,
+      "p95_ms": 59278
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "2 inputs; fewer than 10",
+      "no minimum meaningful difference declared"
+    ]
+  },
+  "integrity": {
+    "events": 72,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 40807,
+    "threshold_ms": 300000,
+    "wall_ms": 313368
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "pairwise-swap",
+      "version": "google/gemini-3.1-pro-preview+rubric-7357ecab+tpl-0e52a472",
+      "pass": 6,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "absolute-1-5",
+      "version": "google/gemini-3.1-pro-preview+rubric-7357ecab+tpl-0f5ef8d8",
+      "pass": 12,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}

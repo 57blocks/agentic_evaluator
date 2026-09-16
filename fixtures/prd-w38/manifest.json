@@ -1,0 +1,77 @@
+{
+  "protocol_version": "0.4",
+  "run_id": "prd-w38-2026-09-16T05-57-03-777Z",
+  "run_name": "prd-w38",
+  "step": {
+    "id": "prd",
+    "version": "1"
+  },
+  "spec": {
+    "path": "specs/prd-w38.yaml",
+    "sha256": "6c49df82e9c7c16b99c3cbfc612c5fcec2c65e1733c1d686393fc126038fce46"
+  },
+  "test_set": {
+    "id": "briefs-v1",
+    "inputs": {
+      "todo-app": "a0f3bb264a1543f6e2da31c9bb55f0cbd899bccaaed167be7ef44120ce840608",
+      "chat-app": "63b941965d16231b7203aaf9b8577d5d95909a62e0be53b7853e55898d486f1b"
+    }
+  },
+  "candidates": {
+    "sonnet-5": {
+      "id": "sonnet-5",
+      "model": "anthropic/claude-sonnet-5",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0.3
+      }
+    },
+    "deepseek-v4-pro": {
+      "id": "deepseek-v4-pro",
+      "model": "deepseek/deepseek-v4-pro",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0.3
+      }
+    },
+    "kimi-k3": {
+      "id": "kimi-k3",
+      "model": "moonshotai/kimi-k3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0.3
+      }
+    }
+  },
+  "control_candidate": "sonnet-5",
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter"
+  },
+  "evaluators": {
+    "required_checks": [],
+    "check_version": null,
+    "rubric_sha256": "7357ecab4ab33f23b6d6be06a7e7a10634927d24c28178fa4c87a02aba860169",
+    "producer_template_sha256": "03f9dd2e8cc9681772d37434fdfeb68777fed5e4dd5a3156206c8132493e6174",
+    "judge_template_sha256": "0e52a472e59ed2740bc8bc45e8f84593ef69727be56239249cc62840d0f316d5",
+    "score_template_sha256": "0f5ef8d84d888847a0c73d3f25d68578b0b0fd04894383953763264d7206026c"
+  },
+  "success_criteria": null,
+  "operating_mode": "highest-assurance",
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 2,
+    "concurrency": 3,
+    "timeout_ms": 240000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold"
+  },
+  "harness": {
+    "name": "agentic-evaluator",
+    "version": "0.1.0",
+    "git_sha": "b8ad780",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-09-16T05:57:03.777Z",
+  "finished_at": "2026-09-16T06:02:17.181Z"
+}

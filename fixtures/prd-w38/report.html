@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>prd-w38 运行报告</title>
+<style>
+:root{--ground:#F3F4F6;--surface:#fff;--surface-2:#E9ECF0;--ink:#1A1F26;--ink-2:#4B5563;--ink-3:#8A94A3;--rule:#D6DBE2;--accent:#2F5D8A;--accent-soft:#DCE7F2;--ok-bg:#DDF1E4;--ok-fg:#1E6B3A;--bad-bg:#F8DEDC;--bad-fg:#9B2C25;--warn-bg:#F8ECD2;--warn-fg:#7D5410}
+@media(prefers-color-scheme:dark){:root{--ground:#12161B;--surface:#1A2027;--surface-2:#232B34;--ink:#E7EAEE;--ink-2:#B3BCC7;--ink-3:#7C8794;--rule:#2E3741;--accent:#7FB0DE;--accent-soft:#24384D;--ok-bg:#1F3A2A;--ok-fg:#8FD6A8;--bad-bg:#43231F;--bad-fg:#F0A29C;--warn-bg:#3F3319;--warn-fg:#EACB7C}}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.6 "IBM Plex Sans","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;padding:28px 20px 64px}
+.page{max-width:68rem;margin:0 auto;display:grid;gap:20px}
+.mono,td.num,.kv dd,code,pre{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.small{font-size:12px}
+header.run{display:grid;gap:6px}.eyebrow{margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em}h1 .id{font-family:"IBM Plex Mono",monospace;font-weight:500}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:8px 0 0;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.kv div{display:grid;gap:2px}.kv dt{font-size:12px;color:var(--ink-3)}.kv dd{margin:0;font-size:13px;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--surface);border-left:4px solid var(--warn-fg);padding:14px 18px;border-radius:6px}
+.verdict .tag{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
+.verdict p{margin:0}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+section.card{background:var(--surface);border-radius:8px;padding:18px 20px;display:grid;gap:12px}
+section.card h2{margin:0;font-size:15px;font-weight:600;display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-weight:500;color:var(--ink-3);font-size:12px;padding:6px 10px;border-bottom:1px solid var(--rule);white-space:nowrap}
+th.num,td.num{text-align:right}td{padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}tr:last-child td{border-bottom:none}
+td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+td .sub{display:block;font-size:11px;color:var(--ink-3)}
+tr.control td.cand::after{content:"对照";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.ledger td:first-child{color:var(--ink-2)}.ledger tr.total td{font-weight:600;border-top:2px solid var(--rule)}
+.note{font-size:12.5px;color:var(--ink-2);margin:0}code{background:var(--surface-2);padding:0 5px;border-radius:3px;font-size:12px}
+ul.gaps{margin:0;padding-left:1.1em;font-size:13px;color:var(--ink-2);display:grid;gap:4px}
+details{font-size:13px}summary{cursor:pointer;color:var(--accent);font-weight:500}
+pre{margin:8px 0 0;padding:12px;background:var(--surface-2);border-radius:6px;overflow-x:auto;font-size:12px;line-height:1.55;max-height:420px}
+footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
+@media(max-width:480px){h1{font-size:20px}.verdict{grid-template-columns:1fr}section.card{padding:14px}}
+</style></head>
+<body><div class="page">
+  <header class="run">
+    <p class="eyebrow">Agentic Evaluator · run report · protocol 0.4</p>
+    <h1>prd 步骤 · <span class="id">prd-w38</span></h1>
+    <dl class="kv">
+      <div><dt>规格</dt><dd>specs/prd-w38.yaml · sha256 6c49df82</dd></div>
+      <div><dt>测试集</dt><dd>briefs-v1 · 2 个输入</dd></div>
+      <div><dt>试验计划</dt><dd>3 候选 × 2 输入 × 2 次 = 12</dd></div>
+      <div><dt>裁判</dt><dd>google/gemini-3.1-pro-preview · rubric 7357ecab</dd></div>
+      <div><dt>模式</dt><dd>capability-neutral · cold cache</dd></div>
+      <div><dt>运行时间</dt><dd>2026-09-16 05:57 → 06:02</dd></div>
+      <div><dt>运行模式</dt><dd>highest-assurance（仅记录）</dd></div>
+      <div><dt>harness</dt><dd>0.1.0 · b8ad780</dd></div>
+    </dl>
+  </header>
+
+  <div class="verdict">
+    <span class="tag">DIRECTIONAL · 2 INPUTS</span>
+    <div><p>步骤 prd 没有声明必过检查，所有 trial 的 task_outcome 为 undetermined；只报裁判判断与成本，不报成功率。 未声明候选资格规则与最小有意义差异，本页不给出选型推荐。</p>
+    <p class="sub">2 inputs; fewer than 10；no minimum meaningful difference declared</p></div>
+  </div>
+
+  <section class="card">
+    <h2>候选结果 <span class="hint">同一组输入，按候选配对；每格 2 次</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>候选</th><th>任务结果</th><th class="num">必过检查</th><th class="num">成对胜率</th><th class="num">绝对分 1–5</th><th class="num">每次成功生成成本</th><th class="num">p50 耗时</th><th>完成状态</th></tr></thead>
+      <tbody><tr class="control">
+        <td class="cand">sonnet-5<span class="model">anthropic/claude-sonnet-5 · openrouter/claude-platform-on-aws</span></td>
+        <td><div class="state-list"><span class="ok">0 success</span><span class="bad">0 failure</span><span class="warn">4 undetermined</span></div></td>
+        <td class="num">—</td>
+        <td class="num">25%<span class="sub">4 场</span></td>
+        <td class="num">5.0</td>
+        <td class="num">—</td>
+        <td class="num">22.5 s</td>
+        <td><div class="state-list"><span class="ok">4 success</span></div></td>
+      </tr><tr>
+        <td class="cand">deepseek-v4-pro<span class="model">deepseek/deepseek-v4-pro · openrouter/streamlake, openrouter/atlascloud, openrouter/siliconflow</span></td>
+        <td><div class="state-list"><span class="ok">0 success</span><span class="bad">0 failure</span><span class="warn">4 undetermined</span></div></td>
+        <td class="num">—</td>
+        <td class="num">38%<span class="sub">4 场</span></td>
+        <td class="num">5.0</td>
+        <td class="num">—</td>
+        <td class="num">62.1 s</td>
+        <td><div class="state-list"><span class="ok">4 success</span></div></td>
+      </tr><tr>
+        <td class="cand">kimi-k3<span class="model">moonshotai/kimi-k3 · openrouter/together</span></td>
+        <td><div class="state-list"><span class="ok">0 success</span><span class="bad">0 failure</span><span class="warn">4 undetermined</span></div></td>
+        <td class="num">—</td>
+        <td class="num">88%<span class="sub">4 场</span></td>
+        <td class="num">5.0</td>
+        <td class="num">—</td>
+        <td class="num">49.7 s</td>
+        <td><div class="state-list"><span class="ok">4 success</span></div></td>
+      </tr></tbody>
+    </table></div>
+    <p class="note">必过检查的分母是检查实际执行的次数。成对胜率只用每格第一次成功输出，tie 计 0.5。每次成功生成成本不含裁判费用，全口径见成本分账。对照候选：sonnet-5。</p>
+  </section>
+
+  <div class="two-col">
+    <section class="card">
+      <h2>评估覆盖 <span class="hint">评估器自己的状态，先于任何通过率</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>评估器</th><th>版本</th><th class="num">应执行</th><th class="num">pass / fail</th><th class="num">未评估</th><th class="num">评估器错误</th></tr></thead>
+        <tbody><tr><td>pairwise-swap</td><td class="mono small">google/gemini-3.1-pro-preview+rubric-7357ecab+tpl-0e52a472</td>
+        <td class="num">6</td>
+        <td class="num">6 / 0</td>
+        <td class="num">0</td>
+        <td class="num">0</td></tr><tr><td>absolute-1-5</td><td class="mono small">google/gemini-3.1-pro-preview+rubric-7357ecab+tpl-0f5ef8d8</td>
+        <td class="num">12</td>
+        <td class="num">12 / 0</td>
+        <td class="num">0</td>
+        <td class="num">0</td></tr></tbody>
+      </table></div>
+      <p class="note">本次没有评估器错误。</p>
+    </section>
+    <section class="card">
+      <h2>成本分账 <span class="hint">来源：provider-reported</span></h2>
+      <div class="table-wrap"><table class="ledger"><tbody>
+        <tr><td>候选生成 · 12 次</td><td class="num">$0.3747</td></tr>
+        <tr><td>成对裁判</td><td class="num">$0.2654</td></tr>
+        <tr><td>绝对打分</td><td class="num">$0.1752</td></tr>
+        <tr><td>确定性检查</td><td class="num">$0.0000</td></tr>
+        <tr><td>重试与恢复</td><td class="num">$0.0000</td></tr>
+        <tr class="total"><td>合计</td><td class="num">$0.8153</td></tr>
+        <tr><td>每次成功的全口径成本</td><td class="num">—</td></tr>
+      </tbody></table></div>
+      <p class="note">评估花费是生成的 1.2 倍。没有成功的任务，每次成功成本无定义。</p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>本次未观测到的字段 <span class="hint">GAPS.md</span></h2>
+    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: OpenRouter reported cached prompt tokens on some calls; recorded under <code>tokens.cached</code>, no cache cost breakdown.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: single-call producers, no interactive execution; recorded as not applicable.</li><li><code>tool_calls</code>: producers make no tool calls this milestone.</li><li><code>checkpoint</code>: not applicable to single-call trials.</li><li>transport retry: not implemented; no provider_error occurred in this run.</li><li>evaluator errors: none in this run.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only.</li><li>statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json).</li></ul>
+  </section>
+
+  <section class="card">
+    <h2>原始记录</h2>
+    <details><summary>scores.jsonl 第一行</summary><pre>{
+ "run": "prd-w38-2026-09-16T05-57-03-777Z",
+ "step": "prd",
+ "candidate": "sonnet-5",
+ "model_ref": "anthropic/claude-sonnet-5",
+ "deployment_ref": "openrouter/claude-platform-on-aws",
+ "input": "todo-app",
+ "trial": 0,
+ "trial_hash": "9c3e3c4c7495b3bac7a51d4e8cb13aa0f0dda90a3a9e4bf527f6ad2a5afc96ff",
+ "completion_state": "success",
+ "truncated": false,
+ "task_outcome": "undetermined",
+ "outcome_reasons": [
+  "no required checks declared for this step; success cannot be decided"
+ ],
+ "rule_version": "success-v1",
+ "checks": {},
+ "judge": {
+  "pairwise": [
+   {
+    "vs": "deepseek-v4-pro",
+    "resolved": "tie"
+   },
+   {
+    "vs": "kimi-k3",
+    "resolved": "loss"
+   }
+  ],
+  "absolute_overall": 5,
+  "absolute_dimensions": {
+   "completeness": 5,
+   "testability": 5,
+   "no-hallucination": 5,
+   "structure": 5
+  }
+ },
+ "cost": {
+  "generation": 0.021344,
+  "source": "provider-reported"
+ },
+ "tokens": {
+  "prompt": 257,
+  "completion": 2083,
+  "cached": 0
+ },
+ "ms": 22460,
+ "ttft_ms": null,
+ "cache": null,
+ "finish_reason": "stop",
+ "error": null,
+ "legacy_status": "ok",
+ "legacy_check_passed": null,
+ "reused_from": null
+}</pre></details>
+    <details><summary>manifest.json</summary><pre>{
+ "protocol_version": "0.4",
+ "run_id": "prd-w38-2026-09-16T05-57-03-777Z",
+ "run_name": "prd-w38",
+ "step": {
+  "id": "prd",
+  "version": "1"
+ },
+ "spec": {
+  "path": "specs/prd-w38.yaml",
+  "sha256": "6c49df82e9c7c16b99c3cbfc612c5fcec2c65e1733c1d686393fc126038fce46"
+ },
+ "test_set": {
+  "id": "briefs-v1",
+  "inputs": {
+   "todo-app": "a0f3bb264a1543f6e2da31c9bb55f0cbd899bccaaed167be7ef44120ce840608",
+   "chat-app": "63b941965d16231b7203aaf9b8577d5d95909a62e0be53b7853e55898d486f1b"
+  }
+ },
+ "candidates": {
+  "sonnet-5": {
+   "id": "sonnet-5",
+   "model": "anthropic/claude-sonnet-5",
+   "provider_route": "openrouter",
+   "generation_settings": {
+    "temperature": 0.3
+   }
+  },
+  "deepseek-v4-pro": {
+   "id": "deepseek-v4-pro",
+   "model": "deepseek/deepseek-v4-pro",
+   "provider_route": "openrouter",
+   "generation_settings": {
+    "temperature": 0.3
+   }
+  },
+  "kimi-k3": {
+   "id": "kimi-k3",
+   "model": "moonshotai/kimi-k3",
+   "provider_route": "openrouter",
+   "generation_settings": {
+    "temperature": 0.3
+   }
+  }
+ },
+ "control_candidate": "sonnet-5",
+ "judge": {
+  "model": "google/gemini-3.1-pro-preview",
+  "provider_route": "openrouter"
+ },
+ "evaluators": {
+  "required_checks": [],
+  "check_version": null,
+  "rubric_sha256": "7357ecab4ab33f23b6d6be06a7e7a10634927d24c28178fa4c87a02aba860169",
+  "producer_template_sha256": "03f9dd2e8cc9681772d37434fdfeb68777fed5e4dd5a3156206c8132493e6174",
+  "judge_template_sha256": "0e52a472e59ed2740bc8bc45e8f84593ef69727be56239249cc62840d0f316d5",
+  "score_template_sha256": "0f5ef8d84d888847a0c73d3f25d68578b0b0fd04894383953763264d7206026c"
+ },
+ "success_criteria": null,
+ "operating_mode": "highest-assurance",
+ "minimum_meaningful_difference": null,
+ "execution": {
+  "trials_per_case": 2,
+  "concurrency": 3,
+  "timeout_ms": 240000,
+  "benchmark_mode": "capability-neutral",
+  "cache_mode": "cold"
+ },
+ "harness": {
+  "name": "agentic-evaluator",
+  "version": "0.1.0",
+  "git_sha": "b8ad780",
+  "node": "v24.14.0"
+ },
+ "started_at": "2026-09-16T05:57:03.777Z",
+ "finished_at": "2026-09-16T06:02:17.181Z"
+}</pre></details>
+  </section>
+
+  <footer><span>prd-w38-2026-09-16T05-57-03-777Z/</span><span>legacy-report.html 保留用于对账</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json</span></footer>
+</div></body></html>

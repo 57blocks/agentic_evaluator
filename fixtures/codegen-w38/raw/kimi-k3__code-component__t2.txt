@@ -1,0 +1,81 @@
+```file:Pagination.tsx
+import type { MouseEvent } from "react";
+
+export interface PaginationProps {
+  currentPage: number; // 1-based
+  totalPages: number; // >= 1
+  onPageChange: (page: number) => void;
+}
+
+export function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) {
+  const goToPage = (page: number): void => {
+    if (page < 1 || page > totalPages || page === currentPage) {
+      return;
+    }
+    onPageChange(page);
+  };
+
+  const handlePreviousClick = (
+    _event: MouseEvent<HTMLButtonElement>,
+  ): void => {
+    goToPage(currentPage - 1);
+  };
+
+  const handleNextClick = (_event: MouseEvent<HTMLButtonElement>): void => {
+    goToPage(currentPage + 1);
+  };
+
+  const pages: number[] = Array.from(
+    { length: totalPages },
+    (_value, index) => index + 1,
+  );
+
+  const isFirstPage: boolean = currentPage <= 1;
+  const isLastPage: boolean = currentPage >= totalPages;
+
+  return (
+    <nav className="pagination" aria-label="Pagination">
+      <button
+        type="button"
+        className="pagination-prev"
+        onClick={handlePreviousClick}
+        disabled={isFirstPage}
+      >
+        Previous
+      </button>
+
+      {pages.map((page) => {
+        const isActive: boolean = page === currentPage;
+        return (
+          <button
+            key={page}
+            type="button"
+            className={
+              isActive ? "pagination-page active" : "pagination-page"
+            }
+            aria-current={isActive ? "page" : undefined}
+            onClick={() => goToPage(page)}
+          >
+            {page}
+          </button>
+        );
+      })}
+
+      <button
+        type="button"
+        className="pagination-next"
+        onClick={handleNextClick}
+        disabled={isLastPage}
+      >
+        Next
+      </button>
+    </nav>
+  );
+}
+
+export default Pagination;
+```

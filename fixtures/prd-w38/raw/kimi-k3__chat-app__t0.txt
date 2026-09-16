@@ -1,0 +1,126 @@
+# PRD: Real-time Group Chat
+
+**Status:** Draft · **Version:** 1.0 · **Platform:** Web (desktop & mobile browsers)
+
+---
+
+## 1. Problem Statement
+
+Distributed teams and communities lack a lightweight, low-friction way to hold live, topic-based conversations. Email and async threads are slow and fragmented; existing chat tools are often heavyweight.
+
+**Goal:** Deliver a web app where registered users can create and join public channels, exchange plain-text messages in real time, see who is online, and access full conversation history — with no page refreshes and no setup beyond creating an account.
+
+**Success criteria (v1):** messages delivered to all online channel members in ≤2 seconds; history loads in ≤2 seconds for a typical channel.
+
+---
+
+## 2. User Stories
+
+- As a **new visitor**, I want to register an account, so that I can participate in channels.
+- As a **registered user**, I want to log in and stay logged in, so that my identity is attached to my messages.
+- As a **registered user**, I want to create a public channel, so that I can start a conversation space around a topic.
+- As a **registered user**, I want to browse all public channels, so that I can find conversations to join.
+- As a **registered user**, I want to join a public channel, so that I can read its history and post messages.
+- As a **channel member**, I want to send text messages, so that I can communicate with other members.
+- As a **channel member**, I want new messages to appear instantly without refreshing, so that the conversation feels live.
+- As a **channel member**, I want to see who is currently online in the channel, so that I know who is available to respond.
+- As a **channel member**, I want to see a timestamp on every message, so that I can understand when each message was sent.
+- As a **channel member**, I want prior messages to load when I open a channel, so that I can catch up on what I missed.
+
+---
+
+## 3. Functional Requirements & Acceptance Criteria
+
+### PRD-1: Account Registration
+The system shall allow a visitor to register with a unique username and a password.
+
+- **AC-1.1:** Given valid, unique credentials, when the visitor submits the registration form, then an account is created and the user is authenticated and landed in the app.
+- **AC-1.2:** Given an already-taken username, when the form is submitted, then registration fails with a clear "username taken" error and no account is created.
+- **AC-1.3:** Empty username or password shorter than 8 characters is rejected with an inline validation error.
+
+### PRD-2: Login & Session
+The system shall authenticate returning users and maintain a session.
+
+- **AC-2.1:** Given valid credentials, when the user logs in, then they are authenticated and routed to the channel list.
+- **AC-2.2:** Given invalid credentials, when the user logs in, then an error is shown and no session is created.
+- **AC-2.3:** An unauthenticated user visiting any app page is redirected to the login page.
+- **AC-2.4:** A logged-in user remains authenticated across browser refreshes (persistent session).
+
+### PRD-3: Create Public Channel
+An authenticated user shall be able to create a public channel with a unique name.
+
+- **AC-3.1:** Given a valid, unique channel name, when the user submits, then the channel is created, the creator is added as a member, and the channel opens.
+- **AC-3.2:** A duplicate channel name is rejected with a clear error.
+- **AC-3.3:** Empty or whitespace-only names are rejected.
+- **AC-3.4:** The new channel appears in the public channel list for all users without requiring them to re-register or restart the app.
+
+### PRD-4: Browse Public Channels
+An authenticated user shall see a list of all public channels.
+
+- **AC-4.1:** The channel list displays every existing public channel by name.
+- **AC-4.2:** The list indicates which channels the user has already joined.
+
+### PRD-5: Join Channel
+An authenticated user shall be able to join any public channel.
+
+- **AC-5.1:** Given a channel the user has not joined, when they select "Join," then they become a member and the channel view opens.
+- **AC-5.2:** Only members can view a channel's messages or post to it; non-members attempting to open a channel are prompted to join first.
+- **AC-5.3:** After joining, the channel is marked as joined in the user's channel list.
+
+### PRD-6: Send Text Message
+A channel member shall be able to post a plain-text message to a channel they have joined.
+
+- **AC-6.1:** Given non-empty text, when the member submits, then the message is persisted with author, channel, and server timestamp, and appears in the sender's message view.
+- **AC-6.2:** Empty or whitespace-only messages cannot be sent (submit is disabled or rejected).
+- **AC-6.3:** Messages are attributed to the sender by username in the UI.
+
+### PRD-7: Real-Time Delivery
+New messages shall be pushed to all online members of the channel without a page refresh.
+
+- **AC-7.1:** Given two members with the same channel open, when one posts a message, then the other sees it within 2 seconds without any manual action.
+- **AC-7.2:** Messages render in chronological order (oldest at top, newest appended at bottom).
+- **AC-7.3:** A member with the channel open who is temporarily disconnected receives missed messages upon reconnecting (via history reload).
+
+### PRD-8: Online Presence per Channel
+The channel view shall show which members are currently online in that channel.
+
+- **AC-8.1:** The channel view displays a list (or count with expandable list) of usernames of members currently viewing/connected to the channel.
+- **AC-8.2:** When a member opens the channel, they appear in the online list for other viewers within 2 seconds.
+- **AC-8.3:** When a member closes the channel or disconnects, they are removed from the online list within 30 seconds.
+
+### PRD-9: Message Timestamps
+Every message shall display a timestamp.
+
+- **AC-9.1:** Each message shows at minimum the time (HH:MM) in the viewer's local timezone.
+- **AC-9.2:** Messages from a prior calendar day also display the date.
+- **AC-9.3:** The timestamp reflects when the server received the message, not when it was rendered.
+
+### PRD-10: Message History on Open
+When a member opens a channel, its stored message history shall load.
+
+- **AC-10.1:** Opening a channel displays the most recent 50 messages in chronological order within 2 seconds (under normal load).
+- **AC-10.2:** Scrolling to the top of the message list loads the next older batch of messages until the full history is reachable.
+- **AC-10.3:** History persists across sessions — messages sent by any member are visible to any member who opens the channel later, including after all users log out and back in.
+
+---
+
+## 4. Out of Scope / Non-Goals (v1)
+
+- Private channels, direct messages, or invite-only channels
+- Message editing, deletion, reactions, threads, or replies
+- Rich text, images, file attachments, or link previews (plain text only)
+- Typing indicators and read receipts
+- Notifications of any kind (push, email, unread badges, mentions)
+- Leaving a channel, channel deletion/archiving, and moderation tools (kick/ban/admin roles)
+- User profiles, avatars, or status messages beyond a username
+- Message search
+- Email verification and password reset flows
+- Native mobile applications
+
+---
+
+## 5. Key Product Decisions (to resolve ambiguity in the brief)
+
+1. **Membership gate:** Only joined members can read or post in a channel — this keeps presence and history semantics unambiguous.
+2. **Unique channel names:** Required so the public channel directory is unambiguous.
+3. **History batching:** Initial load capped at 50 messages with scroll-back pagination; engineering may tune the batch size, but full history must remain reachable.

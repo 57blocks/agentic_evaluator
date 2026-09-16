@@ -1,0 +1,56 @@
+```file:utils.ts
+export function parseQueryString(qs: string): Record<string, string | string[]> {
+  const result: Record<string, string | string[]> = {};
+
+  // Strip leading '?' if present
+  const raw = qs.startsWith("?") ? qs.slice(1) : qs;
+  if (raw.length === 0) {
+    return result;
+  }
+
+  const pairs = raw.split("&");
+
+  for (const pair of pairs) {
+    if (pair.length === 0) {
+      continue; // skip empty segments from trailing/doubled &
+    }
+
+    const eqIdx = pair.indexOf("=");
+    let rawKey: string;
+    let rawValue: string;
+
+    if (eqIdx === -1) {
+      rawKey = pair;
+      rawValue = "";
+    } else {
+      rawKey = pair.slice(0, eqIdx);
+      rawValue = pair.slice(eqIdx + 1);
+    }
+
+    const key = decode(rawKey);
+    const value = decode(rawValue);
+
+    const existing = result[key];
+    if (existing === undefined) {
+      result[key] = value;
+    } else if (Array.isArray(existing)) {
+      existing.push(value);
+    } else {
+      result[key] = [existing, value];
+    }
+  }
+
+  return result;
+}
+
+function decode(str: string): string {
+  // Replace + with space before percent decoding
+  const withSpaces = str.replace(/\+/g, " ");
+  try {
+    return decodeURIComponent(withSpaces);
+  } catch {
+    // If malformed, return the raw substring (after + → space conversion)
+    return withSpaces;
+  }
+}
+```

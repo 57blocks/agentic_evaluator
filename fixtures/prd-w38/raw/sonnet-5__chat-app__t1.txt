@@ -1,0 +1,112 @@
+# PRD: Real-Time Group Chat — Public Channels
+
+## 1. Problem Statement & Goal
+
+**Problem:** Teams and communities need a lightweight way to communicate in shared, topic-based spaces without email threads or fragmented DMs. Users need visibility into who's active and need to catch up on conversation history when joining or returning to a channel.
+
+**Goal:** Enable registered users to create and join public channels, exchange text messages in real time, see who else is currently online in a channel, and load prior message history on entry.
+
+**Success criteria:**
+- Messages appear for all channel members within 1 second of being sent (p95).
+- Users can create a channel and have a peer join it within 2 minutes of signup, with zero manual setup steps.
+
+---
+
+## 2. User Stories
+
+- **As a registered user**, I want to create a public channel, so that I can start a topic-based conversation others can join.
+- **As a registered user**, I want to see a list of existing public channels, so that I can find and join ones relevant to me.
+- **As a registered user**, I want to join a public channel, so that I can participate in its conversation.
+- **As a channel member**, I want to post text messages, so that I can communicate with other members.
+- **As a channel member**, I want new messages to appear instantly without refreshing, so that conversation feels live.
+- **As a channel member**, I want to see which members are currently online, so that I know who is available.
+- **As a channel member**, I want to see a timestamp on each message, so that I know when it was sent.
+- **As a channel member**, I want to see past messages when I open a channel, so that I have context before joining the conversation.
+
+---
+
+## 3. Functional Requirements & Acceptance Criteria
+
+### PRD-1: Channel Creation
+Registered users can create a new public channel with a unique name.
+
+**Acceptance Criteria:**
+- Given a logged-in user, when they submit a channel name that is not already taken, a new public channel is created and the user becomes a member.
+- Channel names must be non-empty, ≤50 characters, and unique (case-insensitive); duplicate/invalid names are rejected with a clear error.
+- The creator is automatically joined to the channel upon creation.
+- The new channel appears in the public channel list for all users within 5 seconds.
+
+### PRD-2: Channel Discovery
+Registered users can view a list of all public channels.
+
+**Acceptance Criteria:**
+- A logged-in user can retrieve a list of all public channels, showing at minimum: channel name and current member count.
+- The list updates (on next load or via real-time push) when channels are created.
+- Users who are not members of a channel can still see it in this list.
+
+### PRD-3: Join Channel
+Registered users can join any public channel.
+
+**Acceptance Criteria:**
+- Given a logged-in user and an existing public channel they are not a member of, when they request to join, they become a member immediately.
+- A user cannot join the same channel twice (idempotent — repeated join requests do not create duplicate memberships).
+- Once joined, the user immediately gains access to that channel's message stream and history.
+
+### PRD-4: Post Text Message
+Channel members can post text messages visible to all members.
+
+**Acceptance Criteria:**
+- Given a channel member, when they submit non-empty text (≤2,000 characters), the message is persisted and associated with the sender, channel, and a server-generated timestamp.
+- Empty messages or messages exceeding the length limit are rejected with a clear error and not persisted.
+- Only members of a channel can post to it; non-members attempting to post receive an authorization error.
+
+### PRD-5: Real-Time Message Delivery
+Messages posted to a channel appear for all currently connected members without manual refresh.
+
+**Acceptance Criteria:**
+- When a member posts a message, all other members currently viewing that channel receive and render it within 1 second (p95) under normal network conditions.
+- Members not currently viewing the channel do not need real-time delivery to that view but will see the message via history load (PRD-7) when they next open it.
+- If a member's connection drops and reconnects, they do not receive duplicate messages already rendered, and any missed messages are recoverable via history load.
+
+### PRD-6: Online Presence Per Channel
+Each channel displays which of its members are currently online.
+
+**Acceptance Criteria:**
+- A member's status is marked "online" for a channel while they have an active session with that channel open.
+- A member's status changes to "offline" within 30 seconds of disconnecting (connection close, tab close, or timeout).
+- The online member list for a channel updates in real time (within 5 seconds) for all other members currently viewing that channel.
+- Only channel members (not all registered users) are shown in the per-channel presence list.
+
+### PRD-7: Message Timestamps
+Every message displays the time it was sent.
+
+**Acceptance Criteria:**
+- Each rendered message shows a timestamp reflecting server-recorded send time.
+- Timestamps are displayed in the viewing user's local time zone.
+- Timestamp is visible on every message in both real-time delivery and loaded history.
+
+### PRD-8: Message History Load
+When a user opens a channel, prior messages load automatically.
+
+**Acceptance Criteria:**
+- On opening a channel (first time or returning), the user's client fetches and displays the most recent N messages (N configurable; default 50) in chronological order.
+- History includes sender identity, message text, and timestamp for each message.
+- History load completes and renders within 2 seconds (p95) under normal network conditions.
+- If a channel has fewer than N messages, all existing messages are shown without error.
+- Users who are not members of a channel cannot load its message history.
+
+---
+
+## 4. Out of Scope / Non-Goals
+
+- Private/direct messages and private (invite-only) channels
+- Leaving/deleting channels, channel ownership transfer, or moderation tools (kick/ban, mute)
+- Message editing, deletion, or reactions
+- Rich media (images, files, links preview), markdown formatting, or mentions/@notifications
+- Read receipts / "seen by" indicators
+- Push notifications (mobile/desktop/email)
+- Pagination/infinite-scroll UX beyond initial history load (may be a fast follow)
+- User registration/authentication flow details (assumed to exist as a prerequisite system)
+- Search within messages or across channels
+- Rate limiting / spam or abuse prevention (flag for follow-up security review)
+- Multi-device presence reconciliation edge cases beyond basic online/offline

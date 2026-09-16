@@ -1,0 +1,57 @@
+```file:utils.ts
+/**
+ * Parse a URL query string into an object of decoded key/value pairs.
+ *
+ * - Accepts input with or without a leading "?".
+ * - Pairs are split on "&"; empty segments are ignored.
+ * - Each pair is split on the FIRST "=" only, so values may contain "=".
+ * - A key with no "=" maps to "".
+ * - Keys and values are percent-decoded with "+" converted to a space;
+ *   malformed sequences are kept as their raw substring.
+ * - Repeated keys collapse into an array in first-seen order.
+ */
+export function parseQueryString(qs: string): Record<string, string | string[]> {
+  const result: Record<string, string | string[]> = {};
+
+  const input = qs.startsWith("?") ? qs.slice(1) : qs;
+  if (input === "") {
+    return result;
+  }
+
+  for (const pair of input.split("&")) {
+    if (pair === "") {
+      continue;
+    }
+
+    const eqIndex = pair.indexOf("=");
+    const rawKey = eqIndex === -1 ? pair : pair.slice(0, eqIndex);
+    const rawValue = eqIndex === -1 ? "" : pair.slice(eqIndex + 1);
+
+    const key = decodeFormComponent(rawKey);
+    const value = decodeFormComponent(rawValue);
+
+    const existing = result[key];
+    if (existing === undefined) {
+      result[key] = value;
+    } else if (Array.isArray(existing)) {
+      existing.push(value);
+    } else {
+      result[key] = [existing, value];
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Decode a single form-encoded component: "+" becomes a space and percent
+ * escapes are decoded. If decoding fails, the raw substring is returned.
+ */
+function decodeFormComponent(component: string): string {
+  try {
+    return decodeURIComponent(component.replace(/\+/g, " "));
+  } catch {
+    return component;
+  }
+}
+```

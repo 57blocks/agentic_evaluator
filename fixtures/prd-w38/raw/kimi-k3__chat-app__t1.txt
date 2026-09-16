@@ -1,0 +1,134 @@
+# PRD: Real-time Group Chat (v1)
+
+**Status:** Draft · **Owner:** Product · **Type:** Web app (new)
+
+---
+
+## 1. Problem Statement & Goal
+
+**Problem:** Registered users have no shared, topic-organized space to converse live. Communication is fragmented, and there is no visibility into who is available or what was said previously.
+
+**Goal:** Give registered users a web app where they can create and join public channels, exchange text messages in real time, see who is online, and read prior conversation history.
+
+**Success measures:**
+- New messages visible to channel members with p95 latency ≤ 2 seconds (no manual refresh).
+- Presence list reflects connect/disconnect within 30 seconds.
+- 100% of sent messages persisted and retrievable via channel history.
+
+---
+
+## 2. User Stories
+
+- As a **new user**, I want to register an account, so that I can access the chat app.
+- As a **registered user**, I want to log in and out, so that my identity is attached to my messages and my session is secure.
+- As a **registered user**, I want to create a public channel, so that I can start a topic-based conversation space.
+- As a **registered user**, I want to browse and join public channels, so that I can participate in conversations that interest me.
+- As a **channel member**, I want to post text messages, so that I can communicate with other members.
+- As a **channel member**, I want new messages to appear instantly without refreshing, so that the conversation feels live.
+- As a **channel member**, I want to see which members are currently online, so that I know who is available to respond.
+- As a **channel member**, I want to see a timestamp on each message, so that I know when it was sent.
+- As a **channel member**, I want message history to load when I open a channel, so that I can catch up on what I missed.
+
+---
+
+## 3. Functional Requirements
+
+### PRD-1: Registration
+The system must allow a new user to register with a unique username, email, and password.
+
+**Acceptance criteria:**
+- Given a unique username/email and a valid password, when the user submits registration, then an account is created and the user is logged in.
+- Given a username or email already in use, submission is rejected with a clear error; no account is created.
+- Password must meet a minimum length of 8 characters; weaker passwords are rejected with an error.
+
+### PRD-2: Authentication (Login / Logout)
+The system must authenticate registered users and maintain a session.
+
+**Acceptance criteria:**
+- Valid credentials create an authenticated session; invalid credentials return an error and no session.
+- Logout terminates the session.
+- Unauthenticated users attempting to access channels or post are redirected to the login page.
+
+### PRD-3: Create Public Channel
+An authenticated user must be able to create a public channel with a name.
+
+**Acceptance criteria:**
+- Channel name is required, 3–50 characters, and must be unique; duplicates are rejected with an error.
+- On creation, the channel appears in the public channel list for all users.
+- The creator is automatically joined as a member of the channel.
+
+### PRD-4: Browse & Join Channels
+An authenticated user must be able to view all public channels and join any of them.
+
+**Acceptance criteria:**
+- The channel list displays every public channel by name.
+- When a user joins a channel, they become a member and can immediately view and post in it.
+- Channels the user has already joined are visually distinguished or excluded from the "join" action.
+
+### PRD-5: Post Text Messages
+A channel member must be able to post a plain-text message to a channel they have joined.
+
+**Acceptance criteria:**
+- Each message is persisted with author, channel, content, and server timestamp.
+- Empty or whitespace-only messages are rejected.
+- Messages are limited to 2,000 characters; longer input is rejected or blocked.
+- A user who has not joined the channel cannot post to it.
+
+### PRD-6: Real-Time Delivery
+A posted message must appear instantly for all members currently viewing the channel, without refresh.
+
+**Acceptance criteria:**
+- When member A posts in a channel, the message renders in member B's open view of that channel within 2 seconds (p95), with no manual action by B.
+- Messages render in chronological order in the channel view.
+- If a member's connection drops, messages missed during the drop are visible after reconnect/reload via history (PRD-7).
+
+### PRD-7: Message History
+When a user opens a channel, its stored message history must load.
+
+**Acceptance criteria:**
+- Opening a channel loads the most recent 50 messages, displayed oldest → newest.
+- The user can load older messages in additional batches (e.g., "load more" or scroll-up trigger) until the start of history is reached.
+- History includes messages sent before the user joined the channel.
+- History is identical for all members viewing the same channel.
+
+### PRD-8: Message Timestamps
+Every message must display a timestamp.
+
+**Acceptance criteria:**
+- Each message shows the time it was sent, rendered in the viewer's local timezone.
+- Same-day messages show time (e.g., 14:32); older messages also show the date.
+- Timestamps reflect the server-recorded send time and are consistent across viewers (same moment, localized display).
+
+### PRD-9: Per-Channel Online Presence
+Each channel must display which of its members are currently online.
+
+**Acceptance criteria:**
+- A member is shown as "online" in a channel while they have an active authenticated connection to the app.
+- When a member connects, they appear in the online list within 5 seconds; when they disconnect or log out, they are removed within 30 seconds.
+- The online list is visible to all members viewing the channel and reflects that channel's membership only.
+
+---
+
+## 4. Non-Functional Notes (supporting the above)
+
+- Real-time delivery via persistent connection (e.g., WebSocket); polling-only is not acceptable for PRD-6.
+- Timestamps stored in UTC; localized at render time.
+- Reasonable baseline: 50 concurrent users per channel without degradation of the PRD-6 latency target.
+
+---
+
+## 5. Out of Scope / Non-Goals (v1)
+
+- Private channels, direct messages, or group DMs.
+- Message editing, deletion, reactions, threads, or rich text/formatting.
+- File, image, or link-preview attachments.
+- Typing indicators and read receipts.
+- @mentions and push/email/browser notifications.
+- Leaving a channel, member management, moderation, or admin roles.
+- Message search.
+- Native mobile apps (responsive web only).
+- Message retention policies or archiving.
+
+---
+
+*Open question for eng/design kickoff: confirm presence definition (app-level connection vs. channel-focused tab) — PRD-9 assumes app-level connection.*

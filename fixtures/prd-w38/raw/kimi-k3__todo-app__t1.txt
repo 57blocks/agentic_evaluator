@@ -1,0 +1,124 @@
+# PRD: Personal To-Do Web App (MVP)
+
+**Status:** Draft · **Version:** 1.0 · **Owner:** Product
+
+---
+
+## 1. Problem Statement & Goal
+
+**Problem:** People need a frictionless way to capture and track personal tasks. Existing tools require account creation and sync setup before a single task can be added — too much overhead for a simple personal list.
+
+**Goal:** Ship a single-user web app where a user can manage the full lifecycle of a personal task list — add, complete, edit, delete, filter — with zero setup, and have tasks persist across browser sessions.
+
+**Success criteria:**
+- A user can complete the full task lifecycle (add → complete → edit → delete) with no errors and no page reloads.
+- 100% of task data (title, due date, status) survives a page reload and browser restart in testing.
+
+---
+
+## 2. User Stories
+
+- As a user, I want to add a task with a title, so that I can capture things I need to do.
+- As a user, I want to optionally set a due date, so that I can track when a task needs to be done.
+- As a user, I want to mark tasks complete (and undo that), so that I can track my progress.
+- As a user, I want to edit a task's title and due date, so that I can fix mistakes or update details.
+- As a user, I want to delete a task, so that I can remove items I no longer need.
+- As a user, I want to filter my list by all / active / completed, so that I can focus on what's relevant.
+- As a user, I want my tasks saved automatically, so that they're still there when I come back.
+
+---
+
+## 3. Functional Requirements
+
+### PRD-1: Create task
+The user can add a task with a required title and an optional due date (date only).
+
+**Acceptance criteria:**
+- AC-1.1: Task can be submitted via an "Add" button and via the Enter key.
+- AC-1.2: Given a non-empty title, on submit the task appears in the list immediately (no page reload) with status "active," and the input clears.
+- AC-1.3: Given an empty or whitespace-only title, submission is blocked, an inline validation message appears, and no task is created.
+- AC-1.4: A task can be created with no due date; when a due date is provided, it is stored and displayed with the task.
+
+### PRD-2: View task list
+All tasks are displayed with title, completion state, and due date (if set).
+
+**Acceptance criteria:**
+- AC-2.1: Each task row shows its title, a completion indicator, and its due date when one is set.
+- AC-2.2: When no tasks match the current view, an empty-state message is shown (e.g., "No tasks yet").
+
+### PRD-3: Mark complete / reopen
+Each task can be toggled between active and completed.
+
+**Acceptance criteria:**
+- AC-3.1: Each task has a checkbox/toggle; activating it marks the task complete and applies a distinct visual style (e.g., strikethrough).
+- AC-3.2: Toggling a completed task returns it to active and removes the completed styling.
+- AC-3.3: The change is reflected immediately without a page reload.
+
+### PRD-4: Edit task
+The user can edit a task's title and due date.
+
+**Acceptance criteria:**
+- AC-4.1: Each task has an edit control that opens an editable view of the title and due date.
+- AC-4.2: The user can change the title, change the due date, or clear the due date; saving applies changes immediately.
+- AC-4.3: Saving with an empty/whitespace-only title is blocked with a validation message.
+- AC-4.4: The user can cancel editing, leaving the task unchanged.
+
+### PRD-5: Delete task
+The user can permanently delete a task.
+
+**Acceptance criteria:**
+- AC-5.1: Each task has a delete control; activating it removes the task from the list immediately.
+- AC-5.2: Deletion is immediate and permanent (no confirmation dialog or undo in MVP — see §7).
+
+### PRD-6: Filter tasks
+The user can filter the list by All / Active / Completed.
+
+**Acceptance criteria:**
+- AC-6.1: Three filter options are shown: All, Active, Completed. "All" is the default on page load.
+- AC-6.2: "Active" shows only incomplete tasks; "Completed" shows only completed tasks; "All" shows every task.
+- AC-6.3: The currently selected filter is visually indicated.
+- AC-6.4: A status change updates the filtered view immediately (e.g., completing a task while in "Active" view removes it from that view).
+
+### PRD-7: Persistence
+All task data persists across sessions using browser storage.
+
+**Acceptance criteria:**
+- AC-7.1: Every create, toggle, edit, and delete is saved to browser storage (localStorage) immediately.
+- AC-7.2: Given existing tasks, when the page is reloaded or the browser is closed and reopened, the list is restored with correct titles, due dates, and completion states.
+- AC-7.3: Data is scoped to the current browser and device; no network call is required to save or load tasks.
+
+---
+
+## 4. Non-Functional Requirements
+
+- **NFR-1:** Fully client-side after initial page load; no backend or network dependency.
+- **NFR-2:** UI remains responsive with up to 500 tasks.
+- **NFR-3:** Keyboard-operable; inputs and controls have accessible labels (WCAG 2.1 AA basics).
+- **NFR-4:** Supports the latest two major versions of Chrome, Firefox, Safari, and Edge.
+
+---
+
+## 5. Out of Scope / Non-Goals (MVP)
+
+- User accounts, authentication, or multi-user support
+- Cloud sync / cross-device access
+- Task priorities, tags/categories, notes/descriptions, subtasks
+- Due *times* (date-only), overdue highlighting, reminders, or notifications
+- Recurring tasks
+- Manual reordering / drag-and-drop
+- Search
+- Delete confirmation, undo, or bulk actions
+- Native mobile apps
+
+---
+
+## 6. Assumptions & Decisions
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| 1 | Persistence via `localStorage`; no backend | Single user, no accounts — client storage satisfies "persists across sessions" |
+| 2 | New tasks are appended to the end of the list | Matches canonical to-do app behavior |
+| 3 | Titles limited to 200 characters (whitespace trimmed) | Guardrail against storage bloat; tunable |
+| 4 | No delete confirmation in MVP | Keeps scope minimal; deletion is low-stakes for a personal list |
+
+**Open question:** If cross-device access becomes a need post-MVP, that triggers a backend + auth workstream (explicitly out of scope here).

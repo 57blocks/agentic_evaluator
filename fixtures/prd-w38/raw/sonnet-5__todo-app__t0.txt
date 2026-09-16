@@ -1,0 +1,106 @@
+# PRD: Personal To-Do Web App (MVP)
+
+## 1. Problem Statement & Goal
+
+**Problem:** Users need a simple way to track personal tasks without the overhead of account creation, collaboration features, or complex organization systems. Existing to-do apps often require sign-up friction or offer more complexity than needed for basic personal task tracking.
+
+**Goal:** Ship a single-user, no-login web app that lets a user create, view, edit, complete, delete, and filter tasks, with data persisting across browser sessions.
+
+**Success criteria:**
+- User can manage a task list entirely within one browser without losing data between visits.
+- Core actions (add/edit/complete/delete/filter) work with no observable data loss or corruption.
+
+---
+
+## 2. User Stories
+
+- **As a user**, I want to add a task with a title and optional due date, so that I can capture things I need to do.
+- **As a user**, I want to mark a task as complete, so that I can track my progress.
+- **As a user**, I want to edit a task's title or due date, so that I can correct or update it.
+- **As a user**, I want to delete a task, so that I can remove items I no longer need.
+- **As a user**, I want to filter tasks by all/active/completed, so that I can focus on what's relevant.
+- **As a user**, I want my tasks to still be there when I close and reopen the app, so that I don't lose my list.
+
+---
+
+## 3. Functional Requirements & Acceptance Criteria
+
+### PRD-1: Add Task
+Users can create a task with a required title and optional due date.
+
+**Acceptance Criteria:**
+- AC1: Given the task input form, when the user enters a non-empty title and submits without a due date, a new task is created with status "active."
+- AC2: Given the task input form, when the user enters a title and selects a due date, the task is created with that due date stored.
+- AC3: Given an empty title, when the user submits, the task is NOT created and an inline validation message is shown.
+- AC4: Newly created tasks appear in the task list immediately without a page reload.
+- AC5: Title max length is enforced (e.g., 200 characters); input beyond this is rejected or truncated with a visible message.
+
+### PRD-2: Mark Task Complete / Incomplete
+Users can toggle a task's completion status.
+
+**Acceptance Criteria:**
+- AC1: Given an active task, when the user marks it complete (e.g., via checkbox), its status changes to "completed" and this is visually indicated (e.g., strikethrough).
+- AC2: Given a completed task, when the user unmarks it, its status reverts to "active."
+- AC3: Toggling completion does not alter the task's title or due date.
+- AC4: The change persists after a page reload.
+
+### PRD-3: Edit Task
+Users can edit the title and/or due date of an existing task.
+
+**Acceptance Criteria:**
+- AC1: Given an existing task, when the user opens edit mode, the current title and due date are pre-filled.
+- AC2: When the user submits an edited title that is non-empty, the task's title updates and displays the new value.
+- AC3: When the user submits an empty title during edit, the edit is rejected and the original title is retained; a validation message is shown.
+- AC4: When the user changes or clears the due date, the task's due date updates accordingly (including removal of a due date).
+- AC5: Edits persist after a page reload.
+- AC6: The user can cancel an edit without saving changes; the task remains unchanged.
+
+### PRD-4: Delete Task
+Users can permanently remove a task.
+
+**Acceptance Criteria:**
+- AC1: Given an existing task, when the user selects delete, the task is removed from the list immediately.
+- AC2: Deleted tasks do not reappear after a page reload.
+- AC3: A confirmation step (e.g., confirm dialog) is presented before deletion to prevent accidental loss.
+
+### PRD-5: Filter Tasks (All / Active / Completed)
+Users can filter the visible task list by status.
+
+**Acceptance Criteria:**
+- AC1: Given tasks with mixed statuses, when the user selects "All," every task is shown.
+- AC2: When the user selects "Active," only tasks with status "active" are shown.
+- AC3: When the user selects "Completed," only tasks with status "completed" are shown.
+- AC4: The selected filter is visually indicated (e.g., highlighted button/tab).
+- AC5: Filter selection does not delete or alter task data—only visibility.
+
+### PRD-6: Persistence Across Sessions
+Task data persists after the browser tab/window is closed and reopened, without requiring an account.
+
+**Acceptance Criteria:**
+- AC1: Given tasks exist, when the user closes the browser and reopens the app (same browser/device), all previously created, edited, and deleted states are preserved accurately.
+- AC2: Persistence works without any login or account creation.
+- AC3: Clearing browser storage/cache for the app removes persisted data (expected behavior, documented to user as a known limitation if storage is client-side).
+
+### PRD-7: View Task List
+Users can see all their tasks with key details at a glance.
+
+**Acceptance Criteria:**
+- AC1: Each task in the list displays its title, due date (if set), and completion status.
+- AC2: Tasks with no due date display no date field or a clear "no due date" indicator (not a blank/error state).
+- AC3: The list updates in real time as tasks are added, edited, completed, or deleted—no manual refresh required.
+
+---
+
+## 4. Out-of-Scope / Non-Goals
+
+- User accounts, authentication, or login/logout.
+- Multi-user support, sharing, or collaboration.
+- Task categories, tags, projects, subtasks, or priority levels.
+- Recurring tasks or reminders/notifications.
+- Sorting options beyond the specified filters (e.g., sort by due date).
+- Search functionality.
+- Mobile native app (web only).
+- Data export/import.
+- Sync across multiple devices/browsers.
+- Offline-first architecture beyond basic client-side persistence.
+- Undo functionality for deletions (beyond the confirmation step).

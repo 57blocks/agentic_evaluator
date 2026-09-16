@@ -1,0 +1,453 @@
+{
+  "suiteId": "prd-w38",
+  "step": "prd",
+  "judge": "google/gemini-3.1-pro-preview",
+  "generatedAt": "2026-09-16T05:57:03.777Z",
+  "candidates": [
+    "sonnet-5",
+    "deepseek-v4-pro",
+    "kimi-k3"
+  ],
+  "inputs": [
+    "todo-app",
+    "chat-app"
+  ],
+  "scorecards": [
+    {
+      "candidate": "sonnet-5",
+      "winRate": 25,
+      "dimensionWinRates": {
+        "completeness": 50,
+        "testability": 50,
+        "no-hallucination": 37.5,
+        "structure": 62.5
+      },
+      "avgCostUsd": 0.023572,
+      "avgMs": 24098.5,
+      "okRate": 1,
+      "trials": 2,
+      "objectivePassRate": null,
+      "absoluteScore": 5,
+      "dimensionScores": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 4.75,
+        "structure": 5
+      }
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "winRate": 37.5,
+      "dimensionWinRates": {
+        "completeness": 50,
+        "testability": 0,
+        "no-hallucination": 37.5,
+        "structure": 0
+      },
+      "avgCostUsd": 0.0085804803025,
+      "avgMs": 62190.5,
+      "okRate": 1,
+      "trials": 2,
+      "objectivePassRate": null,
+      "absoluteScore": 5,
+      "dimensionScores": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      }
+    },
+    {
+      "candidate": "kimi-k3",
+      "winRate": 87.5,
+      "dimensionWinRates": {
+        "completeness": 50,
+        "testability": 100,
+        "no-hallucination": 75,
+        "structure": 87.5
+      },
+      "avgCostUsd": 0.0615153,
+      "avgMs": 51753.75,
+      "okRate": 1,
+      "trials": 2,
+      "objectivePassRate": null,
+      "absoluteScore": 5,
+      "dimensionScores": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      }
+    }
+  ],
+  "judgements": [
+    {
+      "inputSlug": "todo-app",
+      "a": "sonnet-5",
+      "b": "deepseek-v4-pro",
+      "dimensions": {
+        "completeness": {
+          "forward": "a",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Output A explicitly includes a 'View Task List' requirement, directly addressing the 'view' action requested in the brief, whereas Output B omits a dedicated view section."
+        },
+        "testability": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A uses numbered Acceptance Criteria with strict Given/When/Then formatting, making it much easier to translate directly into automated tests."
+        },
+        "no-hallucination": {
+          "forward": "a",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Output B invents a whole new requirement section for 'Responsive Layout' and an optional task count, whereas Output A stays strictly focused on the requested features."
+        },
+        "structure": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A provides a more rigorous structure with stable, numbered AC IDs (AC1, AC2) and clear BDD syntax that developers and QA can easily reference."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "b",
+        "resolved": "tie",
+        "reason": "Output A is the stronger PRD because it strictly follows the brief without adding unrequested feature sections, and its Given/When/Then acceptance criteria provide superior testability and structure."
+      }
+    },
+    {
+      "inputSlug": "todo-app",
+      "a": "sonnet-5",
+      "b": "kimi-k3",
+      "dimensions": {
+        "completeness": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both PRDs fully cover all the core requirements outlined in the implied brief without missing any functional areas."
+        },
+        "testability": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B includes more rigorous edge cases in its acceptance criteria, such as whitespace trimming, empty states, and default filter selections."
+        },
+        "no-hallucination": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output A invents a delete confirmation step not requested in the brief, whereas Output B strictly avoids scope creep by explicitly listing it as out of scope."
+        },
+        "structure": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B uses globally unique, stable IDs for its acceptance criteria (e.g., AC-1.1), making them much easier for developers and QA to reference than Output A's repetitive AC1/AC2 numbering."
+        }
+      },
+      "overall": {
+        "forward": "b",
+        "reverse": "b",
+        "resolved": "b",
+        "reason": "Output B is the superior PRD because it maintains strict discipline against scope creep, provides highly testable edge-case criteria, and uses a more robust referencing structure for development."
+      }
+    },
+    {
+      "inputSlug": "todo-app",
+      "a": "deepseek-v4-pro",
+      "b": "kimi-k3",
+      "dimensions": {
+        "completeness": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both PRDs fully cover all the core requirements outlined in the brief without missing any functionality."
+        },
+        "testability": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B provides numbered, highly specific acceptance criteria (e.g., AC-1.1) and covers edge cases like whitespace trimming and empty states."
+        },
+        "no-hallucination": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output A introduces a specific responsive layout requirement with exact pixel breakpoints that was not requested, whereas Output B sticks strictly to the brief."
+        },
+        "structure": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B uses stable, hierarchical IDs for both the requirements and the individual acceptance criteria, making it much easier for developers to reference."
+        }
+      },
+      "overall": {
+        "forward": "b",
+        "reverse": "b",
+        "resolved": "b",
+        "reason": "Output B is the superior PRD because its numbered acceptance criteria make it highly testable, and it maintains strict discipline regarding the scope of the brief."
+      }
+    },
+    {
+      "inputSlug": "chat-app",
+      "a": "sonnet-5",
+      "b": "deepseek-v4-pro",
+      "dimensions": {
+        "completeness": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both PRDs successfully cover all the core features requested in the brief, including channels, real-time messaging, presence, and history."
+        },
+        "testability": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A uses stable, numbered IDs for every single acceptance criterion (e.g., AC-1.1), making it much easier for QA to track and verify."
+        },
+        "no-hallucination": {
+          "forward": "a",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Output B dictates specific technical implementations like 'session token (cookie)' and 'WebSocket', whereas Output A correctly sticks to product behavior."
+        },
+        "structure": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A provides a highly disciplined structure with clear, hierarchical numbering for both requirements and acceptance criteria."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "b",
+        "resolved": "tie",
+        "reason": "Output A is the superior PRD because it maintains strict product focus without dictating technical architecture, and its numbered acceptance criteria make it highly actionable for developers and testers."
+      }
+    },
+    {
+      "inputSlug": "chat-app",
+      "a": "sonnet-5",
+      "b": "kimi-k3",
+      "dimensions": {
+        "completeness": {
+          "forward": "b",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Output B includes pagination to ensure the entire message history is accessible, whereas Output A only loads the last 50 messages with no way to view older ones."
+        },
+        "testability": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B provides slightly more precise acceptance criteria, such as distinguishing between server receipt time and render time for timestamps."
+        },
+        "no-hallucination": {
+          "forward": "tie",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Both outputs introduce minor, standard technical constraints not explicitly in the brief (Output A adds max message length; Output B adds password length and pagination) to make the app buildable."
+        },
+        "structure": {
+          "forward": "b",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Output B includes a highly valuable 'Key Product Decisions' section that explicitly resolves ambiguities for developers, alongside standard metadata and clear IDs."
+        }
+      },
+      "overall": {
+        "forward": "b",
+        "reverse": "b",
+        "resolved": "b",
+        "reason": "Output B delivers a more robust and developer-ready PRD by addressing edge cases like full history pagination and explicitly documenting its product decisions to resolve brief ambiguities."
+      }
+    },
+    {
+      "inputSlug": "chat-app",
+      "a": "deepseek-v4-pro",
+      "b": "kimi-k3",
+      "dimensions": {
+        "completeness": {
+          "forward": "tie",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Both PRDs fully cover all the requirements mentioned in the brief, including real-time messaging, presence, timestamps, and history."
+        },
+        "testability": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B uses the Given/When/Then format for its acceptance criteria, making them highly concrete and directly translatable into automated tests."
+        },
+        "no-hallucination": {
+          "forward": "a",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Output A strictly adheres to the brief, whereas Output B invents unrequested features like scroll-back pagination and an 8-character password constraint."
+        },
+        "structure": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B uses stable, hierarchical IDs for every single acceptance criterion (e.g., AC-1.1), making it easier for developers to reference."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "b",
+        "resolved": "tie",
+        "reason": "Although Output B has slightly better structure and testability, Output A wins overall because it strictly follows the prompt's rule to avoid scope creep and unrequested features like pagination."
+      }
+    }
+  ],
+  "scores": [
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "todo-app",
+      "trial": 0,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "todo-app",
+      "trial": 1,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 4,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "todo-app",
+      "trial": 0,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "todo-app",
+      "trial": 1,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "todo-app",
+      "trial": 0,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "todo-app",
+      "trial": 1,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "chat-app",
+      "trial": 0,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "chat-app",
+      "trial": 1,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "chat-app",
+      "trial": 0,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "chat-app",
+      "trial": 1,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "chat-app",
+      "trial": 0,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "chat-app",
+      "trial": 1,
+      "dimensions": {
+        "completeness": 5,
+        "testability": 5,
+        "no-hallucination": 5,
+        "structure": 5
+      },
+      "overall": 5
+    }
+  ]
+}

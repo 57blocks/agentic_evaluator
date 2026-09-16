@@ -1,0 +1,82 @@
+{
+  "protocol_version": "0.4",
+  "run_id": "codegen-w38-2026-09-16T05-50-19-377Z",
+  "run_name": "codegen-w38",
+  "step": {
+    "id": "codegen",
+    "version": "1"
+  },
+  "spec": {
+    "path": "specs/codegen-w38.yaml",
+    "sha256": "b2f624ede18531b6d244d4bfcb4f5734b32c06cda0f1b8dd242f7c133a1881e3"
+  },
+  "test_set": {
+    "id": "code-v1",
+    "inputs": {
+      "code-utils": "deddbd434c436f80116137fc9fd1414c1eb34a869deeeb2bdcb528f15fac7e24",
+      "code-component": "947235496e4cbeb45c67f6a106c649456cdd1f68041736d6b31c0c01f75fca14",
+      "code-schema": "8e0e42e20813a75bc534662c2ca5d60d1ef6ff246ebb6d422cdd7d553ba49fe4"
+    }
+  },
+  "candidates": {
+    "sonnet-5": {
+      "id": "sonnet-5",
+      "model": "anthropic/claude-sonnet-5",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0.2
+      }
+    },
+    "deepseek-v4-pro": {
+      "id": "deepseek-v4-pro",
+      "model": "deepseek/deepseek-v4-pro",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0.2
+      }
+    },
+    "kimi-k3": {
+      "id": "kimi-k3",
+      "model": "moonshotai/kimi-k3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0.2
+      }
+    }
+  },
+  "control_candidate": "sonnet-5",
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter"
+  },
+  "evaluators": {
+    "required_checks": [
+      "tsc-noemit"
+    ],
+    "check_version": "tsc-6.0.3+scaffold-46888556",
+    "rubric_sha256": "e5842052772fae734cfc2999bd87879b6e49776e634c1f345ffb4f8a4cfca724",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "01fdb36e0a299a8c7f4286d085d6035424b1419512bf88a4d753b8c18b3955b4",
+    "score_template_sha256": "02138c61f94c42f69a50d3bfb125ca89077b4a315fb41e2357d68007cc29a176"
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "lowest-cost",
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 3,
+    "concurrency": 3,
+    "timeout_ms": 180000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold"
+  },
+  "harness": {
+    "name": "agentic-evaluator",
+    "version": "0.1.0",
+    "git_sha": "ddb57c7",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-09-16T05:50:19.377Z",
+  "finished_at": "2026-09-16T05:57:03.387Z"
+}
