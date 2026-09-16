@@ -8,8 +8,26 @@
  * verdict across both rounds counts as a win, otherwise it's a tie.
  */
 
-import { complete } from "./llm.js";
+import { complete, LlmError, type LlmTrace } from "./llm.js";
+import { sha256 } from "./canon/hash.js";
+import {
+  attemptFrom,
+  EvaluatorCallError,
+  summarizeAttempts,
+  type AttemptUsage,
+  type EvaluatorUsage,
+} from "./canon/usage.js";
 import type { DimensionVerdict, Judgement, Winner } from "./types.js";
+
+export const PAIRWISE_EVALUATOR_ID = "pairwise-swap";
+
+/** A judgement plus what it cost to obtain (both rounds, all attempts). */
+export type JudgedPair = Judgement & { usage: EvaluatorUsage };
+
+/** Hash of the judge prompt template with the rubric — part of the evaluator version. */
+export function judgePromptTemplateSha(rubric: string, dimensions: readonly string[]): string {
+  return sha256(buildPrompt(rubric, dimensions, "{{A}}", "{{B}}"));
+}
 
 /** Raw winner in the judge's own A/B space (one round, before de-biasing). */
 type RawWinner = "A" | "B" | "tie";
@@ -112,6 +130,11 @@ function parseRound(text: string, dimensions: readonly string[]): RoundVerdict {
  *  retries bump the temperature to get a different (hopefully valid) reply. */
 const JUDGE_MAX_ATTEMPTS = 3;
 
+/**
+ * One judge round with retries. Returns the verdict plus every attempt's usage;
+ * throws `EvaluatorCallError` (carrying the attempts) when all attempts fail so
+ * the caller can still charge the cost and record an evaluator_error.
+ */
 async function judgeOnce(
   judgeModel: string,
   rubric: string,
@@ -119,12 +142,15 @@ async function judgeOnce(
   first: string,
   second: string,
   timeoutMs?: number,
-): Promise<RoundVerdict> {
+  trace?: LlmTrace,
+  context?: Record<string, unknown>,
+): Promise<{ verdict: RoundVerdict; attempts: AttemptUsage[] }> {
   const prompt = buildPrompt(rubric, dimensions, first, second);
+  const attempts: AttemptUsage[] = [];
   let lastErr: unknown;
   for (let attempt = 0; attempt < JUDGE_MAX_ATTEMPTS; attempt++) {
     try {
-      const { text } = await complete({
+      const r = await complete({
         model: judgeModel,
         prompt,
         temperature: attempt === 0 ? 0 : 0.4,
@@ -133,13 +159,25 @@ async function judgeOnce(
         // per-dimension reply being truncated mid-object.
         jsonMode: true,
         maxTokens: 8000,
+        trace,
+        traceContext: { ...context, attempt },
       });
-      return parseRound(text, dimensions);
+      try {
+        const verdict = parseRound(r.text, dimensions);
+        attempts.push(attemptFrom(r, r.ms, true));
+        return { verdict, attempts };
+      } catch (parseErr) {
+        // The call was billed but its output was unusable — a retry, not final.
+        attempts.push(attemptFrom(r, r.ms, false));
+        lastErr = parseErr;
+      }
     } catch (err) {
+      if (err instanceof LlmError) attempts.push(attemptFrom(err.usage, err.ms, false));
       lastErr = err;
     }
   }
-  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+  const message = lastErr instanceof Error ? lastErr.message : String(lastErr);
+  throw new EvaluatorCallError(`judge failed after ${JUDGE_MAX_ATTEMPTS} attempts: ${message}`, attempts, lastErr);
 }
 
 /**
@@ -184,7 +222,10 @@ export async function judgePair(params: {
   /** Per-call timeout for the judge. Large-doc comparisons (PRD/TRD) exceed the
    *  120s llm.ts default, which otherwise aborts mid-judging and fails the suite. */
   timeoutMs?: number;
-}): Promise<Judgement> {
+  trace?: LlmTrace;
+  traceContext?: Record<string, unknown>;
+}): Promise<JudgedPair> {
+  const ctx = { ...params.traceContext, phase: "judge", pair: `${params.a} vs ${params.b}`, input: params.inputSlug };
   const fwd = await judgeOnce(
     params.judgeModel,
     params.rubric,
@@ -192,19 +233,32 @@ export async function judgePair(params: {
     params.aText,
     params.bText,
     params.timeoutMs,
+    params.trace,
+    { ...ctx, round: "forward" },
   );
-  const rev = await judgeOnce(
-    params.judgeModel,
-    params.rubric,
-    params.dimensions,
-    params.bText,
-    params.aText,
-    params.timeoutMs,
-  );
+  let rev: { verdict: RoundVerdict; attempts: AttemptUsage[] };
+  try {
+    rev = await judgeOnce(
+      params.judgeModel,
+      params.rubric,
+      params.dimensions,
+      params.bText,
+      params.aText,
+      params.timeoutMs,
+      params.trace,
+      { ...ctx, round: "reverse" },
+    );
+  } catch (err) {
+    // The forward round was paid for; surface its attempts with the failure.
+    if (err instanceof EvaluatorCallError) {
+      throw new EvaluatorCallError(err.message, [...fwd.attempts, ...err.attempts], err.cause);
+    }
+    throw err;
+  }
 
   const dimensions: Record<string, DimensionVerdict> = {};
   for (const key of params.dimensions) {
-    dimensions[key] = resolveAxis(fwd.dimensions[key], rev.dimensions[key]);
+    dimensions[key] = resolveAxis(fwd.verdict.dimensions[key], rev.verdict.dimensions[key]);
   }
 
   return {
@@ -212,6 +266,7 @@ export async function judgePair(params: {
     a: params.a,
     b: params.b,
     dimensions,
-    overall: resolveAxis(fwd.overall, rev.overall),
+    overall: resolveAxis(fwd.verdict.overall, rev.verdict.overall),
+    usage: summarizeAttempts([...fwd.attempts, ...rev.attempts]),
   };
 }

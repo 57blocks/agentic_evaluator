@@ -6,6 +6,14 @@
  * outputs.
  */
 
+import type {
+  CandidateDef,
+  CompletionState,
+  CostSource,
+  EvaluationState,
+  SuccessCriteria,
+} from "./canon/types.js";
+
 /** Project tier passed to the real doc agents (PM / TRD). */
 export type EvalTier = "S" | "M" | "L";
 
@@ -69,6 +77,32 @@ export interface Suite {
    * or empty the judge only produces the overall verdict.
    */
   dimensions?: string[];
+
+  // ── Canonical (protocol v0.4) fields, populated by the YAML spec loader. ──
+  // All optional so a legacy suites/*.json still loads; `loadLegacySuite`
+  // synthesizes `candidateDefs` with id = model.
+
+  /** Candidate definitions keyed by id. `candidates` holds the ids. */
+  candidateDefs?: Record<string, CandidateDef>;
+  protocolVersion?: string;
+  runName?: string;
+  budgetUsd?: number;
+  stepId?: string;
+  stepVersion?: string;
+  testSetId?: string;
+  /** Required-check ids for the step (e.g. ["tsc-noemit"]). Empty → no gates. */
+  requiredChecks?: string[];
+  successCriteria?: SuccessCriteria;
+  operatingMode?: string;
+  /** Predeclared minimum meaningful difference; null/undefined → directional only. */
+  mmd?: number | null;
+  controlCandidate?: string;
+  benchmarkMode?: "capability-neutral" | "production-realistic";
+  cacheMode?: "cold" | "warm" | "both";
+  concurrency?: number;
+  /** sha256 of the spec file as loaded, and its repo-relative path. */
+  specSha?: string;
+  specPath?: string;
 }
 
 /** One candidate run against one input, one trial. */
@@ -90,6 +124,22 @@ export interface RunRecord {
   /** Objective check detail (codegen → tsc output; taskbreakdown → coverage
    *  summary), truncated. */
   checkOutput?: string;
+
+  // ── Canonical (protocol v0.4) fields. `candidate` above holds the candidate
+  // id (which equals the model id for legacy suites). ──
+  modelRef?: string;
+  /** Provider route + upstream provider, e.g. "openrouter/anthropic". */
+  deploymentRef?: string;
+  trialHash?: string;
+  completionState?: CompletionState;
+  truncated?: boolean;
+  costSource?: CostSource;
+  cachedTokens?: number;
+  finishReason?: string;
+  checkState?: EvaluationState;
+  checkVersion?: string;
+  /** runId this record's output was reused from (EVAL_REUSE), if any. */
+  reusedFrom?: string;
 }
 
 /** Which side of a pairwise comparison won, in candidate (a/b) space. */

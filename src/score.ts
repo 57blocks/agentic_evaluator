@@ -12,12 +12,30 @@
  * tells the grader to use the full range and not default to 4.
  */
 
-import { complete } from "./llm.js";
+import { complete, LlmError, type LlmTrace } from "./llm.js";
+import { sha256 } from "./canon/hash.js";
+import {
+  attemptFrom,
+  EvaluatorCallError,
+  summarizeAttempts,
+  type AttemptUsage,
+  type EvaluatorUsage,
+} from "./canon/usage.js";
+
+export const ABSOLUTE_EVALUATOR_ID = "absolute-1-5";
 
 /** A 1–5 grade per dimension key, plus an overall 1–5. */
 export interface AbsoluteScore {
   dimensions: Record<string, number>;
   overall: number;
+}
+
+/** A grade plus what it cost to obtain (all attempts). */
+export type ScoredOutput = AbsoluteScore & { usage: EvaluatorUsage };
+
+/** Hash of the scorer prompt template with the rubric — part of the evaluator version. */
+export function scorePromptTemplateSha(rubric: string, dimensions: readonly string[]): string {
+  return sha256(buildPrompt(rubric, dimensions, "{{OUTPUT}}"));
 }
 
 const MIN_SCORE = 1;
@@ -118,30 +136,47 @@ function parse(text: string, dimensions: readonly string[]): AbsoluteScore {
  *  different (hopefully valid) reply, same as the pairwise judge. */
 const MAX_ATTEMPTS = 3;
 
-/** Grade one output 1–5 per dimension + overall. Retries on parse failure. */
+/**
+ * Grade one output 1–5 per dimension + overall. Retries on parse failure.
+ * Throws `EvaluatorCallError` (with every billed attempt) when all attempts fail.
+ */
 export async function scoreOne(params: {
   judgeModel: string;
   rubric: string;
   dimensions: readonly string[];
   text: string;
   timeoutMs?: number;
-}): Promise<AbsoluteScore> {
+  trace?: LlmTrace;
+  traceContext?: Record<string, unknown>;
+}): Promise<ScoredOutput> {
   const prompt = buildPrompt(params.rubric, params.dimensions, params.text);
+  const attempts: AttemptUsage[] = [];
   let lastErr: unknown;
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
-      const { text } = await complete({
+      const r = await complete({
         model: params.judgeModel,
         prompt,
         temperature: attempt === 0 ? 0 : 0.3,
         timeoutMs: params.timeoutMs,
         jsonMode: true,
         maxTokens: 4000,
+        trace: params.trace,
+        traceContext: { ...params.traceContext, phase: "score", attempt },
       });
-      return parse(text, params.dimensions);
+      try {
+        const graded = parse(r.text, params.dimensions);
+        attempts.push(attemptFrom(r, r.ms, true));
+        return { ...graded, usage: summarizeAttempts(attempts) };
+      } catch (parseErr) {
+        attempts.push(attemptFrom(r, r.ms, false));
+        lastErr = parseErr;
+      }
     } catch (err) {
+      if (err instanceof LlmError) attempts.push(attemptFrom(err.usage, err.ms, false));
       lastErr = err;
     }
   }
-  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+  const message = lastErr instanceof Error ? lastErr.message : String(lastErr);
+  throw new EvaluatorCallError(`scorer failed after ${MAX_ATTEMPTS} attempts: ${message}`, attempts, lastErr);
 }
