@@ -1,0 +1,21 @@
+{
+  "suiteId": "smoke-codegen",
+  "step": "codegen",
+  "producer": "codegen",
+  "rubricFile": "rubrics/codegen.md",
+  "dimensions": ["meets-spec", "correctness", "type-quality", "simplicity", "robustness"],
+  "candidates": [
+    "anthropic/claude-sonnet-5",
+    "deepseek/deepseek-v4-pro"
+  ],
+  "judge": "google/gemini-3.1-pro-preview",
+  "inputs": [
+    "code-utils"
+  ],
+  "check": {
+    "scaffoldDir": "scaffold"
+  },
+  "trials": 1,
+  "temperature": 0.2,
+  "timeoutMs": 180000
+}

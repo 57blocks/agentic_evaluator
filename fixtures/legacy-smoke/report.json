@@ -1,0 +1,136 @@
+{
+  "suiteId": "smoke-codegen",
+  "step": "codegen",
+  "judge": "google/gemini-3.1-pro-preview",
+  "generatedAt": "2026-09-16T03:14:03.668Z",
+  "candidates": [
+    "anthropic/claude-sonnet-5",
+    "deepseek/deepseek-v4-pro"
+  ],
+  "inputs": [
+    "code-utils"
+  ],
+  "scorecards": [
+    {
+      "candidate": "anthropic/claude-sonnet-5",
+      "winRate": 100,
+      "dimensionWinRates": {
+        "meets-spec": 50,
+        "correctness": 100,
+        "type-quality": 50,
+        "simplicity": 50,
+        "robustness": 100
+      },
+      "avgCostUsd": 0.006866,
+      "avgMs": 5241,
+      "okRate": 1,
+      "trials": 1,
+      "objectivePassRate": 1,
+      "absoluteScore": 5,
+      "dimensionScores": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      }
+    },
+    {
+      "candidate": "deepseek/deepseek-v4-pro",
+      "winRate": 0,
+      "dimensionWinRates": {
+        "meets-spec": 50,
+        "correctness": 0,
+        "type-quality": 50,
+        "simplicity": 50,
+        "robustness": 0
+      },
+      "avgCostUsd": 0.0017602,
+      "avgMs": 4327,
+      "okRate": 1,
+      "trials": 1,
+      "objectivePassRate": 1,
+      "absoluteScore": 5,
+      "dimensionScores": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      }
+    }
+  ],
+  "judgements": [
+    {
+      "inputSlug": "code-utils",
+      "a": "anthropic/claude-sonnet-5",
+      "b": "deepseek/deepseek-v4-pro",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both implementations successfully parse query strings into the requested record format."
+        },
+        "correctness": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A correctly handles built-in prototype keys (like 'toString') by using hasOwnProperty, whereas Output B will incorrectly include prototype methods in its arrays."
+        },
+        "type-quality": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both use identical, appropriate TypeScript types for the function signature and internal variables."
+        },
+        "simplicity": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both implementations are straightforward, avoid unnecessary dependencies, and follow a very similar logical structure."
+        },
+        "robustness": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A is more robust against prototype pollution/inherited properties and correctly retains the '+' to space replacement even if decodeURIComponent throws an error."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "a",
+        "resolved": "a",
+        "reason": "Output A is the clear winner due to its safer handling of object properties via hasOwnProperty, preventing bugs with keys that match Object.prototype methods."
+      }
+    }
+  ],
+  "scores": [
+    {
+      "candidate": "anthropic/claude-sonnet-5",
+      "inputSlug": "code-utils",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek/deepseek-v4-pro",
+      "inputSlug": "code-utils",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    }
+  ]
+}

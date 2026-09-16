@@ -1,0 +1,26 @@
+[
+  {
+    "candidate": "anthropic/claude-sonnet-5",
+    "inputSlug": "code-utils",
+    "trial": 0,
+    "promptTokens": 938,
+    "completionTokens": 499,
+    "costUsd": 0.006866,
+    "ms": 5241,
+    "status": "ok",
+    "checkPassed": true,
+    "checkOutput": "npm warn Unknown env config \"verify-deps-before-run\". This will stop working in the next major version of npm.\nnpm warn Unknown user config \"home\". This will stop working in the next major version of npm."
+  },
+  {
+    "candidate": "deepseek/deepseek-v4-pro",
+    "inputSlug": "code-utils",
+    "trial": 0,
+    "promptTokens": 664,
+    "completionTokens": 345,
+    "costUsd": 0.0017602,
+    "ms": 4327,
+    "status": "ok",
+    "checkPassed": true,
+    "checkOutput": "npm warn Unknown env config \"verify-deps-before-run\". This will stop working in the next major version of npm.\nnpm warn Unknown user config \"home\". This will stop working in the next major version of npm."
+  }
+]
