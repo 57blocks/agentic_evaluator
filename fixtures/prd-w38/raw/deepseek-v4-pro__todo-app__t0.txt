@@ -1,0 +1,103 @@
+# Personal To-Do Web App MVP — Product Requirements Document
+
+## Problem Statement
+Users need a frictionless way to capture and manage daily tasks. Existing to-do tools often require account creation or are overloaded with features, creating unnecessary barriers. The goal is to deliver a lightweight, single-user to-do list that runs entirely in the browser, persists data locally, and requires zero setup.
+
+## Goal
+Provide a personal, browser-based to-do app where a single user can add, edit, complete, delete, and filter tasks. All data survives browser restarts via local storage. No accounts, no backend.
+
+---
+
+## User Stories
+- As a user, I want to add a task with a title and an optional due date, so that I can capture what I need to do and when it’s due.
+- As a user, I want to mark a task as complete, so that I can track my progress.
+- As a user, I want to edit a task’s title and due date, so that I can correct or update its details.
+- As a user, I want to delete a task, so that I can remove items I no longer need.
+- As a user, I want to filter tasks by all, active, or completed, so that I can focus on the relevant subset.
+- As a user, I want my tasks to persist automatically across browser sessions, so that I never lose my list.
+
+---
+
+## Functional Requirements
+
+### PRD-1: Add Task
+The app shall allow the user to create a new task with a title and an optional due date.
+
+**Acceptance Criteria**
+- An input field for the task title and a date picker for the optional due date are visible.
+- Submitting with an empty title shows a validation error (e.g., field highlighted, inline message) and does not create a task.
+- Submitting with a valid title adds the task to the list; if a due date is provided, it is displayed alongside the title in a human-readable format.
+- The new task is immediately saved to `localStorage`.
+- After a successful add, the input fields are cleared.
+
+### PRD-2: Mark Task Complete / Incomplete
+Each task shall provide a toggle to switch between completed and active states.
+
+**Acceptance Criteria**
+- Every task row includes a checkbox (or equivalent toggle).
+- Clicking the toggle marks the task as completed; the task text displays with a strikethrough and/or muted style.
+- Clicking the toggle again reverts the task to the active state and normal styling.
+- The completion state is persisted in `localStorage` immediately.
+
+### PRD-3: Edit Task
+The user shall be able to modify an existing task’s title and due date.
+
+**Acceptance Criteria**
+- Each task row offers an edit action (e.g., pencil icon).
+- Activating edit opens an inline editing mode or a modal pre-filled with the current title and due date.
+- The user can change the title and/or due date; saving with an empty title is prevented (same validation as PRD-1).
+- Saving updates the task in the list and writes the change to `localStorage`.
+- Canceling discards any changes and exits edit mode without altering the task.
+
+### PRD-4: Delete Task
+The user shall be able to remove a task permanently.
+
+**Acceptance Criteria**
+- Each task row includes a delete action (e.g., trash icon).
+- Clicking delete immediately removes the task from the displayed list.
+- The task is removed from `localStorage`.
+- No confirmation dialog is required (MVP simplicity).
+
+### PRD-5: Filter Tasks
+The app shall provide controls to filter the task list by status.
+
+**Acceptance Criteria**
+- Filter options are presented as “All”, “Active”, and “Completed” (e.g., tabs or buttons).
+- The default view on page load is “All”, showing every task.
+- Selecting “Active” displays only tasks that are not completed.
+- Selecting “Completed” displays only tasks that are completed.
+- The filter state does not need to persist across page reloads; it resets to “All”.
+- (Optional) A count of tasks in the current filter may be shown.
+
+### PRD-6: Data Persistence
+All task data shall be stored in the browser’s `localStorage` and survive sessions.
+
+**Acceptance Criteria**
+- On initial page load, if `localStorage` contains a task list, it is rendered exactly as saved.
+- Every create, update, delete, or completion toggle immediately serializes the full task list to `localStorage`.
+- Closing and reopening the browser (or tab) restores the task list and each task’s completion state.
+- No data is transmitted to any server.
+
+### PRD-7: Responsive Layout
+The user interface shall be usable on common screen sizes (mobile, tablet, desktop).
+
+**Acceptance Criteria**
+- At viewport widths of 320px and above, all controls and the task list are visible without horizontal scrolling.
+- Interactive elements (buttons, checkboxes) have a minimum touch target size of 44×44px on touch-enabled devices.
+- The layout adapts to a single-column, appropriately spaced design on narrow screens.
+
+---
+
+## Out of Scope / Non-Goals
+- Multi-user support, user accounts, or authentication.
+- Server-side storage, cloud sync, or any backend.
+- Due-date reminders, notifications, or alarms.
+- Task prioritization, categories, tags, or labels.
+- Subtasks, recurring tasks, or task dependencies.
+- Drag-and-drop reordering or manual sorting.
+- Search or full-text filtering.
+- Bulk actions (e.g., “delete all completed”).
+- Undo/redo functionality.
+- Offline service workers or PWA installation.
+- Accessibility beyond basic semantic HTML (no formal WCAG conformance target).
+- Import/export of tasks.

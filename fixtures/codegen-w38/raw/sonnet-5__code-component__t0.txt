@@ -1,0 +1,99 @@
+```file:Pagination.tsx
+import React from "react";
+
+interface PaginationProps {
+  currentPage: number; // 1-based
+  totalPages: number; // >= 1
+  onPageChange: (page: number) => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) => {
+  const isFirstPage = currentPage <= 1;
+  const isLastPage = currentPage >= totalPages;
+
+  const goToPage = (page: number): void => {
+    if (page < 1 || page > totalPages) {
+      return;
+    }
+    if (page === currentPage) {
+      return;
+    }
+    onPageChange(page);
+  };
+
+  const handlePrevious = (_event: React.MouseEvent<HTMLButtonElement>): void => {
+    if (isFirstPage) {
+      return;
+    }
+    goToPage(currentPage - 1);
+  };
+
+  const handleNext = (_event: React.MouseEvent<HTMLButtonElement>): void => {
+    if (isLastPage) {
+      return;
+    }
+    goToPage(currentPage + 1);
+  };
+
+  const handlePageClick = (page: number) => (
+    _event: React.MouseEvent<HTMLButtonElement>
+  ): void => {
+    goToPage(page);
+  };
+
+  const pages: number[] = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1
+  );
+
+  return (
+    <nav aria-label="Pagination">
+      <ul style={{ display: "flex", listStyle: "none", gap: "4px" }}>
+        <li>
+          <button
+            type="button"
+            onClick={handlePrevious}
+            disabled={isFirstPage}
+            aria-label="Previous page"
+          >
+            Previous
+          </button>
+        </li>
+        {pages.map((page: number) => {
+          const isActive = page === currentPage;
+          return (
+            <li key={page}>
+              <button
+                type="button"
+                onClick={handlePageClick(page)}
+                aria-current={isActive ? "page" : undefined}
+                className={isActive ? "active" : undefined}
+              >
+                {page}
+              </button>
+            </li>
+          );
+        })}
+        <li>
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={isLastPage}
+            aria-label="Next page"
+          >
+            Next
+          </button>
+        </li>
+      </ul>
+    </nav>
+  );
+};
+
+export { Pagination };
+export type { PaginationProps };
+export default Pagination;
+```

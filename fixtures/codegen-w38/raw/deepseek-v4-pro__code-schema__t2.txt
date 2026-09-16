@@ -1,0 +1,40 @@
+```file:schema.ts
+import { z } from "zod";
+
+export const signupSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z
+    .string()
+    .regex(
+      /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/,
+      "Password must be at least 8 characters and contain at least one letter and one digit"
+    ),
+  age: z
+    .number()
+    .int("Age must be an integer")
+    .min(13, "You must be at least 13 years old")
+    .max(120, "Age must be at most 120"),
+});
+
+export type Signup = z.infer<typeof signupSchema>;
+
+export type ValidationResult =
+  | { success: true; data: Signup }
+  | { success: false; errors: Record<string, string> };
+
+export function validateSignup(input: unknown): ValidationResult {
+  const result = signupSchema.safeParse(input);
+  if (result.success) {
+    return { success: true, data: result.data };
+  }
+
+  const errors: Record<string, string> = {};
+  for (const issue of result.error.issues) {
+    const key = issue.path[0]?.toString() ?? "_root";
+    if (!(key in errors)) {
+      errors[key] = issue.message;
+    }
+  }
+  return { success: false, errors };
+}
+```

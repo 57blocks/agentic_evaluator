@@ -1,0 +1,84 @@
+```file:Pagination.tsx
+import React from "react";
+
+interface PaginationProps {
+  currentPage: number; // 1-based
+  totalPages: number; // >= 1
+  onPageChange: (page: number) => void;
+}
+
+export const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) => {
+  const isPrevDisabled = currentPage <= 1;
+  const isNextDisabled = currentPage >= totalPages;
+
+  const goToPage = (page: number): void => {
+    if (page < 1 || page > totalPages) {
+      return;
+    }
+    if (page === currentPage) {
+      return;
+    }
+    onPageChange(page);
+  };
+
+  const handlePrevClick = (): void => {
+    if (isPrevDisabled) {
+      return;
+    }
+    goToPage(currentPage - 1);
+  };
+
+  const handleNextClick = (): void => {
+    if (isNextDisabled) {
+      return;
+    }
+    goToPage(currentPage + 1);
+  };
+
+  const pages: number[] = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
+
+  return (
+    <nav aria-label="Pagination">
+      <button
+        type="button"
+        onClick={handlePrevClick}
+        disabled={isPrevDisabled}
+      >
+        Previous
+      </button>
+
+      {pages.map((page: number) => {
+        const isActive = page === currentPage;
+        return (
+          <button
+            key={page}
+            type="button"
+            className={isActive ? "active" : undefined}
+            aria-current={isActive ? "page" : undefined}
+            onClick={(): void => goToPage(page)}
+          >
+            {page}
+          </button>
+        );
+      })}
+
+      <button
+        type="button"
+        onClick={handleNextClick}
+        disabled={isNextDisabled}
+      >
+        Next
+      </button>
+    </nav>
+  );
+};
+
+export default Pagination;
+```

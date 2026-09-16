@@ -1,0 +1,110 @@
+# PRD: Personal To-Do Web App (MVP)
+
+**Status:** Draft · **Owner:** Product · **Scope:** Single-user MVP
+
+---
+
+## 1. Problem Statement & Goal
+
+**Problem:** People need a frictionless way to capture and track personal tasks. Existing tools often require account creation and setup before a single task can be saved — too much overhead for simple personal use.
+
+**Goal:** Ship a single-user web app where a user can add, complete, edit, delete, and filter tasks, with all data persisting across browser sessions — no account or setup required. A first-time user should be able to create their first task within seconds of opening the app.
+
+---
+
+## 2. User Stories
+
+- As a user, I want to add a task with a title, so that I can quickly capture things I need to do.
+- As a user, I want to optionally set a due date, so that I can track when tasks need to be done.
+- As a user, I want to mark tasks complete (and unmark them), so that I can track my progress.
+- As a user, I want to edit a task's title or due date, so that I can correct mistakes or adjust plans.
+- As a user, I want to delete tasks, so that my list stays relevant.
+- As a user, I want to filter by all / active / completed, so that I can focus on what matters right now.
+- As a user, I want my tasks saved automatically, so that my list survives closing the browser.
+
+---
+
+## 3. Functional Requirements
+
+### PRD-1: Add Task
+The user can create a task with a required title and an optional due date.
+
+**Acceptance criteria:**
+- AC-1.1: A task is created via a title input, an optional date picker, and an explicit submit action (Enter key or "Add" button).
+- AC-1.2: Submitting an empty or whitespace-only title creates no task and shows a validation message (or submit is disabled).
+- AC-1.3: A task can be created with no due date; the due date field is never blocking.
+- AC-1.4: On successful creation, the new task appears in the list and the input fields are cleared.
+- AC-1.5: Leading/trailing whitespace is trimmed from the title before saving.
+
+### PRD-2: View Task List
+The app displays the user's tasks with their title, due date (if set), and completion state.
+
+**Acceptance criteria:**
+- AC-2.1: Each task row shows its title, its due date (if one is set), and a completion toggle (e.g., checkbox).
+- AC-2.2: Completed tasks are visually distinct from active tasks (e.g., strikethrough or muted styling).
+- AC-2.3: When no tasks match the current filter, a clear empty-state message is shown.
+- AC-2.4: Tasks are displayed in a stable, predictable order (assumption: newest first — confirm with design).
+
+### PRD-3: Mark Complete / Reopen
+The user can toggle a task between active and completed.
+
+**Acceptance criteria:**
+- AC-3.1: Clicking the completion toggle immediately updates the task's state and its visual treatment (per AC-2.2).
+- AC-3.2: A completed task can be toggled back to active.
+- AC-3.3: Toggling state immediately changes which filters the task appears under (PRD-6).
+
+### PRD-4: Edit Task
+The user can edit an existing task's title and due date.
+
+**Acceptance criteria:**
+- AC-4.1: Each task offers an edit action that puts its title and due date into an editable state.
+- AC-4.2: The user can change the title, change the due date, or clear the due date entirely.
+- AC-4.3: Saving with an empty or whitespace-only title is rejected with a validation message; the task is unchanged.
+- AC-4.4: The user can cancel editing, leaving the task unchanged.
+- AC-4.5: Saved edits are immediately reflected in the list.
+
+### PRD-5: Delete Task
+The user can permanently delete a task.
+
+**Acceptance criteria:**
+- AC-5.1: Each task has a delete action that removes it from the list immediately.
+- AC-5.2: A deleted task does not appear under any filter and does not reappear after a page reload.
+
+### PRD-6: Filter Tasks
+The user can filter the list by **All**, **Active**, or **Completed**.
+
+**Acceptance criteria:**
+- AC-6.1: "All" shows every task; "Active" shows only incomplete tasks; "Completed" shows only completed tasks.
+- AC-6.2: The currently active filter is visually indicated.
+- AC-6.3: The default filter on app load is "All."
+- AC-6.4: Switching filters never modifies task data — it only changes visibility.
+
+### PRD-7: Persistence
+All task data (title, due date, completion state) persists across sessions without an account.
+
+**Acceptance criteria:**
+- AC-7.1: After closing and reopening the app in the same browser, all tasks and their states are fully restored.
+- AC-7.2: Every create, edit, toggle, and delete action is reflected after a reload.
+- AC-7.3: Data is stored client-side (e.g., localStorage); no server round-trip or login is required. Data is scoped to the browser/device.
+
+---
+
+## 4. Out of Scope / Non-Goals (MVP)
+
+- User accounts, authentication, or multi-user support
+- Sync across devices or browsers
+- Task priorities, tags/categories, descriptions/notes, subtasks, attachments
+- Reminders, notifications, or overdue alerts
+- Sorting options (including due-date sorting) and drag-and-drop reordering
+- Bulk actions (e.g., "clear all completed"), multi-select
+- Delete confirmation flows or undo
+- Search
+- Native mobile apps (responsive web layout is acceptable but not a separate deliverable)
+- Sharing or collaboration
+
+---
+
+## 5. Open Questions
+
+1. Task ordering: newest-first vs. creation order — confirm with design before build (AC-2.4).
+2. Title length limit: propose a generous cap (e.g., 200 chars) to keep storage and layout sane — confirm with engineering.

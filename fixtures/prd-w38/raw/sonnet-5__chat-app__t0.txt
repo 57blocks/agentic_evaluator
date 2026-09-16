@@ -1,0 +1,116 @@
+# PRD: Real-Time Group Chat Web App
+
+## 1. Problem Statement
+
+Teams and communities need a lightweight way to communicate in shared, topic-based spaces without email or fragmented tools. Users need to see conversations update instantly, know who else is active, and catch up on past discussion when they join a conversation.
+
+## 2. Goal
+
+Enable registered users to create and join public text channels, exchange messages in real time, see channel presence, and load prior message history — providing a functional baseline group chat experience.
+
+## 3. User Stories
+
+- **US-1**: As a registered user, I want to create a public channel, so that I can start a topic-based conversation others can join.
+- **US-2**: As a registered user, I want to see a list of available public channels, so that I can find one to join.
+- **US-3**: As a registered user, I want to join a public channel, so that I can participate in its conversation.
+- **US-4**: As a channel member, I want to post text messages, so that I can communicate with other members.
+- **US-5**: As a channel member, I want new messages to appear instantly without refreshing, so that I can follow the conversation live.
+- **US-6**: As a channel member, I want to see who is currently online in the channel, so that I know who is available to chat.
+- **US-7**: As a channel member, I want each message to show when it was sent, so that I can follow the conversation timeline.
+- **US-8**: As a channel member, I want to see prior messages when I open a channel, so that I have context for the ongoing conversation.
+
+## 4. Functional Requirements & Acceptance Criteria
+
+### PRD-1: User Registration & Login
+**Requirement**: Users must register an account (username + password, or equivalent) and log in to access the app.
+
+**Acceptance Criteria**:
+- AC-1.1: Given a unique username/email and valid password, a new account is created successfully.
+- AC-1.2: Given a duplicate username/email, registration is rejected with a clear error.
+- AC-1.3: Given valid credentials, a user can log in and receive an authenticated session.
+- AC-1.4: Given invalid credentials, login is rejected with a clear error.
+- AC-1.5: Unauthenticated users cannot access channel listing, messaging, or presence features.
+
+### PRD-2: Create Public Channel
+**Requirement**: Authenticated users can create a new public channel with a unique name.
+
+**Acceptance Criteria**:
+- AC-2.1: A logged-in user can submit a channel name to create a channel.
+- AC-2.2: Channel names must be unique (case-insensitive); duplicate names are rejected with an error.
+- AC-2.3: A successfully created channel is immediately visible in the public channel list to all users.
+- AC-2.4: The creating user is automatically added as a member of the channel.
+
+### PRD-3: List Public Channels
+**Requirement**: Authenticated users can view a list of all public channels.
+
+**Acceptance Criteria**:
+- AC-3.1: The channel list displays all existing public channels' names.
+- AC-3.2: The list updates (on refresh or reload) to include newly created channels.
+- AC-3.3: List is visible only to authenticated users.
+
+### PRD-4: Join Public Channel
+**Requirement**: Authenticated users can join any public channel from the channel list.
+
+**Acceptance Criteria**:
+- AC-4.1: Clicking "join" on a channel adds the user as a member.
+- AC-4.2: After joining, the user can view the channel's message history and post messages.
+- AC-4.3: A user who is already a member is not duplicated in the membership list.
+- AC-4.4: Membership persists across sessions (user remains a member after logout/login).
+
+### PRD-5: Post Text Message
+**Requirement**: Channel members can post text messages to a channel they belong to.
+
+**Acceptance Criteria**:
+- AC-5.1: A member can submit a non-empty text message to a channel they belong to.
+- AC-5.2: Empty or whitespace-only messages are rejected client-side and server-side.
+- AC-5.3: A posted message is persisted and associated with the sender, channel, and send time.
+- AC-5.4: Non-members cannot post to a channel (request rejected with an authorization error).
+- AC-5.5: There is a maximum message length (e.g., 2,000 characters); messages exceeding it are rejected with an error.
+
+### PRD-6: Real-Time Message Delivery
+**Requirement**: Messages appear instantly for all currently connected members of the channel without manual refresh.
+
+**Acceptance Criteria**:
+- AC-6.1: When a member posts a message, all other members currently viewing that channel see it appear within 1 second under normal network conditions, with no page reload.
+- AC-6.2: If a member's connection drops and reconnects, they resume receiving new real-time messages without needing to re-join the channel.
+- AC-6.3: Messages sent while a member is disconnected are not lost; they appear when history is reloaded or connection resumes.
+
+### PRD-7: Online Presence Per Channel
+**Requirement**: Each channel displays which of its members are currently online.
+
+**Acceptance Criteria**:
+- AC-7.1: A member viewing a channel sees a list/indicator of currently online members of that channel.
+- AC-7.2: When a member connects (opens the channel/app), their status updates to online for other viewers within a few seconds.
+- AC-7.3: When a member disconnects (closes app/loses connection) or logs out, their status updates to offline for other viewers within a reasonable timeout (e.g., ≤30 seconds).
+- AC-7.4: Presence is scoped per channel — a user only shows as online in channels they are a member of and currently active in (per PRD scope; simple global online status acceptable if per-channel not feasible, but must be documented behavior).
+
+### PRD-8: Message Timestamps
+**Requirement**: Every message displays the time it was sent.
+
+**Acceptance Criteria**:
+- AC-8.1: Each message in the UI shows a timestamp (e.g., date and time) reflecting when it was sent.
+- AC-8.2: Timestamps are displayed in the viewer's local time zone.
+- AC-8.3: Timestamp is immutable once the message is created.
+
+### PRD-9: Message History Load on Channel Open
+**Requirement**: When a member opens a channel, prior messages load automatically.
+
+**Acceptance Criteria**:
+- AC-9.1: Opening a channel loads and displays the most recent messages (e.g., last 50, configurable) in chronological order.
+- AC-9.2: History loads only for channels the user is a member of.
+- AC-9.3: If the channel has no prior messages, an empty state is shown (no error).
+- AC-9.4: History load completes within 2 seconds under normal conditions for the default page size.
+
+## 5. Out-of-Scope / Non-Goals
+
+- Private channels or direct (1:1) messaging
+- Message editing or deletion
+- File, image, or media attachments
+- Message reactions, threads, or replies
+- Typing indicators or read receipts
+- Full-text search across messages/channels
+- Push notifications (mobile/desktop)
+- Channel moderation tools (mute, ban, admin roles)
+- Leaving/archiving/deleting channels
+- Multi-language support / localization
+- Native mobile apps (web app only)

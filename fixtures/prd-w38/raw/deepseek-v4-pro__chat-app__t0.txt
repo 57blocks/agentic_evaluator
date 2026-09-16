@@ -1,0 +1,99 @@
+# PRD: Real-Time Group Chat Web App
+
+## Problem Statement & Goal
+**Problem:** Registered users need a simple, shared space to have real-time text conversations within public topic channels. Without a unified place to see who’s present, view message timing, and catch up on past discussions, collaboration feels disjointed.
+
+**Goal:** Provide a web application where registered users can create/join public channels, exchange text messages that appear instantly for all channel members, see who is online per channel, view message timestamps, and automatically load message history when opening a channel.
+
+## User Stories
+- **As a** registered user, **I want** to create a public channel, **so that** I can start a conversation around a specific topic.
+- **As a** registered user, **I want** to view and join existing public channels, **so that** I can participate in discussions that interest me.
+- **As a** channel member, **I want** to send a text message that appears immediately for all other members, **so that** we can have a fluid, real-time conversation.
+- **As a** channel member, **I want** to see a list of who is currently online in the channel, **so that** I know who is available to respond.
+- **As a** channel member, **I want** to see a timestamp on every message, **so that** I understand the context and recency of each contribution.
+- **As a** channel member, **I want** to see previous messages when I open a channel, **so that** I can catch up on what I missed.
+
+## Functional Requirements
+
+### PRD-1: User Authentication
+Authenticated access is required for all chat features.
+
+**Acceptance Criteria:**
+- A registration form accepts a unique username and password.
+- After registration, the user can log in with the same credentials.
+- A logged-in user receives a session token (cookie) that persists across browser tabs/refreshes.
+- Unauthenticated requests to any chat endpoint return a redirect to the login page.
+
+### PRD-2: Public Channel Creation
+Authenticated users can create a new public channel.
+
+**Acceptance Criteria:**
+- User can trigger creation via a “Create Channel” button and enter a channel name.
+- The name must be non-empty, alphanumeric (underscores/hyphens allowed), and unique across the system.
+- On success, the channel appears in the public channel list and the creator is automatically joined as a member.
+- If the name is taken, an error message is shown without creating a duplicate.
+
+### PRD-3: Channel Discovery & Joining
+Users can browse all public channels and join any of them.
+
+**Acceptance Criteria:**
+- A channel list page shows every public channel’s name.
+- Next to each channel, a “Join” button is available.
+- Clicking “Join” immediately makes the user a member and opens the channel view.
+- The user’s membership is visible to others through the online presence list.
+
+### PRD-4: Real-Time Text Messaging
+Members can send text messages that appear instantly for all channel participants.
+
+**Acceptance Criteria:**
+- In a joined channel, a text input field and a send button are displayed.
+- Submitting a non-empty message (via button or Enter key) persists the message with the server timestamp and broadcasts it via WebSocket to all clients viewing that channel.
+- The new message appears in the message list of every member without a page refresh, within 2 seconds under normal network conditions.
+- Empty or whitespace-only messages are not sent (client-side validation).
+
+### PRD-5: Message Timestamps
+Every message shows the time it was sent.
+
+**Acceptance Criteria:**
+- Each message displays a human-readable timestamp (e.g., `10:32 AM` or a relative format like `2 minutes ago`), derived from the server-assigned creation time.
+- The timestamp is visible to all channel members and updates relative labels appropriately over time.
+
+### PRD-6: Online Presence per Channel
+Users can see which channel members are currently online (active in the channel).
+
+**Acceptance Criteria:**
+- In the channel view, a dynamic list shows the usernames of members who have an active WebSocket connection for that channel.
+- When a member connects (opens the channel) or disconnects (closes tab/logs out), the list updates in real-time for all other viewing members within 2 seconds.
+- The current user’s own name appears in the online list.
+
+### PRD-7: Message History on Channel Open
+When a user opens a channel, previous messages are loaded so they can see what was discussed.
+
+**Acceptance Criteria:**
+- Upon entering a channel, the system fetches and displays the most recent messages (up to the last 100) in chronological order, with the oldest of this batch at the top and the newest at the bottom.
+- If no messages exist, an empty state message is shown (e.g., “No messages yet. Start the conversation!”).
+- Each message in history shows its timestamp (PRD-5) and appears with the same formatting as live messages.
+- History loading completes before live messages start appearing (no race condition that drops messages).
+
+### PRD-8: Real-Time Synchronization Consistency
+The system ensures consistent delivery of real-time updates across multiple clients.
+
+**Acceptance Criteria:**
+- When testing with at least two browser tabs joined to the same channel, a message sent from one tab appears in the other tab’s message list and the sender’s tab within 2 seconds.
+- Online presence changes propagate in the same timeframe.
+- In case of a temporary WebSocket disconnection, the client automatically reconnects and re-synchronizes with no duplicate messages (using the server’s last known message state).
+
+## Out of Scope / Non-Goals
+- Direct (private) messaging between users.
+- Password reset, email verification, or OAuth/SSO login.
+- Editing or deleting messages after they are sent.
+- Emoji reactions, threaded replies, or message formatting (plain text only).
+- File uploads, image sharing, or any attachments.
+- User avatars, profile pages, or custom statuses.
+- Channel administration (deleting channels, removing members, moderation).
+- Typing indicators or read receipts.
+- Browser push notifications or email alerts.
+- Pagination or infinite scroll for older message history (only the initial batch of recent messages is loaded; loading further history is not implemented).
+- Search within messages or channels.
+- Mobile-specific responsive design or native apps.
+- Any form of end-to-end encryption or advanced security beyond basic auth.

@@ -1,0 +1,192 @@
+{
+  "run": "codegen-w38-2026-09-16T05-50-19-377Z",
+  "step": "codegen",
+  "inputs": [
+    "code-utils",
+    "code-component",
+    "code-schema"
+  ],
+  "candidates": [
+    {
+      "candidate": "sonnet-5",
+      "valid_attempts": 9,
+      "classified": 9,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "completion_states": {
+        "success": 9,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 9,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 9,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.00755,
+      "p50_ms": 5389,
+      "p95_ms": 7586
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "valid_attempts": 9,
+      "classified": 9,
+      "task_success_rate": {
+        "value": 0.8888888888888888,
+        "numerator": 8,
+        "denominator": 9
+      },
+      "reliability": {
+        "value": 0.8888888888888888,
+        "numerator": 8,
+        "denominator": 9
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "required_check_pass_rate": {
+        "value": 0.8888888888888888,
+        "numerator": 8,
+        "denominator": 9
+      },
+      "completion_states": {
+        "success": 9,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 8,
+        "failure": 1,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 8,
+        "fail": 1,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.003301,
+      "p50_ms": 24619,
+      "p95_ms": 34563
+    },
+    {
+      "candidate": "kimi-k3",
+      "valid_attempts": 9,
+      "classified": 9,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 9,
+        "denominator": 9
+      },
+      "completion_states": {
+        "success": 9,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 9,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 9,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.042528,
+      "p50_ms": 26115,
+      "p95_ms": 115511
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "3 inputs; fewer than 10",
+      "no minimum meaningful difference declared"
+    ]
+  },
+  "integrity": {
+    "events": 144,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 26277,
+    "threshold_ms": 300000,
+    "wall_ms": 403970
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "tsc-noemit",
+      "version": "tsc-6.0.3+scaffold-46888556",
+      "pass": 26,
+      "fail": 1,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "pairwise-swap",
+      "version": "google/gemini-3.1-pro-preview+rubric-e5842052+tpl-01fdb36e",
+      "pass": 9,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "absolute-1-5",
+      "version": "google/gemini-3.1-pro-preview+rubric-e5842052+tpl-02138c61",
+      "pass": 27,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}

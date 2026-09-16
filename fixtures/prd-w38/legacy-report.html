@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>评测 — prd-w38</title>
+<style>
+  :root{
+    --grad1:#eef1f6;--grad2:#f7f8fb;
+    --surface:#ffffff;--surface-2:#f6f7fa;
+    --text:#0f172a;--muted:#667085;--border:#e6e8ec;
+    --accent:#4f46e5;--accent-2:#7c73f0;--accent-soft:rgba(79,70,229,.08);
+    --champ:#eef2ff;--pass:#16a34a;--fail:#dc2626;--warn:#b45309;
+    --note-bg:#fff8ef;--note-bd:#fcd9a8;--note-edge:#f59e0b;--note-tx:#7c4a12;--note-code:rgba(120,70,10,.1);
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;
+  }
+  *{box-sizing:border-box}
+  body{font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    max-width:1080px;margin:0 auto;padding:48px 24px 80px;color:var(--text);
+    background:linear-gradient(180deg,var(--grad1),var(--grad2) 340px) no-repeat,var(--grad2);
+    -webkit-font-smoothing:antialiased;min-height:100vh}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.022em;margin:0 0 6px;text-wrap:balance}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 8px}
+  .lede{color:var(--muted);font-size:14px;margin:2px 0 0;max-width:66ch;line-height:1.6}
+  .meta{color:var(--muted);font-size:13px;margin:14px 0 8px}
+  .verdict{margin:22px 0 6px;background:var(--surface);border:1px solid var(--border);
+    border-left:4px solid var(--accent);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow)}
+  .verdict .vlabel{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 7px}
+  .verdict .vbig{font-size:16px;font-weight:700;margin:0;line-height:1.5}
+  .verdict .vsub{margin:7px 0 0;color:var(--muted);font-size:13px}
+  .verdict .vbig b,.verdict .vsub b{color:var(--accent)}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px}
+  table{border-collapse:collapse;width:100%;margin:10px 0 2px;font-size:13px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:top}
+  thead th{position:sticky;top:0;background:var(--surface-2);font-size:10.5px;text-transform:uppercase;
+    color:var(--muted);letter-spacing:.06em;font-weight:600}
+  tbody tr{transition:background .12s ease}
+  tbody tr:hover{background:var(--accent-soft)}
+  td.m{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+  td.reason{white-space:normal;min-width:240px;max-width:520px;color:var(--muted)}
+  .card{position:relative;overflow:hidden;border:1px solid var(--border);border-radius:16px;
+    padding:20px 24px 22px;margin:22px 0;background:var(--surface);box-shadow:var(--shadow)}
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+  .card-head{margin:4px 0 6px}
+  .card-head h2{font-size:15px;margin:0 0 8px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.05em;color:var(--accent);border:0;padding:0}
+  h2{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:26px 0 4px}
+  .champ-line{margin:0;font-size:15px;font-weight:600}
+  .champ-line b{font-weight:700}
+  .champ-reason{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+  .trophy{font-size:16px;margin-right:2px}
+  h3{font-size:10.5px;text-transform:uppercase;color:var(--muted);letter-spacing:.06em;
+    font-weight:600;margin:22px 0 2px;padding-top:14px;border-top:1px solid var(--border)}
+  .card h3:first-of-type{border-top:0;padding-top:4px}
+  .bar{display:inline-block;width:120px;height:9px;background:var(--surface-2);border-radius:99px;
+    vertical-align:middle;margin-right:9px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--border)}
+  .bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+  b{font-variant-numeric:tabular-nums}
+  tr.champ,tr.champ:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}
+  table.matrix td.heat{text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
+  .check-pass{color:var(--pass);font-weight:700}
+  .check-fail{color:var(--fail);font-weight:700}
+  details{margin:14px 0 2px}
+  summary{cursor:pointer;color:var(--accent);font-size:12.5px;font-weight:600;display:inline-block;
+    padding:5px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);
+    user-select:none;transition:background .12s}
+  summary:hover{background:var(--accent-soft)}
+  details[open] summary{margin-bottom:8px}
+  .rz-note{margin:2px 0 10px;font-size:12px;line-height:1.6;color:var(--muted);
+    background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 12px}
+  .rz-note b{color:var(--text)}
+  .total{margin-top:34px;font-size:13px;font-weight:600;color:var(--muted);display:inline-block;
+    padding:8px 14px;border:1px solid var(--border);border-radius:99px;background:var(--surface)}
+  .sub{color:var(--muted);font-size:11px;font-weight:400}
+  .note{background:var(--note-bg);border:1px solid var(--note-bd);border-left:3px solid var(--note-edge);
+    border-radius:10px;padding:12px 16px;margin:18px 0;font-size:13px;color:var(--note-tx);line-height:1.6}
+  .note b{color:inherit}
+  .note code{background:var(--note-code);padding:1px 5px;border-radius:4px;font-size:12px;font-family:ui-monospace,monospace}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin:6px 0 2px;font-size:12px;color:var(--muted)}
+  .legend .lg{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .chart{width:100%;height:auto;display:block;margin:4px 0 2px}
+  .chart .grid{stroke:var(--border);stroke-width:1}
+  .chart .axlbl{fill:var(--muted);font-size:10px}
+  .chart .val{fill:var(--text);font-size:9px;font-weight:600}
+  .chart rect{transition:opacity .12s}
+  .chart rect:hover{opacity:.82}
+  .s0{fill:var(--s1);background:var(--s1)}
+  .s1{fill:var(--s2);background:var(--s2)}
+  .s2{fill:var(--s3);background:var(--s3)}
+  .s3{fill:var(--s4);background:var(--s4)}
+  .radar{max-width:560px;margin:4px auto 2px}
+  .radgrid,.radspoke{fill:none;stroke:var(--border);stroke-width:1}
+  .radpoly{fill-opacity:.14;stroke-width:2;stroke-linejoin:round}
+  .rc0{fill:var(--s1);stroke:var(--s1)}
+  .rc1{fill:var(--s2);stroke:var(--s2)}
+  .rc2{fill:var(--s3);stroke:var(--s3)}
+  .rc3{fill:var(--s4);stroke:var(--s4)}
+  .model{display:inline-flex;align-items:center;gap:8px}
+  .mscore{display:inline-flex;align-items:center;gap:9px;justify-content:flex-end}
+  .mtrack{width:66px;height:7px;border-radius:99px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--border);overflow:hidden;flex:0 0 auto}
+  .mfill{height:100%;display:block;border-radius:99px}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-weight:700;font-size:12px}
+  .pill.good{background:rgba(22,163,74,.14);color:var(--pass)}
+  .pill.warn{background:rgba(180,83,9,.16);color:var(--warn)}
+  .pill.muted{background:var(--surface-2);color:var(--muted)}
+  .rec-table th,.rec-table td{white-space:normal;text-align:left;vertical-align:top}
+  .rec-table td.pick{color:var(--accent);font-weight:700;white-space:nowrap}
+  .langbtn{position:fixed;top:16px;right:16px;z-index:10;cursor:pointer;
+    font:600 12.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    padding:8px 14px;border:1px solid var(--border);border-radius:999px;
+    background:var(--surface);color:var(--accent);box-shadow:var(--shadow);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .langbtn:hover{background:var(--accent-soft)}
+  .doc[hidden]{display:none}
+  @media(prefers-color-scheme:dark){
+    :root{
+      --grad1:#0d1219;--grad2:#0a0d13;
+      --surface:#141922;--surface-2:#1a212c;
+      --text:#e7eaef;--muted:#93a0b4;--border:#262e3b;
+      --accent:#818cf8;--accent-2:#a78bfa;--accent-soft:rgba(129,140,248,.12);
+      --champ:#1a2340;--pass:#4ade80;--fail:#f87171;--warn:#fbbf24;
+      --note-bg:#241a0e;--note-bd:#4a3618;--note-edge:#d97706;--note-tx:#fcd9a8;--note-code:rgba(255,255,255,.08);
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+      --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;
+    }
+  }
+</style></head>
+<body>
+  <h1>大模型评测 — prd-w38</h1>
+  <div class="meta">步骤:prd · 裁判:google/gemini-3.1-pro-preview · 2026-09-16T05:57:03.777Z</div>
+  <div class="note"><b>怎么读这份报告 —— 两个透镜:</b> <b>战绩(胜–负–平)</b>是<b>成对偏好排名</b> —— 每个模型在若干场捉对中的胜负平(单一裁判、正反消偏)。它可靠地表达<b>方向</b>,但分辨率粗:对局少时,<b>0</b> 意味「每场都输」,而非「输出差」。<b>绝对分(1–5)</b>是对每份输出单独打的分 —— 看<b>它</b>才能判断质量差距的<b>大小</b>(强的亚军仍紧贴冠军,比如 4.2 对 4.5,即使 0 胜)。两者都不是百分制;提高 <code>trials</code> 和输入数量可让二者更精确。</div>
+  <section class="card">
+    <div class="card-head">
+    <h2>PRD</h2>
+    <p class="champ-line"><span class="trophy">🏆</span> <b>kimi-k3</b> · 4 场对局中胜出 3 场 · 战绩 3–0–1 <span class="sub">(胜–负–平)</span> · 绝对分 5.0<span class="sub">/5</span></p>
+    <p class="champ-reason">Output B is the superior PRD because it maintains strict discipline against scope creep, provides highly testable edge-case criteria, and uses a more robust referencing structure for development.</p>
+  </div>
+    <h3>综合排名</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>#</th><th>模型</th><th>战绩 <span class="sub">胜–负–平</span></th><th>绝对分 <span class="sub">1–5</span></th><th>平均成本</th><th>平均延迟</th><th>成功率</th></tr></thead>
+    <tbody><tr class="champ">
+        <td>1</td>
+        <td><span class="model"><span class="sw s2"></span><span class="m">kimi-k3</span></span></td>
+        <td><div class="bar"><span style="width:100%"></span></div><b>3–0–1</b> <span class="sub">共 4 场 · 88%</span></td>
+        <td><span class="mscore"><span class="mtrack"><span class="mfill s2" style="width:100%"></span></span><b>5.0</b></span></td>
+        <td>$0.0615</td>
+        <td>51.8s</td>
+        <td>100%</td>
+      </tr>
+<tr>
+        <td>2</td>
+        <td><span class="model"><span class="sw s1"></span><span class="m">deepseek-v4-pro</span></span></td>
+        <td><div class="bar"><span style="width:43%"></span></div><b>0–1–3</b> <span class="sub">共 4 场 · 38%</span></td>
+        <td><span class="mscore"><span class="mtrack"><span class="mfill s1" style="width:100%"></span></span><b>5.0</b></span></td>
+        <td>$0.0086</td>
+        <td>62.2s</td>
+        <td>100%</td>
+      </tr>
+<tr>
+        <td>3</td>
+        <td><span class="model"><span class="sw s0"></span><span class="m">sonnet-5</span></span></td>
+        <td><div class="bar"><span style="width:29%"></span></div><b>0–2–2</b> <span class="sub">共 4 场 · 25%</span></td>
+        <td><span class="mscore"><span class="mtrack"><span class="mfill s0" style="width:100%"></span></span><b>5.0</b></span></td>
+        <td>$0.0236</td>
+        <td>24.1s</td>
+        <td>100%</td>
+      </tr></tbody>
+  </table></div>
+    <h3>维度剖面 <span class="sub">— 1–5 绝对分 · 雷达(圆心 1,边缘 5)</span></h3>
+  <div class="legend"><span class="lg"><span class="sw s0"></span>sonnet-5</span><span class="lg"><span class="sw s1"></span>deepseek-v4-pro</span><span class="lg"><span class="sw s2"></span>kimi-k3</span></div>
+  <div class="scroll"><svg class="chart radar" viewBox="0 0 520 400" role="img" aria-label="各模型逐维度绝对分雷达图">
+    <polygon class="radgrid" points="260.0,165.5 292.5,198.0 260.0,230.5 227.5,198.0"/><polygon class="radgrid" points="260.0,133.0 325.0,198.0 260.0,263.0 195.0,198.0"/><polygon class="radgrid" points="260.0,100.5 357.5,198.0 260.0,295.5 162.5,198.0"/><polygon class="radgrid" points="260.0,68.0 390.0,198.0 260.0,328.0 130.0,198.0"/><line class="radspoke" x1="260" y1="198" x2="260.0" y2="68.0"/><text class="axlbl" x="260.0" y="51.0" text-anchor="middle">完整性</text><line class="radspoke" x1="260" y1="198" x2="390.0" y2="198.0"/><text class="axlbl" x="410.0" y="201.0" text-anchor="start">可测试性</text><line class="radspoke" x1="260" y1="198" x2="260.0" y2="328.0"/><text class="axlbl" x="260.0" y="351.0" text-anchor="middle">无幻觉</text><line class="radspoke" x1="260" y1="198" x2="130.0" y2="198.0"/><text class="axlbl" x="110.0" y="201.0" text-anchor="end">结构</text><text class="axlbl" x="263.0" y="168.5" opacity="0.7">2</text><text class="axlbl" x="263.0" y="136.0" opacity="0.7">3</text><text class="axlbl" x="263.0" y="103.5" opacity="0.7">4</text><text class="axlbl" x="263.0" y="71.0" opacity="0.7">5</text><polygon class="rc0 radpoly" points="260.0,68.0 390.0,198.0 260.0,319.9 130.0,198.0"/><polygon class="rc1 radpoly" points="260.0,68.0 390.0,198.0 260.0,328.0 130.0,198.0"/><polygon class="rc2 radpoly" points="260.0,68.0 390.0,198.0 260.0,328.0 130.0,198.0"/><circle class="rc0" cx="260.0" cy="68.0" r="3"><title>sonnet-5 · 完整性: 5.0/5</title></circle><circle class="rc0" cx="390.0" cy="198.0" r="3"><title>sonnet-5 · 可测试性: 5.0/5</title></circle><circle class="rc0" cx="260.0" cy="319.9" r="3"><title>sonnet-5 · 无幻觉: 4.8/5</title></circle><circle class="rc0" cx="130.0" cy="198.0" r="3"><title>sonnet-5 · 结构: 5.0/5</title></circle><circle class="rc1" cx="260.0" cy="68.0" r="3"><title>deepseek-v4-pro · 完整性: 5.0/5</title></circle><circle class="rc1" cx="390.0" cy="198.0" r="3"><title>deepseek-v4-pro · 可测试性: 5.0/5</title></circle><circle class="rc1" cx="260.0" cy="328.0" r="3"><title>deepseek-v4-pro · 无幻觉: 5.0/5</title></circle><circle class="rc1" cx="130.0" cy="198.0" r="3"><title>deepseek-v4-pro · 结构: 5.0/5</title></circle><circle class="rc2" cx="260.0" cy="68.0" r="3"><title>kimi-k3 · 完整性: 5.0/5</title></circle><circle class="rc2" cx="390.0" cy="198.0" r="3"><title>kimi-k3 · 可测试性: 5.0/5</title></circle><circle class="rc2" cx="260.0" cy="328.0" r="3"><title>kimi-k3 · 无幻觉: 5.0/5</title></circle><circle class="rc2" cx="130.0" cy="198.0" r="3"><title>kimi-k3 · 结构: 5.0/5</title></circle>
+  </svg></div>
+    <h3>维度偏好 <span class="sub">— 对局胜率,相对</span></h3>
+  <div class="scroll"><table class="matrix">
+    <thead><tr><th>模型</th><th>完整性</th><th>可测试性</th><th>无幻觉</th><th>结构</th></tr></thead>
+    <tbody><tr><td class="m">kimi-k3</td><td class="heat" style="background:rgba(34,197,94,0.100)">50</td><td class="heat" style="background:rgba(34,197,94,0.400)">100</td><td class="heat" style="background:rgba(34,197,94,0.250)">75</td><td class="heat" style="background:rgba(34,197,94,0.325)">88</td></tr>
+<tr><td class="m">deepseek-v4-pro</td><td class="heat" style="background:rgba(34,197,94,0.100)">50</td><td class="heat" style="background:rgba(239,68,68,0.400)">0</td><td class="heat" style="background:rgba(239,68,68,0.175)">38</td><td class="heat" style="background:rgba(239,68,68,0.400)">0</td></tr>
+<tr><td class="m">sonnet-5</td><td class="heat" style="background:rgba(34,197,94,0.100)">50</td><td class="heat" style="background:rgba(34,197,94,0.100)">50</td><td class="heat" style="background:rgba(239,68,68,0.175)">38</td><td class="heat" style="background:rgba(34,197,94,0.175)">63</td></tr></tbody>
+  </table></div>
+    <details>
+    <summary>对决理由 · 总体 + 11 处维度分歧(共 6 场对比)</summary>
+    <p class="rz-note">这些是<b>单场、相对 A/B</b> 的裁判理由(单一输入、仅取首个成功输出),<b>不是该维度的综合质量评价</b>;维度层只列出<b>与总体判定不一致</b>的项(标 ⚠,即真正的取舍点),一致的已隐藏。绝对质量请看上方「绝对分 1–5」表。</p>
+    <div class="scroll"><table>
+      <thead><tr><th>输入</th><th>A</th><th>B</th><th>维度</th><th>胜者</th><th>理由</th></tr></thead>
+      <tbody><tr>
+    <td>todo-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td>总体</td>
+    <td>平局</td>
+    <td class="reason">Output A is the stronger PRD because it strictly follows the brief without adding unrequested feature sections, and its Given/When/Then acceptance criteria provide superior testability and structure.</td>
+  </tr>
+<tr>
+    <td>todo-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td>可测试性 ⚠</td>
+    <td>sonnet-5</td>
+    <td class="reason">Output A uses numbered Acceptance Criteria with strict Given/When/Then formatting, making it much easier to translate directly into automated tests.</td>
+  </tr>
+<tr>
+    <td>todo-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td>结构 ⚠</td>
+    <td>sonnet-5</td>
+    <td class="reason">Output A provides a more rigorous structure with stable, numbered AC IDs (AC1, AC2) and clear BDD syntax that developers and QA can easily reference.</td>
+  </tr>
+<tr>
+    <td>todo-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">kimi-k3</td>
+    <td>总体</td>
+    <td>kimi-k3</td>
+    <td class="reason">Output B is the superior PRD because it maintains strict discipline against scope creep, provides highly testable edge-case criteria, and uses a more robust referencing structure for development.</td>
+  </tr>
+<tr>
+    <td>todo-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">kimi-k3</td>
+    <td>完整性 ⚠</td>
+    <td>平局</td>
+    <td class="reason">Both PRDs fully cover all the core requirements outlined in the implied brief without missing any functional areas.</td>
+  </tr>
+<tr>
+    <td>todo-app</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td class="m">kimi-k3</td>
+    <td>总体</td>
+    <td>kimi-k3</td>
+    <td class="reason">Output B is the superior PRD because its numbered acceptance criteria make it highly testable, and it maintains strict discipline regarding the scope of the brief.</td>
+  </tr>
+<tr>
+    <td>todo-app</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td class="m">kimi-k3</td>
+    <td>完整性 ⚠</td>
+    <td>平局</td>
+    <td class="reason">Both PRDs fully cover all the core requirements outlined in the brief without missing any functionality.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td>总体</td>
+    <td>平局</td>
+    <td class="reason">Output A is the superior PRD because it maintains strict product focus without dictating technical architecture, and its numbered acceptance criteria make it highly actionable for developers and testers.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td>可测试性 ⚠</td>
+    <td>sonnet-5</td>
+    <td class="reason">Output A uses stable, numbered IDs for every single acceptance criterion (e.g., AC-1.1), making it much easier for QA to track and verify.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td>结构 ⚠</td>
+    <td>sonnet-5</td>
+    <td class="reason">Output A provides a highly disciplined structure with clear, hierarchical numbering for both requirements and acceptance criteria.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">kimi-k3</td>
+    <td>总体</td>
+    <td>kimi-k3</td>
+    <td class="reason">Output B delivers a more robust and developer-ready PRD by addressing edge cases like full history pagination and explicitly documenting its product decisions to resolve brief ambiguities.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">kimi-k3</td>
+    <td>完整性 ⚠</td>
+    <td>平局</td>
+    <td class="reason">Output B includes pagination to ensure the entire message history is accessible, whereas Output A only loads the last 50 messages with no way to view older ones.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">kimi-k3</td>
+    <td>无幻觉 ⚠</td>
+    <td>平局</td>
+    <td class="reason">Both outputs introduce minor, standard technical constraints not explicitly in the brief (Output A adds max message length; Output B adds password length and pagination) to make the app buildable.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">sonnet-5</td>
+    <td class="m">kimi-k3</td>
+    <td>结构 ⚠</td>
+    <td>平局</td>
+    <td class="reason">Output B includes a highly valuable 'Key Product Decisions' section that explicitly resolves ambiguities for developers, alongside standard metadata and clear IDs.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td class="m">kimi-k3</td>
+    <td>总体</td>
+    <td>平局</td>
+    <td class="reason">Although Output B has slightly better structure and testability, Output A wins overall because it strictly follows the prompt's rule to avoid scope creep and unrequested features like pagination.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td class="m">kimi-k3</td>
+    <td>可测试性 ⚠</td>
+    <td>kimi-k3</td>
+    <td class="reason">Output B uses the Given/When/Then format for its acceptance criteria, making them highly concrete and directly translatable into automated tests.</td>
+  </tr>
+<tr>
+    <td>chat-app</td>
+    <td class="m">deepseek-v4-pro</td>
+    <td class="m">kimi-k3</td>
+    <td>结构 ⚠</td>
+    <td>kimi-k3</td>
+    <td class="reason">Output B uses stable, hierarchical IDs for every single acceptance criterion (e.g., AC-1.1), making it easier for developers to reference.</td>
+  </tr></tbody>
+    </table></div>
+  </details>
+    
+  </section>
+</body></html>

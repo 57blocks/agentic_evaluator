@@ -1,0 +1,832 @@
+{
+  "suiteId": "codegen-w38",
+  "step": "codegen",
+  "judge": "google/gemini-3.1-pro-preview",
+  "generatedAt": "2026-09-16T05:50:19.377Z",
+  "candidates": [
+    "sonnet-5",
+    "deepseek-v4-pro",
+    "kimi-k3"
+  ],
+  "inputs": [
+    "code-utils",
+    "code-component",
+    "code-schema"
+  ],
+  "scorecards": [
+    {
+      "candidate": "sonnet-5",
+      "winRate": 50,
+      "dimensionWinRates": {
+        "meets-spec": 58.333333333333336,
+        "correctness": 66.66666666666666,
+        "type-quality": 41.66666666666667,
+        "simplicity": 0,
+        "robustness": 58.333333333333336
+      },
+      "avgCostUsd": 0.007549555555555555,
+      "avgMs": 5822.777777777777,
+      "okRate": 1,
+      "trials": 3,
+      "objectivePassRate": 1,
+      "absoluteScore": 5,
+      "dimensionScores": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      }
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "winRate": 25,
+      "dimensionWinRates": {
+        "meets-spec": 41.66666666666667,
+        "correctness": 33.33333333333333,
+        "type-quality": 41.66666666666667,
+        "simplicity": 50,
+        "robustness": 33.33333333333333
+      },
+      "avgCostUsd": 0.0029338874355555556,
+      "avgMs": 22809,
+      "okRate": 1,
+      "trials": 3,
+      "objectivePassRate": 0.8888888888888888,
+      "absoluteScore": 4.888888888888889,
+      "dimensionScores": {
+        "meets-spec": 4.888888888888889,
+        "correctness": 4.777777777777778,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 4.777777777777778
+      }
+    },
+    {
+      "candidate": "kimi-k3",
+      "winRate": 75,
+      "dimensionWinRates": {
+        "meets-spec": 50,
+        "correctness": 50,
+        "type-quality": 66.66666666666666,
+        "simplicity": 100,
+        "robustness": 58.333333333333336
+      },
+      "avgCostUsd": 0.04252832222222222,
+      "avgMs": 38952,
+      "okRate": 1,
+      "trials": 3,
+      "objectivePassRate": 1,
+      "absoluteScore": 4.666666666666667,
+      "dimensionScores": {
+        "meets-spec": 4.888888888888889,
+        "correctness": 4.666666666666667,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 4.666666666666667
+      }
+    }
+  ],
+  "judgements": [
+    {
+      "inputSlug": "code-utils",
+      "a": "sonnet-5",
+      "b": "deepseek-v4-pro",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both implementations meet the specification and implement the exact signature requested."
+        },
+        "correctness": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A correctly handles query keys that conflict with Object.prototype properties (like 'toString' or 'constructor') by using hasOwnProperty, whereas Output B will erroneously include native functions in the parsed arrays."
+        },
+        "type-quality": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both submissions use identical, appropriate types for the parameters, return values, and internal variables."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B is slightly simpler to read by extracting the `decode` helper outside the main function and using a concise ternary for the leading question mark."
+        },
+        "robustness": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A is more robust against inherited property collisions by safely checking for existing keys using Object.prototype.hasOwnProperty.call."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "a",
+        "resolved": "a",
+        "reason": "Output A is the better implementation because it avoids a significant bug where built-in prototype properties (like 'toString') would be treated as existing query parameters, making it much more correct and robust."
+      }
+    },
+    {
+      "inputSlug": "code-utils",
+      "a": "sonnet-5",
+      "b": "kimi-k3",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A correctly handles keys that match Object.prototype properties (like 'toString'), whereas Output B fails to process them correctly."
+        },
+        "correctness": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output B has a bug where keys like 'toString' or 'constructor' will evaluate as not undefined, resulting in the native function being included in the parsed array."
+        },
+        "type-quality": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both implementations use the exact same, correct types for the parameters and return values."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B is slightly more concise, uses a cleaner ternary for string slicing, and extracts the decoding logic into a separate helper function."
+        },
+        "robustness": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A uses `Object.prototype.hasOwnProperty.call` to safely check for existing keys, preventing prototype pollution and collision with inherited properties."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "a",
+        "resolved": "a",
+        "reason": "Output A is significantly more robust and correct because it safely handles object prototype properties, avoiding a major bug present in Output B."
+      }
+    },
+    {
+      "inputSlug": "code-utils",
+      "a": "deepseek-v4-pro",
+      "b": "kimi-k3",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both implementations meet the requirements and handle the specified edge cases."
+        },
+        "correctness": {
+          "forward": "a",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Output A correctly preserves the '+' to space conversion even if the subsequent percent-decoding fails, whereas Output B reverts the space conversion on failure."
+        },
+        "type-quality": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both use identical, correct TypeScript types for the function signature and internal variables."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B uses more concise ternary operators for splitting the key/value pairs and includes a helpful JSDoc comment."
+        },
+        "robustness": {
+          "forward": "a",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Output A's error handling in the decode function is more robust because it doesn't discard valid transformations (like '+' to space) when a separate transformation (percent decoding) fails."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "b",
+        "resolved": "tie",
+        "reason": "Output A is the winner due to its more accurate fallback behavior when decoding malformed URI components, ensuring that valid '+' characters are still converted to spaces."
+      }
+    },
+    {
+      "inputSlug": "code-component",
+      "a": "sonnet-5",
+      "b": "deepseek-v4-pro",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both implementations correctly implement the requested signature and handle pagination logic."
+        },
+        "correctness": {
+          "forward": "a",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Output A uses proper semantic HTML (a list inside a nav) for pagination, whereas Output B omits the list and unnecessarily calls e.preventDefault() on type=\"button\" elements."
+        },
+        "type-quality": {
+          "forward": "a",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Output A provides more explicit return types for its functions and handlers, whereas Output B relies heavily on inference."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B is slightly more concise and avoids the extra abstraction of a centralized goToPage function, though at the cost of some duplication."
+        },
+        "robustness": {
+          "forward": "a",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Output A centralizes its bounds and equality checking in a single `goToPage` function, making the logic more robust and less prone to errors than Output B's duplicated checks."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "b",
+        "resolved": "tie",
+        "reason": "Output A is the better submission due to its use of semantic HTML for accessibility, centralized and robust validation logic, and avoidance of unnecessary event preventions."
+      }
+    },
+    {
+      "inputSlug": "code-component",
+      "a": "sonnet-5",
+      "b": "kimi-k3",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both submissions implement the requested signature and provide functional pagination components."
+        },
+        "correctness": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both correctly handle boundary conditions, disable buttons appropriately, and prevent invalid page changes."
+        },
+        "type-quality": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both use appropriate TypeScript types, with Output B correctly relying on inference for inline event handlers while Output A explicitly types them."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B is much more concise and idiomatic, avoiding the verbose curried event handlers and redundant bounds checks found in Output A."
+        },
+        "robustness": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both safely guard against out-of-bounds page changes and redundant updates to the current page."
+        }
+      },
+      "overall": {
+        "forward": "b",
+        "reverse": "b",
+        "resolved": "b",
+        "reason": "Output B delivers the same functionality and safety as Output A but with significantly cleaner, more idiomatic, and easier-to-read React code."
+      }
+    },
+    {
+      "inputSlug": "code-component",
+      "a": "deepseek-v4-pro",
+      "b": "kimi-k3",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both outputs implement the requested Pagination component with the correct signature and props."
+        },
+        "correctness": {
+          "forward": "tie",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Both correctly handle pagination logic, bounds checking, and disabling buttons at the edges."
+        },
+        "type-quality": {
+          "forward": "tie",
+          "reverse": "b",
+          "resolved": "tie",
+          "reason": "Both use appropriate TypeScript types for the props and internal logic."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B unifies the page change logic into a single concise `goToPage` function and avoids unnecessary `e.preventDefault()` calls on `type=\"button\"` elements."
+        },
+        "robustness": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both safely guard against out-of-bounds page changes and redundant clicks on the current page."
+        }
+      },
+      "overall": {
+        "forward": "b",
+        "reverse": "b",
+        "resolved": "b",
+        "reason": "Output B provides a cleaner, more focused implementation by consolidating the navigation logic into a single function and avoiding unnecessary event handler boilerplate."
+      }
+    },
+    {
+      "inputSlug": "code-schema",
+      "a": "sonnet-5",
+      "b": "deepseek-v4-pro",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both outputs implement the requested schema, types, and validation function with the same structural behavior."
+        },
+        "correctness": {
+          "forward": "a",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Output A's password validation correctly handles all valid string characters, whereas Output B's regex using `.+` will incorrectly reject passwords containing newline characters."
+        },
+        "type-quality": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both outputs correctly type the input as `unknown`, use Zod's inference for the `Signup` type, and return a well-typed discriminated union."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B uses Zod's idiomatic shorthand for custom error messages (passing a string directly instead of an object), making the schema definition slightly cleaner."
+        },
+        "robustness": {
+          "forward": "a",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Output A provides more granular error messages for password requirements and avoids brittle lookahead regexes that can fail on edge-case characters."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "b",
+        "resolved": "tie",
+        "reason": "Output A is the better submission because its password validation is more robust, avoids regex edge-case bugs with newline characters, and provides better error granularity."
+      }
+    },
+    {
+      "inputSlug": "code-schema",
+      "a": "sonnet-5",
+      "b": "kimi-k3",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both submissions implement the requested schema, types, and validation function correctly."
+        },
+        "correctness": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both correctly validate the inputs, enforce the constraints, and return the expected success or error objects."
+        },
+        "type-quality": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B exports the `ValidationResult` type, which is necessary for consumers to properly type the return value of the validation function."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B uses Zod's built-in `.regex()` method for string patterns, which is much simpler and more idiomatic than Output A's verbose `.refine()` calls."
+        },
+        "robustness": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B handles potential nested error paths more robustly by joining the full path array, whereas Output A only grabs the first element."
+        }
+      },
+      "overall": {
+        "forward": "b",
+        "reverse": "b",
+        "resolved": "b",
+        "reason": "Output B is more idiomatic in its use of Zod, exports all necessary types, and handles error paths more robustly."
+      }
+    },
+    {
+      "inputSlug": "code-schema",
+      "a": "deepseek-v4-pro",
+      "b": "kimi-k3",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B exports the ValidationResult type, which is typically expected for consumers of the validateSignup function."
+        },
+        "correctness": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B splits the password regex into two separate checks, allowing for more specific and helpful error messages."
+        },
+        "type-quality": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B exports the ValidationResult type, making the types fully accessible to external modules."
+        },
+        "simplicity": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B avoids complex regex lookaheads by chaining two simple regex validations for the password."
+        },
+        "robustness": {
+          "forward": "b",
+          "reverse": "b",
+          "resolved": "b",
+          "reason": "Output B uses `issue.path.join('.')` which safely handles deeply nested paths if the schema were to be expanded in the future."
+        }
+      },
+      "overall": {
+        "forward": "b",
+        "reverse": "b",
+        "resolved": "b",
+        "reason": "Output B is superior because it exports all necessary types, uses simpler and more precise regex validations, and handles error paths more robustly."
+      }
+    }
+  ],
+  "scores": [
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-utils",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-utils",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-utils",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-utils",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-utils",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-utils",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-utils",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 4,
+        "correctness": 3,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 3
+      },
+      "overall": 3
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-utils",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-utils",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 4,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 4
+      },
+      "overall": 4
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-component",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-component",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-component",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-component",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-component",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-component",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-component",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-component",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-component",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-schema",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-schema",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-schema",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-schema",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-schema",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 4,
+        "correctness": 3,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 3
+      },
+      "overall": 4
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-schema",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-schema",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-schema",
+      "trial": 1,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "kimi-k3",
+      "inputSlug": "code-schema",
+      "trial": 2,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    }
+  ]
+}

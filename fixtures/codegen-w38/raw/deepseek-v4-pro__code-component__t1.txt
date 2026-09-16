@@ -1,0 +1,57 @@
+```file:Pagination.tsx
+interface PaginationProps {
+  currentPage: number;   // 1-based
+  totalPages: number;    // >= 1
+  onPageChange: (page: number) => void;
+}
+
+export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  return (
+    <nav aria-label="Pagination">
+      <button
+        onClick={handlePrevious}
+        disabled={currentPage <= 1}
+        aria-label="Previous page"
+      >
+        Previous
+      </button>
+      {pages.map((page) => (
+        <button
+          key={page}
+          onClick={() => {
+            if (page !== currentPage) {
+              onPageChange(page);
+            }
+          }}
+          aria-current={page === currentPage ? 'page' : undefined}
+          className={page === currentPage ? 'active' : undefined}
+          aria-label={`Page ${page}`}
+        >
+          {page}
+        </button>
+      ))}
+      <button
+        onClick={handleNext}
+        disabled={currentPage >= totalPages}
+        aria-label="Next page"
+      >
+        Next
+      </button>
+    </nav>
+  );
+}
+```

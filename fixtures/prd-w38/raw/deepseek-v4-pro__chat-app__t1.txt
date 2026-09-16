@@ -1,0 +1,115 @@
+# PRD: Real-Time Group Chat Web App
+
+**Status:** Draft  
+**Author:** Senior Product Manager  
+**Target Release:** v1.0
+
+---
+
+## Problem Statement & Goal
+
+Teams and communities need a lightweight, synchronous way to discuss shared topics without friction. Existing solutions are often bloated or require app installations.  
+**Goal:** Provide a simple web-based chat where registered users can instantly create or join public channels, exchange text messages in real time, see who is currently active, and review past conversations—all without page reloads.
+
+---
+
+## User Stories
+
+- **As a** registered user, **I want to** create a new public channel, **so that** I can start a conversation around a specific topic.
+- **As a** registered user, **I want to** browse and join existing public channels, **so that** I can participate in ongoing discussions.
+- **As a** channel member, **I want to** send a text message that appears immediately for everyone in the channel, **so that** we can have a fluid, real-time conversation.
+- **As a** channel member, **I want to** see who is currently online in the channel, **so that** I know who is available to respond.
+- **As a** channel member, **I want to** see a timestamp on every message, **so that** I understand the timing and sequence of the conversation.
+- **As a** user opening a channel, **I want to** see the recent message history automatically, **so that** I can catch up on what I missed.
+
+---
+
+## Functional Requirements
+
+### PRD-1: User Registration & Authentication
+The system must allow a person to create an account and log in, so that only identified users can access channels.
+
+**Acceptance Criteria:**
+- A visitor can register with a unique username and password.
+- A registered user can log in with their credentials.
+- Invalid credentials show an error; successful login redirects to the main channel list.
+- Sessions persist across browser tabs until explicit logout.
+
+---
+
+### PRD-2: Create Public Channel
+A logged-in user must be able to create a new public channel.
+
+**Acceptance Criteria:**
+- User provides a unique channel name (case-insensitive).
+- On creation, the channel appears in the public channel list visible to all registered users.
+- The creator is automatically added as a member and sees the empty channel view.
+- Duplicate channel names are rejected with a clear message.
+
+---
+
+### PRD-3: Discover & Join Public Channels
+A logged-in user must be able to view all public channels and join any of them.
+
+**Acceptance Criteria:**
+- A list of all public channels (with names) is displayed.
+- Each channel shows a “Join” button if the user is not a member.
+- Clicking “Join” instantly adds the user to the channel; the channel opens, showing message history and online users.
+- A user can be a member of multiple channels simultaneously.
+
+---
+
+### PRD-4: Real-Time Text Messaging
+A channel member must be able to send a text message that appears instantly for all members currently viewing that channel.
+
+**Acceptance Criteria:**
+- A text input and send button are present in the channel view.
+- Pressing Enter or clicking Send dispatches the message.
+- The message appears in the sender’s chat pane immediately and in all other online members’ panes within 1 second, without manual refresh.
+- Each message displays the sender’s username and a timestamp (format: `HH:MM`, 24-hour, server time).
+- Empty messages or messages exceeding 1000 characters are prevented with inline validation.
+
+---
+
+### PRD-5: Message History on Channel Open
+When a user opens a channel, the system must load and display the most recent messages.
+
+**Acceptance Criteria:**
+- Opening a channel fetches the last 50 messages, displayed in chronological order (oldest at top, newest at bottom).
+- Each historical message shows username and timestamp.
+- The chat pane auto-scrolls to the bottom (most recent message).
+- If fewer than 50 messages exist, all are shown.
+- (Out of scope for v1: infinite scroll / “load more” pagination.)
+
+---
+
+### PRD-6: Online Presence per Channel
+The system must show which members are currently online (i.e., have the channel open) in real time.
+
+**Acceptance Criteria:**
+- A sidebar or panel lists “Online” members with their usernames.
+- When a user opens a channel, their name appears in the online list for all other members within 2 seconds.
+- When a user closes the channel tab/window or navigates away, their name is removed from the online list within 5 seconds.
+- The list updates automatically; no manual refresh needed.
+
+---
+
+## Out of Scope / Non-Goals
+
+- Private/invite-only channels
+- Direct (1:1) messaging
+- File attachments, images, or rich media
+- Message editing or deletion
+- Typing indicators
+- Read receipts / “seen” status
+- Push or email notifications
+- User profiles, avatars, or status messages
+- Message search or full-text indexing
+- Channel moderation (kick, ban, mute)
+- Threaded replies or reactions
+- Offline support or mobile native apps
+- Password reset / account recovery flows (basic registration only)
+
+---
+
+*End of PRD*

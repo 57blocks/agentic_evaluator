@@ -1,0 +1,62 @@
+```file:Pagination.tsx
+import React from 'react';
+
+interface PaginationProps {
+  currentPage: number;   // 1-based
+  totalPages: number;    // >= 1
+  onPageChange: (page: number) => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+  const handlePageClick = (page: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (page !== currentPage && page >= 1 && page <= totalPages) {
+      onPageChange(page);
+    }
+  };
+
+  const handlePrevious = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  return (
+    <nav aria-label="Pagination">
+      <button
+        onClick={handlePrevious}
+        disabled={currentPage <= 1}
+        aria-label="Previous page"
+      >
+        Previous
+      </button>
+      {pageNumbers.map((page) => (
+        <button
+          key={page}
+          onClick={handlePageClick(page)}
+          aria-current={page === currentPage ? 'page' : undefined}
+          className={page === currentPage ? 'active' : undefined}
+        >
+          {page}
+        </button>
+      ))}
+      <button
+        onClick={handleNext}
+        disabled={currentPage >= totalPages}
+        aria-label="Next page"
+      >
+        Next
+      </button>
+    </nav>
+  );
+};
+
+export default Pagination;
+```
