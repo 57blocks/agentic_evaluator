@@ -34,6 +34,7 @@ import { buildManifest } from "./canon/manifest.js";
 import { buildLedger } from "./canon/cost.js";
 import { directionality, ratesFor } from "./canon/rates.js";
 import { evaluationCoverage, writeCanonBundle, writeManifest } from "./canon/write.js";
+import { writeRunReport } from "./report-v2.js";
 import {
   toEvaluationRows,
   toTrialRows,
@@ -819,6 +820,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
     ledger,
     summary,
   });
+  if (html) await writeRunReport(outDir);
 
   console.log(`\n${md}\n`);
   console.log(
