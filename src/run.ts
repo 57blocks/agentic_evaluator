@@ -1,23 +1,49 @@
 /**
  * Model-eval CLI entry point + reusable `runSuite` driver.
  *
- *   tsx eval/src/run.ts --suite eval/suites/prd.json [--html]
+ *   pnpm run run -- --suite specs/codegen-w38.yaml --html --yes
+ *   pnpm run run -- --suite suites/codegen.json  --html        (legacy JSON)
  *
  * Runs every candidate against every fixed input (× trials) through the suite's
- * producer, then has a judge pairwise-rank them. codegen suites additionally run
- * an objective `tsc --noEmit` gate. Writes report.{md,json,html} + raw outputs
- * to eval/results/<runId>/.
+ * producer, then has a judge pairwise-rank them and grade them 1–5. codegen
+ * suites additionally run an objective `tsc --noEmit` gate.
  *
- * `runSuite` is exported so `run-all.ts` can drive all three steps in-process.
+ * Two output layers land in runs/<runId>/:
+ *   legacy   raw/*.txt, records.json, report.{md,json,html}  — unchanged aggregate
+ *   canon    manifest.json, trace.jsonl, scores.jsonl, evaluations.jsonl,
+ *            ledger.json, summary.json, GAPS.md                — protocol v0.4
+ *
+ * `runSuite`, `aggregate`, `scoreAll` are exported for rescore.ts / dashboard.ts.
  */
 
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { complete } from "./llm.js";
-import { judgePair } from "./judge.js";
-import { scoreOne } from "./score.js";
+import { complete, LlmError, type LlmTrace } from "./llm.js";
+import { judgePair, judgePromptTemplateSha, PAIRWISE_EVALUATOR_ID, type JudgedPair } from "./judge.js";
+import { scoreOne, scorePromptTemplateSha, ABSOLUTE_EVALUATOR_ID } from "./score.js";
+import { checkVersion as tscCheckVersion, TSC_CHECK_ID } from "./check.js";
 import { renderMarkdown, renderHtml } from "./report.js";
+import { loadSuiteOrSpec } from "./spec/load-spec.js";
+import { REPO_ROOT, runsDir } from "./paths.js";
+import { CODEGEN_PREAMBLE, CODEGEN_PRODUCER_VERSION } from "./producers/code-gen.js";
+import { sha256, short, trialHash } from "./canon/hash.js";
+import { classifyCompletion } from "./canon/states.js";
+import { openTrace } from "./canon/trace.js";
+import { buildManifest } from "./canon/manifest.js";
+import { buildLedger } from "./canon/cost.js";
+import { directionality, ratesFor } from "./canon/rates.js";
+import { evaluationCoverage, writeCanonBundle, writeManifest } from "./canon/write.js";
+import {
+  toEvaluationRows,
+  toTrialRows,
+  type PairFailure,
+  type ScoredRecord,
+  type SkippedPair,
+  type TrialFailure,
+} from "./canon/adapt.js";
+import { EvaluatorCallError, summarizeAttempts, type EvaluatorUsage } from "./canon/usage.js";
+import type { CandidateDef, CompletionState, CostSource, EvaluationState } from "./canon/types.js";
 import type {
   Judgement,
   ProducerKind,
@@ -28,8 +54,6 @@ import type {
   Suite,
   Winner,
 } from "./types.js";
-
-import { REPO_ROOT, inputsDir, runsDir } from "./paths.js";
 
 /** Load KEY=VALUE lines from .env.local into process.env (no dependency). */
 async function loadEnvLocal(): Promise<void> {
@@ -47,54 +71,50 @@ async function loadEnvLocal(): Promise<void> {
   }
 }
 
-function parseArgs(argv: string[]): { suite: string; html: boolean } {
-  let suite = "suites/prd.json";
+interface CliArgs {
+  suite: string;
+  html: boolean;
+  yes: boolean;
+}
+
+function parseArgs(argv: string[]): CliArgs {
+  let suite = "specs/codegen-w38.yaml";
   let html = false;
+  let yes = process.env.EVAL_YES === "1";
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--suite") suite = argv[++i];
     else if (argv[i] === "--html") html = true;
+    else if (argv[i] === "--yes") yes = true;
   }
-  return { suite, html };
+  return { suite, html, yes };
 }
 
-async function loadSuite(suitePath: string): Promise<Suite> {
-  const raw = await fs.readFile(path.resolve(REPO_ROOT, suitePath), "utf-8");
-  return JSON.parse(raw) as Suite;
+async function readInput(inputSlug: string): Promise<string> {
+  return fs.readFile(path.join(REPO_ROOT, "inputs", `${inputSlug}.txt`), "utf-8");
 }
 
-function readInput(inputSlug: string): Promise<string> {
-  return fs.readFile(path.join(inputsDir(), `${inputSlug}.txt`), "utf-8");
-}
-
-/** Stable run id shared by the output dir and (for run-all) reporting. */
+/** Stable run id shared by the output dir and (for dashboards) reporting. */
 export function reportRunId(report: Report): string {
   return `${report.suiteId}-${report.generatedAt.replace(/[:.]/g, "-")}`;
 }
 
-/** OpenRouter model ids contain `/` (and sometimes `:`) — make a fs-safe name. */
+/** Candidate ids may be OpenRouter model ids (legacy) with `/` and `:` — make fs-safe. */
 function safeName(candidate: string): string {
   return candidate.replace(/[/:]/g, "_");
 }
 
-/** Fallback max concurrent generations/judgements when EVAL_CONCURRENCY is unset/invalid. */
+/** Fallback max concurrent LLM calls when neither the spec nor EVAL_CONCURRENCY says. */
 const DEFAULT_CONCURRENCY = 5;
 
-/**
- * Max concurrent in-flight LLM calls, from `EVAL_CONCURRENCY` (parseInt, base 10).
- * Unset/invalid → {@link DEFAULT_CONCURRENCY}; anything below 1 clamps to 1.
- * Read after env is loaded (loadEnvLocal runs before runSuite in both entry
- * points), so it also picks up values placed in `.env.local`.
- */
-function resolveConcurrency(): number {
+function resolveConcurrency(suite: Suite): number {
+  if (suite.concurrency && suite.concurrency > 0) return suite.concurrency;
   const parsed = parseInt(process.env.EVAL_CONCURRENCY ?? "", 10);
   return Number.isNaN(parsed) ? DEFAULT_CONCURRENCY : Math.max(1, parsed);
 }
 
 /**
- * Map `fn` over `items` with at most `limit` calls in flight at once. Uses a
- * sliding window (a finished slot is immediately refilled — not a batch barrier)
- * and returns results in INPUT order regardless of completion order. Pure
- * Promise implementation, no third-party dependency.
+ * Map `fn` over `items` with at most `limit` calls in flight at once. Sliding
+ * window; results return in INPUT order regardless of completion order.
  */
 async function mapWithConcurrency<T, R>(
   items: readonly T[],
@@ -103,9 +123,6 @@ async function mapWithConcurrency<T, R>(
 ): Promise<R[]> {
   const results = new Array<R>(items.length);
   let cursor = 0;
-  // Each worker pulls the next unclaimed index until the list is exhausted. The
-  // read-then-increment is atomic under JS's single-threaded model, so no two
-  // workers ever claim the same index.
   const worker = async (): Promise<void> => {
     while (cursor < items.length) {
       const index = cursor;
@@ -114,9 +131,23 @@ async function mapWithConcurrency<T, R>(
     }
   };
   const workerCount = Math.min(limit, items.length);
-  const workers = Array.from({ length: workerCount }, () => worker());
-  await Promise.all(workers);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
   return results;
+}
+
+/** Candidate definition for an id; legacy suites carry none, so id = model. */
+function defOf(suite: Suite, candidateId: string): CandidateDef {
+  return suite.candidateDefs?.[candidateId] ?? { id: candidateId, model: candidateId, provider_route: "openrouter" };
+}
+
+/** "Claude Platform on AWS" → "claude-platform-on-aws": identifiers stay portable. */
+function slugify(name: string): string {
+  return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+function deploymentRef(def: CandidateDef, provider: string | undefined): string | undefined {
+  const route = def.provider_route ?? "openrouter";
+  return provider ? `${route}/${slugify(provider)}` : route;
 }
 
 /** Output of a single generation (before it becomes a RunRecord). */
@@ -124,56 +155,75 @@ interface GenOutput {
   text: string;
   promptTokens: number;
   completionTokens: number;
+  cachedTokens?: number;
   costUsd: number;
+  costSource: CostSource;
   ms: number;
+  provider?: string;
+  finishReason?: string;
+  refusal?: string;
+  /** codegen: number of files parsed from the output. */
+  parsedUnits?: number;
   checkPassed?: boolean;
   checkOutput?: string;
+  checkState?: EvaluationState;
+  checkVersion?: string;
 }
 
-/**
- * Produce one candidate output for one input, dispatched by producer kind.
- * Dynamic imports keep `src/` (agent) / the `tsc` gate (codegen) out of the
- * module graph until after env is configured, and are module-cached across
- * calls.
- */
 async function generateOne(params: {
   suite: Suite;
   producer: ProducerKind;
   promptTpl: string;
   inputText: string;
-  candidate: string;
+  def: CandidateDef;
   temperature: number;
   timeoutMs: number;
   checkWorkDir: string;
+  trace: LlmTrace;
+  traceContext: Record<string, unknown>;
 }): Promise<GenOutput> {
-  const { suite, producer, promptTpl, inputText, candidate, temperature, timeoutMs } = params;
+  const { suite, producer, promptTpl, inputText, def, temperature, timeoutMs, trace, traceContext } = params;
 
   if (producer === "prompt") {
     const prompt = promptTpl.replace("{{input}}", inputText);
-    const r = await complete({ model: candidate, prompt, temperature, timeoutMs });
+    const r = await complete({ model: def.model, prompt, temperature, timeoutMs, trace, traceContext });
     return {
       text: r.text,
       promptTokens: r.promptTokens,
       completionTokens: r.completionTokens,
+      cachedTokens: r.cachedTokens,
       costUsd: r.costUsd,
+      costSource: r.costSource,
       ms: r.ms,
+      provider: r.provider,
+      finishReason: r.finishReason,
+      refusal: r.refusal,
     };
   }
 
   if (producer === "agent") {
     // The real PMAgent / TRDAgent / TaskBreakdownAgent producers live in
-    // agentic-builder and import its src/. They are not available in this
-    // standalone repo; wire them back through a candidate adapter later.
-    throw new Error(
-      `agent producer is not available in this repo (step "${suite.step}"); use "prompt" or "codegen"`,
-    );
+    // agentic-builder and import its src/. Not available here; wire them back
+    // through a candidate adapter later.
+    throw new Error(`agent producer is not available in this repo (step "${suite.step}"); use "prompt" or "codegen"`);
   }
 
   // producer === "codegen"
   const { produceCode } = await import("./producers/code-gen.js");
-  const r = await produceCode(inputText, candidate, { temperature, timeoutMs });
-  let checkPassed: boolean | undefined;
-  let checkOutput: string | undefined;
+  const r = await produceCode(inputText, def.model, { temperature, timeoutMs, trace, traceContext });
+  const out: GenOutput = {
+    text: r.text,
+    promptTokens: r.promptTokens,
+    completionTokens: r.completionTokens,
+    cachedTokens: r.cachedTokens,
+    costUsd: r.costUsd,
+    costSource: r.costSource,
+    ms: r.ms,
+    provider: r.provider,
+    finishReason: r.finishReason,
+    refusal: r.refusal,
+    parsedUnits: r.files.length,
+  };
   if (suite.check) {
     const { runCheck } = await import("./check.js");
     const result = await runCheck({
@@ -181,18 +231,15 @@ async function generateOne(params: {
       scaffoldDir: path.resolve(REPO_ROOT, suite.check.scaffoldDir),
       workDir: params.checkWorkDir,
     });
-    checkPassed = result.passed;
-    checkOutput = result.output;
+    return {
+      ...out,
+      checkPassed: result.passed,
+      checkOutput: result.output,
+      checkState: result.state,
+      checkVersion: result.version,
+    };
   }
-  return {
-    text: r.text,
-    promptTokens: r.promptTokens,
-    completionTokens: r.completionTokens,
-    costUsd: r.costUsd,
-    ms: r.ms,
-    checkPassed,
-    checkOutput,
-  };
+  return out;
 }
 
 /** One unit of generation work in the input × candidate × trial grid. */
@@ -200,182 +247,196 @@ interface GenTask {
   inputSlug: string;
   inputText: string;
   candidate: string;
+  def: CandidateDef;
+  trial: number;
+  hash: string;
+}
+
+interface ReusableEntry {
+  candidate: string;
+  inputSlug: string;
   trial: number;
 }
 
 /**
- * Narrow one parsed `records.json` entry (text-stripped, `unknown`) into a full
- * {@link RunRecord} for reuse — but only if it matches (candidate, inputSlug,
- * trial), has `status === "ok"`, and carries valid numeric metrics. The reused
- * `text` comes from the raw file, not the record. Returns `null` on any
- * mismatch so `loadReusable` can keep scanning. Never throws.
- */
-function toReusableRecord(
-  value: unknown,
-  candidate: string,
-  inputSlug: string,
-  trial: number,
-  text: string,
-): RunRecord | null {
-  if (typeof value !== "object" || value === null) return null;
-  const r = value as Record<string, unknown>;
-  if (r.candidate !== candidate || r.inputSlug !== inputSlug || r.trial !== trial) {
-    return null;
-  }
-  if (r.status !== "ok") return null;
-  if (
-    typeof r.promptTokens !== "number" ||
-    typeof r.completionTokens !== "number" ||
-    typeof r.costUsd !== "number" ||
-    typeof r.ms !== "number"
-  ) {
-    return null;
-  }
-  return {
-    candidate,
-    inputSlug,
-    trial,
-    text,
-    promptTokens: r.promptTokens,
-    completionTokens: r.completionTokens,
-    costUsd: r.costUsd,
-    ms: r.ms,
-    status: "ok",
-    checkPassed: typeof r.checkPassed === "boolean" ? r.checkPassed : undefined,
-    checkOutput: typeof r.checkOutput === "string" ? r.checkOutput : undefined,
-  };
-}
-
-/**
- * Find a reusable prior generation for one (candidate, inputSlug, trial) so an
- * already-run candidate isn't regenerated (no LLM call, no cost) when a new
- * candidate is added — see EVAL_REUSE. Scans `eval/results/` for dirs named
- * `<step>-…` (excluding the current run), newest-first (name descending), and
- * returns the first that has BOTH the raw output file AND a matching `status:
- * "ok"` record in its `records.json`. The returned record's `text` is read from
- * the raw file (records.json is text-stripped). Best-effort: any read/parse
- * failure is swallowed and treated as a miss — never throws. Returns `null`
- * when nothing reusable is found (→ caller generates fresh).
+ * Find a prior generation with the SAME trial hash (producer, prompt template,
+ * input, model, sampling, trial) so nothing is regenerated when only judges or
+ * evaluators changed — see EVAL_REUSE. Scans runs/<step>-* newest-first and
+ * requires both a matching `status:"ok"` record and its raw output file.
  */
 async function loadReusable(
   step: string,
-  candidate: string,
-  inputSlug: string,
-  trial: number,
+  hash: string,
   currentRunId: string,
-): Promise<RunRecord | null> {
-  const resultsDir = runsDir();
+): Promise<{ record: RunRecord; from: string } | null> {
   let dirNames: string[];
   try {
-    const entries = await fs.readdir(resultsDir, { withFileTypes: true });
+    const entries = await fs.readdir(runsDir(), { withFileTypes: true });
     dirNames = entries
-      .filter(
-        (e) =>
-          e.isDirectory() &&
-          e.name.startsWith(`${step}-`) &&
-          e.name !== currentRunId,
-      )
+      .filter((e) => e.isDirectory() && e.name.startsWith(`${step}-`) && e.name !== currentRunId)
       .map((e) => e.name)
-      // Timestamped names sort lexicographically by time → descending = newest first.
       .sort((a, b) => b.localeCompare(a));
   } catch {
     return null;
   }
 
-  const rawFileName = `${safeName(candidate)}__${inputSlug}__t${trial}.txt`;
   for (const dirName of dirNames) {
     try {
-      const dir = path.join(resultsDir, dirName);
-      // Require the raw output first — throws (→ caught → next dir) if absent.
-      const text = await fs.readFile(path.join(dir, "raw", rawFileName), "utf-8");
-      const parsed: unknown = JSON.parse(
-        await fs.readFile(path.join(dir, "records.json"), "utf-8"),
-      );
+      const dir = path.join(runsDir(), dirName);
+      const parsed: unknown = JSON.parse(await fs.readFile(path.join(dir, "records.json"), "utf-8"));
       if (!Array.isArray(parsed)) continue;
-      for (const entry of parsed) {
-        const record = toReusableRecord(entry, candidate, inputSlug, trial, text);
-        if (record) return record;
+      const hit = parsed.find(
+        (e): e is Record<string, unknown> =>
+          typeof e === "object" && e !== null && (e as Record<string, unknown>).trialHash === hash && (e as Record<string, unknown>).status === "ok",
+      );
+      if (!hit) continue;
+      const entry = hit as unknown as ReusableEntry & Partial<RunRecord>;
+      const text = await fs.readFile(
+        path.join(dir, "raw", `${safeName(entry.candidate)}__${entry.inputSlug}__t${entry.trial}.txt`),
+        "utf-8",
+      );
+      if (
+        typeof entry.promptTokens !== "number" ||
+        typeof entry.completionTokens !== "number" ||
+        typeof entry.costUsd !== "number" ||
+        typeof entry.ms !== "number"
+      ) {
+        continue;
       }
+      return { record: { ...(entry as RunRecord), text, status: "ok" }, from: dirName };
     } catch {
-      // Missing raw file, unreadable / invalid records.json, etc. → treat as a
-      // miss and keep scanning older dirs.
       continue;
     }
   }
   return null;
 }
 
+function errorRecord(task: GenTask, err: unknown): RunRecord {
+  const message = err instanceof Error ? err.message : String(err);
+  if (err instanceof LlmError) {
+    const verdict = classifyCompletion({
+      error: { kind: err.kind, httpStatus: err.httpStatus, finishReason: err.finishReason, refusal: err.refusal },
+    });
+    return {
+      candidate: task.candidate,
+      inputSlug: task.inputSlug,
+      trial: task.trial,
+      text: "",
+      promptTokens: err.usage?.promptTokens ?? 0,
+      completionTokens: err.usage?.completionTokens ?? 0,
+      cachedTokens: err.usage?.cachedTokens,
+      costUsd: err.usage?.costUsd ?? 0,
+      costSource: err.usage?.costSource ?? "none",
+      ms: err.ms,
+      status: "error",
+      error: message,
+      modelRef: task.def.model,
+      deploymentRef: deploymentRef(task.def, err.provider),
+      trialHash: task.hash,
+      completionState: verdict.state,
+      truncated: false,
+      finishReason: err.finishReason,
+    };
+  }
+  return {
+    candidate: task.candidate,
+    inputSlug: task.inputSlug,
+    trial: task.trial,
+    text: "",
+    promptTokens: 0,
+    completionTokens: 0,
+    costUsd: 0,
+    costSource: "none",
+    ms: 0,
+    status: "error",
+    error: message,
+    modelRef: task.def.model,
+    deploymentRef: deploymentRef(task.def, undefined),
+    trialHash: task.hash,
+    completionState: classifyCompletion({ error: { kind: "unknown" } }).state,
+    truncated: false,
+  };
+}
+
 /**
  * Run every candidate × input × trial, up to `limit` in parallel. Failures are
- * recorded, not thrown. Records come back in input → candidate → trial order
- * (matching the old serial loops), so `representative` and raw-file writing are
- * unaffected; only the interleaved console output changes.
+ * recorded (with whatever the provider billed), never thrown.
  */
-async function runAll(
-  suite: Suite,
-  producer: ProducerKind,
-  promptTpl: string,
-  outDir: string,
-  limit: number,
-  runId: string,
-  reuse: boolean,
-): Promise<RunRecord[]> {
+async function runAll(params: {
+  suite: Suite;
+  producer: ProducerKind;
+  promptTpl: string;
+  promptTemplateSha: string;
+  inputTextBySlug: ReadonlyMap<string, string>;
+  outDir: string;
+  limit: number;
+  runId: string;
+  reuse: boolean;
+  trace: LlmTrace;
+}): Promise<RunRecord[]> {
+  const { suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace } = params;
   const trials = suite.trials ?? 2;
-  const temperature = suite.temperature ?? 0.3;
+  const baseTemperature = suite.temperature ?? 0.3;
   const timeoutMs = suite.timeoutMs ?? 120_000;
 
-  // Read each input file once, up front — the grid reuses the text across every
-  // candidate and trial for that input.
-  const inputTextBySlug = new Map<string, string>();
-  for (const inputSlug of suite.inputs) {
-    inputTextBySlug.set(inputSlug, await readInput(inputSlug));
-  }
-
-  // Full task grid in input → candidate → trial order.
   const tasks: GenTask[] = [];
   for (const inputSlug of suite.inputs) {
     const inputText = inputTextBySlug.get(inputSlug) ?? "";
     for (const candidate of suite.candidates) {
+      const def = defOf(suite, candidate);
+      const temperature = def.generation_settings?.temperature ?? baseTemperature;
       for (let trial = 0; trial < trials; trial++) {
-        tasks.push({ inputSlug, inputText, candidate, trial });
+        tasks.push({
+          inputSlug,
+          inputText,
+          candidate,
+          def,
+          trial,
+          hash: trialHash({
+            producer,
+            producerVersion: producer === "codegen" ? CODEGEN_PRODUCER_VERSION : "1",
+            promptTemplateSha,
+            inputSha: sha256(inputText),
+            model: def.model,
+            temperature,
+            maxTokens: def.generation_settings?.max_tokens,
+            trial,
+          }),
+        });
       }
     }
   }
 
   return mapWithConcurrency(tasks, limit, async (task): Promise<RunRecord> => {
-    const { inputSlug, inputText, candidate, trial } = task;
-    // Unique per (candidate, inputSlug, trial) → each parallel task writes its
-    // own temp dir, so concurrent codegen checks never collide.
-    const checkWorkDir = path.join(
-      outDir,
-      "checks",
-      `${safeName(candidate)}__${inputSlug}__t${trial}`,
-    );
-    // Reuse a prior generation for already-run candidates (no LLM call, no cost)
-    // — only genuinely-new (candidate, input, trial) cells hit generateOne. Pure
-    // disk read, so it mixes freely into the same concurrency window.
+    const { inputSlug, inputText, candidate, def, trial } = task;
+    const temperature = def.generation_settings?.temperature ?? baseTemperature;
+    const checkWorkDir = path.join(outDir, "checks", `${safeName(candidate)}__${inputSlug}__t${trial}`);
+
     if (reuse) {
-      const reused = await loadReusable(suite.step, candidate, inputSlug, trial, runId);
+      const reused = await loadReusable(suite.step, task.hash, runId);
       if (reused) {
-        console.log(`  reuse  ${candidate} · ${inputSlug} · t${trial}`);
-        return reused;
+        console.log(`  reuse  ${candidate} · ${inputSlug} · t${trial}  ← ${reused.from}`);
+        return { ...reused.record, candidate, inputSlug, trial, reusedFrom: reused.from };
       }
     }
+
     try {
       const g = await generateOne({
         suite,
         producer,
         promptTpl,
         inputText,
-        candidate,
+        def,
         temperature,
         timeoutMs,
         checkWorkDir,
+        trace,
+        traceContext: { phase: "generation", candidate, model: def.model, input: inputSlug, trial },
       });
-      const checkTag =
-        g.checkPassed === undefined ? "" : g.checkPassed ? " · tsc ✓" : " · tsc ✗";
+      const verdict = classifyCompletion({ finishReason: g.finishReason, refusal: g.refusal, parsedUnits: g.parsedUnits });
+      const checkTag = g.checkState === undefined ? "" : ` · tsc ${g.checkState}`;
       console.log(
-        `  ok   ${candidate} · ${inputSlug} · t${trial} (${(g.ms / 1000).toFixed(1)}s, $${g.costUsd.toFixed(4)})${checkTag}`,
+        `  ${verdict.state.padEnd(8)} ${candidate} · ${inputSlug} · t${trial} (${(g.ms / 1000).toFixed(1)}s, $${g.costUsd.toFixed(4)} ${g.costSource})${checkTag}`,
       );
       return {
         candidate,
@@ -384,44 +445,36 @@ async function runAll(
         text: g.text,
         promptTokens: g.promptTokens,
         completionTokens: g.completionTokens,
+        cachedTokens: g.cachedTokens,
         costUsd: g.costUsd,
+        costSource: g.costSource,
         ms: g.ms,
         status: "ok",
         checkPassed: g.checkPassed,
         checkOutput: g.checkOutput,
+        checkState: g.checkState,
+        checkVersion: g.checkVersion,
+        modelRef: def.model,
+        deploymentRef: deploymentRef(def, g.provider),
+        trialHash: task.hash,
+        completionState: verdict.state,
+        truncated: verdict.truncated,
+        finishReason: g.finishReason,
       };
     } catch (err) {
-      const error = err instanceof Error ? err.message : String(err);
-      console.log(`  ERR  ${candidate} · ${inputSlug} · t${trial}: ${error}`);
-      return {
-        candidate,
-        inputSlug,
-        trial,
-        text: "",
-        promptTokens: 0,
-        completionTokens: 0,
-        costUsd: 0,
-        ms: 0,
-        status: "error",
-        error,
-      };
+      const rec = errorRecord(task, err);
+      console.log(`  ${(rec.completionState ?? "error").padEnd(8)} ${candidate} · ${inputSlug} · t${trial}: ${rec.error}`);
+      return rec;
     }
   });
 }
 
 /** First successful output for a (candidate, input) pair, if any. */
-function representative(
-  records: RunRecord[],
-  candidate: string,
-  inputSlug: string,
-): string | null {
-  const hit = records.find(
-    (r) => r.candidate === candidate && r.inputSlug === inputSlug && r.status === "ok",
-  );
+function representative(records: readonly RunRecord[], candidate: string, inputSlug: string): string | null {
+  const hit = records.find((r) => r.candidate === candidate && r.inputSlug === inputSlug && r.status === "ok" && r.text.trim() !== "");
   return hit ? hit.text : null;
 }
 
-/** One pairwise judge task — both sides already confirmed to have output. */
 interface JudgeTask {
   inputSlug: string;
   a: string;
@@ -430,16 +483,24 @@ interface JudgeTask {
   bText: string;
 }
 
-/** Pairwise judge every candidate pair, per input, up to `limit` in parallel. */
-async function judgeAll(
-  suite: Suite,
-  rubric: string,
-  records: RunRecord[],
-  limit: number,
-): Promise<Judgement[]> {
-  // Build the pair grid first, skipping any pair where a side produced no output
-  // (equivalent to the old `continue`).
+interface JudgeOutcome {
+  judgements: JudgedPair[];
+  failures: PairFailure[];
+  skipped: SkippedPair[];
+}
+
+function usageOfError(err: unknown): EvaluatorUsage {
+  return err instanceof EvaluatorCallError ? summarizeAttempts(err.attempts) : summarizeAttempts([]);
+}
+
+/**
+ * Pairwise judge every candidate pair, per input. A failed judge call is kept
+ * as an evaluator_error (with its cost) instead of vanishing; a pair where one
+ * side produced no output is recorded as not_evaluated.
+ */
+async function judgeAll(suite: Suite, rubric: string, records: readonly RunRecord[], limit: number, trace: LlmTrace): Promise<JudgeOutcome> {
   const tasks: JudgeTask[] = [];
+  const skipped: SkippedPair[] = [];
   for (const inputSlug of suite.inputs) {
     for (let i = 0; i < suite.candidates.length; i++) {
       for (let j = i + 1; j < suite.candidates.length; j++) {
@@ -447,102 +508,99 @@ async function judgeAll(
         const b = suite.candidates[j];
         const aText = representative(records, a, inputSlug);
         const bText = representative(records, b, inputSlug);
-        if (!aText || !bText) continue; // one side failed → no comparison
+        if (!aText || !bText) {
+          const missing = [!aText ? a : null, !bText ? b : null].filter((x): x is string => x !== null);
+          skipped.push({ input: inputSlug, a, b, reason: `no successful output from ${missing.join(" and ")}` });
+          continue;
+        }
         tasks.push({ inputSlug, a, aText, b, bText });
       }
     }
   }
 
-  // A single judge call failing (timeout / bad judge model / transient API error)
-  // must NOT discard the whole suite and every paid generation with it. Catch
-  // per-pair, log a SKIP, and drop that comparison — the suite still reports on
-  // whatever judgements succeeded (a candidate with zero comparisons just gets a
-  // null winRate).
-  const results = await mapWithConcurrency(
-    tasks,
-    limit,
-    async (task): Promise<Judgement | null> => {
-      console.log(`  judge  ${task.a} vs ${task.b} · ${task.inputSlug}`);
-      try {
-        return await judgePair({
-          judgeModel: suite.judge,
-          // Judge big docs can exceed llm.ts's 120s default → use the suite's
-          // (generous) timeout so judging doesn't abort prematurely.
-          timeoutMs: suite.timeoutMs ?? 240_000,
-          rubric,
-          // The prompt lists these keys; each gets its own de-biased verdict.
-          dimensions: suite.dimensions ?? [],
-          inputSlug: task.inputSlug,
-          a: task.a,
-          aText: task.aText,
-          b: task.b,
-          bText: task.bText,
-        });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.log(`  judge SKIP  ${task.a} vs ${task.b} · ${task.inputSlug}: ${msg}`);
-        return null;
-      }
-    },
-  );
-  return results.filter((j): j is Judgement => j !== null);
+  const failures: PairFailure[] = [];
+  const results = await mapWithConcurrency(tasks, limit, async (task): Promise<JudgedPair | null> => {
+    console.log(`  judge  ${task.a} vs ${task.b} · ${task.inputSlug}`);
+    try {
+      return await judgePair({
+        judgeModel: suite.judge,
+        timeoutMs: suite.timeoutMs ?? 240_000,
+        rubric,
+        dimensions: suite.dimensions ?? [],
+        inputSlug: task.inputSlug,
+        a: task.a,
+        aText: task.aText,
+        b: task.b,
+        bText: task.bText,
+        trace,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`  judge EVALUATOR_ERROR  ${task.a} vs ${task.b} · ${task.inputSlug}: ${message}`);
+      failures.push({ input: task.inputSlug, a: task.a, b: task.b, message, usage: usageOfError(err) });
+      return null;
+    }
+  });
+  return { judgements: results.filter((j): j is JudgedPair => j !== null), failures, skipped };
+}
+
+export interface ScoreHooks {
+  trace?: LlmTrace;
+  onScored?: (record: ScoredRecord) => void;
+  onFailure?: (failure: TrialFailure) => void;
 }
 
 /**
- * Absolute 1–5 grade for every OK output, up to `limit` in parallel. O(n) — one
- * grader call per output, independent of the candidate count. A single failure
- * is logged as a SKIP and dropped (never throws), exactly like `judgeAll`, so
- * the suite still reports whatever grades succeeded.
+ * Absolute 1–5 grade for every OK output. Returns plain ScoreRecords so
+ * `aggregate` and rescore.ts are unchanged; usage and failures flow through hooks.
  */
 async function scoreAll(
   suite: Suite,
   rubric: string,
-  records: RunRecord[],
+  records: readonly RunRecord[],
   limit: number,
+  hooks: ScoreHooks = {},
 ): Promise<ScoreRecord[]> {
   const dimensions = suite.dimensions ?? [];
   const oks = records.filter((r) => r.status === "ok" && r.text.trim());
-  const results = await mapWithConcurrency(
-    oks,
-    limit,
-    async (r): Promise<ScoreRecord | null> => {
-      console.log(`  score  ${r.candidate} · ${r.inputSlug} · t${r.trial}`);
-      try {
-        const s = await scoreOne({
-          judgeModel: suite.judge,
-          rubric,
-          dimensions,
-          text: r.text,
-          timeoutMs: suite.timeoutMs ?? 240_000,
-        });
-        return {
-          candidate: r.candidate,
-          inputSlug: r.inputSlug,
-          trial: r.trial,
-          dimensions: s.dimensions,
-          overall: s.overall,
-        };
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.log(`  score SKIP  ${r.candidate} · ${r.inputSlug} · t${r.trial}: ${msg}`);
-        return null;
-      }
-    },
-  );
+  const results = await mapWithConcurrency(oks, limit, async (r): Promise<ScoreRecord | null> => {
+    console.log(`  score  ${r.candidate} · ${r.inputSlug} · t${r.trial}`);
+    try {
+      const s = await scoreOne({
+        judgeModel: suite.judge,
+        rubric,
+        dimensions,
+        text: r.text,
+        timeoutMs: suite.timeoutMs ?? 240_000,
+        trace: hooks.trace,
+        traceContext: { candidate: r.candidate, input: r.inputSlug, trial: r.trial },
+      });
+      const scored: ScoredRecord = {
+        candidate: r.candidate,
+        inputSlug: r.inputSlug,
+        trial: r.trial,
+        dimensions: s.dimensions,
+        overall: s.overall,
+        usage: s.usage,
+      };
+      hooks.onScored?.(scored);
+      const { usage: _usage, ...plain } = scored;
+      return plain;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`  score EVALUATOR_ERROR  ${r.candidate} · ${r.inputSlug} · t${r.trial}: ${message}`);
+      hooks.onFailure?.({ candidate: r.candidate, input: r.inputSlug, trial: r.trial, message, usage: usageOfError(err) });
+      return null;
+    }
+  });
   return results.filter((s): s is ScoreRecord => s !== null);
 }
 
 /**
  * Win rate (0..100, tie = 0.5) for one candidate on one axis, or null when it
- * had no comparisons on that axis. `pick` reads the resolved verdict for the
- * axis of interest (overall, or one dimension) off each judgement; returning
- * `undefined` means "this judgement doesn't cover this axis" → not counted.
+ * had no comparisons on that axis.
  */
-function winRateFor(
-  candidate: string,
-  judgements: Judgement[],
-  pick: (jm: Judgement) => Winner | undefined,
-): number | null {
+function winRateFor(candidate: string, judgements: readonly Judgement[], pick: (jm: Judgement) => Winner | undefined): number | null {
   let wins = 0;
   let comparisons = 0;
   for (const jm of judgements) {
@@ -561,60 +619,28 @@ function winRateFor(
   return comparisons > 0 ? (wins / comparisons) * 100 : null;
 }
 
-function aggregate(
-  suite: Suite,
-  records: RunRecord[],
-  judgements: Judgement[],
-  scores: ScoreRecord[] = [],
-): Scorecard[] {
+/** Legacy aggregate — semantics unchanged from the original harness. */
+function aggregate(suite: Suite, records: readonly RunRecord[], judgements: readonly Judgement[], scores: readonly ScoreRecord[] = []): Scorecard[] {
   const trials = suite.trials ?? 2;
   const dimensions = suite.dimensions ?? [];
   return suite.candidates.map((candidate) => {
     const own = records.filter((r) => r.candidate === candidate);
     const oks = own.filter((r) => r.status === "ok");
-
-    // Overall win rate — same rule/口径 as before, now off `overall.resolved`.
     const winRate = winRateFor(candidate, judgements, (jm) => jm.overall.resolved);
-
-    // Per-dimension win rate — the identical computation over each dimension's
-    // resolved verdict. A candidate never compared on a dimension → null.
     const dimensionWinRates: Record<string, number | null> = {};
     for (const dim of dimensions) {
-      dimensionWinRates[dim] = winRateFor(
-        candidate,
-        judgements,
-        (jm) => jm.dimensions[dim]?.resolved,
-      );
+      dimensionWinRates[dim] = winRateFor(candidate, judgements, (jm) => jm.dimensions[dim]?.resolved);
     }
-
-    const avg = (nums: number[]) =>
-      nums.length ? nums.reduce((s, n) => s + n, 0) / nums.length : 0;
-
-    // Objective pass rate: fraction of OK runs whose objective check passed.
-    // Producer-agnostic — any producer that stamps `checkPassed` on its records
-    // gets a score (codegen → tsc, taskbreakdown → PRD coverage); prd/trd never
-    // set it, so the field stays null and the report hides the column.
+    const avg = (nums: number[]): number => (nums.length ? nums.reduce((s, n) => s + n, 0) / nums.length : 0);
     const hasObjective = oks.some((r) => r.checkPassed !== undefined);
-    const objectivePassRate =
-      hasObjective && oks.length
-        ? oks.filter((r) => r.checkPassed === true).length / oks.length
-        : null;
-
-    // Absolute 1–5 grades: mean overall + mean per dimension across this
-    // candidate's graded outputs. Null when nothing was scored (e.g. an older
-    // run, or every grade SKIPped) so the report hides the columns.
+    const objectivePassRate = hasObjective && oks.length ? oks.filter((r) => r.checkPassed === true).length / oks.length : null;
     const myScores = scores.filter((s) => s.candidate === candidate);
-    const absoluteScore = myScores.length
-      ? avg(myScores.map((s) => s.overall))
-      : null;
+    const absoluteScore = myScores.length ? avg(myScores.map((s) => s.overall)) : null;
     const dimensionScores: Record<string, number | null> = {};
     for (const dim of dimensions) {
-      const vals = myScores
-        .map((s) => s.dimensions[dim])
-        .filter((v): v is number => typeof v === "number");
+      const vals = myScores.map((s) => s.dimensions[dim]).filter((v): v is number => typeof v === "number");
       dimensionScores[dim] = vals.length ? avg(vals) : null;
     }
-
     return {
       candidate,
       winRate,
@@ -630,46 +656,98 @@ function aggregate(
   });
 }
 
+interface RunPlan {
+  generations: number;
+  pairs: number;
+  judgeCalls: number;
+  scoreCalls: number;
+}
+
+function planRun(suite: Suite): RunPlan {
+  const c = suite.candidates.length;
+  const i = suite.inputs.length;
+  const t = suite.trials ?? 2;
+  const pairs = (i * c * (c - 1)) / 2;
+  return { generations: c * i * t, pairs, judgeCalls: pairs * 2, scoreCalls: c * i * t };
+}
+
+function printPreview(suite: Suite, plan: RunPlan, limit: number, reuse: boolean): void {
+  console.log(`\n▶ ${suite.suiteId} [${suite.producer ?? "prompt"}] — ${suite.candidates.length} candidates × ${suite.inputs.length} inputs × ${suite.trials ?? 2} trials`);
+  console.log(`  generations ${plan.generations} · pairwise ${plan.pairs} pairs (${plan.judgeCalls} judge calls, up to 3 attempts each) · absolute ${plan.scoreCalls} calls`);
+  console.log(`  judge ${suite.judge} · concurrency ${limit}${reuse ? " · reuse ON" : ""}${suite.budgetUsd !== undefined ? ` · budget $${suite.budgetUsd}` : ""}`);
+  console.log(`  benchmark ${suite.benchmarkMode ?? "capability-neutral"} · cache ${suite.cacheMode ?? "cold"} · directional ${suite.inputs.length < 10 || suite.mmd == null ? "yes" : "no"}\n`);
+}
+
 /**
- * Run one suite end-to-end and write its report. Returns the Report so callers
- * (run-all) can aggregate across steps.
+ * Run one suite end-to-end and write both output layers. Returns the legacy
+ * Report so dashboards can aggregate across steps.
  */
-export async function runSuite(suitePath: string, html: boolean): Promise<Report> {
-  const suite = await loadSuite(suitePath);
+export async function runSuite(suitePath: string, html: boolean, opts: { yes?: boolean } = {}): Promise<Report | null> {
+  const suite = await loadSuiteOrSpec(suitePath);
   const producer: ProducerKind = suite.producer ?? "prompt";
+  const isSpec = /\.ya?ml$/i.test(suitePath);
 
   const rubric = await fs.readFile(path.resolve(REPO_ROOT, suite.rubricFile), "utf-8");
-  // The prompt template is only meaningful for the "prompt" producer; agent and
-  // codegen build their own prompts.
   let promptTpl = "";
   if (producer === "prompt") {
-    if (!suite.promptFile) {
-      throw new Error(`suite "${suite.suiteId}" uses producer "prompt" but has no promptFile`);
-    }
+    if (!suite.promptFile) throw new Error(`suite "${suite.suiteId}" uses producer "prompt" but has no promptFile`);
     promptTpl = await fs.readFile(path.resolve(REPO_ROOT, suite.promptFile), "utf-8");
   }
+  const promptTemplateSha = producer === "prompt" ? sha256(promptTpl) : sha256(CODEGEN_PREAMBLE);
 
-  // runId is fixed up front so codegen check work dirs can nest under it.
+  const inputTextBySlug = new Map<string, string>();
+  const inputShas: Record<string, string> = {};
+  for (const slug of suite.inputs) {
+    const text = await readInput(slug);
+    inputTextBySlug.set(slug, text);
+    inputShas[slug] = sha256(text);
+  }
+
+  const limit = resolveConcurrency(suite);
+  const reuse = process.env.EVAL_REUSE === "1";
+  const plan = planRun(suite);
+  printPreview(suite, plan, limit, reuse);
+  if (isSpec && !opts.yes) {
+    console.log("Preview only. Re-run with --yes (or EVAL_YES=1) to execute.");
+    return null;
+  }
+
   const generatedAt = new Date().toISOString();
   const runId = `${suite.suiteId}-${generatedAt.replace(/[:.]/g, "-")}`;
   const outDir = path.join(runsDir(), runId);
+  await fs.mkdir(outDir, { recursive: true });
 
-  const limit = resolveConcurrency();
-  // Output reuse: when set, already-run (candidate, input, trial) cells load
-  // their prior raw output instead of regenerating. Default off → identical
-  // behavior to before. Judging still re-runs over ALL candidates.
-  const reuse = process.env.EVAL_REUSE === "1";
+  const trace = await openTrace(outDir, runId);
+  const dimensions = suite.dimensions ?? [];
+  const rubricSha = sha256(rubric);
+  const judgeTplSha = judgePromptTemplateSha(rubric, dimensions);
+  const scoreTplSha = scorePromptTemplateSha(rubric, dimensions);
+  const checkVersion = suite.check ? await tscCheckVersion(path.resolve(REPO_ROOT, suite.check.scaffoldDir)) : null;
+  const manifest = await buildManifest(suite, {
+    runId,
+    startedAt: generatedAt,
+    concurrency: limit,
+    inputShas,
+    rubricSha,
+    producerTemplateSha: promptTemplateSha,
+    judgeTemplateSha: judgeTplSha,
+    scoreTemplateSha: scoreTplSha,
+    checkVersion,
+  });
+  await writeManifest(outDir, manifest);
 
-  console.log(
-    `\n▶ Eval "${suite.suiteId}" [${producer}] — ${suite.candidates.length} candidates × ${suite.inputs.length} inputs (concurrency ${limit}${reuse ? ", reuse ON" : ""})\n`,
-  );
-
-  const records = await runAll(suite, producer, promptTpl, outDir, limit, runId, reuse);
+  const records = await runAll({ suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit });
   console.log("\n▶ Judging (pairwise)…\n");
-  const judgements = await judgeAll(suite, rubric, records, limit);
+  const judged = await judgeAll(suite, rubric, records, limit, trace.emit);
   console.log("\n▶ Scoring (absolute 1–5)…\n");
-  const scores = await scoreAll(suite, rubric, records, limit);
-  const scorecards = aggregate(suite, records, judgements, scores);
+  const scored: ScoredRecord[] = [];
+  const scoreFailures: TrialFailure[] = [];
+  const scores = await scoreAll(suite, rubric, records, limit, {
+    trace: trace.emit,
+    onScored: (s) => scored.push(s),
+    onFailure: (f) => scoreFailures.push(f),
+  });
+  const scorecards = aggregate(suite, records, judged.judgements, scores);
 
   const report: Report = {
     suiteId: suite.suiteId,
@@ -679,72 +757,83 @@ export async function runSuite(suitePath: string, html: boolean): Promise<Report
     candidates: suite.candidates,
     inputs: suite.inputs,
     scorecards,
-    judgements,
+    judgements: judged.judgements.map(({ usage: _usage, ...j }) => j),
     scores,
   };
 
+  // ── legacy layer ──
   const rawDir = path.join(outDir, "raw");
   await fs.mkdir(rawDir, { recursive: true });
-
   await Promise.all(
     records
-      .filter((r) => r.status === "ok")
-      .map((r) =>
-        fs.writeFile(
-          path.join(rawDir, `${safeName(r.candidate)}__${r.inputSlug}__t${r.trial}.txt`),
-          r.text,
-          "utf-8",
-        ),
-      ),
+      .filter((r) => r.text.trim() !== "")
+      .map((r) => fs.writeFile(path.join(rawDir, `${safeName(r.candidate)}__${r.inputSlug}__t${r.trial}.txt`), r.text, "utf-8")),
   );
-
-  // Per-run detail (text stripped — full outputs live in raw/). Persists single
-  // -run cost/tokens and the per-run objective result (codegen tsc / taskbreakdown
-  // coverage), which the aggregated scorecards otherwise only summarize.
   await fs.writeFile(
     path.join(outDir, "records.json"),
-    JSON.stringify(
-      records.map((r) => ({
-        candidate: r.candidate,
-        inputSlug: r.inputSlug,
-        trial: r.trial,
-        promptTokens: r.promptTokens,
-        completionTokens: r.completionTokens,
-        costUsd: r.costUsd,
-        ms: r.ms,
-        status: r.status,
-        error: r.error,
-        checkPassed: r.checkPassed,
-        checkOutput: r.checkOutput,
-      })),
-      null,
-      2,
-    ),
+    JSON.stringify(records.map(({ text: _text, ...rest }) => rest), null, 2),
     "utf-8",
   );
-
   const md = renderMarkdown(report);
   await fs.writeFile(path.join(outDir, "report.md"), md, "utf-8");
   await fs.writeFile(path.join(outDir, "report.json"), JSON.stringify(report, null, 2), "utf-8");
-  if (html) {
-    await fs.writeFile(path.join(outDir, "report.html"), renderHtml(report), "utf-8");
-  }
+  if (html) await fs.writeFile(path.join(outDir, "legacy-report.html"), renderHtml(report), "utf-8");
+
+  // ── canonical layer ──
+  const adaptInput = {
+    runId,
+    step: suite.step,
+    requiredChecks: suite.requiredChecks ?? [],
+    successCriteria: suite.successCriteria,
+    checkId: TSC_CHECK_ID,
+    pairwiseId: PAIRWISE_EVALUATOR_ID,
+    absoluteId: ABSOLUTE_EVALUATOR_ID,
+    versions: {
+      check: checkVersion,
+      pairwise: `${suite.judge}+rubric-${short(rubricSha)}+tpl-${short(judgeTplSha)}`,
+      absolute: `${suite.judge}+rubric-${short(rubricSha)}+tpl-${short(scoreTplSha)}`,
+    },
+    records,
+    judgements: judged.judgements,
+    judgeFailures: judged.failures,
+    skippedPairs: judged.skipped,
+    scores: scored,
+    scoreFailures,
+  };
+  const trials = toTrialRows(adaptInput);
+  const evaluations = toEvaluationRows(adaptInput);
+  const ledger = buildLedger(trials, evaluations, PAIRWISE_EVALUATOR_ID, ABSOLUTE_EVALUATOR_ID);
+  const summary = {
+    run: runId,
+    step: suite.step,
+    inputs: suite.inputs,
+    candidates: suite.candidates.map((c) => ratesFor(c, trials)),
+    directionality: directionality(suite.inputs.length, suite.mmd),
+    evaluation_coverage: evaluationCoverage(evaluations),
+  };
+  const traceRows = await trace.close();
+  await writeCanonBundle(outDir, {
+    manifest: { ...manifest, finished_at: new Date().toISOString() },
+    trials,
+    evaluations,
+    ledger,
+    summary,
+  });
 
   console.log(`\n${md}\n`);
-  console.log(`✔ Written to runs/${runId}/${html ? " (+ report.html)" : ""}`);
+  console.log(
+    `✔ runs/${runId}/ — ${trials.length} trials, ${evaluations.length} evaluator rows, ${traceRows} trace events, ledger total $${ledger.total.toFixed(4)} (${ledger.source})${html ? ", legacy-report.html" : ""}`,
+  );
   return report;
 }
 
 async function main(): Promise<void> {
   await loadEnvLocal();
-  const { suite: suitePath, html } = parseArgs(process.argv.slice(2));
-  await runSuite(suitePath, html);
+  const args = parseArgs(process.argv.slice(2));
+  await runSuite(args.suite, args.html, { yes: args.yes });
 }
 
-// Run main() only when invoked directly (tsx eval/src/run.ts …), NOT when
-// run-all.ts imports `runSuite` from this module.
-const invokedDirectly =
-  import.meta.url === pathToFileURL(process.argv[1] ?? "").href;
+const invokedDirectly = import.meta.url === pathToFileURL(process.argv[1] ?? "").href;
 if (invokedDirectly) {
   main().catch((err) => {
     console.error(err instanceof Error ? err.message : err);
