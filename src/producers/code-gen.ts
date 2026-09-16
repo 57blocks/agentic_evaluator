@@ -11,7 +11,8 @@
  * from `src/`.
  */
 
-import { complete } from "../llm.js";
+import { complete, type LlmTrace } from "../llm.js";
+import type { CostSource } from "../canon/types.js";
 
 /** One parsed source file from a model's output. */
 export interface CodeFile {
@@ -22,6 +23,8 @@ export interface CodeFile {
 export interface CodeGenOptions {
   temperature?: number;
   timeoutMs?: number;
+  trace?: LlmTrace;
+  traceContext?: Record<string, unknown>;
   /**
    * Fallback file name used only when the model ignores the ```file:<path>```
    * convention and emits a single bare code block. Extension is auto-picked
@@ -34,9 +37,14 @@ export interface CodeGenResult {
   text: string;
   files: CodeFile[];
   costUsd: number;
+  costSource: CostSource;
+  cachedTokens?: number;
   ms: number;
   promptTokens: number;
   completionTokens: number;
+  provider?: string;
+  finishReason?: string;
+  refusal?: string;
 }
 
 /** `file:<path>` block extractor — same shape as the production code-gen agent. */
@@ -96,38 +104,50 @@ export function parseFileBlocks(
  * emitted files. The spec text itself instructs the ```file:<path>``` output
  * format; a short preamble reinforces it for models that skip instructions.
  */
+/** Fixed preamble prepended to every task spec. Hashed into the trial identity. */
+export const CODEGEN_PREAMBLE = [
+  "You are an expert TypeScript engineer.",
+  "Implement the task below to the letter. Output ONLY the source file(s),",
+  "each wrapped in a fenced block whose info string is `file:<path>`, e.g.",
+  "```file:utils.ts",
+  "// code…",
+  "```",
+  "Do not add prose, tests, or usage examples outside the file blocks.",
+  "",
+  "---",
+  "",
+].join("\n");
+
+/** Bump when the preamble or parsing rules change materially. */
+export const CODEGEN_PRODUCER_VERSION = "1";
+
 export async function produceCode(
   taskSpec: string,
   model: string,
   opts: CodeGenOptions = {},
 ): Promise<CodeGenResult> {
-  const prompt = [
-    "You are an expert TypeScript engineer.",
-    "Implement the task below to the letter. Output ONLY the source file(s),",
-    "each wrapped in a fenced block whose info string is `file:<path>`, e.g.",
-    "```file:utils.ts",
-    "// code…",
-    "```",
-    "Do not add prose, tests, or usage examples outside the file blocks.",
-    "",
-    "---",
-    "",
-    taskSpec,
-  ].join("\n");
+  const prompt = CODEGEN_PREAMBLE + taskSpec;
 
   const r = await complete({
     model,
     prompt,
     temperature: opts.temperature ?? 0.2,
     timeoutMs: opts.timeoutMs,
+    trace: opts.trace,
+    traceContext: opts.traceContext,
   });
 
   return {
     text: r.text,
     files: parseFileBlocks(r.text, opts.fallbackName),
     costUsd: r.costUsd,
+    costSource: r.costSource,
+    cachedTokens: r.cachedTokens,
     ms: r.ms,
     promptTokens: r.promptTokens,
     completionTokens: r.completionTokens,
+    provider: r.provider,
+    finishReason: r.finishReason,
+    refusal: r.refusal,
   };
 }
