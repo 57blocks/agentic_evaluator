@@ -158,8 +158,9 @@ async function rescoreDir(
     "utf-8",
   );
   await fs.writeFile(path.join(dir, "report.md"), renderMarkdown(updated), "utf-8");
-  await fs.writeFile(path.join(dir, "report.html"), renderHtml(updated), "utf-8");
-  console.log(`  ✔ ${scores.length} scored · updated report.{json,md,html}`);
+  // Legacy layer only: canonical rows (scores.jsonl / evaluations.jsonl) are not re-derived by rescore.
+  await fs.writeFile(path.join(dir, "legacy-report.html"), renderHtml(updated), "utf-8");
+  console.log(`  ✔ ${scores.length} scored · updated report.{json,md} + legacy-report.html`);
   return { report: updated, records: lite };
 }
 
