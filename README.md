@@ -27,10 +27,16 @@ pnpm install
 cp ../agentic-builder/.env.local .env.local        # OPENROUTER_API_KEY=...
 pnpm run check-models -- specs/codegen-w38.yaml    # every model routable? prices?
 pnpm run run -- --suite specs/codegen-w38.yaml --html          # preview only
-pnpm run run -- --suite specs/codegen-w38.yaml --html --yes    # execute
+caffeinate -i pnpm run run -- --suite specs/codegen-w38.yaml --html --yes    # execute
 pnpm run report -- runs/<runId>                                 # re-render report.html
 pnpm test
 ```
+
+Run paid specs under `caffeinate -i` (macOS). A suspended host leaves regular
+multi-minute gaps between trace events and every timeout and duration in that
+run becomes meaningless; `summary.json.integrity` counts such gaps and GAPS.md
+warns when any exist. `pnpm run rescore` refreshes the legacy layer only
+(report.json, legacy-report.html); canonical rows are not re-derived.
 
 A spec is the versioned source of truth (`specs/*.yaml`, schema in
 `src/spec/schema.ts`). Legacy `suites/*.json` still run; candidate id = model id.
