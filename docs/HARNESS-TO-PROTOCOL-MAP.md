@@ -102,3 +102,25 @@
 ## 九、GAPS.md 初始条目（适配器填 not_observable）
 
 TTFT；缓存读写；deployment 的 region 与 tier；每条评估器的耗时（裁判有 ms，可补）；人工介入（not_applicable）；checkpoint；工具调用（本周 producer 无工具）。
+
+## 十、实施状态（2026-09-16 更新）
+
+仓库 `agentic_evaluator` 已建立，harness 原样导入为第一次提交，之后逐步改造。本周 ● 行的完成情况：
+
+| 已完成 | 说明 |
+|---|---|
+| 1、2、8、9、13、26 | `specs/*.yaml` 经 JSON Schema 与语义检查编译为 Suite；候选为对象，记录里存 candidate id；manifest 记 benchmark / cache 模式 |
+| 3、14、18 | RunRecord 有六值 completion_state 与 TaskOutcome；`canon/success.ts` 实现成功判定契约，prd 步骤全部 undetermined |
+| 15 | `llm.ts` 读 OpenRouter 的 provider 字段，deployment_ref 形如 `openrouter/claude-platform-on-aws` |
+| 16、17 | 裁判/打分失败落 evaluator_error 行并记成本；tsc 检查四态带版本 |
+| 7、30 | ledger.json 六分项；成本来源标注；失败调用保留已计费用量 |
+| 31 | EVAL_REUSE 按 trialHash 复用 |
+| 32 | trace.jsonl 每次 LLM 调用一条，含裁判与打分；不记 prompt 正文 |
+| 5、6、25 | summary.json 每个率带分子分母；directionality 标注 |
+| 27 | 运行前预览打印生成数、裁判数、打分数；YAML spec 需 `--yes` 才执行 |
+| 38、39 | scores.jsonl / evaluations.jsonl / report.html（canonical）与 legacy 输出并存 |
+| 对账 | `tests/parity.test.ts` 用 `tests/legacy-aggregate.ts`（导入提交的原版 aggregate）复算，对 fixtures 逐字段一致 |
+
+未做（本周 ○ 或 —）：#4/#11 资格门槛影响排名、#10 seed 与预算强制、#12/#35 运行模式选择、#21 多 trial 进成对、#23/#24、#29 对照候选比较（只标记）、#33、#34 区间估计、#36、#40 十个输入、#41。预览的花费估算（#27 的一半）未做，目前只打印调用数。
+
+从真实运行中发现并修掉的问题：读取响应体阶段的 AbortError 绕过了 LlmError，被记成 malformed、ms=0、无 trace 事件；宿主机挂起（trace 里规律的 16 分钟空档）让所有超时与耗时失真，现在 summary.json 有 integrity 字段、GAPS.md 会警告。
