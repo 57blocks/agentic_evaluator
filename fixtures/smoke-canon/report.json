@@ -1,0 +1,136 @@
+{
+  "suiteId": "smoke-codegen",
+  "step": "codegen",
+  "judge": "google/gemini-3.1-pro-preview",
+  "generatedAt": "2026-09-16T03:27:54.631Z",
+  "candidates": [
+    "sonnet-5",
+    "deepseek-v4-pro"
+  ],
+  "inputs": [
+    "code-utils"
+  ],
+  "scorecards": [
+    {
+      "candidate": "sonnet-5",
+      "winRate": 100,
+      "dimensionWinRates": {
+        "meets-spec": 50,
+        "correctness": 100,
+        "type-quality": 50,
+        "simplicity": 100,
+        "robustness": 100
+      },
+      "avgCostUsd": 0.006906,
+      "avgMs": 5707,
+      "okRate": 1,
+      "trials": 1,
+      "objectivePassRate": 1,
+      "absoluteScore": 5,
+      "dimensionScores": {
+        "meets-spec": 5,
+        "correctness": 4,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      }
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "winRate": 0,
+      "dimensionWinRates": {
+        "meets-spec": 50,
+        "correctness": 0,
+        "type-quality": 50,
+        "simplicity": 0,
+        "robustness": 0
+      },
+      "avgCostUsd": 0.00874993068,
+      "avgMs": 53123,
+      "okRate": 1,
+      "trials": 1,
+      "objectivePassRate": 1,
+      "absoluteScore": 5,
+      "dimensionScores": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      }
+    }
+  ],
+  "judgements": [
+    {
+      "inputSlug": "code-utils",
+      "a": "sonnet-5",
+      "b": "deepseek-v4-pro",
+      "dimensions": {
+        "meets-spec": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both implementations meet the core requirements of parsing a query string into a dictionary of strings or string arrays."
+        },
+        "correctness": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A correctly handles keys that conflict with Object prototype properties (like 'toString') by using hasOwnProperty, whereas Output B will crash trying to call .push() on inherited methods."
+        },
+        "type-quality": {
+          "forward": "tie",
+          "reverse": "tie",
+          "resolved": "tie",
+          "reason": "Both use appropriate TypeScript types and avoid 'any' or unsafe casts."
+        },
+        "simplicity": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A extracts the decoding logic into a reusable helper function, avoiding the duplicated try-catch blocks found in Output B."
+        },
+        "robustness": {
+          "forward": "a",
+          "reverse": "a",
+          "resolved": "a",
+          "reason": "Output A's use of Object.prototype.hasOwnProperty makes it robust against unexpected keys that exist on the Object prototype."
+        }
+      },
+      "overall": {
+        "forward": "a",
+        "reverse": "a",
+        "resolved": "a",
+        "reason": "Output A is superior because it safely handles prototype property collisions (e.g., '?toString=1') and keeps the code DRY with a decode helper."
+      }
+    }
+  ],
+  "scores": [
+    {
+      "candidate": "sonnet-5",
+      "inputSlug": "code-utils",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 4,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "inputSlug": "code-utils",
+      "trial": 0,
+      "dimensions": {
+        "meets-spec": 5,
+        "correctness": 5,
+        "type-quality": 5,
+        "simplicity": 5,
+        "robustness": 5
+      },
+      "overall": 5
+    }
+  ]
+}

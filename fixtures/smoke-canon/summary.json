@@ -1,0 +1,136 @@
+{
+  "run": "smoke-codegen-2026-09-16T03-27-54-631Z",
+  "step": "codegen",
+  "inputs": [
+    "code-utils"
+  ],
+  "candidates": [
+    {
+      "candidate": "sonnet-5",
+      "valid_attempts": 1,
+      "classified": 1,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "completion_states": {
+        "success": 1,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 1,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 1,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "cost_per_success": 0.006906,
+      "p50_ms": 5707,
+      "p95_ms": 5707
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "valid_attempts": 1,
+      "classified": 1,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "completion_states": {
+        "success": 1,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 1,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 1,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "cost_per_success": 0.00875,
+      "p50_ms": 53123,
+      "p95_ms": 53123
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "1 inputs; fewer than 10",
+      "no minimum meaningful difference declared"
+    ]
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "tsc-noemit",
+      "version": "tsc-6.0.3+scaffold-46888556",
+      "pass": 2,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "pairwise-swap",
+      "version": "google/gemini-3.1-pro-preview+rubric-e5842052+tpl-01fdb36e",
+      "pass": 1,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "absolute-1-5",
+      "version": "google/gemini-3.1-pro-preview+rubric-e5842052+tpl-02138c61",
+      "pass": 2,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}

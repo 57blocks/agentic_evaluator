@@ -1,0 +1,72 @@
+{
+  "protocol_version": "0.4",
+  "run_id": "smoke-codegen-2026-09-16T03-27-54-631Z",
+  "run_name": "smoke-codegen",
+  "step": {
+    "id": "codegen",
+    "version": "1"
+  },
+  "spec": {
+    "path": "specs/smoke-codegen.yaml",
+    "sha256": "d3705868c887550a2915b1eaba1f013e7996e5caca9b45d5c38b1d251fae951d"
+  },
+  "test_set": {
+    "id": "code-v1",
+    "inputs": {
+      "code-utils": "deddbd434c436f80116137fc9fd1414c1eb34a869deeeb2bdcb528f15fac7e24"
+    }
+  },
+  "candidates": {
+    "sonnet-5": {
+      "id": "sonnet-5",
+      "model": "anthropic/claude-sonnet-5",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0.2
+      }
+    },
+    "deepseek-v4-pro": {
+      "id": "deepseek-v4-pro",
+      "model": "deepseek/deepseek-v4-pro",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0.2
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter"
+  },
+  "evaluators": {
+    "required_checks": [
+      "tsc-noemit"
+    ],
+    "check_version": "tsc-6.0.3+scaffold-46888556",
+    "rubric_sha256": "e5842052772fae734cfc2999bd87879b6e49776e634c1f345ffb4f8a4cfca724",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "01fdb36e0a299a8c7f4286d085d6035424b1419512bf88a4d753b8c18b3955b4",
+    "score_template_sha256": "02138c61f94c42f69a50d3bfb125ca89077b4a315fb41e2357d68007cc29a176"
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "lowest-cost",
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 2,
+    "timeout_ms": 180000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold"
+  },
+  "harness": {
+    "name": "agentic-evaluator",
+    "version": "0.1.0",
+    "git_sha": "8e847db",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-09-16T03:27:54.631Z",
+  "finished_at": "2026-09-16T03:29:39.300Z"
+}
