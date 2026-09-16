@@ -15,6 +15,7 @@ import type { CostLedger } from "./cost.js";
 import type { RunManifest } from "./manifest.js";
 import type { CandidateRates, Directionality } from "./rates.js";
 import type { EvaluationRow, TrialRow } from "./rows.js";
+import type { TraceIntegrity } from "./trace.js";
 
 export interface CanonSummary {
   run: string;
@@ -22,6 +23,7 @@ export interface CanonSummary {
   inputs: string[];
   candidates: CandidateRates[];
   directionality: Directionality;
+  integrity: TraceIntegrity;
   evaluation_coverage: {
     evaluator: string;
     version: string;
@@ -51,13 +53,18 @@ export function evaluationCoverage(rows: readonly EvaluationRow[]): CanonSummary
   return [...byKey.values()];
 }
 
-export function buildGaps(trials: readonly TrialRow[], evaluations: readonly EvaluationRow[]): string {
+export function buildGaps(trials: readonly TrialRow[], evaluations: readonly EvaluationRow[], integrity?: TraceIntegrity): string {
   const lines: string[] = [
     "# GAPS — fields the protocol wants that this run did not observe",
     "",
     "Every field below is recorded as `null` or `not_applicable`, never defaulted to a measured-looking value.",
     "",
   ];
+  if (integrity && integrity.gaps_over_threshold > 0) {
+    lines.push(
+      `- **wall-clock integrity**: ${integrity.gaps_over_threshold} gap(s) longer than ${Math.round(integrity.threshold_ms / 60000)} min between consecutive trace events (longest ${(integrity.longest_gap_ms / 60000).toFixed(1)} min). The host likely suspended the process; durations, timeouts and p50/p95 in this run are unreliable.`,
+    );
+  }
   const sawCache = trials.some((t) => t.tokens.cached !== null && t.tokens.cached > 0);
   const sawProvider = trials.some((t) => t.deployment_ref !== null);
   const providerErrors = trials.filter((t) => t.completion_state === "provider_error").length;
@@ -109,6 +116,6 @@ export async function writeCanonBundle(
     fs.writeFile(path.join(runDir, "evaluations.jsonl"), jsonl(bundle.evaluations), "utf-8"),
     fs.writeFile(path.join(runDir, "ledger.json"), JSON.stringify(bundle.ledger, null, 2), "utf-8"),
     fs.writeFile(path.join(runDir, "summary.json"), JSON.stringify(bundle.summary, null, 2), "utf-8"),
-    fs.writeFile(path.join(runDir, "GAPS.md"), buildGaps(bundle.trials, bundle.evaluations), "utf-8"),
+    fs.writeFile(path.join(runDir, "GAPS.md"), buildGaps(bundle.trials, bundle.evaluations, bundle.summary.integrity), "utf-8"),
   ]);
 }

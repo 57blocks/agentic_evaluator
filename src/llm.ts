@@ -217,7 +217,21 @@ export async function complete(params: CompleteParams): Promise<LlmResult> {
       );
     }
 
-    const json = (await res.json()) as CompletionResponse;
+    // Reading the body is also governed by the abort signal: a slow judge that
+    // starts replying but does not finish before the timeout aborts HERE, not
+    // in fetch(). Classify it as a timeout too, never as an unknown error.
+    let json: CompletionResponse;
+    try {
+      json = (await res.json()) as CompletionResponse;
+    } catch (err) {
+      const isAbort = err instanceof Error && err.name === "AbortError";
+      return fail(
+        new LlmError(
+          isAbort ? `timeout after ${elapsed()}ms while reading the response` : `unreadable response body: ${err instanceof Error ? err.message : String(err)}`,
+          { kind: isAbort ? "timeout" : "network", ms: elapsed() },
+        ),
+      );
+    }
     const choice = json.choices?.[0];
     const text = choice?.message?.content ?? "";
     const usage = normaliseUsage(params.model, json.usage);
