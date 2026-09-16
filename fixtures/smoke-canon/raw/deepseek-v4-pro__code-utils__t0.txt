@@ -1,0 +1,48 @@
+```file:utils.ts
+export function parseQueryString(qs: string): Record<string, string | string[]> {
+  // Strip optional leading '?'
+  if (qs.startsWith('?')) {
+    qs = qs.slice(1);
+  }
+
+  if (qs === '') {
+    return {};
+  }
+
+  const pairs = qs.split('&').filter(pair => pair !== '');
+  const result: Record<string, string | string[]> = {};
+
+  for (const pair of pairs) {
+    const eqIdx = pair.indexOf('=');
+    const rawKey = eqIdx === -1 ? pair : pair.slice(0, eqIdx);
+    const rawValue = eqIdx === -1 ? '' : pair.slice(eqIdx + 1);
+
+    // Decode key
+    let key: string;
+    try {
+      key = decodeURIComponent(rawKey.replace(/\+/g, ' '));
+    } catch {
+      key = rawKey;
+    }
+
+    // Decode value
+    let value: string;
+    try {
+      value = decodeURIComponent(rawValue.replace(/\+/g, ' '));
+    } catch {
+      value = rawValue;
+    }
+
+    const existing = result[key];
+    if (existing === undefined) {
+      result[key] = value;
+    } else if (typeof existing === 'string') {
+      result[key] = [existing, value];
+    } else {
+      existing.push(value);
+    }
+  }
+
+  return result;
+}
+```
