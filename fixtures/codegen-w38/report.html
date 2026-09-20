@@ -13,7 +13,9 @@ h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em}h1 .id{font-fam
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:8px 0 0;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .kv div{display:grid;gap:2px}.kv dt{font-size:12px;color:var(--ink-3)}.kv dd{margin:0;font-size:13px;overflow-wrap:anywhere}
 .verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--surface);border-left:4px solid var(--warn-fg);padding:14px 18px;border-radius:6px}
+.verdict.firm{border-left-color:var(--ok-fg)}.verdict.needs-review{border-left-color:var(--bad-fg)}
 .verdict .tag{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
+.verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
 .verdict p{margin:0}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
 section.card{background:var(--surface);border-radius:8px;padding:18px 20px;display:grid;gap:12px}
 section.card h2{margin:0;font-size:15px;font-weight:600;display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
@@ -23,6 +25,8 @@ th.num,td.num{text-align:right}td{padding:9px 10px;border-bottom:1px solid var(-
 td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
 td .sub{display:block;font-size:11px;color:var(--ink-3)}
 tr.control td.cand::after{content:"对照";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
+tr.chosen td.cand{color:var(--ok-fg)}tr.gated td{color:var(--ink-3)}
+ol.trace{margin:0;padding-left:1.2em;font-size:13px;color:var(--ink-2);display:grid;gap:8px}
 .pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
 .state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
 .two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
@@ -45,23 +49,29 @@ footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
       <div><dt>裁判</dt><dd>google/gemini-3.1-pro-preview · rubric e5842052</dd></div>
       <div><dt>模式</dt><dd>capability-neutral · cold cache</dd></div>
       <div><dt>运行时间</dt><dd>2026-09-16 05:50 → 05:57</dd></div>
-      <div><dt>运行模式</dt><dd>lowest-cost（仅记录）</dd></div>
+      <div><dt>运行模式</dt><dd>lowest-cost · directional · 推荐 sonnet-5</dd></div>
       <div><dt>harness</dt><dd>0.1.0 · ddb57c7</dd></div>
     </dl>
   </header>
 
-  <div class="verdict">
+  <div class="verdict directional">
     <span class="tag">DIRECTIONAL · 3 INPUTS</span>
-    <div><p>成对胜率最高的是 kimi-k3（75%，6 场）。 每次成功的生成成本最低的是 deepseek-v4-pro（$0.0033）。 deepseek-v4-pro 失败 1 次。 未声明候选资格规则与最小有意义差异，本页不给出选型推荐。</p>
+    <div><p>运行模式 lowest-cost 下推荐 sonnet-5。 chosen candidate is the control (sonnet-5)。 lowest generation cost per successful task among eligible: $0.00755。</p>
     <p class="sub">3 inputs; fewer than 10；no minimum meaningful difference declared</p></div>
   </div>
+
+  <section class="card">
+    <h2>推荐轨迹 <span class="hint">select-v1 · 只读 summary.json，不重跑模型</span></h2>
+    <ol class="trace"><li><b>required-check-pass-rate</b> — required-check pass rate ≥ 1。剔除：deepseek-v4-pro（required-check pass rate 0.889 (8/9) &lt; 1）。剩余：sonnet-5、kimi-k3。</li><li><b>reliability</b> — reliability ≥ 1。剔除：无人被剔除。剩余：sonnet-5、kimi-k3。</li></ol>
+    <p class="note">合格：sonnet-5、kimi-k3。成对胜率仍展示但不进入选择器。</p>
+  </section>
 
   <section class="card">
     <h2>候选结果 <span class="hint">同一组输入，按候选配对；每格 3 次</span></h2>
     <div class="table-wrap"><table>
       <thead><tr><th>候选</th><th>任务结果</th><th class="num">必过检查</th><th class="num">成对胜率</th><th class="num">绝对分 1–5</th><th class="num">每次成功生成成本</th><th class="num">p50 耗时</th><th>完成状态</th></tr></thead>
-      <tbody><tr class="control">
-        <td class="cand">sonnet-5<span class="model">anthropic/claude-sonnet-5 · openrouter/claude-platform-on-aws</span></td>
+      <tbody><tr class="control chosen">
+        <td class="cand">sonnet-5<span class="model">推荐</span><span class="model">anthropic/claude-sonnet-5 · openrouter/claude-platform-on-aws</span></td>
         <td><div class="state-list"><span class="ok">9 success</span><span class="bad">0 failure</span><span class="warn">0 undetermined</span></div></td>
         <td class="num">9 / 9</td>
         <td class="num">50%<span class="sub">6 场</span></td>
@@ -69,8 +79,8 @@ footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
         <td class="num">$0.0076</td>
         <td class="num">5.4 s</td>
         <td><div class="state-list"><span class="ok">9 success</span></div></td>
-      </tr><tr>
-        <td class="cand">deepseek-v4-pro<span class="model">deepseek/deepseek-v4-pro · openrouter/deepinfra, openrouter/gmicloud, openrouter/alibaba, openrouter/streamlake</span></td>
+      </tr><tr class="gated">
+        <td class="cand">deepseek-v4-pro<span class="model">未过门</span><span class="model">deepseek/deepseek-v4-pro · openrouter/deepinfra, openrouter/gmicloud, openrouter/alibaba, openrouter/streamlake</span></td>
         <td><div class="state-list"><span class="ok">8 success</span><span class="bad">1 failure</span><span class="warn">0 undetermined</span></div></td>
         <td class="num">8 / 9</td>
         <td class="num">25%<span class="sub">6 场</span></td>
@@ -279,5 +289,5 @@ footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
 }</pre></details>
   </section>
 
-  <footer><span>codegen-w38-2026-09-16T05-50-19-377Z/</span><span>legacy-report.html 保留用于对账</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json</span></footer>
+  <footer><span>codegen-w38/</span><span>legacy-report.html 保留用于对账</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
 </div></body></html>

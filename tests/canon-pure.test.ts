@@ -12,9 +12,12 @@ test("timeout error classifies as timeout", () => {
   assert.equal(v.state, "timeout");
 });
 
-test("http 429 and network errors classify as provider_error", () => {
-  assert.equal(classifyCompletion({ error: { kind: "http", httpStatus: 429 } }).state, "provider_error");
-  assert.equal(classifyCompletion({ error: { kind: "network" } }).state, "provider_error");
+test("spawn errors classify as provider_error", () => {
+  assert.equal(classifyCompletion({ error: { kind: "spawn" } }).state, "provider_error");
+});
+
+test("cancelled errors classify as cancelled", () => {
+  assert.equal(classifyCompletion({ error: { kind: "cancelled" } }).state, "cancelled");
 });
 
 test("empty completion with content_filter finish reason is a refusal", () => {
@@ -112,4 +115,18 @@ test("trialHash changes when the prompt template changes", () => {
 test("trialHash changes across trials and models", () => {
   assert.notEqual(trialHash(base), trialHash({ ...base, trial: 1 }));
   assert.notEqual(trialHash(base), trialHash({ ...base, model: "deepseek/deepseek-v4-pro" }));
+});
+
+test("omitting adapter fields keeps the existing trial identity", () => {
+  assert.equal(trialHash(base), trialHash({ ...base, adapter: undefined, adapterConfigSha: undefined }));
+});
+
+test("agent-cli adapter fields change the trial hash", () => {
+  assert.notEqual(trialHash(base), trialHash({ ...base, adapter: "agent-cli", adapterConfigSha: sha256("{}") }));
+});
+
+test("finish_reason length with nothing parsed is malformed, not a success", () => {
+  const v = classifyCompletion({ finishReason: "length" });
+  assert.equal(v.state, "malformed");
+  assert.equal(v.truncated, true);
 });

@@ -1,0 +1,117 @@
+Implement a small, dependency-free reactive graph in TypeScript — signals,
+lazy computed values, and effects — with glitch-free propagation.
+
+## Files
+The entry point must be `signals.ts` at the top level. You may split the
+implementation across additional files (e.g. `graph.ts`, `scheduler.ts`) as
+long as `signals.ts` re-exports the full public API below. Every file must be
+reachable from `signals.ts` by relative import.
+
+Also output `conformance.ts` EXACTLY as given at the end of this task, byte for
+byte, with nothing added or removed. It is a type-level acceptance check.
+
+## Public API
+
+```ts
+export type Dispose = () => void;
+
+export interface Signal<T> {
+  (): T;
+  set(next: T): void;
+}
+
+export function signal<T>(initial: T, equals?: (a: T, b: T) => boolean): Signal<T>;
+export function computed<T>(fn: () => T, equals?: (a: T, b: T) => boolean): () => T;
+export function effect(fn: (onCleanup: (f: () => void) => void) => void): Dispose;
+export function batch<T>(fn: () => T): T;
+export function untracked<T>(fn: () => T): T;
+export class CycleError extends Error {}
+```
+
+## Required behavior
+
+1. **Lazy computed.** A `computed` body must not run until the value is first
+   read. Reading twice without any dependency change runs the body once.
+
+2. **Glitch-free diamond.** Given `a`, `b = computed(() => a())`,
+   `c = computed(() => a())`, `d = computed(() => b() + c())`: a single
+   `a.set(...)` must recompute `d` exactly once, and `d` must never observe a
+   mix of old and new values.
+
+3. **Dynamic dependencies.** For `computed(() => useX() ? x() : y())`, after
+   `useX` flips to false, later writes to `x` must NOT cause the computed or
+   its dependent effects to re-run. Dependencies are re-collected on every
+   evaluation and stale sources are unsubscribed.
+
+4. **Equality short-circuit.** Writing a value equal to the current one (by
+   `Object.is`, or by the `equals` argument when given) must not notify any
+   dependent. This applies to `computed` results too: if a computed re-evaluates
+   to an equal value, its own dependents must not re-run.
+
+5. **Batching.** Inside `batch(fn)`, writes are collected and dependents run
+   once, after the outermost batch returns. Nested batches flush only at the
+   outermost exit. `batch` returns whatever `fn` returns. Reads inside a batch
+   see the values written so far in that batch.
+
+6. **Effects.** `effect(fn)` runs `fn` immediately, tracks whatever it reads,
+   and re-runs when any tracked source changes. `fn` receives an `onCleanup`
+   registrar; every registered cleanup runs before the next re-run and once
+   more when the effect is disposed. The returned `Dispose` unsubscribes the
+   effect from all sources; after disposal it never runs again, and calling it
+   twice is safe.
+
+7. **Topological order.** When one effect reads a computed that depends on
+   another signal, no effect may ever observe a stale value: within one flush,
+   every value an effect reads is fully up to date.
+
+8. **Cycle detection.** A `computed` whose evaluation re-enters itself must
+   throw `CycleError`. The graph must remain usable afterwards: unrelated
+   signals, computed values and effects keep working.
+
+9. **`untracked(fn)`** runs `fn` and returns its result without registering any
+   dependency on what it reads.
+
+10. **No leaks.** Disposing an effect, or a source becoming unused after a
+    dependency change, must drop the subscription — a disposed effect's
+    cleanup must not keep the graph alive.
+
+## Constraints
+- Strict TypeScript. No `any`, no `@ts-ignore`, no non-null assertions used to
+  dodge the checker.
+- No imports from any package, no Node-only globals. Pure standard JS/TS.
+- No `setTimeout` / microtask scheduling: propagation is synchronous.
+- Do not mutate a caller's array or object; keep internal state private.
+
+## conformance.ts — output this file verbatim
+
+```file:conformance.ts
+// Type-level acceptance check. Do not modify.
+import { signal, computed, effect, batch, untracked, CycleError } from "./signals.js";
+import type { Dispose, Signal } from "./signals.js";
+
+type Eq<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+const assertType = <T extends true>(_: T): void => void _;
+
+const count: Signal<number> = signal(0);
+assertType<Eq<ReturnType<typeof count>, number>>(true);
+count.set(1);
+
+const label = signal("a", (x, y) => x.length === y.length);
+assertType<Eq<ReturnType<typeof label>, string>>(true);
+
+const doubled = computed(() => count() * 2);
+assertType<Eq<ReturnType<typeof doubled>, number>>(true);
+
+const stop: Dispose = effect((onCleanup) => {
+  const seen: number = doubled();
+  onCleanup(() => void seen);
+});
+stop();
+
+assertType<Eq<ReturnType<typeof batch<string>>, string>>(true);
+assertType<Eq<ReturnType<typeof untracked<boolean>>, boolean>>(true);
+const cycleIsAnError: Error = new CycleError("cycle");
+void cycleIsAnError;
+```
+
+Output only the files, no prose.

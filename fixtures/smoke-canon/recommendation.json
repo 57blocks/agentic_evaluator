@@ -1,0 +1,89 @@
+{
+  "rule_version": "select-v1",
+  "operating_mode": "lowest-cost",
+  "control_candidate": null,
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 1",
+      "removed": [],
+      "remaining": [
+        "sonnet-5",
+        "deepseek-v4-pro"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 1",
+      "removed": [],
+      "remaining": [
+        "sonnet-5",
+        "deepseek-v4-pro"
+      ]
+    }
+  ],
+  "eligible": [
+    "sonnet-5",
+    "deepseek-v4-pro"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "sonnet-5",
+      "eligible": true,
+      "generation_cost_per_success": 0.006906,
+      "p50_ms": 5707,
+      "p95_ms": 5707,
+      "reliability": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      }
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "eligible": true,
+      "generation_cost_per_success": 0.00875,
+      "p50_ms": 53123,
+      "p95_ms": 53123,
+      "reliability": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      }
+    }
+  ],
+  "chosen": "sonnet-5",
+  "compared_to_control": null,
+  "firmness": "directional",
+  "reasons": [
+    "lowest generation cost per successful task among eligible: $0.006906",
+    "1 inputs; fewer than 10",
+    "no minimum meaningful difference declared"
+  ]
+}

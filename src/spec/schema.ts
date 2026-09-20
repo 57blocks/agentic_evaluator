@@ -53,9 +53,28 @@ export const SPEC_SCHEMA = {
               },
               operating_mode: {
                 type: "string",
-                enum: ["lowest-cost", "fastest-within-cost-ceiling", "highest-assurance"],
+                enum: [
+                  "lowest-cost",
+                  "fastest-within-cost-ceiling",
+                  "highest-assurance",
+                  "judge-preference",
+                ],
+              },
+              eligibility: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  minimum_reliability: { type: "number", minimum: 0, maximum: 1 },
+                  minimum_required_check_pass_rate: { type: "number", minimum: 0, maximum: 1 },
+                  maximum_p95_ms: { type: "number", exclusiveMinimum: 0 },
+                  cost_ceiling_per_success_usd: { type: "number", exclusiveMinimum: 0 },
+                },
               },
               maximum_completion_time_seconds: { type: "number", exclusiveMinimum: 0 },
+              producer: { type: "string", enum: ["prompt", "codegen"] },
+              prompt_file: { type: "string" },
+              rubric_file: { type: "string" },
+              input_from: { type: "string" },
             },
           },
         },
@@ -67,9 +86,10 @@ export const SPEC_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["id", "model"],
+        required: ["id"],
         properties: {
           id: { type: "string", pattern: "^[a-z0-9][a-z0-9.-]*$" },
+          adapter: { type: "string", enum: ["model-api", "codegen", "agent-cli"] },
           model: { type: "string" },
           provider_route: { type: "string" },
           generation_settings: {
@@ -78,6 +98,15 @@ export const SPEC_SCHEMA = {
             properties: {
               temperature: { type: "number", minimum: 0, maximum: 2 },
               max_tokens: { type: "integer", minimum: 1 },
+            },
+          },
+          cli: {
+            type: "object",
+            additionalProperties: false,
+            required: ["argv"],
+            properties: {
+              argv: { type: "array", minItems: 1, items: { type: "string" } },
+              env: { type: "object", additionalProperties: { type: "string" } },
             },
           },
         },

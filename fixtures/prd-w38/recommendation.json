@@ -1,0 +1,110 @@
+{
+  "rule_version": "select-v1",
+  "operating_mode": "highest-assurance",
+  "control_candidate": "sonnet-5",
+  "eligibility": {
+    "minimum_reliability": null,
+    "minimum_required_check_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "qualifying-success-criteria",
+      "description": "a candidate can qualify only when the step declares required checks; without them task success is undetermined and cannot gate cost or speed",
+      "removed": [
+        {
+          "candidate": "sonnet-5",
+          "reason": "sonnet-5: no required checks declared for this step"
+        },
+        {
+          "candidate": "deepseek-v4-pro",
+          "reason": "deepseek-v4-pro: no required checks declared for this step"
+        },
+        {
+          "candidate": "kimi-k3",
+          "reason": "kimi-k3: no required checks declared for this step"
+        }
+      ],
+      "remaining": []
+    }
+  ],
+  "eligible": [],
+  "tradeoffs": [
+    {
+      "candidate": "sonnet-5",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 22460,
+      "p95_ms": 28221,
+      "reliability": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "required_check_pass_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "task_success_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      }
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 62056,
+      "p95_ms": 71271,
+      "reliability": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "required_check_pass_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "task_success_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      }
+    },
+    {
+      "candidate": "kimi-k3",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 49656,
+      "p95_ms": 59278,
+      "reliability": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4
+      },
+      "required_check_pass_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      },
+      "task_success_rate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0
+      }
+    }
+  ],
+  "chosen": null,
+  "compared_to_control": {
+    "beats_control": null,
+    "reason": "no chosen candidate to compare with control sonnet-5"
+  },
+  "firmness": "needs-review",
+  "reasons": [
+    "no candidate passed eligibility gates"
+  ]
+}

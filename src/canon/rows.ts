@@ -63,6 +63,15 @@ export type EvaluationSubject =
   | { kind: "trial"; candidate: string; input: string; trial: number }
   | { kind: "pair"; a: string; b: string; input: string };
 
+/** One pairwise dimension, both order-swapped rounds kept. */
+export interface DimensionDetail {
+  forward: Winner;
+  reverse: Winner;
+  resolved: Winner;
+  /** The forward round's rationale; empty when the judge gave none. */
+  reason?: string;
+}
+
 export interface EvaluationRow {
   run: string;
   step: string;
@@ -73,6 +82,12 @@ export interface EvaluationRow {
   score?: number;
   /** Pairwise: per-dimension resolved winner; absolute: per-dimension 1–5. */
   dimensions?: Record<string, Winner | number>;
+  /**
+   * Pairwise only: what `dimensions` collapses. Keeping both rounds is what
+   * makes "the judge contradicted itself when the order flipped" visible —
+   * a resolved `tie` otherwise reads as "genuinely indistinguishable".
+   */
+  dimension_detail?: Record<string, DimensionDetail>;
   overall?: Winner | number;
   evidence?: string;
   reason?: string;

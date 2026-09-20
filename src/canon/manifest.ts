@@ -10,7 +10,8 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { REPO_ROOT } from "../paths.js";
 import type { Suite } from "../types.js";
-import type { CandidateDef } from "./types.js";
+import type { CandidateDef, EligibilityThresholds } from "./types.js";
+import { resolveEligibility } from "./select.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -34,6 +35,8 @@ export interface RunManifest {
   };
   success_criteria: { mandatory_checks: "all" } | null;
   operating_mode: string | null;
+  /** Resolved gates actually used; frozen so a later default change cannot rewrite this run. */
+  eligibility: EligibilityThresholds;
   minimum_meaningful_difference: number | null;
   execution: {
     trials_per_case: number;
@@ -104,6 +107,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     },
     success_criteria: suite.successCriteria ?? null,
     operating_mode: suite.operatingMode ?? null,
+    eligibility: resolveEligibility(suite.requiredChecks ?? [], suite.eligibility),
     minimum_meaningful_difference: suite.mmd ?? null,
     execution: {
       trials_per_case: suite.trials ?? 2,

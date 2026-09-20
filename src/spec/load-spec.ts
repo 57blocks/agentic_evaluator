@@ -6,22 +6,44 @@
  * `run.ts` keeps its control flow. Legacy `suites/*.json` still load through
  * `loadLegacySuite`, which synthesizes candidate definitions with id = model.
  *
- * This week a spec declares exactly one step; multi-step workflows arrive with
- * the end-to-end control in a later milestone.
+ * Specs may declare several independent steps; each compiles to its own Suite.
+ * Independent eval does not pipe output forward. Steps with `input_from` form
+ * the single-model e2e control chain (protocol §8).
  */
 
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { parse as parseYaml } from "yaml";
+import { adapterIdOf } from "../adapters/types.js";
+import { orderControlChain } from "../canon/e2e.js";
 import { sha256 } from "../canon/hash.js";
-import type { CandidateDef } from "../canon/types.js";
+import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
 import { REPO_ROOT } from "../paths.js";
 import type { Suite } from "../types.js";
 import { SPEC_SCHEMA } from "./schema.js";
 
 const DEFAULT_TEMPERATURE = 0.3;
 const DEFAULT_TIMEOUT_MS = 120_000;
+
+export interface EvalStep {
+  id: string;
+  version: string;
+  test_set: { id: string; inputs: string[] };
+  candidate_ids: string[];
+  required_checks?: string[];
+  judged_dimensions?: string[];
+  success_criteria?: { mandatory_checks: "all" };
+  operating_mode?: string;
+  eligibility?: EligibilityDecl;
+  maximum_completion_time_seconds?: number;
+  /** Overrides x-harness.producer for this step. */
+  producer?: "prompt" | "codegen";
+  prompt_file?: string;
+  rubric_file?: string;
+  /** Prior step id whose output is this step's input during e2e control. Independent eval still uses test_set. */
+  input_from?: string;
+}
 
 /** Static shape of a validated spec (mirrors SPEC_SCHEMA; kept loose on purpose). */
 export interface EvalSpec {
@@ -30,17 +52,7 @@ export interface EvalSpec {
   budget_usd?: number;
   workflow: {
     control_candidate?: string;
-    steps: Array<{
-      id: string;
-      version: string;
-      test_set: { id: string; inputs: string[] };
-      candidate_ids: string[];
-      required_checks?: string[];
-      judged_dimensions?: string[];
-      success_criteria?: { mandatory_checks: "all" };
-      operating_mode?: string;
-      maximum_completion_time_seconds?: number;
-    }>;
+    steps: EvalStep[];
   };
   candidates: CandidateDef[];
   evaluators: {
@@ -91,57 +103,132 @@ export function parseSpec(text: string, specPath: string): EvalSpec {
   return data as EvalSpec;
 }
 
+function specError(specPath: string, message: string): SpecError {
+  return new SpecError(`spec ${specPath}: ${message}`);
+}
+
+function duplicateIds(ids: readonly string[]): string[] {
+  return ids.filter((id, i, all) => all.indexOf(id) !== i);
+}
+
+/** Per-step producer / prompt / rubric win over x-harness and evaluators.judge. */
+function stepOverrides(step: EvalStep, spec: EvalSpec): {
+  producer: "prompt" | "codegen";
+  promptFile: string | undefined;
+  rubricFile: string;
+} {
+  const harness = spec["x-harness"]!;
+  return {
+    producer: step.producer ?? harness.producer,
+    promptFile: step.prompt_file ?? harness.prompt_file,
+    rubricFile: step.rubric_file ?? spec.evaluators.judge.rubric_file,
+  };
+}
+
 /** Semantic checks the schema cannot express. */
 function checkSemantics(spec: EvalSpec, specPath: string): void {
-  if (spec.workflow.steps.length !== 1) {
-    throw new SpecError(`spec ${specPath}: exactly one workflow step is supported this milestone (got ${spec.workflow.steps.length})`);
-  }
-  const step = spec.workflow.steps[0];
+  const steps = spec.workflow.steps;
+  const stepDupes = duplicateIds(steps.map((s) => s.id));
+  if (stepDupes.length > 0) throw specError(specPath, `duplicate step ids ${stepDupes.join(", ")}`);
+
   const byId = new Map(spec.candidates.map((c) => [c.id, c]));
-  const dupes = spec.candidates.map((c) => c.id).filter((id, i, all) => all.indexOf(id) !== i);
-  if (dupes.length > 0) throw new SpecError(`spec ${specPath}: duplicate candidate ids ${dupes.join(", ")}`);
+  const dupes = duplicateIds(spec.candidates.map((c) => c.id));
+  if (dupes.length > 0) throw specError(specPath, `duplicate candidate ids ${dupes.join(", ")}`);
 
-  const missing = step.candidate_ids.filter((id) => !byId.has(id));
-  if (missing.length > 0) {
-    throw new SpecError(`spec ${specPath}: step "${step.id}" references unknown candidate ids ${missing.join(", ")}`);
-  }
   if (spec.workflow.control_candidate && !byId.has(spec.workflow.control_candidate)) {
-    throw new SpecError(`spec ${specPath}: control_candidate "${spec.workflow.control_candidate}" is not a declared candidate`);
-  }
-
-  const judgeVendor = vendorOf(spec.evaluators.judge.model);
-  const sameVendor = step.candidate_ids
-    .map((id) => byId.get(id)!)
-    .filter((c) => vendorOf(c.model) === judgeVendor)
-    .map((c) => c.id);
-  if (sameVendor.length > 0 && !spec["x-harness"]?.allow_same_vendor_judge) {
-    throw new SpecError(
-      `spec ${specPath}: judge ${spec.evaluators.judge.model} shares a vendor with candidate(s) ${sameVendor.join(", ")}; ` +
-        `the protocol requires a cross-vendor judge (set x-harness.allow_same_vendor_judge to override deliberately)`,
-    );
-  }
-
-  const declaredChecks = new Set(Object.keys(spec.evaluators.required_checks ?? {}));
-  const undeclared = (step.required_checks ?? []).filter((c) => !declaredChecks.has(c));
-  if (undeclared.length > 0) {
-    throw new SpecError(`spec ${specPath}: required_checks ${undeclared.join(", ")} have no evaluator definition`);
+    throw specError(specPath, `control_candidate "${spec.workflow.control_candidate}" is not a declared candidate`);
   }
 
   const harness = spec["x-harness"];
-  if (!harness) throw new SpecError(`spec ${specPath}: x-harness.producer is required this milestone`);
-  if (harness.producer === "prompt" && !harness.prompt_file) {
-    throw new SpecError(`spec ${specPath}: producer "prompt" needs x-harness.prompt_file`);
+  if (!harness) throw specError(specPath, "x-harness.producer is required this milestone");
+
+  const declaredChecks = new Set(Object.keys(spec.evaluators.required_checks ?? {}));
+  const judgeVendor = vendorOf(spec.evaluators.judge.model);
+
+  for (const step of steps) {
+    const missing = step.candidate_ids.filter((id) => !byId.has(id));
+    if (missing.length > 0) {
+      throw specError(specPath, `step "${step.id}" references unknown candidate ids ${missing.join(", ")}`);
+    }
+
+    const { producer, promptFile } = stepOverrides(step, spec);
+    if (producer === "prompt" && !promptFile) {
+      throw specError(specPath, `step "${step.id}" producer "prompt" needs prompt_file`);
+    }
+
+    for (const id of step.candidate_ids) {
+      const c = byId.get(id)!;
+      const adapter = adapterIdOf(c, producer);
+      if (adapter === "agent-cli" && !c.cli?.argv?.length) {
+        throw specError(specPath, `candidate "${c.id}" adapter agent-cli needs cli.argv`);
+      }
+      if (adapter !== "agent-cli" && !c.model) {
+        throw specError(specPath, `candidate "${c.id}" adapter ${adapter} needs a model`);
+      }
+    }
+
+    const sameVendor = step.candidate_ids.filter((id) => {
+      const model = byId.get(id)!.model;
+      return model !== undefined && vendorOf(model) === judgeVendor;
+    });
+    if (sameVendor.length > 0 && !harness.allow_same_vendor_judge) {
+      throw specError(
+        specPath,
+        `step "${step.id}" judge ${spec.evaluators.judge.model} shares a vendor with candidate(s) ${sameVendor.join(", ")}; ` +
+          `the protocol requires a cross-vendor judge (set x-harness.allow_same_vendor_judge to override deliberately)`,
+      );
+    }
+
+    const undeclared = (step.required_checks ?? []).filter((c) => !declaredChecks.has(c));
+    if (undeclared.length > 0) {
+      throw specError(specPath, `step "${step.id}" required_checks ${undeclared.join(", ")} have no evaluator definition`);
+    }
+  }
+
+  checkControlChain(spec, specPath);
+}
+
+function checkControlChain(spec: EvalSpec, specPath: string): void {
+  const steps = spec.workflow.steps;
+  const indexOf = new Map(steps.map((s, i) => [s.id, i]));
+
+  for (const step of steps) {
+    if (!step.input_from) continue;
+    const parent = indexOf.get(step.input_from);
+    if (parent === undefined) {
+      throw specError(specPath, `step "${step.id}" input_from "${step.input_from}" is not a declared step`);
+    }
+    if (parent >= indexOf.get(step.id)!) {
+      throw specError(specPath, `step "${step.id}" input_from "${step.input_from}" must be an earlier step`);
+    }
+  }
+
+  const chain = orderControlChain(steps.map((s) => ({ id: s.id, inputFrom: s.input_from })));
+  if (!chain) {
+    if (steps.some((s) => s.input_from)) {
+      throw specError(specPath, "input_from must form a single linear chain (no forks or cycles)");
+    }
+    return;
+  }
+
+  const control = spec.workflow.control_candidate;
+  if (!control) {
+    throw specError(specPath, "input_from requires workflow.control_candidate for the single-model e2e control");
+  }
+  for (const id of chain) {
+    if (!steps[indexOf.get(id)!].candidate_ids.includes(control)) {
+      throw specError(specPath, `control_candidate "${control}" is not in step "${id}" candidate_ids`);
+    }
   }
 }
 
-/** Compile a validated spec into the harness Suite. Pure. */
-export function compileSpec(spec: EvalSpec, specPath: string, specSha: string): Suite {
-  checkSemantics(spec, specPath);
-  const step = spec.workflow.steps[0];
+function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, step: EvalStep): Suite {
   const harness = spec["x-harness"]!;
+  const { producer, promptFile, rubricFile } = stepOverrides(step, spec);
+  const wanted = new Set(step.candidate_ids);
   const candidateDefs: Record<string, CandidateDef> = {};
   for (const c of spec.candidates) {
-    if (step.candidate_ids.includes(c.id)) candidateDefs[c.id] = c;
+    if (wanted.has(c.id)) candidateDefs[c.id] = { ...c, adapter: adapterIdOf(c, producer) };
   }
   const requiredChecks = step.required_checks ?? [];
   const tscCheck = requiredChecks
@@ -151,9 +238,9 @@ export function compileSpec(spec: EvalSpec, specPath: string, specSha: string): 
   return {
     suiteId: spec.run_name,
     step: step.id,
-    producer: harness.producer,
-    promptFile: harness.prompt_file,
-    rubricFile: spec.evaluators.judge.rubric_file,
+    producer,
+    promptFile,
+    rubricFile,
     candidates: [...step.candidate_ids],
     judge: spec.evaluators.judge.model,
     inputs: [...step.test_set.inputs],
@@ -175,6 +262,7 @@ export function compileSpec(spec: EvalSpec, specPath: string, specSha: string): 
     requiredChecks,
     successCriteria: step.success_criteria,
     operatingMode: step.operating_mode,
+    eligibility: step.eligibility,
     mmd: spec.execution.minimum_meaningful_difference ?? null,
     controlCandidate: spec.workflow.control_candidate,
     benchmarkMode: spec.execution.benchmark_mode ?? "capability-neutral",
@@ -182,14 +270,30 @@ export function compileSpec(spec: EvalSpec, specPath: string, specSha: string): 
     concurrency: spec.execution.concurrency,
     specSha,
     specPath,
+    inputFrom: step.input_from,
   };
 }
 
-export async function loadSpec(specPath: string): Promise<Suite> {
+/** Compile every workflow step into its own Suite. Independent eval has no handoff; `input_from` is for the e2e control pass. */
+export function compileWorkflow(spec: EvalSpec, specPath: string, specSha: string): Suite[] {
+  checkSemantics(spec, specPath);
+  return spec.workflow.steps.map((step) => compileOneStep(spec, specPath, specSha, step));
+}
+
+/** First step only — existing single-step callers. Use `compileWorkflow` for all steps. */
+export function compileSpec(spec: EvalSpec, specPath: string, specSha: string): Suite {
+  return compileWorkflow(spec, specPath, specSha)[0];
+}
+
+export async function loadWorkflow(specPath: string): Promise<Suite[]> {
   const abs = path.resolve(REPO_ROOT, specPath);
   const text = await fs.readFile(abs, "utf-8");
   const spec = parseSpec(text, specPath);
-  return compileSpec(spec, path.relative(REPO_ROOT, abs), sha256(text));
+  return compileWorkflow(spec, path.relative(REPO_ROOT, abs), sha256(text));
+}
+
+export async function loadSpec(specPath: string): Promise<Suite> {
+  return (await loadWorkflow(specPath))[0];
 }
 
 /** Legacy suites/*.json: candidate id = model id, provider implied (openrouter). */
@@ -199,7 +303,12 @@ export async function loadLegacySuite(suitePath: string): Promise<Suite> {
   const suite = JSON.parse(text) as Suite;
   const candidateDefs: Record<string, CandidateDef> = {};
   for (const model of suite.candidates) {
-    candidateDefs[model] = { id: model, model, provider_route: "openrouter" };
+    candidateDefs[model] = {
+      id: model,
+      model,
+      provider_route: "openrouter",
+      adapter: suite.check ? "codegen" : "model-api",
+    };
   }
   return {
     ...suite,
@@ -213,7 +322,12 @@ export async function loadLegacySuite(suitePath: string): Promise<Suite> {
   };
 }
 
-/** Pick the loader by extension. */
+/** Pick the loader by extension. YAML may contain several independent steps. */
+export async function loadSuites(p: string): Promise<Suite[]> {
+  return /\.ya?ml$/i.test(p) ? loadWorkflow(p) : [await loadLegacySuite(p)];
+}
+
+/** First (or only) step. Prefer `loadSuites` when the spec may be multi-step. */
 export async function loadSuiteOrSpec(p: string): Promise<Suite> {
-  return /\.ya?ml$/i.test(p) ? loadSpec(p) : loadLegacySuite(p);
+  return (await loadSuites(p))[0];
 }

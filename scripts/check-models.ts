@@ -8,7 +8,8 @@
  * show up as provider_error on every trial and poison the comparison.
  */
 
-import { loadSpec } from "../src/spec/load-spec.js";
+import { loadWorkflow } from "../src/spec/load-spec.js";
+import type { Suite } from "../src/types.js";
 
 interface CatalogModel {
   id: string;
@@ -26,6 +27,18 @@ async function fetchCatalog(): Promise<Map<string, CatalogModel>> {
 
 const perMillion = (v: string | undefined): string => (v === undefined ? "  ?  " : (Number(v) * 1e6).toFixed(2).padStart(6));
 
+/** OpenRouter ids actually used by any step. CLI-only candidates have no model. */
+function modelsToCheck(suites: readonly Suite[]): Map<string, string> {
+  const models = new Map<string, string>();
+  for (const suite of suites) {
+    for (const [id, def] of Object.entries(suite.candidateDefs ?? {})) {
+      if (def.model) models.set(def.model, `candidate ${id}`);
+    }
+    models.set(suite.judge, "judge");
+  }
+  return models;
+}
+
 async function main(): Promise<void> {
   const specPaths = process.argv.slice(2);
   if (specPaths.length === 0) {
@@ -35,10 +48,7 @@ async function main(): Promise<void> {
   const catalog = await fetchCatalog();
   let missing = 0;
   for (const specPath of specPaths) {
-    const suite = await loadSpec(specPath);
-    const models = new Map<string, string>();
-    for (const [id, def] of Object.entries(suite.candidateDefs ?? {})) models.set(def.model, `candidate ${id}`);
-    models.set(suite.judge, "judge");
+    const models = modelsToCheck(await loadWorkflow(specPath));
     console.log(`\n${specPath}`);
     for (const [model, role] of models) {
       const m = catalog.get(model);

@@ -1,17 +1,20 @@
-# PRD step: no deterministic required checks exist yet, so every trial's
-# task_outcome is `undetermined` by the success-decision contract. The step is
-# still judged (pairwise + absolute) and costed; it demonstrates that a step
-# without gates cannot manufacture a success rate.
+# Three independent steps (no handoff): PRD from a feature brief, task
+# breakdown from a frozen compact PRD, then codegen from frozen code specs.
+# Prior-step output is not piped forward. PRD / taskbreakdown have no
+# required check (task_outcome stays undetermined). Codegen gates on tsc.
 
 protocol_version: "0.4"
 run_name: prd-w38
-budget_usd: 6
+budget_usd: 22
 
 workflow:
   control_candidate: sonnet-5
   steps:
     - id: prd
       version: "1"
+      producer: prompt
+      prompt_file: prompts/prd.md
+      rubric_file: rubrics/prd.md
       test_set:
         id: briefs-v1
         inputs: [todo-app, chat-app]
@@ -20,6 +23,36 @@ workflow:
       judged_dimensions: [completeness, testability, no-hallucination, structure]
       operating_mode: highest-assurance
       maximum_completion_time_seconds: 240
+    - id: taskbreakdown
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/taskbreakdown.md
+      rubric_file: rubrics/taskbreakdown.md
+      test_set:
+        id: compact-prd-v1
+        inputs: [todo-app.tb, chat-app.tb]
+      candidate_ids: [sonnet-5, deepseek-v4-pro, kimi-k3]
+      required_checks: []
+      judged_dimensions: [granularity, dependencies, verifiability, faithfulness, actionability]
+      operating_mode: highest-assurance
+      maximum_completion_time_seconds: 240
+    - id: codegen
+      version: "1"
+      producer: codegen
+      rubric_file: rubrics/codegen.md
+      test_set:
+        id: code-v1
+        inputs: [code-utils, code-component, code-schema]
+      candidate_ids: [sonnet-5, deepseek-v4-pro, kimi-k3]
+      required_checks: [tsc-noemit]
+      judged_dimensions: [meets-spec, correctness, type-quality, simplicity, robustness]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 180
 
 candidates:
   - id: sonnet-5
@@ -36,6 +69,10 @@ candidates:
     generation_settings: { temperature: 0.3 }
 
 evaluators:
+  required_checks:
+    tsc-noemit:
+      kind: tsc
+      scaffold_dir: scaffold
   judge:
     model: google/gemini-3.1-pro-preview
     provider_route: openrouter

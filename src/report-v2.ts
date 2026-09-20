@@ -5,20 +5,31 @@
  *
  *   pnpm run report -- runs/<runId>          → writes runs/<runId>/report.html
  *
- * Reads only; every number on the page traces to a row in those files. The
- * page says "directional" whenever summary.json says so, and never offers a
- * recommendation — that requires eligibility rules and a declared minimum
- * meaningful difference, neither of which exist this milestone.
+ * Reads only; every number on the page traces to a row in those files.
+ * Eligibility and the operating-mode recommendation are recomputed from
+ * manifest + summary (select-v1) so an old run directory can still produce
+ * recommendation.json without re-calling a model.
  */
 
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { modelRefOf } from "./adapters/types.js";
 import type { CostLedger } from "./canon/cost.js";
 import type { RunManifest } from "./canon/manifest.js";
 import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { CanonSummary } from "./canon/write.js";
+import { recommendFromCanon, type Recommendation } from "./canon/select.js";
 import { escapeHtml } from "./render.js";
+import { CHART_STYLES, renderHeatmap, renderRadar, renderTrialStrip } from "./report-charts.js";
+import {
+  EVIDENCE_STYLES,
+  loadRawOutputs,
+  renderDuels,
+  renderOutputs,
+  renderTrials,
+  type RawOutput,
+} from "./report-evidence.js";
 
 interface RunBundle {
   dir: string;
@@ -27,7 +38,9 @@ interface RunBundle {
   evaluations: EvaluationRow[];
   ledger: CostLedger;
   summary: CanonSummary;
+  recommendation: Recommendation;
   gaps: string;
+  outputs: RawOutput[];
 }
 
 async function readJsonl<T>(file: string): Promise<T[]> {
@@ -37,13 +50,19 @@ async function readJsonl<T>(file: string): Promise<T[]> {
 
 export async function loadBundle(dir: string): Promise<RunBundle> {
   const read = async <T>(name: string): Promise<T> => JSON.parse(await fs.readFile(path.join(dir, name), "utf-8")) as T;
+  const manifest = await read<RunManifest>("manifest.json");
+  const summary = await read<CanonSummary>("summary.json");
+  const trials = await readJsonl<TrialRow>(path.join(dir, "scores.jsonl"));
+  const recommendation = recommendFromCanon(manifest, summary, trials);
   return {
     dir,
-    manifest: await read<RunManifest>("manifest.json"),
-    trials: await readJsonl<TrialRow>(path.join(dir, "scores.jsonl")),
+    manifest,
+    outputs: await loadRawOutputs(dir, trials),
+    trials,
     evaluations: await readJsonl<EvaluationRow>(path.join(dir, "evaluations.jsonl")),
     ledger: await read<CostLedger>("ledger.json"),
-    summary: await read<CanonSummary>("summary.json"),
+    summary,
+    recommendation,
     gaps: await fs.readFile(path.join(dir, "GAPS.md"), "utf-8").catch(() => ""),
   };
 }
@@ -90,7 +109,7 @@ function candidateViews(b: RunBundle): CandidateView[] {
     const wr = winRate(c.candidate, b.evaluations);
     return {
       id: c.candidate,
-      model: def?.model ?? c.candidate,
+      model: def ? modelRefOf(def) : c.candidate,
       deployment: deployments.join(", ") || "—",
       attempts: c.valid_attempts,
       checkPass: c.check_states.pass,
@@ -120,30 +139,68 @@ function stateClass(state: string): string {
   return "bad";
 }
 
-function verdictText(b: RunBundle, views: CandidateView[]): string {
+function withPeriod(text: string): string {
+  return text.endsWith("。") ? text : `${text}。`;
+}
+
+function verdictText(b: RunBundle): string {
+  const rec = b.recommendation;
   const step = b.manifest.step.id;
-  const noChecks = b.manifest.evaluators.required_checks.length === 0;
   const parts: string[] = [];
-  if (noChecks) {
-    parts.push(`步骤 ${step} 没有声明必过检查，所有 trial 的 task_outcome 为 undetermined；只报裁判判断与成本，不报成功率。`);
+  if (rec.eligible.length === 0) {
+    parts.push(`步骤 ${step} 没有合格候选，选择器不给出配置推荐。`);
+  } else if (rec.chosen) {
+    parts.push(`运行模式 ${rec.operating_mode ?? "未声明"} 下推荐 ${rec.chosen}。`);
+    if (rec.compared_to_control) parts.push(rec.compared_to_control.reason + "。");
   } else {
-    const best = [...views].sort((x, y) => (y.winRate ?? -1) - (x.winRate ?? -1))[0];
-    const cheapest = [...views].filter((v) => v.costPerSuccess !== null).sort((x, y) => x.costPerSuccess! - y.costPerSuccess!)[0];
-    if (best) parts.push(`成对胜率最高的是 ${best.id}（${fmtPct(best.winRate)}，${best.comparisons} 场）。`);
-    if (cheapest) parts.push(`每次成功的生成成本最低的是 ${cheapest.id}（${fmtUsd(cheapest.costPerSuccess)}）。`);
-    const failing = views.filter((v) => v.outcomes.failure > 0);
-    if (failing.length) parts.push(`${failing.map((v) => `${v.id} 失败 ${v.outcomes.failure} 次`).join("，")}。`);
+    parts.push(`步骤 ${step} 有合格候选，但选择器未能选出推荐。`);
   }
-  parts.push("未声明候选资格规则与最小有意义差异，本页不给出选型推荐。");
+  if (rec.reasons[0]) parts.push(withPeriod(rec.reasons[0]));
   return parts.join(" ");
+}
+
+function filterList(rec: Recommendation): string {
+  return rec.filters
+    .map((f) => {
+      const removed =
+        f.removed.length === 0
+          ? "无人被剔除"
+          : f.removed.map((r) => `${escapeHtml(r.candidate)}（${escapeHtml(r.reason)}）`).join("；");
+      const remaining = f.remaining.length > 0 ? f.remaining.map(escapeHtml).join("、") : "无";
+      return `<li><b>${escapeHtml(f.id)}</b> — ${escapeHtml(f.description)}。剔除：${removed}。剩余：${remaining}。</li>`;
+    })
+    .join("");
+}
+
+function firmnessTag(firmness: Recommendation["firmness"]): string {
+  switch (firmness) {
+    case "firm":
+      return "FIRM";
+    case "directional":
+      return "DIRECTIONAL";
+    case "needs-review":
+      return "NEEDS-REVIEW";
+  }
+}
+
+function subtitleReasons(rec: Recommendation, directionality: { reasons: string[] }): string[] {
+  return rec.firmness === "directional" ? directionality.reasons : rec.reasons;
+}
+
+function candidateMark(gated: boolean, chosen: boolean): string {
+  if (gated) return `<span class="model">未过门</span>`;
+  if (chosen) return `<span class="model">推荐</span>`;
+  return "";
 }
 
 // ── render ─────────────────────────────────────────────────────────────────
 
 export function renderRunReport(b: RunBundle): string {
   const m = b.manifest;
+  const rec = b.recommendation;
   const views = candidateViews(b);
-  const dir = b.summary.directionality;
+  const tag = firmnessTag(rec.firmness);
+  const support = subtitleReasons(rec, b.summary.directionality);
   const inputs = m.test_set.inputs;
   const trialsPer = m.execution.trials_per_case;
   const evaluatorErrors = b.evaluations.filter((e) => e.state === "evaluator_error");
@@ -156,12 +213,17 @@ export function renderRunReport(b: RunBundle): string {
   const candidateRows = views
     .map((v) => {
       const isControl = m.control_candidate === v.id;
+      const gated = !rec.eligible.includes(v.id);
+      const chosen = rec.chosen === v.id;
+      const rowClass = [isControl ? "control" : "", gated ? "gated" : "", chosen ? "chosen" : ""]
+        .filter(Boolean)
+        .join(" ");
       const states = v.states
         .map(([s, n]) => `<span class="${stateClass(s)}">${n} ${escapeHtml(s)}</span>`)
         .join("");
       const outcomes = `<span class="ok">${v.outcomes.success} success</span><span class="bad">${v.outcomes.failure} failure</span><span class="warn">${v.outcomes.undetermined} undetermined</span>`;
-      return `<tr${isControl ? ' class="control"' : ""}>
-        <td class="cand">${escapeHtml(v.id)}<span class="model">${escapeHtml(v.model)} · ${escapeHtml(v.deployment)}</span></td>
+      return `<tr${rowClass ? ` class="${rowClass}"` : ""}>
+        <td class="cand">${escapeHtml(v.id)}${candidateMark(gated, chosen)}<span class="model">${escapeHtml(v.model)} · ${escapeHtml(v.deployment)}</span></td>
         <td><div class="state-list">${outcomes}</div></td>
         <td class="num">${v.checkExecuted > 0 ? `${v.checkPass} / ${v.checkExecuted}` : "—"}</td>
         <td class="num">${fmtPct(v.winRate)}<span class="sub">${v.comparisons} 场</span></td>
@@ -197,7 +259,7 @@ export function renderRunReport(b: RunBundle): string {
   return `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(m.run_name)} 运行报告</title>
-<style>${STYLE}</style></head>
+<style>${STYLE}${EVIDENCE_STYLES}${CHART_STYLES}</style></head>
 <body><div class="page">
   <header class="run">
     <p class="eyebrow">Agentic Evaluator · run report · protocol ${escapeHtml(m.protocol_version)}</p>
@@ -209,16 +271,22 @@ export function renderRunReport(b: RunBundle): string {
       <div><dt>裁判</dt><dd>${escapeHtml(m.judge.model)} · rubric ${sha8(m.evaluators.rubric_sha256)}</dd></div>
       <div><dt>模式</dt><dd>${escapeHtml(m.execution.benchmark_mode)} · ${escapeHtml(m.execution.cache_mode)} cache</dd></div>
       <div><dt>运行时间</dt><dd>${escapeHtml(m.started_at.slice(0, 16).replace("T", " "))} → ${escapeHtml((m.finished_at ?? "").slice(11, 16))}</dd></div>
-      <div><dt>运行模式</dt><dd>${escapeHtml(m.operating_mode ?? "—")}（仅记录）</dd></div>
+      <div><dt>运行模式</dt><dd>${escapeHtml(m.operating_mode ?? "—")} · ${escapeHtml(rec.firmness)}${rec.chosen ? ` · 推荐 ${escapeHtml(rec.chosen)}` : " · 无推荐"}</dd></div>
       <div><dt>harness</dt><dd>${escapeHtml(m.harness.version)} · ${escapeHtml(m.harness.git_sha ?? "—")}</dd></div>
     </dl>
   </header>
 
-  <div class="verdict">
-    <span class="tag">${dir.directional ? "DIRECTIONAL" : "FIRM"} · ${Object.keys(inputs).length} INPUTS</span>
-    <div><p>${escapeHtml(verdictText(b, views))}</p>
-    <p class="sub">${dir.reasons.map((r) => escapeHtml(r)).join("；") || "样本与阈值满足决策级要求"}</p></div>
+  <div class="verdict ${escapeHtml(rec.firmness)}">
+    <span class="tag">${tag} · ${Object.keys(inputs).length} INPUTS</span>
+    <div><p>${escapeHtml(verdictText(b))}</p>
+    <p class="sub">${support.map((r) => escapeHtml(r)).join("；") || "样本与阈值满足决策级要求"}</p></div>
   </div>
+
+  <section class="card">
+    <h2>推荐轨迹 <span class="hint">select-v1 · 只读 summary.json，不重跑模型</span></h2>
+    <ol class="trace">${filterList(rec)}</ol>
+    <p class="note">合格：${rec.eligible.length ? rec.eligible.map(escapeHtml).join("、") : "无"}。成对胜率仍展示但不进入选择器。</p>
+  </section>
 
   <section class="card">
     <h2>候选结果 <span class="hint">同一组输入，按候选配对；每格 ${trialsPer} 次</span></h2>
@@ -254,6 +322,21 @@ export function renderRunReport(b: RunBundle): string {
   </div>
 
   <section class="card">
+    <h2>评分画像 <span class="hint">同一份 scores.jsonl，图与表不会打架</span></h2>
+    <div class="viz-grid2">
+      ${renderRadar(b.trials)}
+      ${renderTrialStrip(b.trials)}
+    </div>
+    ${renderHeatmap(b.trials)}
+  </section>
+
+  ${renderDuels(b.evaluations)}
+
+  ${renderTrials(b.trials)}
+
+  ${renderOutputs(b.outputs)}
+
+  <section class="card">
     <h2>本次未观测到的字段 <span class="hint">GAPS.md</span></h2>
     <ul class="gaps">${gapsHtml}</ul>
   </section>
@@ -264,7 +347,7 @@ export function renderRunReport(b: RunBundle): string {
     <details><summary>manifest.json</summary><pre>${escapeHtml(JSON.stringify(m, null, 1))}</pre></details>
   </section>
 
-  <footer><span>${escapeHtml(path.basename(b.dir))}/</span><span>legacy-report.html 保留用于对账</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json</span></footer>
+  <footer><span>${escapeHtml(path.basename(b.dir))}/</span><span>legacy-report.html 保留用于对账</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
 </div></body></html>`;
 }
 
@@ -280,7 +363,9 @@ h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em}h1 .id{font-fam
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:8px 0 0;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .kv div{display:grid;gap:2px}.kv dt{font-size:12px;color:var(--ink-3)}.kv dd{margin:0;font-size:13px;overflow-wrap:anywhere}
 .verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--surface);border-left:4px solid var(--warn-fg);padding:14px 18px;border-radius:6px}
+.verdict.firm{border-left-color:var(--ok-fg)}.verdict.needs-review{border-left-color:var(--bad-fg)}
 .verdict .tag{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
+.verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
 .verdict p{margin:0}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
 section.card{background:var(--surface);border-radius:8px;padding:18px 20px;display:grid;gap:12px}
 section.card h2{margin:0;font-size:15px;font-weight:600;display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
@@ -290,6 +375,8 @@ th.num,td.num{text-align:right}td{padding:9px 10px;border-bottom:1px solid var(-
 td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
 td .sub{display:block;font-size:11px;color:var(--ink-3)}
 tr.control td.cand::after{content:"对照";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
+tr.chosen td.cand{color:var(--ok-fg)}tr.gated td{color:var(--ink-3)}
+ol.trace{margin:0;padding-left:1.2em;font-size:13px;color:var(--ink-2);display:grid;gap:8px}
 .pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
 .state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
 .two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
@@ -304,6 +391,7 @@ footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
 
 export async function writeRunReport(runDir: string): Promise<string> {
   const bundle = await loadBundle(runDir);
+  await fs.writeFile(path.join(runDir, "recommendation.json"), JSON.stringify(bundle.recommendation, null, 2), "utf-8");
   const out = path.join(runDir, "report.html");
   await fs.writeFile(out, renderRunReport(bundle), "utf-8");
   return out;

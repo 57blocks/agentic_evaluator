@@ -61,7 +61,7 @@ function buildPrompt(
   const dimSchema =
     dimensions.length > 0
       ? dimensions
-          .map((d) => `"${d}": {"score": <1-5>, "reason": "<one sentence>"}`)
+          .map((d) => `"${d}": {"score": <1-5>, "reason": "<cited evidence>"}`)
           .join(", ")
       : "";
   return [
@@ -82,8 +82,15 @@ function buildPrompt(
     text.trim(),
     "",
     "## Response",
+    "Every reason must be CHECKABLE by someone holding the output: name the",
+    "concrete thing you graded — a task id, requirement id, function, type, file",
+    "or section — and say what the output did with it. Two to four sentences. A",
+    'reason that only asserts a quality ("well structured", "thorough") without',
+    "naming what in the output makes it so is invalid; so is a reason that cites",
+    "something the output does not contain.",
+    "",
     "Respond with ONLY a JSON object of exactly this shape:",
-    `{"dimensions": {${dimSchema}}, "overall": {"score": <1-5>, "reason": "<one sentence>"}}`,
+    `{"dimensions": {${dimSchema}}, "overall": {"score": <1-5>, "reason": "<cited evidence>"}}`,
   ].join("\n");
 }
 

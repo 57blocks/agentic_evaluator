@@ -6,6 +6,7 @@
  *   evaluations.jsonl  one row per evaluator invocation, including errors
  *   ledger.json        itemized cost
  *   summary.json       per-candidate rates + directionality
+ *   recommendation.json eligibility filters + operating-mode choice (pure)
  *   GAPS.md            fields the protocol wants that this run could not observe
  */
 
@@ -15,6 +16,7 @@ import type { CostLedger } from "./cost.js";
 import type { RunManifest } from "./manifest.js";
 import type { CandidateRates, Directionality } from "./rates.js";
 import type { EvaluationRow, TrialRow } from "./rows.js";
+import { recommendFromCanon, type Recommendation } from "./select.js";
 import type { TraceIntegrity } from "./trace.js";
 
 export interface CanonSummary {
@@ -94,8 +96,8 @@ export function buildGaps(trials: readonly TrialRow[], evaluations: readonly Eva
       ? `- evaluator errors: ${evaluatorErrors} evaluator invocation(s) failed and are recorded as evaluator_error rows (excluded from candidate rates).`
       : "- evaluator errors: none in this run.",
   );
-  lines.push("- pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only.");
-  lines.push("- statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json).");
+  lines.push("- pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector does not use pairwise win rate.");
+  lines.push("- statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json) and recommendation.json firmness follows that label.");
   return lines.join("\n") + "\n";
 }
 
@@ -108,7 +110,8 @@ export async function writeCanonBundle(
     ledger: CostLedger;
     summary: CanonSummary;
   },
-): Promise<void> {
+): Promise<Recommendation> {
+  const recommendation = recommendFromCanon(bundle.manifest, bundle.summary, bundle.trials);
   await fs.mkdir(runDir, { recursive: true });
   await Promise.all([
     fs.writeFile(path.join(runDir, "manifest.json"), JSON.stringify(bundle.manifest, null, 2), "utf-8"),
@@ -116,6 +119,8 @@ export async function writeCanonBundle(
     fs.writeFile(path.join(runDir, "evaluations.jsonl"), jsonl(bundle.evaluations), "utf-8"),
     fs.writeFile(path.join(runDir, "ledger.json"), JSON.stringify(bundle.ledger, null, 2), "utf-8"),
     fs.writeFile(path.join(runDir, "summary.json"), JSON.stringify(bundle.summary, null, 2), "utf-8"),
+    fs.writeFile(path.join(runDir, "recommendation.json"), JSON.stringify(recommendation, null, 2), "utf-8"),
     fs.writeFile(path.join(runDir, "GAPS.md"), buildGaps(bundle.trials, bundle.evaluations, bundle.summary.integrity), "utf-8"),
   ]);
+  return recommendation;
 }
