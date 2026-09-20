@@ -15,7 +15,8 @@
     "check-models": "tsx scripts/check-models.ts",
     "test": "node --import tsx --test tests/*.test.ts",
     "report": "tsx src/report-v2.ts",
-    "preview": "tsx src/run.ts --suite"
+    "preview": "tsx src/run.ts --suite",
+    "demo": "tsx src/demo/server.ts"
   },
   "dependencies": {
     "ajv": "^8.17.1",

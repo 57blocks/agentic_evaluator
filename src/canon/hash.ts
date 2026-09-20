@@ -30,6 +30,9 @@ export interface TrialIdentity {
   temperature: number;
   maxTokens?: number;
   trial: number;
+  /** When set, included in the hash so a CLI candidate never reuses a model trial. */
+  adapter?: string;
+  adapterConfigSha?: string;
 }
 
 /**
@@ -48,6 +51,7 @@ export function trialHash(id: TrialIdentity): string {
     temperature: id.temperature,
     maxTokens: id.maxTokens ?? null,
     trial: id.trial,
+    ...(id.adapter ? { adapter: id.adapter, adapterConfigSha: id.adapterConfigSha ?? null } : {}),
   });
   return sha256(canonical);
 }

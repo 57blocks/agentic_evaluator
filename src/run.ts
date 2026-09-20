@@ -4,9 +4,10 @@
  *   pnpm run run -- --suite specs/codegen-w38.yaml --html --yes
  *   pnpm run run -- --suite suites/codegen.json  --html        (legacy JSON)
  *
- * Runs every candidate against every fixed input (× trials) through the suite's
- * producer, then has a judge pairwise-rank them and grade them 1–5. codegen
- * suites additionally run an objective `tsc --noEmit` gate.
+ * Runs every candidate against every fixed input (× trials) through a
+ * candidate adapter (model-api, codegen, or agent-cli), then has a judge
+ * pairwise-rank them and grade them 1–5. Suites with a tsc required check
+ * still run `tsc --noEmit` on returned artifacts.
  *
  * Two output layers land in runs/<runId>/:
  *   legacy   raw/*.txt, records.json, report.{md,json,html}  — unchanged aggregate
@@ -19,12 +20,34 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { complete, LlmError, type LlmTrace } from "./llm.js";
+import { LlmError, type LlmTrace } from "./llm.js";
+import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "./adapters/resolve.js";
+import type { ArtifactFile } from "./adapters/types.js";
+import { deliverableText, parsedUnitsFor } from "./adapters/deliverable.js";
 import { judgePair, judgePromptTemplateSha, PAIRWISE_EVALUATOR_ID, type JudgedPair } from "./judge.js";
 import { scoreOne, scorePromptTemplateSha, ABSOLUTE_EVALUATOR_ID } from "./score.js";
 import { checkVersion as tscCheckVersion, TSC_CHECK_ID } from "./check.js";
 import { renderMarkdown, renderHtml } from "./report.js";
-import { loadSuiteOrSpec } from "./spec/load-spec.js";
+import { loadSuites } from "./spec/load-spec.js";
+import {
+  decideValidation,
+  orderControlChain,
+  pairCases,
+  proposedAssignment,
+  sameAssignment,
+  type E2eValidation,
+  type StepAssignment,
+  type ValidationArm,
+  type ValidationThresholds,
+} from "./canon/e2e.js";
+import {
+  constantAssignment,
+  runChainArm,
+  runControlChain,
+  type E2eArmGenerate,
+  type E2eArmReport,
+  type E2eControlReport,
+} from "./e2e-control.js";
 import { REPO_ROOT, runsDir } from "./paths.js";
 import { CODEGEN_PREAMBLE, CODEGEN_PRODUCER_VERSION } from "./producers/code-gen.js";
 import { sha256, short, trialHash } from "./canon/hash.js";
@@ -34,6 +57,7 @@ import { buildManifest } from "./canon/manifest.js";
 import { buildLedger } from "./canon/cost.js";
 import { directionality, ratesFor } from "./canon/rates.js";
 import { evaluationCoverage, writeCanonBundle, writeManifest } from "./canon/write.js";
+import { resolveEligibility, type Recommendation } from "./canon/select.js";
 import { writeRunReport } from "./report-v2.js";
 import {
   toEvaluationRows,
@@ -44,7 +68,13 @@ import {
   type TrialFailure,
 } from "./canon/adapt.js";
 import { EvaluatorCallError, summarizeAttempts, type EvaluatorUsage } from "./canon/usage.js";
-import type { CandidateDef, CompletionState, CostSource, EvaluationState } from "./canon/types.js";
+import type {
+  CandidateDef,
+  CompletionState,
+  CostSource,
+  EligibilityThresholds,
+  EvaluationState,
+} from "./canon/types.js";
 import type {
   Judgement,
   ProducerKind,
@@ -138,7 +168,14 @@ async function mapWithConcurrency<T, R>(
 
 /** Candidate definition for an id; legacy suites carry none, so id = model. */
 function defOf(suite: Suite, candidateId: string): CandidateDef {
-  return suite.candidateDefs?.[candidateId] ?? { id: candidateId, model: candidateId, provider_route: "openrouter" };
+  return (
+    suite.candidateDefs?.[candidateId] ?? {
+      id: candidateId,
+      model: candidateId,
+      provider_route: "openrouter",
+      adapter: "model-api",
+    }
+  );
 }
 
 /** "Claude Platform on AWS" → "claude-platform-on-aws": identifiers stay portable. */
@@ -165,6 +202,7 @@ interface GenOutput {
   refusal?: string;
   /** codegen: number of files parsed from the output. */
   parsedUnits?: number;
+  artifacts: ArtifactFile[];
   checkPassed?: boolean;
   checkOutput?: string;
   checkState?: EvaluationState;
@@ -175,6 +213,7 @@ async function generateOne(params: {
   suite: Suite;
   producer: ProducerKind;
   promptTpl: string;
+  inputSlug: string;
   inputText: string;
   def: CandidateDef;
   temperature: number;
@@ -183,64 +222,42 @@ async function generateOne(params: {
   trace: LlmTrace;
   traceContext: Record<string, unknown>;
 }): Promise<GenOutput> {
-  const { suite, producer, promptTpl, inputText, def, temperature, timeoutMs, trace, traceContext } = params;
-
-  if (producer === "prompt") {
-    const prompt = promptTpl.replace("{{input}}", inputText);
-    const r = await complete({ model: def.model, prompt, temperature, timeoutMs, trace, traceContext });
-    return {
-      text: r.text,
-      promptTokens: r.promptTokens,
-      completionTokens: r.completionTokens,
-      cachedTokens: r.cachedTokens,
-      costUsd: r.costUsd,
-      costSource: r.costSource,
-      ms: r.ms,
-      provider: r.provider,
-      finishReason: r.finishReason,
-      refusal: r.refusal,
-    };
-  }
-
-  if (producer === "agent") {
-    // The real PMAgent / TRDAgent / TaskBreakdownAgent producers live in
-    // agentic-builder and import its src/. Not available here; wire them back
-    // through a candidate adapter later.
-    throw new Error(`agent producer is not available in this repo (step "${suite.step}"); use "prompt" or "codegen"`);
-  }
-
-  // producer === "codegen"
-  const { produceCode } = await import("./producers/code-gen.js");
-  const r = await produceCode(inputText, def.model, { temperature, timeoutMs, trace, traceContext });
+  const { suite, producer, promptTpl, inputSlug, inputText, def, temperature, timeoutMs, trace, traceContext } = params;
+  const adapter = adapterFor(def, producer);
+  const result = await adapter.execute(
+    {
+      stepId: suite.step,
+      candidateId: def.id,
+      inputId: inputSlug,
+      inputText,
+      promptTemplate: promptTpl,
+      temperature,
+      timeoutMs,
+      model: def.model,
+      maxTokens: def.generation_settings?.max_tokens,
+      cli: def.cli,
+    },
+    { workDir: params.checkWorkDir, emit: trace, traceContext },
+  );
   const out: GenOutput = {
-    text: r.text,
-    promptTokens: r.promptTokens,
-    completionTokens: r.completionTokens,
-    cachedTokens: r.cachedTokens,
-    costUsd: r.costUsd,
-    costSource: r.costSource,
-    ms: r.ms,
-    provider: r.provider,
-    finishReason: r.finishReason,
-    refusal: r.refusal,
-    parsedUnits: r.files.length,
+    ...result,
+    text: deliverableText(adapter.id, result.text, result.artifacts),
+    parsedUnits: parsedUnitsFor(adapter.id, result.artifacts, suite.check !== undefined),
   };
-  if (suite.check) {
-    const { runCheck } = await import("./check.js");
-    const result = await runCheck({
-      files: r.files,
-      scaffoldDir: path.resolve(REPO_ROOT, suite.check.scaffoldDir),
-      workDir: params.checkWorkDir,
-    });
-    return {
-      ...out,
-      checkPassed: result.passed,
-      checkOutput: result.output,
-      checkState: result.state,
-      checkVersion: result.version,
-    };
-  }
-  return out;
+  if (!suite.check) return out;
+  const { runCheck } = await import("./check.js");
+  const check = await runCheck({
+    files: result.artifacts,
+    scaffoldDir: path.resolve(REPO_ROOT, suite.check.scaffoldDir),
+    workDir: params.checkWorkDir,
+  });
+  return {
+    ...out,
+    checkPassed: check.passed,
+    checkOutput: check.output,
+    checkState: check.state,
+    checkVersion: check.version,
+  };
 }
 
 /** One unit of generation work in the input × candidate × trial grid. */
@@ -314,48 +331,45 @@ async function loadReusable(
 
 function errorRecord(task: GenTask, err: unknown): RunRecord {
   const message = err instanceof Error ? err.message : String(err);
+  const shared = {
+    candidate: task.candidate,
+    inputSlug: task.inputSlug,
+    trial: task.trial,
+    text: "",
+    status: "error" as const,
+    error: message,
+    modelRef: modelRefOf(task.def),
+    trialHash: task.hash,
+    truncated: false,
+  };
   if (err instanceof LlmError) {
     const verdict = classifyCompletion({
       error: { kind: err.kind, httpStatus: err.httpStatus, finishReason: err.finishReason, refusal: err.refusal },
     });
     return {
-      candidate: task.candidate,
-      inputSlug: task.inputSlug,
-      trial: task.trial,
-      text: "",
+      ...shared,
       promptTokens: err.usage?.promptTokens ?? 0,
       completionTokens: err.usage?.completionTokens ?? 0,
       cachedTokens: err.usage?.cachedTokens,
       costUsd: err.usage?.costUsd ?? 0,
       costSource: err.usage?.costSource ?? "none",
       ms: err.ms,
-      status: "error",
-      error: message,
-      modelRef: task.def.model,
       deploymentRef: deploymentRef(task.def, err.provider),
-      trialHash: task.hash,
       completionState: verdict.state,
-      truncated: false,
       finishReason: err.finishReason,
     };
   }
+  const kind = err instanceof AdapterError ? err.kind : "unknown";
+  const verdict = classifyCompletion({ error: { kind } });
   return {
-    candidate: task.candidate,
-    inputSlug: task.inputSlug,
-    trial: task.trial,
-    text: "",
+    ...shared,
     promptTokens: 0,
     completionTokens: 0,
     costUsd: 0,
     costSource: "none",
-    ms: 0,
-    status: "error",
-    error: message,
-    modelRef: task.def.model,
+    ms: err instanceof AdapterError ? err.ms : 0,
     deploymentRef: deploymentRef(task.def, undefined),
-    trialHash: task.hash,
-    completionState: classifyCompletion({ error: { kind: "unknown" } }).state,
-    truncated: false,
+    completionState: verdict.state,
   };
 }
 
@@ -398,10 +412,11 @@ async function runAll(params: {
             producerVersion: producer === "codegen" ? CODEGEN_PRODUCER_VERSION : "1",
             promptTemplateSha,
             inputSha: sha256(inputText),
-            model: def.model,
+            model: modelRefOf(def),
             temperature,
             maxTokens: def.generation_settings?.max_tokens,
             trial,
+            ...trialAdapterFields(def, producer),
           }),
         });
       }
@@ -426,13 +441,14 @@ async function runAll(params: {
         suite,
         producer,
         promptTpl,
+        inputSlug,
         inputText,
         def,
         temperature,
         timeoutMs,
         checkWorkDir,
         trace,
-        traceContext: { phase: "generation", candidate, model: def.model, input: inputSlug, trial },
+        traceContext: { phase: "generation", candidate, model: modelRefOf(def), input: inputSlug, trial },
       });
       const verdict = classifyCompletion({ finishReason: g.finishReason, refusal: g.refusal, parsedUnits: g.parsedUnits });
       const checkTag = g.checkState === undefined ? "" : ` · tsc ${g.checkState}`;
@@ -455,7 +471,7 @@ async function runAll(params: {
         checkOutput: g.checkOutput,
         checkState: g.checkState,
         checkVersion: g.checkVersion,
-        modelRef: def.model,
+        modelRef: modelRefOf(def),
         deploymentRef: deploymentRef(def, g.provider),
         trialHash: task.hash,
         completionState: verdict.state,
@@ -673,28 +689,59 @@ function planRun(suite: Suite): RunPlan {
 }
 
 function printPreview(suite: Suite, plan: RunPlan, limit: number, reuse: boolean): void {
-  console.log(`\n▶ ${suite.suiteId} [${suite.producer ?? "prompt"}] — ${suite.candidates.length} candidates × ${suite.inputs.length} inputs × ${suite.trials ?? 2} trials`);
+  console.log(`\n▶ ${suite.suiteId} / ${suite.step} [${suite.producer ?? "prompt"}] — ${suite.candidates.length} candidates × ${suite.inputs.length} inputs × ${suite.trials ?? 2} trials`);
   console.log(`  generations ${plan.generations} · pairwise ${plan.pairs} pairs (${plan.judgeCalls} judge calls, up to 3 attempts each) · absolute ${plan.scoreCalls} calls`);
   console.log(`  judge ${suite.judge} · concurrency ${limit}${reuse ? " · reuse ON" : ""}${suite.budgetUsd !== undefined ? ` · budget $${suite.budgetUsd}` : ""}`);
-  console.log(`  benchmark ${suite.benchmarkMode ?? "capability-neutral"} · cache ${suite.cacheMode ?? "cold"} · directional ${suite.inputs.length < 10 || suite.mmd == null ? "yes" : "no"}\n`);
+  console.log(`  benchmark ${suite.benchmarkMode ?? "capability-neutral"} · cache ${suite.cacheMode ?? "cold"} · directional ${suite.inputs.length < 10 || suite.mmd == null ? "yes" : "no"}`);
 }
 
-/**
- * Run one suite end-to-end and write both output layers. Returns the legacy
- * Report so dashboards can aggregate across steps.
- */
-export async function runSuite(suitePath: string, html: boolean, opts: { yes?: boolean } = {}): Promise<Report | null> {
-  const suite = await loadSuiteOrSpec(suitePath);
-  const producer: ProducerKind = suite.producer ?? "prompt";
-  const isSpec = /\.ya?ml$/i.test(suitePath);
+function e2eChain(suites: Suite[]): Suite[] | null {
+  const ids = orderControlChain(suites.map((s) => ({ id: s.step, inputFrom: s.inputFrom })));
+  if (!ids) return null;
+  const byId = new Map(suites.map((s) => [s.step, s]));
+  return ids.map((id) => byId.get(id)!);
+}
 
-  const rubric = await fs.readFile(path.resolve(REPO_ROOT, suite.rubricFile), "utf-8");
-  let promptTpl = "";
-  if (producer === "prompt") {
-    if (!suite.promptFile) throw new Error(`suite "${suite.suiteId}" uses producer "prompt" but has no promptFile`);
-    promptTpl = await fs.readFile(path.resolve(REPO_ROOT, suite.promptFile), "utf-8");
+function printE2ePreview(suites: Suite[]): void {
+  const chain = e2eChain(suites);
+  if (!chain) return;
+  const root = chain[0];
+  const trials = root.trials ?? 2;
+  const perArm = root.inputs.length * trials * chain.length;
+  console.log(
+    `\n  e2e control ${root.controlCandidate}: ${chain.map((s) => s.step).join(" → ")} · ${root.inputs.length} cases × ${trials} trials × ${chain.length} steps = ${perArm} generations (no judge)`,
+  );
+  console.log(
+    `  e2e validation: one more arm of ${perArm} generations if the step recommendations propose a combination other than the control — up to ${perArm * 2} in total\n`,
+  );
+}
+
+async function loadPromptTemplate(
+  suite: Suite,
+  producer: ProducerKind,
+): Promise<{ promptTpl: string; promptTemplateSha: string }> {
+  if (producer !== "prompt") {
+    return { promptTpl: "", promptTemplateSha: sha256(CODEGEN_PREAMBLE) };
   }
-  const promptTemplateSha = producer === "prompt" ? sha256(promptTpl) : sha256(CODEGEN_PREAMBLE);
+  if (!suite.promptFile) {
+    throw new Error(`suite "${suite.suiteId}" step "${suite.step}" uses producer "prompt" but has no promptFile`);
+  }
+  const promptTpl = await fs.readFile(path.resolve(REPO_ROOT, suite.promptFile), "utf-8");
+  return { promptTpl, promptTemplateSha: sha256(promptTpl) };
+}
+
+async function executeSuite(params: {
+  suite: Suite;
+  outDir: string;
+  runId: string;
+  html: boolean;
+  reuse: boolean;
+  generatedAt: string;
+}): Promise<{ report: Report; recommendation: Recommendation; trials: number; ledgerTotal: number }> {
+  const { suite, outDir, runId, html, reuse, generatedAt } = params;
+  const producer: ProducerKind = suite.producer ?? "prompt";
+  const rubric = await fs.readFile(path.resolve(REPO_ROOT, suite.rubricFile), "utf-8");
+  const { promptTpl, promptTemplateSha } = await loadPromptTemplate(suite, producer);
 
   const inputTextBySlug = new Map<string, string>();
   const inputShas: Record<string, string> = {};
@@ -705,17 +752,6 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
   }
 
   const limit = resolveConcurrency(suite);
-  const reuse = process.env.EVAL_REUSE === "1";
-  const plan = planRun(suite);
-  printPreview(suite, plan, limit, reuse);
-  if (isSpec && !opts.yes) {
-    console.log("Preview only. Re-run with --yes (or EVAL_YES=1) to execute.");
-    return null;
-  }
-
-  const generatedAt = new Date().toISOString();
-  const runId = `${suite.suiteId}-${generatedAt.replace(/[:.]/g, "-")}`;
-  const outDir = path.join(runsDir(), runId);
   await fs.mkdir(outDir, { recursive: true });
 
   const trace = await openTrace(outDir, runId);
@@ -762,7 +798,6 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
     scores,
   };
 
-  // ── legacy layer ──
   const rawDir = path.join(outDir, "raw");
   await fs.mkdir(rawDir, { recursive: true });
   await Promise.all(
@@ -780,7 +815,6 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
   await fs.writeFile(path.join(outDir, "report.json"), JSON.stringify(report, null, 2), "utf-8");
   if (html) await fs.writeFile(path.join(outDir, "legacy-report.html"), renderHtml(report), "utf-8");
 
-  // ── canonical layer ──
   const adaptInput = {
     runId,
     step: suite.step,
@@ -818,7 +852,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
   if (integrity.gaps_over_threshold > 0) {
     console.log(`⚠ ${integrity.gaps_over_threshold} wall-clock gap(s) > ${integrity.threshold_ms / 60000} min in the trace — host suspended? durations unreliable (see GAPS.md)`);
   }
-  await writeCanonBundle(outDir, {
+  const recommendation = await writeCanonBundle(outDir, {
     manifest: { ...manifest, finished_at: new Date().toISOString() },
     trials,
     evaluations,
@@ -829,9 +863,361 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
 
   console.log(`\n${md}\n`);
   console.log(
-    `✔ runs/${runId}/ — ${trials.length} trials, ${evaluations.length} evaluator rows, ${traceRows} trace events, ledger total $${ledger.total.toFixed(4)} (${ledger.source})${html ? ", legacy-report.html" : ""}`,
+    `✔ ${path.relative(runsDir(), outDir)}/ — ${trials.length} trials, ${evaluations.length} evaluator rows, ${traceRows} trace events, ledger total $${ledger.total.toFixed(4)} (${ledger.source}), recommend ${recommendation.chosen ?? "none"} (${recommendation.firmness})${html ? ", report.html" : ""}`,
   );
-  return report;
+  return { report, recommendation, trials: trials.length, ledgerTotal: ledger.total };
+}
+
+interface WorkflowStepSummary {
+  id: string;
+  dir: string;
+  chosen: string | null;
+  firmness: string;
+  trials: number;
+  ledger_total: number;
+}
+
+/** Single-step: runs/<runId>/. Multi-step: runs/<runId>/<stepId>/ (runId tagged with the step). */
+function stepLayout(
+  root: string,
+  runId: string,
+  step: string,
+  nested: boolean,
+): { outDir: string; runId: string; dir: string } {
+  const dir = safeName(step);
+  if (!nested) return { outDir: root, runId, dir };
+  return { outDir: path.join(root, dir), runId: `${runId}/${step}`, dir };
+}
+
+interface E2eArms {
+  control: E2eControlReport | null;
+  proposed: E2eArmReport | null;
+  validation: E2eValidation | null;
+}
+
+/** The workflow must clear the strictest gate any chained step declares. */
+export function workflowThresholds(chain: readonly Suite[]): ValidationThresholds {
+  const declared = chain.map((s) => resolveEligibility(s.requiredChecks ?? [], s.eligibility));
+  const strictest = (pick: (t: EligibilityThresholds) => number | null): number | null => {
+    const values = declared.map(pick).filter((v): v is number => v !== null);
+    return values.length === 0 ? null : Math.max(...values);
+  };
+  return {
+    minimum_reliability: strictest((t) => t.minimum_reliability),
+    minimum_required_check_pass_rate: strictest((t) => t.minimum_required_check_pass_rate),
+  };
+}
+
+/** One comparison needs one mode; disagreeing steps leave the workflow unvalidated. */
+export function workflowMode(chain: readonly Suite[]): { mode: string } | { reason: string } {
+  const modes = [...new Set(chain.map((s) => s.operatingMode ?? "(none)"))];
+  if (modes.length > 1) {
+    return { reason: `chained steps declare different operating modes (${modes.join(", ")})` };
+  }
+  if (modes[0] === "(none)") {
+    return { reason: "no operating_mode declared on the chained steps" };
+  }
+  return { mode: modes[0] };
+}
+
+/** Generation for one arm: its own check work dirs and its own trace file. */
+async function openArmRunner(params: {
+  armId: string;
+  chain: Suite[];
+  root: string;
+  runId: string;
+}): Promise<{ outDir: string; generate: E2eArmGenerate; close: () => Promise<unknown> }> {
+  const { armId, chain, root, runId } = params;
+  const outDir = path.join(root, armId);
+  await fs.mkdir(outDir, { recursive: true });
+  const trace = await openTrace(outDir, `${runId}/${armId}`);
+  const promptByStep = new Map<string, string>();
+  for (const step of chain) {
+    promptByStep.set(step.step, (await loadPromptTemplate(step, step.producer ?? "prompt")).promptTpl);
+  }
+
+  const generate: E2eArmGenerate = async function (step, candidate, inputSlug, inputText, trial) {
+    const def = defOf(step, candidate);
+    const checkWorkDir = path.join(outDir, "checks", `${safeName(step.step)}__${inputSlug}__t${trial}`);
+    try {
+      const g = await generateOne({
+        suite: step,
+        producer: step.producer ?? "prompt",
+        promptTpl: promptByStep.get(step.step) ?? "",
+        inputSlug,
+        inputText,
+        def,
+        temperature: def.generation_settings?.temperature ?? step.temperature ?? 0.3,
+        timeoutMs: step.timeoutMs ?? 120_000,
+        checkWorkDir,
+        trace: trace.emit,
+        traceContext: { phase: armId, candidate, step: step.step, input: inputSlug, trial },
+      });
+      const verdict = classifyCompletion({
+        finishReason: g.finishReason,
+        refusal: g.refusal,
+        parsedUnits: g.parsedUnits,
+      });
+      const checks =
+        g.checkState === undefined
+          ? []
+          : [{ evaluator: TSC_CHECK_ID, version: g.checkVersion ?? "unknown", state: g.checkState }];
+      console.log(`  ${verdict.state.padEnd(8)} ${step.step} · ${candidate} · ${inputSlug} · t${trial}`);
+      return {
+        completion_state: verdict.state,
+        text: g.text,
+        artifacts: g.artifacts,
+        cost_usd: g.costUsd,
+        ms: g.ms,
+        checks,
+      };
+    } catch (err) {
+      const rec = errorRecord({ inputSlug, inputText, candidate, def, trial, hash: "" }, err);
+      console.log(`  ${(rec.completionState ?? "error").padEnd(8)} ${step.step} · ${candidate} · ${inputSlug} · t${trial}: ${rec.error}`);
+      return {
+        completion_state: rec.completionState ?? "malformed",
+        text: "",
+        artifacts: [],
+        cost_usd: rec.costUsd,
+        ms: rec.ms,
+        checks: [],
+      };
+    }
+  };
+
+  return { outDir, generate, close: trace.close };
+}
+
+function validationArm(
+  report: E2eArmReport,
+  kind: "proposed" | "control",
+): ValidationArm {
+  return {
+    arm_id: report.arm_id,
+    kind,
+    assignment: report.assignment,
+    cases: report.cases.length,
+    rates: report.rates,
+  };
+}
+
+/**
+ * Protocol §8 step 3: run the single-model control and, when the step-level
+ * recommendations propose a different combination, run that combination over
+ * the same cases and decide whether it may be adopted.
+ */
+export async function maybeRunE2eValidation(params: {
+  suites: Suite[];
+  root: string;
+  runId: string;
+  chosenByStep: Record<string, string | null>;
+}): Promise<E2eArms | null> {
+  const { suites, root, runId, chosenByStep } = params;
+  const chain = e2eChain(suites);
+  if (!chain) return null;
+  const controlCandidate = chain[0].controlCandidate;
+  if (!controlCandidate) return null;
+
+  const rootInputs = await Promise.all(
+    chain[0].inputs.map(async (slug) => ({ slug, text: await readInput(slug) })),
+  );
+  const trials = chain[0].trials ?? 2;
+
+  const runArm = async (
+    armId: string,
+    armKind: "proposed" | "control",
+    assignment: StepAssignment,
+  ): Promise<E2eArmReport> => {
+    const runner = await openArmRunner({ armId, chain, root, runId });
+    console.log(
+      `\n▶ ${armId} — ${chain.map((s) => `${s.step}:${assignment[s.step]}`).join(" → ")}`,
+    );
+    try {
+      return await runChainArm({
+        armId,
+        armKind,
+        assignment,
+        chain,
+        rootInputs,
+        trials,
+        generate: runner.generate,
+      });
+    } finally {
+      await runner.close();
+    }
+  };
+
+  const controlAssignment = constantAssignment(chain, controlCandidate);
+  const controlArm = await runArm("e2e-control", "control", controlAssignment);
+  const control: E2eControlReport = {
+    ...controlArm,
+    arm_kind: "control",
+    kind: "single-model-e2e-control",
+    candidate: controlCandidate,
+  };
+  const controlJson = JSON.stringify(control, null, 2);
+  await fs.writeFile(path.join(root, "e2e-control", "e2e-control.json"), controlJson, "utf-8");
+  await fs.writeFile(path.join(root, "e2e-control.json"), controlJson, "utf-8");
+  console.log(
+    `✔ e2e control ${controlCandidate}: ${control.totals.success} success / ${control.totals.failure} failure / ${control.totals.undetermined} undetermined`,
+  );
+
+  const chainIds = chain.map((s) => s.step);
+  const proposal = proposedAssignment(chainIds, chosenByStep);
+  const mode = workflowMode(chain);
+  const thresholds = workflowThresholds(chain);
+  const shared = {
+    mmd: chain[0].mmd ?? null,
+    thresholds,
+    inputs: rootInputs.length,
+    control: validationArm(control, "control"),
+  };
+
+  let proposed: E2eArmReport | null = null;
+  let validation: E2eValidation;
+  if ("reason" in proposal) {
+    validation = decideValidation({ ...shared, mode: null, proposed: null, notValidatedReason: proposal.reason });
+  } else if ("reason" in mode) {
+    validation = decideValidation({ ...shared, mode: null, proposed: null, notValidatedReason: mode.reason });
+  } else if (sameAssignment(proposal.assignment, controlAssignment)) {
+    validation = decideValidation({
+      ...shared,
+      mode: mode.mode,
+      proposed: null,
+      blockedReason: `the proposed combination is the single-model control (${controlCandidate}); no second arm was run`,
+    });
+  } else {
+    proposed = await runArm("e2e-proposed", "proposed", proposal.assignment);
+    await fs.writeFile(
+      path.join(root, "e2e-proposed", "e2e-proposed.json"),
+      JSON.stringify(proposed, null, 2),
+      "utf-8",
+    );
+    validation = decideValidation({
+      ...shared,
+      mode: mode.mode,
+      proposed: validationArm(proposed, "proposed"),
+      pairs: pairCases(proposed.cases, control.cases),
+    });
+  }
+
+  await fs.writeFile(
+    path.join(root, "e2e-validation.json"),
+    JSON.stringify(validation, null, 2),
+    "utf-8",
+  );
+  console.log(`✔ e2e validation: ${validation.verdict} (${validation.firmness}) — ${validation.reasons[0]}`);
+  return { control, proposed, validation };
+}
+
+/**
+ * Run a spec (one or more independent steps) or a legacy JSON suite.
+ * Single-step output layout is unchanged. Multi-step writes each step under
+ * runs/<runId>/<stepId>/ plus workflow.json at the root (no handoff).
+ * When steps declare input_from, the end-to-end validation pass runs after the
+ * independent eval: the single-model control arm, the proposed combination arm
+ * when the step recommendations differ from it, and the verdict that decides
+ * whether the combination may be adopted (e2e-validation.json).
+ */
+export async function runSuite(suitePath: string, html: boolean, opts: { yes?: boolean } = {}): Promise<Report | null> {
+  const suites = await loadSuites(suitePath);
+  const isSpec = /\.ya?ml$/i.test(suitePath);
+  const reuse = process.env.EVAL_REUSE === "1";
+
+  for (const suite of suites) {
+    printPreview(suite, planRun(suite), resolveConcurrency(suite), reuse);
+  }
+  printE2ePreview(suites);
+  if (isSpec && !opts.yes) {
+    console.log("Preview only. Re-run with --yes (or EVAL_YES=1) to execute.");
+    return null;
+  }
+
+  const generatedAt = new Date().toISOString();
+  const runName = suites[0].runName ?? suites[0].suiteId;
+  const runId = `${runName}-${generatedAt.replace(/[:.]/g, "-")}`;
+  const nested = suites.length > 1;
+  const root = path.join(runsDir(), runId);
+  if (nested) await fs.mkdir(root, { recursive: true });
+
+  const steps: WorkflowStepSummary[] = [];
+  let last: Report | null = null;
+  for (const suite of suites) {
+    const layout = stepLayout(root, runId, suite.step, nested);
+    const done = await executeSuite({
+      suite,
+      outDir: layout.outDir,
+      runId: layout.runId,
+      html,
+      reuse,
+      generatedAt,
+    });
+    last = done.report;
+    if (nested) {
+      steps.push({
+        id: suite.step,
+        dir: layout.dir,
+        chosen: done.recommendation.chosen,
+        firmness: done.recommendation.firmness,
+        trials: done.trials,
+        ledger_total: done.ledgerTotal,
+      });
+    }
+  }
+
+  if (nested) {
+    const chosenByStep = Object.fromEntries(steps.map((s) => [s.id, s.chosen]));
+    const e2e = await maybeRunE2eValidation({ suites, root, runId, chosenByStep });
+    const control = e2e?.control ?? null;
+    await fs.writeFile(
+      path.join(root, "workflow.json"),
+      JSON.stringify(
+        {
+          protocol_version: suites[0].protocolVersion ?? "0.4",
+          run_id: runId,
+          run_name: runName,
+          handoff: control !== null,
+          e2e_control: control
+            ? {
+                candidate: control.candidate,
+                chain: control.chain,
+                success: control.totals.success,
+                failure: control.totals.failure,
+                undetermined: control.totals.undetermined,
+                cost_usd: control.totals.cost_usd,
+              }
+            : null,
+          e2e_proposed: e2e?.proposed
+            ? {
+                assignment: e2e.proposed.assignment,
+                success: e2e.proposed.totals.success,
+                failure: e2e.proposed.totals.failure,
+                undetermined: e2e.proposed.totals.undetermined,
+                cost_usd: e2e.proposed.totals.cost_usd,
+              }
+            : null,
+          e2e_validation: e2e?.validation
+            ? {
+                verdict: e2e.validation.verdict,
+                firmness: e2e.validation.firmness,
+                assignment: e2e.validation.assignment,
+                deltas: e2e.validation.deltas,
+              }
+            : null,
+          steps,
+        },
+        null,
+        2,
+      ),
+      "utf-8",
+    );
+    const picks = steps.map((s) => `${s.id}:${s.chosen ?? "none"}`).join(", ");
+    const e2eBit = control
+      ? ` · e2e ${control.candidate} ${control.totals.success}/${control.totals.cases}${e2e?.validation ? ` · ${e2e.validation.verdict}` : ""}`
+      : " · no handoff";
+    console.log(`✔ runs/${runId}/ — ${steps.length} independent steps${e2eBit} · ${picks}`);
+  }
+  return last;
 }
 
 async function main(): Promise<void> {

@@ -16,6 +16,9 @@ workflow:
       success_criteria:
         mandatory_checks: all
       operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
       maximum_completion_time_seconds: 180
 
 candidates:

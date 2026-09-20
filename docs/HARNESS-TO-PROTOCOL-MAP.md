@@ -67,7 +67,7 @@
 | 33 | 先过必过检查再判主观 | 对所有 ok 输出都判，不看 tsc | 可配置：不合格输出不进成对 | S | ○ |
 | 34 | 估计不确定性 | 无 | 同 #25 | — | ○ |
 | 35 | 按运行模式选择 | 无；`champion()` 取最高胜率 | 同 #12 | — | ○ |
-| 36 | 端到端对照组合工作流 | 无 | 推后 | — | — |
+| 36 | 端到端对照组合工作流 | `canon/e2e.ts` 的 arm 模型：control arm（单模型）与 proposed arm（各步 recommendation.chosen）跑同一批 case，`decideValidation` 出 adopt-combination / keep-control / not-validated，写 `e2e-validation.json` | 有；未跑「每个单配置工作流」与「现网工作流」两类 arm，记在 `not_compared` | M | 有 |
 | 37 | 输出批准的视图 | report.md/html/json、dashboard；`summarize.ts` 用 LLM 写结论和推荐 | LLM 写的推荐不是决策轨迹；保留为"AI 讲评"，不作 recommendation | — | 标注 |
 
 ## 六、协议第 12、13 节：输出与 MVP
@@ -77,7 +77,7 @@
 | 38 | run 目录：manifest、原始与规范化记录、检查与裁判记录含证据、每步结果表、推荐轨迹、不确定性 | raw/、records.json、report.json（判决含理由） | 缺 manifest、评估器状态、trace、决策轨迹；新增 `scores.jsonl` 规范化输出 | M | ● |
 | 39 | 机器可读报告是准绳 | report.json | 是；新页面读 scores.jsonl，旧 report.html 保留对账 | S | ● |
 | 40 | 首次验证 2 候选 × 10 任务 × 3 次 | codegen 3 输入、prd 2 输入 | 输入不够 10 个；本周先 3 个，标 directional | — | ○ |
-| 41 | 单模型端到端对照 | 无 | 推后 | — | — |
+| 41 | 单模型端到端对照 | `input_from` 链上对 `control_candidate` 再跑一遍交接；写 `e2e-control.json`。独立评测仍用冻住输入。混合组合验证见 #36 | 有 | M | ● |
 
 ## 七、与协议无关但影响本周的事实
 
@@ -119,8 +119,25 @@ TTFT；缓存读写；deployment 的 region 与 tier；每条评估器的耗时�
 | 5、6、25 | summary.json 每个率带分子分母；directionality 标注 |
 | 27 | 运行前预览打印生成数、裁判数、打分数；YAML spec 需 `--yes` 才执行 |
 | 38、39 | scores.jsonl / evaluations.jsonl / report.html（canonical）与 legacy 输出并存 |
+| 4、11、12、35 | `canon/select.ts`：必过检查与可靠性门槛先过滤，再按 operating_mode 写出 `recommendation.json`；canonical 报告读这份文件。无必过检查的步骤（prd）无人合格。firmness 跟随 sample/MMD |
+| 独立多 step | YAML 可声明多个 step；各自 producer / rubric / 检查 / 推荐。单 step 输出布局不变；多 step 写在 `runs/<runId>/<stepId>/`，根上 `workflow.json`。`input_from` 时额外跑单模型 e2e 对照（#41）；混合组合验证（#36）未做 |
+| 候选适配器 §5 | `src/adapters/`：`model-api` / `codegen` 包装原 producer；`agent-cli` 在 workDir 里跑本地命令。未写 `adapter` 时按 `x-harness.producer` 默认。现有 YAML 的 trialHash 不变；仅 agent-cli 把 adapter 写入 hash。混合套件可以 codegen 候选 + agent-cli 候选。 |
 | 对账 | `tests/parity.test.ts` 用 `tests/legacy-aggregate.ts`（导入提交的原版 aggregate）复算，对 fixtures 逐字段一致 |
 
-未做（本周 ○ 或 —）：#4/#11 资格门槛影响排名、#10 seed 与预算强制、#12/#35 运行模式选择、#21 多 trial 进成对、#23/#24、#29 对照候选比较（只标记）、#33、#34 区间估计、#36、#40 十个输入、#41。预览的花费估算（#27 的一半）未做，目前只打印调用数。
+未做（本周 ○ 或 —）：#10 seed 与预算强制、#21 多 trial 进成对、#23/#24、#33、#34 区间估计、#40 十个输入。预览的花费估算（#27 的一半）未做，目前只打印调用数。
 
 从真实运行中发现并修掉的问题：读取响应体阶段的 AbortError 绕过了 LlmError，被记成 malformed、ms=0、无 trace 事件；宿主机挂起（trace 里规律的 16 分钟空档）让所有超时与耗时失真，现在 summary.json 有 integrity 字段、GAPS.md 会警告。
+
+## 十一、#36 混合组合端到端验证（2026-09-17）
+
+协议 §8 的三段式补齐第三段：Evaluate（各 step 独立评测）→ Select（`canon/select.ts` 出 `recommendation.json`）→ **Validate**（本次新增）。
+
+- **arm 模型**：一个 arm = 每个 step 一个候选的指派。control arm 全链用 `control_candidate`；proposed arm 用各 step 的 `recommendation.chosen`。两个 arm 跑同一批 (input, trial)，各自独立的 trace 与检查工作目录（`e2e-control/`、`e2e-proposed/`）。
+- **判定**（`canon/e2e.ts` 的 `decideValidation`，规则版本 `e2e-validate-v1`）：先用工作流级门槛过滤（链上各 step 声明中最严的 `minimum_reliability` 与 `minimum_required_check_pass_rate`），再按 operating_mode 比一个指标——lowest-cost 比整条工作流的 cost per success，fastest 比 p50，highest-assurance 比 reliability 且与 `select.ts` 一致地不套用 MMD。只有改进 ≥ 预先声明的 MMD 才 `adopt-combination`，否则 `keep-control`。
+- **不下结论的情形**（`not-validated`）：某个 step 没有 chosen、链上各 step 的 operating_mode 不一致、两个 arm 都过不了门槛、指标无定义。
+- **退化情形**：proposed 指派与 control 完全相同时不跑第二个 arm，直接记 `keep-control` 并说明。
+- **配对**：`pairCases` 按 (input, trial) 配对两个 arm 的工作流结果，写进 `deltas.paired`；输入 < 10 或 MMD 为 null 时 firmness 只能是 directional。
+- **输出**：`runs/<runId>/e2e-validation.json`（canonical）、`e2e-proposed/e2e-proposed.json`、`workflow.json` 增加 `e2e_proposed` 与 `e2e_validation`；`e2e-control.json` 形状不变（新增 `arm_kind`、每步 `candidate` 与 `checks` 字段）。`report.html` 目前只渲染单个 step 的 bundle，工作流层没有页面，本次未改。
+- **与协议的差距**：§8 还要求与「每个单配置工作流」和「现网工作流」比较；本实现只跑 proposed 与 control 两个 arm，其余写在 `e2e-validation.json` 的 `not_compared` 里，不假装跑过。
+- **#29 的位置**：工作流层现在是硬门槛（不打赢 control 就 keep-control）；step 层的 `compared_to_control` 仍只是信息。
+- **本地验证**：`specs/smoke-e2e-validation.yaml` 两个 agent-cli 候选（control 故意写出编译不过的 TS），`tests/e2e-validation.test.ts` 跑完整两臂，无付费调用。

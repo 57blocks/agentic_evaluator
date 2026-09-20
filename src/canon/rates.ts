@@ -45,13 +45,13 @@ export interface Directionality {
 
 export const FIRM_MIN_INPUTS = 10;
 
-const rate = (numerator: number, denominator: number): Rate => ({
+export const rate = (numerator: number, denominator: number): Rate => ({
   value: denominator > 0 ? numerator / denominator : null,
   numerator,
   denominator,
 });
 
-function percentile(sorted: readonly number[], p: number): number | null {
+export function percentile(sorted: readonly number[], p: number): number | null {
   if (sorted.length === 0) return null;
   const idx = Math.min(sorted.length - 1, Math.max(0, Math.ceil(p * sorted.length) - 1));
   return sorted[idx];

@@ -12,7 +12,7 @@ import type { CompletionState } from "./types.js";
 export interface CompletionSignal {
   /** Set when the call threw. */
   error?: {
-    kind: "http" | "timeout" | "network" | "empty" | "unknown";
+    kind: "http" | "timeout" | "network" | "empty" | "unknown" | "cancelled" | "spawn";
     httpStatus?: number;
     finishReason?: string;
     refusal?: string;
@@ -39,7 +39,10 @@ export function classifyCompletion(signal: CompletionSignal): CompletionVerdict 
     if (err.kind === "timeout") {
       return { state: "timeout", truncated: false, reason: "call aborted at timeout" };
     }
-    if (err.kind === "http" || err.kind === "network") {
+    if (err.kind === "cancelled") {
+      return { state: "cancelled", truncated: false, reason: "candidate execution was cancelled" };
+    }
+    if (err.kind === "http" || err.kind === "network" || err.kind === "spawn") {
       const status = err.httpStatus !== undefined ? ` (HTTP ${err.httpStatus})` : "";
       return { state: "provider_error", truncated: false, reason: `provider or transport failure${status}` };
     }
@@ -61,6 +64,16 @@ export function classifyCompletion(signal: CompletionSignal): CompletionVerdict 
   }
 
   const truncated = signal.finishReason === "length";
+  if (truncated && signal.parsedUnits === undefined) {
+    // Cut at the token cap with nothing to verify against: the tail is missing
+    // and no parser said the rest is usable. Calling that a success lets a
+    // half-written answer into the ranking.
+    return {
+      state: "malformed",
+      truncated: true,
+      reason: "stopped on max tokens; no parsed units to confirm the output is usable",
+    };
+  }
   return {
     state: "success",
     truncated,

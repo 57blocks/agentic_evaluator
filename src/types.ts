@@ -10,6 +10,7 @@ import type {
   CandidateDef,
   CompletionState,
   CostSource,
+  EligibilityDecl,
   EvaluationState,
   SuccessCriteria,
 } from "./canon/types.js";
@@ -94,12 +95,16 @@ export interface Suite {
   requiredChecks?: string[];
   successCriteria?: SuccessCriteria;
   operatingMode?: string;
+  /** Declared eligibility gates; resolved and frozen into the run manifest. */
+  eligibility?: EligibilityDecl;
   /** Predeclared minimum meaningful difference; null/undefined → directional only. */
   mmd?: number | null;
   controlCandidate?: string;
   benchmarkMode?: "capability-neutral" | "production-realistic";
   cacheMode?: "cold" | "warm" | "both";
   concurrency?: number;
+  /** Prior step id for the single-model e2e control handoff. Independent eval ignores this. */
+  inputFrom?: string;
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;

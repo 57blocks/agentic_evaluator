@@ -1,0 +1,78 @@
+# 从一份 PRD 生成任务拆分，比较三个模型。
+# 本文件的 sha256 进 manifest，改一个字（含注释）hash 就变。
+
+protocol_version: "0.4"
+run_name: taskbreakdown   # 输出到 runs/<run_name>-<时间戳>/
+budget_usd: 3             # 只记录，不强制
+
+workflow:
+  control_candidate: sonnet-5   # 对照基线；指标全平时兜底选它
+
+  steps:
+    - id: taskbreakdown
+      version: "1"              # 改了任务定义就要动它
+
+      producer: prompt          # prompt（调一次模型）| codegen（解析文件块）
+      prompt_file: prompts/taskbreakdown.md   # {{input}} 替换为输入正文
+      rubric_file: rubrics/taskbreakdown.md   # 裁判和打分都读它
+
+      test_set:
+        id: todolist-prd-v1
+        inputs: [todolist.prd]  # → inputs/todolist.prd.txt
+
+      candidate_ids: [sonnet-5, deepseek-v4-pro, kimi-k3]
+
+      # 留空 → 所有 task_outcome 都是 undetermined → 除 judge-preference 外都不推荐。
+      # 有检查时写 [tsc-noemit]，并补 success_criteria 与 eligibility。
+      required_checks: []
+
+      judged_dimensions: [granularity, dependencies, verifiability, faithfulness, actionability]
+
+      # lowest-cost | fastest-within-cost-ceiling | highest-assurance | judge-preference
+      # 无必过检查时只有 judge-preference 能出结论，且强制 directional。
+      operating_mode: judge-preference
+
+      maximum_completion_time_seconds: 300   # 超时算候选的表现，不是系统错误
+
+# 候选 = 模型 + 路线 + 参数。换 temperature 就是另一个候选。
+# id 不用厂商名，避免裁判认出自家输出。
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3, max_tokens: 24000 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3, max_tokens: 24000 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3, max_tokens: 24000 }
+  # 本地 agent 候选见 specs/eval.yaml（adapter: agent-cli）
+
+evaluators:
+  # required_checks:
+  #   tsc-noemit: { kind: tsc, scaffold_dir: scaffold }   # kind 目前只有 tsc
+
+  judge:
+    model: openai/gpt-5.6-sol   # 必须跨厂商
+    provider_route: openrouter
+    rubric_file: rubrics/taskbreakdown.md
+    # pairwise-swap: 正反两轮，一致才算胜负；absolute-1-5: 单份按锚点打分
+    methods: [pairwise-swap, absolute-1-5]
+
+execution:
+  trials_per_case: 2   # 成对只取每格第一次成功的输出，重复只进绝对打分
+  concurrency: 3
+
+  benchmark_mode: capability-neutral   # 所有候选同等条件
+  cache_mode: cold                     # 成本按冷启动算
+
+  minimum_meaningful_difference: null  # null → 结论强制 directional；升 firm 还需 ≥10 个输入
+
+# 旧 harness 的默认值，步骤里已声明时冗余
+x-harness:
+  producer: prompt
+  prompt_file: prompts/taskbreakdown.md
+  default_temperature: 0.3

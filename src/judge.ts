@@ -56,7 +56,7 @@ function buildPrompt(
   const dimSchema =
     dimensions.length > 0
       ? dimensions
-          .map((d) => `"${d}": {"winner": "A" | "B" | "tie", "reason": "<one sentence>"}`)
+          .map((d) => `"${d}": {"winner": "A" | "B" | "tie", "reason": "<cited evidence>"}`)
           .join(", ")
       : "";
   return [
@@ -77,11 +77,18 @@ function buildPrompt(
     "",
     "## Instructions",
     "For every dimension key above, decide which output is better on THAT",
-    'dimension alone (A / B / tie) with a one-sentence reason. Then give an',
-    '"overall" verdict. Be decisive; only use "tie" when genuinely',
-    "indistinguishable on that axis.",
+    'dimension alone (A / B / tie). Then give an "overall" verdict. Be decisive;',
+    'only use "tie" when genuinely indistinguishable on that axis.',
+    "",
+    "Every reason must be CHECKABLE by someone holding both outputs: name the",
+    "concrete thing you compared — a task id, requirement id, function, type,",
+    "file or section — and say what each output did with it. Two to four",
+    "sentences. A reason that only asserts a quality (\"better structured\",",
+    "\"more thorough\") without naming what in the output makes it so is invalid;",
+    "so is a reason that cites something not present in the output it describes.",
+    "",
     "Respond with ONLY a JSON object of exactly this shape:",
-    `{"dimensions": {${dimSchema}}, "overall": {"winner": "A" | "B" | "tie", "reason": "<one sentence>"}}`,
+    `{"dimensions": {${dimSchema}}, "overall": {"winner": "A" | "B" | "tie", "reason": "<cited evidence>"}}`,
   ].join("\n");
 }
 

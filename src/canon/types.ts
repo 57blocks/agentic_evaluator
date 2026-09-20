@@ -30,17 +30,57 @@ export interface GenerationSettings {
   max_tokens?: number;
 }
 
-/** One testable option: model + route + settings. `id` is what records store. */
+/** One testable option: model + route + settings, or a CLI agent. */
+export type CandidateAdapterId = "model-api" | "codegen" | "agent-cli";
+
+export interface AgentCliConfig {
+  argv: string[];
+  env?: Record<string, string>;
+}
+
 export interface CandidateDef {
   id: string;
-  model: string;
+  /** Defaults from the spec producer: codegen → "codegen", else "model-api". */
+  adapter?: CandidateAdapterId;
+  model?: string;
   provider_route?: string;
   generation_settings?: GenerationSettings;
+  cli?: AgentCliConfig;
 }
 
 export interface SuccessCriteria {
   mandatory_checks: "all";
 }
+
+/**
+ * Operating mode (protocol §4). Applied only after eligibility filters.
+ *
+ * `judge-preference` is outside the protocol's three: it ranks on a judge
+ * model's verdicts for steps that have no deterministic check. It can never
+ * yield a firm recommendation, and the reason string always says so.
+ */
+export type OperatingMode =
+  | "lowest-cost"
+  | "fastest-within-cost-ceiling"
+  | "highest-assurance"
+  | "judge-preference";
+
+/**
+ * Declared aggregate gates (protocol §3 candidate eligibility).
+ * `null` means the rule is not applied. Omitted spec fields are resolved to
+ * defaults by `resolveEligibility` before they are frozen into the manifest.
+ */
+export interface EligibilityThresholds {
+  minimum_reliability: number | null;
+  minimum_required_check_pass_rate: number | null;
+  maximum_p95_ms: number | null;
+  cost_ceiling_per_success_usd: number | null;
+}
+
+/** Spec-side subset; missing keys take protocol defaults at freeze time. */
+export type EligibilityDecl = {
+  [K in keyof EligibilityThresholds]?: number;
+};
 
 /** One evaluator's verdict on one trial (or one pair, for comparative evaluators). */
 export interface EvaluationResult {

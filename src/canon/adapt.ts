@@ -10,7 +10,7 @@
 import type { JudgedPair } from "../judge.js";
 import type { RunRecord, ScoreRecord, Winner } from "../types.js";
 import { decideTaskOutcome } from "./success.js";
-import type { CheckCell, EvaluationRow, TrialRow } from "./rows.js";
+import type { CheckCell, DimensionDetail, EvaluationRow, TrialRow } from "./rows.js";
 import type { EvaluatorUsage } from "./usage.js";
 import type { SuccessCriteria } from "./types.js";
 
@@ -166,7 +166,16 @@ export function toEvaluationRows(input: AdaptInput): EvaluationRow[] {
 
   for (const j of input.judgements) {
     const dimensions: Record<string, Winner> = {};
-    for (const [k, v] of Object.entries(j.dimensions)) dimensions[k] = v.resolved;
+    const dimensionDetail: Record<string, DimensionDetail> = {};
+    for (const [k, v] of Object.entries(j.dimensions)) {
+      dimensions[k] = v.resolved;
+      dimensionDetail[k] = {
+        forward: v.forward,
+        reverse: v.reverse,
+        resolved: v.resolved,
+        ...(v.reason ? { reason: v.reason } : {}),
+      };
+    }
     rows.push({
       ...base,
       evaluator: input.pairwiseId,
@@ -174,6 +183,7 @@ export function toEvaluationRows(input: AdaptInput): EvaluationRow[] {
       state: "pass",
       subject: { kind: "pair", a: j.a, b: j.b, input: j.inputSlug },
       dimensions,
+      dimension_detail: dimensionDetail,
       overall: j.overall.resolved,
       evidence: j.overall.reason,
       cost: costOf(j.usage),
