@@ -5,8 +5,8 @@
  */
 
 export const PAGE_STYLE = `
-:root{--ground:#F7F8FB;--ground-top:#EEF1F6;--surface:#fff;--surface-2:#F6F7FA;--ink:#0F172A;--ink-2:#667085;--ink-3:#98A2B3;--rule:#E6E8EC;--accent:#C81E3A;--accent-2:#E4572E;--accent-soft:rgba(200,30,58,.07);--champ:#F1FAF3;--ok-bg:#DCFCE7;--ok-fg:#16A34A;--bad-bg:#FEE2E2;--bad-fg:#DC2626;--warn-bg:#FFF8EF;--warn-fg:#B45309;--shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);--s1:#2A78D6;--s2:#EB6834;--s3:#1BAF7A;--s4:#EDA100}
-@media(prefers-color-scheme:dark){:root{--ground:#12161B;--ground-top:#0E1217;--surface:#1A2027;--surface-2:#232B34;--ink:#E7EAEE;--ink-2:#B3BCC7;--ink-3:#7C8794;--rule:#2E3741;--accent:#F2748C;--accent-2:#F0956B;--accent-soft:rgba(242,116,140,.13);--champ:#1E3326;--ok-bg:#1F3A2A;--ok-fg:#8FD6A8;--bad-bg:#43231F;--bad-fg:#F0A29C;--warn-bg:#3F3319;--warn-fg:#EACB7C;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
+:root{--ground:#F7F8FB;--ground-top:#EEF1F6;--surface:#fff;--surface-2:#F6F7FA;--ink:#0F172A;--ink-2:#667085;--ink-3:#98A2B3;--rule:#E6E8EC;--accent:#4F46E5;--accent-2:#7C73F0;--accent-soft:rgba(79,70,229,.08);--champ:#EEF2FF;--ok-bg:#DCFCE7;--ok-fg:#16A34A;--bad-bg:#FEE2E2;--bad-fg:#DC2626;--warn-bg:#FFF8EF;--warn-fg:#B45309;--shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);--s1:#2A78D6;--s2:#EB6834;--s3:#1BAF7A;--s4:#EDA100}
+@media(prefers-color-scheme:dark){:root{--ground:#12161B;--ground-top:#0E1217;--surface:#1A2027;--surface-2:#232B34;--ink:#E7EAEE;--ink-2:#B3BCC7;--ink-3:#7C8794;--rule:#2E3741;--accent:#8B84F5;--accent-2:#A79FF8;--accent-soft:rgba(139,132,245,.14);--champ:#232045;--ok-bg:#1F3A2A;--ok-fg:#8FD6A8;--bad-bg:#43231F;--bad-fg:#F0A29C;--warn-bg:#3F3319;--warn-fg:#EACB7C;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
 body{margin:0;color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:44px 24px 80px;background:linear-gradient(180deg,var(--ground-top),var(--ground) 340px) no-repeat,var(--ground)}
 .page{max-width:68rem;margin:0 auto;display:grid;gap:20px}
 .mono,td.num,code,pre,.kv dd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;font-variant-numeric:tabular-nums}
@@ -35,7 +35,7 @@ td.num .bar{margin-right:8px}td{padding:9px 13px;border-bottom:1px solid var(--r
 td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
 td .sub{display:block;font-size:11px;color:var(--ink-3)}
 tr.control td.cand::after{content:"对照";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
-tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--ok-fg)}tr.gated td{color:var(--ink-3)}
+tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}tr.gated td{color:var(--ink-3)}
 tbody tr{transition:background .12s ease}tbody tr:hover{background:var(--accent-soft)}
 .sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:baseline}
 .sw0{background:var(--s1)}.sw1{background:var(--s2)}.sw2{background:var(--s3)}.sw3{background:var(--s4)}
