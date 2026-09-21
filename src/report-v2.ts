@@ -395,10 +395,8 @@ export function renderRunReport(b: RunBundle): string {
       ${renderRadar(b.trials)}
       ${renderTrialStrip(b.trials)}
     </div>
-    <div class="two-col">
-      ${renderHeatmap(b.trials)}
-      ${renderDimensionPreference(b.evaluations)}
-    </div>
+    ${renderHeatmap(b.trials)}
+    ${renderDimensionPreference(b.evaluations)}
     <p class="note"><b>两个刻度，两个问题。</b>左表是<b>幅度</b>：每份输出单独打的 1–5 分，看差距有多大。右表是<b>方向</b>：捉对比较里谁被偏好，0–100。成对是零和的，分母只有每个候选参与的对局数——<code>0</code> 意味「每场都输」，不是「输出差」，<code>100</code> 同理。两者可以同时为真：一个候选可能每场都略输（方向 0），绝对分却只差 1 分（幅度 4.0 对 5.0）。</p>
   </section>
 
