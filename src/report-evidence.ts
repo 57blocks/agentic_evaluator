@@ -12,7 +12,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { DimensionDetail, EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { Winner } from "./types.js";
-import { escapeHtml } from "./render.js";
+import { escapeHtml } from "./html.js";
 
 /** Longer outputs are cut for display only; the file on disk stays whole. */
 const MAX_OUTPUT_CHARS = 30_000;

@@ -63,7 +63,9 @@ A spec is the versioned source of truth (`specs/*.yaml`, schema in
 `src/spec/schema.ts`). A spec may list several **independent** steps; each
 gets its own recommendation. Add `input_from` to chain a step onto the previous
 one; that also turns on the end-to-end validation pass.
-Legacy `suites/*.json` still run; candidate id = model id.
+Legacy `suites/*.json` still run (candidate id = model id), but that path is
+**deprecated**: it predates the candidate-as-object contract and every new
+step belongs in a spec.
 
 ## Layout
 
@@ -77,12 +79,43 @@ src/check.ts          tsc --noEmit required check with four-state result and ver
 src/spec/             YAML spec loader + JSON Schema + semantic checks
 src/canon/            protocol layer: states, success decision, hash, usage, cost, trace,
                       manifest, rows, adapt, rates, write
-src/report-v2.ts      canonical report page
+src/html.ts           escapeHtml — the only thing both report layers share
+src/report-v2.ts      canonical report page (+ report-charts, report-evidence)
+src/render.ts         legacy renderer for report.ts + dashboard.ts (frozen)
 src/demo/             local read-only UI (`pnpm run demo`)
 tests/                node:test; parity uses tests/legacy-aggregate.ts (pristine oracle)
 fixtures/             committed real runs used by the parity test
 docs/                 protocol, implementation plan, harness-to-protocol map, runner design
 ```
+
+## The two report layers
+
+Every run writes both a **canonical** set (`manifest.json`, `scores.jsonl`,
+`evaluations.jsonl`, `ledger.json`, `summary.json`, `recommendation.json`,
+`report.html`) and the **legacy** set the original harness wrote
+(`records.json`, `report.json`, `report.md`, `legacy-report.html`). This is a
+deliberate transition state, not drift. Three things hide under "legacy" and
+they have different fates:
+
+1. `tests/legacy-aggregate.ts` — a pristine copy of the original aggregate,
+   used by `parity.test.ts` as the oracle. **Permanent.** It is frozen by
+   design and is not part of any merge.
+2. Legacy run outputs (`records.json`, `report.json`, `raw/`). Retire once the
+   canonical files reconstruct every field they carry and nothing reads them.
+3. The legacy renderer (`render.ts`, `report.ts`, `dashboard.ts`,
+   `summarize.ts`, `i18n.ts`). **Frozen — no new features go here.** It still
+   does one thing the canonical pages cannot: `dashboard.ts` merges several
+   steps into one cross-step view, while `report-v2.ts` renders a single step
+   and the workflow level has no page at all.
+
+**Retirement gate.** Delete the legacy renderer and stop writing the legacy
+outputs when (a) a canonical workflow-level page covers what `dashboard.ts`
+shows, and (b) parity holds on every fixture. Until then both are written.
+`summarize.ts` writes an LLM-authored verdict; it is commentary, never a
+recommendation, and must not enter the canonical report.
+
+The canonical pages must not import from `render.ts` — shared HTML helpers live
+in `src/html.ts` so the legacy layer can be deleted in one piece.
 
 ## Not in this milestone
 
