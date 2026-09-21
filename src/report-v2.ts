@@ -247,6 +247,20 @@ function renderHero(b: RunBundle, views: readonly CandidateView[], support: read
   </div>`;
 }
 
+
+/** Required checks as a pill: green when every executed check passed. */
+function checkPill(v: CandidateView): string {
+  if (v.checkExecuted === 0) return "—";
+  const all = v.checkPass === v.checkExecuted;
+  return `<span class="pill ${all ? "pass" : "miss"}">${v.checkPass} / ${v.checkExecuted}</span>`;
+}
+
+/** The legacy report's inline win-rate bar; absent when nothing was compared. */
+function winBar(winRate: number | null): string {
+  if (winRate === null) return "";
+  return `<span class="bar"><span style="width:${Math.max(0, Math.min(100, winRate)).toFixed(0)}%"></span></span>`;
+}
+
 export function renderRunReport(b: RunBundle): string {
   const m = b.manifest;
   const rec = b.recommendation;
@@ -262,6 +276,7 @@ export function renderRunReport(b: RunBundle): string {
     .map((l) => `<li>${escapeHtml(l.slice(2)).replace(/`([^`]+)`/g, "<code>$1</code>")}</li>`)
     .join("");
 
+  const colorOf = new Map(views.map((v, i) => [v.id, i % 4]));
   const candidateRows = views
     .map((v) => {
       const isControl = m.control_candidate === v.id;
@@ -275,10 +290,10 @@ export function renderRunReport(b: RunBundle): string {
         .join("");
       const outcomes = `<span class="ok">${v.outcomes.success} success</span><span class="bad">${v.outcomes.failure} failure</span><span class="warn">${v.outcomes.undetermined} undetermined</span>`;
       return `<tr${rowClass ? ` class="${rowClass}"` : ""}>
-        <td class="cand">${escapeHtml(v.id)}${candidateMark(gated, chosen)}<span class="model">${escapeHtml(v.model)} · ${escapeHtml(v.deployment)}</span></td>
+        <td class="cand"><span class="sw sw${colorOf.get(v.id) ?? 0}"></span>${escapeHtml(v.id)}${candidateMark(gated, chosen)}<span class="model">${escapeHtml(v.model)} · ${escapeHtml(v.deployment)}</span></td>
         <td><div class="state-list">${outcomes}</div></td>
-        <td class="num">${v.checkExecuted > 0 ? `${v.checkPass} / ${v.checkExecuted}` : "—"}</td>
-        <td class="num">${fmtPct(v.winRate)}<span class="sub">${v.comparisons} 场</span></td>
+        <td class="num">${checkPill(v)}</td>
+        <td class="num">${winBar(v.winRate)}${fmtPct(v.winRate)}<span class="sub">${v.comparisons} 场</span></td>
         <td class="num">${fmtScore(v.absolute)}</td>
         <td class="num">${fmtUsd(v.costPerSuccess)}</td>
         <td class="num">${fmtSec(v.p50)}</td>
