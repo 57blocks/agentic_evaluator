@@ -57,6 +57,7 @@ import { buildManifest } from "./canon/manifest.js";
 import { buildLedger, type CostLedger } from "./canon/cost.js";
 import { buildWorkflowRecord, workflowGaps, type WorkflowStepInput } from "./canon/workflow.js";
 import { directionality, ratesFor } from "./canon/rates.js";
+import { judgeDiscrimination } from "./canon/discrimination.js";
 import { evaluationCoverage, writeCanonBundle, writeManifest } from "./canon/write.js";
 import { resolveEligibility, type Recommendation } from "./canon/select.js";
 import { writeRunReport } from "./report-v2.js";
@@ -600,6 +601,7 @@ async function scoreAll(
         trial: r.trial,
         dimensions: s.dimensions,
         overall: s.overall,
+        reasons: s.reasons,
         usage: s.usage,
       };
       hooks.onScored?.(scored);
@@ -849,6 +851,7 @@ async function executeSuite(params: {
     candidates: suite.candidates.map((c) => ratesFor(c, trials)),
     directionality: directionality(suite.inputs.length, suite.mmd),
     integrity,
+    judge_discrimination: judgeDiscrimination(trials),
     evaluation_coverage: evaluationCoverage(evaluations),
   };
   if (integrity.gaps_over_threshold > 0) {

@@ -72,6 +72,12 @@ export interface DimensionDetail {
   reason?: string;
 }
 
+/** One absolute dimension: the grade and the rationale behind it. */
+export interface ScoreDetail {
+  score: number;
+  reason?: string;
+}
+
 export interface EvaluationRow {
   run: string;
   step: string;
@@ -88,6 +94,12 @@ export interface EvaluationRow {
    * a resolved `tie` otherwise reads as "genuinely indistinguishable".
    */
   dimension_detail?: Record<string, DimensionDetail>;
+  /**
+   * Absolute only: the grade plus the grader's cited reason per dimension.
+   * `dimensions` keeps the bare numbers; this is what makes a score auditable
+   * — without it a wall of 5s cannot be told from a wall of real verdicts.
+   */
+  score_detail?: Record<string, ScoreDetail>;
   overall?: Winner | number;
   evidence?: string;
   reason?: string;

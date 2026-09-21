@@ -191,6 +191,8 @@ export interface ScoreRecord {
   dimensions: Record<string, number>;
   /** 1–5 overall. */
   overall: number;
+  /** Why the grader gave those scores; absent on runs recorded before v0.4.1. */
+  reasons?: { dimensions: Record<string, string>; overall: string | null };
 }
 
 /** Aggregated per-candidate result. */

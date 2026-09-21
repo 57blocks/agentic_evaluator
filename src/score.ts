@@ -28,6 +28,12 @@ export const ABSOLUTE_EVALUATOR_ID = "absolute-1-5";
 export interface AbsoluteScore {
   dimensions: Record<string, number>;
   overall: number;
+  /**
+   * The grader's per-dimension rationale, keyed like `dimensions`, plus the
+   * overall one. The prompt demands a checkable reason for every score;
+   * dropping it on the floor leaves "why is everything a 5?" unanswerable.
+   */
+  reasons: { dimensions: Record<string, string>; overall: string | null };
 }
 
 /** A grade plus what it cost to obtain (all attempts). */
@@ -109,6 +115,13 @@ function parseScoreAxis(value: unknown): number | null {
   return null;
 }
 
+/** The rationale beside a score, when the grader returned the object form. */
+function parseReasonAxis(value: unknown): string | null {
+  if (typeof value !== "object" || value === null) return null;
+  const reason = (value as Record<string, unknown>).reason;
+  return typeof reason === "string" && reason.trim() !== "" ? reason.trim() : null;
+}
+
 /**
  * Parse the grader JSON. Throws when no JSON object can be extracted or when the
  * overall score is missing/invalid (so `scoreAll`'s per-item try/catch skips it,
@@ -128,15 +141,19 @@ function parse(text: string, dimensions: readonly string[]): AbsoluteScore {
       : {};
 
   const dims: Record<string, number> = {};
+  const dimReasons: Record<string, string> = {};
   for (const key of dimensions) {
     const s = parseScoreAxis(rawDims[key]);
-    if (s !== null) dims[key] = s;
+    if (s === null) continue;
+    dims[key] = s;
+    const reason = parseReasonAxis(rawDims[key]);
+    if (reason !== null) dimReasons[key] = reason;
   }
   const overall = parseScoreAxis(root.overall);
   if (overall === null) {
     throw new Error("scorer JSON missing a valid overall score");
   }
-  return { dimensions: dims, overall };
+  return { dimensions: dims, overall, reasons: { dimensions: dimReasons, overall: parseReasonAxis(root.overall) } };
 }
 
 /** Max grader attempts per output. Retries bump temperature to shake loose a
