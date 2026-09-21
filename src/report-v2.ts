@@ -20,6 +20,7 @@ import type { RunManifest } from "./canon/manifest.js";
 import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { CanonSummary } from "./canon/write.js";
 import { recommendFromCanon, type Recommendation } from "./canon/select.js";
+import { judgeDiscrimination } from "./canon/discrimination.js";
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
 import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
@@ -325,6 +326,11 @@ export function renderRunReport(b: RunBundle): string {
 
   <section class="card">
     <h2>评分画像 <span class="hint">同一份 scores.jsonl，图与表不会打架</span></h2>
+    ${
+      judgeDiscrimination(b.trials).saturated.length > 0
+        ? `<p class="note"><b>注意：</b>绝对打分在 ${escapeHtml(judgeDiscrimination(b.trials).saturated.join("、"))} 上对所有候选给了同一个分。这些分数没有测出差异，推荐不会采用它们。</p>`
+        : ""
+    }
     <div class="viz-grid2">
       ${renderRadar(b.trials)}
       ${renderTrialStrip(b.trials)}
