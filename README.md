@@ -92,6 +92,40 @@ fixtures/             committed real runs used by the parity test
 docs/                 protocol, implementation plan, harness-to-protocol map, runner design
 ```
 
+## Required checks
+
+A step's required check is what turns a trial outcome from `undetermined` into
+measured success or failure. Two kinds:
+
+```yaml
+evaluators:
+  required_checks:
+    tsc-noemit:
+      kind: tsc                       # compile the produced files
+      scaffold_dir: scaffold
+    task-coverage:
+      kind: command                   # run a program you declare
+      argv: ["node", "checks/task-coverage.mjs"]
+      version_files: [checks/task-coverage.mjs]   # hashed into the evaluator version
+      timeout_seconds: 30
+```
+
+A command check runs with `cwd` set to the trial's work dir, which already
+holds the candidate's parsed artifacts plus `output.txt` (the deliverable),
+`input.txt` (the test case) and `meta.json` (`{step, candidate, input,
+trial}`). Exit 0 passes, exit 1 fails the candidate, and **anything else — a
+missing program, a timeout, any other exit code — is an evaluator error**,
+never a candidate failure. stdout may be `{"evidence": "...", "reason": "..."}`
+or plain text kept as the evidence.
+
+`checks/task-coverage.mjs` is a worked example: it fails a task breakdown that
+cites a requirement id the PRD never defines, or that leaves one uncovered.
+
+One required check per step; declaring two is rejected at load time rather
+than silently gating on one. The command runs on this host with your
+privileges — the Docker sandbox is still deferred, so only declare checks you
+would run yourself.
+
 ## The two report layers
 
 Every run writes both a **canonical** set (`manifest.json`, `scores.jsonl`,

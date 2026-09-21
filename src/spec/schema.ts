@@ -124,8 +124,14 @@ export const SPEC_SCHEMA = {
             additionalProperties: false,
             required: ["kind"],
             properties: {
-              kind: { type: "string", enum: ["tsc"] },
+              kind: { type: "string", enum: ["tsc", "command"] },
+              /** tsc only. */
               scaffold_dir: { type: "string" },
+              /** command only: program + args, run in the trial work dir. */
+              argv: { type: "array", minItems: 1, items: { type: "string" } },
+              /** command only: files hashed into the evaluator version. */
+              version_files: { type: "array", items: { type: "string" } },
+              timeout_seconds: { type: "number", exclusiveMinimum: 0 },
             },
           },
         },

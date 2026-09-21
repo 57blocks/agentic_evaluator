@@ -28,13 +28,34 @@ export type EvalTier = "S" | "M" | "L";
  */
 export type ProducerKind = "prompt" | "agent" | "codegen";
 
-/** Objective check config (codegen only). */
-export interface CheckConfig {
-  /** Repo-relative dir holding a `tsconfig.json` copied into each work dir. */
-  scaffoldDir: string;
-  /** Reserved override for the check command. Unused today (always tsc). */
-  command?: string;
-}
+/**
+ * The step's required check. Two kinds:
+ *
+ *   tsc      — compile the produced files against a scaffold tsconfig.
+ *   command  — run a user-declared program in the trial's work dir. This is
+ *              how a step that is not codegen gets a deterministic gate at
+ *              all: without one, every trial outcome stays `undetermined`.
+ *
+ * One per step today. A step declaring two required checks is rejected by the
+ * loader rather than silently gated on one of them.
+ */
+export type CheckConfig =
+  | {
+      /** Evaluator id, as declared in the spec (e.g. "tsc-noemit"). */
+      id: string;
+      kind: "tsc";
+      /** Repo-relative dir holding a `tsconfig.json` copied into each work dir. */
+      scaffoldDir: string;
+    }
+  | {
+      id: string;
+      kind: "command";
+      /** Program and arguments, run with cwd = the trial work dir. */
+      argv: string[];
+      /** Repo-relative files hashed into the evaluator version. */
+      versionFiles: string[];
+      timeoutMs: number;
+    };
 
 /** One eval suite = one pipeline step, several candidates, a few fixed inputs. */
 export interface Suite {
