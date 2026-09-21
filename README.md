@@ -92,6 +92,22 @@ fixtures/             committed real runs used by the parity test
 docs/                 protocol, implementation plan, harness-to-protocol map, runner design
 ```
 
+## Judging methods
+
+```yaml
+evaluators:
+  judge:
+    methods: [pairwise-swap]        # absolute-1-5 omitted → not run
+```
+
+`methods` is now honoured (it used to be parsed and ignored). A method left
+out is not run, not planned, and not billed; the manifest records what was
+declared and GAPS.md states that the missing scores are a declaration rather
+than a failure, so an old run and a deliberately narrowed one can be told
+apart. Absolute scoring is off in `specs/prd-chain-trial.yaml`: with no
+per-dimension thresholds the grader returned 5 for everything, once graded
+the same prototype-key defect 3 and once 5, and cost a third of the run.
+
 ## Run guards
 
 - **Transport retry.** Network faults, 408/409/425/429 and 5xx are retried

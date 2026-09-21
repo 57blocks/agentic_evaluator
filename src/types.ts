@@ -28,6 +28,9 @@ export type EvalTier = "S" | "M" | "L";
  */
 export type ProducerKind = "prompt" | "agent" | "codegen";
 
+/** The two judging methods a step can declare. */
+export type JudgeMethod = "pairwise-swap" | "absolute-1-5";
+
 /**
  * The step's required check. Two kinds:
  *
@@ -83,6 +86,13 @@ export interface Suite {
   candidates: string[];
   /** Judge model ID — MUST differ in family from the candidates. */
   judge: string;
+  /**
+   * Judging methods this step actually runs. Declared in the spec as
+   * `evaluators.judge.methods`; both when omitted. Turning off
+   * `absolute-1-5` is the documented escape from a grader that has no
+   * per-dimension thresholds and returns a wall of 5s.
+   */
+  judgeMethods?: JudgeMethod[];
   /** Input case slugs; each maps to `eval/inputs/<slug>.txt`. */
   inputs: string[];
   /** Repeats per (candidate, input) to average cost/latency. Default 2. */

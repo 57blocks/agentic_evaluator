@@ -19,7 +19,7 @@ import { adapterIdOf } from "../adapters/types.js";
 import { orderControlChain } from "../canon/e2e.js";
 import { sha256 } from "../canon/hash.js";
 import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
-import type { CheckConfig } from "../types.js";
+import type { CheckConfig, JudgeMethod } from "../types.js";
 import { TSC_CHECK_ID } from "../check.js";
 import { REPO_ROOT } from "../paths.js";
 import type { Suite } from "../types.js";
@@ -234,6 +234,14 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
 }
 
 const DEFAULT_CHECK_TIMEOUT_S = 120;
+const ALL_JUDGE_METHODS: JudgeMethod[] = ["pairwise-swap", "absolute-1-5"];
+
+/** Declared methods, or both when the spec is silent. */
+function judgeMethodsOf(spec: EvalSpec): JudgeMethod[] {
+  const declared = spec.evaluators.judge.methods;
+  if (!declared || declared.length === 0) return [...ALL_JUDGE_METHODS];
+  return ALL_JUDGE_METHODS.filter((m) => declared.includes(m));
+}
 
 /**
  * The step's required check, resolved against the evaluator definitions.
@@ -292,6 +300,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, step:
     rubricFile,
     candidates: [...step.candidate_ids],
     judge: spec.evaluators.judge.model,
+    judgeMethods: judgeMethodsOf(spec),
     inputs: [...step.test_set.inputs],
     trials: spec.execution.trials_per_case,
     temperature: harness.default_temperature ?? DEFAULT_TEMPERATURE,

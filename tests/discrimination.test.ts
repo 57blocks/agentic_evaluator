@@ -12,6 +12,7 @@ import { judgeDiscrimination, saturationGap } from "../src/canon/discrimination.
 import type { TrialRow } from "../src/canon/rows.js";
 import { recommend } from "../src/canon/select.js";
 import { toEvaluationRows } from "../src/canon/adapt.js";
+import { buildGaps } from "../src/canon/write.js";
 import type { CandidateRates } from "../src/canon/rates.js";
 
 function trial(candidate: string, overall: number | null, dims: Record<string, number>): TrialRow {
@@ -225,4 +226,12 @@ test("an all-tie verdict with a flat scale chooses nobody, rather than by id ord
   assert.equal(rec.chosen, null);
   assert.equal(rec.firmness, "needs-review");
   assert.match(rec.reasons.join(" "), /did not separate the candidates/);
+});
+
+test("a method the spec switched off is stated as a declaration, not a failure", () => {
+  const gaps = buildGaps([], [], undefined, undefined, ["pairwise-swap"]);
+
+  assert.match(gaps, /absolute 1–5 scoring: \*\*not run\*\*/);
+  assert.match(gaps, /a declaration, not a failure/);
+  assert.doesNotMatch(buildGaps([], [], undefined, undefined, ["pairwise-swap", "absolute-1-5"]), /not run/);
 });

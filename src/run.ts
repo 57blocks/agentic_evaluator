@@ -739,17 +739,27 @@ interface RunPlan {
   scoreCalls: number;
 }
 
+/** Methods the step declared; both when the spec is silent (legacy suites). */
+function methodsOf(suite: Suite): { pairwise: boolean; absolute: boolean } {
+  const declared = suite.judgeMethods ?? ["pairwise-swap", "absolute-1-5"];
+  return { pairwise: declared.includes("pairwise-swap"), absolute: declared.includes("absolute-1-5") };
+}
+
 function planRun(suite: Suite): RunPlan {
   const c = suite.candidates.length;
   const i = suite.inputs.length;
   const t = suite.trials ?? 2;
-  const pairs = (i * c * (c - 1)) / 2;
-  return { generations: c * i * t, pairs, judgeCalls: pairs * 2, scoreCalls: c * i * t };
+  const { pairwise, absolute } = methodsOf(suite);
+  const pairs = pairwise ? (i * c * (c - 1)) / 2 : 0;
+  return { generations: c * i * t, pairs, judgeCalls: pairs * 2, scoreCalls: absolute ? c * i * t : 0 };
 }
 
 function printPreview(suite: Suite, plan: RunPlan, limit: number, reuse: boolean): void {
   console.log(`\n▶ ${suite.suiteId} / ${suite.step} [${suite.producer ?? "prompt"}] — ${suite.candidates.length} candidates × ${suite.inputs.length} inputs × ${suite.trials ?? 2} trials`);
-  console.log(`  generations ${plan.generations} · pairwise ${plan.pairs} pairs (${plan.judgeCalls} judge calls, up to 3 attempts each) · absolute ${plan.scoreCalls} calls`);
+  const { pairwise, absolute } = methodsOf(suite);
+  console.log(
+    `  generations ${plan.generations} · pairwise ${pairwise ? `${plan.pairs} pairs (${plan.judgeCalls} judge calls, up to 3 attempts each)` : "off"} · absolute ${absolute ? `${plan.scoreCalls} calls` : "off"}`,
+  );
   console.log(`  judge ${suite.judge} · concurrency ${limit}${reuse ? " · reuse ON" : ""}${suite.budgetUsd !== undefined ? ` · budget $${suite.budgetUsd}` : ""}`);
   console.log(`  benchmark ${suite.benchmarkMode ?? "capability-neutral"} · cache ${suite.cacheMode ?? "cold"} · directional ${suite.inputs.length < 10 || suite.mmd == null ? "yes" : "no"}`);
 }
@@ -840,23 +850,28 @@ async function executeSuite(params: {
 
   const budget = params.budget ?? new BudgetGuard(suite.budgetUsd);
   const records = await runAll({ suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget });
-  console.log("\n▶ Judging (pairwise)…\n");
-  const judged = await judgeAll(suite, rubric, records, limit, trace.emit, budget);
-  console.log("\n▶ Scoring (absolute 1–5)…\n");
+  const methods = methodsOf(suite);
+  const judged = methods.pairwise
+    ? (console.log("\n▶ Judging (pairwise)…\n"), await judgeAll(suite, rubric, records, limit, trace.emit, budget))
+    : (console.log("\n▶ Judging (pairwise) — off by spec\n"), { judgements: [], failures: [], skipped: [] });
+  if (methods.absolute) console.log("\n▶ Scoring (absolute 1–5)…\n");
+  else console.log("\n▶ Scoring (absolute 1–5) — off by spec\n");
   const scored: ScoredRecord[] = [];
   const scoreFailures: TrialFailure[] = [];
-  const scores = await scoreAll(
-    suite,
-    rubric,
-    records,
-    limit,
-    {
-      trace: trace.emit,
-      onScored: (s) => scored.push(s),
-      onFailure: (f) => scoreFailures.push(f),
-    },
-    budget,
-  );
+  const scores = methods.absolute
+    ? await scoreAll(
+        suite,
+        rubric,
+        records,
+        limit,
+        {
+          trace: trace.emit,
+          onScored: (s) => scored.push(s),
+          onFailure: (f) => scoreFailures.push(f),
+        },
+        budget,
+      )
+    : [];
   const scorecards = aggregate(suite, records, judged.judgements, scores);
 
   const report: Report = {
