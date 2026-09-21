@@ -8,42 +8,10 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { CostLedger } from "../src/canon/cost.js";
 import type { E2eValidation } from "../src/canon/e2e.js";
-import { buildWorkflowRecord, workflowGaps, workflowLedger, type WorkflowStepInput } from "../src/canon/workflow.js";
+import { buildWorkflowRecord, workflowGaps, workflowLedger } from "../src/canon/workflow.js";
+import { WORKFLOW_LEDGER_FIXTURE as LEDGER, workflowStepFixture as step } from "./helpers/workflow-fixture.js";
 import { renderWorkflowReport } from "../src/report-workflow.js";
-
-function ledger(over: Partial<CostLedger> = {}): CostLedger {
-  return {
-    generation: 1,
-    judging: 2,
-    scoring: 0.5,
-    checks: 0,
-    retries: 0.25,
-    total: 3.75,
-    source: "provider-reported",
-    successes: 1,
-    cost_per_success: 3.75,
-    cost_per_attempt: 3.75,
-    ...over,
-  };
-}
-
-function step(over: Partial<WorkflowStepInput> = {}): WorkflowStepInput {
-  return {
-    id: "plan",
-    dir: "plan",
-    operatingMode: "lowest-cost",
-    chosen: "cand-a",
-    firmness: "directional",
-    eligible: ["cand-a"],
-    gated: [{ candidate: "cand-b", reason: "reliability 0.5 < 0.8" }],
-    trials: 3,
-    ledger: ledger(),
-    gaps: "# GAPS\n\n- `ttft_ms`: non-streaming calls.\n- `cache`: not observable.\n",
-    ...over,
-  };
-}
 
 const VALIDATION: E2eValidation = {
   rule_version: "e2e-validate-v1",
@@ -79,7 +47,7 @@ const ARM = {
 
 test("workflow ledger sums every step component and keeps the arms separate", () => {
   // Arrange
-  const steps = [step(), step({ id: "code", dir: "code", ledger: ledger({ generation: 3, total: 5.75 }) })];
+  const steps = [step(), step({ id: "code", dir: "code", ledger: { ...LEDGER, generation: 3, total: 5.75 } })];
 
   // Act
   const l = workflowLedger(steps, [ARM, { ...ARM, kind: "proposed", cost_usd: 0.4 }]);
@@ -93,7 +61,7 @@ test("workflow ledger sums every step component and keeps the arms separate", ()
 });
 
 test("estimated cost anywhere in the chain labels the whole workflow estimated", () => {
-  const steps = [step(), step({ id: "code", dir: "code", ledger: ledger({ source: "estimated" }) })];
+  const steps = [step(), step({ id: "code", dir: "code", ledger: { ...LEDGER, source: "estimated" } })];
   assert.equal(workflowLedger(steps, []).source, "estimated");
 });
 
