@@ -7,6 +7,7 @@
  */
 
 import { judgeStandings, type JudgeStanding } from "./judge-standings.js";
+import { judgeDiscrimination } from "./discrimination.js";
 import type { TrialRow } from "./rows.js";
 import type { CandidateRates, Directionality, Rate } from "./rates.js";
 import type { EligibilityDecl, EligibilityThresholds, OperatingMode } from "./types.js";
@@ -78,6 +79,11 @@ export interface RecommendInput {
   candidates: CandidateRates[];
   /** Required by judge-preference; ignored by every other mode. */
   judge?: readonly JudgeStanding[];
+  /**
+   * False when the absolute grader gave every candidate the same score, so the
+   * mean cannot rank anyone. Defaults to true for callers that never scored.
+   */
+  absoluteDiscriminates?: boolean;
 }
 
 /**
@@ -260,6 +266,8 @@ function pickJudgePreference(
   eligible: readonly CandidateRates[],
   standings: readonly JudgeStanding[],
   control: string | null,
+  /** False when every candidate got the same absolute score; then it cannot rank. */
+  absoluteDiscriminates: boolean,
 ): { chosen: string | null; reason: string } {
   const byCandidate = new Map(standings.map((s) => [s.candidate, s]));
   const judged = eligible.filter((c) => {
@@ -274,7 +282,7 @@ function pickJudgePreference(
     const sb = byCandidate.get(b.candidate)!;
     const win = (sb.win_rate ?? -1) - (sa.win_rate ?? -1);
     if (win !== 0) return win;
-    const abs = (sb.absolute_mean ?? -1) - (sa.absolute_mean ?? -1);
+    const abs = absoluteDiscriminates ? (sb.absolute_mean ?? -1) - (sa.absolute_mean ?? -1) : 0;
     if (abs !== 0) return abs;
     const costA = a.generation_cost_per_success;
     const costB = b.generation_cost_per_success;
@@ -283,9 +291,27 @@ function pickJudgePreference(
   });
   const best = ranked[0];
   const s = byCandidate.get(best.candidate)!;
+  const absolute = absoluteDiscriminates
+    ? `mean absolute score ${s.absolute_mean === null ? "n/a" : s.absolute_mean.toFixed(2)}`
+    : "absolute scores ignored: they show no discrimination between candidates";
+  if (judged.length === 1 && s.comparisons === 0) {
+    return {
+      chosen: best.candidate,
+      reason:
+        `only ${best.candidate} carried any judge evidence; every other candidate produced nothing gradable, ` +
+        "so this is the last one standing, not a preference between candidates",
+    };
+  }
+  if (!absoluteDiscriminates && s.comparisons === 0) {
+    return {
+      chosen: null,
+      reason:
+        "no usable judge evidence: no pairwise comparison, and the absolute scores are identical across candidates",
+    };
+  }
   return {
     chosen: best.candidate,
-    reason: `highest judge preference: ${s.wins}–${s.losses}–${s.ties} over ${s.comparisons} comparison(s), mean absolute score ${s.absolute_mean === null ? "n/a" : s.absolute_mean.toFixed(2)}. This ranks one model's opinion, not measured task success.`,
+    reason: `highest judge preference: ${s.wins}–${s.losses}–${s.ties} over ${s.comparisons} comparison(s), ${absolute}. This ranks one model's opinion, not measured task success.`,
   };
 }
 
@@ -295,6 +321,7 @@ function pickForMode(
   control: string | null,
   mmd: number | null,
   standings: readonly JudgeStanding[],
+  absoluteDiscriminates: boolean,
 ): { chosen: string | null; reason: string } {
   switch (mode) {
     case "lowest-cost":
@@ -304,7 +331,7 @@ function pickForMode(
     case "highest-assurance":
       return pickHighestAssurance(eligible, control);
     case "judge-preference":
-      return pickJudgePreference(eligible, standings, control);
+      return pickJudgePreference(eligible, standings, control, absoluteDiscriminates);
   }
 }
 
@@ -450,7 +477,14 @@ export function recommend(input: RecommendInput): Recommendation {
   } else if (eligibleRates.length === 0) {
     reasons.push("no candidate passed eligibility gates");
   } else {
-    const pick = pickForMode(mode, eligibleRates, input.controlCandidate, input.mmd, input.judge ?? []);
+    const pick = pickForMode(
+      mode,
+      eligibleRates,
+      input.controlCandidate,
+      input.mmd,
+      input.judge ?? [],
+      input.absoluteDiscriminates ?? true,
+    );
     chosen = pick.chosen;
     reasons.push(pick.reason);
   }
@@ -529,6 +563,7 @@ export function recommendFromCanon(
 ): Recommendation {
   return recommend({
     judge: judgeStandings(trials),
+    absoluteDiscriminates: judgeDiscrimination(trials).discriminates,
     operatingMode: manifest.operating_mode,
     controlCandidate: manifest.control_candidate,
     requiredChecks: manifest.evaluators.required_checks,

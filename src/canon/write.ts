@@ -17,6 +17,7 @@ import type { RunManifest } from "./manifest.js";
 import type { CandidateRates, Directionality } from "./rates.js";
 import type { EvaluationRow, TrialRow } from "./rows.js";
 import { recommendFromCanon, type Recommendation } from "./select.js";
+import { judgeDiscrimination, saturationGap, type JudgeDiscrimination } from "./discrimination.js";
 import type { TraceIntegrity } from "./trace.js";
 
 export interface CanonSummary {
@@ -26,6 +27,8 @@ export interface CanonSummary {
   candidates: CandidateRates[];
   directionality: Directionality;
   integrity: TraceIntegrity;
+  /** Whether the absolute grader separated the candidates at all. */
+  judge_discrimination?: JudgeDiscrimination;
   evaluation_coverage: {
     evaluator: string;
     version: string;
@@ -96,6 +99,8 @@ export function buildGaps(trials: readonly TrialRow[], evaluations: readonly Eva
       ? `- evaluator errors: ${evaluatorErrors} evaluator invocation(s) failed and are recorded as evaluator_error rows (excluded from candidate rates).`
       : "- evaluator errors: none in this run.",
   );
+  const saturation = saturationGap(judgeDiscrimination(trials));
+  if (saturation !== null) lines.push(saturation);
   lines.push("- pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector does not use pairwise win rate.");
   lines.push("- statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json) and recommendation.json firmness follows that label.");
   return lines.join("\n") + "\n";

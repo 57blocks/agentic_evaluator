@@ -222,7 +222,14 @@ export function toEvaluationRows(input: AdaptInput): EvaluationRow[] {
       subject: { kind: "trial", candidate: s.candidate, input: s.inputSlug, trial: s.trial },
       score: s.overall,
       dimensions: { ...s.dimensions },
+      score_detail: Object.fromEntries(
+        Object.entries(s.dimensions).map(([dim, score]) => {
+          const reason = s.reasons?.dimensions[dim];
+          return [dim, reason === undefined ? { score } : { score, reason }];
+        }),
+      ),
       overall: s.overall,
+      ...(s.reasons?.overall ? { reason: s.reasons.overall } : {}),
       cost: costOf(s.usage),
       ms: s.usage.ms,
     });
