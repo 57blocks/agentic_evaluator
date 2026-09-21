@@ -1,0 +1,67 @@
+# One step, three candidates, two inputs, one trial — the smallest run that
+# can still show discrimination: kimi-k3 is in it precisely because the two
+# stronger candidates score alike, and a judge with nothing weak to compare
+# against returns a wall of 5s.
+#
+# Gated on tsc, picked by cost among the candidates that compile.
+
+protocol_version: "0.4"
+run_name: codegen-trial
+budget_usd: 2
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: codegen
+      version: "1"
+      producer: codegen
+      rubric_file: rubrics/codegen.md
+      test_set:
+        id: code-v1
+        inputs: [code-utils, code-schema]
+      candidate_ids: [sonnet-5, deepseek-v4-pro, kimi-k3]
+      required_checks: [tsc-noemit]
+      judged_dimensions: [meets-spec, correctness, type-quality, simplicity, robustness]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 240
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+
+evaluators:
+  required_checks:
+    tsc-noemit:
+      kind: tsc
+      scaffold_dir: scaffold
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/codegen.md
+    methods: [pairwise-swap, absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 3
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.3

@@ -20,6 +20,7 @@ import type { RunManifest } from "./canon/manifest.js";
 import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { CanonSummary } from "./canon/write.js";
 import { recommendFromCanon, type Recommendation } from "./canon/select.js";
+import { judgeStandings } from "./canon/judge-standings.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
@@ -28,6 +29,7 @@ import { CHART_STYLES, renderHeatmap, renderRadar, renderTrialStrip } from "./re
 import {
   EVIDENCE_STYLES,
   loadRawOutputs,
+  renderDimensionPreference,
   renderDuels,
   renderOutputs,
   renderTrials,
@@ -198,6 +200,53 @@ function candidateMark(gated: boolean, chosen: boolean): string {
 
 // ── render ─────────────────────────────────────────────────────────────────
 
+
+/**
+ * The headline, in the legacy report's idiom: one line you can read at a
+ * glance. What it names is the RECOMMENDATION — eligibility gates first, then
+ * the declared operating mode — not the judge's favourite. The judge's own
+ * verdict sits beside it, because the two can disagree and that disagreement
+ * is information: on this run the cheapest eligible candidate was also the one
+ * the judge ranked last, which says the required check is too weak.
+ */
+function renderHero(b: RunBundle, views: readonly CandidateView[], support: readonly string[]): string {
+  const rec = b.recommendation;
+  const standings = judgeStandings(b.trials);
+  const best = [...standings].sort((a, z) => (z.win_rate ?? -1) - (a.win_rate ?? -1))[0];
+  const chosenView = views.find((v) => v.id === rec.chosen);
+
+  const headline = rec.chosen
+    ? `<span class="trophy">🏆</span> <b>${escapeHtml(rec.chosen)}</b> · ${escapeHtml(rec.operating_mode ?? "未声明模式")} 推荐`
+    : `<b>无推荐</b> · ${escapeHtml(rec.operating_mode ?? "未声明模式")}`;
+  const facts = rec.chosen && chosenView
+    ? [
+        chosenView.costPerSuccess !== null ? `$${chosenView.costPerSuccess.toFixed(4)}/次成功` : null,
+        chosenView.checkExecuted > 0 ? `${chosenView.checkPass}/${chosenView.checkExecuted} 通过必过检查` : null,
+        rec.firmness,
+      ].filter((x): x is string => x !== null && x !== "")
+    : [rec.firmness];
+
+  const judgeLine =
+    best && best.comparisons > 0
+      ? `裁判偏好另列：<b>${escapeHtml(best.candidate)}</b> ${best.wins}–${best.losses}–${best.ties}（${best.comparisons} 场）${
+          rec.chosen && best.candidate !== rec.chosen
+            ? "。与推荐不一致：必过检查通过的候选之间，选择器按声明的运行模式比较，不读裁判偏好。"
+            : ""
+        }`
+      : "本次没有可用的成对判决。";
+
+  return `<div class="verdict ${escapeHtml(rec.firmness)}">
+    <span class="tag">${escapeHtml(rec.firmness.toUpperCase())} · ${Object.keys(b.manifest.test_set.inputs ?? {}).length} INPUTS</span>
+    <div>
+      <p class="champ-line">${headline}</p>
+      <p class="champ-facts">${facts.map(escapeHtml).join(" · ")}</p>
+      <p class="sub">${escapeHtml(verdictText(b))}</p>
+      <p class="sub">${judgeLine}</p>
+      <p class="sub">${support.map((r) => escapeHtml(r)).join("；") || "样本与阈值满足决策级要求"}</p>
+    </div>
+  </div>`;
+}
+
 export function renderRunReport(b: RunBundle): string {
   const m = b.manifest;
   const rec = b.recommendation;
@@ -279,11 +328,7 @@ export function renderRunReport(b: RunBundle): string {
     </dl>
   </header>
 
-  <div class="verdict ${escapeHtml(rec.firmness)}">
-    <span class="tag">${tag} · ${Object.keys(inputs).length} INPUTS</span>
-    <div><p>${escapeHtml(verdictText(b))}</p>
-    <p class="sub">${support.map((r) => escapeHtml(r)).join("；") || "样本与阈值满足决策级要求"}</p></div>
-  </div>
+  ${renderHero(b, views, support)}
 
   <section class="card">
     <h2>推荐轨迹 <span class="hint">select-v1 · 只读 summary.json，不重跑模型</span></h2>
@@ -337,6 +382,8 @@ export function renderRunReport(b: RunBundle): string {
     </div>
     ${renderHeatmap(b.trials)}
   </section>
+
+  ${renderDimensionPreference(b.evaluations)}
 
   ${renderDuels(b.evaluations)}
 
