@@ -55,6 +55,7 @@ import { classifyCompletion } from "./canon/states.js";
 import { openTrace, traceIntegrity } from "./canon/trace.js";
 import { buildManifest } from "./canon/manifest.js";
 import { buildLedger, type CostLedger } from "./canon/cost.js";
+import { BudgetGuard, budgetGap } from "./canon/budget.js";
 import { buildWorkflowRecord, workflowGaps, type WorkflowStepInput } from "./canon/workflow.js";
 import { directionality, ratesFor } from "./canon/rates.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
@@ -198,6 +199,8 @@ interface GenOutput {
   completionTokens: number;
   cachedTokens?: number;
   costUsd: number;
+  retryCostUsd?: number;
+  transportRetries?: number;
   costSource: CostSource;
   ms: number;
   provider?: string;
@@ -372,6 +375,8 @@ function errorRecord(task: GenTask, err: unknown): RunRecord {
       completionTokens: err.usage?.completionTokens ?? 0,
       cachedTokens: err.usage?.cachedTokens,
       costUsd: err.usage?.costUsd ?? 0,
+      retryCostUsd: err instanceof LlmError ? err.retryCostUsd : undefined,
+      transportRetries: err instanceof LlmError ? err.transportRetries : undefined,
       costSource: err.usage?.costSource ?? "none",
       ms: err.ms,
       deploymentRef: deploymentRef(task.def, err.provider),
@@ -408,8 +413,9 @@ async function runAll(params: {
   runId: string;
   reuse: boolean;
   trace: LlmTrace;
+  budget: BudgetGuard;
 }): Promise<RunRecord[]> {
-  const { suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace } = params;
+  const { suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace, budget } = params;
   const trials = suite.trials ?? 2;
   const baseTemperature = suite.temperature ?? 0.3;
   const timeoutMs = suite.timeoutMs ?? 120_000;
@@ -443,7 +449,7 @@ async function runAll(params: {
     }
   }
 
-  return mapWithConcurrency(tasks, limit, async (task): Promise<RunRecord> => {
+  const done = await mapWithConcurrency(tasks, limit, async (task): Promise<RunRecord | null> => {
     const { inputSlug, inputText, candidate, def, trial } = task;
     const temperature = def.generation_settings?.temperature ?? baseTemperature;
     const checkWorkDir = path.join(outDir, "checks", `${safeName(candidate)}__${inputSlug}__t${trial}`);
@@ -454,6 +460,13 @@ async function runAll(params: {
         console.log(`  reuse  ${candidate} · ${inputSlug} · t${trial}  ← ${reused.from}`);
         return { ...reused.record, candidate, inputSlug, trial, reusedFrom: reused.from };
       }
+    }
+
+    // Protocol §7: stop cleanly on the limit. The unit is counted as not run,
+    // not recorded as a candidate failure — the candidate never got a turn.
+    if (!budget.allows("generation")) {
+      console.log(`  skip   ${candidate} · ${inputSlug} · t${trial} — budget limit reached`);
+      return null;
     }
 
     try {
@@ -470,6 +483,7 @@ async function runAll(params: {
         trace,
         traceContext: { phase: "generation", candidate, model: modelRefOf(def), input: inputSlug, trial },
       });
+      budget.add(g.costUsd + (g.retryCostUsd ?? 0));
       const verdict = classifyCompletion({ finishReason: g.finishReason, refusal: g.refusal, parsedUnits: g.parsedUnits });
       const checkTag = g.checkState === undefined ? "" : ` · tsc ${g.checkState}`;
       console.log(
@@ -484,6 +498,8 @@ async function runAll(params: {
         completionTokens: g.completionTokens,
         cachedTokens: g.cachedTokens,
         costUsd: g.costUsd,
+        retryCostUsd: g.retryCostUsd,
+        transportRetries: g.transportRetries,
         costSource: g.costSource,
         ms: g.ms,
         status: "ok",
@@ -500,10 +516,13 @@ async function runAll(params: {
       };
     } catch (err) {
       const rec = errorRecord(task, err);
+      budget.add(rec.costUsd + (rec.retryCostUsd ?? 0));
       console.log(`  ${(rec.completionState ?? "error").padEnd(8)} ${candidate} · ${inputSlug} · t${trial}: ${rec.error}`);
       return rec;
     }
   });
+
+  return done.filter((r): r is RunRecord => r !== null);
 }
 
 /** First successful output for a (candidate, input) pair, if any. */
@@ -535,7 +554,14 @@ function usageOfError(err: unknown): EvaluatorUsage {
  * as an evaluator_error (with its cost) instead of vanishing; a pair where one
  * side produced no output is recorded as not_evaluated.
  */
-async function judgeAll(suite: Suite, rubric: string, records: readonly RunRecord[], limit: number, trace: LlmTrace): Promise<JudgeOutcome> {
+async function judgeAll(
+  suite: Suite,
+  rubric: string,
+  records: readonly RunRecord[],
+  limit: number,
+  trace: LlmTrace,
+  budget: BudgetGuard,
+): Promise<JudgeOutcome> {
   const tasks: JudgeTask[] = [];
   const skipped: SkippedPair[] = [];
   for (const inputSlug of suite.inputs) {
@@ -557,9 +583,13 @@ async function judgeAll(suite: Suite, rubric: string, records: readonly RunRecor
 
   const failures: PairFailure[] = [];
   const results = await mapWithConcurrency(tasks, limit, async (task): Promise<JudgedPair | null> => {
+    if (!budget.allows("judging")) {
+      skipped.push({ input: task.inputSlug, a: task.a, b: task.b, reason: "budget limit reached before this pair was judged" });
+      return null;
+    }
     console.log(`  judge  ${task.a} vs ${task.b} · ${task.inputSlug}`);
     try {
-      return await judgePair({
+      const judged = await judgePair({
         judgeModel: suite.judge,
         timeoutMs: suite.timeoutMs ?? 240_000,
         rubric,
@@ -571,8 +601,11 @@ async function judgeAll(suite: Suite, rubric: string, records: readonly RunRecor
         bText: task.bText,
         trace,
       });
+      budget.add(judged.usage?.costUsd ?? 0);
+      return judged;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      budget.add(usageOfError(err).costUsd);
       console.log(`  judge EVALUATOR_ERROR  ${task.a} vs ${task.b} · ${task.inputSlug}: ${message}`);
       failures.push({ input: task.inputSlug, a: task.a, b: task.b, message, usage: usageOfError(err) });
       return null;
@@ -597,10 +630,12 @@ async function scoreAll(
   records: readonly RunRecord[],
   limit: number,
   hooks: ScoreHooks = {},
+  budget?: BudgetGuard,
 ): Promise<ScoreRecord[]> {
   const dimensions = suite.dimensions ?? [];
   const oks = records.filter((r) => r.status === "ok" && r.text.trim());
   const results = await mapWithConcurrency(oks, limit, async (r): Promise<ScoreRecord | null> => {
+    if (budget && !budget.allows("scoring")) return null;
     console.log(`  score  ${r.candidate} · ${r.inputSlug} · t${r.trial}`);
     try {
       const s = await scoreOne({
@@ -621,13 +656,16 @@ async function scoreAll(
         reasons: s.reasons,
         usage: s.usage,
       };
+      budget?.add(s.usage.costUsd + s.usage.retryCostUsd);
       hooks.onScored?.(scored);
       const { usage: _usage, ...plain } = scored;
       return plain;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.log(`  score EVALUATOR_ERROR  ${r.candidate} · ${r.inputSlug} · t${r.trial}: ${message}`);
-      hooks.onFailure?.({ candidate: r.candidate, input: r.inputSlug, trial: r.trial, message, usage: usageOfError(err) });
+      const failureUsage = usageOfError(err);
+      budget?.add(failureUsage.costUsd + failureUsage.retryCostUsd);
+      hooks.onFailure?.({ candidate: r.candidate, input: r.inputSlug, trial: r.trial, message, usage: failureUsage });
       return null;
     }
   });
@@ -758,6 +796,8 @@ async function executeSuite(params: {
   html: boolean;
   reuse: boolean;
   generatedAt: string;
+  /** Shared across the steps of a multi-step run; one spec, one limit. */
+  budget?: BudgetGuard;
 }): Promise<{ report: Report; recommendation: Recommendation; trials: number; ledgerTotal: number; ledger: CostLedger }> {
   const { suite, outDir, runId, html, reuse, generatedAt } = params;
   const producer: ProducerKind = suite.producer ?? "prompt";
@@ -798,17 +838,25 @@ async function executeSuite(params: {
   });
   await writeManifest(outDir, manifest);
 
-  const records = await runAll({ suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit });
+  const budget = params.budget ?? new BudgetGuard(suite.budgetUsd);
+  const records = await runAll({ suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget });
   console.log("\n▶ Judging (pairwise)…\n");
-  const judged = await judgeAll(suite, rubric, records, limit, trace.emit);
+  const judged = await judgeAll(suite, rubric, records, limit, trace.emit, budget);
   console.log("\n▶ Scoring (absolute 1–5)…\n");
   const scored: ScoredRecord[] = [];
   const scoreFailures: TrialFailure[] = [];
-  const scores = await scoreAll(suite, rubric, records, limit, {
-    trace: trace.emit,
-    onScored: (s) => scored.push(s),
-    onFailure: (f) => scoreFailures.push(f),
-  });
+  const scores = await scoreAll(
+    suite,
+    rubric,
+    records,
+    limit,
+    {
+      trace: trace.emit,
+      onScored: (s) => scored.push(s),
+      onFailure: (f) => scoreFailures.push(f),
+    },
+    budget,
+  );
   const scorecards = aggregate(suite, records, judged.judgements, scores);
 
   const report: Report = {
@@ -872,9 +920,16 @@ async function executeSuite(params: {
     candidates: suite.candidates.map((c) => ratesFor(c, trials)),
     directionality: directionality(suite.inputs.length, suite.mmd),
     integrity,
+    budget: budget.state(),
     judge_discrimination: judgeDiscrimination(trials),
     evaluation_coverage: evaluationCoverage(evaluations),
   };
+  if (budget.stoppedEarly) {
+    const st = budget.state();
+    console.log(
+      `⚠ budget limit $${(st.limit_usd ?? 0).toFixed(2)} reached after $${st.spent_usd.toFixed(4)} — skipped ${st.skipped.generation} generation(s), ${st.skipped.judging} judgement(s), ${st.skipped.scoring} scoring call(s); this run is partial (see GAPS.md)`,
+    );
+  }
   if (integrity.gaps_over_threshold > 0) {
     console.log(`⚠ ${integrity.gaps_over_threshold} wall-clock gap(s) > ${integrity.threshold_ms / 60000} min in the trace — host suspended? durations unreliable (see GAPS.md)`);
   }
@@ -1158,6 +1213,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
   const root = path.join(runsDir(), runId);
   if (nested) await fs.mkdir(root, { recursive: true });
 
+  const budget = new BudgetGuard(suites[0].budgetUsd);
   const steps: WorkflowStepInput[] = [];
   let last: Report | null = null;
   for (const suite of suites) {
@@ -1169,6 +1225,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
       html,
       reuse,
       generatedAt,
+      budget,
     });
     last = done.report;
     if (nested) {

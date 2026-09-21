@@ -125,7 +125,11 @@ export function toTrialRows(input: AdaptInput): TrialRow[] {
         absolute_overall: score?.overall ?? null,
         absolute_dimensions: score ? { ...score.dimensions } : null,
       },
-      cost: { generation: r.costUsd, source: r.costSource ?? (r.costUsd > 0 ? "provider-reported" : "none") },
+      cost: {
+        generation: r.costUsd,
+        retry: r.retryCostUsd ?? 0,
+        source: r.costSource ?? (r.costUsd > 0 ? "provider-reported" : "none"),
+      },
       tokens: { prompt: r.promptTokens, completion: r.completionTokens, cached: r.cachedTokens ?? null },
       ms: r.ms,
       ttft_ms: null,

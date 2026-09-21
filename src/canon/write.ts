@@ -17,6 +17,7 @@ import type { RunManifest } from "./manifest.js";
 import type { CandidateRates, Directionality } from "./rates.js";
 import type { EvaluationRow, TrialRow } from "./rows.js";
 import { recommendFromCanon, type Recommendation } from "./select.js";
+import { budgetGap, type BudgetState } from "./budget.js";
 import { judgeDiscrimination, saturationGap, type JudgeDiscrimination } from "./discrimination.js";
 import type { TraceIntegrity } from "./trace.js";
 
@@ -29,6 +30,8 @@ export interface CanonSummary {
   integrity: TraceIntegrity;
   /** Whether the absolute grader separated the candidates at all. */
   judge_discrimination?: JudgeDiscrimination;
+  /** Spend against the declared ceiling, and what the ceiling stopped. */
+  budget?: BudgetState;
   evaluation_coverage: {
     evaluator: string;
     version: string;
@@ -58,16 +61,23 @@ export function evaluationCoverage(rows: readonly EvaluationRow[]): CanonSummary
   return [...byKey.values()];
 }
 
-export function buildGaps(trials: readonly TrialRow[], evaluations: readonly EvaluationRow[], integrity?: TraceIntegrity): string {
+export function buildGaps(
+  trials: readonly TrialRow[],
+  evaluations: readonly EvaluationRow[],
+  integrity?: TraceIntegrity,
+  budget?: BudgetState,
+): string {
   const lines: string[] = [
     "# GAPS — fields the protocol wants that this run did not observe",
     "",
     "Every field below is recorded as `null` or `not_applicable`, never defaulted to a measured-looking value.",
     "",
   ];
+  const overBudget = budget ? budgetGap(budget) : null;
+  if (overBudget !== null) lines.push(overBudget);
   if (integrity && integrity.gaps_over_threshold > 0) {
     lines.push(
-      `- **wall-clock integrity**: ${integrity.gaps_over_threshold} gap(s) longer than ${Math.round(integrity.threshold_ms / 60000)} min between consecutive trace events (longest ${(integrity.longest_gap_ms / 60000).toFixed(1)} min). The host likely suspended the process; durations, timeouts and p50/p95 in this run are unreliable.`,
+      `- **wall-clock integrity**: ${integrity.gaps_over_threshold} gap(s) with nothing in flight, longer than ${Math.round(integrity.threshold_ms / 60000)} min between consecutive trace events (longest ${(integrity.longest_gap_ms / 60000).toFixed(1)} min). The host likely suspended the process; durations, timeouts and p50/p95 in this run are unreliable.`,
     );
   }
   const sawCache = trials.some((t) => t.tokens.cached !== null && t.tokens.cached > 0);
@@ -125,7 +135,11 @@ export async function writeCanonBundle(
     fs.writeFile(path.join(runDir, "ledger.json"), JSON.stringify(bundle.ledger, null, 2), "utf-8"),
     fs.writeFile(path.join(runDir, "summary.json"), JSON.stringify(bundle.summary, null, 2), "utf-8"),
     fs.writeFile(path.join(runDir, "recommendation.json"), JSON.stringify(recommendation, null, 2), "utf-8"),
-    fs.writeFile(path.join(runDir, "GAPS.md"), buildGaps(bundle.trials, bundle.evaluations, bundle.summary.integrity), "utf-8"),
+    fs.writeFile(
+      path.join(runDir, "GAPS.md"),
+      buildGaps(bundle.trials, bundle.evaluations, bundle.summary.integrity, bundle.summary.budget),
+      "utf-8",
+    ),
   ]);
   return recommendation;
 }

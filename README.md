@@ -92,6 +92,25 @@ fixtures/             committed real runs used by the parity test
 docs/                 protocol, implementation plan, harness-to-protocol map, runner design
 ```
 
+## Run guards
+
+- **Transport retry.** Network faults, 408/409/425/429 and 5xx are retried
+  twice with exponential backoff and are not candidate attempts (protocol §7).
+  A 403 is retried only when OpenRouter's body shows endpoint routing or geo
+  gating — that pool flaps, and one run recorded a candidate as failed on
+  every step because of it; a plain 403 is an access problem and is not
+  retried. A timeout is never retried: the candidate had its declared budget.
+  What the abandoned attempts were billed lands in the ledger's `retries`,
+  not in `generation`.
+- **`budget_usd` is enforced**, not just printed. The guard is consulted
+  before each generation, judged pair and scored output; once spend reaches
+  the ceiling the run stops starting work, counts what it skipped by kind into
+  `summary.json.budget`, and GAPS.md says the run is partial. One spec, one
+  ceiling — the steps of a multi-step run share it.
+- **Wall-clock integrity** only accuses the host when a long quiet stretch had
+  *nothing* in flight. A 600s timeout produces a ten-minute silence by design;
+  those are counted separately as `in_flight_gaps`.
+
 ## Required checks
 
 A step's required check is what turns a trial outcome from `undetermined` into

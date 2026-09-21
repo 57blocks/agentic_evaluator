@@ -140,6 +140,10 @@ export interface RunRecord {
   promptTokens: number;
   completionTokens: number;
   costUsd: number;
+  /** Billed by transport retries that preceded this attempt; kept out of costUsd. */
+  retryCostUsd?: number;
+  /** How many transport retries it took (protocol §7: not candidate attempts). */
+  transportRetries?: number;
   ms: number;
   status: "ok" | "error";
   error?: string;

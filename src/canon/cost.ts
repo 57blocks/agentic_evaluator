@@ -38,7 +38,9 @@ export function buildLedger(
   const scoringRows = evaluations.filter((e) => e.evaluator === absoluteId && e.cost);
   const judging = judgingRows.reduce((s, e) => s + (e.cost?.usd ?? 0), 0);
   const scoring = scoringRows.reduce((s, e) => s + (e.cost?.usd ?? 0), 0);
-  const retries = evaluations.reduce((s, e) => s + (e.cost?.retry_usd ?? 0), 0);
+  const retries =
+    evaluations.reduce((s, e) => s + (e.cost?.retry_usd ?? 0), 0) +
+    trials.reduce((s, t) => s + (t.cost.retry ?? 0), 0);
   const total = generation + judging + scoring + retries;
   const successes = trials.filter((t) => t.task_outcome === "success").length;
   const sources: CostSource[] = [

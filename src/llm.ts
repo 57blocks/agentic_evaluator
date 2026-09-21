@@ -42,6 +42,10 @@ export interface LlmUsage {
 export interface LlmResult extends LlmUsage {
   text: string;
   ms: number;
+  /** Transport retries that preceded this result (protocol §7: not attempts). */
+  transportRetries?: number;
+  /** Anything the abandoned transport attempts were billed. */
+  retryCostUsd?: number;
   /** Upstream provider that served the request, as reported by OpenRouter. */
   provider?: string;
   finishReason?: string;
@@ -60,6 +64,10 @@ export class LlmError extends Error {
   readonly provider?: string;
   readonly finishReason?: string;
   readonly refusal?: string;
+  /** Transport retries attempted before giving up; 0 when the first try failed for good. */
+  readonly transportRetries?: number;
+  /** What those abandoned attempts were billed, if anything. */
+  readonly retryCostUsd?: number;
 
   constructor(
     message: string,
@@ -71,6 +79,8 @@ export class LlmError extends Error {
       provider?: string;
       finishReason?: string;
       refusal?: string;
+      transportRetries?: number;
+      retryCostUsd?: number;
     },
   ) {
     super(message);
@@ -82,12 +92,14 @@ export class LlmError extends Error {
     this.provider = fields.provider;
     this.finishReason = fields.finishReason;
     this.refusal = fields.refusal;
+    this.transportRetries = fields.transportRetries;
+    this.retryCostUsd = fields.retryCostUsd;
   }
 }
 
 /** One trace event per request and per response/error. Never carries prompt text. */
 export interface LlmCallEvent {
-  type: "model.request" | "model.response" | "model.error";
+  type: "model.request" | "model.response" | "model.error" | "model.retry";
   model: string;
   promptSha: string;
   promptChars: number;
@@ -147,14 +159,19 @@ export interface CompleteParams {
   traceContext?: Record<string, unknown>;
 }
 
-export async function complete(params: CompleteParams): Promise<LlmResult> {
+async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmResult> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY is not set (put it in .env.local)");
   }
 
   const promptSha = sha256(params.prompt);
-  const base = { model: params.model, promptSha, promptChars: params.prompt.length, context: params.traceContext };
+  const base = {
+    model: params.model,
+    promptSha,
+    promptChars: params.prompt.length,
+    context: retryIndex > 0 ? { ...params.traceContext, transport_retry: retryIndex } : params.traceContext,
+  };
   params.trace?.({ type: "model.request", ...base });
 
   const controller = new AbortController();
@@ -250,5 +267,82 @@ export async function complete(params: CompleteParams): Promise<LlmResult> {
     return { text, ms, provider, finishReason, refusal, ...usage };
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+/**
+ * Transport failures the protocol (§7) says may be retried WITHOUT counting as
+ * a completed candidate attempt: the request never reached a model, or the
+ * gateway refused it for reasons unrelated to the candidate.
+ *
+ *   network errors, 408, 409, 425, 429, 5xx
+ *   403 only when OpenRouter's body shows endpoint routing/geo gating — that
+ *   pool flaps, and a run once recorded a candidate as failed on all three
+ *   steps because of it. A plain 403 (bad key, no access) is not retried.
+ *
+ * A timeout is NOT a transport failure: the candidate was given its declared
+ * budget and did not finish inside it. That stays a candidate result.
+ */
+const RETRYABLE_STATUS = new Set([408, 409, 425, 429]);
+const ROUTING_MARKERS = ["routing_funnel", "not available in your region", "no endpoints found"];
+const MAX_TRANSPORT_RETRIES = 2;
+const RETRY_BASE_DELAY_MS = 1_000;
+
+export function isTransportFailure(err: unknown): boolean {
+  if (!(err instanceof LlmError)) return false;
+  if (err.kind === "network") return true;
+  if (err.kind !== "http" || err.httpStatus === undefined) return false;
+  if (err.httpStatus >= 500 || RETRYABLE_STATUS.has(err.httpStatus)) return true;
+  if (err.httpStatus === 403) {
+    const body = err.message.toLowerCase();
+    return ROUTING_MARKERS.some((m) => body.includes(m));
+  }
+  return false;
+}
+
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * One completion, retrying transport failures with exponential backoff. The
+ * returned result carries how many retries it took and what they were billed,
+ * so the ledger can keep recovery cost out of the generation line.
+ */
+export async function complete(params: CompleteParams): Promise<LlmResult> {
+  let retryCostUsd = 0;
+  for (let retry = 0; ; retry++) {
+    try {
+      const result = await attempt(params, retry);
+      return retry === 0 ? result : { ...result, transportRetries: retry, retryCostUsd };
+    } catch (err) {
+      const last = retry >= MAX_TRANSPORT_RETRIES;
+      if (!isTransportFailure(err) || last) {
+        if (err instanceof LlmError && retry > 0) {
+          throw new LlmError(err.message, {
+            kind: err.kind,
+            httpStatus: err.httpStatus,
+            ms: err.ms,
+            usage: err.usage,
+            provider: err.provider,
+            finishReason: err.finishReason,
+            refusal: err.refusal,
+            transportRetries: retry,
+            retryCostUsd,
+          });
+        }
+        throw err;
+      }
+      retryCostUsd += (err as LlmError).usage?.costUsd ?? 0;
+      const delayMs = RETRY_BASE_DELAY_MS * 2 ** retry;
+      params.trace?.({
+        type: "model.retry",
+        model: params.model,
+        promptSha: sha256(params.prompt),
+        promptChars: params.prompt.length,
+        ms: (err as LlmError).ms,
+        error: { kind: (err as LlmError).kind, httpStatus: (err as LlmError).httpStatus, message: (err as LlmError).message },
+        context: { ...params.traceContext, transport_retry: retry + 1, delay_ms: delayMs },
+      });
+      await sleep(delayMs);
+    }
   }
 }

@@ -33,35 +33,59 @@ export interface TraceIntegrity {
   threshold_ms: number;
   /** Elapsed wall time between first and last event. */
   wall_ms: number;
+  /**
+   * Long quiet stretches that had a call in flight. Those are a slow provider
+   * or a long timeout, not a suspended host, so they are counted apart and do
+   * not make the run's durations suspect.
+   */
+  in_flight_gaps: number;
 }
 
 export const GAP_THRESHOLD_MS = 5 * 60 * 1000;
 
 /**
- * Wall-clock integrity of a finished trace. Regular multi-minute gaps mean the
- * host suspended the process; every duration and timeout in that run is then
- * suspect and the report must say so.
+ * Wall-clock integrity of a finished trace. Regular multi-minute gaps with
+ * NOTHING in flight mean the host suspended the process; every duration and
+ * timeout in that run is then suspect and the report must say so.
+ *
+ * A gap while a request is outstanding is just a slow call — a 600s timeout
+ * produces a ten-minute quiet stretch by design. Counting those as suspension
+ * made every long-timeout run warn about itself, so they are tracked
+ * separately as `in_flight_gaps`.
  */
 export async function traceIntegrity(file: string, thresholdMs = GAP_THRESHOLD_MS): Promise<TraceIntegrity> {
   const raw = await fs.readFile(file, "utf-8").catch(() => "");
-  const times = raw
+  const rows = raw
     .split("\n")
     .filter((l) => l.trim() !== "")
-    .map((l) => Date.parse((JSON.parse(l) as TraceRow).ts))
-    .filter((t) => !Number.isNaN(t));
+    .map((l) => JSON.parse(l) as TraceRow)
+    .map((r) => ({ at: Date.parse(r.ts), type: r.type }))
+    .filter((r) => !Number.isNaN(r.at));
+
   let gaps = 0;
+  let inFlightGaps = 0;
   let longest = 0;
-  for (let i = 1; i < times.length; i++) {
-    const gap = times[i] - times[i - 1];
-    if (gap > thresholdMs) gaps += 1;
-    if (gap > longest) longest = gap;
+  let outstanding = 0;
+  for (const [i, row] of rows.entries()) {
+    if (i > 0) {
+      const gap = row.at - rows[i - 1].at;
+      if (gap > thresholdMs) {
+        if (outstanding > 0) inFlightGaps += 1;
+        else gaps += 1;
+      }
+      if (gap > longest && outstanding === 0) longest = gap;
+    }
+    if (row.type === "model.request") outstanding += 1;
+    else if (row.type === "model.response" || row.type === "model.error") outstanding = Math.max(0, outstanding - 1);
   }
+
   return {
-    events: times.length,
+    events: rows.length,
     gaps_over_threshold: gaps,
     longest_gap_ms: longest,
     threshold_ms: thresholdMs,
-    wall_ms: times.length > 1 ? times[times.length - 1] - times[0] : 0,
+    wall_ms: rows.length > 1 ? rows[rows.length - 1].at - rows[0].at : 0,
+    in_flight_gaps: inFlightGaps,
   };
 }
 
