@@ -184,7 +184,7 @@ export function renderHeatmap(trials: readonly TrialRow[]): string {
 
   return `<figure class="viz">
     <figcaption>维度得分矩阵 <span class="hint">1–5 绝对分，颜色深浅即分数高低</span></figcaption>
-    <table class="viz-heat"><thead><tr><th>候选</th>${head}<th class="num">总分</th></tr></thead><tbody>${body}</tbody></table>
+    <div class="table-wrap"><table class="viz-heat"><thead><tr><th>候选</th>${head}<th class="num">总分</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="viz-scale"><span>1</span>${scale}<span>5</span></div>
     ${
       flat.size > 0

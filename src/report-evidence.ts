@@ -267,11 +267,11 @@ export function renderDimensionPreference(evaluations: readonly EvaluationRow[])
     })
     .join("");
 
-  return `<section class="card">
-    <h2>维度偏好 <span class="hint">每维度成对胜率（tie 记 0.5）· 裁判意见，不进入推荐</span></h2>
-    <div class="table-wrap"><table>
+  return `<figure class="viz">
+    <figcaption>方向 · 成对胜率 0–100 <span class="hint">谁被偏好，tie 记 0.5</span></figcaption>
+    <div class="table-wrap"><table class="pref">
       <thead><tr><th>候选</th>${head}</tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
-  </section>`;
+  </figure>`;
 }

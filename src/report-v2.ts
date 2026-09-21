@@ -385,7 +385,7 @@ export function renderRunReport(b: RunBundle): string {
   </div>
 
   <section class="card">
-    <h2>评分画像 <span class="hint">同一份 scores.jsonl，图与表不会打架</span></h2>
+    <h2>评分画像 <span class="hint">两个透镜：幅度看绝对分，方向看成对胜率</span></h2>
     ${
       judgeDiscrimination(b.trials).saturated.length > 0
         ? `<p class="note"><b>注意：</b>绝对打分在 ${escapeHtml(judgeDiscrimination(b.trials).saturated.join("、"))} 上对所有候选给了同一个分。这些分数没有测出差异，推荐不会采用它们。</p>`
@@ -395,10 +395,12 @@ export function renderRunReport(b: RunBundle): string {
       ${renderRadar(b.trials)}
       ${renderTrialStrip(b.trials)}
     </div>
-    ${renderHeatmap(b.trials)}
+    <div class="two-col">
+      ${renderHeatmap(b.trials)}
+      ${renderDimensionPreference(b.evaluations)}
+    </div>
+    <p class="note"><b>两个刻度，两个问题。</b>左表是<b>幅度</b>：每份输出单独打的 1–5 分，看差距有多大。右表是<b>方向</b>：捉对比较里谁被偏好，0–100。成对是零和的，分母只有每个候选参与的对局数——<code>0</code> 意味「每场都输」，不是「输出差」，<code>100</code> 同理。两者可以同时为真：一个候选可能每场都略输（方向 0），绝对分却只差 1 分（幅度 4.0 对 5.0）。</p>
   </section>
-
-  ${renderDimensionPreference(b.evaluations)}
 
   ${renderDuels(b.evaluations)}
 
