@@ -286,3 +286,13 @@ test("two required checks on one step are rejected rather than silently gated on
   ]);
   assert.throws(() => compileSpec(spec, "x.yaml", sha), /one per step is supported/);
 });
+
+test("judge methods compile onto the suite and default to both", async () => {
+  const both = await loadSpec(CODEGEN);
+  assert.deepEqual(both.judgeMethods, ["pairwise-swap", "absolute-1-5"]);
+
+  const { spec, sha } = await parsePatched([
+    ["    methods: [pairwise-swap, absolute-1-5]", "    methods: [pairwise-swap]"],
+  ]);
+  assert.deepEqual(compileSpec(spec, "x.yaml", sha).judgeMethods, ["pairwise-swap"]);
+});

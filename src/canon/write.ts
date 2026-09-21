@@ -66,6 +66,7 @@ export function buildGaps(
   evaluations: readonly EvaluationRow[],
   integrity?: TraceIntegrity,
   budget?: BudgetState,
+  judgeMethods?: readonly string[],
 ): string {
   const lines: string[] = [
     "# GAPS — fields the protocol wants that this run did not observe",
@@ -109,6 +110,14 @@ export function buildGaps(
       ? `- evaluator errors: ${evaluatorErrors} evaluator invocation(s) failed and are recorded as evaluator_error rows (excluded from candidate rates).`
       : "- evaluator errors: none in this run.",
   );
+  if (judgeMethods && !judgeMethods.includes("absolute-1-5")) {
+    lines.push(
+      "- absolute 1–5 scoring: **not run** — the spec declares `methods` without `absolute-1-5`. Magnitude is therefore not observed at all in this run; the empty score columns are a declaration, not a failure.",
+    );
+  }
+  if (judgeMethods && !judgeMethods.includes("pairwise-swap")) {
+    lines.push("- pairwise judging: **not run** — the spec declares `methods` without `pairwise-swap`. No preference direction is observed in this run.");
+  }
   const saturation = saturationGap(judgeDiscrimination(trials));
   if (saturation !== null) lines.push(saturation);
   lines.push("- pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector does not use pairwise win rate.");
@@ -137,7 +146,13 @@ export async function writeCanonBundle(
     fs.writeFile(path.join(runDir, "recommendation.json"), JSON.stringify(recommendation, null, 2), "utf-8"),
     fs.writeFile(
       path.join(runDir, "GAPS.md"),
-      buildGaps(bundle.trials, bundle.evaluations, bundle.summary.integrity, bundle.summary.budget),
+      buildGaps(
+        bundle.trials,
+        bundle.evaluations,
+        bundle.summary.integrity,
+        bundle.summary.budget,
+        bundle.manifest.judge.methods,
+      ),
       "utf-8",
     ),
   ]);

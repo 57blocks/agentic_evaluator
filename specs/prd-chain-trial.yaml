@@ -91,7 +91,11 @@ evaluators:
     model: google/gemini-3.1-pro-preview
     provider_route: openrouter
     rubric_file: rubrics/prd.md
-    methods: [pairwise-swap, absolute-1-5]
+    # absolute-1-5 is off: with no per-dimension thresholds in the rubrics the
+    # grader returns 5 for everything, and on one run it graded the same
+    # prototype-key defect 3 in one run and 5 in another. Pairwise separates
+    # the candidates; absolute only added a third of the bill.
+    methods: [pairwise-swap]
 
 execution:
   trials_per_case: 1

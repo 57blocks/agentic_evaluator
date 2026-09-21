@@ -24,7 +24,7 @@ export interface RunManifest {
   test_set: { id: string | null; inputs: Record<string, string> };
   candidates: Record<string, CandidateDef>;
   control_candidate: string | null;
-  judge: { model: string; provider_route: string | null };
+  judge: { model: string; provider_route: string | null; methods: string[] };
   evaluators: {
     required_checks: string[];
     check_version: string | null;
@@ -96,7 +96,11 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     test_set: { id: suite.testSetId ?? null, inputs: m.inputShas },
     candidates: suite.candidateDefs ?? {},
     control_candidate: suite.controlCandidate ?? null,
-    judge: { model: suite.judge, provider_route: "openrouter" },
+    judge: {
+      model: suite.judge,
+      provider_route: "openrouter",
+      methods: suite.judgeMethods ?? ["pairwise-swap", "absolute-1-5"],
+    },
     evaluators: {
       required_checks: suite.requiredChecks ?? [],
       check_version: m.checkVersion,
