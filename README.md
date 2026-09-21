@@ -43,7 +43,7 @@ runs/<runId>/
 ```bash
 pnpm install
 cp ../agentic-builder/.env.local .env.local        # OPENROUTER_API_KEY=...
-pnpm run check-models -- specs/codegen-w38.yaml    # every model routable? prices?
+pnpm run check-models specs/codegen-w38.yaml       # reachable from here? prices?
 pnpm run run -- --suite specs/codegen-w38.yaml --html          # preview only
 caffeinate -i pnpm run run -- --suite specs/codegen-w38.yaml --html --yes    # execute
 pnpm run report runs/<runId>                                    # re-render report.html
