@@ -54,11 +54,13 @@ import { sha256, short, trialHash } from "./canon/hash.js";
 import { classifyCompletion } from "./canon/states.js";
 import { openTrace, traceIntegrity } from "./canon/trace.js";
 import { buildManifest } from "./canon/manifest.js";
-import { buildLedger } from "./canon/cost.js";
+import { buildLedger, type CostLedger } from "./canon/cost.js";
+import { buildWorkflowRecord, workflowGaps, type WorkflowStepInput } from "./canon/workflow.js";
 import { directionality, ratesFor } from "./canon/rates.js";
 import { evaluationCoverage, writeCanonBundle, writeManifest } from "./canon/write.js";
 import { resolveEligibility, type Recommendation } from "./canon/select.js";
 import { writeRunReport } from "./report-v2.js";
+import { writeWorkflowReport } from "./report-workflow.js";
 import {
   toEvaluationRows,
   toTrialRows,
@@ -737,7 +739,7 @@ async function executeSuite(params: {
   html: boolean;
   reuse: boolean;
   generatedAt: string;
-}): Promise<{ report: Report; recommendation: Recommendation; trials: number; ledgerTotal: number }> {
+}): Promise<{ report: Report; recommendation: Recommendation; trials: number; ledgerTotal: number; ledger: CostLedger }> {
   const { suite, outDir, runId, html, reuse, generatedAt } = params;
   const producer: ProducerKind = suite.producer ?? "prompt";
   const rubric = await fs.readFile(path.resolve(REPO_ROOT, suite.rubricFile), "utf-8");
@@ -865,17 +867,9 @@ async function executeSuite(params: {
   console.log(
     `✔ ${path.relative(runsDir(), outDir)}/ — ${trials.length} trials, ${evaluations.length} evaluator rows, ${traceRows} trace events, ledger total $${ledger.total.toFixed(4)} (${ledger.source}), recommend ${recommendation.chosen ?? "none"} (${recommendation.firmness})${html ? ", report.html" : ""}`,
   );
-  return { report, recommendation, trials: trials.length, ledgerTotal: ledger.total };
+  return { report, recommendation, trials: trials.length, ledgerTotal: ledger.total, ledger };
 }
 
-interface WorkflowStepSummary {
-  id: string;
-  dir: string;
-  chosen: string | null;
-  firmness: string;
-  trials: number;
-  ledger_total: number;
-}
 
 /** Single-step: runs/<runId>/. Multi-step: runs/<runId>/<stepId>/ (runId tagged with the step). */
 function stepLayout(
@@ -1140,7 +1134,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
   const root = path.join(runsDir(), runId);
   if (nested) await fs.mkdir(root, { recursive: true });
 
-  const steps: WorkflowStepSummary[] = [];
+  const steps: WorkflowStepInput[] = [];
   let last: Report | null = null;
   for (const suite of suites) {
     const layout = stepLayout(root, runId, suite.step, nested);
@@ -1157,10 +1151,14 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
       steps.push({
         id: suite.step,
         dir: layout.dir,
+        operatingMode: done.recommendation.operating_mode,
         chosen: done.recommendation.chosen,
         firmness: done.recommendation.firmness,
+        eligible: done.recommendation.eligible,
+        gated: done.recommendation.filters.flatMap((f) => f.removed),
         trials: done.trials,
-        ledger_total: done.ledgerTotal,
+        ledger: done.ledger,
+        gaps: await fs.readFile(path.join(layout.outDir, "GAPS.md"), "utf-8").catch(() => ""),
       });
     }
   }
@@ -1169,53 +1167,46 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
     const chosenByStep = Object.fromEntries(steps.map((s) => [s.id, s.chosen]));
     const e2e = await maybeRunE2eValidation({ suites, root, runId, chosenByStep });
     const control = e2e?.control ?? null;
-    await fs.writeFile(
-      path.join(root, "workflow.json"),
-      JSON.stringify(
-        {
-          protocol_version: suites[0].protocolVersion ?? "0.4",
-          run_id: runId,
-          run_name: runName,
-          handoff: control !== null,
-          e2e_control: control
-            ? {
-                candidate: control.candidate,
-                chain: control.chain,
-                success: control.totals.success,
-                failure: control.totals.failure,
-                undetermined: control.totals.undetermined,
-                cost_usd: control.totals.cost_usd,
-              }
-            : null,
-          e2e_proposed: e2e?.proposed
-            ? {
-                assignment: e2e.proposed.assignment,
-                success: e2e.proposed.totals.success,
-                failure: e2e.proposed.totals.failure,
-                undetermined: e2e.proposed.totals.undetermined,
-                cost_usd: e2e.proposed.totals.cost_usd,
-              }
-            : null,
-          e2e_validation: e2e?.validation
-            ? {
-                verdict: e2e.validation.verdict,
-                firmness: e2e.validation.firmness,
-                assignment: e2e.validation.assignment,
-                deltas: e2e.validation.deltas,
-              }
-            : null,
-          steps,
-        },
-        null,
-        2,
-      ),
-      "utf-8",
-    );
+    const record = buildWorkflowRecord({
+      protocolVersion: suites[0].protocolVersion ?? "0.4",
+      runId,
+      runName,
+      steps,
+      control: control
+        ? {
+            kind: "control",
+            candidate: control.candidate,
+            assignment: control.assignment,
+            chain: control.chain,
+            cases: control.totals.cases,
+            success: control.totals.success,
+            failure: control.totals.failure,
+            undetermined: control.totals.undetermined,
+            cost_usd: control.totals.cost_usd,
+          }
+        : null,
+      proposed: e2e?.proposed
+        ? {
+            kind: "proposed",
+            assignment: e2e.proposed.assignment,
+            chain: e2e.proposed.chain,
+            cases: e2e.proposed.totals.cases,
+            success: e2e.proposed.totals.success,
+            failure: e2e.proposed.totals.failure,
+            undetermined: e2e.proposed.totals.undetermined,
+            cost_usd: e2e.proposed.totals.cost_usd,
+          }
+        : null,
+      validation: e2e?.validation ?? null,
+    });
+    await fs.writeFile(path.join(root, "workflow.json"), JSON.stringify(record, null, 2), "utf-8");
+    await fs.writeFile(path.join(root, "GAPS.md"), workflowGaps(steps, record.e2e_validation), "utf-8");
+    if (html) await writeWorkflowReport(root);
     const picks = steps.map((s) => `${s.id}:${s.chosen ?? "none"}`).join(", ");
     const e2eBit = control
       ? ` · e2e ${control.candidate} ${control.totals.success}/${control.totals.cases}${e2e?.validation ? ` · ${e2e.validation.verdict}` : ""}`
       : " · no handoff";
-    console.log(`✔ runs/${runId}/ — ${steps.length} independent steps${e2eBit} · ${picks}`);
+    console.log(`✔ runs/${runId}/ — ${steps.length} independent steps${e2eBit} · ${picks} · total $${record.ledger.total.toFixed(4)}${html ? ", report.html" : ""}`);
   }
   return last;
 }

@@ -22,8 +22,11 @@ runs/<runId>/
   raw/ records.json report.json report.md     legacy layer, aggregate unchanged
 ```
 
-A multi-step spec writes each step under `runs/<runId>/<stepId>/` plus
-`workflow.json` at the root. When steps declare `input_from`, the run also
+A multi-step spec writes each step under `runs/<runId>/<stepId>/` plus, at the
+root, `workflow.json` (per-step recommendations, the whole-workflow ledger and
+the validation verdict), a workflow `GAPS.md` collected from the steps, and
+`report.html` — the workflow page, the only view of the §8 verdict, both arms
+and what was not compared. When steps declare `input_from`, the run also
 validates the workflow end to end (protocol §8):
 
 ```
@@ -80,7 +83,8 @@ src/spec/             YAML spec loader + JSON Schema + semantic checks
 src/canon/            protocol layer: states, success decision, hash, usage, cost, trace,
                       manifest, rows, adapt, rates, write
 src/html.ts           escapeHtml — the only thing both report layers share
-src/report-v2.ts      canonical report page (+ report-charts, report-evidence)
+src/report-v2.ts      canonical step report page (+ report-charts, report-evidence)
+src/report-workflow.ts canonical workflow page: verdict, arms, per-step links, ledger
 src/render.ts         legacy renderer for report.ts + dashboard.ts (frozen)
 src/demo/             local read-only UI (`pnpm run demo`)
 tests/                node:test; parity uses tests/legacy-aggregate.ts (pristine oracle)
@@ -109,8 +113,11 @@ they have different fates:
    and the workflow level has no page at all.
 
 **Retirement gate.** Delete the legacy renderer and stop writing the legacy
-outputs when (a) a canonical workflow-level page covers what `dashboard.ts`
-shows, and (b) parity holds on every fixture. Until then both are written.
+outputs when (a) a canonical page covers what `dashboard.ts` shows, and (b)
+parity holds on every fixture. `report-workflow.ts` closes half of (a): it
+renders the steps of **one** run. `dashboard.ts` does something else — it scans
+the whole results directory and keeps the newest run per step, a cross-*run*
+view that no canonical page has yet. Until then both are written.
 `summarize.ts` writes an LLM-authored verdict; it is commentary, never a
 recommendation, and must not enter the canonical report.
 
