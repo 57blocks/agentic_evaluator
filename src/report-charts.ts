@@ -12,7 +12,7 @@
  */
 
 import type { TrialRow } from "./canon/rows.js";
-import { escapeHtml } from "./render.js";
+import { escapeHtml } from "./html.js";
 
 /** All-pairs forms (radar) cap at three series; past that the shape is noise. */
 const RADAR_MAX_SERIES = 3;

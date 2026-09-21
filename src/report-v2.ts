@@ -20,7 +20,7 @@ import type { RunManifest } from "./canon/manifest.js";
 import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { CanonSummary } from "./canon/write.js";
 import { recommendFromCanon, type Recommendation } from "./canon/select.js";
-import { escapeHtml } from "./render.js";
+import { escapeHtml } from "./html.js";
 import { CHART_STYLES, renderHeatmap, renderRadar, renderTrialStrip } from "./report-charts.js";
 import {
   EVIDENCE_STYLES,

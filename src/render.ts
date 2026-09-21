@@ -9,6 +9,7 @@
  * tables inside an `overflow-x:auto` container, and every dynamic value escaped.
  */
 
+import { escapeHtml } from "./html.js";
 import type { Report, RunRecord, Scorecard, Judgement, Winner } from "./types.js";
 import type { AiSummary } from "./summarize.js";
 import {
@@ -28,12 +29,8 @@ export { type Lang, dimLabel, caveatHtml, CAVEAT_MD } from "./i18n.js";
 /** records.json shape — a RunRecord with the raw output text stripped. */
 export type RunRecordLite = Omit<RunRecord, "text">;
 
-export function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
+// Lives in html.ts so the canonical pages do not depend on this module.
+export { escapeHtml } from "./html.js";
 
 // ── formatting helpers ──────────────────────────────────────────────────────
 
