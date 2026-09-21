@@ -145,3 +145,136 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
     );
   });
 }
+
+/* ── command checks ─────────────────────────────────────────────────────────
+ *
+ * A declared program is how a step that is not codegen gets a deterministic
+ * gate. The contract is deliberately small so a check can be a ten-line
+ * script:
+ *
+ *   work dir     the trial's own directory, already holding the candidate's
+ *                parsed artifacts (if any), plus:
+ *                  output.txt  the deliverable text
+ *                  input.txt   this test case's input
+ *                  meta.json   { step, candidate, input, trial }
+ *   cwd          the work dir
+ *   exit 0       pass
+ *   exit 1       fail — the candidate did not satisfy the check
+ *   anything else, a spawn failure, or a timeout → evaluator_error, which is
+ *                NEVER counted as a candidate failure (protocol §5)
+ *   stdout       optional JSON {"evidence": "...", "reason": "..."}; plain
+ *                text is kept verbatim as the evidence instead
+ *
+ * The command runs on this host with the caller's privileges. Until the
+ * Docker sandbox lands, only declare checks you would run yourself.
+ */
+
+const COMMAND_EXIT_PASS = 0;
+const COMMAND_EXIT_FAIL = 1;
+
+/** Version = the argv plus the contents of every declared version file. */
+export async function commandCheckVersion(
+  argv: readonly string[],
+  versionFiles: readonly string[],
+): Promise<string> {
+  const parts = await Promise.all(
+    [...versionFiles].sort().map(async (rel) => {
+      const content = await fs.readFile(path.resolve(REPO_ROOT, rel), "utf-8").catch(() => "<missing>");
+      return `${rel}:${sha256(content)}`;
+    }),
+  );
+  return `cmd-${short(sha256(argv.join(" ")))}+files-${short(sha256(parts.join("\n")))}`;
+}
+
+/** Pull evidence out of the check's stdout, JSON or not. */
+function evidenceOf(stdout: string): { evidence: string; reason?: string } {
+  const text = stdout.trim();
+  if (!text.startsWith("{")) return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
+  try {
+    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown };
+    return {
+      evidence: typeof parsed.evidence === "string" ? parsed.evidence.slice(0, MAX_OUTPUT_CHARS) : text.slice(0, MAX_OUTPUT_CHARS),
+      ...(typeof parsed.reason === "string" ? { reason: parsed.reason } : {}),
+    };
+  } catch {
+    return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
+  }
+}
+
+export async function runCommandCheck(params: {
+  argv: readonly string[];
+  versionFiles: readonly string[];
+  timeoutMs: number;
+  files: readonly CheckFile[];
+  /** The deliverable text, for checks that grade prose or JSON rather than files. */
+  output: string;
+  input: string;
+  meta: { step: string; candidate: string; input: string; trial: number };
+  workDir: string;
+}): Promise<CheckResult> {
+  const version = await commandCheckVersion(params.argv, params.versionFiles);
+  try {
+    await fs.mkdir(params.workDir, { recursive: true });
+    await Promise.all([
+      ...params.files.map(async (f) => {
+        const dest = path.join(params.workDir, f.path.replace(/^[/\\]+/, ""));
+        await fs.mkdir(path.dirname(dest), { recursive: true });
+        await fs.writeFile(dest, f.content, "utf-8");
+      }),
+      fs.writeFile(path.join(params.workDir, "output.txt"), params.output, "utf-8"),
+      fs.writeFile(path.join(params.workDir, "input.txt"), params.input, "utf-8"),
+      fs.writeFile(path.join(params.workDir, "meta.json"), JSON.stringify(params.meta, null, 2), "utf-8"),
+    ]);
+  } catch (err) {
+    return {
+      state: "evaluator_error",
+      passed: false,
+      exitCode: -1,
+      output: err instanceof Error ? err.message : String(err),
+      version,
+      reason: "could not materialize work dir",
+    };
+  }
+
+  const [program, ...args] = params.argv;
+  return new Promise((resolve) => {
+    execFile(
+      program,
+      args,
+      { cwd: params.workDir, timeout: params.timeoutMs, maxBuffer: 20 * 1024 * 1024 },
+      (error, stdout, stderr) => {
+        const { evidence, reason } = evidenceOf(`${stdout ?? ""}`);
+        const errText = `${stderr ?? ""}`.trim().slice(0, MAX_OUTPUT_CHARS);
+        if (!error) {
+          resolve({ state: "pass", passed: true, exitCode: COMMAND_EXIT_PASS, output: evidence, version, ...(reason ? { reason } : {}) });
+          return;
+        }
+        const e = error as NodeJS.ErrnoException & { killed?: boolean; code?: unknown };
+        if (typeof e.code === "number" && e.code === COMMAND_EXIT_FAIL) {
+          resolve({
+            state: "fail",
+            passed: false,
+            exitCode: COMMAND_EXIT_FAIL,
+            output: evidence || errText,
+            version,
+            ...(reason ? { reason } : {}),
+          });
+          return;
+        }
+        const why = e.killed
+          ? `check timed out after ${params.timeoutMs}ms`
+          : e.code === "ENOENT"
+            ? `check program not found: ${program}`
+            : `check exited with ${String(e.code)}`;
+        resolve({
+          state: "evaluator_error",
+          passed: false,
+          exitCode: typeof e.code === "number" ? e.code : -1,
+          output: errText || evidence || why,
+          version,
+          reason: why,
+        });
+      },
+    );
+  });
+}

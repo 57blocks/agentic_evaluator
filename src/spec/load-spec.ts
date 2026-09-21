@@ -19,6 +19,8 @@ import { adapterIdOf } from "../adapters/types.js";
 import { orderControlChain } from "../canon/e2e.js";
 import { sha256 } from "../canon/hash.js";
 import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
+import type { CheckConfig } from "../types.js";
+import { TSC_CHECK_ID } from "../check.js";
 import { REPO_ROOT } from "../paths.js";
 import type { Suite } from "../types.js";
 import { SPEC_SCHEMA } from "./schema.js";
@@ -56,7 +58,16 @@ export interface EvalSpec {
   };
   candidates: CandidateDef[];
   evaluators: {
-    required_checks?: Record<string, { kind: "tsc"; scaffold_dir?: string }>;
+    required_checks?: Record<
+      string,
+      {
+        kind: "tsc" | "command";
+        scaffold_dir?: string;
+        argv?: string[];
+        version_files?: string[];
+        timeout_seconds?: number;
+      }
+    >;
     judge: { model: string; provider_route?: string; rubric_file: string; methods?: string[] };
   };
   execution: {
@@ -222,6 +233,46 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
   }
 }
 
+const DEFAULT_CHECK_TIMEOUT_S = 120;
+
+/**
+ * The step's required check, resolved against the evaluator definitions.
+ *
+ * One per step: the trial record carries a single check result, so a second
+ * one would be silently dropped. Rejecting it is better than gating on
+ * whichever happened to be found first.
+ */
+function compileCheck(
+  spec: EvalSpec,
+  specPath: string,
+  stepId: string,
+  requiredChecks: readonly string[],
+): CheckConfig | undefined {
+  if (requiredChecks.length === 0) return undefined;
+  if (requiredChecks.length > 1) {
+    throw specError(
+      specPath,
+      `step "${stepId}" declares ${requiredChecks.length} required checks (${requiredChecks.join(", ")}); one per step is supported`,
+    );
+  }
+  const id = requiredChecks[0];
+  const def = spec.evaluators.required_checks?.[id];
+  if (!def) throw specError(specPath, `step "${stepId}" required check "${id}" has no evaluator definition`);
+  if (def.kind === "tsc") {
+    return { id, kind: "tsc", scaffoldDir: def.scaffold_dir ?? "scaffold" };
+  }
+  if (!def.argv || def.argv.length === 0) {
+    throw specError(specPath, `required check "${id}" is kind: command and must declare argv`);
+  }
+  return {
+    id,
+    kind: "command",
+    argv: [...def.argv],
+    versionFiles: [...(def.version_files ?? [])],
+    timeoutMs: (def.timeout_seconds ?? DEFAULT_CHECK_TIMEOUT_S) * 1000,
+  };
+}
+
 function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, step: EvalStep): Suite {
   const harness = spec["x-harness"]!;
   const { producer, promptFile, rubricFile } = stepOverrides(step, spec);
@@ -231,9 +282,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, step:
     if (wanted.has(c.id)) candidateDefs[c.id] = { ...c, adapter: adapterIdOf(c, producer) };
   }
   const requiredChecks = step.required_checks ?? [];
-  const tscCheck = requiredChecks
-    .map((id) => spec.evaluators.required_checks?.[id])
-    .find((def) => def?.kind === "tsc");
+  const check = compileCheck(spec, specPath, step.id, requiredChecks);
 
   return {
     suiteId: spec.run_name,
@@ -249,7 +298,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, step:
     timeoutMs: step.maximum_completion_time_seconds
       ? step.maximum_completion_time_seconds * 1000
       : DEFAULT_TIMEOUT_MS,
-    check: tscCheck ? { scaffoldDir: tscCheck.scaffold_dir ?? "scaffold" } : undefined,
+    check,
     dimensions: step.judged_dimensions ?? [],
 
     candidateDefs,
@@ -300,7 +349,13 @@ export async function loadSpec(specPath: string): Promise<Suite> {
 export async function loadLegacySuite(suitePath: string): Promise<Suite> {
   const abs = path.resolve(REPO_ROOT, suitePath);
   const text = await fs.readFile(abs, "utf-8");
-  const suite = JSON.parse(text) as Suite;
+  const parsed = JSON.parse(text) as Suite & { check?: { scaffoldDir?: string } };
+  // Legacy JSON carries a bare { scaffoldDir }; give it the id and kind the
+  // canonical layer now expects without touching the files on disk.
+  const suite: Suite = {
+    ...parsed,
+    check: parsed.check ? { id: TSC_CHECK_ID, kind: "tsc", scaffoldDir: parsed.check.scaffoldDir ?? "scaffold" } : undefined,
+  };
   const candidateDefs: Record<string, CandidateDef> = {};
   for (const model of suite.candidates) {
     candidateDefs[model] = {
@@ -313,7 +368,7 @@ export async function loadLegacySuite(suitePath: string): Promise<Suite> {
   return {
     ...suite,
     candidateDefs,
-    requiredChecks: suite.check ? ["tsc-noemit"] : [],
+    requiredChecks: suite.check ? [TSC_CHECK_ID] : [],
     successCriteria: suite.check ? { mandatory_checks: "all" } : undefined,
     benchmarkMode: "capability-neutral",
     cacheMode: "cold",

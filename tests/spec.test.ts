@@ -22,7 +22,7 @@ test("codegen spec compiles to a Suite with candidate ids, not model ids", async
   assert.equal(suite.candidateDefs?.["sonnet-5"].adapter, "codegen");
   assert.equal(suite.judge, "google/gemini-3.1-pro-preview");
   assert.deepEqual(suite.requiredChecks, ["tsc-noemit"]);
-  assert.equal(suite.check?.scaffoldDir, "scaffold");
+  assert.deepEqual(suite.check, { id: "tsc-noemit", kind: "tsc", scaffoldDir: "scaffold" });
   assert.equal(suite.trials, 3);
   assert.equal(suite.timeoutMs, 180_000);
   assert.equal(suite.mmd, null);
@@ -56,7 +56,7 @@ test("prd spec is an independent prd → taskbreakdown → codegen pipeline", as
   assert.equal(code.rubricFile, "rubrics/codegen.md");
   assert.deepEqual(code.inputs, ["code-utils", "code-component", "code-schema"]);
   assert.deepEqual(code.requiredChecks, ["tsc-noemit"]);
-  assert.equal(code.check?.scaffoldDir, "scaffold");
+  assert.deepEqual(code.check, { id: "tsc-noemit", kind: "tsc", scaffoldDir: "scaffold" });
   assert.equal(code.operatingMode, "lowest-cost");
   assert.equal(code.candidateDefs?.["sonnet-5"].adapter, "codegen");
   assert.equal(suites[0].candidateDefs?.["sonnet-5"].adapter, "model-api");
@@ -247,4 +247,42 @@ x-harness:
 `;
   const spec = parseSpec(text, "x.yaml");
   assert.throws(() => compileWorkflow(spec, "x.yaml", sha256(text)), /producer "prompt" needs prompt_file/);
+});
+
+test("a command check compiles with its argv, version files and timeout", async () => {
+  const { spec, sha } = await parsePatched([
+    [
+      "  required_checks:\n    tsc-noemit:",
+      "  required_checks:\n    task-coverage:\n      kind: command\n      argv: [\"node\", \"checks/task-coverage.mjs\"]\n      version_files: [checks/task-coverage.mjs]\n      timeout_seconds: 30\n    tsc-noemit:",
+    ],
+    ["required_checks: [tsc-noemit]", "required_checks: [task-coverage]"],
+  ]);
+
+  const suite = compileSpec(spec, "x.yaml", sha);
+
+  assert.deepEqual(suite.check, {
+    id: "task-coverage",
+    kind: "command",
+    argv: ["node", "checks/task-coverage.mjs"],
+    versionFiles: ["checks/task-coverage.mjs"],
+    timeoutMs: 30_000,
+  });
+});
+
+test("a command check without argv is rejected at load time", async () => {
+  const { spec, sha } = await parsePatched([
+    ["      kind: tsc\n      scaffold_dir: scaffold", "      kind: command"],
+  ]);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha), /must declare argv/);
+});
+
+test("two required checks on one step are rejected rather than silently gated on one", async () => {
+  const { spec, sha } = await parsePatched([
+    [
+      "  required_checks:\n    tsc-noemit:",
+      "  required_checks:\n    task-coverage:\n      kind: command\n      argv: [\"node\", \"checks/task-coverage.mjs\"]\n    tsc-noemit:",
+    ],
+    ["required_checks: [tsc-noemit]", "required_checks: [tsc-noemit, task-coverage]"],
+  ]);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha), /one per step is supported/);
 });

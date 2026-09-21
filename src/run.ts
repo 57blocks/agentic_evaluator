@@ -26,7 +26,7 @@ import type { ArtifactFile } from "./adapters/types.js";
 import { deliverableText, parsedUnitsFor } from "./adapters/deliverable.js";
 import { judgePair, judgePromptTemplateSha, PAIRWISE_EVALUATOR_ID, type JudgedPair } from "./judge.js";
 import { scoreOne, scorePromptTemplateSha, ABSOLUTE_EVALUATOR_ID } from "./score.js";
-import { checkVersion as tscCheckVersion, TSC_CHECK_ID } from "./check.js";
+import { checkVersion as tscCheckVersion, commandCheckVersion, TSC_CHECK_ID } from "./check.js";
 import { renderMarkdown, renderHtml } from "./report.js";
 import { loadSuites } from "./spec/load-spec.js";
 import {
@@ -248,12 +248,29 @@ async function generateOne(params: {
     parsedUnits: parsedUnitsFor(adapter.id, result.artifacts, suite.check !== undefined),
   };
   if (!suite.check) return out;
-  const { runCheck } = await import("./check.js");
-  const check = await runCheck({
-    files: result.artifacts,
-    scaffoldDir: path.resolve(REPO_ROOT, suite.check.scaffoldDir),
-    workDir: params.checkWorkDir,
-  });
+  const { runCheck, runCommandCheck } = await import("./check.js");
+  const check =
+    suite.check.kind === "tsc"
+      ? await runCheck({
+          files: result.artifacts,
+          scaffoldDir: path.resolve(REPO_ROOT, suite.check.scaffoldDir),
+          workDir: params.checkWorkDir,
+        })
+      : await runCommandCheck({
+          argv: suite.check.argv,
+          versionFiles: suite.check.versionFiles,
+          timeoutMs: suite.check.timeoutMs,
+          files: result.artifacts,
+          output: out.text,
+          input: params.inputText,
+          meta: {
+            step: suite.step,
+            candidate: params.def.id,
+            input: params.inputSlug,
+            trial: Number(params.traceContext.trial ?? 0),
+          },
+          workDir: params.checkWorkDir,
+        });
   return {
     ...out,
     checkPassed: check.passed,
@@ -763,7 +780,11 @@ async function executeSuite(params: {
   const rubricSha = sha256(rubric);
   const judgeTplSha = judgePromptTemplateSha(rubric, dimensions);
   const scoreTplSha = scorePromptTemplateSha(rubric, dimensions);
-  const checkVersion = suite.check ? await tscCheckVersion(path.resolve(REPO_ROOT, suite.check.scaffoldDir)) : null;
+  const checkVersion = !suite.check
+    ? null
+    : suite.check.kind === "tsc"
+      ? await tscCheckVersion(path.resolve(REPO_ROOT, suite.check.scaffoldDir))
+      : await commandCheckVersion(suite.check.argv, suite.check.versionFiles);
   const manifest = await buildManifest(suite, {
     runId,
     startedAt: generatedAt,
@@ -824,7 +845,7 @@ async function executeSuite(params: {
     step: suite.step,
     requiredChecks: suite.requiredChecks ?? [],
     successCriteria: suite.successCriteria,
-    checkId: TSC_CHECK_ID,
+    checkId: suite.check?.id ?? TSC_CHECK_ID,
     pairwiseId: PAIRWISE_EVALUATOR_ID,
     absoluteId: ABSOLUTE_EVALUATOR_ID,
     versions: {
@@ -958,7 +979,7 @@ async function openArmRunner(params: {
       const checks =
         g.checkState === undefined
           ? []
-          : [{ evaluator: TSC_CHECK_ID, version: g.checkVersion ?? "unknown", state: g.checkState }];
+          : [{ evaluator: step.check?.id ?? TSC_CHECK_ID, version: g.checkVersion ?? "unknown", state: g.checkState }];
       console.log(`  ${verdict.state.padEnd(8)} ${step.step} · ${candidate} · ${inputSlug} · t${trial}`);
       return {
         completion_state: verdict.state,

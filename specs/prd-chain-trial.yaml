@@ -3,10 +3,11 @@
 # shape of the evidence, not to decide anything: with one input per step every
 # result is directional by construction.
 #
-# PRD and taskbreakdown declare no deterministic check, so task_outcome stays
-# undetermined there and the ranking rests on the judge — hence
-# operating_mode: judge-preference, which says so out loud. Codegen gates on
-# tsc and picks by cost among candidates that compile.
+# PRD still declares no deterministic check, so task_outcome stays undetermined
+# there and the ranking rests on the judge — hence operating_mode:
+# judge-preference, which says so out loud. Taskbreakdown gates on
+# checks/task-coverage.mjs and codegen on tsc; both pick by cost among the
+# candidates that pass.
 
 protocol_version: "0.4"
 run_name: prd-chain-trial
@@ -38,9 +39,14 @@ workflow:
         id: compact-prd-v1
         inputs: [todo-app.tb]
       candidate_ids: [sonnet-5, deepseek-v4-pro]
-      required_checks: []
+      # The deterministic gate this step used to lack: every task must cite a
+      # requirement the PRD actually defines, and every requirement must be
+      # covered. Without it task_outcome could only ever be undetermined.
+      required_checks: [task-coverage]
       judged_dimensions: [granularity, dependencies, verifiability, faithfulness, actionability]
-      operating_mode: judge-preference
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
       maximum_completion_time_seconds: 600
 
     - id: codegen
@@ -76,6 +82,11 @@ evaluators:
     tsc-noemit:
       kind: tsc
       scaffold_dir: scaffold
+    task-coverage:
+      kind: command
+      argv: ["node", "checks/task-coverage.mjs"]
+      version_files: [checks/task-coverage.mjs]
+      timeout_seconds: 30
   judge:
     model: google/gemini-3.1-pro-preview
     provider_route: openrouter
