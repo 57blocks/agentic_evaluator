@@ -53,7 +53,8 @@ test("the ramp spans the 1-5 domain and refuses a missing score", () => {
 });
 
 test("the radar plots at most three profiles and says what it dropped", () => {
-  const many = ["a1", "a2", "a3", "a4"].flatMap((c) => [trial(c, 0, { a: 4, b: 4, c: 4 }, 4)]);
+  // Scores differ per candidate: an all-equal grader draws no radar at all.
+  const many = ["a1", "a2", "a3", "a4"].map((c, i) => trial(c, 0, { a: 2 + i, b: 4, c: 5 - i }, 4));
   const html = renderRadar(many);
   assert.match(html, /另有 1 个候选未画/);
   assert.equal((html.match(/viz-poly/g) ?? []).length, 3);
@@ -88,4 +89,31 @@ test("candidate names are escaped", () => {
   const html = renderHeatmap([trial("<script>", 0, { a: 4, b: 4, c: 4 }, 4)]);
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /&lt;script&gt;/);
+});
+
+test("a saturated grader gets no radar, only a statement of what happened", () => {
+  // Arrange — two candidates, identical scores on every dimension.
+  const trials = [
+    trial("sonnet-5", 0, { completeness: 5, testability: 5, structure: 5 }, 5),
+    trial("deepseek-v4-pro", 0, { completeness: 5, testability: 5, structure: 5 }, 5),
+  ];
+
+  // Act
+  const svg = renderRadar(trials);
+
+  // Assert
+  assert.doesNotMatch(svg, /<polygon class="viz-poly/, "no outline is drawn");
+  assert.match(svg, /没有区分度/);
+});
+
+test("the heatmap flags the columns where every candidate scored alike", () => {
+  const trials = [
+    trial("a", 0, { completeness: 5, testability: 3 }, 4),
+    trial("b", 0, { completeness: 5, testability: 4 }, 4),
+  ];
+
+  const html = renderHeatmap(trials);
+
+  assert.match(html, /completeness <span class="viz-flag">无区分<\/span>/);
+  assert.doesNotMatch(html, /testability <span class="viz-flag">/);
 });

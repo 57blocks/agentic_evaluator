@@ -11,6 +11,7 @@
  * the radar direct-labels every vertex and the heatmap prints its values.
  */
 
+import { judgeDiscrimination } from "./canon/discrimination.js";
 import type { TrialRow } from "./canon/rows.js";
 import { escapeHtml } from "./html.js";
 
@@ -84,6 +85,16 @@ export function renderRadar(trials: readonly TrialRow[]): string {
   const all = profiles(trials);
   const drawable = all.filter((p) => dims.every((d) => p.scores[d] !== null));
   if (dims.length < 3 || drawable.length === 0) return "";
+
+  // Every dimension saturated: the outlines are one shape on top of another.
+  // Drawing it invites reading a profile out of a grader that never varied.
+  const spread = judgeDiscrimination(trials);
+  if (dims.every((d) => spread.saturated.includes(d))) {
+    return `<figure class="viz viz-void">
+    <figcaption>维度轮廓 <span class="hint">未绘制</span></figcaption>
+    <p class="viz-note">每个维度上所有候选得分相同，轮廓会完全重合。绝对打分在这次运行里没有区分度，不画图形以免被读成"势均力敌"。见下方矩阵与 GAPS.md。</p>
+  </figure>`;
+  }
   const series = drawable.slice(0, RADAR_MAX_SERIES);
   const dropped = drawable.length - series.length;
 
@@ -143,7 +154,15 @@ export function renderHeatmap(trials: readonly TrialRow[]): string {
   const rows = profiles(trials);
   if (dims.length === 0 || rows.length === 0) return "";
 
-  const head = dims.map((d) => `<th class="num">${escapeHtml(d)}</th>`).join("");
+  const spread = judgeDiscrimination(trials);
+  const flat = new Set(spread.saturated);
+  const head = dims
+    .map((d) =>
+      flat.has(d)
+        ? `<th class="num viz-flat" title="所有候选同分，无区分度">${escapeHtml(d)} <span class="viz-flag">无区分</span></th>`
+        : `<th class="num">${escapeHtml(d)}</th>`,
+    )
+    .join("");
   const body = rows
     .map((p) => {
       const cells = dims
@@ -167,6 +186,11 @@ export function renderHeatmap(trials: readonly TrialRow[]): string {
     <figcaption>维度得分矩阵 <span class="hint">1–5 绝对分，颜色深浅即分数高低</span></figcaption>
     <table class="viz-heat"><thead><tr><th>候选</th>${head}<th class="num">总分</th></tr></thead><tbody>${body}</tbody></table>
     <div class="viz-scale"><span>1</span>${scale}<span>5</span></div>
+    ${
+      flat.size > 0
+        ? `<p class="viz-note">标注「无区分」的维度上，每个候选拿到的分完全一样——那是打分器没有分辨出差异，不是候选真的相当。这些列不参与推荐。</p>`
+        : ""
+    }
   </figure>`;
 }
 
@@ -228,6 +252,9 @@ export function renderTrialStrip(trials: readonly TrialRow[]): string {
 }
 
 export const CHART_STYLES = `
+.viz-flat{color:var(--warn-fg)}
+.viz-flag{font-size:10px;font-weight:600;background:var(--warn-bg);color:var(--warn-fg);padding:0 5px;border-radius:3px;white-space:nowrap}
+.viz-void .viz-note{margin-top:8px}
 .viz{margin:14px 0 0;padding:0}
 .viz-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;align-items:start}
 .viz figcaption{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:baseline}
