@@ -309,6 +309,17 @@ function pickJudgePreference(
         "no usable judge evidence: no pairwise comparison, and the absolute scores are identical across candidates",
     };
   }
+  // Every comparison a tie and no usable scale: the judge did not separate
+  // them, and picking on id order would dress an arbitrary choice as a verdict.
+  const separated =
+    new Set(judged.map((c) => byCandidate.get(c.candidate)!.win_rate ?? -1)).size > 1;
+  if (judged.length > 1 && !separated && !absoluteDiscriminates) {
+    return {
+      chosen: null,
+      reason: `the judge did not separate the candidates: ${s.wins}–${s.losses}–${s.ties} across ${s.comparisons} comparison(s) for each, and the absolute scores show no discrimination`,
+    };
+  }
+
   return {
     chosen: best.candidate,
     reason: `highest judge preference: ${s.wins}–${s.losses}–${s.ties} over ${s.comparisons} comparison(s), ${absolute}. This ranks one model's opinion, not measured task success.`,

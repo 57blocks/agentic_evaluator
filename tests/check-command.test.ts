@@ -198,3 +198,26 @@ test("a PRD with no requirement ids is an evaluator error, not a silent pass", a
   assert.equal(result.state, "evaluator_error");
   await fs.rm(dir, { recursive: true, force: true });
 });
+
+test("a repo-relative script is resolved against the repo, not the work dir", async () => {
+  // The work dir is a temp directory; "checks/…" only exists under the repo.
+  const dir = await workDir();
+  const result = await run([NODE, "checks/task-coverage.mjs"], dir, {
+    output: JSON.stringify([{ id: "T-1", covers: ["FR-1"] }]),
+    input: "FR-1 add a task.",
+  });
+
+  assert.equal(result.state, "pass");
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test("a declared script that does not exist is an evaluator error, not a failed candidate", async () => {
+  // node exits 1 for "cannot find module" — indistinguishable from our fail
+  // contract, which once marked every candidate as failed.
+  const dir = await workDir();
+  const result = await run([NODE, "checks/not-a-real-check.mjs"], dir);
+
+  assert.equal(result.state, "evaluator_error");
+  assert.match(result.output, /not found under the repo/);
+  await fs.rm(dir, { recursive: true, force: true });
+});

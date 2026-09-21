@@ -17,6 +17,7 @@
  */
 
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { REPO_ROOT } from "./paths.js";
@@ -172,6 +173,34 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
 const COMMAND_EXIT_PASS = 0;
 const COMMAND_EXIT_FAIL = 1;
 
+/**
+ * argv is written relative to the repo (`["node", "checks/x.mjs"]`) but the
+ * command runs with cwd = the trial work dir, so those paths must be resolved
+ * before spawning. A declared script that does not exist is an evaluator
+ * error, caught here: node exits 1 for "cannot find module", which would
+ * otherwise be indistinguishable from the check failing the candidate — and
+ * that is exactly how a broken path once marked every candidate as failed.
+ */
+const SCRIPT_PATH = /^(?:\.{1,2}\/)?[\w.@-]+(?:\/[\w.@-]+)*\.(?:mjs|cjs|js|ts|py|sh)$/;
+
+function looksLikePath(arg: string): boolean {
+  // Deliberately narrow: an inline program (`node -e "a/b"`) is an argument,
+  // not a path, and must not be mistaken for a missing file.
+  return SCRIPT_PATH.test(arg);
+}
+
+export function resolveArgv(argv: readonly string[]): { argv: string[]; missing: string[] } {
+  const missing: string[] = [];
+  const resolved = argv.map((arg) => {
+    if (path.isAbsolute(arg) || !looksLikePath(arg)) return arg;
+    const abs = path.resolve(REPO_ROOT, arg);
+    if (existsSync(abs)) return abs;
+    missing.push(arg);
+    return arg;
+  });
+  return { argv: resolved, missing };
+}
+
 /** Version = the argv plus the contents of every declared version file. */
 export async function commandCheckVersion(
   argv: readonly string[],
@@ -236,7 +265,19 @@ export async function runCommandCheck(params: {
     };
   }
 
-  const [program, ...args] = params.argv;
+  const { argv: resolvedArgv, missing } = resolveArgv(params.argv);
+  if (missing.length > 0) {
+    return {
+      state: "evaluator_error",
+      passed: false,
+      exitCode: -1,
+      output: `declared check path(s) not found under the repo: ${missing.join(", ")}`,
+      version,
+      reason: "check program not found",
+    };
+  }
+
+  const [program, ...args] = resolvedArgv;
   return new Promise((resolve) => {
     execFile(
       program,

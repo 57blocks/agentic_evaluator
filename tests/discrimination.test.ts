@@ -205,3 +205,24 @@ test("the only candidate that produced output is named as such, not as a prefere
   assert.equal(rec.chosen, "sonnet-5");
   assert.match(rec.reasons.join(" "), /last one standing, not a preference/);
 });
+
+test("an all-tie verdict with a flat scale chooses nobody, rather than by id order", () => {
+  // Arrange — the real prd step: one comparison, a tie, every score a 5.
+  const rec = recommend({
+    operatingMode: "judge-preference",
+    controlCandidate: null,
+    requiredChecks: [],
+    mmd: null,
+    directionality: DIRECTIONAL,
+    candidates: [rates("sonnet-5"), rates("deepseek-v4-pro")],
+    judge: [
+      { candidate: "sonnet-5", wins: 0, losses: 0, ties: 1, comparisons: 1, win_rate: 0, absolute_mean: 5, absolute_scored: 1 },
+      { candidate: "deepseek-v4-pro", wins: 0, losses: 0, ties: 1, comparisons: 1, win_rate: 0, absolute_mean: 5, absolute_scored: 1 },
+    ],
+    absoluteDiscriminates: false,
+  });
+
+  assert.equal(rec.chosen, null);
+  assert.equal(rec.firmness, "needs-review");
+  assert.match(rec.reasons.join(" "), /did not separate the candidates/);
+});
