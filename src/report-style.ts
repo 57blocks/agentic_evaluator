@@ -19,7 +19,10 @@ h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em}h1 .id{font-fam
 .verdict.firm{border-left-color:var(--ok-fg)}.verdict.needs-review{border-left-color:var(--bad-fg)}
 .verdict .tag{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
 .verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
-.verdict p{margin:0}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+.verdict p{margin:0}
+.champ-line{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}.champ-line b{font-weight:700}
+.trophy{font-size:18px}
+.champ-facts{margin:3px 0 6px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-2)}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
 section.card{background:var(--surface);border-radius:8px;padding:18px 20px;display:grid;gap:12px}
 section.card h2{margin:0;font-size:15px;font-weight:600;display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
 .table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}

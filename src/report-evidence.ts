@@ -194,6 +194,8 @@ export function renderOutputs(outputs: readonly RawOutput[]): string {
 }
 
 export const EVIDENCE_STYLES = `
+.pref-high{color:var(--ok-fg);font-weight:600}.pref-low{color:var(--ink-3)}
+
 .duel{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin:10px 0}
 .duel header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .duel .evidence{margin:6px 0 10px;color:var(--ink-2)}
@@ -206,3 +208,70 @@ details>summary{cursor:pointer;padding:6px 0;color:var(--ink-2)}
 pre.raw{max-height:460px;overflow:auto;background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-word;font-size:12px}
 .muted{color:var(--ink-3)}
 `;
+
+/**
+ * Dimension preference: per-dimension pairwise win rate, the legacy report's
+ * most useful table and the one the canonical page lacked. A tie counts 0.5,
+ * so a row of 50 means "indistinguishable", not "no data" — an empty cell is
+ * what no data looks like.
+ *
+ * This is judge opinion, shown next to the recommendation, never inside it.
+ */
+export function renderDimensionPreference(evaluations: readonly EvaluationRow[]): string {
+  const duels = evaluations.filter((e) => e.subject.kind === "pair" && e.state === "pass" && e.dimensions);
+  if (duels.length === 0) return "";
+
+  const dims = [...new Set(duels.flatMap((d) => Object.keys(d.dimensions ?? {})))];
+  const tally = new Map<string, Map<string, { points: number; duels: number }>>();
+  const bump = (candidate: string, dim: string, points: number): void => {
+    const row = tally.get(candidate) ?? new Map<string, { points: number; duels: number }>();
+    const cell = row.get(dim) ?? { points: 0, duels: 0 };
+    row.set(dim, { points: cell.points + points, duels: cell.duels + 1 });
+    tally.set(candidate, row);
+  };
+
+  for (const duel of duels) {
+    if (duel.subject.kind !== "pair") continue;
+    const { a, b } = duel.subject;
+    for (const [dim, winner] of Object.entries(duel.dimensions ?? {})) {
+      if (winner !== "a" && winner !== "b" && winner !== "tie") continue;
+      bump(a, dim, winner === "a" ? 1 : winner === "tie" ? 0.5 : 0);
+      bump(b, dim, winner === "b" ? 1 : winner === "tie" ? 0.5 : 0);
+    }
+  }
+
+  const candidates = [...tally.keys()];
+  const rate = (candidate: string, dim: string): number | null => {
+    const cell = tally.get(candidate)?.get(dim);
+    return cell && cell.duels > 0 ? (cell.points / cell.duels) * 100 : null;
+  };
+  const overall = (candidate: string): number => {
+    const cells = [...(tally.get(candidate)?.values() ?? [])];
+    const duelCount = cells.reduce((s, c) => s + c.duels, 0);
+    return duelCount === 0 ? -1 : (cells.reduce((s, c) => s + c.points, 0) / duelCount) * 100;
+  };
+
+  const head = dims.map((d) => `<th class="num">${escapeHtml(d)}</th>`).join("");
+  const rows = [...candidates]
+    .sort((x, y) => overall(y) - overall(x))
+    .map((candidate) => {
+      const cells = dims
+        .map((d) => {
+          const value = rate(candidate, d);
+          if (value === null) return `<td class="num muted">—</td>`;
+          const cls = value >= 66 ? " pref-high" : value <= 33 ? " pref-low" : "";
+          return `<td class="num${cls}">${value.toFixed(0)}</td>`;
+        })
+        .join("");
+      return `<tr><td>${escapeHtml(candidate)}</td>${cells}</tr>`;
+    })
+    .join("");
+
+  return `<section class="card">
+    <h2>维度偏好 <span class="hint">每维度成对胜率（tie 记 0.5）· 裁判意见，不进入推荐</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>候选</th>${head}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  </section>`;
+}
