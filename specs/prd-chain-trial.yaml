@@ -1,0 +1,95 @@
+# Smallest honest run of the three-step pipeline: PRD → task breakdown →
+# codegen, two candidates, one input per step, one trial. Meant to show the
+# shape of the evidence, not to decide anything: with one input per step every
+# result is directional by construction.
+#
+# PRD and taskbreakdown declare no deterministic check, so task_outcome stays
+# undetermined there and the ranking rests on the judge — hence
+# operating_mode: judge-preference, which says so out loud. Codegen gates on
+# tsc and picks by cost among candidates that compile.
+
+protocol_version: "0.4"
+run_name: prd-chain-trial
+budget_usd: 3
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: prd
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/prd.md
+      rubric_file: rubrics/prd.md
+      test_set:
+        id: briefs-v1
+        inputs: [todo-app]
+      candidate_ids: [sonnet-5, deepseek-v4-pro]
+      required_checks: []
+      judged_dimensions: [completeness, testability, no-hallucination, structure]
+      operating_mode: judge-preference
+      maximum_completion_time_seconds: 240
+
+    - id: taskbreakdown
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/taskbreakdown.md
+      rubric_file: rubrics/taskbreakdown.md
+      test_set:
+        id: compact-prd-v1
+        inputs: [todo-app.tb]
+      candidate_ids: [sonnet-5, deepseek-v4-pro]
+      required_checks: []
+      judged_dimensions: [granularity, dependencies, verifiability, faithfulness, actionability]
+      operating_mode: judge-preference
+      maximum_completion_time_seconds: 600
+
+    - id: codegen
+      version: "1"
+      producer: codegen
+      rubric_file: rubrics/codegen.md
+      test_set:
+        id: code-v1
+        inputs: [code-utils]
+      candidate_ids: [sonnet-5, deepseek-v4-pro]
+      required_checks: [tsc-noemit]
+      judged_dimensions: [meets-spec, correctness, type-quality, simplicity, robustness]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 180
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+
+evaluators:
+  required_checks:
+    tsc-noemit:
+      kind: tsc
+      scaffold_dir: scaffold
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/prd.md
+    methods: [pairwise-swap, absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 2
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/prd.md
+  default_temperature: 0.3
