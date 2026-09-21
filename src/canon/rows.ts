@@ -46,7 +46,12 @@ export interface TrialRow {
     absolute_overall: number | null;
     absolute_dimensions: Record<string, number> | null;
   };
-  cost: { generation: number; source: CostSource };
+  cost: {
+    generation: number;
+    /** Transport retries billed before this attempt succeeded or gave up. */
+    retry?: number;
+    source: CostSource;
+  };
   tokens: { prompt: number; completion: number; cached: number | null };
   ms: number;
   ttft_ms: null;
