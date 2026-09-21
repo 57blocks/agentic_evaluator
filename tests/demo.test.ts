@@ -7,6 +7,8 @@ import path from "node:path";
 import { listRuns, listSpecs, loadRun, safeId } from "../src/demo/catalog.js";
 import { createDemoServer, listenDemo, underRoot } from "../src/demo/server.js";
 import { demoPage } from "../src/demo/ui.js";
+import { buildWorkflowRecord } from "../src/canon/workflow.js";
+import { WORKFLOW_LEDGER_FIXTURE, workflowStepFixture } from "./helpers/workflow-fixture.js";
 
 async function get(url: string): Promise<{ status: number; type: string; body: string }> {
   const res = await fetch(url);
@@ -70,6 +72,43 @@ test("loadRun reads a nested workflow directory", async () => {
   assert.equal(view?.handoff, false);
   assert.equal(view?.steps[0].id, "pass-step");
   assert.equal(view?.steps[0].chosen, "fake-pass");
+});
+
+test("the demo opens a run written with the current workflow record", async () => {
+  // Arrange — the record run.ts writes today, not the hand-rolled shape.
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "eval-demo-record-"));
+  await fs.mkdir(path.join(tmp, "wf", "plan"), { recursive: true });
+  const record = buildWorkflowRecord({
+    protocolVersion: "0.4",
+    runId: "wf",
+    runName: "chain",
+    steps: [workflowStepFixture()],
+    control: {
+      kind: "control",
+      candidate: "cand-a",
+      assignment: { plan: "cand-a" },
+      chain: ["plan"],
+      cases: 2,
+      success: 1,
+      failure: 1,
+      undetermined: 0,
+      cost_usd: 0.2,
+    },
+    proposed: null,
+    validation: null,
+  });
+  await fs.writeFile(path.join(tmp, "wf", "workflow.json"), JSON.stringify(record));
+
+  // Act
+  const view = await loadRun("wf", { runsRoot: tmp });
+
+  // Assert — the catalog reads the arm fields its UI renders.
+  assert.equal(view?.kind, "workflow");
+  assert.equal(view?.handoff, true);
+  assert.equal(view?.e2e?.candidate, "cand-a");
+  assert.deepEqual(view?.e2e?.chain, ["plan"]);
+  assert.equal(view?.steps[0].chosen, "cand-a");
+  assert.equal(record.ledger.total, WORKFLOW_LEDGER_FIXTURE.total + 0.2);
 });
 
 test("demo page names the four protocol questions", () => {
