@@ -23,6 +23,20 @@ const SCORE_MAX = 5;
 /** Sequential blue ramp, 100 → 700, light means "near zero". */
 const RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#2a78d6", "#1c5cab", "#104281"];
 
+/**
+ * Diverging tint around a midpoint, as the legacy report coloured its matrix:
+ * green above, red below, and the further from the middle the stronger the
+ * wash. A solid ramp says "big number"; this says "better or worse than the
+ * middle", which is what a grade or a win rate actually means.
+ */
+export function heatTint(value: number | null, min: number, max: number): string {
+  if (value === null) return "";
+  const mid = (min + max) / 2;
+  const dist = Math.min(1, Math.abs(value - mid) / ((max - min) / 2));
+  const alpha = (0.1 + dist * 0.3).toFixed(3);
+  return `background:rgba(${value >= mid ? "34,197,94" : "239,68,68"},${alpha})`;
+}
+
 export interface CandidateProfile {
   candidate: string;
   /** Mean absolute score per dimension; null when that dimension was never scored. */
@@ -168,22 +182,22 @@ export function renderHeatmap(trials: readonly TrialRow[]): string {
       const cells = dims
         .map((d) => {
           const v = p.scores[d];
-          const fill = rampStep(v);
-          if (v === null || fill === null) {
+          if (v === null) {
             return `<td class="viz-cell viz-none" title="${escapeHtml(d)}：未打分">—</td>`;
           }
-          const dark = v >= 3.5;
-          return `<td class="viz-cell${dark ? " viz-on-dark" : ""}" style="background:${fill}" title="${escapeHtml(p.candidate)} · ${escapeHtml(d)}: ${v.toFixed(1)}/5">${v.toFixed(1)}</td>`;
+          return `<td class="viz-cell" style="${heatTint(v, SCORE_MIN, SCORE_MAX)}" title="${escapeHtml(p.candidate)} · ${escapeHtml(d)}: ${v.toFixed(1)}/5">${v.toFixed(1)}</td>`;
         })
         .join("");
       return `<tr><th>${escapeHtml(p.candidate)}</th>${cells}<td class="num">${p.overall === null ? "—" : p.overall.toFixed(1)}</td></tr>`;
     })
     .join("");
 
-  const scale = RAMP.map((c) => `<span class="viz-step" style="background:${c}"></span>`).join("");
+  const scale = [1, 2, 3, 4, 5]
+    .map((v) => `<span class="viz-step" style="${heatTint(v, SCORE_MIN, SCORE_MAX)}"></span>`)
+    .join("");
 
   return `<figure class="viz">
-    <figcaption>维度得分矩阵 <span class="hint">1–5 绝对分，颜色深浅即分数高低</span></figcaption>
+    <figcaption>幅度 · 绝对分 1–5 <span class="hint">高于 3 分偏绿、低于 3 分偏红，越远越浓</span></figcaption>
     <div class="table-wrap"><table class="viz-heat"><thead><tr><th>候选</th>${head}<th class="num">总分</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="viz-scale"><span>1</span>${scale}<span>5</span></div>
     ${

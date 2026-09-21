@@ -13,6 +13,7 @@ import path from "node:path";
 import type { DimensionDetail, EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { Winner } from "./types.js";
 import { escapeHtml } from "./html.js";
+import { heatTint } from "./report-charts.js";
 
 /** Longer outputs are cut for display only; the file on disk stays whole. */
 const MAX_OUTPUT_CHARS = 30_000;
@@ -259,8 +260,7 @@ export function renderDimensionPreference(evaluations: readonly EvaluationRow[])
         .map((d) => {
           const value = rate(candidate, d);
           if (value === null) return `<td class="num muted">—</td>`;
-          const cls = value >= 66 ? " pref-high" : value <= 33 ? " pref-low" : "";
-          return `<td class="num${cls}">${value.toFixed(0)}</td>`;
+          return `<td class="num" style="${heatTint(value, 0, 100)}">${value.toFixed(0)}</td>`;
         })
         .join("");
       return `<tr><td>${escapeHtml(candidate)}</td>${cells}</tr>`;
