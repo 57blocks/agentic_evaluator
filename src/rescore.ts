@@ -22,7 +22,7 @@ import { renderDashboardHtml } from "./dashboard.js";
 import type { RunRecordLite } from "./render.js";
 import type { Report, RunRecord, Suite } from "./types.js";
 
-import { REPO_ROOT, runsDir, suitesDir } from "./paths.js";
+import { REPO_ROOT, listRunDirs, runsDir, suitesDir } from "./paths.js";
 
 /** Steps we know how to map back to `eval/suites/<step>.json`. */
 const STEP_ORDER = ["prd", "trd", "taskbreakdown", "codegen"] as const;
@@ -47,28 +47,17 @@ async function readJson(filePath: string): Promise<unknown | null> {
 }
 
 /** Newest run dir per step under `resultsDir` (dir names sort by embedded ts). */
-async function latestRunDirs(
-  resultsDir: string,
-): Promise<Array<{ step: string; dir: string }>> {
-  let names: string[];
-  try {
-    const entries = await fs.readdir(resultsDir, { withFileTypes: true });
-    names = entries.filter((e) => e.isDirectory()).map((e) => e.name);
-  } catch {
-    return [];
-  }
-  const best = new Map<string, string>();
-  for (const name of names) {
+async function latestRunDirs(): Promise<Array<{ step: string; dir: string }>> {
+  // Across every task's runs/ and the legacy top-level one.
+  const best = new Map<string, { name: string; dir: string }>();
+  for (const { name, dir } of await listRunDirs()) {
     const step = STEP_ORDER.find((s) => name.startsWith(`${s}-`));
     if (!step) continue;
     const cur = best.get(step);
-    if (!cur || name.localeCompare(cur) > 0) best.set(step, name);
+    if (!cur || name.localeCompare(cur.name) > 0) best.set(step, { name, dir });
   }
   // Preserve canonical PDLC order.
-  return STEP_ORDER.filter((s) => best.has(s)).map((step) => ({
-    step,
-    dir: path.join(resultsDir, best.get(step)!),
-  }));
+  return STEP_ORDER.filter((s) => best.has(s)).map((step) => ({ step, dir: best.get(step)!.dir }));
 }
 
 /** Rebuild full RunRecords (with text) from a text-stripped records.json + raw/. */
@@ -166,10 +155,9 @@ async function rescoreDir(
 
 async function main(): Promise<void> {
   await loadEnvLocal();
-  const resultsDir = runsDir();
-  const targets = await latestRunDirs(resultsDir);
+  const targets = await latestRunDirs();
   if (targets.length === 0) {
-    console.error(`No run dirs found under ${path.relative(REPO_ROOT, resultsDir)}/.`);
+    console.error(`No run dirs found under tasks/*/runs/ or ${path.relative(REPO_ROOT, runsDir())}/.`);
     process.exit(1);
   }
 
@@ -189,7 +177,9 @@ async function main(): Promise<void> {
   const ts = new Date().toISOString().replace(/[:.]/g, "-");
   const recordsByStep: Record<string, RunRecordLite[]> = {};
   for (const u of updated) recordsByStep[u.report.step] = u.records;
-  const dashPath = path.join(resultsDir, `dashboard-${ts}.html`);
+  // Spans every task, so the combined dashboard lives in the shared runs/ dir.
+  await fs.mkdir(runsDir(), { recursive: true });
+  const dashPath = path.join(runsDir(), `dashboard-${ts}.html`);
   await fs.writeFile(
     dashPath,
     renderDashboardHtml(updated.map((u) => u.report), recordsByStep),
