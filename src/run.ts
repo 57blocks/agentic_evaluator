@@ -48,7 +48,7 @@ import {
   type E2eArmReport,
   type E2eControlReport,
 } from "./e2e-control.js";
-import { REPO_ROOT, runsDir } from "./paths.js";
+import { REPO_ROOT, listRunDirs, runsDir, runsRootFor, taskInputPath, taskRootOf, resolveTaskAsset } from "./paths.js";
 import { CODEGEN_PREAMBLE, CODEGEN_PRODUCER_VERSION } from "./producers/code-gen.js";
 import { sha256, short, trialHash } from "./canon/hash.js";
 import { classifyCompletion } from "./canon/states.js";
@@ -124,8 +124,14 @@ function parseArgs(argv: string[]): CliArgs {
   return { suite, html, yes };
 }
 
-async function readInput(inputSlug: string): Promise<string> {
-  return fs.readFile(path.join(REPO_ROOT, "inputs", `${inputSlug}.txt`), "utf-8");
+async function readInput(inputSlug: string, taskRoot: string): Promise<string> {
+  const inTask = taskInputPath(taskRoot, inputSlug);
+  try {
+    return await fs.readFile(inTask, "utf-8");
+  } catch {
+    // Pre-migration layout: a shared top-level `inputs/`.
+    return fs.readFile(path.join(REPO_ROOT, "inputs", `${inputSlug}.txt`), "utf-8");
+  }
 }
 
 /** Stable run id shared by the output dir and (for dashboards) reporting. */
@@ -256,12 +262,13 @@ async function generateOne(params: {
     suite.check.kind === "tsc"
       ? await runCheck({
           files: result.artifacts,
-          scaffoldDir: path.resolve(REPO_ROOT, suite.check.scaffoldDir),
+          scaffoldDir: await resolveTaskAsset(taskRootOf(suite), suite.check.scaffoldDir),
           workDir: params.checkWorkDir,
         })
       : await runCommandCheck({
           argv: suite.check.argv,
           versionFiles: suite.check.versionFiles,
+          taskRoot: taskRootOf(suite),
           timeoutMs: suite.check.timeoutMs,
           files: result.artifacts,
           output: out.text,
@@ -310,20 +317,15 @@ async function loadReusable(
   hash: string,
   currentRunId: string,
 ): Promise<{ record: RunRecord; from: string } | null> {
-  let dirNames: string[];
-  try {
-    const entries = await fs.readdir(runsDir(), { withFileTypes: true });
-    dirNames = entries
-      .filter((e) => e.isDirectory() && e.name.startsWith(`${step}-`) && e.name !== currentRunId)
-      .map((e) => e.name)
-      .sort((a, b) => b.localeCompare(a));
-  } catch {
-    return null;
-  }
+  // Every task's runs, not just this one's: `trialHash` is content-addressed,
+  // so a generation produced under another task is the same generation. Nine
+  // specs share `code-utils`; scanning per-task only would re-buy it per task.
+  const candidates = (await listRunDirs())
+    .filter((e) => e.name.startsWith(`${step}-`) && e.name !== currentRunId)
+    .sort((a, b) => b.name.localeCompare(a.name));
 
-  for (const dirName of dirNames) {
+  for (const { dir } of candidates) {
     try {
-      const dir = path.join(runsDir(), dirName);
       const parsed: unknown = JSON.parse(await fs.readFile(path.join(dir, "records.json"), "utf-8"));
       if (!Array.isArray(parsed)) continue;
       const hit = parsed.find(
@@ -344,7 +346,7 @@ async function loadReusable(
       ) {
         continue;
       }
-      return { record: { ...(entry as RunRecord), text, status: "ok" }, from: dirName };
+      return { record: { ...(entry as RunRecord), text, status: "ok" }, from: path.relative(REPO_ROOT, dir) };
     } catch {
       continue;
     }
@@ -795,7 +797,7 @@ async function loadPromptTemplate(
   if (!suite.promptFile) {
     throw new Error(`suite "${suite.suiteId}" step "${suite.step}" uses producer "prompt" but has no promptFile`);
   }
-  const promptTpl = await fs.readFile(path.resolve(REPO_ROOT, suite.promptFile), "utf-8");
+  const promptTpl = await fs.readFile(await resolveTaskAsset(taskRootOf(suite), suite.promptFile), "utf-8");
   return { promptTpl, promptTemplateSha: sha256(promptTpl) };
 }
 
@@ -811,13 +813,13 @@ async function executeSuite(params: {
 }): Promise<{ report: Report; recommendation: Recommendation; trials: number; ledgerTotal: number; ledger: CostLedger }> {
   const { suite, outDir, runId, html, reuse, generatedAt } = params;
   const producer: ProducerKind = suite.producer ?? "prompt";
-  const rubric = await fs.readFile(path.resolve(REPO_ROOT, suite.rubricFile), "utf-8");
+  const rubric = await fs.readFile(await resolveTaskAsset(taskRootOf(suite), suite.rubricFile), "utf-8");
   const { promptTpl, promptTemplateSha } = await loadPromptTemplate(suite, producer);
 
   const inputTextBySlug = new Map<string, string>();
   const inputShas: Record<string, string> = {};
   for (const slug of suite.inputs) {
-    const text = await readInput(slug);
+    const text = await readInput(slug, taskRootOf(suite));
     inputTextBySlug.set(slug, text);
     inputShas[slug] = sha256(text);
   }
@@ -833,8 +835,8 @@ async function executeSuite(params: {
   const checkVersion = !suite.check
     ? null
     : suite.check.kind === "tsc"
-      ? await tscCheckVersion(path.resolve(REPO_ROOT, suite.check.scaffoldDir))
-      : await commandCheckVersion(suite.check.argv, suite.check.versionFiles);
+      ? await tscCheckVersion(await resolveTaskAsset(taskRootOf(suite), suite.check.scaffoldDir))
+      : await commandCheckVersion(suite.check.argv, suite.check.versionFiles, taskRootOf(suite));
   const manifest = await buildManifest(suite, {
     runId,
     startedAt: generatedAt,
@@ -959,7 +961,7 @@ async function executeSuite(params: {
 
   console.log(`\n${md}\n`);
   console.log(
-    `✔ ${path.relative(runsDir(), outDir)}/ — ${trials.length} trials, ${evaluations.length} evaluator rows, ${traceRows} trace events, ledger total $${ledger.total.toFixed(4)} (${ledger.source}), recommend ${recommendation.chosen ?? "none"} (${recommendation.firmness})${html ? ", report.html" : ""}`,
+    `✔ ${path.relative(REPO_ROOT, outDir)}/ — ${trials.length} trials, ${evaluations.length} evaluator rows, ${traceRows} trace events, ledger total $${ledger.total.toFixed(4)} (${ledger.source}), recommend ${recommendation.chosen ?? "none"} (${recommendation.firmness})${html ? ", report.html" : ""}`,
   );
   return { report, recommendation, trials: trials.length, ledgerTotal: ledger.total, ledger };
 }
@@ -1107,7 +1109,7 @@ export async function maybeRunE2eValidation(params: {
   if (!controlCandidate) return null;
 
   const rootInputs = await Promise.all(
-    chain[0].inputs.map(async (slug) => ({ slug, text: await readInput(slug) })),
+    chain[0].inputs.map(async (slug) => ({ slug, text: await readInput(slug, taskRootOf(chain[0])) })),
   );
   const trials = chain[0].trials ?? 2;
 
@@ -1225,7 +1227,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
   const runName = suites[0].runName ?? suites[0].suiteId;
   const runId = `${runName}-${generatedAt.replace(/[:.]/g, "-")}`;
   const nested = suites.length > 1;
-  const root = path.join(runsDir(), runId);
+  const root = path.join(runsRootFor(taskRootOf(suites[0])), runId);
   if (nested) await fs.mkdir(root, { recursive: true });
 
   const budget = new BudgetGuard(suites[0].budgetUsd);

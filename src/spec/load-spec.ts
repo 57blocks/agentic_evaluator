@@ -328,6 +328,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, step:
     concurrency: spec.execution.concurrency,
     specSha,
     specPath,
+    taskRoot: path.dirname(path.resolve(REPO_ROOT, specPath)),
     inputFrom: step.input_from,
   };
 }
@@ -383,6 +384,7 @@ export async function loadLegacySuite(suitePath: string): Promise<Suite> {
     cacheMode: "cold",
     specSha: sha256(text),
     specPath: path.relative(REPO_ROOT, abs),
+    taskRoot: path.dirname(abs),
   };
 }
 

@@ -20,7 +20,7 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { REPO_ROOT } from "./paths.js";
+import { REPO_ROOT, resolveTaskAssetSync } from "./paths.js";
 import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
 
@@ -189,11 +189,14 @@ function looksLikePath(arg: string): boolean {
   return SCRIPT_PATH.test(arg);
 }
 
-export function resolveArgv(argv: readonly string[]): { argv: string[]; missing: string[] } {
+export function resolveArgv(
+  argv: readonly string[],
+  taskRoot: string = REPO_ROOT,
+): { argv: string[]; missing: string[] } {
   const missing: string[] = [];
   const resolved = argv.map((arg) => {
     if (path.isAbsolute(arg) || !looksLikePath(arg)) return arg;
-    const abs = path.resolve(REPO_ROOT, arg);
+    const abs = resolveTaskAssetSync(taskRoot, arg);
     if (existsSync(abs)) return abs;
     missing.push(arg);
     return arg;
@@ -205,10 +208,13 @@ export function resolveArgv(argv: readonly string[]): { argv: string[]; missing:
 export async function commandCheckVersion(
   argv: readonly string[],
   versionFiles: readonly string[],
+  taskRoot: string = REPO_ROOT,
 ): Promise<string> {
   const parts = await Promise.all(
     [...versionFiles].sort().map(async (rel) => {
-      const content = await fs.readFile(path.resolve(REPO_ROOT, rel), "utf-8").catch(() => "<missing>");
+      const content = await fs
+        .readFile(resolveTaskAssetSync(taskRoot, rel), "utf-8")
+        .catch(() => "<missing>");
       return `${rel}:${sha256(content)}`;
     }),
   );
@@ -240,8 +246,11 @@ export async function runCommandCheck(params: {
   input: string;
   meta: { step: string; candidate: string; input: string; trial: number };
   workDir: string;
+  /** Task dir the check's argv and version files resolve against. */
+  taskRoot?: string;
 }): Promise<CheckResult> {
-  const version = await commandCheckVersion(params.argv, params.versionFiles);
+  const taskRoot = params.taskRoot ?? REPO_ROOT;
+  const version = await commandCheckVersion(params.argv, params.versionFiles, taskRoot);
   try {
     await fs.mkdir(params.workDir, { recursive: true });
     await Promise.all([
@@ -265,7 +274,7 @@ export async function runCommandCheck(params: {
     };
   }
 
-  const { argv: resolvedArgv, missing } = resolveArgv(params.argv);
+  const { argv: resolvedArgv, missing } = resolveArgv(params.argv, taskRoot);
   if (missing.length > 0) {
     return {
       state: "evaluator_error",
