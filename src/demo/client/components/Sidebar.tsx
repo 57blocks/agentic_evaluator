@@ -8,8 +8,11 @@ interface Props {
   tasks: TaskView[];
   unfiled: RunView[];
   selected: string | null;
+  /** True when the cross-run overview is showing rather than a task or run. */
+  home: boolean;
   onSelectTask: (task: TaskView) => void;
   onSelectRun: (run: RunView) => void;
+  onSelectHome: () => void;
 }
 
 function TaskItem({ task, selected, onSelectTask, onSelectRun }: {
@@ -68,7 +71,7 @@ function TaskItem({ task, selected, onSelectTask, onSelectRun }: {
   );
 }
 
-export function Sidebar({ tasks, unfiled, selected, onSelectTask, onSelectRun }: Props) {
+export function Sidebar({ tasks, unfiled, selected, home, onSelectTask, onSelectRun, onSelectHome }: Props) {
   const smoke = tasks.filter(isSmokeTask);
   const real = tasks.filter((t) => !isSmokeTask(t));
 
@@ -100,9 +103,22 @@ export function Sidebar({ tasks, unfiled, selected, onSelectTask, onSelectRun }:
         </p>
         <h1 className="text-xl font-semibold">这一步该用谁</h1>
         <p className="text-[13px] text-muted-foreground">
-          不是模型排行榜。推荐绑定步骤、测试集、运行模式。本地只读，不会开跑。
+          不是模型排行榜。推荐绑定步骤、测试集、运行模式。
         </p>
       </div>
+
+      <button
+        type="button"
+        onClick={onSelectHome}
+        aria-current={home ? "true" : undefined}
+        className={cn(
+          "mt-1 w-full rounded-lg border border-transparent px-2.5 py-2 text-left text-xs",
+          "hover:bg-accent focus-visible:bg-accent focus-visible:outline-none",
+          "aria-[current]:border-border aria-[current]:bg-accent",
+        )}
+      >
+        总览 —— 每一步的最新结论，和还没测的部分
+      </button>
 
       {section("任务", real)}
       {smoke.length > 0 && (

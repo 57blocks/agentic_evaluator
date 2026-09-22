@@ -59,8 +59,8 @@ export function TaskPage({ task, onSelectRun }: {
           {` · ${handoff}`}
         </p>
         <p className="text-xs text-muted-foreground">
-          预览不花钱：<code className="font-mono">pnpm run run -- --suite {task.specPath} --html</code>
-          。真跑再加 <code className="font-mono">--yes</code>。
+          命令行里同样一件事：<code className="font-mono">agenteval plan {task.name}</code> 只报价，
+          <code className="font-mono">agenteval run {task.name} --yes</code> 才真跑。
         </p>
       </header>
 
