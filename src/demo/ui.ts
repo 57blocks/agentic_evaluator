@@ -64,6 +64,13 @@ main{padding:28px 28px 64px;min-width:0}
 .btn.primary{background:var(--accent);color:#FBF9F4;border-color:var(--accent)}
 @media(prefers-color-scheme:dark){.btn.primary{color:#161411}}
 .empty{color:var(--muted)}
+.list .runs{list-style:none;margin:2px 0 6px;padding:0 0 0 10px;display:grid;gap:2px;border-left:1px solid var(--line)}
+.list .runs button{padding:5px 8px}
+.list .runs .m{font-size:11px}
+.spend.over{color:var(--bad);font-weight:650}
+.task-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.task-head .n{font-family:var(--mono);font-size:12px}
+.task-head .c{font-size:11px;color:var(--muted);white-space:nowrap}
 iframe{width:100%;min-height:70vh;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
 .note{font-size:12px;color:var(--muted);margin:0}
 </style>
@@ -77,18 +84,19 @@ iframe{width:100%;min-height:70vh;border:1px solid var(--line);border-radius:10p
       <h1>这一步该用谁</h1>
       <p class="sub">不是模型排行榜。推荐绑定步骤、测试集、运行模式。本地只读，不会开跑。</p>
     </div>
-    <nav aria-label="规格">
-      <h2>规格</h2>
-      <ul class="list" id="specs"></ul>
+    <nav aria-label="任务">
+      <h2>任务</h2>
+      <ul class="list" id="tasks"></ul>
     </nav>
-    <nav aria-label="已完成运行">
-      <h2>运行</h2>
-      <ul class="list" id="runs"></ul>
-    </nav>
-    <nav aria-label="冒烟运行" id="smokeNav" hidden>
+    <nav aria-label="冒烟任务" id="smokeNav" hidden>
       <h2>冒烟（脚本候选）</h2>
-      <ul class="list" id="smokeRuns"></ul>
+      <ul class="list" id="smokeTasks"></ul>
       <p class="note">候选是本地脚本，不是模型。用来验证管线，不是证据。</p>
+    </nav>
+    <nav aria-label="仓库样例" id="unfiledNav" hidden>
+      <h2>仓库样例</h2>
+      <ul class="list" id="unfiled"></ul>
+      <p class="note">committed 的示例证据，不属于任何任务。</p>
     </nav>
   </aside>
   <main>
@@ -102,12 +110,23 @@ iframe{width:100%;min-height:70vh;border:1px solid var(--line);border-radius:10p
   </main>
 </div>
 <script>
-const specsEl = document.getElementById("specs");
-const runsEl = document.getElementById("runs");
-const smokeEl = document.getElementById("smokeRuns");
+const tasksEl = document.getElementById("tasks");
+const smokeEl = document.getElementById("smokeTasks");
 const smokeNav = document.getElementById("smokeNav");
+const unfiledEl = document.getElementById("unfiled");
+const unfiledNav = document.getElementById("unfiledNav");
 const stage = document.getElementById("stage");
-let catalog = { specs: [], runs: [] };
+let catalog = { tasks: [], unfiled: [], specs: [], runs: [] };
+
+/** Every run the catalog knows, task-owned or not — hash lookups stay flat. */
+function allRuns() {
+  return catalog.tasks.flatMap((t) => t.runs).concat(catalog.unfiled);
+}
+function allSpecs() {
+  return catalog.tasks.map((t) => ({
+    path: t.specPath, runName: t.runName, budgetUsd: t.budgetUsd, steps: t.steps,
+  }));
+}
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -217,40 +236,79 @@ function markCurrent(kind, key) {
   }
 }
 
-function renderNav() {
-  specsEl.innerHTML = catalog.specs.map((s) =>
-    navButton("spec", s.path, s.runName, s.steps.map((x) => x.id).join(" → "))
+/** Budget line: what the task has spent against what its spec allows. */
+function spendLabel(task) {
+  if (task.spentUsd == null) return "";
+  const spent = "$" + task.spentUsd.toFixed(2);
+  if (task.budgetUsd == null) return '<span class="spend">' + spent + "</span>";
+  const over = task.spentUsd > task.budgetUsd;
+  return '<span class="spend' + (over ? " over" : "") + '">' + spent + " / $" + task.budgetUsd +
+    (over ? " 超支" : "") + "</span>";
+}
+
+/** What the task's most recent run concluded — the column you scan down. */
+function latestLabel(task) {
+  const r = task.runs[0];
+  if (!r) return "未跑过";
+  return runDate(r.startedAt) + " · " +
+    r.steps.map((s) => (s.chosen ? escapeHtml(s.chosen) : "需人工评审")).join(" / ");
+}
+
+function taskItem(task) {
+  const runs = task.runs.map((r) =>
+    '<li><button type="button" data-kind="run" data-key="' + escapeHtml(r.id) + '">' +
+      '<span class="m">' + runMeta(r) + "</span></button></li>"
   ).join("");
-  const real = catalog.runs.filter((r) => !r.synthetic);
-  const smoke = catalog.runs.filter((r) => r.synthetic);
-  runsEl.innerHTML = real.map((r) =>
-    navButton("run", r.id, r.runName, (r.sample ? "样例 · " : "") + runMeta(r))
-  ).join("") || '<li class="m">还没有 runs/ 或样例</li>';
-  smokeEl.innerHTML = smoke.map((r) => navButton("run", r.id, r.runName, runMeta(r))).join("");
+  return '<li>' +
+    '<button type="button" data-kind="spec" data-key="' + escapeHtml(task.specPath) + '">' +
+      '<span class="task-head"><span class="n">' + escapeHtml(task.name) + "</span>" +
+      '<span class="c">' + task.runs.length + " 次 " + spendLabel(task) + "</span></span>" +
+      '<span class="m">' + latestLabel(task) + "</span>" +
+    "</button>" +
+    (runs ? '<ul class="runs">' + runs + "</ul>" : "") +
+    "</li>";
+}
+
+/** A task whose every run used scripted stand-ins proves the pipeline, not a model. */
+function isSmokeTask(task) {
+  return task.runs.length > 0 && task.runs.every((r) => r.synthetic);
+}
+
+function renderNav() {
+  const smoke = catalog.tasks.filter(isSmokeTask);
+  const real = catalog.tasks.filter((t) => !isSmokeTask(t));
+  tasksEl.innerHTML = real.map(taskItem).join("") || '<li class="m">tasks/ 下还没有任务</li>';
+  smokeEl.innerHTML = smoke.map(taskItem).join("");
   smokeNav.hidden = smoke.length === 0;
+  unfiledEl.innerHTML = catalog.unfiled.map((r) =>
+    navButton("run", r.id, r.runName, (r.sample ? "样例 · " : "") + runMeta(r))
+  ).join("");
+  unfiledNav.hidden = catalog.unfiled.length === 0;
 }
 
 function showFromHash() {
   const h = new URLSearchParams(location.hash.replace(/^#/, ""));
   const specPath = h.get("spec");
   const runId = h.get("run");
-  const spec = specPath && catalog.specs.find((x) => x.path === specPath);
+  const spec = specPath && allSpecs().find((x) => x.path === specPath);
   if (spec) {
     markCurrent("spec", specPath);
     renderSpec(spec);
     return;
   }
-  const run = runId && catalog.runs.find((x) => x.id === runId);
+  const run = runId && allRuns().find((x) => x.id === runId);
   if (run) {
     markCurrent("run", runId);
     renderRun(run);
     return;
   }
-  if (catalog.runs[0]) {
-    location.hash = "run=" + encodeURIComponent(catalog.runs[0].id);
+  const first = allRuns()[0];
+  if (first) {
+    location.hash = "run=" + encodeURIComponent(first.id);
     return;
   }
-  if (catalog.specs[0]) renderSpec(catalog.specs[0]);
+  const spec0 = allSpecs()[0];
+  if (spec0) renderSpec(spec0);
 }
 
 document.body.addEventListener("click", function (e) {
