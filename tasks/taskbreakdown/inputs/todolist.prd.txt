@@ -1,0 +1,101 @@
+<!-- FROZEN FIXTURE — input for the task-breakdown eval. Every requirement carries
+     a stable id (FR-n, AC-n) so requirement coverage can be checked mechanically:
+     a breakdown may only cite ids that appear here, and must cite all of them.
+     Changing an id invalidates comparison with earlier runs. -->
+
+# PRD: Focus — a single-user to-do list
+
+## 1. Problem & Goal
+People capture tasks in notes apps that have no notion of "done", or in team
+trackers that demand projects, assignees and workflows. Focus is a single-user
+to-do list for one browser: capture a task in under two seconds, see what is
+left today, and never lose the list.
+
+Goal: ship a web app where one person can capture, organise, complete and
+recover tasks, with everything persisted locally and no account.
+
+## 2. Users
+One user, one browser profile, no accounts, no sharing, no sync.
+
+## 3. Functional Requirements
+
+### FR-1 Capture a task
+A single always-visible input creates a task from a title.
+- AC-1: Submitting a non-empty title creates a task in the Active state and
+  clears the input, leaving focus in the input so the next task can be typed.
+- AC-2: A title that is empty or only whitespace is rejected: no task is
+  created, the input keeps its content, and an inline message appears.
+- AC-3: A title longer than 200 characters is rejected with an inline message
+  stating the limit; the typed text is not truncated silently.
+- AC-4: A new task is inserted at the top of the list.
+
+### FR-2 Complete and reopen
+- AC-5: Toggling a task flips it between Active and Completed and updates its
+  visual state in place, without reordering the list.
+- AC-6: Completing a task that is currently filtered out of view (see FR-4)
+  removes it from view without disturbing the scroll position of the list.
+
+### FR-3 Edit and delete
+- AC-7: Double-clicking a task title, or pressing Enter on a focused task,
+  enters inline edit mode with the current title selected.
+- AC-8: Saving an edit with a valid title updates the task in place; saving an
+  empty title is rejected and the task keeps its previous title.
+- AC-9: Pressing Escape during an edit discards the change.
+- AC-10: Deleting a task removes it from the list immediately.
+
+### FR-4 Filter
+- AC-11: Three filters — All, Active, Completed — show the matching tasks; the
+  active filter is visually distinct.
+- AC-12: The chosen filter survives a reload.
+- AC-13: When a filter matches nothing, the list area shows an empty state that
+  names the filter, not a blank area.
+
+### FR-5 Due dates and overdue
+- AC-14: A task may have an optional due date; a task without one is never
+  treated as overdue.
+- AC-15: An Active task whose due date is before today is marked overdue and is
+  distinguishable without relying on colour alone.
+- AC-16: A Completed task is never marked overdue, whatever its due date.
+
+### FR-6 Bulk clear
+- AC-17: A "Clear completed" action removes every Completed task in one step and
+  is disabled when there are none.
+
+### FR-7 Undo
+- AC-18: After a delete or a bulk clear, an Undo affordance is available for ten
+  seconds and restores the removed task or tasks, including their completed
+  state and position.
+- AC-19: Undo applies to the most recent destructive action only; a second
+  destructive action replaces what Undo would restore.
+
+### FR-8 Persistence
+- AC-20: Tasks, their completed state, their due dates and the chosen filter are
+  restored when the app is reopened in the same browser.
+- AC-21: Stored data carries a schema version. When stored data has an older
+  version, it is migrated on load; when it is unreadable or of an unknown
+  version, the app starts empty and tells the user the saved list could not be
+  read, rather than crashing or silently discarding data.
+
+### FR-9 Keyboard and accessibility
+- AC-22: The capture input, every task, and the filters are reachable and
+  operable by keyboard alone.
+- AC-23: Toggling, deleting and undoing are announced to assistive technology.
+- AC-24: Every interactive control has an accessible name.
+
+## 4. Data
+A task has: id, title, completed flag, optional due date, created timestamp.
+Ordering is newest first and does not change when a task is completed.
+
+## 5. Non-Goals
+- No accounts, authentication, multi-device sync or a backend.
+- No collaboration, sharing, comments or assignment.
+- No tags, categories, priorities, sub-tasks or projects.
+- No recurring tasks, reminders or notifications.
+- No native mobile app; responsive web only.
+- No search; the list is expected to stay small.
+
+## 6. Constraints
+- Runs entirely in the browser; storage is local to the browser profile.
+- One page, no routing beyond the filter state.
+- Must behave correctly when storage is unavailable or full: the app stays
+  usable for the session and says that changes will not be saved.

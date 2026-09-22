@@ -225,7 +225,7 @@ test("paired case counts accompany the verdict", () => {
 test("runChainArm routes each step to the candidate the arm assigned", async () => {
   const { runChainArm } = await import("../src/e2e-control.js");
   const { loadWorkflow } = await import("../src/spec/load-spec.js");
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   const seen: Array<{ step: string; candidate: string }> = [];
   const report = await runChainArm({
     armId: "e2e-proposed",
@@ -257,7 +257,7 @@ test("runChainArm routes each step to the candidate the arm assigned", async () 
 test("runChainArm refuses an assignment that misses a chained step", async () => {
   const { runChainArm } = await import("../src/e2e-control.js");
   const { loadWorkflow } = await import("../src/spec/load-spec.js");
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   await assert.rejects(
     runChainArm({
       armId: "e2e-proposed",
@@ -304,7 +304,7 @@ test("maybeRunE2eValidation runs both arms and adopts the combination the contro
   const os = await import("node:os");
   const path = await import("node:path");
 
-  const suites = await loadWorkflow("specs/smoke-e2e-validation.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-validation/spec.yaml");
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "eval-e2e-validate-"));
   const arms = await maybeRunE2eValidation({
     suites,

@@ -5,7 +5,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { REPO_ROOT, listRunDirs, runsDir } from "../paths.js";
+import { REPO_ROOT, listRunDirs, runsDir, tasksDir } from "../paths.js";
 import { loadWorkflow } from "../spec/load-spec.js";
 import { loadBundle } from "../report-v2.js";
 import type { Recommendation } from "../canon/select.js";
@@ -137,12 +137,32 @@ async function locateRun(id: string, over?: CatalogRoots): Promise<RunLocation |
   return { id, sample, diskId, kind: sample ? "fixture" : "run", abs };
 }
 
+/**
+ * Spec files to list. A task owns its spec (`tasks/<name>/spec.yaml`); an
+ * explicit `specsDir` override still means "every yaml directly in here", so
+ * the tmp-dir tests keep working.
+ */
+async function specPaths(over?: CatalogRoots): Promise<string[]> {
+  if (over?.specsDir !== undefined) {
+    const names = (await fs.readdir(over.specsDir)).filter((n) => /\.ya?ml$/i.test(n)).sort();
+    return names.map((n) => path.join(over.specsDir!, n));
+  }
+  const dirs = (await fs.readdir(tasksDir(), { withFileTypes: true }))
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort();
+  const out: string[] = [];
+  for (const d of dirs) {
+    const p = path.join(tasksDir(), d, "spec.yaml");
+    if (await fileExists(p)) out.push(p);
+  }
+  return out;
+}
+
 export async function listSpecs(over?: CatalogRoots): Promise<SpecView[]> {
-  const { specsDir } = rootsOf(over);
-  const names = (await fs.readdir(specsDir)).filter((n) => /\.ya?ml$/i.test(n)).sort();
   const out: SpecView[] = [];
-  for (const name of names) {
-    const rel = `specs/${name}`;
+  for (const abs of await specPaths(over)) {
+    const rel = path.relative(REPO_ROOT, abs);
     const suites = await loadWorkflow(rel);
     out.push({
       path: rel,

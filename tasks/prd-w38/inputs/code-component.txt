@@ -1,0 +1,47 @@
+Implement a single, self-contained React component in TypeScript (TSX).
+
+## File
+Output exactly one file:
+
+```file:Pagination.tsx
+// your implementation
+```
+
+## Component to implement
+A `Pagination` component. It must be the default or a named export `Pagination`
+and use this exact props interface (define it in the file):
+
+```ts
+interface PaginationProps {
+  currentPage: number;   // 1-based
+  totalPages: number;    // >= 1
+  onPageChange: (page: number) => void;
+}
+```
+
+## Behavior
+- Render a "Previous" button, a "Next" button, and one numbered button for each
+  page from 1 to `totalPages`.
+- Clicking a page number, Previous, or Next calls `onPageChange` with the target
+  page number. Previous targets `currentPage - 1`; Next targets
+  `currentPage + 1`.
+- The Previous button is disabled when `currentPage <= 1`. The Next button is
+  disabled when `currentPage >= totalPages`. Disabled buttons must not fire
+  `onPageChange`.
+- The button for `currentPage` is visually marked as active (e.g. via
+  `aria-current="page"` and/or a class) and does not need to call `onPageChange`
+  when it is already the current page.
+- Never call `onPageChange` with a page below 1 or above `totalPages`.
+
+## Acceptance criteria
+- Compiles under `jsx: "react-jsx"` (no explicit React import is required, but if
+  you import React it must type-check).
+- Props are typed via the `PaginationProps` interface; the callback prop is typed
+  explicitly.
+- Boundary disabling works: on page 1 Previous is disabled; on the last page Next
+  is disabled.
+
+## Constraints
+- Strict TypeScript: no `any`. Type event handlers correctly.
+- `react` is available (with `@types/react`). Do NOT import any other package.
+- Output ONLY the `Pagination.tsx` file block, no prose or tests.

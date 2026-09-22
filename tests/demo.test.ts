@@ -33,12 +33,12 @@ test("underRoot stays inside the given directory", () => {
 test("listSpecs surfaces independent workflow steps", async () => {
   const specs = await listSpecs();
   const paths = specs.map((s) => s.path);
-  assert.ok(paths.includes("specs/prd-w38.yaml"));
-  assert.ok(paths.includes("specs/codegen-w38.yaml"));
-  const prd = specs.find((s) => s.path === "specs/prd-w38.yaml");
+  assert.ok(paths.includes("tasks/prd-w38/spec.yaml"));
+  assert.ok(paths.includes("tasks/codegen-w38/spec.yaml"));
+  const prd = specs.find((s) => s.path === "tasks/prd-w38/spec.yaml");
   assert.deepEqual(prd?.steps.map((s) => s.id), ["prd", "taskbreakdown", "codegen"]);
   assert.equal(prd?.steps[0].producer, "prompt");
-  const codegen = specs.find((s) => s.path === "specs/codegen-w38.yaml");
+  const codegen = specs.find((s) => s.path === "tasks/codegen-w38/spec.yaml");
   assert.deepEqual(codegen?.steps[0].requiredChecks, ["tsc-noemit"]);
 });
 
@@ -131,7 +131,7 @@ test("demo server serves the page, catalog, fixture report, and blocks traversal
     const catalog = await get(origin + "/api/catalog");
     assert.equal(catalog.status, 200);
     const data = JSON.parse(catalog.body) as { specs: Array<{ path: string }>; runs: Array<{ id: string; sample?: boolean }> };
-    assert.ok(data.specs.some((s) => s.path === "specs/prd-w38.yaml"));
+    assert.ok(data.specs.some((s) => s.path === "tasks/prd-w38/spec.yaml"));
     assert.ok(data.runs.some((r) => r.id === "fixture:prd-w38" && r.sample));
 
     const report = await get(origin + "/artifact/fixture/prd-w38/report.html");
