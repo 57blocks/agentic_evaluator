@@ -10,7 +10,7 @@ import http from "node:http";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { REPO_ROOT, runsDir } from "../paths.js";
-import { listRuns, listSpecs, liveRunIndex, loadRun } from "./catalog.js";
+import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun } from "./catalog.js";
 import { demoPage } from "./ui.js";
 
 const HOST = "127.0.0.1";
@@ -95,8 +95,10 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
     return;
   }
   if (url.pathname === "/api/catalog") {
-    const [specs, runs] = await Promise.all([listSpecs(), listRuns()]);
-    sendJson(res, 200, { specs, runs });
+    // `tasks` is what the UI renders; `specs`/`runs` stay as the flat views
+    // for anything reading the catalog directly.
+    const [{ tasks, unfiled }, specs, runs] = await Promise.all([listTasks(), listSpecs(), listRuns()]);
+    sendJson(res, 200, { tasks, unfiled, specs, runs });
     return;
   }
   const runMatch = url.pathname.match(/^\/api\/run\/([^/]+)$/);

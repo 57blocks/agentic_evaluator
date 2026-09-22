@@ -43,6 +43,8 @@ export interface RunStepView {
 
 export interface RunView {
   id: string;
+  /** Task directory that owns this run; null for a legacy top-level run or a fixture. */
+  task: string | null;
   kind: "single" | "workflow";
   runName: string;
   startedAt: string | null;
@@ -59,6 +61,25 @@ export interface RunView {
     undetermined: number;
   } | null;
   steps: RunStepView[];
+}
+
+/**
+ * A task and everything it has produced. The demo's top-level unit: one
+ * directory on disk, one row in the UI, its runs nested underneath newest
+ * first — so "which experiments used this input, and how did they go" is one
+ * click rather than a join the reader performs by eye across two flat lists.
+ */
+export interface TaskView {
+  /** Directory name under tasks/. */
+  name: string;
+  specPath: string;
+  runName: string;
+  budgetUsd: number | null;
+  steps: SpecStepView[];
+  /** Newest first. */
+  runs: RunView[];
+  /** Summed over runs that reported a ledger; null when none did. */
+  spentUsd: number | null;
 }
 
 export interface CatalogRoots {
@@ -81,6 +102,8 @@ interface RunLocation {
   diskId: string;
   kind: "run" | "fixture";
   abs: string;
+  /** Task that owns the run, derived from where the directory sits. */
+  task: string | null;
 }
 
 interface WorkflowFile {
@@ -102,6 +125,14 @@ function rootsOf(over?: CatalogRoots): Required<CatalogRoots> {
     runsRoot: over?.runsRoot ?? runsDir(),
     fixturesDir: over?.fixturesDir ?? path.join(REPO_ROOT, "fixtures"),
   };
+}
+
+/** tasks/<name>/runs/<id> -> "<name>"; anything else -> null. */
+function taskOfRunDir(abs: string): string | null {
+  const rel = path.relative(tasksDir(), abs);
+  if (rel.startsWith("..") || path.isAbsolute(rel)) return null;
+  const parts = rel.split(path.sep);
+  return parts.length >= 3 && parts[1] === "runs" ? parts[0] : null;
 }
 
 /** Reject path segments that could escape a catalog root. */
@@ -134,7 +165,7 @@ async function locateRun(id: string, over?: CatalogRoots): Promise<RunLocation |
   const abs = sample
     ? path.join(fixturesDir, diskId)
     : ((await liveRunIndex(over)).get(diskId) ?? path.join(runsRoot, diskId));
-  return { id, sample, diskId, kind: sample ? "fixture" : "run", abs };
+  return { id, sample, diskId, kind: sample ? "fixture" : "run", abs, task: taskOfRunDir(abs) };
 }
 
 /**
@@ -286,6 +317,51 @@ export async function listRuns(over?: CatalogRoots): Promise<RunView[]> {
   return [...live, ...samples].sort(byDemoOrder);
 }
 
+/**
+ * Tasks with their runs attached, plus anything that belongs to no task —
+ * legacy top-level runs and committed fixtures — kept separate rather than
+ * hidden, so a run never silently disappears from the UI.
+ */
+export async function listTasks(
+  over?: CatalogRoots,
+): Promise<{ tasks: TaskView[]; unfiled: RunView[] }> {
+  const [specs, runs] = await Promise.all([listSpecs(over), listRuns(over)]);
+  const byTask = new Map<string, RunView[]>();
+  const unfiled: RunView[] = [];
+  for (const r of runs) {
+    if (r.task === null) unfiled.push(r);
+    else (byTask.get(r.task) ?? byTask.set(r.task, []).get(r.task)!).push(r);
+  }
+
+  const tasks = specs.map((spec) => {
+    const name = path.basename(path.dirname(spec.path));
+    const own = (byTask.get(name) ?? []).sort((a, b) =>
+      (b.startedAt ?? "").localeCompare(a.startedAt ?? ""),
+    );
+    const spent = own.reduce<number | null>(
+      (acc, r) => (r.totalUsd === null ? acc : (acc ?? 0) + r.totalUsd),
+      null,
+    );
+    return {
+      name,
+      specPath: spec.path,
+      runName: spec.runName,
+      budgetUsd: spec.budgetUsd,
+      steps: spec.steps,
+      runs: own,
+      spentUsd: spent,
+    };
+  });
+
+  // A task that has never run still belongs in the list — that is information.
+  tasks.sort((a, b) => {
+    const at = a.runs[0]?.startedAt ?? "";
+    const bt = b.runs[0]?.startedAt ?? "";
+    return bt.localeCompare(at) || a.name.localeCompare(b.name);
+  });
+  return { tasks, unfiled };
+}
+
 export async function loadRun(id: string, over?: CatalogRoots): Promise<RunView | null> {
   const loc = await locateRun(id, over);
   if (!loc) return null;
@@ -310,6 +386,7 @@ async function loadWorkflowRun(loc: RunLocation): Promise<RunView | null> {
   if (steps.length === 0) return null;
   return {
     id: loc.id,
+    task: loc.task,
     kind: "workflow",
     runName: wf.run_name ?? loc.diskId,
     startedAt: startedAtFromId(loc.diskId),
@@ -343,6 +420,7 @@ async function loadSingleRun(loc: RunLocation): Promise<RunView | null> {
   const steps = [step];
   return {
     id: loc.id,
+    task: loc.task,
     kind: "single",
     runName,
     startedAt: startedAt ?? startedAtFromId(loc.diskId),
