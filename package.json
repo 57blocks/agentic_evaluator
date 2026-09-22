@@ -8,17 +8,13 @@
     "node": ">=22"
   },
   "scripts": {
+    "agenteval": "tsx src/cli/index.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "run": "tsx src/run.ts",
-    "rescore": "tsx src/rescore.ts",
-    "dashboard": "tsx src/dashboard.ts",
-    "check-models": "tsx scripts/check-models.ts",
     "test": "node --import tsx --test tests/*.test.ts",
-    "report": "tsx src/report-v2.ts",
-    "preview": "tsx src/run.ts --suite",
-    "demo": "tsx src/demo/server.ts",
     "build:demo": "vite build",
     "demo:dev": "vite",
+    "rescore": "tsx src/rescore.ts",
+    "dashboard": "tsx src/dashboard.ts",
     "parity": "tsx scripts/parity.ts"
   },
   "dependencies": {
@@ -50,5 +46,16 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
-  }
+  },
+  "bin": {
+    "agenteval": "./bin/agenteval.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "fixtures",
+    "vite.config.ts",
+    "tsconfig.json",
+    "README.md"
+  ]
 }

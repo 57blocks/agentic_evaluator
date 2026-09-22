@@ -16,6 +16,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { INSTALL_ROOT } from "../paths.js";
 
+/** A name or path that resolves to no spec — a bad argument, not a failed run. */
+export class NoSuchSpecError extends Error {}
+
 export interface Workspace {
   /** Directory holding `tasks/`; runs and legacy suites resolve under it. */
   readonly root: string;
@@ -144,5 +147,5 @@ export async function resolveSpecPath(ws: Workspace, arg: string): Promise<strin
     }
     if (await fs.stat(c).then((s) => s.isFile()).catch(() => false)) return c;
   }
-  throw new Error(`no spec found for "${arg}" (looked in ${candidates.join(", ")})`);
+  throw new NoSuchSpecError(`no spec found for "${arg}" (looked in ${candidates.join(", ")})`);
 }
