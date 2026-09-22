@@ -139,6 +139,14 @@ export interface Suite {
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;
+  /**
+   * Absolute path to the task directory that owns this spec — the directory
+   * the spec file sits in. Inputs, rubric, checks, scaffold and runs resolve
+   * against it, so a task can be copied or archived whole. Absent on Suites
+   * built by tests or older callers; `taskRootOf` then falls back to the repo
+   * root, which is the pre-migration behaviour.
+   */
+  taskRoot?: string;
 }
 
 /** One candidate run against one input, one trial. */
