@@ -2,6 +2,7 @@
 
 import type { RunView } from "../../catalog.js";
 import { firmTone } from "../render.js";
+import { Evidence } from "./Evidence";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,6 +87,11 @@ export function RunPage({ run }: { run: RunView }) {
           );
         })}
       </div>
+
+      <section className="flex flex-col gap-3">
+        <h3 className="text-base font-semibold">证据</h3>
+        <Evidence run={run} />
+      </section>
 
       {firstReport && (
         <iframe
