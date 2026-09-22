@@ -48,7 +48,7 @@ test("handoffPayload prefers artifacts over stdout", () => {
 });
 
 test("smoke-e2e-control compiles a draft → review chain", async () => {
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   assert.deepEqual(suites.map((s) => s.step), ["draft", "review"]);
   assert.equal(suites[0].inputFrom, undefined);
   assert.equal(suites[1].inputFrom, "draft");
@@ -102,7 +102,7 @@ async function stubGen(step: Suite, _slug: string, text: string): Promise<E2eGen
 }
 
 test("runControlChain hands draft output to review and records shas", async () => {
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   const report = await runControlChain({
     candidate: "fake-pass",
     chain: suites,
@@ -120,7 +120,7 @@ test("runControlChain hands draft output to review and records shas", async () =
 });
 
 test("runControlChain aborts the chain when a step does not complete", async () => {
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   const report = await runControlChain({
     candidate: "fake-pass",
     chain: suites,
@@ -134,7 +134,7 @@ test("runControlChain aborts the chain when a step does not complete", async () 
 });
 
 test("runControlChain with the real agent-cli adapter pipes artifacts", async () => {
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "eval-e2e-"));
   const { runCheck } = await import("../src/check.js");
   const report = await runControlChain({

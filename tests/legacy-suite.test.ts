@@ -26,7 +26,7 @@ test("legacy prd suite has no required checks", async () => {
 });
 
 test("loader picks YAML vs JSON by extension", async () => {
-  const yaml = await loadSuiteOrSpec("specs/codegen-w38.yaml");
+  const yaml = await loadSuiteOrSpec("tasks/codegen-w38/spec.yaml");
   const json = await loadSuiteOrSpec("suites/codegen.json");
   assert.equal(yaml.candidateDefs?.["sonnet-5"]?.model, "anthropic/claude-sonnet-5");
   assert.equal(json.candidateDefs?.["anthropic/claude-sonnet-5"]?.model, "anthropic/claude-sonnet-5");

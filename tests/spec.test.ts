@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import { compileSpec, compileWorkflow, loadSpec, loadWorkflow, parseSpec, SpecError, type EvalSpec } from "../src/spec/load-spec.js";
 import { sha256 } from "../src/canon/hash.js";
 
-const CODEGEN = "specs/codegen-w38.yaml";
+const CODEGEN = "tasks/codegen-w38/spec.yaml";
 const CANDIDATE_IDS = "candidate_ids: [sonnet-5, deepseek-v4-pro, kimi-k3]";
 
 async function parsePatched(replacements: readonly (readonly [string, string])[]): Promise<{ spec: EvalSpec; sha: string }> {
@@ -33,7 +33,7 @@ test("codegen spec compiles to a Suite with candidate ids, not model ids", async
 });
 
 test("prd spec has no required checks and no tsc gate", async () => {
-  const suite = await loadSpec("specs/prd-w38.yaml");
+  const suite = await loadSpec("tasks/prd-w38/spec.yaml");
   assert.deepEqual(suite.requiredChecks, []);
   assert.equal(suite.check, undefined);
   assert.equal(suite.producer, "prompt");
@@ -42,7 +42,7 @@ test("prd spec has no required checks and no tsc gate", async () => {
 });
 
 test("prd spec is an independent prd → taskbreakdown → codegen pipeline", async () => {
-  const suites = await loadWorkflow("specs/prd-w38.yaml");
+  const suites = await loadWorkflow("tasks/prd-w38/spec.yaml");
   assert.deepEqual(suites.map((s) => s.step), ["prd", "taskbreakdown", "codegen"]);
   const tb = suites[1];
   assert.equal(tb.producer, "prompt");
