@@ -5,7 +5,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { REPO_ROOT, runsDir } from "../paths.js";
+import { REPO_ROOT, listRunDirs, runsDir } from "../paths.js";
 import { loadWorkflow } from "../spec/load-spec.js";
 import { loadBundle } from "../report-v2.js";
 import type { Recommendation } from "../canon/select.js";
@@ -109,18 +109,32 @@ export function safeId(id: string): boolean {
   return id.length > 0 && !path.isAbsolute(id) && !id.includes("..") && !id.includes("/") && !id.includes("\\");
 }
 
-function locateRun(id: string, over?: CatalogRoots): RunLocation | null {
+/**
+ * Run id -> directory, across every task's `runs/` plus the legacy top-level
+ * one. An explicitly injected `runsRoot` (tests, fixtures) stays a single flat
+ * root so callers can still point the catalog at a temp dir.
+ */
+export async function liveRunIndex(over?: CatalogRoots): Promise<Map<string, string>> {
+  const root = over?.runsRoot;
+  if (root !== undefined) {
+    return new Map((await listRunNames(root)).map((n) => [n, path.join(root, n)]));
+  }
+  const out = new Map<string, string>();
+  for (const e of await listRunDirs()) {
+    if (safeId(e.name)) out.set(e.name, e.dir);
+  }
+  return out;
+}
+
+async function locateRun(id: string, over?: CatalogRoots): Promise<RunLocation | null> {
   const { runsRoot, fixturesDir } = rootsOf(over);
   const sample = id.startsWith(FIXTURE_PREFIX);
   const diskId = sample ? id.slice(FIXTURE_PREFIX.length) : id;
   if (!safeId(diskId)) return null;
-  return {
-    id,
-    sample,
-    diskId,
-    kind: sample ? "fixture" : "run",
-    abs: path.join(sample ? fixturesDir : runsRoot, diskId),
-  };
+  const abs = sample
+    ? path.join(fixturesDir, diskId)
+    : ((await liveRunIndex(over)).get(diskId) ?? path.join(runsRoot, diskId));
+  return { id, sample, diskId, kind: sample ? "fixture" : "run", abs };
 }
 
 export async function listSpecs(over?: CatalogRoots): Promise<SpecView[]> {
@@ -242,14 +256,18 @@ function byDemoOrder(a: RunView, b: RunView): number {
 }
 
 export async function listRuns(over?: CatalogRoots): Promise<RunView[]> {
-  const { runsRoot, fixturesDir } = rootsOf(over);
-  const live = await collectRuns(runsRoot, "", over);
+  const { fixturesDir } = rootsOf(over);
+  const live: RunView[] = [];
+  for (const name of [...(await liveRunIndex(over)).keys()].sort().reverse()) {
+    const view = await loadRun(name, over);
+    if (view) live.push(view);
+  }
   const samples = await collectRuns(fixturesDir, FIXTURE_PREFIX, over);
   return [...live, ...samples].sort(byDemoOrder);
 }
 
 export async function loadRun(id: string, over?: CatalogRoots): Promise<RunView | null> {
-  const loc = locateRun(id, over);
+  const loc = await locateRun(id, over);
   if (!loc) return null;
   const st = await fs.stat(loc.abs).catch(() => null);
   if (!st?.isDirectory()) return null;

@@ -45,7 +45,7 @@ import { loadEnvLocal } from "./run.js";
 /** Re-exported for `run-all.ts` (its records reader is typed against this). */
 export type { RunRecordLite };
 
-import { REPO_ROOT, runsDir } from "./paths.js";
+import { REPO_ROOT, listRunDirs, runsDir } from "./paths.js";
 
 /** Canonical PDLC ordering for step sections; unknown steps sort last. */
 const STEP_ORDER = ["prd", "trd", "taskbreakdown", "codegen"] as const;
@@ -313,17 +313,13 @@ interface Discovered {
  * Scan eval/results/*, parse each report.json, keep the newest per step (by
  * generatedAt), and attach the same dir's records.json when present.
  */
-async function discoverLatestByStep(resultsDir: string): Promise<Discovered[]> {
-  let entries: string[] = [];
-  try {
-    entries = await fs.readdir(resultsDir);
-  } catch {
-    return [];
-  }
+async function discoverLatestByStep(): Promise<Discovered[]> {
+  // Every task's runs/ plus the legacy top-level one — the latest run of a
+  // step wins no matter which task produced it.
+  const entries = await listRunDirs();
 
   const latest = new Map<string, Discovered>();
-  for (const entry of entries) {
-    const dir = path.join(resultsDir, entry);
+  for (const { dir } of entries) {
     const parsed = await readJson(path.join(dir, "report.json"));
     const report = coerceReport(parsed);
     if (!report) continue;
@@ -338,12 +334,11 @@ async function discoverLatestByStep(resultsDir: string): Promise<Discovered[]> {
 }
 
 async function main(): Promise<void> {
-  const resultsDir = runsDir();
-  const found = await discoverLatestByStep(resultsDir);
+  const found = await discoverLatestByStep();
 
   if (found.length === 0) {
     console.log(
-      `No report.json found under ${path.relative(REPO_ROOT, resultsDir)}/. ` +
+      `No report.json found under tasks/*/runs/ or ${path.relative(REPO_ROOT, runsDir())}/. ` +
         "Run an eval first (pnpm run run --suite suites/<step>.json).",
     );
     return; // exit 0 — nothing to render is not an error.
@@ -373,7 +368,9 @@ async function main(): Promise<void> {
   }
 
   const ts = new Date().toISOString().replace(/[:.]/g, "-");
-  const outPath = path.join(resultsDir, `dashboard-${ts}.html`);
+  // Spans every task, so the combined dashboard lives in the shared runs/ dir.
+  await fs.mkdir(runsDir(), { recursive: true });
+  const outPath = path.join(runsDir(), `dashboard-${ts}.html`);
   await fs.writeFile(
     outPath,
     renderDashboardHtml(reports, recordsByStep, aiSummary),

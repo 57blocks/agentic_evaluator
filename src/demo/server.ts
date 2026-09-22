@@ -10,7 +10,7 @@ import http from "node:http";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { REPO_ROOT, runsDir } from "../paths.js";
-import { listRuns, listSpecs, loadRun } from "./catalog.js";
+import { listRuns, listSpecs, liveRunIndex, loadRun } from "./catalog.js";
 import { demoPage } from "./ui.js";
 
 const HOST = "127.0.0.1";
@@ -48,15 +48,29 @@ export function underRoot(root: string, rel: string): string | null {
   return abs;
 }
 
-function artifactRoot(kind: string): string | null {
-  if (kind === "run") return runsDir();
-  if (kind === "fixture") return path.join(REPO_ROOT, "fixtures");
-  return null;
+/**
+ * Root a `/artifact/<kind>/<rel>` request resolves under.
+ *
+ * Runs no longer live under one directory — each task keeps its own `runs/` —
+ * so the first segment of `rel` is looked up in the live run index and the
+ * rest resolves under that run's own directory. The id must be one the index
+ * actually lists, which is a stricter gate than the old containment check,
+ * and `underRoot` still guards the remainder of the path.
+ */
+async function artifactRoot(kind: string, rel: string): Promise<{ root: string; rel: string } | null> {
+  if (kind === "fixture") return { root: path.join(REPO_ROOT, "fixtures"), rel };
+  if (kind !== "run") return null;
+  const [runId, ...rest] = rel.split("/");
+  const dir = (await liveRunIndex()).get(runId);
+  if (dir) return { root: dir, rel: rest.join("/") };
+  // No such run in the index: fall back to the legacy root so an old link
+  // still 404s on a missing file rather than 403ing on a valid one.
+  return { root: runsDir(), rel };
 }
 
 async function sendArtifact(res: http.ServerResponse, kind: string, rel: string): Promise<void> {
-  const root = artifactRoot(kind);
-  const abs = root ? underRoot(root, rel) : null;
+  const target = await artifactRoot(kind, rel);
+  const abs = target ? underRoot(target.root, target.rel) : null;
   if (!abs) {
     send(res, 403, "forbidden");
     return;
