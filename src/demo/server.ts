@@ -9,8 +9,8 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { REPO_ROOT, runsDir } from "../paths.js";
-import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun } from "./catalog.js";
+import { REPO_ROOT, runsDir, tasksDir } from "../paths.js";
+import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun, safeId } from "./catalog.js";
 import { demoPage } from "./ui.js";
 
 const HOST = "127.0.0.1";
@@ -59,6 +59,14 @@ export function underRoot(root: string, rel: string): string | null {
  */
 async function artifactRoot(kind: string, rel: string): Promise<{ root: string; rel: string } | null> {
   if (kind === "fixture") return { root: path.join(REPO_ROOT, "fixtures"), rel };
+  if (kind === "task") {
+    // tasks/<name>/<file>: the name must be a single safe segment, and the
+    // rest resolves under that task dir. `runs/` is reachable this way too,
+    // which is intended — a run's own files belong to its task.
+    const [name, ...rest] = rel.split("/");
+    if (!safeId(name)) return null;
+    return { root: path.join(tasksDir(), name), rel: rest.join("/") };
+  }
   if (kind !== "run") return null;
   const [runId, ...rest] = rel.split("/");
   const dir = (await liveRunIndex()).get(runId);
@@ -111,7 +119,7 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
     sendJson(res, 200, view);
     return;
   }
-  const art = url.pathname.match(/^\/artifact\/(run|fixture)\/(.+)$/);
+  const art = url.pathname.match(/^\/artifact\/(run|fixture|task)\/(.+)$/);
   if (art) {
     await sendArtifact(res, art[1], decodeURIComponent(art[2]));
     return;

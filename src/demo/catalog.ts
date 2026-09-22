@@ -76,6 +76,13 @@ export interface TaskView {
   runName: string;
   budgetUsd: number | null;
   steps: SpecStepView[];
+  /**
+   * Files that make up the definition, relative to the task dir, `runs/`
+   * excluded — the inputs, rubrics, prompts, checks and scaffold a reader
+   * needs to answer "what was asked and how is it judged" without leaving
+   * the page.
+   */
+  files: string[];
   /** Newest first. */
   runs: RunView[];
   /** Summed over runs that reported a ledger; null when none did. */
@@ -317,6 +324,38 @@ export async function listRuns(over?: CatalogRoots): Promise<RunView[]> {
   return [...live, ...samples].sort(byDemoOrder);
 }
 
+/** Directories that are output or vendored, never part of a task's definition. */
+const NON_DEFINITION_DIRS = new Set(["runs", "node_modules"]);
+
+/** Cap the listing: a task that somehow holds thousands of files is a bug, not a page. */
+const MAX_DEFINITION_FILES = 400;
+
+/** Definition files under a task dir, relative and sorted, `runs/` excluded. */
+async function definitionFiles(taskDir: string): Promise<string[]> {
+  const out: string[] = [];
+  async function walk(dir: string, prefix: string): Promise<void> {
+    if (out.length >= MAX_DEFINITION_FILES) return;
+    let entries;
+    try {
+      entries = await fs.readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      if (out.length >= MAX_DEFINITION_FILES) return;
+      const rel = prefix ? `${prefix}/${e.name}` : e.name;
+      if (e.isDirectory()) {
+        if (prefix === "" && NON_DEFINITION_DIRS.has(e.name)) continue;
+        await walk(path.join(dir, e.name), rel);
+      } else if (e.isFile()) {
+        out.push(rel);
+      }
+    }
+  }
+  await walk(taskDir, "");
+  return out;
+}
+
 /**
  * Tasks with their runs attached, plus anything that belongs to no task —
  * legacy top-level runs and committed fixtures — kept separate rather than
@@ -333,7 +372,7 @@ export async function listTasks(
     else (byTask.get(r.task) ?? byTask.set(r.task, []).get(r.task)!).push(r);
   }
 
-  const tasks = specs.map((spec) => {
+  const tasks = await Promise.all(specs.map(async (spec) => {
     const name = path.basename(path.dirname(spec.path));
     const own = (byTask.get(name) ?? []).sort((a, b) =>
       (b.startedAt ?? "").localeCompare(a.startedAt ?? ""),
@@ -348,10 +387,11 @@ export async function listTasks(
       runName: spec.runName,
       budgetUsd: spec.budgetUsd,
       steps: spec.steps,
+      files: await definitionFiles(path.join(tasksDir(), name)),
       runs: own,
       spentUsd: spent,
     };
-  });
+  }));
 
   // A task that has never run still belongs in the list — that is information.
   tasks.sort((a, b) => {
