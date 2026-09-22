@@ -8,21 +8,15 @@
  * A **task** is one self-contained runnable unit: `tasks/<name>/` holds the
  * spec, the inputs it feeds, the rubric that judges them, its checks and its
  * runs. Paths written inside a spec (`rubrics/codegen.md`, `scaffold`,
- * `checks/task-coverage.mjs`) resolve against that task dir, so a task can be
- * copied or archived whole. `resolveTaskAsset` falls back to the repo root for
- * specs that still live under `specs/`, which keeps the migration incremental.
+ * `checks/behaviour.mjs`) resolve against that task dir, so a task can be
+ * copied or archived whole.
  */
 
-import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-
-export function inputsDir(): string {
-  return path.join(REPO_ROOT, "inputs");
-}
 
 export function runsDir(): string {
   return path.join(REPO_ROOT, "runs");
@@ -41,7 +35,7 @@ export function resolveRepo(p: string): string {
   return path.resolve(REPO_ROOT, p);
 }
 
-/** True while `taskRoot` is a migrated task dir rather than the old `specs/`. */
+/** True when `taskRoot` is a real task dir rather than the repo root. */
 export function isTaskRoot(taskRoot: string): boolean {
   const rel = path.relative(tasksDir(), taskRoot);
   return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
@@ -50,26 +44,19 @@ export function isTaskRoot(taskRoot: string): boolean {
 /**
  * Resolve an asset a spec refers to (rubric, scaffold, check script).
  *
- * Task dir first, repo root second. The fallback is what lets a migrated task
- * and an un-migrated spec coexist during the move; once `specs/` is empty it
- * only ever takes the first branch.
+ * Always inside the task. A missing file resolves to where it should have
+ * been rather than to a repo-root copy: silently grading against a shared
+ * file the task does not own is how two runs of "the same" task end up
+ * judged by different rubrics.
  */
 export async function resolveTaskAsset(taskRoot: string, p: string): Promise<string> {
-  if (path.isAbsolute(p)) return p;
-  const inTask = path.resolve(taskRoot, p);
-  try {
-    await fs.access(inTask);
-    return inTask;
-  } catch {
-    return path.resolve(REPO_ROOT, p);
-  }
+  return path.isAbsolute(p) ? p : path.resolve(taskRoot, p);
 }
 
 /**
  * The task dir a Suite belongs to. Structurally typed so this module stays
- * free of a `types.js` import. Falls back to the repo root for Suites built
- * before the task layout (tests, legacy callers), which reproduces the old
- * repo-relative resolution exactly.
+ * free of a `types.js` import. Suites built without one — test fixtures,
+ * legacy suites/*.json — resolve against the repo root.
  */
 export function taskRootOf(suite: { taskRoot?: string }): string {
   return suite.taskRoot ?? REPO_ROOT;
@@ -77,9 +64,7 @@ export function taskRootOf(suite: { taskRoot?: string }): string {
 
 /** Sync twin of `resolveTaskAsset`, for the argv resolution in `check.ts`. */
 export function resolveTaskAssetSync(taskRoot: string, p: string): string {
-  if (path.isAbsolute(p)) return p;
-  const inTask = path.resolve(taskRoot, p);
-  return existsSync(inTask) ? inTask : path.resolve(REPO_ROOT, p);
+  return path.isAbsolute(p) ? p : path.resolve(taskRoot, p);
 }
 
 /** Input text lives with its task: `tasks/<name>/inputs/<slug>.txt`. */
@@ -88,9 +73,9 @@ export function taskInputPath(taskRoot: string, slug: string): string {
 }
 
 /**
- * Where a task's runs are written. Migrated tasks keep their evidence beside
- * their definition; anything still under `specs/` keeps using the top-level
- * `runs/` so old specs stay runnable mid-migration.
+ * Where a task's runs are written: beside the definition that produced them.
+ * A Suite with no task dir — a test fixture, a legacy suites/*.json — still
+ * writes to the top-level `runs/`.
  */
 export function runsRootFor(taskRoot: string): string {
   return isTaskRoot(taskRoot) ? path.join(taskRoot, "runs") : runsDir();
@@ -118,8 +103,8 @@ async function readRunDirs(root: string, task: string | null): Promise<RunDirEnt
 }
 
 /**
- * Every run directory on disk: each task's own `runs/`, plus the legacy
- * top-level `runs/`.
+ * Every run directory on disk: each task's own `runs/`, plus the top-level
+ * `runs/` that legacy suites still use.
  *
  * Generation reuse matches on `trialHash`, which is content-addressed, so a
  * result produced under one task is safely reusable under another — scanning

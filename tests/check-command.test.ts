@@ -131,7 +131,7 @@ FR-2 filter by all / active / completed.
 `;
 
 function coverage(output: string, dir: string) {
-  return run([NODE, path.resolve("checks/task-coverage.mjs")], dir, { output, input: PRD });
+  return run([NODE, path.resolve("tasks/prd-chain-trial/checks/task-coverage.mjs")], dir, { output, input: PRD });
 }
 
 test("task-coverage passes a breakdown that cites every requirement", async () => {
@@ -190,7 +190,7 @@ test("an unparsable task list is the candidate's failure, not the evaluator's", 
 
 test("a PRD with no requirement ids is an evaluator error, not a silent pass", async () => {
   const dir = await workDir();
-  const result = await run([NODE, path.resolve("checks/task-coverage.mjs")], dir, {
+  const result = await run([NODE, path.resolve("tasks/prd-chain-trial/checks/task-coverage.mjs")], dir, {
     output: JSON.stringify([{ id: "T-1" }]),
     input: "a prose brief with no ids at all",
   });
@@ -202,7 +202,7 @@ test("a PRD with no requirement ids is an evaluator error, not a silent pass", a
 test("a repo-relative script is resolved against the repo, not the work dir", async () => {
   // The work dir is a temp directory; "checks/…" only exists under the repo.
   const dir = await workDir();
-  const result = await run([NODE, "checks/task-coverage.mjs"], dir, {
+  const result = await run([NODE, "tasks/prd-chain-trial/checks/task-coverage.mjs"], dir, {
     output: JSON.stringify([{ id: "T-1", covers: ["FR-1"] }]),
     input: "FR-1 add a task.",
   });

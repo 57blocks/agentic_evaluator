@@ -1,0 +1,81 @@
+# The task the harness could not grade until now.
+#
+# tasks/code-reactive/README.md said it plainly: the only required check was
+# `tsc --noEmit`, so "an implementation that compiles and is completely wrong
+# still passes". spec.test.ts existed as the behavioural grader and was never
+# wired in. checks/behaviour.mjs wires it, one test per numbered requirement,
+# and it is validated against reference/signals.ts — 10 pass there, 9 fail on
+# a stub that only satisfies the types.
+#
+# The harness gates a step on exactly one required check, and rejects two
+# rather than silently applying one — so this step gates on behaviour, not
+# tsc. Little is lost: the grader imports the whole public API, so an
+# implementation with the wrong shape fails at import and scores 9 failures,
+# which is what tsc-noemit would have caught. Cost decides among whoever
+# clears it. tsc-noemit stays declared below, unused, for the day a step can
+# carry both.
+
+protocol_version: "0.4"
+run_name: code-reactive
+budget_usd: 3
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: codegen
+      version: "1"
+      producer: codegen
+      rubric_file: rubrics/codegen.md
+      test_set:
+        id: reactive-v1
+        inputs: [code-reactive]
+      candidate_ids: [sonnet-5, deepseek-v4-pro]
+      required_checks: [code-reactive-behaviour]
+      judged_dimensions: [meets-spec, correctness, type-quality, simplicity, robustness]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 600
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+
+evaluators:
+  required_checks:
+    tsc-noemit:
+      kind: tsc
+      scaffold_dir: scaffold
+    code-reactive-behaviour:
+      kind: command
+      argv: ["node", "checks/behaviour.mjs"]
+      version_files: [checks/behaviour.mjs, spec.test.ts]
+      timeout_seconds: 180
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/codegen.md
+    # A behavioural gate now decides correctness, so the judge is left to
+    # rank what it can actually separate. absolute-1-5 returned a wall of 5s
+    # on the other codegen steps; see tasks/prd-chain-trial/spec.yaml.
+    methods: [pairwise-swap]
+
+execution:
+  trials_per_case: 1
+  concurrency: 2
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.3

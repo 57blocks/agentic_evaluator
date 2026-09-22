@@ -160,7 +160,7 @@ test("runControlChain with the real agent-cli adapter pipes artifacts", async ()
       );
       const check = await runCheck({
         files: result.artifacts,
-        scaffoldDir: path.join(REPO_ROOT, "scaffold"),
+        scaffoldDir: path.join(REPO_ROOT, "tasks", "codegen-trial", "scaffold"),
         workDir,
       });
       return {
