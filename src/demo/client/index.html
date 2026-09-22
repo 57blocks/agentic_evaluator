@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>这一步该用谁 · Agentic Evaluator</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip" href="#stage">跳到内容</a>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <p>Agent Evaluation Protocol v0.4</p>
+      <h1>这一步该用谁</h1>
+      <p class="sub">不是模型排行榜。推荐绑定步骤、测试集、运行模式。本地只读，不会开跑。</p>
+    </div>
+    <nav aria-label="任务">
+      <h2>任务</h2>
+      <ul class="list" id="tasks"></ul>
+    </nav>
+    <nav aria-label="冒烟任务" id="smokeNav" hidden>
+      <h2>冒烟（脚本候选）</h2>
+      <ul class="list" id="smokeTasks"></ul>
+      <p class="note">候选是本地脚本，不是模型。用来验证管线，不是证据。</p>
+    </nav>
+    <nav aria-label="仓库样例" id="unfiledNav" hidden>
+      <h2>仓库样例</h2>
+      <ul class="list" id="unfiled"></ul>
+      <p class="note">committed 的示例证据，不属于任何任务。</p>
+    </nav>
+  </aside>
+  <main>
+    <section class="questions" aria-label="协议要回答的四个问题">
+      <div class="q"><b>1. 做对了吗</b><span>任务结果 × 必过检查，不用平均分冒充成功</span></div>
+      <div class="q"><b>2. 这一步用谁</b><span>每步自己的推荐，资格门先于选型</span></div>
+      <div class="q"><b>3. 成本还是速度</b><span>只在合格候选里按 operating mode 选</span></div>
+      <div class="q"><b>4. 证据能否复现</b><span>打开本步 report.html</span></div>
+    </section>
+    <section class="stage" id="stage" tabindex="-1"><p class="empty">选左侧一份规格或一次运行。</p></section>
+  </main>
+</div>
+<script type="module" src="./main.ts"></script>
+</body></html>
