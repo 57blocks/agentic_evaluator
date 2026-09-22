@@ -295,6 +295,12 @@ export async function runAll(params: {
   /** Workspace scanned for a reusable generation. */
   ws: Workspace;
   emit: RunEventSink;
+  /**
+   * Cooperative cancellation. A call already in flight finishes and is
+   * recorded — aborting a provider call mid-flight would throw away a result
+   * that has already been billed. Nothing new is dispatched after it fires.
+   */
+  signal?: AbortSignal;
   producer: ProducerKind;
   promptTpl: string;
   promptTemplateSha: string;
@@ -340,8 +346,14 @@ export async function runAll(params: {
     }
   }
 
+  let dispatched = 0;
+  let cancelled = 0;
   const done = await mapWithConcurrency(tasks, limit, async (task): Promise<RunRecord | null> => {
     const { inputSlug, inputText, candidate, def, trial } = task;
+    if (params.signal?.aborted) {
+      cancelled += 1;
+      return null;
+    }
     const temperature = def.generation_settings?.temperature ?? baseTemperature;
     const checkWorkDir = path.join(outDir, "checks", `${safeName(candidate)}__${inputSlug}__t${trial}`);
 
@@ -360,6 +372,7 @@ export async function runAll(params: {
       return null;
     }
 
+    dispatched += 1;
     try {
       const g = await generateOne({
         suite,
@@ -429,6 +442,9 @@ export async function runAll(params: {
     }
   });
 
+  if (cancelled > 0) {
+    params.emit({ type: "run.cancelled", step: suite.step, dispatched, skipped: cancelled });
+  }
   return done.filter((r): r is RunRecord => r !== null);
 }
 

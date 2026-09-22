@@ -87,6 +87,13 @@ export type RunEvent =
     }
   /** Wall-clock gaps that make every duration in this run unreliable. */
   | { type: "integrity.gaps"; gaps: number; thresholdMs: number }
+  /**
+   * The run was cancelled. Calls already in flight were allowed to finish and
+   * are recorded; nothing further was dispatched. Like a budget stop, this
+   * leaves real but partial evidence — never an empty directory pretending
+   * nothing happened.
+   */
+  | { type: "run.cancelled"; step: string; dispatched: number; skipped: number }
   | {
       type: "step.done";
       step: string;

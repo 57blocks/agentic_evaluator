@@ -61,6 +61,7 @@ export async function executeSuite(params: {
   suite: Suite;
   ws: Workspace;
   emit: RunEventSink;
+  signal?: AbortSignal;
   outDir: string;
   runId: string;
   html: boolean;
@@ -109,7 +110,7 @@ export async function executeSuite(params: {
   await writeManifest(outDir, manifest);
 
   const budget = params.budget ?? new BudgetGuard(suite.budgetUsd);
-  const records = await runAll({ suite, ws: params.ws, emit: params.emit, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget });
+  const records = await runAll({ suite, ws: params.ws, emit: params.emit, signal: params.signal, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget });
   const methods = methodsOf(suite);
   params.emit({ type: "phase", step: suite.step, phase: "judging", declared: methods.pairwise });
   const judged = methods.pairwise
@@ -251,6 +252,11 @@ export interface RunOptions {
   yes?: boolean;
   /** Where progress goes. Silent by default: a library call prints nothing. */
   onEvent?: RunEventSink;
+  /**
+   * Stop dispatching. Calls in flight finish and are recorded; the run writes
+   * whatever it has, and `run.cancelled` says how much never got a turn.
+   */
+  signal?: AbortSignal;
 }
 
 export async function runSuite(suitePath: string, html: boolean, opts: RunOptions = {}): Promise<Report | null> {
@@ -281,11 +287,13 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
   const steps: WorkflowStepInput[] = [];
   let last: Report | null = null;
   for (const suite of suites) {
+    if (opts.signal?.aborted && last !== null) break;
     const layout = stepLayout(root, runId, suite.step, nested);
     const done = await executeSuite({
       suite,
       ws,
       emit,
+      signal: opts.signal,
       outDir: layout.outDir,
       runId: layout.runId,
       html,

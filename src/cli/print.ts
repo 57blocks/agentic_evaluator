@@ -65,6 +65,10 @@ export function formatEvent(e: RunEvent): string[] {
       return [
         `⚠ budget limit ${usd(e.limitUsd ?? 0, 2)} reached after ${usd(e.spentUsd)} — skipped ${e.skipped.generation} generation(s), ${e.skipped.judging} judgement(s), ${e.skipped.scoring} scoring call(s); this run is partial (see GAPS.md)`,
       ];
+    case "run.cancelled":
+      return [
+        `⚠ cancelled after ${e.dispatched} generation(s) in ${e.step}; ${e.skipped} never got a turn — this run is partial (see GAPS.md)`,
+      ];
     case "integrity.gaps":
       return [
         `⚠ ${e.gaps} wall-clock gap(s) > ${e.thresholdMs / 60000} min in the trace — host suspended? durations unreliable (see GAPS.md)`,
