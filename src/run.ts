@@ -48,7 +48,8 @@ import {
   type E2eArmReport,
   type E2eControlReport,
 } from "./e2e-control.js";
-import { REPO_ROOT, listRunDirs, runsDir, runsRootFor, taskInputPath, taskRootOf, resolveTaskAsset } from "./paths.js";
+import { INSTALL_ROOT, displayPath, taskInputPath, taskRootOf, resolveTaskAsset } from "./paths.js";
+import { listRunDirs, runsRootFor, workspaceForSpec, type Workspace } from "./core/workspace.js";
 import { CODEGEN_PREAMBLE, CODEGEN_PRODUCER_VERSION } from "./producers/code-gen.js";
 import { sha256, short, trialHash } from "./canon/hash.js";
 import { classifyCompletion } from "./canon/states.js";
@@ -90,10 +91,21 @@ import type {
   Winner,
 } from "./types.js";
 
-/** Load KEY=VALUE lines from .env.local into process.env (no dependency). */
-async function loadEnvLocal(): Promise<void> {
+/**
+ * Load KEY=VALUE lines from .env.local into process.env (no dependency).
+ *
+ * The working directory first, then the installation: a user running the tool
+ * against their own workspace keeps their key next to their work, and the
+ * checkout's own .env.local still works when you are standing in it. An
+ * ambient variable always wins over both.
+ */
+async function loadEnvLocal(dirs: readonly string[] = [process.cwd(), INSTALL_ROOT]): Promise<void> {
+  for (const dir of dirs) await loadEnvFile(path.join(dir, ".env.local"));
+}
+
+async function loadEnvFile(file: string): Promise<void> {
   try {
-    const raw = await fs.readFile(path.join(REPO_ROOT, ".env.local"), "utf-8");
+    const raw = await fs.readFile(file, "utf-8");
     for (const line of raw.split("\n")) {
       const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
       if (!m) continue;
@@ -125,7 +137,7 @@ function parseArgs(argv: string[]): CliArgs {
 }
 
 /** A task's input text. Every task owns its inputs; there is no shared pool. */
-async function readInput(inputSlug: string, taskRoot: string): Promise<string> {
+async function readInput(inputSlug: string, taskRoot: string | undefined): Promise<string> {
   return fs.readFile(taskInputPath(taskRoot, inputSlug), "utf-8");
 }
 
@@ -244,7 +256,7 @@ async function generateOne(params: {
       maxTokens: def.generation_settings?.max_tokens,
       cli: def.cli,
     },
-    { workDir: params.checkWorkDir, emit: trace, traceContext },
+    { workDir: params.checkWorkDir, taskRoot: taskRootOf(suite), emit: trace, traceContext },
   );
   const out: GenOutput = {
     ...result,
@@ -311,11 +323,12 @@ async function loadReusable(
   step: string,
   hash: string,
   currentRunId: string,
+  ws: Workspace,
 ): Promise<{ record: RunRecord; from: string } | null> {
   // Every task's runs, not just this one's: `trialHash` is content-addressed,
   // so a generation produced under another task is the same generation. Nine
   // specs share `code-utils`; scanning per-task only would re-buy it per task.
-  const candidates = (await listRunDirs())
+  const candidates = (await listRunDirs(ws))
     .filter((e) => e.name.startsWith(`${step}-`) && e.name !== currentRunId)
     .sort((a, b) => b.name.localeCompare(a.name));
 
@@ -341,7 +354,7 @@ async function loadReusable(
       ) {
         continue;
       }
-      return { record: { ...(entry as RunRecord), text, status: "ok" }, from: path.relative(REPO_ROOT, dir) };
+      return { record: { ...(entry as RunRecord), text, status: "ok" }, from: displayPath(dir) };
     } catch {
       continue;
     }
@@ -401,6 +414,8 @@ function errorRecord(task: GenTask, err: unknown): RunRecord {
  */
 async function runAll(params: {
   suite: Suite;
+  /** Workspace scanned for a reusable generation. */
+  ws: Workspace;
   producer: ProducerKind;
   promptTpl: string;
   promptTemplateSha: string;
@@ -452,7 +467,7 @@ async function runAll(params: {
     const checkWorkDir = path.join(outDir, "checks", `${safeName(candidate)}__${inputSlug}__t${trial}`);
 
     if (reuse) {
-      const reused = await loadReusable(suite.step, task.hash, runId);
+      const reused = await loadReusable(suite.step, task.hash, runId, params.ws);
       if (reused) {
         console.log(`  reuse  ${candidate} · ${inputSlug} · t${trial}  ← ${reused.from}`);
         return { ...reused.record, candidate, inputSlug, trial, reusedFrom: reused.from };
@@ -798,6 +813,7 @@ async function loadPromptTemplate(
 
 async function executeSuite(params: {
   suite: Suite;
+  ws: Workspace;
   outDir: string;
   runId: string;
   html: boolean;
@@ -846,7 +862,7 @@ async function executeSuite(params: {
   await writeManifest(outDir, manifest);
 
   const budget = params.budget ?? new BudgetGuard(suite.budgetUsd);
-  const records = await runAll({ suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget });
+  const records = await runAll({ suite, ws: params.ws, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget });
   const methods = methodsOf(suite);
   const judged = methods.pairwise
     ? (console.log("\n▶ Judging (pairwise)…\n"), await judgeAll(suite, rubric, records, limit, trace.emit, budget))
@@ -956,7 +972,7 @@ async function executeSuite(params: {
 
   console.log(`\n${md}\n`);
   console.log(
-    `✔ ${path.relative(REPO_ROOT, outDir)}/ — ${trials.length} trials, ${evaluations.length} evaluator rows, ${traceRows} trace events, ledger total $${ledger.total.toFixed(4)} (${ledger.source}), recommend ${recommendation.chosen ?? "none"} (${recommendation.firmness})${html ? ", report.html" : ""}`,
+    `✔ ${displayPath(outDir)}/ — ${trials.length} trials, ${evaluations.length} evaluator rows, ${traceRows} trace events, ledger total $${ledger.total.toFixed(4)} (${ledger.source}), recommend ${recommendation.chosen ?? "none"} (${recommendation.firmness})${html ? ", report.html" : ""}`,
   );
   return { report, recommendation, trials: trials.length, ledgerTotal: ledger.total, ledger };
 }
@@ -1222,7 +1238,10 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
   const runName = suites[0].runName ?? suites[0].suiteId;
   const runId = `${runName}-${generatedAt.replace(/[:.]/g, "-")}`;
   const nested = suites.length > 1;
-  const root = path.join(runsRootFor(taskRootOf(suites[0])), runId);
+  // The workspace the spec belongs to, not the one the user is standing in:
+  // a run is written beside its task, and reuse is scanned around it.
+  const ws = await workspaceForSpec(suitePath);
+  const root = path.join(runsRootFor(taskRootOf(suites[0]), ws), runId);
   if (nested) await fs.mkdir(root, { recursive: true });
 
   const budget = new BudgetGuard(suites[0].budgetUsd);
@@ -1232,6 +1251,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: { yes?: b
     const layout = stepLayout(root, runId, suite.step, nested);
     const done = await executeSuite({
       suite,
+      ws,
       outDir: layout.outDir,
       runId: layout.runId,
       html,

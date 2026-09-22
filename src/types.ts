@@ -47,7 +47,7 @@ export type CheckConfig =
       /** Evaluator id, as declared in the spec (e.g. "tsc-noemit"). */
       id: string;
       kind: "tsc";
-      /** Repo-relative dir holding a `tsconfig.json` copied into each work dir. */
+      /** Task-relative dir holding a `tsconfig.json` copied into each work dir. */
       scaffoldDir: string;
     }
   | {
@@ -55,7 +55,7 @@ export type CheckConfig =
       kind: "command";
       /** Program and arguments, run with cwd = the trial work dir. */
       argv: string[];
-      /** Repo-relative files hashed into the evaluator version. */
+      /** Task-relative files hashed into the evaluator version. */
       versionFiles: string[];
       timeoutMs: number;
     };

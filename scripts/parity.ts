@@ -22,9 +22,13 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { listRunDirs, REPO_ROOT } from "../src/paths.js";
+import { displayPath } from "../src/paths.js";
+import { findWorkspace, listRunDirs, type Workspace } from "../src/core/workspace.js";
 
-const PARITY_DIR = path.join(REPO_ROOT, "parity");
+/** Captures are workspace output, beside the runs they summarize. */
+function parityDir(ws: Workspace): string {
+  return path.join(ws.root, "parity");
+}
 
 interface TrialRow {
   step: string;
@@ -94,16 +98,16 @@ function stdev(xs: readonly number[]): number {
 }
 
 /** Every run of `spec`, newest first. */
-async function runsOf(spec: string): Promise<{ id: string; dir: string }[]> {
+async function runsOf(ws: Workspace, spec: string): Promise<{ id: string; dir: string }[]> {
   const taskName = path.basename(path.dirname(spec));
-  return (await listRunDirs())
+  return (await listRunDirs(ws))
     .filter((e) => e.task === taskName)
     .sort((a, b) => b.name.localeCompare(a.name))
     .map((e) => ({ id: e.name, dir: e.dir }));
 }
 
-async function capture(label: string, spec: string, take: number): Promise<void> {
-  const runs = (await runsOf(spec)).slice(0, take);
+async function capture(ws: Workspace, label: string, spec: string, take: number): Promise<void> {
+  const runs = (await runsOf(ws, spec)).slice(0, take);
   if (runs.length === 0) {
     console.error(`No runs found for ${spec}. Run it first — capture never spends.`);
     process.exit(1);
@@ -118,17 +122,17 @@ async function capture(label: string, spec: string, take: number): Promise<void>
     trials += rows.length;
   }
   const arm: Arm = { label, spec, runIds: runs.map((r) => r.id), rates, trials };
-  await fs.mkdir(PARITY_DIR, { recursive: true });
-  await fs.writeFile(path.join(PARITY_DIR, `${label}.json`), JSON.stringify(arm, null, 2));
+  await fs.mkdir(parityDir(ws), { recursive: true });
+  await fs.writeFile(path.join(parityDir(ws), `${label}.json`), JSON.stringify(arm, null, 2));
   console.log(
     `✔ ${label}: ${rates.length} runs, ${trials} trials, ` +
       `success ${(mean(rates) * 100).toFixed(1)}% ± ${(stdev(rates) * 100).toFixed(1)}`,
   );
 }
 
-async function compare(a: string, b: string): Promise<void> {
+async function compare(ws: Workspace, a: string, b: string): Promise<void> {
   const read = async (l: string) =>
-    JSON.parse(await fs.readFile(path.join(PARITY_DIR, `${l}.json`), "utf-8")) as Arm;
+    JSON.parse(await fs.readFile(path.join(parityDir(ws), `${l}.json`), "utf-8")) as Arm;
   const before = await read(a);
   const after = await read(b);
 
@@ -150,7 +154,7 @@ async function compare(a: string, b: string): Promise<void> {
     ].join(","),
   ].join("\n");
 
-  const out = path.join(PARITY_DIR, "parity.csv");
+  const out = path.join(parityDir(ws), "parity.csv");
   await fs.writeFile(out, `${rows}\n`);
   console.log(rows);
 
@@ -158,7 +162,7 @@ async function compare(a: string, b: string): Promise<void> {
   const delta = Math.abs(mean(after.rates) - mean(before.rates));
   const noise = Math.max(stdev(before.rates), stdev(after.rates));
   console.log(
-    `\n→ ${path.relative(REPO_ROOT, out)}` +
+    `\n→ ${displayPath(out)}` +
       `\n  delta ${(delta * 100).toFixed(1)}pp against a run-to-run spread of ` +
       `${(noise * 100).toFixed(1)}pp.` +
       (delta <= noise
@@ -168,15 +172,16 @@ async function compare(a: string, b: string): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  const ws = await findWorkspace();
   const [cmd, ...rest] = process.argv.slice(2);
   if (cmd === "capture") {
     const [label, spec, take] = rest;
     if (!label || !spec) throw new Error("usage: parity capture <label> <spec> [runs]");
-    await capture(label, spec, Number(take ?? 3));
+    await capture(ws, label, spec, Number(take ?? 3));
   } else if (cmd === "compare") {
     const [a, b] = rest;
     if (!a || !b) throw new Error("usage: parity compare <before> <after>");
-    await compare(a, b);
+    await compare(ws, a, b);
   } else {
     console.error("usage: parity capture <label> <spec> [runs] | parity compare <before> <after>");
     process.exit(1);

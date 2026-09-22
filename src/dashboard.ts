@@ -45,7 +45,8 @@ import { loadEnvLocal } from "./run.js";
 /** Re-exported for `run-all.ts` (its records reader is typed against this). */
 export type { RunRecordLite };
 
-import { REPO_ROOT, listRunDirs, runsDir } from "./paths.js";
+import { displayPath } from "./paths.js";
+import { findWorkspace, listRunDirs, runsDir, type Workspace } from "./core/workspace.js";
 
 /** Canonical PDLC ordering for step sections; unknown steps sort last. */
 const STEP_ORDER = ["prd", "trd", "taskbreakdown", "codegen"] as const;
@@ -313,10 +314,10 @@ interface Discovered {
  * Scan eval/results/*, parse each report.json, keep the newest per step (by
  * generatedAt), and attach the same dir's records.json when present.
  */
-async function discoverLatestByStep(): Promise<Discovered[]> {
+async function discoverLatestByStep(ws: Workspace): Promise<Discovered[]> {
   // Every task's runs/ plus the legacy top-level one — the latest run of a
   // step wins no matter which task produced it.
-  const entries = await listRunDirs();
+  const entries = await listRunDirs(ws);
 
   const latest = new Map<string, Discovered>();
   for (const { dir } of entries) {
@@ -334,11 +335,12 @@ async function discoverLatestByStep(): Promise<Discovered[]> {
 }
 
 async function main(): Promise<void> {
-  const found = await discoverLatestByStep();
+  const ws = await findWorkspace();
+  const found = await discoverLatestByStep(ws);
 
   if (found.length === 0) {
     console.log(
-      `No report.json found under tasks/*/runs/ or ${path.relative(REPO_ROOT, runsDir())}/. ` +
+      `No report.json found under tasks/*/runs/ or ${displayPath(runsDir(ws))}/. ` +
         "Run an eval first (pnpm run run --suite suites/<step>.json).",
     );
     return; // exit 0 — nothing to render is not an error.
@@ -369,8 +371,8 @@ async function main(): Promise<void> {
 
   const ts = new Date().toISOString().replace(/[:.]/g, "-");
   // Spans every task, so the combined dashboard lives in the shared runs/ dir.
-  await fs.mkdir(runsDir(), { recursive: true });
-  const outPath = path.join(runsDir(), `dashboard-${ts}.html`);
+  await fs.mkdir(runsDir(ws), { recursive: true });
+  const outPath = path.join(runsDir(ws), `dashboard-${ts}.html`);
   await fs.writeFile(
     outPath,
     renderDashboardHtml(reports, recordsByStep, aiSummary),
@@ -378,7 +380,7 @@ async function main(): Promise<void> {
   );
 
   const steps = reports.map((r) => r.step).join(", ");
-  console.log(`✔ dashboard written to ${path.relative(REPO_ROOT, outPath)} (steps: ${steps})`);
+  console.log(`✔ dashboard written to ${displayPath(outPath)} (steps: ${steps})`);
 }
 
 // Run main() only when invoked directly (tsx eval/src/dashboard.ts), NOT when

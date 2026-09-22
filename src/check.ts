@@ -20,7 +20,8 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { REPO_ROOT, resolveTaskAssetSync } from "./paths.js";
+import { INSTALL_ROOT, resolveTaskAssetSync } from "./paths.js";
+import { looksLikePath } from "./script-path.js";
 import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
 
@@ -48,11 +49,11 @@ export interface CheckResult {
 
 let cachedTscVersion: string | undefined;
 
-/** TypeScript version from the repo's installed package; "unknown" if absent. */
+/** TypeScript version from the harness's own installed package; "unknown" if absent. */
 export async function tscVersion(): Promise<string> {
   if (cachedTscVersion) return cachedTscVersion;
   try {
-    const raw = await fs.readFile(path.join(REPO_ROOT, "node_modules", "typescript", "package.json"), "utf-8");
+    const raw = await fs.readFile(path.join(INSTALL_ROOT, "node_modules", "typescript", "package.json"), "utf-8");
     const parsed = JSON.parse(raw) as { version?: unknown };
     cachedTscVersion = typeof parsed.version === "string" ? parsed.version : "unknown";
   } catch {
@@ -120,9 +121,9 @@ export async function runCheck(params: {
   return { ...result, version };
 }
 
-/** Spawn the repo's tsc via node (no npx: deterministic binary, no npm noise). */
+/** Spawn the harness's own tsc via node (no npx: deterministic binary, no npm noise). */
 function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
-  const tscJs = path.join(REPO_ROOT, "node_modules", "typescript", "lib", "tsc.js");
+  const tscJs = path.join(INSTALL_ROOT, "node_modules", "typescript", "lib", "tsc.js");
   return new Promise((resolve) => {
     execFile(
       process.execPath,
@@ -181,17 +182,9 @@ const COMMAND_EXIT_FAIL = 1;
  * otherwise be indistinguishable from the check failing the candidate — and
  * that is exactly how a broken path once marked every candidate as failed.
  */
-const SCRIPT_PATH = /^(?:\.{1,2}\/)?[\w.@-]+(?:\/[\w.@-]+)*\.(?:mjs|cjs|js|ts|py|sh)$/;
-
-function looksLikePath(arg: string): boolean {
-  // Deliberately narrow: an inline program (`node -e "a/b"`) is an argument,
-  // not a path, and must not be mistaken for a missing file.
-  return SCRIPT_PATH.test(arg);
-}
-
 export function resolveArgv(
   argv: readonly string[],
-  taskRoot: string = REPO_ROOT,
+  taskRoot?: string,
 ): { argv: string[]; missing: string[] } {
   const missing: string[] = [];
   const resolved = argv.map((arg) => {
@@ -208,7 +201,7 @@ export function resolveArgv(
 export async function commandCheckVersion(
   argv: readonly string[],
   versionFiles: readonly string[],
-  taskRoot: string = REPO_ROOT,
+  taskRoot?: string,
 ): Promise<string> {
   const parts = await Promise.all(
     [...versionFiles].sort().map(async (rel) => {
@@ -249,7 +242,7 @@ export async function runCommandCheck(params: {
   /** Task dir the check's argv and version files resolve against. */
   taskRoot?: string;
 }): Promise<CheckResult> {
-  const taskRoot = params.taskRoot ?? REPO_ROOT;
+  const taskRoot = params.taskRoot;
   const version = await commandCheckVersion(params.argv, params.versionFiles, taskRoot);
   try {
     await fs.mkdir(params.workDir, { recursive: true });

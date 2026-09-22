@@ -2,9 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { compileSpec, compileWorkflow, loadSpec, loadWorkflow, parseSpec, SpecError, type EvalSpec } from "../src/spec/load-spec.js";
+import path from "node:path";
 import { sha256 } from "../src/canon/hash.js";
 
 const CODEGEN = "tasks/codegen-w38/spec.yaml";
+/** Where a patched copy of the spec would live — its assets resolve there. */
+const TASK_ROOT = path.dirname(path.resolve(CODEGEN));
 const CANDIDATE_IDS = "candidate_ids: [sonnet-5, deepseek-v4-pro, kimi-k3]";
 
 async function parsePatched(replacements: readonly (readonly [string, string])[]): Promise<{ spec: EvalSpec; sha: string }> {
@@ -69,12 +72,12 @@ test("schema rejects an unknown top-level field", async () => {
 
 test("semantic check rejects a step referencing an undeclared candidate", async () => {
   const { spec, sha } = await parsePatched([[CANDIDATE_IDS, "candidate_ids: [sonnet-5, ghost]"]]);
-  assert.throws(() => compileSpec(spec, "x.yaml", sha), /unknown candidate ids ghost/);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /unknown candidate ids ghost/);
 });
 
 test("semantic check rejects a judge from the same vendor as a candidate", async () => {
   const { spec, sha } = await parsePatched([["model: google/gemini-3.1-pro-preview", "model: anthropic/claude-opus-4.8"]]);
-  assert.throws(() => compileSpec(spec, "x.yaml", sha), /shares a vendor/);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /shares a vendor/);
 });
 
 test("same-vendor judge is allowed only with the explicit override", async () => {
@@ -82,7 +85,7 @@ test("same-vendor judge is allowed only with the explicit override", async () =>
     ["model: google/gemini-3.1-pro-preview", "model: anthropic/claude-opus-4.8"],
     ["default_temperature: 0.2", "default_temperature: 0.2\n  allow_same_vendor_judge: true"],
   ]);
-  assert.equal(compileSpec(spec, "x.yaml", sha).judge, "anthropic/claude-opus-4.8");
+  assert.equal(compileSpec(spec, "x.yaml", sha, TASK_ROOT).judge, "anthropic/claude-opus-4.8");
 });
 
 const KIMI_BLOCK = `  - id: kimi-k3
@@ -101,7 +104,7 @@ test("agent-cli candidate may omit model and keeps codegen defaults on the other
     ],
     [CANDIDATE_IDS, "candidate_ids: [sonnet-5, deepseek-v4-pro, fake-cli]"],
   ]);
-  const suite = compileSpec(spec, "x.yaml", sha);
+  const suite = compileSpec(spec, "x.yaml", sha, TASK_ROOT);
   assert.equal(suite.candidateDefs?.["fake-cli"].adapter, "agent-cli");
   assert.equal(suite.candidateDefs?.["fake-cli"].model, undefined);
   assert.equal(suite.candidateDefs?.["sonnet-5"].adapter, "codegen");
@@ -112,7 +115,7 @@ test("agent-cli without cli.argv is rejected", async () => {
     [KIMI_BLOCK, "  - id: fake-cli\n    adapter: agent-cli"],
     [CANDIDATE_IDS, "candidate_ids: [sonnet-5, deepseek-v4-pro, fake-cli]"],
   ]);
-  assert.throws(() => compileSpec(spec, "x.yaml", sha), /needs cli.argv/);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /needs cli.argv/);
 });
 
 test("model-api candidate without a model is rejected", async () => {
@@ -120,7 +123,7 @@ test("model-api candidate without a model is rejected", async () => {
     [KIMI_BLOCK, "  - id: ghost\n    adapter: model-api"],
     [CANDIDATE_IDS, "candidate_ids: [sonnet-5, deepseek-v4-pro, ghost]"],
   ]);
-  assert.throws(() => compileSpec(spec, "x.yaml", sha), /needs a model/);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /needs a model/);
 });
 
 test("same-vendor check ignores agent-cli candidates that have no model", async () => {
@@ -130,7 +133,7 @@ test("same-vendor check ignores agent-cli candidates that have no model", async 
     ["model: google/gemini-3.1-pro-preview", "model: anthropic/claude-opus-4.8"],
   ]);
   assert.throws(
-    () => compileSpec(spec, "x.yaml", sha),
+    () => compileSpec(spec, "x.yaml", sha, TASK_ROOT),
     (err: unknown) => {
       assert.ok(err instanceof SpecError);
       assert.match(err.message, /sonnet-5/);
@@ -165,7 +168,7 @@ x-harness:
   producer: codegen
 `;
   const spec = parseSpec(text, "x.yaml");
-  assert.throws(() => compileWorkflow(spec, "x.yaml", sha256(text)), /duplicate step ids/);
+  assert.throws(() => compileWorkflow(spec, "x.yaml", sha256(text), TASK_ROOT), /duplicate step ids/);
 });
 
 test("multi-step spec compiles independently per step", () => {
@@ -207,7 +210,7 @@ x-harness:
   default_temperature: 0.2
 `;
   const spec = parseSpec(text, "x.yaml");
-  const suites = compileWorkflow(spec, "x.yaml", sha256(text));
+  const suites = compileWorkflow(spec, "x.yaml", sha256(text), TASK_ROOT);
   assert.equal(suites.length, 2);
   assert.equal(suites[0].step, "prd");
   assert.equal(suites[0].producer, "prompt");
@@ -221,7 +224,7 @@ x-harness:
   assert.deepEqual(suites[1].candidates, ["sonnet-5", "fake-cli"]);
   assert.equal(suites[1].candidateDefs?.["sonnet-5"].adapter, "codegen");
   assert.equal(suites[1].candidateDefs?.["fake-cli"].adapter, "agent-cli");
-  assert.equal(compileSpec(spec, "x.yaml", sha256(text)).step, "prd");
+  assert.equal(compileSpec(spec, "x.yaml", sha256(text), TASK_ROOT).step, "prd");
 });
 
 test("prompt step without prompt_file is rejected", () => {
@@ -246,7 +249,7 @@ x-harness:
   producer: codegen
 `;
   const spec = parseSpec(text, "x.yaml");
-  assert.throws(() => compileWorkflow(spec, "x.yaml", sha256(text)), /producer "prompt" needs prompt_file/);
+  assert.throws(() => compileWorkflow(spec, "x.yaml", sha256(text), TASK_ROOT), /producer "prompt" needs prompt_file/);
 });
 
 test("a command check compiles with its argv, version files and timeout", async () => {
@@ -258,7 +261,7 @@ test("a command check compiles with its argv, version files and timeout", async 
     ["required_checks: [tsc-noemit]", "required_checks: [task-coverage]"],
   ]);
 
-  const suite = compileSpec(spec, "x.yaml", sha);
+  const suite = compileSpec(spec, "x.yaml", sha, TASK_ROOT);
 
   assert.deepEqual(suite.check, {
     id: "task-coverage",
@@ -273,7 +276,7 @@ test("a command check without argv is rejected at load time", async () => {
   const { spec, sha } = await parsePatched([
     ["      kind: tsc\n      scaffold_dir: scaffold", "      kind: command"],
   ]);
-  assert.throws(() => compileSpec(spec, "x.yaml", sha), /must declare argv/);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /must declare argv/);
 });
 
 test("two required checks on one step are rejected rather than silently gated on one", async () => {
@@ -284,7 +287,7 @@ test("two required checks on one step are rejected rather than silently gated on
     ],
     ["required_checks: [tsc-noemit]", "required_checks: [tsc-noemit, task-coverage]"],
   ]);
-  assert.throws(() => compileSpec(spec, "x.yaml", sha), /one per step is supported/);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /one per step is supported/);
 });
 
 test("judge methods compile onto the suite and default to both", async () => {
@@ -294,5 +297,19 @@ test("judge methods compile onto the suite and default to both", async () => {
   const { spec, sha } = await parsePatched([
     ["    methods: [pairwise-swap, absolute-1-5]", "    methods: [pairwise-swap]"],
   ]);
-  assert.deepEqual(compileSpec(spec, "x.yaml", sha).judgeMethods, ["pairwise-swap"]);
+  assert.deepEqual(compileSpec(spec, "x.yaml", sha, TASK_ROOT).judgeMethods, ["pairwise-swap"]);
+});
+
+test("an empty methods list turns judging off; only an absent one means both", async () => {
+  // Arrange - the spec declares a judge (the schema requires one) but no method.
+  const { spec, sha } = await parsePatched([
+    ["    methods: [pairwise-swap, absolute-1-5]", "    methods: []"],
+  ]);
+
+  // Act
+  const suite = compileSpec(spec, "x.yaml", sha, TASK_ROOT);
+
+  // Assert - declaring nothing is not the same as declaring none. Collapsing
+  // the two billed a full judging pass on a run that asked for no judging.
+  assert.deepEqual(suite.judgeMethods, []);
 });

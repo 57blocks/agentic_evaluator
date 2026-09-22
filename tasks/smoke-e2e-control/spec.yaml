@@ -45,7 +45,7 @@ candidates:
   - id: fake-pass
     adapter: agent-cli
     cli:
-      argv: [node, scripts/fake-codegen-agent.mjs]
+      argv: [node, agents/fake-codegen-agent.mjs]
 
 evaluators:
   required_checks:

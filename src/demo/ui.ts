@@ -9,9 +9,9 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { REPO_ROOT } from "../paths.js";
+import { INSTALL_ROOT } from "../paths.js";
 
-export const DIST_DIR = path.join(REPO_ROOT, "dist", "demo");
+export const DIST_DIR = path.join(INSTALL_ROOT, "dist", "demo");
 const INDEX_HTML = path.join(DIST_DIR, "index.html");
 
 let building: Promise<void> | null = null;
@@ -19,7 +19,7 @@ let building: Promise<void> | null = null;
 /** Build the client bundle. Vite is a dev dependency, so import it lazily. */
 async function buildClient(): Promise<void> {
   const { build } = await import("vite");
-  await build({ configFile: path.join(REPO_ROOT, "vite.config.ts"), logLevel: "warn" });
+  await build({ configFile: path.join(INSTALL_ROOT, "vite.config.ts"), logLevel: "warn" });
 }
 
 /** Build once per process, and let concurrent callers share that one build. */

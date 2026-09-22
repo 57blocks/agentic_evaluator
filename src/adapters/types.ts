@@ -31,6 +31,13 @@ export interface CandidateRequest {
 
 export interface ExecutionContext {
   workDir: string;
+  /**
+   * Task directory a declared script path resolves against. A task owns its
+   * agent; without this an `agent-cli` candidate resolves against whatever
+   * the harness happens to call its own root, which stops being meaningful
+   * the moment the task lives somewhere else.
+   */
+  taskRoot?: string;
   emit?: LlmTrace;
   traceContext?: Record<string, unknown>;
 }
