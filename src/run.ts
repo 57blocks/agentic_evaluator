@@ -1,15 +1,15 @@
 /**
  * Model-eval CLI entry point + reusable `runSuite` driver.
  *
- *   pnpm run run -- --suite specs/codegen-w38.yaml --html --yes
- *   pnpm run run -- --suite suites/codegen.json  --html        (legacy JSON)
+ *   pnpm run run -- --suite tasks/codegen-w38/spec.yaml --html --yes
+ *   pnpm run run -- --suite suites/codegen.json          --html   (legacy JSON)
  *
  * Runs every candidate against every fixed input (× trials) through a
  * candidate adapter (model-api, codegen, or agent-cli), then has a judge
  * pairwise-rank them and grade them 1–5. Suites with a tsc required check
  * still run `tsc --noEmit` on returned artifacts.
  *
- * Two output layers land in runs/<runId>/:
+ * Two output layers land in the task's runs/<runId>/:
  *   legacy   raw/*.txt, records.json, report.{md,json,html}  — unchanged aggregate
  *   canon    manifest.json, trace.jsonl, scores.jsonl, evaluations.jsonl,
  *            ledger.json, summary.json, GAPS.md                — protocol v0.4
@@ -113,7 +113,7 @@ interface CliArgs {
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  let suite = "specs/codegen-w38.yaml";
+  let suite = "tasks/codegen-w38/spec.yaml";
   let html = false;
   let yes = process.env.EVAL_YES === "1";
   for (let i = 0; i < argv.length; i++) {
@@ -124,14 +124,9 @@ function parseArgs(argv: string[]): CliArgs {
   return { suite, html, yes };
 }
 
+/** A task's input text. Every task owns its inputs; there is no shared pool. */
 async function readInput(inputSlug: string, taskRoot: string): Promise<string> {
-  const inTask = taskInputPath(taskRoot, inputSlug);
-  try {
-    return await fs.readFile(inTask, "utf-8");
-  } catch {
-    // Pre-migration layout: a shared top-level `inputs/`.
-    return fs.readFile(path.join(REPO_ROOT, "inputs", `${inputSlug}.txt`), "utf-8");
-  }
+  return fs.readFile(taskInputPath(taskRoot, inputSlug), "utf-8");
 }
 
 /** Stable run id shared by the output dir and (for dashboards) reporting. */
