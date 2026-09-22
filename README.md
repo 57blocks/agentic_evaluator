@@ -42,38 +42,84 @@ runs/<runId>/
 
 ```bash
 pnpm install
-cp ../agentic-builder/.env.local .env.local        # OPENROUTER_API_KEY=...
-pnpm run check-models specs/codegen-w38.yaml       # reachable from here? prices?
-pnpm run run -- --suite specs/codegen-w38.yaml --html          # preview only
-caffeinate -i pnpm run run -- --suite specs/codegen-w38.yaml --html --yes    # execute
-pnpm run report runs/<runId>                                    # re-render report.html
-pnpm run demo                                                   # local UI at http://127.0.0.1:4173
-pnpm test
+npm link                    # or: pnpm run agenteval <command>
+
+agenteval init my-task      # a runnable, offline task to edit
+agenteval ls                # what this workspace holds, and what it spent
+agenteval plan my-task      # what a run would cost — no key, no call
+agenteval run my-task --yes # execute
+agenteval dash              # the dashboard, over this workspace
 ```
 
-The demo UI is read-only: it lists `specs/*.yaml`, completed `runs/`, and
-committed fixtures as samples. It does not start paid evals. Open a spec to
-see each independent step’s candidates; open a run to see the per-step
-recommendation and the canonical `report.html`.
+A **workspace** is any directory holding `tasks/`, found by walking up from
+where you are standing; `--workspace DIR` names one explicitly. The harness
+itself is a workspace, which is why running inside this checkout needs no
+flags. A task is self-contained — spec, inputs, rubric, agents, checks,
+scaffold and its own `runs/` — so copying the directory somewhere else and
+running it there is the supported thing to do, not a trick.
 
-Run paid specs under `caffeinate -i` (macOS). A suspended host leaves regular
+```bash
+agenteval models my-task              # reachable from here? at what price?
+agenteval models my-task --catalog-only   # no key, nothing billed
+agenteval report <runId>              # re-render report.html; no number moves
+agenteval run my-task --yes --json    # one JSON event per line, for a script
+```
+
+Exit codes: `0` done · `1` failed · `2` usage · `3` completed but partial —
+the budget stopped it early, or the trace shows gaps that make its durations
+unreliable. The third is why they are separate: a script that cannot tell a
+spending cap from an outage will treat a half-run as a whole one.
+
+Run paid tasks under `caffeinate -i` (macOS). A suspended host leaves regular
 multi-minute gaps between trace events and every timeout and duration in that
-run becomes meaningless; `summary.json.integrity` counts such gaps and GAPS.md
-warns when any exist. `pnpm run rescore` refreshes the legacy layer only
-(report.json, legacy-report.html); canonical rows are not re-derived.
+run becomes meaningless; `summary.json.integrity` counts such gaps, GAPS.md
+warns, and `agenteval run` exits 3.
 
-A spec is the versioned source of truth (`specs/*.yaml`, schema in
+`tasks/smoke-local` is the free full-pipeline smoke: local command candidates
+and no declared judging method, so it exercises spec load, adapter dispatch,
+the required check, the ledger and the recommendation without a single network
+call. It is what gates every refactor here.
+
+A spec is the versioned source of truth (`tasks/<name>/spec.yaml`, schema in
 `src/spec/schema.ts`). A spec may list several **independent** steps; each
 gets its own recommendation. Add `input_from` to chain a step onto the previous
 one; that also turns on the end-to-end validation pass.
-Legacy `suites/*.json` still run (candidate id = model id), but that path is
-**deprecated**: it predates the candidate-as-object contract and every new
-step belongs in a spec.
+
+`evaluators.judge.methods` is honoured exactly: absent means both methods run
+(what every spec written before the key existed meant), an empty list means
+neither. A step with no method declared is a check-only step — the manifest
+records the declaration and GAPS.md states the missing scores are a choice.
+
+Legacy `suites/*.json` still load (candidate id = model id) but no longer run:
+their `rubrics/` and `scaffold/` were workspace-level and moved into the tasks
+that own them. The path is **deprecated** — every new step belongs in a task.
+
+The legacy entry points that have not been folded into `agenteval` yet:
+
+```bash
+pnpm run rescore      # refresh the legacy layer only; canonical rows untouched
+pnpm run dashboard    # the cross-run view the canonical pages do not have yet
+pnpm run parity       # capture/compare: did a change move the numbers?
+pnpm test
+```
 
 ## Layout
 
 ```
-src/run.ts            driver: spec → trials → judge → score → legacy + canonical outputs
+bin/agenteval.mjs     the installed entry point
+src/cli/              argv -> core, and the only place a run is formatted for a human
+  index.ts            dispatch, --help, --version, exit codes
+  commands/           run plan ls init models report dash
+  print.ts            events -> terminal lines        json.ts  events -> NDJSON
+src/core/             the kernel: no terminal, no cwd, no process.exit
+  workspace.ts        where the user's tasks and runs live
+  plan.ts             what a run would do, before it does any of it (pure)
+  events.ts           what a run emits while it happens
+  generate.ts         candidate × input × trial through an adapter
+  evaluate.ts         judge and scorer      scorecard.ts  the frozen legacy aggregate
+  e2e-arms.ts         the two end-to-end arms and the §8 verdict
+  execute.ts          one step, then the run around it
+src/paths.ts          the installation: its own tsc, version, built assets, fixtures
 src/adapters/         candidate adapters: model-api, codegen, agent-cli (protocol §5)
 src/llm.ts            OpenRouter client; provider, finish reason, labeled cost source, LlmError
 src/judge.ts          pairwise with order swap; keeps every attempt's cost
@@ -86,7 +132,7 @@ src/html.ts           escapeHtml — the only thing both report layers share
 src/report-v2.ts      canonical step report page (+ report-charts, report-evidence)
 src/report-workflow.ts canonical workflow page: verdict, arms, per-step links, ledger
 src/render.ts         legacy renderer for report.ts + dashboard.ts (frozen)
-src/demo/             local read-only UI (`pnpm run demo`)
+src/demo/             the dashboard server and its React client
 tests/                node:test; parity uses tests/legacy-aggregate.ts (pristine oracle)
 fixtures/             committed real runs used by the parity test
 docs/                 protocol, implementation plan, harness-to-protocol map, runner design
