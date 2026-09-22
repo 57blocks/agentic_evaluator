@@ -68,6 +68,18 @@ main{padding:28px 28px 64px;min-width:0}
 .list .runs button{padding:5px 8px}
 .list .runs .m{font-size:11px}
 .spend.over{color:var(--bad);font-weight:650}
+.files{display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:12px;align-items:start}
+.files .names{list-style:none;margin:0;padding:0;display:grid;gap:2px;max-height:60vh;overflow:auto}
+.files .names button{width:100%;text-align:left;border:1px solid transparent;background:transparent;border-radius:6px;padding:5px 8px;color:var(--ink);font-family:var(--mono);font-size:12px}
+.files .names button:hover,.files .names button:focus-visible{background:var(--chip);outline:none}
+.files .names button[aria-current="true"]{border-color:var(--line);background:var(--chip)}
+.files pre{margin:0;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:10px;max-height:60vh;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.runtable{width:100%;border-collapse:collapse;font-size:13px}
+.runtable th{text-align:left;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line)}
+.runtable td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.runtable tbody tr:hover{background:var(--chip)}
+.runtable .num{font-family:var(--mono);white-space:nowrap}
+.runtable button{border:0;background:transparent;padding:0;color:var(--accent);text-decoration:underline;font-size:13px}
 .task-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .task-head .n{font-family:var(--mono);font-size:12px}
 .task-head .c{font-size:11px;color:var(--muted);white-space:nowrap}
@@ -170,25 +182,86 @@ function navButton(kind, key, title, meta) {
     '"><span class="k">' + escapeHtml(title) + '</span><span class="m">' + meta + "</span></button></li>";
 }
 
-function renderSpec(spec) {
-  const chain = spec.steps.filter((s) => s.inputFrom);
+/** Task detail: what the task asks, how it is judged, and every run it produced. */
+function renderTask(task) {
+  const chain = task.steps.filter((s) => s.inputFrom);
   const handoffNote = chain.length
-    ? "独立评测无交接；e2e 对照沿 " + spec.steps.map((s) => s.id).join(" → ")
-    : spec.steps.length + " 个独立步骤（无交接）";
-  const steps = spec.steps.map((s) => \`
+    ? "独立评测无交接；e2e 对照沿 " + task.steps.map((s) => s.id).join(" → ")
+    : task.steps.length + " 个独立步骤（无交接）";
+  const steps = task.steps.map((s) => \`
     <article class="step">
       <h3>\${escapeHtml(s.id)} <em>\${escapeHtml(s.producer)}</em></h3>
       <p class="meta">\${escapeHtml(s.operatingMode || "无运行模式")} · 检查 \${s.requiredChecks.length ? s.requiredChecks.join(", ") : "无"}\${s.inputFrom ? " · 交接自 " + escapeHtml(s.inputFrom) : ""}</p>
       \${chips(s.candidates)}
-      <p class="note">输入 \${s.inputs.join("、")} · 裁判标准 \${s.rubricFile}</p>
+      <p class="note">输入 \${s.inputs.join("、")} · 裁判标准 \${escapeHtml(s.rubricFile)}</p>
     </article>\`).join("");
+
+  const fileList = task.files.map((f) =>
+    '<li><button type="button" data-file="' + escapeHtml(f) + '">' + escapeHtml(f) + "</button></li>"
+  ).join("");
+
+  const rows = task.runs.map((r) => {
+    const verdict = r.steps
+      .map((x) => (x.chosen ? escapeHtml(x.chosen) : '<span class="pill warn">需评审</span>'))
+      .join(" / ");
+    return "<tr>" +
+      '<td class="num"><button type="button" data-kind="run" data-key="' + escapeHtml(r.id) + '">' +
+        escapeHtml((r.startedAt || r.id).slice(0, 16).replace("T", " ")) + "</button></td>" +
+      '<td class="num">' + (r.totalUsd == null ? "—" : "$" + r.totalUsd.toFixed(4)) + "</td>" +
+      "<td>" + verdict + "</td>" +
+      '<td class="num">' + escapeHtml(r.kind === "workflow" ? "多步骤" : "单步骤") +
+        (r.synthetic ? " · 脚本" : "") + "</td>" +
+      "</tr>";
+  }).join("");
+
+  const runsBlock = task.runs.length
+    ? '<table class="runtable"><thead><tr><th>运行</th><th>成本</th><th>各步推荐</th><th>类型</th></tr></thead><tbody>' +
+      rows + "</tbody></table>"
+    : '<p class="empty">这个任务还没跑过。</p>';
+
+  const spend = task.spentUsd == null
+    ? ""
+    : " · 已花 $" + task.spentUsd.toFixed(2) +
+      (task.budgetUsd != null ? " / 预算 $" + task.budgetUsd + (task.spentUsd > task.budgetUsd ? "（超支）" : "") : "");
+
   stage.innerHTML = \`
     <div>
-      <h2>\${escapeHtml(spec.runName)}</h2>
-      <p class="meta">\${escapeHtml(spec.path)}\${spec.budgetUsd != null ? " · 预算 $" + spec.budgetUsd : ""} · \${handoffNote}</p>
-      <p class="note">预览不花钱：<code>pnpm run run -- --suite \${escapeHtml(spec.path)} --html</code>。真跑再加 <code>--yes</code>。</p>
+      <h2>\${escapeHtml(task.name)}</h2>
+      <p class="meta">\${escapeHtml(task.specPath)}\${spend} · \${handoffNote}</p>
+      <p class="note">预览不花钱：<code>pnpm run run -- --suite \${escapeHtml(task.specPath)} --html</code>。真跑再加 <code>--yes</code>。</p>
     </div>
-    <div class="pipeline">\${steps}</div>\`;
+    <div class="pipeline">\${steps}</div>
+    <div>
+      <h3>定义（\${task.files.length} 个文件）</h3>
+      <div class="files">
+        <ul class="names">\${fileList}</ul>
+        <pre id="fileBody">选左侧一个文件。</pre>
+      </div>
+    </div>
+    <div>
+      <h3>运行（\${task.runs.length} 次）</h3>
+      \${runsBlock}
+    </div>\`;
+
+  const body = document.getElementById("fileBody");
+  const preferred = task.files.find((f) => f === "spec.yaml") || task.files[0];
+  if (preferred) showFile(task.name, preferred, body);
+}
+
+/** Load one definition file into the pane, marking which name is current. */
+async function showFile(taskName, rel, body) {
+  for (const b of document.querySelectorAll(".files .names button")) {
+    b.removeAttribute("aria-current");
+    if (b.dataset.file === rel) b.setAttribute("aria-current", "true");
+  }
+  body.textContent = "载入中…";
+  try {
+    const res = await fetch("/artifact/task/" + encodeURIComponent(taskName) + "/" +
+      rel.split("/").map(encodeURIComponent).join("/"));
+    body.textContent = res.ok ? await res.text() : "读不到（" + res.status + "）";
+  } catch (err) {
+    body.textContent = "读不到：" + err.message;
+  }
 }
 
 function renderRun(run) {
@@ -290,10 +363,10 @@ function showFromHash() {
   const h = new URLSearchParams(location.hash.replace(/^#/, ""));
   const specPath = h.get("spec");
   const runId = h.get("run");
-  const spec = specPath && allSpecs().find((x) => x.path === specPath);
-  if (spec) {
+  const task = specPath && catalog.tasks.find((x) => x.specPath === specPath);
+  if (task) {
     markCurrent("spec", specPath);
-    renderSpec(spec);
+    renderTask(task);
     return;
   }
   const run = runId && allRuns().find((x) => x.id === runId);
@@ -307,11 +380,20 @@ function showFromHash() {
     location.hash = "run=" + encodeURIComponent(first.id);
     return;
   }
-  const spec0 = allSpecs()[0];
-  if (spec0) renderSpec(spec0);
+  const task0 = catalog.tasks[0];
+  if (task0) {
+    location.hash = "spec=" + encodeURIComponent(task0.specPath);
+  }
 }
 
 document.body.addEventListener("click", function (e) {
+  const fileBtn = e.target.closest("button[data-file]");
+  if (fileBtn) {
+    const h = new URLSearchParams(location.hash.replace(/^#/, ""));
+    const task = catalog.tasks.find((t) => t.specPath === h.get("spec"));
+    if (task) showFile(task.name, fileBtn.dataset.file, document.getElementById("fileBody"));
+    return;
+  }
   const btn = e.target.closest("button[data-kind]");
   if (!btn) return;
   location.hash = btn.dataset.kind + "=" + encodeURIComponent(btn.dataset.key);
