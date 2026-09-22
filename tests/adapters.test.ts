@@ -91,3 +91,41 @@ test("agent-cli missing binary throws AdapterError spawn", async () => {
     },
   );
 });
+
+test("agent-cli resolves a relative script against the task dir, not the harness", async () => {
+  // Arrange - the script lives in the task, which is where a self-contained
+  // task keeps its agent. The harness root has no copy of it.
+  const taskRoot = await fs.mkdtemp(path.join(os.tmpdir(), "eval-task-"));
+  await fs.mkdir(path.join(taskRoot, "agents"), { recursive: true });
+  await fs.copyFile(helper, path.join(taskRoot, "agents", "agent.mjs"));
+  const workDir = await tmpWorkDir();
+
+  // Act
+  const r = await agentCliAdapter.execute(
+    request({ argv: [process.execPath, "agents/agent.mjs"] }),
+    { workDir, taskRoot },
+  );
+
+  // Assert
+  assert.equal(r.finishReason, "stop");
+  assert.ok(r.artifacts.some((f) => f.path === "src/index.ts"));
+});
+
+test("agent-cli calls a declared script that does not exist a spawn error, not a candidate failure", async () => {
+  // Arrange - a path that resolves nowhere. Left alone, node would exit 1 with
+  // MODULE_NOT_FOUND and the stack trace would be recorded as the candidate's
+  // deliverable, then judged and billed.
+  const taskRoot = await fs.mkdtemp(path.join(os.tmpdir(), "eval-task-"));
+  const workDir = await tmpWorkDir();
+
+  // Act + Assert
+  await assert.rejects(
+    agentCliAdapter.execute(request({ argv: [process.execPath, "agents/missing.mjs"] }), { workDir, taskRoot }),
+    (err: unknown) => {
+      assert.ok(err instanceof AdapterError);
+      assert.equal(err.kind, "spawn");
+      assert.match(err.message, /agents\/missing\.mjs/);
+      return true;
+    },
+  );
+});

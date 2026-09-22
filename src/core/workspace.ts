@@ -1,0 +1,148 @@
+/**
+ * A workspace — where the user's tasks and runs live.
+ *
+ * Separate from the installation (`src/paths.ts`) on purpose: the harness is
+ * a tool, and a tool is pointed at work it does not own. A workspace is any
+ * directory holding `tasks/`; the harness's own checkout is simply the
+ * workspace you get when you stand in it.
+ *
+ * Resolution order, most explicit first:
+ *   1. an explicit root (`--workspace`, or a task path given on the command line)
+ *   2. the nearest ancestor of the working directory that holds `tasks/`
+ *   3. the installation itself, so running inside the checkout keeps working
+ */
+
+import fs from "node:fs/promises";
+import path from "node:path";
+import { INSTALL_ROOT } from "../paths.js";
+
+export interface Workspace {
+  /** Directory holding `tasks/`; runs and legacy suites resolve under it. */
+  readonly root: string;
+}
+
+export function workspaceAt(root: string): Workspace {
+  return { root: path.resolve(root) };
+}
+
+async function isDir(p: string): Promise<boolean> {
+  return fs
+    .stat(p)
+    .then((s) => s.isDirectory())
+    .catch(() => false);
+}
+
+/**
+ * Walk up from `startDir` for a directory that holds `tasks/`.
+ *
+ * Falling back to the installation is what keeps `pnpm run run` working from
+ * inside the checkout. It is a fallback, not the definition — the moment a
+ * user has their own `tasks/`, theirs wins.
+ */
+export async function findWorkspace(startDir: string = process.cwd()): Promise<Workspace> {
+  let dir = path.resolve(startDir);
+  for (;;) {
+    if (await isDir(path.join(dir, "tasks"))) return workspaceAt(dir);
+    const parent = path.dirname(dir);
+    if (parent === dir) return workspaceAt(INSTALL_ROOT);
+    dir = parent;
+  }
+}
+
+/**
+ * The workspace a spec file belongs to: the nearest ancestor holding `tasks/`,
+ * so a task given by absolute path drags its own workspace along.
+ */
+export async function workspaceForSpec(specPath: string): Promise<Workspace> {
+  return findWorkspace(path.dirname(path.resolve(specPath)));
+}
+
+export function tasksDir(ws: Workspace): string {
+  return path.join(ws.root, "tasks");
+}
+
+/** Legacy top-level runs — where a suite with no task of its own writes. */
+export function runsDir(ws: Workspace): string {
+  return path.join(ws.root, "runs");
+}
+
+export function suitesDir(ws: Workspace): string {
+  return path.join(ws.root, "suites");
+}
+
+/**
+ * Where a run is written: beside the task that produced it, so the definition
+ * and its evidence travel together. A legacy suite owns no directory and
+ * falls back to the workspace's own `runs/`.
+ */
+export function runsRootFor(taskRoot: string | undefined, ws: Workspace): string {
+  return taskRoot ? path.join(taskRoot, "runs") : runsDir(ws);
+}
+
+export interface RunDirEntry {
+  /** Run id — the directory's own name. */
+  name: string;
+  /** Absolute path to the run directory. */
+  dir: string;
+  /** Owning task, or null for a run under the workspace's top-level `runs/`. */
+  task: string | null;
+}
+
+async function readRunDirs(root: string, task: string | null): Promise<RunDirEntry[]> {
+  let entries;
+  try {
+    entries = await fs.readdir(root, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  return entries
+    .filter((e) => e.isDirectory())
+    .map((e) => ({ name: e.name, dir: path.join(root, e.name), task }));
+}
+
+/**
+ * Every run directory in the workspace: each task's own `runs/`, plus the
+ * top-level `runs/` a legacy suite writes to.
+ *
+ * Generation reuse matches on `trialHash`, which is content-addressed, so a
+ * result produced under one task is safely reusable under another — scanning
+ * every task (not just the current one) is what keeps `code-utils`, which
+ * several tasks share, from being re-generated once per task.
+ */
+export async function listRunDirs(ws: Workspace): Promise<RunDirEntry[]> {
+  const out = await readRunDirs(runsDir(ws), null);
+  let taskNames: string[];
+  try {
+    taskNames = (await fs.readdir(tasksDir(ws), { withFileTypes: true }))
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name);
+  } catch {
+    return out;
+  }
+  for (const task of taskNames) {
+    out.push(...(await readRunDirs(path.join(tasksDir(ws), task, "runs"), task)));
+  }
+  return out;
+}
+
+/**
+ * Turn what a user typed into a spec file path.
+ *
+ * Accepts a task name (`smoke-local`), a directory (with `spec.yaml` inside),
+ * or a file. Relative paths resolve against the working directory first —
+ * a CLI resolves what you type where you are standing — and against the
+ * workspace's `tasks/` second, so `agenteval run smoke-local` works from
+ * anywhere in the workspace.
+ */
+export async function resolveSpecPath(ws: Workspace, arg: string): Promise<string> {
+  const candidates = [path.resolve(arg), path.join(tasksDir(ws), arg), path.join(ws.root, arg)];
+  for (const c of candidates) {
+    if (await isDir(c)) {
+      const spec = path.join(c, "spec.yaml");
+      if (await fs.stat(spec).then(() => true).catch(() => false)) return spec;
+      continue;
+    }
+    if (await fs.stat(c).then((s) => s.isFile()).catch(() => false)) return c;
+  }
+  throw new Error(`no spec found for "${arg}" (looked in ${candidates.join(", ")})`);
+}

@@ -5,7 +5,8 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { REPO_ROOT, listRunDirs, runsDir, tasksDir } from "../paths.js";
+import { fixturesDir as installedFixturesDir } from "../paths.js";
+import { findWorkspace, listRunDirs, runsDir, tasksDir, type Workspace } from "../core/workspace.js";
 import { loadWorkflow } from "../spec/load-spec.js";
 import { loadBundle } from "../report-v2.js";
 import type { Recommendation } from "../canon/select.js";
@@ -90,9 +91,19 @@ export interface TaskView {
 }
 
 export interface CatalogRoots {
+  /**
+   * Workspace the catalog reads. Absent means "resolve from the working
+   * directory" — a server passes the one it was started with, so every
+   * request answers about the same workspace.
+   */
+  ws?: Workspace;
   specsDir?: string;
   runsRoot?: string;
   fixturesDir?: string;
+}
+
+async function wsOf(over?: CatalogRoots): Promise<Workspace> {
+  return over?.ws ?? (await findWorkspace());
 }
 
 const FIXTURE_PREFIX = "fixture:";
@@ -126,17 +137,19 @@ interface WorkflowFile {
   steps?: Array<{ id: string; dir: string; chosen: string | null; firmness: string }>;
 }
 
-function rootsOf(over?: CatalogRoots): Required<CatalogRoots> {
+async function rootsOf(over?: CatalogRoots): Promise<Required<Omit<CatalogRoots, "ws">> & { ws: Workspace }> {
+  const ws = await wsOf(over);
   return {
-    specsDir: over?.specsDir ?? path.join(REPO_ROOT, "specs"),
-    runsRoot: over?.runsRoot ?? runsDir(),
-    fixturesDir: over?.fixturesDir ?? path.join(REPO_ROOT, "fixtures"),
+    ws,
+    specsDir: over?.specsDir ?? path.join(ws.root, "specs"),
+    runsRoot: over?.runsRoot ?? runsDir(ws),
+    fixturesDir: over?.fixturesDir ?? installedFixturesDir(),
   };
 }
 
 /** tasks/<name>/runs/<id> -> "<name>"; anything else -> null. */
-function taskOfRunDir(abs: string): string | null {
-  const rel = path.relative(tasksDir(), abs);
+function taskOfRunDir(ws: Workspace, abs: string): string | null {
+  const rel = path.relative(tasksDir(ws), abs);
   if (rel.startsWith("..") || path.isAbsolute(rel)) return null;
   const parts = rel.split(path.sep);
   return parts.length >= 3 && parts[1] === "runs" ? parts[0] : null;
@@ -158,21 +171,21 @@ export async function liveRunIndex(over?: CatalogRoots): Promise<Map<string, str
     return new Map((await listRunNames(root)).map((n) => [n, path.join(root, n)]));
   }
   const out = new Map<string, string>();
-  for (const e of await listRunDirs()) {
+  for (const e of await listRunDirs(await wsOf(over))) {
     if (safeId(e.name)) out.set(e.name, e.dir);
   }
   return out;
 }
 
 async function locateRun(id: string, over?: CatalogRoots): Promise<RunLocation | null> {
-  const { runsRoot, fixturesDir } = rootsOf(over);
+  const { ws, runsRoot, fixturesDir } = await rootsOf(over);
   const sample = id.startsWith(FIXTURE_PREFIX);
   const diskId = sample ? id.slice(FIXTURE_PREFIX.length) : id;
   if (!safeId(diskId)) return null;
   const abs = sample
     ? path.join(fixturesDir, diskId)
     : ((await liveRunIndex(over)).get(diskId) ?? path.join(runsRoot, diskId));
-  return { id, sample, diskId, kind: sample ? "fixture" : "run", abs, task: taskOfRunDir(abs) };
+  return { id, sample, diskId, kind: sample ? "fixture" : "run", abs, task: taskOfRunDir(ws, abs) };
 }
 
 /**
@@ -185,23 +198,25 @@ async function specPaths(over?: CatalogRoots): Promise<string[]> {
     const names = (await fs.readdir(over.specsDir)).filter((n) => /\.ya?ml$/i.test(n)).sort();
     return names.map((n) => path.join(over.specsDir!, n));
   }
-  const dirs = (await fs.readdir(tasksDir(), { withFileTypes: true }))
+  const ws = await wsOf(over);
+  const dirs = (await fs.readdir(tasksDir(ws), { withFileTypes: true }))
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
     .sort();
   const out: string[] = [];
   for (const d of dirs) {
-    const p = path.join(tasksDir(), d, "spec.yaml");
+    const p = path.join(tasksDir(ws), d, "spec.yaml");
     if (await fileExists(p)) out.push(p);
   }
   return out;
 }
 
 export async function listSpecs(over?: CatalogRoots): Promise<SpecView[]> {
+  const ws = await wsOf(over);
   const out: SpecView[] = [];
   for (const abs of await specPaths(over)) {
-    const rel = path.relative(REPO_ROOT, abs);
-    const suites = await loadWorkflow(rel);
+    const rel = path.relative(ws.root, abs);
+    const suites = await loadWorkflow(abs);
     out.push({
       path: rel,
       runName: suites[0].runName ?? suites[0].suiteId,
@@ -314,7 +329,7 @@ function byDemoOrder(a: RunView, b: RunView): number {
 }
 
 export async function listRuns(over?: CatalogRoots): Promise<RunView[]> {
-  const { fixturesDir } = rootsOf(over);
+  const { fixturesDir } = await rootsOf(over);
   const live: RunView[] = [];
   for (const name of [...(await liveRunIndex(over)).keys()].sort().reverse()) {
     const view = await loadRun(name, over);
@@ -364,7 +379,8 @@ async function definitionFiles(taskDir: string): Promise<string[]> {
 export async function listTasks(
   over?: CatalogRoots,
 ): Promise<{ tasks: TaskView[]; unfiled: RunView[] }> {
-  const [specs, runs] = await Promise.all([listSpecs(over), listRuns(over)]);
+  const ws = await wsOf(over);
+  const [specs, runs] = await Promise.all([listSpecs({ ...over, ws }), listRuns({ ...over, ws })]);
   const byTask = new Map<string, RunView[]>();
   const unfiled: RunView[] = [];
   for (const r of runs) {
@@ -387,7 +403,7 @@ export async function listTasks(
       runName: spec.runName,
       budgetUsd: spec.budgetUsd,
       steps: spec.steps,
-      files: await definitionFiles(path.join(tasksDir(), name)),
+      files: await definitionFiles(path.join(tasksDir(ws), name)),
       runs: own,
       spentUsd: spent,
     };

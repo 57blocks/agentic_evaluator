@@ -1,128 +1,69 @@
 /**
- * Repository paths — resolved from this file's location, not from `process.cwd()`,
- * so every CLI works no matter which directory it is launched from.
+ * Installation paths — where the harness's own code lives.
  *
- * The original harness lived under `agentic-builder/eval/` and hard-coded that
- * prefix in seven places. Here the repo root IS the harness root.
+ * Resolved from this file's location, never from `process.cwd()`, so the tool
+ * finds its own `node_modules`, its own `package.json` and its own built
+ * assets no matter which directory it was launched from.
  *
- * A **task** is one self-contained runnable unit: `tasks/<name>/` holds the
- * spec, the inputs it feeds, the rubric that judges them, its checks and its
- * runs. Paths written inside a spec (`rubrics/codegen.md`, `scaffold`,
- * `checks/behaviour.mjs`) resolve against that task dir, so a task can be
- * copied or archived whole.
+ * This is deliberately **not** where the user's work lives. A task, its
+ * inputs, its checks and its runs belong to a *workspace* — see
+ * `src/core/workspace.ts`. The two used to be one constant called
+ * `REPO_ROOT`, which is why the harness could only evaluate tasks vendored
+ * into its own checkout.
+ *
+ * Install-rooted (here): the TypeScript compiler a `tsc` check spawns, the
+ * harness version and commit a manifest records, the built demo assets, the
+ * fixtures shipped as samples.
+ * Workspace-rooted (there): `tasks/`, `runs/`, `suites/`.
  */
 
-import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+/** Root of the installed harness — the directory holding its package.json. */
+export const INSTALL_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-export function runsDir(): string {
-  return path.join(REPO_ROOT, "runs");
-}
-
-export function suitesDir(): string {
-  return path.join(REPO_ROOT, "suites");
-}
-
-export function tasksDir(): string {
-  return path.join(REPO_ROOT, "tasks");
-}
-
-/** Resolve a repo-relative path (as written in suite/spec files) to absolute. */
-export function resolveRepo(p: string): string {
-  return path.resolve(REPO_ROOT, p);
-}
-
-/** True when `taskRoot` is a real task dir rather than the repo root. */
-export function isTaskRoot(taskRoot: string): boolean {
-  const rel = path.relative(tasksDir(), taskRoot);
-  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
+/** Committed sample runs, shipped with the harness. */
+export function fixturesDir(): string {
+  return path.join(INSTALL_ROOT, "fixtures");
 }
 
 /**
  * Resolve an asset a spec refers to (rubric, scaffold, check script).
  *
  * Always inside the task. A missing file resolves to where it should have
- * been rather than to a repo-root copy: silently grading against a shared
+ * been rather than to a shared copy elsewhere: silently grading against a
  * file the task does not own is how two runs of "the same" task end up
  * judged by different rubrics.
+ *
+ * `taskRoot` is absent only for a legacy `suites/*.json`, whose asset paths
+ * the loader has already made absolute.
  */
-export async function resolveTaskAsset(taskRoot: string, p: string): Promise<string> {
-  return path.isAbsolute(p) ? p : path.resolve(taskRoot, p);
-}
-
-/**
- * The task dir a Suite belongs to. Structurally typed so this module stays
- * free of a `types.js` import. Suites built without one — test fixtures,
- * legacy suites/*.json — resolve against the repo root.
- */
-export function taskRootOf(suite: { taskRoot?: string }): string {
-  return suite.taskRoot ?? REPO_ROOT;
+export async function resolveTaskAsset(taskRoot: string | undefined, p: string): Promise<string> {
+  return resolveTaskAssetSync(taskRoot, p);
 }
 
 /** Sync twin of `resolveTaskAsset`, for the argv resolution in `check.ts`. */
-export function resolveTaskAssetSync(taskRoot: string, p: string): string {
-  return path.isAbsolute(p) ? p : path.resolve(taskRoot, p);
-}
-
-/** Input text lives with its task: `tasks/<name>/inputs/<slug>.txt`. */
-export function taskInputPath(taskRoot: string, slug: string): string {
-  return path.join(taskRoot, "inputs", `${slug}.txt`);
+export function resolveTaskAssetSync(taskRoot: string | undefined, p: string): string {
+  if (path.isAbsolute(p)) return p;
+  return path.resolve(taskRoot ?? process.cwd(), p);
 }
 
 /**
- * Where a task's runs are written: beside the definition that produced them.
- * A Suite with no task dir — a test fixture, a legacy suites/*.json — still
- * writes to the top-level `runs/`.
+ * The task dir a Suite belongs to, or undefined for a legacy suite.
+ * Structurally typed so this module stays free of a `types.js` import.
  */
-export function runsRootFor(taskRoot: string): string {
-  return isTaskRoot(taskRoot) ? path.join(taskRoot, "runs") : runsDir();
+export function taskRootOf(suite: { taskRoot?: string }): string | undefined {
+  return suite.taskRoot;
 }
 
-export interface RunDirEntry {
-  /** Run id — the directory's own name. */
-  name: string;
-  /** Absolute path to the run directory. */
-  dir: string;
-  /** Owning task, or null for a run under the legacy top-level `runs/`. */
-  task: string | null;
+/** Input text lives with its task: `<task>/inputs/<slug>.txt`. */
+export function taskInputPath(taskRoot: string | undefined, slug: string): string {
+  return path.join(taskRoot ?? process.cwd(), "inputs", `${slug}.txt`);
 }
 
-async function readRunDirs(root: string, task: string | null): Promise<RunDirEntry[]> {
-  let entries;
-  try {
-    entries = await fs.readdir(root, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-  return entries
-    .filter((e) => e.isDirectory())
-    .map((e) => ({ name: e.name, dir: path.join(root, e.name), task }));
-}
-
-/**
- * Every run directory on disk: each task's own `runs/`, plus the top-level
- * `runs/` that legacy suites still use.
- *
- * Generation reuse matches on `trialHash`, which is content-addressed, so a
- * result produced under one task is safely reusable under another — scanning
- * every task (not just the current one) is what keeps `code-utils`, which nine
- * specs share, from being re-generated once per task.
- */
-export async function listRunDirs(): Promise<RunDirEntry[]> {
-  const out = await readRunDirs(runsDir(), null);
-  let taskNames: string[];
-  try {
-    taskNames = (await fs.readdir(tasksDir(), { withFileTypes: true }))
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name);
-  } catch {
-    return out;
-  }
-  for (const task of taskNames) {
-    out.push(...(await readRunDirs(path.join(tasksDir(), task, "runs"), task)));
-  }
-  return out;
+/** Display a path the way a CLI should: relative to where the user is standing. */
+export function displayPath(abs: string): string {
+  const rel = path.relative(process.cwd(), abs);
+  return rel === "" ? "." : rel.startsWith("..") ? abs : rel;
 }

@@ -22,7 +22,8 @@ import { renderDashboardHtml } from "./dashboard.js";
 import type { RunRecordLite } from "./render.js";
 import type { Report, RunRecord, Suite } from "./types.js";
 
-import { REPO_ROOT, listRunDirs, runsDir, suitesDir } from "./paths.js";
+import { displayPath } from "./paths.js";
+import { findWorkspace, listRunDirs, runsDir, suitesDir, type Workspace } from "./core/workspace.js";
 
 /** Steps we know how to map back to `eval/suites/<step>.json`. */
 const STEP_ORDER = ["prd", "trd", "taskbreakdown", "codegen"] as const;
@@ -47,10 +48,10 @@ async function readJson(filePath: string): Promise<unknown | null> {
 }
 
 /** Newest run dir per step under `resultsDir` (dir names sort by embedded ts). */
-async function latestRunDirs(): Promise<Array<{ step: string; dir: string }>> {
+async function latestRunDirs(ws: Workspace): Promise<Array<{ step: string; dir: string }>> {
   // Across every task's runs/ and the legacy top-level one.
   const best = new Map<string, { name: string; dir: string }>();
-  for (const { name, dir } of await listRunDirs()) {
+  for (const { name, dir } of await listRunDirs(ws)) {
     const step = STEP_ORDER.find((s) => name.startsWith(`${s}-`));
     if (!step) continue;
     const cur = best.get(step);
@@ -93,6 +94,7 @@ interface Rescored {
 /** Re-score one run dir in place; returns the updated report (+ its lite records
  *  for the dashboard), or null when the dir can't be processed. */
 async function rescoreDir(
+  ws: Workspace,
   step: string,
   dir: string,
   scoreModelOverride: string | undefined,
@@ -105,7 +107,7 @@ async function rescoreDir(
     return null;
   }
   const suiteRaw = (await readJson(
-    path.join(suitesDir(), `${step}.json`),
+    path.join(suitesDir(ws), `${step}.json`),
   )) as Suite | null;
   if (!suiteRaw) {
     console.error(`  skip ${shortDir}: no suites/${step}.json`);
@@ -129,7 +131,7 @@ async function rescoreDir(
     judge: scoreModelOverride ?? report.judge,
   };
   const rubric = await fs.readFile(
-    path.resolve(REPO_ROOT, suite.rubricFile),
+    path.resolve(ws.root, suite.rubricFile),
     "utf-8",
   );
 
@@ -155,9 +157,10 @@ async function rescoreDir(
 
 async function main(): Promise<void> {
   await loadEnvLocal();
-  const targets = await latestRunDirs();
+  const ws = await findWorkspace();
+  const targets = await latestRunDirs(ws);
   if (targets.length === 0) {
-    console.error(`No run dirs found under tasks/*/runs/ or ${path.relative(REPO_ROOT, runsDir())}/.`);
+    console.error(`No run dirs found under tasks/*/runs/ or ${displayPath(runsDir(ws))}/.`);
     process.exit(1);
   }
 
@@ -165,7 +168,7 @@ async function main(): Promise<void> {
   const limit = resolveConcurrency();
   const updated: Rescored[] = [];
   for (const { step, dir } of targets) {
-    const r = await rescoreDir(step, dir, scoreModelOverride, limit);
+    const r = await rescoreDir(ws, step, dir, scoreModelOverride, limit);
     if (r) updated.push(r);
   }
 
@@ -178,15 +181,15 @@ async function main(): Promise<void> {
   const recordsByStep: Record<string, RunRecordLite[]> = {};
   for (const u of updated) recordsByStep[u.report.step] = u.records;
   // Spans every task, so the combined dashboard lives in the shared runs/ dir.
-  await fs.mkdir(runsDir(), { recursive: true });
-  const dashPath = path.join(runsDir(), `dashboard-${ts}.html`);
+  await fs.mkdir(runsDir(ws), { recursive: true });
+  const dashPath = path.join(runsDir(ws), `dashboard-${ts}.html`);
   await fs.writeFile(
     dashPath,
     renderDashboardHtml(updated.map((u) => u.report), recordsByStep),
     "utf-8",
   );
   console.log(
-    `\n✔ re-scored ${updated.length} step(s); combined dashboard → ${path.relative(REPO_ROOT, dashPath)}`,
+    `\n✔ re-scored ${updated.length} step(s); combined dashboard → ${displayPath(dashPath)}`,
   );
 }
 
