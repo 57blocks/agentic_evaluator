@@ -11,7 +11,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { REPO_ROOT, runsDir, tasksDir } from "../paths.js";
 import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun, safeId } from "./catalog.js";
-import { demoPage } from "./ui.js";
+import { demoPage, DIST_DIR } from "./ui.js";
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.PORT) || 4173;
@@ -24,6 +24,8 @@ const MIME: Record<string, string> = {
   ".txt": "text/plain; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
 };
 
 function send(res: http.ServerResponse, status: number, body: string | Buffer, type = "text/plain; charset=utf-8"): void {
@@ -99,7 +101,18 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
     return;
   }
   if (url.pathname === "/" || url.pathname === "/index.html") {
-    send(res, 200, demoPage(), "text/html; charset=utf-8");
+    send(res, 200, await demoPage(), "text/html; charset=utf-8");
+    return;
+  }
+  // Bundled client assets (hashed js/css/maps) sit beside index.html.
+  if (url.pathname.startsWith("/assets/")) {
+    const abs = underRoot(DIST_DIR, url.pathname.slice(1));
+    if (!abs) {
+      send(res, 403, "forbidden");
+      return;
+    }
+    const type = MIME[path.extname(abs).toLowerCase()] ?? "application/octet-stream";
+    send(res, 200, await fs.readFile(abs), type);
     return;
   }
   if (url.pathname === "/api/catalog") {

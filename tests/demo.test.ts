@@ -7,6 +7,8 @@ import path from "node:path";
 import { listRuns, listSpecs, loadRun, safeId } from "../src/demo/catalog.js";
 import { createDemoServer, listenDemo, underRoot } from "../src/demo/server.js";
 import { demoPage } from "../src/demo/ui.js";
+import { latestLabel, runMeta, spendLabel, taskItem } from "../src/demo/client/render.js";
+import type { RunView, TaskView } from "../src/demo/catalog.js";
 import { buildWorkflowRecord } from "../src/canon/workflow.js";
 import { WORKFLOW_LEDGER_FIXTURE, workflowStepFixture } from "./helpers/workflow-fixture.js";
 
@@ -111,8 +113,8 @@ test("the demo opens a run written with the current workflow record", async () =
   assert.equal(record.ledger.total, WORKFLOW_LEDGER_FIXTURE.total + 0.2);
 });
 
-test("demo page names the four protocol questions", () => {
-  const html = demoPage();
+test("demo page names the four protocol questions", async () => {
+  const html = await demoPage();
   assert.match(html, /做对了吗/);
   assert.match(html, /这一步用谁/);
   assert.match(html, /成本还是速度/);
@@ -180,5 +182,30 @@ test("a run with real model candidates is not synthetic and carries its total co
 });
 
 test("the nav labels a step with no eligible candidate as needing human review", () => {
-  assert.match(demoPage(), /需人工评审/);
+  const run = {
+    id: "r", task: "t", kind: "single", runName: "r", startedAt: "2026-09-21T00:00:00Z",
+    handoff: false, sample: false, synthetic: false, totalUsd: 0.5,
+    steps: [{ id: "s", dir: "", chosen: null, firmness: "needs-review", eligible: [],
+              gated: [], operatingMode: null, ledgerTotal: null, reportHref: null }],
+  } as unknown as RunView;
+
+  assert.match(runMeta(run), /需人工评审/);
+});
+
+test("a task row states its spend against budget and calls out an overrun", () => {
+  const base = { name: "t", specPath: "tasks/t/spec.yaml", runName: "t", steps: [], files: [], runs: [] };
+
+  assert.match(spendLabel({ ...base, budgetUsd: 3, spentUsd: 3.96 } as TaskView), /超支/);
+  assert.doesNotMatch(spendLabel({ ...base, budgetUsd: 3, spentUsd: 1.5 } as TaskView), /超支/);
+  assert.equal(spendLabel({ ...base, budgetUsd: 3, spentUsd: null } as TaskView), "");
+});
+
+test("a task that has never run says so rather than rendering blank", () => {
+  const task = {
+    name: "smoke-e2e-control", specPath: "tasks/smoke-e2e-control/spec.yaml",
+    runName: "smoke-e2e-control", budgetUsd: 1, spentUsd: null, steps: [], files: [], runs: [],
+  } as unknown as TaskView;
+
+  assert.equal(latestLabel(task), "未跑过");
+  assert.match(taskItem(task), /smoke-e2e-control/);
 });
