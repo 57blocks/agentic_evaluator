@@ -311,6 +311,7 @@ test("maybeRunE2eValidation runs both arms and adopts the combination the contro
     root,
     runId: "smoke-e2e-validation-test",
     chosenByStep: { draft: "fake-pass", review: "fake-pass" },
+    emit: () => {},
   });
 
   assert.ok(arms);
