@@ -18,7 +18,8 @@
     "preview": "tsx src/run.ts --suite",
     "demo": "tsx src/demo/server.ts",
     "build:demo": "vite build",
-    "demo:dev": "vite"
+    "demo:dev": "vite",
+    "parity": "tsx scripts/parity.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
