@@ -21,6 +21,7 @@ import { pathToFileURL } from "node:url";
 import { fixturesDir } from "../paths.js";
 import { findWorkspace, runsDir, tasksDir, type Workspace } from "../core/workspace.js";
 import { AlreadyRunning, PlanMismatch, RunRegistry, type PlanAck } from "../server/runs.js";
+import { buildOverview } from "../server/overview.js";
 import { NoSuchSpecError } from "../core/workspace.js";
 import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun, safeId } from "./catalog.js";
 import { demoPage, DIST_DIR } from "./ui.js";
@@ -264,6 +265,10 @@ async function handle(
     }
     const type = MIME[path.extname(abs).toLowerCase()] ?? "application/octet-stream";
     send(res, 200, await fs.readFile(abs), type);
+    return;
+  }
+  if (url.pathname === "/api/overview") {
+    sendJson(res, 200, await buildOverview(ws));
     return;
   }
   if (url.pathname === "/api/catalog") {
