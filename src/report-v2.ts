@@ -1,7 +1,7 @@
 /**
  * Canonical run report — one self-contained HTML page rendered from the
  * protocol-shaped files in a run directory (manifest, scores, evaluations,
- * ledger, summary, GAPS). The legacy report stays as legacy-report.html.
+ * ledger, summary, GAPS).
  *
  *   pnpm run report -- runs/<runId>          → writes runs/<runId>/report.html
  *
@@ -427,7 +427,7 @@ export function renderRunReport(b: RunBundle): string {
     <details><summary>manifest.json</summary><pre>${escapeHtml(JSON.stringify(m, null, 1))}</pre></details>
   </section>
 
-  <footer><span>${escapeHtml(path.basename(b.dir))}/</span><span>legacy-report.html 保留用于对账</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
+  <footer><span>${escapeHtml(path.basename(b.dir))}/</span><span>离线可开，无外部依赖</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
 </div></body></html>`;
 }
 

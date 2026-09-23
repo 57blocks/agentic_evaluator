@@ -280,6 +280,6 @@ export interface Report {
   scorecards: Scorecard[];
   judgements: Judgement[];
   /** Absolute per-output grades (1–5). Optional — present only once a suite has
-   *  been scored (or re-scored via rescore.ts); older reports omit it. */
+   *  been scored; older reports omit it. */
   scores?: ScoreRecord[];
 }

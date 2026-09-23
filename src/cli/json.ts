@@ -13,13 +13,13 @@ export function jsonSink(write: (line: string) => void = (l) => process.stdout.w
 }
 
 /**
- * `step.done.markdown` is the legacy report, carried on the event so a
- * terminal can still print it at the end of a run. It is already on disk as
- * `report.md`, and a machine reading this stream wants the row, not a second
- * copy of a rendering of it.
+ * `step.done.rows` is every trial row of the step, carried so a renderer can
+ * build its own table. They are already on disk as `scores.jsonl`, one row per
+ * line, and repeating all of them on one event line makes the stream unusable
+ * to read. The counts and the recommendation stay.
  */
 function strip(event: RunEvent): RunEvent {
   if (event.type !== "step.done") return event;
-  const { markdown: _markdown, ...rest } = event;
-  return rest;
+  const { rows: _rows, ...rest } = event;
+  return { ...rest, rows: [] };
 }

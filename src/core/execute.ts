@@ -12,7 +12,6 @@ import path from "node:path";
 import { judgePromptTemplateSha, PAIRWISE_EVALUATOR_ID } from "../judge.js";
 import { scorePromptTemplateSha, ABSOLUTE_EVALUATOR_ID } from "../score.js";
 import { checkVersion as tscCheckVersion, commandCheckVersion, TSC_CHECK_ID } from "../check.js";
-import { renderMarkdown, renderHtml } from "../report.js";
 import { loadSuites } from "../spec/load-spec.js";
 import { displayPath, resolveTaskAsset, taskRootOf } from "../paths.js";
 import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
@@ -20,7 +19,6 @@ import { silentSink, type RunEventSink } from "./events.js";
 import { methodsOf, planE2e, planStep, resolveConcurrency } from "./plan.js";
 import { readInput, runAll, safeName } from "./generate.js";
 import { judgeAll, scoreAll } from "./evaluate.js";
-import { aggregate } from "./scorecard.js";
 import { maybeRunE2eValidation } from "./e2e-arms.js";
 import { CODEGEN_PREAMBLE } from "../producers/code-gen.js";
 import { sha256, short } from "../canon/hash.js";
@@ -41,7 +39,7 @@ import {
   type ScoredRecord,
   type TrialFailure,
 } from "../canon/adapt.js";
-import type { ProducerKind, Report, Suite } from "../types.js";
+import type { ProducerKind, Suite } from "../types.js";
 
 export async function loadPromptTemplate(
   suite: Suite,
@@ -57,7 +55,18 @@ export async function loadPromptTemplate(
   return { promptTpl, promptTemplateSha: sha256(promptTpl) };
 }
 
-export async function executeSuite(params: {
+/** What one step produced. The canonical files on disk are the record; this is the handle. */
+export interface StepResult {
+  step: string;
+  /** Absolute path to the step's output directory. */
+  dir: string;
+  recommendation: Recommendation;
+  trials: number;
+  ledgerTotal: number;
+  ledger: CostLedger;
+}
+
+async function executeSuite(params: {
   suite: Suite;
   ws: Workspace;
   emit: RunEventSink;
@@ -69,7 +78,7 @@ export async function executeSuite(params: {
   generatedAt: string;
   /** Shared across the steps of a multi-step run; one spec, one limit. */
   budget?: BudgetGuard;
-}): Promise<{ report: Report; recommendation: Recommendation; trials: number; ledgerTotal: number; ledger: CostLedger }> {
+}): Promise<StepResult> {
   const { suite, outDir, runId, html, reuse, generatedAt } = params;
   const producer: ProducerKind = suite.producer ?? "prompt";
   const rubric = await fs.readFile(await resolveTaskAsset(taskRootOf(suite), suite.rubricFile), "utf-8");
@@ -119,33 +128,21 @@ export async function executeSuite(params: {
   params.emit({ type: "phase", step: suite.step, phase: "scoring", declared: methods.absolute });
   const scored: ScoredRecord[] = [];
   const scoreFailures: TrialFailure[] = [];
-  const scores = methods.absolute
-    ? await scoreAll(
-        suite,
-        rubric,
-        records,
-        limit,
-        {
-          trace: trace.emit,
-          onScored: (s) => scored.push(s),
-          onFailure: (f) => scoreFailures.push(f),
-        },
-        budget,
-      )
-    : [];
-  const scorecards = aggregate(suite, records, judged.judgements, scores);
-
-  const report: Report = {
-    suiteId: suite.suiteId,
-    step: suite.step,
-    judge: suite.judge,
-    generatedAt,
-    candidates: suite.candidates,
-    inputs: suite.inputs,
-    scorecards,
-    judgements: judged.judgements.map(({ usage: _usage, ...j }) => j),
-    scores,
-  };
+  if (methods.absolute) {
+    await scoreAll(
+      suite,
+      rubric,
+      records,
+      limit,
+      {
+        trace: trace.emit,
+        emit: params.emit,
+        onScored: (s) => scored.push(s),
+        onFailure: (f) => scoreFailures.push(f),
+      },
+      budget,
+    );
+  }
 
   const rawDir = path.join(outDir, "raw");
   await fs.mkdir(rawDir, { recursive: true });
@@ -154,15 +151,6 @@ export async function executeSuite(params: {
       .filter((r) => r.text.trim() !== "")
       .map((r) => fs.writeFile(path.join(rawDir, `${safeName(r.candidate)}__${r.inputSlug}__t${r.trial}.txt`), r.text, "utf-8")),
   );
-  await fs.writeFile(
-    path.join(outDir, "records.json"),
-    JSON.stringify(records.map(({ text: _text, ...rest }) => rest), null, 2),
-    "utf-8",
-  );
-  const md = renderMarkdown(report);
-  await fs.writeFile(path.join(outDir, "report.md"), md, "utf-8");
-  await fs.writeFile(path.join(outDir, "report.json"), JSON.stringify(report, null, 2), "utf-8");
-  if (html) await fs.writeFile(path.join(outDir, "legacy-report.html"), renderHtml(report), "utf-8");
 
   const adaptInput = {
     runId,
@@ -228,9 +216,18 @@ export async function executeSuite(params: {
     chosen: recommendation.chosen,
     firmness: recommendation.firmness,
     html,
-    markdown: md,
+    gated: recommendation.filters.flatMap((f) => f.removed),
+    rows: trials,
+    candidates: suite.candidates,
   });
-  return { report, recommendation, trials: trials.length, ledgerTotal: ledger.total, ledger };
+  return {
+    step: suite.step,
+    dir: outDir,
+    recommendation,
+    trials: trials.length,
+    ledgerTotal: ledger.total,
+    ledger,
+  };
 }
 
 
@@ -259,7 +256,7 @@ export interface RunOptions {
   signal?: AbortSignal;
 }
 
-export async function runSuite(suitePath: string, html: boolean, opts: RunOptions = {}): Promise<Report | null> {
+export async function runSuite(suitePath: string, html: boolean, opts: RunOptions = {}): Promise<StepResult | null> {
   const emit = opts.onEvent ?? silentSink;
   const suites = await loadSuites(suitePath);
   const isSpec = /\.ya?ml$/i.test(suitePath);
@@ -285,7 +282,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
 
   const budget = new BudgetGuard(suites[0].budgetUsd);
   const steps: WorkflowStepInput[] = [];
-  let last: Report | null = null;
+  let last: StepResult | null = null;
   for (const suite of suites) {
     if (opts.signal?.aborted && last !== null) break;
     const layout = stepLayout(root, runId, suite.step, nested);
@@ -301,7 +298,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
       generatedAt,
       budget,
     });
-    last = done.report;
+    last = done;
     if (nested) {
       steps.push({
         id: suite.step,

@@ -9,8 +9,8 @@
  *   pnpm run run -- --suite tasks/codegen-w38/spec.yaml --html --yes
  *   pnpm run run -- --suite suites/codegen.json          --html   (legacy JSON)
  *
- * `runSuite`, `aggregate` and `scoreAll` are re-exported here because
- * rescore.ts, dashboard.ts and the tests still import them from this path.
+ * `runSuite` and the workflow helpers are re-exported here because the tests
+ * import them from this path.
  */
 
 import fs from "node:fs/promises";
@@ -80,8 +80,5 @@ if (invokedDirectly) {
 }
 
 export { loadEnvLocal, runSuite };
-export { aggregate } from "./core/scorecard.js";
-export { scoreAll, type ScoreHooks } from "./core/evaluate.js";
-export { reportRunId } from "./core/generate.js";
 export { maybeRunE2eValidation, workflowMode, workflowThresholds } from "./core/e2e-arms.js";
-export type { RunOptions } from "./core/execute.js";
+export type { RunOptions, StepResult } from "./core/execute.js";

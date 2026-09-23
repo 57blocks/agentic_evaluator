@@ -15,7 +15,7 @@ import type { RunEventSink } from "./events.js";
 import { BudgetGuard } from "../canon/budget.js";
 import type { PairFailure, ScoredRecord, SkippedPair, TrialFailure } from "../canon/adapt.js";
 import { EvaluatorCallError, summarizeAttempts, type EvaluatorUsage } from "../canon/usage.js";
-import type { Judgement, RunRecord, ScoreRecord, Suite, Winner } from "../types.js";
+import type { Judgement, RunRecord, Suite, Winner } from "../types.js";
 
 export function representative(records: readonly RunRecord[], candidate: string, inputSlug: string): string | null {
   const hit = records.find((r) => r.candidate === candidate && r.inputSlug === inputSlug && r.status === "ok" && r.text.trim() !== "");
@@ -110,13 +110,17 @@ export interface ScoreHooks {
   trace?: LlmTrace;
   onScored?: (record: ScoredRecord) => void;
   onFailure?: (failure: TrialFailure) => void;
-  /** Absent for rescore.ts, which re-grades a finished run and reports its own progress. */
+  /** Absent when the caller renders its own progress. */
   emit?: RunEventSink;
 }
 
 /**
- * Absolute 1–5 grade for every OK output. Returns plain ScoreRecords so
- * `aggregate` and rescore.ts are unchanged; usage and failures flow through hooks.
+ * Absolute 1–5 grade for every OK output.
+ *
+ * Everything it produces leaves through the hooks — the graded record, the
+ * failures, the usage. It used to also return a stripped copy for the legacy
+ * aggregate; that consumer is gone, and a second path out of the same
+ * function is a second thing to keep in agreement with the first.
  */
 export async function scoreAll(
   suite: Suite,
@@ -125,11 +129,11 @@ export async function scoreAll(
   limit: number,
   hooks: ScoreHooks = {},
   budget?: BudgetGuard,
-): Promise<ScoreRecord[]> {
+): Promise<void> {
   const dimensions = suite.dimensions ?? [];
   const oks = records.filter((r) => r.status === "ok" && r.text.trim());
-  const results = await mapWithConcurrency(oks, limit, async (r): Promise<ScoreRecord | null> => {
-    if (budget && !budget.allows("scoring")) return null;
+  await mapWithConcurrency(oks, limit, async (r): Promise<void> => {
+    if (budget && !budget.allows("scoring")) return;
     hooks.emit?.({ type: "score", step: suite.step, candidate: r.candidate, input: r.inputSlug, trial: r.trial, ok: true });
     try {
       const s = await scoreOne({
@@ -152,18 +156,14 @@ export async function scoreAll(
       };
       budget?.add(s.usage.costUsd + s.usage.retryCostUsd);
       hooks.onScored?.(scored);
-      const { usage: _usage, ...plain } = scored;
-      return plain;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       hooks.emit?.({ type: "score", step: suite.step, candidate: r.candidate, input: r.inputSlug, trial: r.trial, ok: false, error: message });
       const failureUsage = usageOfError(err);
       budget?.add(failureUsage.costUsd + failureUsage.retryCostUsd);
       hooks.onFailure?.({ candidate: r.candidate, input: r.inputSlug, trial: r.trial, message, usage: failureUsage });
-      return null;
     }
   });
-  return results.filter((s): s is ScoreRecord => s !== null);
 }
 
 /**
