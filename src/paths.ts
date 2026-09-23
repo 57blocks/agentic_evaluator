@@ -1,29 +1,69 @@
 /**
- * Repository paths — resolved from this file's location, not from `process.cwd()`,
- * so every CLI works no matter which directory it is launched from.
+ * Installation paths — where the harness's own code lives.
  *
- * The original harness lived under `agentic-builder/eval/` and hard-coded that
- * prefix in seven places. Here the repo root IS the harness root.
+ * Resolved from this file's location, never from `process.cwd()`, so the tool
+ * finds its own `node_modules`, its own `package.json` and its own built
+ * assets no matter which directory it was launched from.
+ *
+ * This is deliberately **not** where the user's work lives. A task, its
+ * inputs, its checks and its runs belong to a *workspace* — see
+ * `src/core/workspace.ts`. The two used to be one constant called
+ * `REPO_ROOT`, which is why the harness could only evaluate tasks vendored
+ * into its own checkout.
+ *
+ * Install-rooted (here): the TypeScript compiler a `tsc` check spawns, the
+ * harness version and commit a manifest records, the built demo assets, the
+ * fixtures shipped as samples.
+ * Workspace-rooted (there): `tasks/`, `runs/`, `suites/`.
  */
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+/** Root of the installed harness — the directory holding its package.json. */
+export const INSTALL_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-export function inputsDir(): string {
-  return path.join(REPO_ROOT, "inputs");
+/** Committed sample runs, shipped with the harness. */
+export function fixturesDir(): string {
+  return path.join(INSTALL_ROOT, "fixtures");
 }
 
-export function runsDir(): string {
-  return path.join(REPO_ROOT, "runs");
+/**
+ * Resolve an asset a spec refers to (rubric, scaffold, check script).
+ *
+ * Always inside the task. A missing file resolves to where it should have
+ * been rather than to a shared copy elsewhere: silently grading against a
+ * file the task does not own is how two runs of "the same" task end up
+ * judged by different rubrics.
+ *
+ * `taskRoot` is absent only for a legacy `suites/*.json`, whose asset paths
+ * the loader has already made absolute.
+ */
+export async function resolveTaskAsset(taskRoot: string | undefined, p: string): Promise<string> {
+  return resolveTaskAssetSync(taskRoot, p);
 }
 
-export function suitesDir(): string {
-  return path.join(REPO_ROOT, "suites");
+/** Sync twin of `resolveTaskAsset`, for the argv resolution in `check.ts`. */
+export function resolveTaskAssetSync(taskRoot: string | undefined, p: string): string {
+  if (path.isAbsolute(p)) return p;
+  return path.resolve(taskRoot ?? process.cwd(), p);
 }
 
-/** Resolve a repo-relative path (as written in suite/spec files) to absolute. */
-export function resolveRepo(p: string): string {
-  return path.resolve(REPO_ROOT, p);
+/**
+ * The task dir a Suite belongs to, or undefined for a legacy suite.
+ * Structurally typed so this module stays free of a `types.js` import.
+ */
+export function taskRootOf(suite: { taskRoot?: string }): string | undefined {
+  return suite.taskRoot;
+}
+
+/** Input text lives with its task: `<task>/inputs/<slug>.txt`. */
+export function taskInputPath(taskRoot: string | undefined, slug: string): string {
+  return path.join(taskRoot ?? process.cwd(), "inputs", `${slug}.txt`);
+}
+
+/** Display a path the way a CLI should: relative to where the user is standing. */
+export function displayPath(abs: string): string {
+  const rel = path.relative(process.cwd(), abs);
+  return rel === "" ? "." : rel.startsWith("..") ? abs : rel;
 }

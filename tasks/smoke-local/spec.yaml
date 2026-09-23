@@ -1,0 +1,72 @@
+# The free full-pipeline smoke: zero network calls, start to finish.
+#
+# Every other smoke still calls OpenRouter for the judge, so none of them can
+# gate a refactor without spending. Here both candidates are local commands
+# (`adapter: agent-cli`) and `evaluators.judge.methods` is empty, so no judge
+# and no scorer run — declared, not failed, and GAPS.md says so. What is left
+# is exactly the machinery a refactor can break: spec load, asset resolution,
+# adapter dispatch, the required check, trial rows, the ledger, eligibility
+# filtering and the recommendation.
+#
+# fake-pass writes TypeScript that compiles; fake-fail writes `return 1` and
+# fails the check. lowest-cost with a 1.0 reliability gate therefore has
+# exactly one eligible candidate, so `recommendation.chosen` is a fixed
+# expected value a test can assert on.
+#
+# The agent lives in this task (`agents/`), not in the harness's own
+# `scripts/`, so the directory can be copied anywhere and still run.
+
+protocol_version: "0.4"
+run_name: smoke-local
+budget_usd: 1
+
+workflow:
+  control_candidate: fake-pass
+  steps:
+    - id: codegen
+      version: "1"
+      test_set:
+        id: code-v1
+        inputs: [code-utils]
+      candidate_ids: [fake-pass, fake-fail]
+      required_checks: [tsc-noemit]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 30
+
+candidates:
+  - id: fake-pass
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/fake-codegen-agent.mjs]
+  - id: fake-fail
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/fake-codegen-agent.mjs, --mode, fail]
+
+evaluators:
+  required_checks:
+    tsc-noemit:
+      kind: tsc
+      scaffold_dir: scaffold
+  judge:
+    # Declared because the schema requires one; never called, because no
+    # method is declared. The manifest records the declaration and GAPS.md
+    # states that the missing scores are a choice, not a failure.
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/codegen.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 2
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2

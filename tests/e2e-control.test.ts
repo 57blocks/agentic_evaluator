@@ -6,7 +6,7 @@ import path from "node:path";
 import { decideE2eOutcome, orderControlChain } from "../src/canon/e2e.js";
 import { handoffPayload, runControlChain, type E2eGeneration } from "../src/e2e-control.js";
 import { compileWorkflow, loadWorkflow, parseSpec, SpecError } from "../src/spec/load-spec.js";
-import { REPO_ROOT } from "../src/paths.js";
+import { INSTALL_ROOT } from "../src/paths.js";
 import { sha256 } from "../src/canon/hash.js";
 import { adapterFor } from "../src/adapters/resolve.js";
 import type { Suite } from "../src/types.js";
@@ -48,7 +48,7 @@ test("handoffPayload prefers artifacts over stdout", () => {
 });
 
 test("smoke-e2e-control compiles a draft → review chain", async () => {
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   assert.deepEqual(suites.map((s) => s.step), ["draft", "review"]);
   assert.equal(suites[0].inputFrom, undefined);
   assert.equal(suites[1].inputFrom, "draft");
@@ -86,7 +86,7 @@ x-harness:
   producer: codegen
 `;
   const spec = parseSpec(text, "x.yaml");
-  assert.throws(() => compileWorkflow(spec, "x.yaml", sha256(text)), SpecError);
+  assert.throws(() => compileWorkflow(spec, "x.yaml", sha256(text), path.join(INSTALL_ROOT, "tasks", "smoke-e2e-control")), SpecError);
 });
 
 async function stubGen(step: Suite, _slug: string, text: string): Promise<E2eGeneration> {
@@ -102,7 +102,7 @@ async function stubGen(step: Suite, _slug: string, text: string): Promise<E2eGen
 }
 
 test("runControlChain hands draft output to review and records shas", async () => {
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   const report = await runControlChain({
     candidate: "fake-pass",
     chain: suites,
@@ -120,7 +120,7 @@ test("runControlChain hands draft output to review and records shas", async () =
 });
 
 test("runControlChain aborts the chain when a step does not complete", async () => {
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   const report = await runControlChain({
     candidate: "fake-pass",
     chain: suites,
@@ -134,7 +134,7 @@ test("runControlChain aborts the chain when a step does not complete", async () 
 });
 
 test("runControlChain with the real agent-cli adapter pipes artifacts", async () => {
-  const suites = await loadWorkflow("specs/smoke-e2e-control.yaml");
+  const suites = await loadWorkflow("tasks/smoke-e2e-control/spec.yaml");
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "eval-e2e-"));
   const { runCheck } = await import("../src/check.js");
   const report = await runControlChain({
@@ -156,11 +156,12 @@ test("runControlChain with the real agent-cli adapter pipes artifacts", async ()
           timeoutMs: 10_000,
           cli: def.cli,
         },
-        { workDir },
+        // The task owns its agent, so the adapter needs to know which task.
+        { workDir, taskRoot: step.taskRoot },
       );
       const check = await runCheck({
         files: result.artifacts,
-        scaffoldDir: path.join(REPO_ROOT, "scaffold"),
+        scaffoldDir: path.join(INSTALL_ROOT, "tasks", "codegen-trial", "scaffold"),
         workDir,
       });
       return {

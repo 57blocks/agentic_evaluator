@@ -47,7 +47,7 @@ export type CheckConfig =
       /** Evaluator id, as declared in the spec (e.g. "tsc-noemit"). */
       id: string;
       kind: "tsc";
-      /** Repo-relative dir holding a `tsconfig.json` copied into each work dir. */
+      /** Task-relative dir holding a `tsconfig.json` copied into each work dir. */
       scaffoldDir: string;
     }
   | {
@@ -55,7 +55,7 @@ export type CheckConfig =
       kind: "command";
       /** Program and arguments, run with cwd = the trial work dir. */
       argv: string[];
-      /** Repo-relative files hashed into the evaluator version. */
+      /** Task-relative files hashed into the evaluator version. */
       versionFiles: string[];
       timeoutMs: number;
     };
@@ -139,6 +139,14 @@ export interface Suite {
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;
+  /**
+   * Absolute path to the task directory that owns this spec — the directory
+   * the spec file sits in. Inputs, rubric, checks, scaffold and runs resolve
+   * against it, so a task can be copied or archived whole. Absent on Suites
+   * built by tests or older callers; `taskRootOf` then falls back to the repo
+   * root, which is the pre-migration behaviour.
+   */
+  taskRoot?: string;
 }
 
 /** One candidate run against one input, one trial. */
@@ -272,6 +280,6 @@ export interface Report {
   scorecards: Scorecard[];
   judgements: Judgement[];
   /** Absolute per-output grades (1–5). Optional — present only once a suite has
-   *  been scored (or re-scored via rescore.ts); older reports omit it. */
+   *  been scored; older reports omit it. */
   scores?: ScoreRecord[];
 }

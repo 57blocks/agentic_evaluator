@@ -21,7 +21,7 @@ import { sha256 } from "../canon/hash.js";
 import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
 import type { CheckConfig, JudgeMethod } from "../types.js";
 import { TSC_CHECK_ID } from "../check.js";
-import { REPO_ROOT } from "../paths.js";
+import { workspaceForSpec, type Workspace } from "../core/workspace.js";
 import type { Suite } from "../types.js";
 import { SPEC_SCHEMA } from "./schema.js";
 
@@ -236,10 +236,18 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
 const DEFAULT_CHECK_TIMEOUT_S = 120;
 const ALL_JUDGE_METHODS: JudgeMethod[] = ["pairwise-swap", "absolute-1-5"];
 
-/** Declared methods, or both when the spec is silent. */
+/**
+ * Declared methods, or both when the spec is silent.
+ *
+ * An **absent** `methods` key means the spec has no opinion, and both methods
+ * run — that is what every spec written before the key existed means. An
+ * **empty list** is an opinion: run neither. Collapsing the two (as this did)
+ * billed a full judging pass on a step that had asked for none, and left no
+ * way to declare a check-only step.
+ */
 function judgeMethodsOf(spec: EvalSpec): JudgeMethod[] {
   const declared = spec.evaluators.judge.methods;
-  if (!declared || declared.length === 0) return [...ALL_JUDGE_METHODS];
+  if (!declared) return [...ALL_JUDGE_METHODS];
   return ALL_JUDGE_METHODS.filter((m) => declared.includes(m));
 }
 
@@ -281,7 +289,7 @@ function compileCheck(
   };
 }
 
-function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, step: EvalStep): Suite {
+function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskRoot: string, step: EvalStep): Suite {
   const harness = spec["x-harness"]!;
   const { producer, promptFile, rubricFile } = stepOverrides(step, spec);
   const wanted = new Set(step.candidate_ids);
@@ -328,26 +336,46 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, step:
     concurrency: spec.execution.concurrency,
     specSha,
     specPath,
+    taskRoot,
     inputFrom: step.input_from,
   };
 }
 
-/** Compile every workflow step into its own Suite. Independent eval has no handoff; `input_from` is for the e2e control pass. */
-export function compileWorkflow(spec: EvalSpec, specPath: string, specSha: string): Suite[] {
+/**
+ * Compile every workflow step into its own Suite. Independent eval has no
+ * handoff; `input_from` is for the e2e control pass.
+ *
+ * `taskRoot` is the directory the spec lives in — every asset it names
+ * resolves there, and its runs are written there. It is passed in rather than
+ * derived, so a caller compiling a spec it holds in memory (a test, a future
+ * editor) states where that spec would live instead of guessing.
+ */
+export function compileWorkflow(spec: EvalSpec, specPath: string, specSha: string, taskRoot: string): Suite[] {
   checkSemantics(spec, specPath);
-  return spec.workflow.steps.map((step) => compileOneStep(spec, specPath, specSha, step));
+  return spec.workflow.steps.map((step) => compileOneStep(spec, specPath, specSha, taskRoot, step));
 }
 
 /** First step only — existing single-step callers. Use `compileWorkflow` for all steps. */
-export function compileSpec(spec: EvalSpec, specPath: string, specSha: string): Suite {
-  return compileWorkflow(spec, specPath, specSha)[0];
+export function compileSpec(spec: EvalSpec, specPath: string, specSha: string, taskRoot: string): Suite {
+  return compileWorkflow(spec, specPath, specSha, taskRoot)[0];
+}
+
+/**
+ * Record a spec path the way a reader can act on it: relative to the
+ * workspace it belongs to, so a manifest says `tasks/code-reactive/spec.yaml`
+ * rather than a path that only existed on the machine that ran it.
+ */
+function specPathFor(ws: Workspace, abs: string): string {
+  const rel = path.relative(ws.root, abs);
+  return rel.startsWith("..") ? abs : rel;
 }
 
 export async function loadWorkflow(specPath: string): Promise<Suite[]> {
-  const abs = path.resolve(REPO_ROOT, specPath);
+  const abs = path.resolve(specPath);
+  const ws = await workspaceForSpec(abs);
   const text = await fs.readFile(abs, "utf-8");
   const spec = parseSpec(text, specPath);
-  return compileWorkflow(spec, path.relative(REPO_ROOT, abs), sha256(text));
+  return compileWorkflow(spec, specPathFor(ws, abs), sha256(text), path.dirname(abs));
 }
 
 export async function loadSpec(specPath: string): Promise<Suite> {
@@ -356,7 +384,8 @@ export async function loadSpec(specPath: string): Promise<Suite> {
 
 /** Legacy suites/*.json: candidate id = model id, provider implied (openrouter). */
 export async function loadLegacySuite(suitePath: string): Promise<Suite> {
-  const abs = path.resolve(REPO_ROOT, suitePath);
+  const abs = path.resolve(suitePath);
+  const ws = await workspaceForSpec(abs);
   const text = await fs.readFile(abs, "utf-8");
   const parsed = JSON.parse(text) as Suite & { check?: { scaffoldDir?: string } };
   // Legacy JSON carries a bare { scaffoldDir }; give it the id and kind the
@@ -382,7 +411,16 @@ export async function loadLegacySuite(suitePath: string): Promise<Suite> {
     benchmarkMode: "capability-neutral",
     cacheMode: "cold",
     specSha: sha256(text),
-    specPath: path.relative(REPO_ROOT, abs),
+    specPath: specPathFor(ws, abs),
+    // A legacy suite owns no directory: its `rubrics/` and `scaffold/` were
+    // always workspace-level, and its runs go to the workspace's own `runs/`.
+    // Resolving them here is what lets `taskRoot` mean one thing everywhere
+    // else — "the task directory that owns this" — instead of two.
+    rubricFile: path.resolve(ws.root, suite.rubricFile),
+    check: suite.check
+      ? { id: TSC_CHECK_ID, kind: "tsc", scaffoldDir: path.resolve(ws.root, parsed.check?.scaffoldDir ?? "scaffold") }
+      : undefined,
+    taskRoot: undefined,
   };
 }
 

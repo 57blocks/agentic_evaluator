@@ -7,6 +7,8 @@ import path from "node:path";
 import { listRuns, listSpecs, loadRun, safeId } from "../src/demo/catalog.js";
 import { createDemoServer, listenDemo, underRoot } from "../src/demo/server.js";
 import { demoPage } from "../src/demo/ui.js";
+import { PROTOCOL_QUESTIONS, latestLabel, runMeta, spendLabel } from "../src/demo/client/render.js";
+import type { RunView, TaskView } from "../src/demo/catalog.js";
 import { buildWorkflowRecord } from "../src/canon/workflow.js";
 import { WORKFLOW_LEDGER_FIXTURE, workflowStepFixture } from "./helpers/workflow-fixture.js";
 
@@ -33,12 +35,12 @@ test("underRoot stays inside the given directory", () => {
 test("listSpecs surfaces independent workflow steps", async () => {
   const specs = await listSpecs();
   const paths = specs.map((s) => s.path);
-  assert.ok(paths.includes("specs/prd-w38.yaml"));
-  assert.ok(paths.includes("specs/codegen-w38.yaml"));
-  const prd = specs.find((s) => s.path === "specs/prd-w38.yaml");
+  assert.ok(paths.includes("tasks/prd-w38/spec.yaml"));
+  assert.ok(paths.includes("tasks/codegen-w38/spec.yaml"));
+  const prd = specs.find((s) => s.path === "tasks/prd-w38/spec.yaml");
   assert.deepEqual(prd?.steps.map((s) => s.id), ["prd", "taskbreakdown", "codegen"]);
   assert.equal(prd?.steps[0].producer, "prompt");
-  const codegen = specs.find((s) => s.path === "specs/codegen-w38.yaml");
+  const codegen = specs.find((s) => s.path === "tasks/codegen-w38/spec.yaml");
   assert.deepEqual(codegen?.steps[0].requiredChecks, ["tsc-noemit"]);
 });
 
@@ -111,12 +113,21 @@ test("the demo opens a run written with the current workflow record", async () =
   assert.equal(record.ledger.total, WORKFLOW_LEDGER_FIXTURE.total + 0.2);
 });
 
-test("demo page names the four protocol questions", () => {
-  const html = demoPage();
-  assert.match(html, /做对了吗/);
-  assert.match(html, /这一步用谁/);
-  assert.match(html, /成本还是速度/);
-  assert.match(html, /证据能否复现/);
+test("the page states the four protocol questions", () => {
+  const asked = PROTOCOL_QUESTIONS.map(([q]) => q);
+
+  assert.equal(asked.length, 4);
+  assert.match(asked.join(" "), /做对了吗/);
+  assert.match(asked.join(" "), /这一步用谁/);
+  assert.match(asked.join(" "), /成本还是速度/);
+  assert.match(asked.join(" "), /证据能否复现/);
+});
+
+test("the served page mounts the bundled client", async () => {
+  const html = await demoPage();
+
+  assert.match(html, /id="root"/);
+  assert.match(html, /<script[^>]+type="module"/);
 });
 
 test("demo server serves the page, catalog, fixture report, and blocks traversal", async () => {
@@ -131,7 +142,7 @@ test("demo server serves the page, catalog, fixture report, and blocks traversal
     const catalog = await get(origin + "/api/catalog");
     assert.equal(catalog.status, 200);
     const data = JSON.parse(catalog.body) as { specs: Array<{ path: string }>; runs: Array<{ id: string; sample?: boolean }> };
-    assert.ok(data.specs.some((s) => s.path === "specs/prd-w38.yaml"));
+    assert.ok(data.specs.some((s) => s.path === "tasks/prd-w38/spec.yaml"));
     assert.ok(data.runs.some((r) => r.id === "fixture:prd-w38" && r.sample));
 
     const report = await get(origin + "/artifact/fixture/prd-w38/report.html");
@@ -180,5 +191,36 @@ test("a run with real model candidates is not synthetic and carries its total co
 });
 
 test("the nav labels a step with no eligible candidate as needing human review", () => {
-  assert.match(demoPage(), /需人工评审/);
+  const run = {
+    id: "r", task: "t", kind: "single", runName: "r", startedAt: "2026-09-21T00:00:00Z",
+    handoff: false, sample: false, synthetic: false, totalUsd: 0.5,
+    steps: [{ id: "s", dir: "", chosen: null, firmness: "needs-review", eligible: [],
+              gated: [], operatingMode: null, ledgerTotal: null, reportHref: null }],
+  } as unknown as RunView;
+
+  assert.match(runMeta(run), /需人工评审/);
+});
+
+test("a task row states its spend against budget and calls out an overrun", () => {
+  const base = { name: "t", specPath: "tasks/t/spec.yaml", runName: "t", steps: [], files: [], runs: [] };
+
+  const over = spendLabel({ ...base, budgetUsd: 3, spentUsd: 3.96 } as TaskView);
+  assert.equal(over?.over, true);
+  assert.match(over?.text ?? "", /超支/);
+
+  const under = spendLabel({ ...base, budgetUsd: 3, spentUsd: 1.5 } as TaskView);
+  assert.equal(under?.over, false);
+  assert.doesNotMatch(under?.text ?? "", /超支/);
+
+  // Never run: no spend line at all, rather than a misleading $0.
+  assert.equal(spendLabel({ ...base, budgetUsd: 3, spentUsd: null } as TaskView), null);
+});
+
+test("a task that has never run says so rather than rendering blank", () => {
+  const task = {
+    name: "smoke-e2e-control", specPath: "tasks/smoke-e2e-control/spec.yaml",
+    runName: "smoke-e2e-control", budgetUsd: 1, spentUsd: null, steps: [], files: [], runs: [],
+  } as unknown as TaskView;
+
+  assert.equal(latestLabel(task), "未跑过");
 });

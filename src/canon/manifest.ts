@@ -8,7 +8,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import { REPO_ROOT } from "../paths.js";
+import { INSTALL_ROOT } from "../paths.js";
 import type { Suite } from "../types.js";
 import type { CandidateDef, EligibilityThresholds } from "./types.js";
 import { resolveEligibility } from "./select.js";
@@ -66,7 +66,7 @@ async function harnessVersion(): Promise<{ name: string; version: string; git_sh
   let name = "agentic-evaluator";
   let version = "0.0.0";
   try {
-    const pkg = JSON.parse(await fs.readFile(path.join(REPO_ROOT, "package.json"), "utf-8")) as {
+    const pkg = JSON.parse(await fs.readFile(path.join(INSTALL_ROOT, "package.json"), "utf-8")) as {
       name?: string;
       version?: string;
     };
@@ -77,7 +77,7 @@ async function harnessVersion(): Promise<{ name: string; version: string; git_sh
   }
   let git_sha: string | null = null;
   try {
-    const { stdout } = await execFileAsync("git", ["rev-parse", "--short", "HEAD"], { cwd: REPO_ROOT });
+    const { stdout } = await execFileAsync("git", ["rev-parse", "--short", "HEAD"], { cwd: INSTALL_ROOT });
     git_sha = stdout.trim() || null;
   } catch {
     git_sha = null;
