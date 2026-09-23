@@ -57,6 +57,18 @@ test("an unknown command exits 2 and says what is available", async () => {
   assert.match(r.err, /\bplan\b/);
 });
 
+test("a leading -- separator is skipped, not read as a command", async () => {
+  // Arrange - `pnpm run agenteval -- ls` passes it through, and the entry
+  // point this replaced required it, so people type it from habit.
+
+  // Act
+  const r = await run(["--", "ls", "--workspace", INSTALL_ROOT]);
+
+  // Assert
+  assert.equal(r.code, EXIT.ok);
+  assert.match(r.out, /^workspace /);
+});
+
 test("--version prints the harness version", async () => {
   const r = await run(["--version"]);
   assert.equal(r.code, EXIT.ok);
