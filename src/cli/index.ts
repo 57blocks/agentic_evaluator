@@ -68,7 +68,10 @@ async function version(): Promise<string> {
 }
 
 export async function main(argv: readonly string[], io: Io = processIo): Promise<ExitCode> {
-  const [name, ...rest] = argv;
+  // `pnpm run agenteval -- ls` puts a bare `--` in front. The old entry point
+  // required that separator, so the habit is real; treating it as a command
+  // name would answer a correct invocation with "unknown command --".
+  const [name, ...rest] = argv[0] === "--" ? argv.slice(1) : argv;
 
   if (name === undefined || name === "--help" || name === "-h" || name === "help") {
     io.out(`${usage()}\n`);
