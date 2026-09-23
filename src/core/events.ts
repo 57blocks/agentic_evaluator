@@ -17,6 +17,7 @@
  */
 
 import type { CompletionState } from "../canon/types.js";
+import type { TrialRow } from "../canon/rows.js";
 
 /** Counts a step will incur — what `plan()` returns, and what a preview prints. */
 export interface StepPlan {
@@ -106,8 +107,11 @@ export type RunEvent =
       chosen: string | null;
       firmness: string;
       html: boolean;
-      /** The legacy markdown report, kept so a terminal can still show it. */
-      markdown?: string;
+      /** Candidates the eligibility gate removed, and why. */
+      gated: ReadonlyArray<{ candidate: string; reason: string }>;
+      /** Every trial row, so a renderer can build its own table. */
+      rows: readonly TrialRow[];
+      candidates: readonly string[];
     }
   | { type: "e2e.arm.start"; armId: string; assignment: Record<string, string> }
   | {

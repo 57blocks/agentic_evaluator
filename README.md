@@ -18,8 +18,8 @@ runs/<runId>/
   summary.json        per-candidate rates with numerators and denominators; directionality
   recommendation.json eligibility filters + operating-mode choice
   GAPS.md             protocol fields this run could not observe (recorded null, never defaulted)
-  report.html         canonical page          legacy-report.html  original harness page
-  raw/ records.json report.json report.md     legacy layer, aggregate unchanged
+  report.html         the page: standings, evidence, what was not observed
+  raw/                each candidate's deliverable, one file per trial
 ```
 
 A multi-step spec writes each step under `runs/<runId>/<stepId>/` plus, at the
@@ -94,11 +94,9 @@ Legacy `suites/*.json` still load (candidate id = model id) but no longer run:
 their `rubrics/` and `scaffold/` were workspace-level and moved into the tasks
 that own them. The path is **deprecated** — every new step belongs in a task.
 
-The legacy entry points that have not been folded into `agenteval` yet:
+Still its own script, because it compares two sets of runs rather than producing one:
 
 ```bash
-pnpm run rescore      # refresh the legacy layer only; canonical rows untouched
-pnpm run dashboard    # the cross-run view the canonical pages do not have yet
 pnpm run parity       # capture/compare: did a change move the numbers?
 pnpm test
 ```
@@ -128,10 +126,10 @@ src/check.ts          tsc --noEmit required check with four-state result and ver
 src/spec/             YAML spec loader + JSON Schema + semantic checks
 src/canon/            protocol layer: states, success decision, hash, usage, cost, trace,
                       manifest, rows, adapt, rates, write
-src/html.ts           escapeHtml — the only thing both report layers share
-src/report-v2.ts      canonical step report page (+ report-charts, report-evidence)
-src/report-workflow.ts canonical workflow page: verdict, arms, per-step links, ledger
-src/render.ts         legacy renderer for report.ts + dashboard.ts (frozen)
+src/html.ts           escapeHtml, shared by the two report pages
+src/report-v2.ts      the step report page (+ report-charts, report-evidence)
+src/report-workflow.ts the workflow page: verdict, arms, per-step links, ledger
+src/server/           run control (plan gate, SSE, cancel) and the cross-run overview
 src/demo/             the dashboard server and its React client
 tests/                node:test; parity uses tests/legacy-aggregate.ts (pristine oracle)
 fixtures/             committed real runs used by the parity test
@@ -207,37 +205,53 @@ than silently gating on one. The command runs on this host with your
 privileges — the Docker sandbox is still deferred, so only declare checks you
 would run yourself.
 
-## The two report layers
+## One layer, and one permanent oracle
 
-Every run writes both a **canonical** set (`manifest.json`, `scores.jsonl`,
-`evaluations.jsonl`, `ledger.json`, `summary.json`, `recommendation.json`,
-`report.html`) and the **legacy** set the original harness wrote
-(`records.json`, `report.json`, `report.md`, `legacy-report.html`). This is a
-deliberate transition state, not drift. Three things hide under "legacy" and
-they have different fates:
+A run writes canonical files only: `manifest.json`, `trace.jsonl`,
+`scores.jsonl`, `evaluations.jsonl`, `ledger.json`, `summary.json`,
+`recommendation.json`, `GAPS.md`, `report.html`, and `raw/`. The legacy layer
+the original harness wrote — `records.json`, `report.json`, `report.md`,
+`legacy-report.html` — is gone, along with the renderer behind it
+(`render.ts`, `report.ts`, `dashboard.ts`, `summarize.ts`, `i18n.ts`) and
+`rescore.ts`, which only ever refreshed it.
 
-1. `tests/legacy-aggregate.ts` — a pristine copy of the original aggregate,
-   used by `parity.test.ts` as the oracle. **Permanent.** It is frozen by
-   design and is not part of any merge.
-2. Legacy run outputs (`records.json`, `report.json`, `raw/`). Retire once the
-   canonical files reconstruct every field they carry and nothing reads them.
-3. The legacy renderer (`render.ts`, `report.ts`, `dashboard.ts`,
-   `summarize.ts`, `i18n.ts`). **Frozen — no new features go here.** It still
-   does one thing the canonical pages cannot: `dashboard.ts` merges several
-   steps into one cross-step view, while `report-v2.ts` renders a single step
-   and the workflow level has no page at all.
+Both retirement conditions were met before it went: the dashboard's cross-run
+view covers what `dashboard.ts` uniquely showed, and parity holds on every
+fixture.
 
-**Retirement gate.** Delete the legacy renderer and stop writing the legacy
-outputs when (a) a canonical page covers what `dashboard.ts` shows, and (b)
-parity holds on every fixture. `report-workflow.ts` closes half of (a): it
-renders the steps of **one** run. `dashboard.ts` does something else — it scans
-the whole results directory and keeps the newest run per step, a cross-*run*
-view that no canonical page has yet. Until then both are written.
-`summarize.ts` writes an LLM-authored verdict; it is commentary, never a
-recommendation, and must not enter the canonical report.
+**`tests/legacy-aggregate.ts` stays, permanently.** It is a pristine copy of
+the original harness's aggregate, and `tests/parity.test.ts` feeds it the
+canonical rows of each committed fixture and checks that it reproduces the
+`report.json` that fixture shipped with. The fixtures keep their legacy files
+forever — that is what makes them an oracle. The invariant it now guards is
+the one worth guarding: **the canonical rows still carry everything the
+original computation needed.** If a change to `canon/` quietly drops a field,
+this fails, and it fails against numbers produced before any of this code was
+written.
 
-The canonical pages must not import from `render.ts` — shared HTML helpers live
-in `src/html.ts` so the legacy layer can be deleted in one piece.
+`scripts/parity.ts` answers the other question — whether a change moved the
+numbers on a live task — by capturing runs before and after and diffing them.
+It never spends: it reads runs you already produced.
+
+## Two renderers, on purpose
+
+`report.html` is written by `report-v2.ts` (one step) and
+`report-workflow.ts` (a whole workflow). The dashboard is a separate React
+application. They are not a duplication to be collapsed, and the difference is
+the artifact's job:
+
+- `report.html` is **evidence**. It is 16 KB of self-contained HTML that opens
+  from a file path with no server, no network and no build, and it sits in the
+  run directory next to the rows it renders. Bundling the dashboard into every
+  run instead would make each one ~900 KB and pin a durable record to a React
+  version.
+- The dashboard is **live**. It follows a run in progress over SSE, spans every
+  run in the workspace, and starts new ones.
+
+What must not drift is the wording — "needs review" rather than a blank cell,
+a gated candidate named with its reason. Those decisions live in view-model
+helpers (`src/demo/client/render.ts`, `src/cli/summary.ts`), separately from
+the markup that presents them.
 
 ## Not in this milestone
 

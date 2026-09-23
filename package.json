@@ -13,8 +13,6 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "build:demo": "vite build",
     "demo:dev": "vite",
-    "rescore": "tsx src/rescore.ts",
-    "dashboard": "tsx src/dashboard.ts",
     "parity": "tsx scripts/parity.ts"
   },
   "dependencies": {

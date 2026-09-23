@@ -7,6 +7,7 @@
  */
 
 import type { RunEvent, RunEventSink, StepPlan } from "../core/events.js";
+import { summaryLines } from "./summary.js";
 
 function usd(n: number, places = 4): string {
   return `$${n.toFixed(places)}`;
@@ -75,7 +76,16 @@ export function formatEvent(e: RunEvent): string[] {
       ];
     case "step.done":
       return [
-        ...(e.markdown ? [`\n${e.markdown}\n`] : []),
+        ...summaryLines({
+          step: e.step,
+          candidates: e.candidates,
+          trials: e.rows,
+          chosen: e.chosen,
+          firmness: e.firmness,
+          gated: e.gated,
+          ledgerTotal: e.ledgerTotal,
+          ledgerSource: e.ledgerSource,
+        }),
         `✔ ${e.dir}/ — ${e.trials} trials, ${e.evaluations} evaluator rows, ${e.traceEvents} trace events, ledger total ${usd(e.ledgerTotal)} (${e.ledgerSource}), recommend ${e.chosen ?? "none"} (${e.firmness})${e.html ? ", report.html" : ""}`,
       ];
     case "e2e.arm.start":

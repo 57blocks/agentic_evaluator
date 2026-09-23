@@ -21,6 +21,7 @@ import { sha256, trialHash } from "../canon/hash.js";
 import { classifyCompletion } from "../canon/states.js";
 import { BudgetGuard } from "../canon/budget.js";
 import type { CandidateDef, CostSource, EvaluationState } from "../canon/types.js";
+import type { TrialRow } from "../canon/rows.js";
 import type { ProducerKind, Report, RunRecord, Suite } from "../types.js";
 
 /** A task's input text. Every task owns its inputs; there is no shared pool. */
@@ -185,17 +186,16 @@ export interface GenTask {
   hash: string;
 }
 
-interface ReusableEntry {
-  candidate: string;
-  inputSlug: string;
-  trial: number;
-}
 
 /**
  * Find a prior generation with the SAME trial hash (producer, prompt template,
  * input, model, sampling, trial) so nothing is regenerated when only judges or
- * evaluators changed — see EVAL_REUSE. Scans runs/<step>-* newest-first and
- * requires both a matching `status:"ok"` record and its raw output file.
+ * evaluators changed — see EVAL_REUSE.
+ *
+ * Reads the canonical `scores.jsonl`, not the legacy `records.json`. The
+ * canonical row already carries everything a reuse needs — the hash, the
+ * tokens, what it was billed, how long it took, and whether it completed —
+ * which is what made retiring the legacy writer possible at all.
  */
 async function loadReusable(
   step: string,
@@ -204,40 +204,84 @@ async function loadReusable(
   ws: Workspace,
 ): Promise<{ record: RunRecord; from: string } | null> {
   // Every task's runs, not just this one's: `trialHash` is content-addressed,
-  // so a generation produced under another task is the same generation. Nine
-  // specs share `code-utils`; scanning per-task only would re-buy it per task.
+  // so a generation produced under another task is the same generation.
+  // Several tasks share `code-utils`; scanning per-task only would re-buy it
+  // once per task.
+  //
+  // Which step a run holds is read from its rows, not guessed from its
+  // directory name. The old filter was `name.startsWith(step + "-")`, which
+  // is only true when a task's run_name happens to begin with its step id —
+  // `codegen-w38/codegen` matched, `smoke-local/codegen` never did, and reuse
+  // silently did nothing there.
   const candidates = (await listRunDirs(ws))
-    .filter((e) => e.name.startsWith(`${step}-`) && e.name !== currentRunId)
+    .filter((e) => e.name !== currentRunId)
     .sort((a, b) => b.name.localeCompare(a.name));
 
   for (const { dir } of candidates) {
+    const hit = await findTrialRow(dir, step, hash);
+    if (!hit) continue;
+    const text = await fs
+      .readFile(path.join(dir, "raw", `${safeName(hit.candidate)}__${hit.input}__t${hit.trial}.txt`), "utf-8")
+      .catch(() => null);
+    // A row with no surviving output is not reusable: the point is to skip
+    // the call, and there is nothing here to skip it with.
+    if (text === null) continue;
+    return { record: recordFromRow(hit, text), from: displayPath(dir) };
+  }
+  return null;
+}
+
+/** The first successful trial row in this run for that step and hash, or null. */
+async function findTrialRow(dir: string, step: string, hash: string): Promise<TrialRow | null> {
+  let raw: string;
+  try {
+    raw = await fs.readFile(path.join(dir, "scores.jsonl"), "utf-8");
+  } catch {
+    return null;
+  }
+  for (const line of raw.split("\n")) {
+    if (line.trim() === "") continue;
+    let row: TrialRow;
     try {
-      const parsed: unknown = JSON.parse(await fs.readFile(path.join(dir, "records.json"), "utf-8"));
-      if (!Array.isArray(parsed)) continue;
-      const hit = parsed.find(
-        (e): e is Record<string, unknown> =>
-          typeof e === "object" && e !== null && (e as Record<string, unknown>).trialHash === hash && (e as Record<string, unknown>).status === "ok",
-      );
-      if (!hit) continue;
-      const entry = hit as unknown as ReusableEntry & Partial<RunRecord>;
-      const text = await fs.readFile(
-        path.join(dir, "raw", `${safeName(entry.candidate)}__${entry.inputSlug}__t${entry.trial}.txt`),
-        "utf-8",
-      );
-      if (
-        typeof entry.promptTokens !== "number" ||
-        typeof entry.completionTokens !== "number" ||
-        typeof entry.costUsd !== "number" ||
-        typeof entry.ms !== "number"
-      ) {
-        continue;
-      }
-      return { record: { ...(entry as RunRecord), text, status: "ok" }, from: displayPath(dir) };
+      row = JSON.parse(line) as TrialRow;
     } catch {
       continue;
     }
+    if (row.step === step && row.trial_hash === hash && row.legacy_status === "ok") return row;
   }
   return null;
+}
+
+function recordFromRow(row: TrialRow, text: string): RunRecord {
+  // A step gates on exactly one required check, so the row carries at most
+  // one cell. Carrying it over is not optional: without the check's state the
+  // reused trial looks unchecked, eligibility removes the candidate, and the
+  // run silently recommends nobody — the same evidence, a different answer.
+  const [check] = Object.values(row.checks);
+  return {
+    candidate: row.candidate,
+    inputSlug: row.input,
+    trial: row.trial,
+    text,
+    promptTokens: row.tokens.prompt,
+    completionTokens: row.tokens.completion,
+    cachedTokens: row.tokens.cached ?? undefined,
+    costUsd: row.cost.generation,
+    retryCostUsd: row.cost.retry,
+    costSource: row.cost.source,
+    ms: row.ms,
+    status: "ok",
+    checkPassed: row.legacy_check_passed ?? undefined,
+    checkState: check?.state,
+    checkVersion: check?.version,
+    checkOutput: check?.evidence,
+    modelRef: row.model_ref,
+    deploymentRef: row.deployment_ref ?? undefined,
+    trialHash: row.trial_hash,
+    completionState: row.completion_state,
+    truncated: row.truncated,
+    finishReason: row.finish_reason ?? undefined,
+  };
 }
 
 export function errorRecord(task: GenTask, err: unknown): RunRecord {
