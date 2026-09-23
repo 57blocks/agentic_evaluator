@@ -104,28 +104,45 @@ run，并把「由看板发起」写进 manifest 的来源字段 —— 「什�
 
 ---
 
-## 3. 分期与闸门
+## 3. 分期与闸门（已完成，2026-09-23）
 
 每一期结束时：`pnpm run typecheck` 干净、全部测试绿、`tests/parity.test.ts`
-在每个 fixture 上逐字段一致。任一条不满足，这一期不算完。
+在每个 fixture 上逐字段一致。
 
-| 期 | 做什么 | 额外闸门 |
-|---|---|---|
-| **P0 基线** | 记录 oracle | ✅ 已完成：typecheck 干净，192 测试全过 |
-| **P1 Workspace** | 解除 REPO_ROOT，任务目录从参数/cwd 解析 | 从仓库外的目录跑通一个 smoke task |
-| **P2 内核** | 抽出 plan/execute/events；`run.ts` 收到约 150 行；所有 `console.log` 变事件 | 新增事件序列测试；`run.ts` 不再 import 任何渲染器 |
-| **P3 CLI** | bin + 子命令 + --help + --json + 退出码 | 每个子命令一条 CLI 测试；README 按新表面重写 |
-| **P4 服务端** | 发起 / 取消 / SSE / 预算闸门 | 用 fake agent-cli 候选从看板跑完整一次，零付费调用 |
-| **P5 看板** | 跨 run 视图（覆盖 dashboard.ts）+ 实时进度 | legacy 退役闸门条件 (a) 达成 |
-| **P6 统一渲染** | React 单文件静态导出为 report.html；删 legacy 整层与 report-v2 系列 | parity 绿；每个 fixture 的页面人工过一眼；report.html 离线可开 |
+| 期 | 做了什么 | 额外闸门 | 结果 |
+|---|---|---|---|
+| **P0 基线** | 记录 oracle | — | typecheck 干净，192 测试全过 |
+| **P1 Workspace** | `REPO_ROOT` 拆成安装根与工作区根，任务目录从参数/cwd 解析 | 从仓库外跑通一个 task | ✅ `tests/workspace.test.ts` |
+| **P2 内核** | plan/execute/events 抽出，`run.ts` 1321 → 87 行 | 事件序列有测试 | ✅ `tests/events.test.ts` |
+| **P3 CLI** | `agenteval` bin + 7 个子命令 + `--json` + 四档退出码 | 每个子命令一条测试 | ✅ `tests/cli.test.ts`（13 条） |
+| **P4 服务端** | 发起 / 取消 / SSE / 预算闸门 | 从看板跑完整一次，零付费 | ✅ `tests/server-runs.test.ts` |
+| **P5 看板** | 跨 run 总览 + 实时进度 | 退役闸门条件 (a) | ✅ `tests/overview.test.ts` + 浏览器实测 |
+| **P6 收拢** | legacy 整层退役 | parity 绿 | ✅ 226 测试，parity 逐 fixture 一致 |
 
-P1 与 P2 是解锁项，其余都依赖它们；P6 最大，但可以推迟而不阻塞最终形态。
+### 顺带修掉的缺陷
 
-**免费验证的载体**：`tasks/smoke-agent-cli` 与 `tasks/smoke-e2e-validation`
-的候选是本地脚本，`tests/e2e-validation.test.ts` 能跑完整两臂而不付费。每一期
-都用它们做端到端，不用真实模型。
+都是「跑完了、文件齐了、结论不一样」这一类：
 
----
+- `evaluators.judge.methods: []` 被当成「没声明」，照跑两种方法并计费。
+- `agent-cli` 候选的脚本路径按仓库根解析，解析不到就把原字符串交给 shell；
+  node 的 `MODULE_NOT_FOUND` 堆栈被当成候选的交付物送去评判。
+- 生成复用按目录名前缀 `startsWith(step + "-")` 过滤，只有 run 名恰好以步骤
+  id 开头时才生效；`smoke-local/codegen` 从来没复用过，却一直报 reuse ON。
+- 复用重建的记录丢掉必过检查的结论 —— 运行照常完成，资格门把候选剔除，
+  推荐变成「无人合格」。
+- `scoreAll` 在 P2 改造时没接到事件汇，绝对打分的进度行静默消失。
+
+### P6 的决定与计划不同
+
+计划里写的是「统一到 React，report.html 变成静态导出」。量过之后推翻了：
+现在的 `report.html` 是 16–24 KB 自包含 HTML，没有网络、没有构建、双击即开；
+把看板打包进每个 run 目录会让每份证据变成约 900 KB，并且把一份要长期留存的
+记录钉死在某个 React 版本上。
+
+所以 P6 只做了退役的那一半：legacy 层删掉，**两个渲染器按职责保留** ——
+`report.html` 是证据（离线、耐久、随 run 走），看板是现场（实时、跨 run、能
+发起）。真正不能漂移的是措辞（「需人工评审」而不是空白、被门槛挡下的候选要
+点名并说明原因），这部分放在两侧共用的 view-model 里。
 
 ## 4. 明确不做
 
