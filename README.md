@@ -18,8 +18,8 @@ runs/<runId>/
   summary.json        per-candidate rates with numerators and denominators; directionality
   recommendation.json eligibility filters + operating-mode choice
   GAPS.md             protocol fields this run could not observe (recorded null, never defaulted)
-  report.html         canonical page          legacy-report.html  original harness page
-  raw/ records.json report.json report.md     legacy layer, aggregate unchanged
+  report.html         the page: standings, evidence, what was not observed
+  raw/                each candidate's deliverable, one file per trial
 ```
 
 A multi-step spec writes each step under `runs/<runId>/<stepId>/` plus, at the
@@ -42,38 +42,82 @@ runs/<runId>/
 
 ```bash
 pnpm install
-cp ../agentic-builder/.env.local .env.local        # OPENROUTER_API_KEY=...
-pnpm run check-models specs/codegen-w38.yaml       # reachable from here? prices?
-pnpm run run -- --suite specs/codegen-w38.yaml --html          # preview only
-caffeinate -i pnpm run run -- --suite specs/codegen-w38.yaml --html --yes    # execute
-pnpm run report runs/<runId>                                    # re-render report.html
-pnpm run demo                                                   # local UI at http://127.0.0.1:4173
-pnpm test
+npm link                    # or: pnpm run agenteval <command>
+
+agenteval init my-task      # a runnable, offline task to edit
+agenteval ls                # what this workspace holds, and what it spent
+agenteval plan my-task      # what a run would cost — no key, no call
+agenteval run my-task --yes # execute
+agenteval dash              # the dashboard, over this workspace
 ```
 
-The demo UI is read-only: it lists `specs/*.yaml`, completed `runs/`, and
-committed fixtures as samples. It does not start paid evals. Open a spec to
-see each independent step’s candidates; open a run to see the per-step
-recommendation and the canonical `report.html`.
+A **workspace** is any directory holding `tasks/`, found by walking up from
+where you are standing; `--workspace DIR` names one explicitly. The harness
+itself is a workspace, which is why running inside this checkout needs no
+flags. A task is self-contained — spec, inputs, rubric, agents, checks,
+scaffold and its own `runs/` — so copying the directory somewhere else and
+running it there is the supported thing to do, not a trick.
 
-Run paid specs under `caffeinate -i` (macOS). A suspended host leaves regular
+```bash
+agenteval models my-task              # reachable from here? at what price?
+agenteval models my-task --catalog-only   # no key, nothing billed
+agenteval report <runId>              # re-render report.html; no number moves
+agenteval run my-task --yes --json    # one JSON event per line, for a script
+```
+
+Exit codes: `0` done · `1` failed · `2` usage · `3` completed but partial —
+the budget stopped it early, or the trace shows gaps that make its durations
+unreliable. The third is why they are separate: a script that cannot tell a
+spending cap from an outage will treat a half-run as a whole one.
+
+Run paid tasks under `caffeinate -i` (macOS). A suspended host leaves regular
 multi-minute gaps between trace events and every timeout and duration in that
-run becomes meaningless; `summary.json.integrity` counts such gaps and GAPS.md
-warns when any exist. `pnpm run rescore` refreshes the legacy layer only
-(report.json, legacy-report.html); canonical rows are not re-derived.
+run becomes meaningless; `summary.json.integrity` counts such gaps, GAPS.md
+warns, and `agenteval run` exits 3.
 
-A spec is the versioned source of truth (`specs/*.yaml`, schema in
+`tasks/smoke-local` is the free full-pipeline smoke: local command candidates
+and no declared judging method, so it exercises spec load, adapter dispatch,
+the required check, the ledger and the recommendation without a single network
+call. It is what gates every refactor here.
+
+A spec is the versioned source of truth (`tasks/<name>/spec.yaml`, schema in
 `src/spec/schema.ts`). A spec may list several **independent** steps; each
 gets its own recommendation. Add `input_from` to chain a step onto the previous
 one; that also turns on the end-to-end validation pass.
-Legacy `suites/*.json` still run (candidate id = model id), but that path is
-**deprecated**: it predates the candidate-as-object contract and every new
-step belongs in a spec.
+
+`evaluators.judge.methods` is honoured exactly: absent means both methods run
+(what every spec written before the key existed meant), an empty list means
+neither. A step with no method declared is a check-only step — the manifest
+records the declaration and GAPS.md states the missing scores are a choice.
+
+Legacy `suites/*.json` still load (candidate id = model id) but no longer run:
+their `rubrics/` and `scaffold/` were workspace-level and moved into the tasks
+that own them. The path is **deprecated** — every new step belongs in a task.
+
+Still its own script, because it compares two sets of runs rather than producing one:
+
+```bash
+pnpm run parity       # capture/compare: did a change move the numbers?
+pnpm test
+```
 
 ## Layout
 
 ```
-src/run.ts            driver: spec → trials → judge → score → legacy + canonical outputs
+bin/agenteval.mjs     the installed entry point
+src/cli/              argv -> core, and the only place a run is formatted for a human
+  index.ts            dispatch, --help, --version, exit codes
+  commands/           run plan ls init models report dash
+  print.ts            events -> terminal lines        json.ts  events -> NDJSON
+src/core/             the kernel: no terminal, no cwd, no process.exit
+  workspace.ts        where the user's tasks and runs live
+  plan.ts             what a run would do, before it does any of it (pure)
+  events.ts           what a run emits while it happens
+  generate.ts         candidate × input × trial through an adapter
+  evaluate.ts         judge and scorer      scorecard.ts  the frozen legacy aggregate
+  e2e-arms.ts         the two end-to-end arms and the §8 verdict
+  execute.ts          one step, then the run around it
+src/paths.ts          the installation: its own tsc, version, built assets, fixtures
 src/adapters/         candidate adapters: model-api, codegen, agent-cli (protocol §5)
 src/llm.ts            OpenRouter client; provider, finish reason, labeled cost source, LlmError
 src/judge.ts          pairwise with order swap; keeps every attempt's cost
@@ -82,11 +126,11 @@ src/check.ts          tsc --noEmit required check with four-state result and ver
 src/spec/             YAML spec loader + JSON Schema + semantic checks
 src/canon/            protocol layer: states, success decision, hash, usage, cost, trace,
                       manifest, rows, adapt, rates, write
-src/html.ts           escapeHtml — the only thing both report layers share
-src/report-v2.ts      canonical step report page (+ report-charts, report-evidence)
-src/report-workflow.ts canonical workflow page: verdict, arms, per-step links, ledger
-src/render.ts         legacy renderer for report.ts + dashboard.ts (frozen)
-src/demo/             local read-only UI (`pnpm run demo`)
+src/html.ts           escapeHtml, shared by the two report pages
+src/report-v2.ts      the step report page (+ report-charts, report-evidence)
+src/report-workflow.ts the workflow page: verdict, arms, per-step links, ledger
+src/server/           run control (plan gate, SSE, cancel) and the cross-run overview
+src/demo/             the dashboard server and its React client
 tests/                node:test; parity uses tests/legacy-aggregate.ts (pristine oracle)
 fixtures/             committed real runs used by the parity test
 docs/                 protocol, implementation plan, harness-to-protocol map, runner design
@@ -161,37 +205,53 @@ than silently gating on one. The command runs on this host with your
 privileges — the Docker sandbox is still deferred, so only declare checks you
 would run yourself.
 
-## The two report layers
+## One layer, and one permanent oracle
 
-Every run writes both a **canonical** set (`manifest.json`, `scores.jsonl`,
-`evaluations.jsonl`, `ledger.json`, `summary.json`, `recommendation.json`,
-`report.html`) and the **legacy** set the original harness wrote
-(`records.json`, `report.json`, `report.md`, `legacy-report.html`). This is a
-deliberate transition state, not drift. Three things hide under "legacy" and
-they have different fates:
+A run writes canonical files only: `manifest.json`, `trace.jsonl`,
+`scores.jsonl`, `evaluations.jsonl`, `ledger.json`, `summary.json`,
+`recommendation.json`, `GAPS.md`, `report.html`, and `raw/`. The legacy layer
+the original harness wrote — `records.json`, `report.json`, `report.md`,
+`legacy-report.html` — is gone, along with the renderer behind it
+(`render.ts`, `report.ts`, `dashboard.ts`, `summarize.ts`, `i18n.ts`) and
+`rescore.ts`, which only ever refreshed it.
 
-1. `tests/legacy-aggregate.ts` — a pristine copy of the original aggregate,
-   used by `parity.test.ts` as the oracle. **Permanent.** It is frozen by
-   design and is not part of any merge.
-2. Legacy run outputs (`records.json`, `report.json`, `raw/`). Retire once the
-   canonical files reconstruct every field they carry and nothing reads them.
-3. The legacy renderer (`render.ts`, `report.ts`, `dashboard.ts`,
-   `summarize.ts`, `i18n.ts`). **Frozen — no new features go here.** It still
-   does one thing the canonical pages cannot: `dashboard.ts` merges several
-   steps into one cross-step view, while `report-v2.ts` renders a single step
-   and the workflow level has no page at all.
+Both retirement conditions were met before it went: the dashboard's cross-run
+view covers what `dashboard.ts` uniquely showed, and parity holds on every
+fixture.
 
-**Retirement gate.** Delete the legacy renderer and stop writing the legacy
-outputs when (a) a canonical page covers what `dashboard.ts` shows, and (b)
-parity holds on every fixture. `report-workflow.ts` closes half of (a): it
-renders the steps of **one** run. `dashboard.ts` does something else — it scans
-the whole results directory and keeps the newest run per step, a cross-*run*
-view that no canonical page has yet. Until then both are written.
-`summarize.ts` writes an LLM-authored verdict; it is commentary, never a
-recommendation, and must not enter the canonical report.
+**`tests/legacy-aggregate.ts` stays, permanently.** It is a pristine copy of
+the original harness's aggregate, and `tests/parity.test.ts` feeds it the
+canonical rows of each committed fixture and checks that it reproduces the
+`report.json` that fixture shipped with. The fixtures keep their legacy files
+forever — that is what makes them an oracle. The invariant it now guards is
+the one worth guarding: **the canonical rows still carry everything the
+original computation needed.** If a change to `canon/` quietly drops a field,
+this fails, and it fails against numbers produced before any of this code was
+written.
 
-The canonical pages must not import from `render.ts` — shared HTML helpers live
-in `src/html.ts` so the legacy layer can be deleted in one piece.
+`scripts/parity.ts` answers the other question — whether a change moved the
+numbers on a live task — by capturing runs before and after and diffing them.
+It never spends: it reads runs you already produced.
+
+## Two renderers, on purpose
+
+`report.html` is written by `report-v2.ts` (one step) and
+`report-workflow.ts` (a whole workflow). The dashboard is a separate React
+application. They are not a duplication to be collapsed, and the difference is
+the artifact's job:
+
+- `report.html` is **evidence**. It is 16 KB of self-contained HTML that opens
+  from a file path with no server, no network and no build, and it sits in the
+  run directory next to the rows it renders. Bundling the dashboard into every
+  run instead would make each one ~900 KB and pin a durable record to a React
+  version.
+- The dashboard is **live**. It follows a run in progress over SSE, spans every
+  run in the workspace, and starts new ones.
+
+What must not drift is the wording — "needs review" rather than a blank cell,
+a gated candidate named with its reason. Those decisions live in view-model
+helpers (`src/demo/client/render.ts`, `src/cli/summary.ts`), separately from
+the markup that presents them.
 
 ## Not in this milestone
 

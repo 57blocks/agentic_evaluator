@@ -1,276 +1,40 @@
-/** Self-contained demo page. Served by demo/server.ts. */
+/**
+ * The demo page as served. The markup, styles and client logic live in
+ * src/demo/client/ as real files; Vite bundles them to dist/demo.
+ *
+ * `demoPage()` returns the built index.html. It builds on first call when the
+ * output is missing so `pnpm demo` stays one command, and the build is cached
+ * for the life of the process.
+ */
 
-export function demoPage(): string {
-  return `<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>这一步该用谁 · Agentic Evaluator</title>
-<style>
-:root{
-  --ground:#F1EFE8;--paper:#FBF9F4;--ink:#1C1915;--muted:#5C564C;--line:#D9D1C3;
-  --accent:#1F4E46;--accent-2:#C45C26;--ok:#1E6B3A;--bad:#9B2C25;--warn:#7D5410;
-  --ok-bg:#DDF1E4;--bad-bg:#F8DEDC;--warn-bg:#F8ECD2;--chip:#E7E1D4;
-  --mono:ui-monospace,"SF Mono",Menlo,monospace;
-  --sans:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Source Han Sans SC",ui-sans-serif,system-ui,sans-serif;
-}
-@media(prefers-color-scheme:dark){
-  :root{--ground:#161411;--paper:#1E1B16;--ink:#F3EEE4;--muted:#B7AFA2;--line:#3A342C;
-    --accent:#8FBFB4;--accent-2:#E08A58;--ok:#8FD6A8;--bad:#F0A29C;--warn:#EACB7C;
-    --ok-bg:#1F3A2A;--bad-bg:#43231F;--warn-bg:#3F3319;--chip:#2A261F}
-}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
-a{color:var(--accent)}button{font:inherit;cursor:pointer}
-.skip{position:absolute;left:-999px;top:8px;background:var(--paper);padding:8px 12px}
-.skip:focus{left:8px;z-index:9}
-.app{display:grid;grid-template-columns:280px 1fr;min-height:100%}
-@media(max-width:840px){.app{grid-template-columns:1fr}}
-aside{background:var(--paper);border-right:1px solid var(--line);padding:22px 18px 40px;display:flex;flex-direction:column;gap:22px}
-@media(max-width:840px){aside{border-right:0;border-bottom:1px solid var(--line)}}
-.brand{display:grid;gap:4px}.brand p{margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
-.brand h1{margin:0;font-size:22px;font-weight:650;letter-spacing:-.02em}
-.brand .sub{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
-nav h2{margin:16px 0 8px;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.list button{width:100%;text-align:left;border:1px solid transparent;background:transparent;border-radius:8px;padding:8px 10px;color:var(--ink)}
-.list button:hover,.list button:focus-visible{background:var(--chip);outline:none}
-.list button[aria-current="true"]{border-color:var(--line);background:var(--chip)}
-.list .k{display:block;font-family:var(--mono);font-size:12px}
-.list .m{display:block;font-size:12px;color:var(--muted)}
-main{padding:28px 28px 64px;min-width:0}
-.questions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:22px}
-@media(max-width:1100px){.questions{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.questions{grid-template-columns:1fr}}
-.q{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-.q b{display:block;font-size:12px;color:var(--accent);margin-bottom:4px}
-.q span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
-.stage{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:22px;display:grid;gap:18px}
-.stage h2{margin:0;font-size:20px}.meta{color:var(--muted);font-size:13px}
-.pipeline{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}
-.step{flex:1 1 220px;border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;background:var(--ground)}
-.step h3{margin:0;font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.step h3 em{font-style:normal;font-size:11px;font-family:var(--mono);color:var(--muted);font-weight:500}
-.pill{display:inline-block;font-size:11px;font-weight:650;padding:2px 8px;border-radius:999px;letter-spacing:.04em}
-.pill.ok{background:var(--ok-bg);color:var(--ok)}
-.pill.bad{background:var(--bad-bg);color:var(--bad)}
-.pill.warn{background:var(--warn-bg);color:var(--warn)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font-family:var(--mono);font-size:11px;background:var(--chip);padding:2px 7px;border-radius:4px}
-.chip.off{opacity:.55;text-decoration:line-through}
-.trace{margin:0;padding-left:1.15em;color:var(--muted);font-size:13px;display:grid;gap:6px}
-.actions{display:flex;gap:10px;flex-wrap:wrap}
-.btn{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 12px;color:var(--ink);text-decoration:none;display:inline-block}
-.btn.primary{background:var(--accent);color:#FBF9F4;border-color:var(--accent)}
-@media(prefers-color-scheme:dark){.btn.primary{color:#161411}}
-.empty{color:var(--muted)}
-iframe{width:100%;min-height:70vh;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
-.note{font-size:12px;color:var(--muted);margin:0}
-</style>
-</head>
-<body>
-<a class="skip" href="#stage">跳到内容</a>
-<div class="app">
-  <aside>
-    <div class="brand">
-      <p>Agent Evaluation Protocol v0.4</p>
-      <h1>这一步该用谁</h1>
-      <p class="sub">不是模型排行榜。推荐绑定步骤、测试集、运行模式。本地只读，不会开跑。</p>
-    </div>
-    <nav aria-label="规格">
-      <h2>规格</h2>
-      <ul class="list" id="specs"></ul>
-    </nav>
-    <nav aria-label="已完成运行">
-      <h2>运行</h2>
-      <ul class="list" id="runs"></ul>
-    </nav>
-    <nav aria-label="冒烟运行" id="smokeNav" hidden>
-      <h2>冒烟（脚本候选）</h2>
-      <ul class="list" id="smokeRuns"></ul>
-      <p class="note">候选是本地脚本，不是模型。用来验证管线，不是证据。</p>
-    </nav>
-  </aside>
-  <main>
-    <section class="questions" aria-label="协议要回答的四个问题">
-      <div class="q"><b>1. 做对了吗</b><span>任务结果 × 必过检查，不用平均分冒充成功</span></div>
-      <div class="q"><b>2. 这一步用谁</b><span>每步自己的推荐，资格门先于选型</span></div>
-      <div class="q"><b>3. 成本还是速度</b><span>只在合格候选里按 operating mode 选</span></div>
-      <div class="q"><b>4. 证据能否复现</b><span>打开本步 report.html</span></div>
-    </section>
-    <section class="stage" id="stage" tabindex="-1"><p class="empty">选左侧一份规格或一次运行。</p></section>
-  </main>
-</div>
-<script>
-const specsEl = document.getElementById("specs");
-const runsEl = document.getElementById("runs");
-const smokeEl = document.getElementById("smokeRuns");
-const smokeNav = document.getElementById("smokeNav");
-const stage = document.getElementById("stage");
-let catalog = { specs: [], runs: [] };
+import fs from "node:fs/promises";
+import path from "node:path";
+import { INSTALL_ROOT } from "../paths.js";
 
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-function firmClass(f) {
-  if (f === "firm") return "ok";
-  if (f === "needs-review") return "bad";
-  return "warn";
-}
-function firmPill(f) {
-  return '<span class="pill ' + firmClass(f) + '">' + escapeHtml(f) + "</span>";
-}
-function chips(items, off) {
-  const blocked = new Set(off || []);
-  const spans = items.map(function (x) {
-    const cls = blocked.has(x) ? "chip off" : "chip";
-    return '<span class="' + cls + '">' + escapeHtml(x) + "</span>";
-  }).join("");
-  return '<div class="chips">' + spans + "</div>";
-}
-function runDate(iso) {
-  return iso ? escapeHtml(iso.slice(0, 10)) : "";
-}
-function runMoney(usd) {
-  return usd == null ? "" : "$" + usd.toFixed(4);
-}
-/** One line under a run's name: when it ran, what it cost, and what it concluded. */
-function runMeta(run) {
-  const verdict = run.steps
-    .map((s) => (s.chosen ? escapeHtml(s.chosen) : "需人工评审"))
-    .join(" · ");
-  return [runDate(run.startedAt), runMoney(run.totalUsd), verdict].filter(Boolean).join(" · ");
-}
-function navButton(kind, key, title, meta) {
-  return '<li><button type="button" data-kind="' + kind + '" data-key="' + escapeHtml(key) +
-    '"><span class="k">' + escapeHtml(title) + '</span><span class="m">' + meta + "</span></button></li>";
+export const DIST_DIR = path.join(INSTALL_ROOT, "dist", "demo");
+const INDEX_HTML = path.join(DIST_DIR, "index.html");
+
+let building: Promise<void> | null = null;
+
+/** Build the client bundle. Vite is a dev dependency, so import it lazily. */
+async function buildClient(): Promise<void> {
+  const { build } = await import("vite");
+  await build({ configFile: path.join(INSTALL_ROOT, "vite.config.ts"), logLevel: "warn" });
 }
 
-function renderSpec(spec) {
-  const chain = spec.steps.filter((s) => s.inputFrom);
-  const handoffNote = chain.length
-    ? "独立评测无交接；e2e 对照沿 " + spec.steps.map((s) => s.id).join(" → ")
-    : spec.steps.length + " 个独立步骤（无交接）";
-  const steps = spec.steps.map((s) => \`
-    <article class="step">
-      <h3>\${escapeHtml(s.id)} <em>\${escapeHtml(s.producer)}</em></h3>
-      <p class="meta">\${escapeHtml(s.operatingMode || "无运行模式")} · 检查 \${s.requiredChecks.length ? s.requiredChecks.join(", ") : "无"}\${s.inputFrom ? " · 交接自 " + escapeHtml(s.inputFrom) : ""}</p>
-      \${chips(s.candidates)}
-      <p class="note">输入 \${s.inputs.join("、")} · 裁判标准 \${s.rubricFile}</p>
-    </article>\`).join("");
-  stage.innerHTML = \`
-    <div>
-      <h2>\${escapeHtml(spec.runName)}</h2>
-      <p class="meta">\${escapeHtml(spec.path)}\${spec.budgetUsd != null ? " · 预算 $" + spec.budgetUsd : ""} · \${handoffNote}</p>
-      <p class="note">预览不花钱：<code>pnpm run run -- --suite \${escapeHtml(spec.path)} --html</code>。真跑再加 <code>--yes</code>。</p>
-    </div>
-    <div class="pipeline">\${steps}</div>\`;
-}
-
-function renderRun(run) {
-  const steps = run.steps.map((s) => {
-    const gated = s.gated || [];
-    const off = gated.map((g) => g.candidate);
-    const why = gated.map((g) => "<li>" + escapeHtml(g.candidate) + " — " + escapeHtml(g.reason) + "</li>").join("");
-    const rec = s.chosen ? "推荐 <b>" + escapeHtml(s.chosen) + "</b>" : "无人合格";
-    const report = s.reportHref
-      ? '<a class="btn" href="' + s.reportHref + '" target="report">打开本步报告</a>'
-      : "";
-    return \`
-      <article class="step">
-        <h3>\${escapeHtml(s.id)} \${firmPill(s.firmness)}</h3>
-        <p>\${rec}</p>
-        \${chips(s.eligible.concat(off), off)}
-        \${why ? '<ol class="trace">' + why + "</ol>" : ""}
-        <p class="note">\${escapeHtml(s.operatingMode || "")}\${s.ledgerTotal != null ? " · $" + s.ledgerTotal.toFixed(4) : ""}</p>
-        <div class="actions">\${report}</div>
-      </article>\`;
-  }).join("");
-  const firstReport = run.steps.find((s) => s.reportHref)?.reportHref;
-  const kindLabel = run.kind === "workflow" ? "多步骤" : "单步骤";
-  const handoffLabel = run.handoff ? " · 有交接" : " · 无交接";
-  const sampleLabel = run.sample ? " · 仓库样例" : "";
-  const e2e = run.e2e
-    ? '<p class="note">单模型端到端对照 <b>' + escapeHtml(run.e2e.candidate) + "</b> · " +
-      escapeHtml((run.e2e.chain || []).join(" → ")) +
-      " · 成功 " + run.e2e.success + " / 失败 " + run.e2e.failure + " / 未定 " + run.e2e.undetermined + "</p>"
-    : "";
-  stage.innerHTML = \`
-    <div>
-      <h2>\${escapeHtml(run.runName)}</h2>
-      <p class="meta">\${escapeHtml(run.id)} · \${kindLabel}\${handoffLabel}\${sampleLabel}</p>
-      \${e2e}
-    </div>
-    <div class="pipeline">\${steps}</div>
-    \${firstReport ? '<iframe title="步骤报告" src="' + firstReport + '"></iframe>' : ""}\`;
-}
-
-function markCurrent(kind, key) {
-  for (const btn of document.querySelectorAll(".list button")) {
-    btn.removeAttribute("aria-current");
-    if (btn.dataset.kind === kind && btn.dataset.key === key) btn.setAttribute("aria-current", "true");
-  }
-}
-
-function renderNav() {
-  specsEl.innerHTML = catalog.specs.map((s) =>
-    navButton("spec", s.path, s.runName, s.steps.map((x) => x.id).join(" → "))
-  ).join("");
-  const real = catalog.runs.filter((r) => !r.synthetic);
-  const smoke = catalog.runs.filter((r) => r.synthetic);
-  runsEl.innerHTML = real.map((r) =>
-    navButton("run", r.id, r.runName, (r.sample ? "样例 · " : "") + runMeta(r))
-  ).join("") || '<li class="m">还没有 runs/ 或样例</li>';
-  smokeEl.innerHTML = smoke.map((r) => navButton("run", r.id, r.runName, runMeta(r))).join("");
-  smokeNav.hidden = smoke.length === 0;
-}
-
-function showFromHash() {
-  const h = new URLSearchParams(location.hash.replace(/^#/, ""));
-  const specPath = h.get("spec");
-  const runId = h.get("run");
-  const spec = specPath && catalog.specs.find((x) => x.path === specPath);
-  if (spec) {
-    markCurrent("spec", specPath);
-    renderSpec(spec);
-    return;
-  }
-  const run = runId && catalog.runs.find((x) => x.id === runId);
-  if (run) {
-    markCurrent("run", runId);
-    renderRun(run);
-    return;
-  }
-  if (catalog.runs[0]) {
-    location.hash = "run=" + encodeURIComponent(catalog.runs[0].id);
-    return;
-  }
-  if (catalog.specs[0]) renderSpec(catalog.specs[0]);
-}
-
-document.body.addEventListener("click", function (e) {
-  const btn = e.target.closest("button[data-kind]");
-  if (!btn) return;
-  location.hash = btn.dataset.kind + "=" + encodeURIComponent(btn.dataset.key);
-});
-window.addEventListener("hashchange", showFromHash);
-
-async function loadCatalog() {
+/** Build once per process, and let concurrent callers share that one build. */
+async function ensureBuilt(): Promise<void> {
   try {
-    const data = await (await fetch("/api/catalog")).json();
-    catalog = data;
-    renderNav();
-    showFromHash();
-  } catch (err) {
-    stage.innerHTML = '<p class="empty">加载失败：' + escapeHtml(err.message) + "</p>";
+    await fs.access(INDEX_HTML);
+    return;
+  } catch {
+    // Not built yet.
   }
+  building ??= buildClient();
+  await building;
 }
-loadCatalog();
-</script>
-</body></html>`;
+
+export async function demoPage(): Promise<string> {
+  await ensureBuilt();
+  return fs.readFile(INDEX_HTML, "utf-8");
 }

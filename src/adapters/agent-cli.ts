@@ -7,7 +7,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { sha256 } from "../canon/hash.js";
-import { REPO_ROOT } from "../paths.js";
+import { looksLikePath } from "../script-path.js";
 import {
   AdapterError,
   type ArtifactFile,
@@ -25,14 +25,27 @@ function subst(value: string, vars: Record<string, string>): string {
   return value.replace(/\{\{(\w+)\}\}/g, (_, key: string) => vars[key] ?? "");
 }
 
-async function resolveArg(arg: string): Promise<string> {
+/**
+ * Resolve one argv entry against the task that declared it.
+ *
+ * A task owns its agent (`agents/run.mjs`), the same way it owns its rubric
+ * and its checks, so the directory can be copied anywhere and still run.
+ * A declared script that resolves nowhere throws: node would otherwise exit 1
+ * with MODULE_NOT_FOUND, and that stack trace would be recorded as the
+ * candidate's deliverable — a broken path billed as a graded attempt.
+ */
+async function resolveArg(arg: string, taskRoot: string | undefined): Promise<string> {
   if (path.isAbsolute(arg)) return arg;
-  const candidate = path.resolve(REPO_ROOT, arg);
+  if (!looksLikePath(arg)) return arg;
+  const candidate = path.resolve(taskRoot ?? process.cwd(), arg);
   try {
     await fs.access(candidate);
     return candidate;
   } catch {
-    return arg;
+    throw new AdapterError(`declared script not found: ${arg} (looked in ${taskRoot ?? process.cwd()})`, {
+      kind: "spawn",
+      ms: 0,
+    });
   }
 }
 
@@ -104,8 +117,8 @@ export const agentCliAdapter: CandidateAdapter = {
     }
     const vars = { input: request.inputText, workdir: context.workDir };
     const raw = cli.argv.map((a) => subst(a, vars));
-    const cmd = await resolveArg(raw[0]);
-    const args = await Promise.all(raw.slice(1).map(resolveArg));
+    const cmd = await resolveArg(raw[0], context.taskRoot);
+    const args = await Promise.all(raw.slice(1).map((a) => resolveArg(a, context.taskRoot)));
 
     await fs.mkdir(context.workDir, { recursive: true });
     await fs.writeFile(path.join(context.workDir, INPUT_FILE), request.inputText, "utf-8");
