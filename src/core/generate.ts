@@ -20,7 +20,9 @@ import { CODEGEN_PRODUCER_VERSION } from "../producers/code-gen.js";
 import { sha256, trialHash } from "../canon/hash.js";
 import { classifyCompletion } from "../canon/states.js";
 import { BudgetGuard } from "../canon/budget.js";
-import type { CandidateDef, CostSource, EvaluationState } from "../canon/types.js";
+import type { CandidateDef, CostSource, EvaluationState,
+  Isolation,
+} from "../canon/types.js";
 import type { TrialRow } from "../canon/rows.js";
 import type { ProducerKind, Report, RunRecord, Suite } from "../types.js";
 
@@ -96,6 +98,8 @@ export interface GenOutput {
   costSource: CostSource;
   ms: number;
   provider?: string;
+  /** agent-cli: whether the command ran in a container or on this host. */
+  isolation?: Isolation;
   finishReason?: string;
   refusal?: string;
   /** codegen: number of files parsed from the output. */

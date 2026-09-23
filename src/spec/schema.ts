@@ -107,6 +107,10 @@ export const SPEC_SCHEMA = {
             properties: {
               argv: { type: "array", minItems: 1, items: { type: "string" } },
               env: { type: "object", additionalProperties: { type: "string" } },
+              image: { type: "string", minLength: 1 },
+              network: { type: "string", enum: ["none", "bridge"] },
+              memory: { type: "string", minLength: 1 },
+              cpus: { type: "string", minLength: 1 },
             },
           },
         },

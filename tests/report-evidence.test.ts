@@ -45,6 +45,7 @@ function trial(over: Partial<TrialRow> = {}): TrialRow {
     tokens: { prompt: 10, completion: 20, cached: null },
     ms: 2000,
     finish_reason: "stop",
+    isolation: null,
     ...over,
   } as TrialRow;
 }

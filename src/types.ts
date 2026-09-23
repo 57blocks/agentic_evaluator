@@ -12,6 +12,7 @@ import type {
   CostSource,
   EligibilityDecl,
   EvaluationState,
+  Isolation,
   SuccessCriteria,
 } from "./canon/types.js";
 
@@ -182,6 +183,8 @@ export interface RunRecord {
   completionState?: CompletionState;
   truncated?: boolean;
   costSource?: CostSource;
+  /** How the candidate's command ran. agent-cli only; undefined elsewhere. */
+  isolation?: Isolation;
   cachedTokens?: number;
   finishReason?: string;
   checkState?: EvaluationState;

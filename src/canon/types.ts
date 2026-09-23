@@ -35,8 +35,32 @@ export type CandidateAdapterId = "model-api" | "codegen" | "agent-cli";
 
 export interface AgentCliConfig {
   argv: string[];
+  /**
+   * Environment for the command. In a container only these keys cross the
+   * boundary, and an empty value means "take it from the host" — so a spec
+   * names every secret the candidate is trusted with, in writing.
+   */
   env?: Record<string, string>;
+  /**
+   * Container image to run the command in. Declared, the candidate runs
+   * under `docker run` with only the work dir mounted; omitted, it runs as
+   * this process, with this process's user and its whole filesystem.
+   *
+   * Which one happened is recorded on every trial rather than assumed:
+   * running an unreviewed agent on the host is a choice a reader of the
+   * evidence is entitled to see.
+   */
+  image?: string;
+  /** Container network. Defaults to "none"; an agent that calls an API needs "bridge". */
+  network?: "none" | "bridge";
+  /** Memory ceiling, e.g. "2g". Defaults to 2g. */
+  memory?: string;
+  /** CPU ceiling, e.g. "2". Defaults to 2. */
+  cpus?: string;
 }
+
+/** How a candidate's command was executed — recorded, never inferred. */
+export type Isolation = "docker" | "none";
 
 export interface CandidateDef {
   id: string;

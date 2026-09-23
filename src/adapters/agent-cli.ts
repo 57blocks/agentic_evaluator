@@ -1,6 +1,11 @@
 /**
- * Run a local command in a clean work directory. The candidate is the command,
- * not a model id. Cost is unobserved (source "none").
+ * Run a candidate's command in a clean work directory. The candidate is the
+ * command, not a model id. Cost is unobserved (source "none").
+ *
+ * With `cli.image` the command runs under `docker run` with only the work dir
+ * mounted; without it, it runs as this process. Every result records which,
+ * so "this agent ran on the harness's own machine" is visible evidence
+ * rather than an assumption a reader has to make.
  */
 
 import { execFile } from "node:child_process";
@@ -8,6 +13,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { sha256 } from "../canon/hash.js";
 import { looksLikePath } from "../script-path.js";
+import { CONTAINER_WORKDIR, runInDocker } from "./docker.js";
 import {
   AdapterError,
   type ArtifactFile,
@@ -115,10 +121,21 @@ export const agentCliAdapter: CandidateAdapter = {
     if (!cli?.argv.length) {
       throw new Error(`agent-cli candidate "${request.candidateId}" has no cli.argv`);
     }
-    const vars = { input: request.inputText, workdir: context.workDir };
+    const inDocker = cli.image !== undefined;
+    // Inside the container the work dir is mounted at a fixed path, and host
+    // paths mean nothing — so argv keeps whatever the spec wrote rather than
+    // being resolved against a filesystem the command will never see.
+    const vars = {
+      input: request.inputText,
+      workdir: inDocker ? CONTAINER_WORKDIR : context.workDir,
+    };
     const raw = cli.argv.map((a) => subst(a, vars));
-    const cmd = await resolveArg(raw[0], context.taskRoot);
-    const args = await Promise.all(raw.slice(1).map((a) => resolveArg(a, context.taskRoot)));
+    const [cmd, ...args] = inDocker
+      ? raw
+      : [
+          await resolveArg(raw[0], context.taskRoot),
+          ...(await Promise.all(raw.slice(1).map((a) => resolveArg(a, context.taskRoot)))),
+        ];
 
     await fs.mkdir(context.workDir, { recursive: true });
     await fs.writeFile(path.join(context.workDir, INPUT_FILE), request.inputText, "utf-8");
@@ -134,7 +151,16 @@ export const agentCliAdapter: CandidateAdapter = {
 
     const t0 = Date.now();
     try {
-      const ran = await runCommand(cmd, args, { cwd: context.workDir, timeoutMs: request.timeoutMs, env: cli.env });
+      const ran = inDocker
+        ? await runInDocker(cli, [cmd, ...args], {
+            workDir: context.workDir,
+            timeoutMs: request.timeoutMs,
+          })
+        : await runCommand(cmd, args, {
+            cwd: context.workDir,
+            timeoutMs: request.timeoutMs,
+            env: cli.env,
+          });
       const artifacts = await collectFiles(context.workDir);
       const ms = Date.now() - t0;
       context.emit?.({ type: "model.response", ...base, ms });
@@ -146,7 +172,8 @@ export const agentCliAdapter: CandidateAdapter = {
         costUsd: 0,
         costSource: "none",
         ms,
-        provider: "local-cli",
+        isolation: inDocker ? "docker" : "none",
+        provider: inDocker ? `docker:${cli.image}` : "local-cli",
         finishReason: ran.exitCode === 0 ? "stop" : `exit ${ran.exitCode}`,
       };
     } catch (err) {

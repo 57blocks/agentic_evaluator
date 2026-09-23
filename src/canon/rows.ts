@@ -14,6 +14,7 @@ import type {
   CostSource,
   EvaluationState,
   TaskOutcome,
+  Isolation,
 } from "./types.js";
 
 export interface CheckCell {
@@ -57,6 +58,12 @@ export interface TrialRow {
   ttft_ms: null;
   cache: null;
   finish_reason: string | null;
+  /**
+   * How the candidate's command was executed — "none" means it ran as the
+   * harness process, with its user and its filesystem. Null for candidates
+   * that are an API call rather than a command.
+   */
+  isolation: Isolation | null;
   error: string | null;
   /** Legacy fields kept so the parity test can rebuild the old aggregate. */
   legacy_status: "ok" | "error";

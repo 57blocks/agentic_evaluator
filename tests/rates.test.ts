@@ -18,7 +18,7 @@ function row(
     checks: check ? { "tsc-noemit": { state: check, version: "v" } } : {},
     judge: { pairwise: null, absolute_overall: null, absolute_dimensions: null },
     cost: { generation: 0.01, source: "provider-reported" }, tokens: { prompt: 1, completion: 1, cached: null },
-    ms, ttft_ms: null, cache: null, finish_reason: "stop", error: null,
+    ms, ttft_ms: null, cache: null, finish_reason: "stop", isolation: null, error: null,
     legacy_status: completion === "success" ? "ok" : "error", legacy_check_passed: check === "pass" ? true : check === "fail" ? false : null,
     reused_from: null,
   };

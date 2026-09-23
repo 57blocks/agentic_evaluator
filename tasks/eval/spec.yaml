@@ -34,8 +34,21 @@ workflow:
       maximum_completion_time_seconds: 300
 
 candidates:
-  # {{input}} is replaced with the task text, {{workdir}} with the temp dir.
+  # {{input}} is replaced with the task text, {{workdir}} with the work dir —
+  # the temp dir on the host, or /work when the candidate declares an image.
   # Adjust the flags to whatever your installed Claude Code accepts.
+  #
+  # These two run on this machine, as whoever started the harness: they can
+  # read this repo, its .env.local and the runs/ directory they are about to
+  # be graded against. Every trial records `isolation: "none"` to say so.
+  # To sandbox them, declare an image that has the CLI in it and name the
+  # credentials it may see:
+  #
+  #   cli:
+  #     image: your-registry/claude-code:latest
+  #     network: bridge          # the CLI calls an API, so it needs one
+  #     env: { ANTHROPIC_API_KEY: "" }   # "" = take it from the host
+  #     argv: [claude, -p, ...]
   - id: cc-sonnet
     adapter: agent-cli
     cli:

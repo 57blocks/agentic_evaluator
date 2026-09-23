@@ -3,7 +3,7 @@
  * surface; model APIs, codegen prompts, and CLI agents are interchangeable.
  */
 
-import type { AgentCliConfig, CandidateAdapterId, CandidateDef, CostSource } from "../canon/types.js";
+import type { AgentCliConfig, CandidateAdapterId, CandidateDef, CostSource, Isolation } from "../canon/types.js";
 import type { LlmTrace } from "../llm.js";
 import type { ProducerKind } from "../types.js";
 
@@ -43,6 +43,12 @@ export interface ExecutionContext {
 }
 
 export interface CandidateResult {
+  /**
+   * How the command was executed. Recorded rather than inferred: whether an
+   * agent ran sandboxed or on the harness's own machine is part of what a
+   * reader needs to weigh the result.
+   */
+  isolation?: Isolation;
   text: string;
   artifacts: ArtifactFile[];
   promptTokens: number;
