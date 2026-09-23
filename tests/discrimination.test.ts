@@ -42,6 +42,7 @@ function trial(candidate: string, overall: number | null, dims: Record<string, n
     ttft_ms: null,
     cache: null,
     finish_reason: "stop",
+    isolation: null,
     error: null,
     legacy_status: "ok",
     legacy_check_passed: null,
