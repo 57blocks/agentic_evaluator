@@ -4,6 +4,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { containerEnv, dockerArgs, dockerAvailable, CONTAINER_WORKDIR } from "../src/adapters/docker.js";
+import { INSTALL_ROOT } from "../src/paths.js";
+import { runSuite } from "../src/core/execute.js";
 import { agentCliAdapter } from "../src/adapters/agent-cli.js";
 import type { AgentCliConfig } from "../src/canon/types.js";
 
@@ -77,4 +79,33 @@ test("a containerised candidate cannot read the host filesystem", { timeout: 180
 
   assert.equal(host.isolation, "none");
   assert.doesNotMatch(host.text, /No such file or directory/);
+});
+
+test("the written trial row says how the candidate ran, not just the adapter's return", async () => {
+  // Arrange - an agent-cli task with no image: it runs on this machine, and
+  // that is exactly what the evidence has to say out loud.
+  const ws = await fs.mkdtemp(path.join(os.tmpdir(), "ae-row-"));
+  const dest = path.join(ws, "tasks", "smoke-local");
+  await fs.cp(path.join(INSTALL_ROOT, "tasks", "smoke-local"), dest, {
+    recursive: true,
+    filter: (src) => !src.includes(`${path.sep}runs`),
+  });
+
+  // Act
+  await runSuite(path.join(dest, "spec.yaml"), false, { yes: true });
+
+  // Assert - asserting on the adapter's CandidateResult is one layer above
+  // where this is written, and the record literal in runAll enumerates its
+  // fields: a field not named there never reaches scores.jsonl.
+  const runsRoot = path.join(dest, "runs");
+  const runId = (await fs.readdir(runsRoot))[0];
+  const rows = (await fs.readFile(path.join(runsRoot, runId, "scores.jsonl"), "utf-8"))
+    .split("\n")
+    .filter((l) => l.trim() !== "")
+    .map((l) => JSON.parse(l) as { isolation: string | null });
+
+  assert.ok(rows.length > 0);
+  assert.deepEqual([...new Set(rows.map((r) => r.isolation))], ["none"]);
+
+  await fs.rm(ws, { recursive: true, force: true });
 });

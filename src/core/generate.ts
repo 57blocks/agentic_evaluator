@@ -285,6 +285,12 @@ function recordFromRow(row: TrialRow, text: string): RunRecord {
     completionState: row.completion_state,
     truncated: row.truncated,
     finishReason: row.finish_reason ?? undefined,
+    // How the artifact was produced travels with it. The image is part of the
+    // trial hash, so a reuse hit ran under the same isolation by construction
+    // — dropping it here would report "not observed" for something recorded
+    // one directory over, and "ran on the host" is precisely what a reader of
+    // the evidence is entitled to see.
+    isolation: row.isolation ?? undefined,
   };
 }
 
@@ -473,6 +479,11 @@ export async function runAll(params: {
         completionState: verdict.state,
         truncated: verdict.truncated,
         finishReason: g.finishReason,
+        // Whether the candidate ran in a container or on this machine. The
+        // adapter observes it; this literal names every field it keeps, so
+        // leaving it out wrote `isolation: null` on every trial — "not
+        // observed" for the one thing the sandbox exists to make visible.
+        isolation: g.isolation,
       };
     } catch (err) {
       const rec = errorRecord(task, err);
