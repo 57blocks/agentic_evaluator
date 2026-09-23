@@ -60,6 +60,37 @@ test("a reused generation reaches the same recommendation as the run it came fro
   await fs.rm(ws, { recursive: true, force: true });
 });
 
+test("a reused trial still records how the artifact was produced, not null", async () => {
+  // Arrange - one run to reuse from.
+  const { ws, spec } = await workspaceWithSmoke();
+  await runSuite(spec, false, { yes: true });
+
+  // Act
+  process.env.EVAL_REUSE = "1";
+  try {
+    await runSuite(spec, false, { yes: true });
+  } finally {
+    delete process.env.EVAL_REUSE;
+  }
+
+  // Assert - `isolation` says whether the candidate ran in a container or on
+  // this machine, and the spec's image is part of the trial hash, so a reuse
+  // hit is the same isolation by construction. Writing null would report
+  // "not observed" for something recorded one directory over — and "ran on
+  // the host" is exactly what a reader of the evidence is entitled to see.
+  const runsRoot = path.join(ws, "tasks", "smoke-local", "runs");
+  const [, second] = (await fs.readdir(runsRoot)).sort();
+  const rows = (await fs.readFile(path.join(runsRoot, second, "scores.jsonl"), "utf-8"))
+    .split("\n")
+    .filter((l) => l.trim() !== "")
+    .map((l) => JSON.parse(l) as { reused_from: string | null; isolation: string | null });
+
+  assert.ok(rows.every((r) => r.reused_from), "expected every row to be a reuse");
+  assert.deepEqual([...new Set(rows.map((r) => r.isolation))], ["none"]);
+
+  await fs.rm(ws, { recursive: true, force: true });
+});
+
 test("reuse matches on the step recorded in the rows, not on the run directory's name", async () => {
   // Arrange - smoke-local's run_name is "smoke-local" and its step is
   // "codegen". The old filter looked for directories starting with the step
