@@ -10,7 +10,7 @@
 
 import { runSuite } from "../../core/execute.js";
 import { planWorkflow } from "../../core/plan.js";
-import { loadSuites } from "../../spec/load-spec.js";
+import { loadWorkflow } from "../../spec/load-spec.js";
 import { findWorkspace, resolveSpecPath, workspaceAt } from "../../core/workspace.js";
 import { consoleSink } from "../print.js";
 import { jsonSink } from "../json.js";
@@ -59,7 +59,7 @@ async function resolve(args: ParsedArgs): Promise<string> {
 export async function cmdPlan(args: ParsedArgs, io: Io): Promise<ExitCode> {
   rejectUnknown(args.flags, ["json", "workspace"]);
   const spec = await resolve(args);
-  const suites = await loadSuites(spec);
+  const suites = await loadWorkflow(spec);
   const plan = planWorkflow(suites, { reuse: process.env.EVAL_REUSE === "1" });
   if (args.flags.json) {
     io.out(`${JSON.stringify(plan, null, 2)}\n`);

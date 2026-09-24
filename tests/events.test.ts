@@ -13,7 +13,7 @@ import os from "node:os";
 import path from "node:path";
 import { INSTALL_ROOT } from "../src/paths.js";
 import { planWorkflow } from "../src/core/plan.js";
-import { loadSuites } from "../src/spec/load-spec.js";
+import { loadWorkflow } from "../src/spec/load-spec.js";
 import { formatEvent } from "../src/cli/print.js";
 import type { RunEvent } from "../src/core/events.js";
 import { runSuite } from "../src/run.js";
@@ -22,7 +22,7 @@ const SMOKE = path.join(INSTALL_ROOT, "tasks", "smoke-local", "spec.yaml");
 
 test("planning a spec counts the calls it would make, and makes none", async () => {
   // Arrange
-  const suites = await loadSuites(SMOKE);
+  const suites = await loadWorkflow(SMOKE);
 
   // Act
   const plan = planWorkflow(suites);

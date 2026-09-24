@@ -113,6 +113,7 @@ for (const dir of fixtures) {
       inputs: report.inputs,
       trials: manifest.execution.trials_per_case,
       dimensions: dims,
+      taskRoot: dir,
     } satisfies Suite;
 
     const rebuilt = legacyAggregate(suite, recordsFrom(trials), judgementsFrom(evaluations, dims), scoresFrom(evaluations));

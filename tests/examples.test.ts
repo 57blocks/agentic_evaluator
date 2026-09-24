@@ -16,7 +16,7 @@ import { EXIT } from "../src/cli/exit-codes.js";
 import { bufferIo } from "../src/cli/io.js";
 import { main } from "../src/cli/index.js";
 import { planWorkflow } from "../src/core/plan.js";
-import { loadSuites } from "../src/spec/load-spec.js";
+import { loadWorkflow } from "../src/spec/load-spec.js";
 
 const EXAMPLES = path.join(INSTALL_ROOT, "examples", "tasks");
 
@@ -41,7 +41,7 @@ async function runJson(task: string): Promise<Array<Record<string, unknown>>> {
 test("every free sample declares no judging, so it cannot bill", async () => {
   for (const task of ["custom-check", "chain-offline"]) {
     // Act
-    const plan = planWorkflow(await loadSuites(path.join(EXAMPLES, task, "spec.yaml")));
+    const plan = planWorkflow(await loadWorkflow(path.join(EXAMPLES, task, "spec.yaml")));
 
     // Assert
     for (const step of plan.steps) {
@@ -74,7 +74,7 @@ test("chain-offline: both arms run and the combination beats the broken control"
 
 test("compare-models: loads, and plans 2 generations and 2 judge calls under a $0.50 ceiling", async () => {
   // Act
-  const plan = planWorkflow(await loadSuites(path.join(EXAMPLES, "compare-models", "spec.yaml")));
+  const plan = planWorkflow(await loadWorkflow(path.join(EXAMPLES, "compare-models", "spec.yaml")));
 
   // Assert
   assert.equal(plan.steps.length, 1);
@@ -86,7 +86,7 @@ test("compare-models: loads, and plans 2 generations and 2 judge calls under a $
 
 test("compare-agents: three agents, two trials each, 6 judge calls, graded on behaviour", async () => {
   // Act
-  const suites = await loadSuites(path.join(EXAMPLES, "compare-agents", "spec.yaml"));
+  const suites = await loadWorkflow(path.join(EXAMPLES, "compare-agents", "spec.yaml"));
   const plan = planWorkflow(suites);
 
   // Assert - 3 agents x 2 trials; 3 agents -> 3 pairs, each judged in both orders.
@@ -99,7 +99,7 @@ test("compare-agents: three agents, two trials each, 6 judge calls, graded on be
 
 test("compare-agent-models: one agent, three models, only --model differs", async () => {
   // Act
-  const suites = await loadSuites(path.join(EXAMPLES, "compare-agent-models", "spec.yaml"));
+  const suites = await loadWorkflow(path.join(EXAMPLES, "compare-agent-models", "spec.yaml"));
   const plan = planWorkflow(suites);
 
   // Assert
@@ -113,7 +113,7 @@ test("compare-agent-models: one agent, three models, only --model differs", asyn
 
 test("compare-setups: three agent + model setups, graded like compare-agents", async () => {
   // Act
-  const suites = await loadSuites(path.join(EXAMPLES, "compare-setups", "spec.yaml"));
+  const suites = await loadWorkflow(path.join(EXAMPLES, "compare-setups", "spec.yaml"));
   const plan = planWorkflow(suites);
 
   // Assert

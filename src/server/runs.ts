@@ -21,7 +21,7 @@
 import { randomUUID } from "node:crypto";
 import { runSuite } from "../core/execute.js";
 import { planWorkflow, type WorkflowPlan } from "../core/plan.js";
-import { loadSuites } from "../spec/load-spec.js";
+import { loadWorkflow } from "../spec/load-spec.js";
 import { resolveSpecPath, type Workspace } from "../core/workspace.js";
 import type { RunEvent } from "../core/events.js";
 
@@ -119,7 +119,7 @@ export class RunRegistry {
   /** The plan a caller must acknowledge, computed fresh from what is on disk. */
   async planFor(task: string): Promise<{ plan: WorkflowPlan; ack: PlanAck; spec: string }> {
     const spec = await resolveSpecPath(this.ws, task);
-    const plan = planWorkflow(await loadSuites(spec));
+    const plan = planWorkflow(await loadWorkflow(spec));
     return { plan, ack: ackOf(plan), spec };
   }
 

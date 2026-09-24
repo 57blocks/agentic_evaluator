@@ -3,8 +3,7 @@
  *
  * The YAML is the user-facing, versioned source of truth (protocol §4). It is
  * validated against `SPEC_SCHEMA`, then compiled into the internal `Suite` so
- * `run.ts` keeps its control flow. Legacy `suites/*.json` still load through
- * `loadLegacySuite`, which synthesizes candidate definitions with id = model.
+ * `run.ts` keeps its control flow.
  *
  * Specs may declare several independent steps; each compiles to its own Suite.
  * Independent eval does not pipe output forward. Steps with `input_from` form
@@ -20,7 +19,6 @@ import { orderControlChain } from "../canon/e2e.js";
 import { sha256 } from "../canon/hash.js";
 import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
 import type { CheckConfig, JudgeMethod } from "../types.js";
-import { TSC_CHECK_ID } from "../check.js";
 import { workspaceForSpec, type Workspace } from "../core/workspace.js";
 import type { Suite } from "../types.js";
 import { SPEC_SCHEMA } from "./schema.js";
@@ -371,6 +369,11 @@ function specPathFor(ws: Workspace, abs: string): string {
 }
 
 export async function loadWorkflow(specPath: string): Promise<Suite[]> {
+  if (/\.json$/i.test(specPath)) {
+    throw new SpecError(
+      `${specPath}: legacy suites/*.json is no longer supported; write tasks/<name>/spec.yaml instead (agenteval init <name> creates one)`,
+    );
+  }
   const abs = path.resolve(specPath);
   const ws = await workspaceForSpec(abs);
   const text = await fs.readFile(abs, "utf-8");
@@ -380,56 +383,4 @@ export async function loadWorkflow(specPath: string): Promise<Suite[]> {
 
 export async function loadSpec(specPath: string): Promise<Suite> {
   return (await loadWorkflow(specPath))[0];
-}
-
-/** Legacy suites/*.json: candidate id = model id, provider implied (openrouter). */
-export async function loadLegacySuite(suitePath: string): Promise<Suite> {
-  const abs = path.resolve(suitePath);
-  const ws = await workspaceForSpec(abs);
-  const text = await fs.readFile(abs, "utf-8");
-  const parsed = JSON.parse(text) as Suite & { check?: { scaffoldDir?: string } };
-  // Legacy JSON carries a bare { scaffoldDir }; give it the id and kind the
-  // canonical layer now expects without touching the files on disk.
-  const suite: Suite = {
-    ...parsed,
-    check: parsed.check ? { id: TSC_CHECK_ID, kind: "tsc", scaffoldDir: parsed.check.scaffoldDir ?? "scaffold" } : undefined,
-  };
-  const candidateDefs: Record<string, CandidateDef> = {};
-  for (const model of suite.candidates) {
-    candidateDefs[model] = {
-      id: model,
-      model,
-      provider_route: "openrouter",
-      adapter: suite.check ? "codegen" : "model-api",
-    };
-  }
-  return {
-    ...suite,
-    candidateDefs,
-    requiredChecks: suite.check ? [TSC_CHECK_ID] : [],
-    successCriteria: suite.check ? { mandatory_checks: "all" } : undefined,
-    benchmarkMode: "capability-neutral",
-    cacheMode: "cold",
-    specSha: sha256(text),
-    specPath: specPathFor(ws, abs),
-    // A legacy suite owns no directory: its `rubrics/` and `scaffold/` were
-    // always workspace-level, and its runs go to the workspace's own `runs/`.
-    // Resolving them here is what lets `taskRoot` mean one thing everywhere
-    // else — "the task directory that owns this" — instead of two.
-    rubricFile: path.resolve(ws.root, suite.rubricFile),
-    check: suite.check
-      ? { id: TSC_CHECK_ID, kind: "tsc", scaffoldDir: path.resolve(ws.root, parsed.check?.scaffoldDir ?? "scaffold") }
-      : undefined,
-    taskRoot: undefined,
-  };
-}
-
-/** Pick the loader by extension. YAML may contain several independent steps. */
-export async function loadSuites(p: string): Promise<Suite[]> {
-  return /\.ya?ml$/i.test(p) ? loadWorkflow(p) : [await loadLegacySuite(p)];
-}
-
-/** First (or only) step. Prefer `loadSuites` when the spec may be multi-step. */
-export async function loadSuiteOrSpec(p: string): Promise<Suite> {
-  return (await loadSuites(p))[0];
 }

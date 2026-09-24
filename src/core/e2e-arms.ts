@@ -35,7 +35,6 @@ import { classifyCompletion } from "../canon/states.js";
 import { defOf, errorRecord, generateOne, readInput, safeName } from "./generate.js";
 import { loadPromptTemplate } from "./execute.js";
 import { e2eChain } from "./plan.js";
-import { taskRootOf } from "../paths.js";
 import type { RunEventSink } from "./events.js";
 import { resolveEligibility } from "../canon/select.js";
 import type { EligibilityThresholds } from "../canon/types.js";
@@ -173,7 +172,7 @@ export async function maybeRunE2eValidation(params: {
   if (!controlCandidate) return null;
 
   const rootInputs = await Promise.all(
-    chain[0].inputs.map(async (slug) => ({ slug, text: await readInput(slug, taskRootOf(chain[0])) })),
+    chain[0].inputs.map(async (slug) => ({ slug, text: await readInput(slug, chain[0].taskRoot) })),
   );
   const trials = chain[0].trials ?? 2;
 
@@ -275,7 +274,7 @@ export async function maybeRunE2eValidation(params: {
 }
 
 /**
- * Run a spec (one or more independent steps) or a legacy JSON suite.
+ * Run a spec (one or more independent steps).
  * Single-step output layout is unchanged. Multi-step writes each step under
  * runs/<runId>/<stepId>/ plus workflow.json at the root (no handoff).
  * When steps declare input_from, the end-to-end validation pass runs after the

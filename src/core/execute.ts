@@ -12,8 +12,8 @@ import path from "node:path";
 import { judgePromptTemplateSha, PAIRWISE_EVALUATOR_ID } from "../judge.js";
 import { scorePromptTemplateSha, ABSOLUTE_EVALUATOR_ID } from "../score.js";
 import { checkVersion as tscCheckVersion, commandCheckVersion, TSC_CHECK_ID } from "../check.js";
-import { loadSuites } from "../spec/load-spec.js";
-import { displayPath, resolveTaskAsset, taskRootOf } from "../paths.js";
+import { loadWorkflow } from "../spec/load-spec.js";
+import { displayPath, resolveTaskAsset } from "../paths.js";
 import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
 import { silentSink, type RunEventSink } from "./events.js";
 import { methodsOf, planE2e, planStep, resolveConcurrency } from "./plan.js";
@@ -51,7 +51,7 @@ export async function loadPromptTemplate(
   if (!suite.promptFile) {
     throw new Error(`suite "${suite.suiteId}" step "${suite.step}" uses producer "prompt" but has no promptFile`);
   }
-  const promptTpl = await fs.readFile(await resolveTaskAsset(taskRootOf(suite), suite.promptFile), "utf-8");
+  const promptTpl = await fs.readFile(await resolveTaskAsset(suite.taskRoot, suite.promptFile), "utf-8");
   return { promptTpl, promptTemplateSha: sha256(promptTpl) };
 }
 
@@ -81,13 +81,13 @@ async function executeSuite(params: {
 }): Promise<StepResult> {
   const { suite, outDir, runId, html, reuse, generatedAt } = params;
   const producer: ProducerKind = suite.producer ?? "prompt";
-  const rubric = await fs.readFile(await resolveTaskAsset(taskRootOf(suite), suite.rubricFile), "utf-8");
+  const rubric = await fs.readFile(await resolveTaskAsset(suite.taskRoot, suite.rubricFile), "utf-8");
   const { promptTpl, promptTemplateSha } = await loadPromptTemplate(suite, producer);
 
   const inputTextBySlug = new Map<string, string>();
   const inputShas: Record<string, string> = {};
   for (const slug of suite.inputs) {
-    const text = await readInput(slug, taskRootOf(suite));
+    const text = await readInput(slug, suite.taskRoot);
     inputTextBySlug.set(slug, text);
     inputShas[slug] = sha256(text);
   }
@@ -103,8 +103,8 @@ async function executeSuite(params: {
   const checkVersion = !suite.check
     ? null
     : suite.check.kind === "tsc"
-      ? await tscCheckVersion(await resolveTaskAsset(taskRootOf(suite), suite.check.scaffoldDir))
-      : await commandCheckVersion(suite.check.argv, suite.check.versionFiles, taskRootOf(suite));
+      ? await tscCheckVersion(await resolveTaskAsset(suite.taskRoot, suite.check.scaffoldDir))
+      : await commandCheckVersion(suite.check.argv, suite.check.versionFiles, suite.taskRoot);
   const manifest = await buildManifest(suite, {
     runId,
     startedAt: generatedAt,
@@ -258,7 +258,7 @@ export interface RunOptions {
 
 export async function runSuite(suitePath: string, html: boolean, opts: RunOptions = {}): Promise<StepResult | null> {
   const emit = opts.onEvent ?? silentSink;
-  const suites = await loadSuites(suitePath);
+  const suites = await loadWorkflow(suitePath);
   const isSpec = /\.ya?ml$/i.test(suitePath);
   const reuse = process.env.EVAL_REUSE === "1";
 
@@ -277,7 +277,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
   // The workspace the spec belongs to, not the one the user is standing in:
   // a run is written beside its task, and reuse is scanned around it.
   const ws = await workspaceForSpec(suitePath);
-  const root = path.join(runsRootFor(taskRootOf(suites[0]), ws), runId);
+  const root = path.join(runsRootFor(suites[0].taskRoot), runId);
   if (nested) await fs.mkdir(root, { recursive: true });
 
   const budget = new BudgetGuard(suites[0].budgetUsd);

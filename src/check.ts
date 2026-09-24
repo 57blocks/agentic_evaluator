@@ -205,7 +205,7 @@ const COMMAND_EXIT_FAIL = 1;
  */
 function resolveArgv(
   argv: readonly string[],
-  taskRoot?: string,
+  taskRoot: string,
 ): { argv: string[]; missing: string[] } {
   const missing: string[] = [];
   const resolved = argv.map((arg) => {
@@ -222,7 +222,7 @@ function resolveArgv(
 export async function commandCheckVersion(
   argv: readonly string[],
   versionFiles: readonly string[],
-  taskRoot?: string,
+  taskRoot: string,
 ): Promise<string> {
   const parts = await Promise.all(
     [...versionFiles].sort().map(async (rel) => {
@@ -261,7 +261,7 @@ export async function runCommandCheck(params: {
   meta: { step: string; candidate: string; input: string; trial: number };
   workDir: string;
   /** Task dir the check's argv and version files resolve against. */
-  taskRoot?: string;
+  taskRoot: string;
 }): Promise<CheckResult> {
   const taskRoot = params.taskRoot;
   const version = await commandCheckVersion(params.argv, params.versionFiles, taskRoot);

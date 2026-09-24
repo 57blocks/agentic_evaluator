@@ -7,7 +7,6 @@
  * watching. `src/cli/print.ts` turns the run's events into lines.
  *
  *   pnpm run run -- --suite tasks/codegen-w38/spec.yaml --html --yes
- *   pnpm run run -- --suite suites/codegen.json          --html   (legacy JSON)
  *
  * `runSuite` and the workflow helpers are re-exported here because the tests
  * import them from this path.

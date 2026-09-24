@@ -13,7 +13,7 @@ import { LlmError, type LlmTrace } from "../llm.js";
 import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "../adapters/resolve.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import { deliverableText, parsedUnitsFor } from "../adapters/deliverable.js";
-import { displayPath, taskInputPath, taskRootOf, resolveTaskAsset } from "../paths.js";
+import { displayPath, taskInputPath, resolveTaskAsset } from "../paths.js";
 import { listRunDirs, type Workspace } from "./workspace.js";
 import type { RunEventSink } from "./events.js";
 import { CODEGEN_PRODUCER_VERSION } from "../producers/code-gen.js";
@@ -27,7 +27,7 @@ import type { TrialRow } from "../canon/rows.js";
 import type { ProducerKind, RunRecord, Suite } from "../types.js";
 
 /** A task's input text. Every task owns its inputs; there is no shared pool. */
-export async function readInput(inputSlug: string, taskRoot: string | undefined): Promise<string> {
+export async function readInput(inputSlug: string, taskRoot: string): Promise<string> {
   return fs.readFile(taskInputPath(taskRoot, inputSlug), "utf-8");
 }
 
@@ -59,7 +59,7 @@ export async function mapWithConcurrency<T, R>(
   return results;
 }
 
-/** Candidate definition for an id; legacy suites carry none, so id = model. */
+/** Candidate definition for an id; a Suite built without definitions defaults to id = model. */
 export function defOf(suite: Suite, candidateId: string): CandidateDef {
   return (
     suite.candidateDefs?.[candidateId] ?? {
@@ -134,7 +134,7 @@ export async function generateOne(params: {
       maxTokens: def.generation_settings?.max_tokens,
       cli: def.cli,
     },
-    { workDir: params.checkWorkDir, taskRoot: taskRootOf(suite), emit: trace, traceContext },
+    { workDir: params.checkWorkDir, taskRoot: suite.taskRoot, emit: trace, traceContext },
   );
   const out: GenOutput = {
     ...result,
@@ -147,13 +147,13 @@ export async function generateOne(params: {
     suite.check.kind === "tsc"
       ? await runCheck({
           files: result.artifacts,
-          scaffoldDir: await resolveTaskAsset(taskRootOf(suite), suite.check.scaffoldDir),
+          scaffoldDir: await resolveTaskAsset(suite.taskRoot, suite.check.scaffoldDir),
           workDir: params.checkWorkDir,
         })
       : await runCommandCheck({
           argv: suite.check.argv,
           versionFiles: suite.check.versionFiles,
-          taskRoot: taskRootOf(suite),
+          taskRoot: suite.taskRoot,
           timeoutMs: suite.check.timeoutMs,
           files: result.artifacts,
           output: out.text,
