@@ -33,6 +33,8 @@ export interface Run {
   fetchPlan: () => Promise<void>;
   start: () => Promise<void>;
   cancel: () => Promise<void>;
+  /** Put the plan away without running — back to just the button. Ignored while running. */
+  dismiss: () => void;
 }
 
 function message(e: unknown): string {
@@ -118,5 +120,14 @@ export function useRun(task: string, onFinished: () => void): Run {
     if (handle) await del(`/api/runs/${handle.id}`);
   }, [handle]);
 
-  return { phase, ack: planned?.ack ?? null, handle, events, error, fetchPlan, start, cancel };
+  const dismiss = useCallback(() => {
+    if (phase === "running") return;
+    setPhase("idle");
+    setPlanned(null);
+    setHandle(null);
+    setEvents([]);
+    setError(null);
+  }, [phase]);
+
+  return { phase, ack: planned?.ack ?? null, handle, events, error, fetchPlan, start, cancel, dismiss };
 }
