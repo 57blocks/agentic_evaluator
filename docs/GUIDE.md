@@ -44,13 +44,14 @@ git-ignored.
 
 ## Five minutes with the samples
 
-`examples/` is a workspace with six tasks. The first two are offline and
+`examples/` is a workspace with seven tasks. The first three are offline and
 free; the rest call real models or agents.
 
 | task | what it shows | cost |
 |---|---|---|
 | `custom-check` | grading a deliverable with your own check script; wrapping any agent as a command | free |
 | `chain-offline` | a two-step chained workflow and its end-to-end validation | free |
+| `docker-sandbox` | the same agent run in a Docker container and on the host; each trial records which | free (needs Docker) |
 | `compare-models` | two real models on one task, a deterministic gate plus a pairwise judge | billed, capped at $0.50 |
 | `compare-agents` | Claude Code, OpenCode and pi build a reactive-signals library with the same model, graded by ten behavioural tests | billed by the agents (not seen by the harness); judge capped at $1 |
 | `compare-agent-models` | one agent (OpenCode) with three models on the same task — the model's effect, with the agent held fixed | billed by OpenRouter (not seen by the harness); judge capped at $1 |
@@ -345,9 +346,13 @@ risk. Add an image to run it in a container instead:
       argv: [claude, -p, --model, claude-sonnet-5, --permission-mode, acceptEdits, "{{input}}"]
 ```
 
-Only the work dir is mounted (at `/work`), the network is off unless you ask
-for it, and only the variables you name are passed in. Every trial records
-`isolation: docker` or `none`, so a report shows which happened.
+The work dir is mounted at `/work` and is the only thing the container can
+write. A script the task ships (`argv: [node, agents/run.mjs]`) works too: the
+task directories the argv names are mounted read-only under `/task`, so
+`agents/` is visible and `checks/` and `rubrics/` are not. The network is off
+unless you ask for it, and only the variables you name are passed in. Every
+trial records `isolation: docker` or `none`, so a report shows which happened.
+`examples/tasks/docker-sandbox` runs one agent both ways, free.
 
 **What the budget cannot see.** An `agent-cli` trial's cost is recorded as
 unobserved (`cost_source: none`): the agent bills its own provider, the ledger

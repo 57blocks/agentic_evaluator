@@ -1,0 +1,79 @@
+# Sample: run a candidate inside Docker instead of on this machine. Free to run;
+# needs Docker running (the first run pulls node:22-bookworm-slim).
+#
+#   agenteval run examples/tasks/docker-sandbox --yes --html
+#
+# The same agent script is two candidates. `contained` has an `image:`, so its
+# command runs under `docker run`; `on-host` has none, so it runs as you.
+#
+# What the container gets:
+#   - the trial's work dir, mounted at /work — the only thing it can write;
+#   - the task directories its argv names, read-only under /task (here
+#     agents/, so `agents/sum-agent.mjs` runs as /task/agents/sum-agent.mjs).
+#     checks/ and rubrics/ are not mounted: the candidate cannot read how it
+#     is graded;
+#   - no network unless `network: bridge`, and only the env vars listed in
+#     `env:` ("" passes the host's value through, e.g. an API key).
+#
+# What to look at: each trial row records `isolation: docker` or `none`, and
+# the check's evidence says where the candidate ran and what it could see.
+#
+# Not contained: the required checks (here checks/sum.mjs) always run on this
+# machine. Declare only checks you would run yourself.
+
+protocol_version: "0.3"
+run_name: docker-sandbox
+budget_usd: 1
+
+workflow:
+  control_candidate: contained
+  steps:
+    - id: sum
+      version: "1"
+      test_set:
+        id: numbers-v1
+        inputs: [numbers]
+      candidate_ids: [contained, on-host]
+      required_checks: [sum]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 120
+
+candidates:
+  - id: contained
+    adapter: agent-cli
+    cli:
+      image: node:22-bookworm-slim
+      network: none
+      argv: [node, agents/sum-agent.mjs]
+  - id: on-host
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/sum-agent.mjs]
+
+evaluators:
+  required_checks:
+    sum:
+      kind: command
+      argv: [node, checks/sum.mjs]
+      version_files: [checks/sum.mjs]
+      timeout_seconds: 30
+  judge:
+    # Required by the schema, never called: no method is declared.
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/none.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 2
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2

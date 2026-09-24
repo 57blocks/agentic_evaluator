@@ -13,7 +13,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { sha256 } from "../canon/hash.js";
 import { looksLikePath } from "../script-path.js";
-import { CONTAINER_WORKDIR, runInDocker } from "./docker.js";
+import { CONTAINER_WORKDIR, runInDocker, TASK_MOUNT, type Mount } from "./docker.js";
 import {
   AdapterError,
   type ArtifactFile,
@@ -53,6 +53,33 @@ async function resolveArg(arg: string, taskRoot: string): Promise<string> {
       ms: 0,
     });
   }
+}
+
+/**
+ * The same argv, for a container. A declared script (`agents/run.mjs`) is
+ * checked against the task exactly as on the host, then rewritten to where
+ * its top-level directory is mounted read-only (`/task/agents/run.mjs`).
+ * Only directories the command names are mounted, so a candidate never sees
+ * the task's `checks/` or `rubrics/` unless its own argv points there.
+ */
+async function containerArgv(raw: readonly string[], taskRoot: string): Promise<{ argv: string[]; mounts: Mount[] }> {
+  const mounts = new Map<string, Mount>();
+  const argv: string[] = [];
+  for (const arg of raw) {
+    if (path.isAbsolute(arg) || !looksLikePath(arg)) {
+      argv.push(arg);
+      continue;
+    }
+    const abs = await resolveArg(arg, taskRoot);
+    const rel = path.relative(taskRoot, abs);
+    if (rel.startsWith("..")) {
+      throw new AdapterError(`declared script is outside the task and cannot be mounted: ${arg}`, { kind: "spawn", ms: 0 });
+    }
+    const [top] = rel.split(path.sep);
+    mounts.set(top, { host: path.join(taskRoot, top), container: `${TASK_MOUNT}/${top}` });
+    argv.push(`${TASK_MOUNT}/${rel.split(path.sep).join("/")}`);
+  }
+  return { argv, mounts: [...mounts.values()] };
 }
 
 async function collectFiles(root: string): Promise<ArtifactFile[]> {
@@ -122,20 +149,18 @@ export const agentCliAdapter: CandidateAdapter = {
       throw new Error(`agent-cli candidate "${request.candidateId}" has no cli.argv`);
     }
     const inDocker = cli.image !== undefined;
-    // Inside the container the work dir is mounted at a fixed path, and host
-    // paths mean nothing — so argv keeps whatever the spec wrote rather than
-    // being resolved against a filesystem the command will never see.
+    // Inside the container the work dir is mounted at a fixed path and host
+    // paths mean nothing, so a declared script is rewritten to its read-only
+    // mount instead of being resolved to a host path.
     const vars = {
       input: request.inputText,
       workdir: inDocker ? CONTAINER_WORKDIR : context.workDir,
     };
     const raw = cli.argv.map((a) => subst(a, vars));
-    const [cmd, ...args] = inDocker
-      ? raw
-      : [
-          await resolveArg(raw[0], context.taskRoot),
-          ...(await Promise.all(raw.slice(1).map((a) => resolveArg(a, context.taskRoot)))),
-        ];
+    const contained = inDocker ? await containerArgv(raw, context.taskRoot) : null;
+    const [cmd, ...args] = contained
+      ? contained.argv
+      : await Promise.all(raw.map((a) => resolveArg(a, context.taskRoot)));
 
     await fs.mkdir(context.workDir, { recursive: true });
     await fs.writeFile(path.join(context.workDir, INPUT_FILE), request.inputText, "utf-8");
@@ -155,6 +180,7 @@ export const agentCliAdapter: CandidateAdapter = {
         ? await runInDocker(cli, [cmd, ...args], {
             workDir: context.workDir,
             timeoutMs: request.timeoutMs,
+            mounts: contained?.mounts,
           })
         : await runCommand(cmd, args, {
             cwd: context.workDir,

@@ -17,6 +17,7 @@ import { bufferIo } from "../src/cli/io.js";
 import { main } from "../src/cli/index.js";
 import { planWorkflow } from "../src/core/plan.js";
 import { loadWorkflow } from "../src/spec/load-spec.js";
+import { dockerAvailable } from "../src/adapters/docker.js";
 
 const EXAMPLES = path.join(INSTALL_ROOT, "examples", "tasks");
 
@@ -39,7 +40,7 @@ async function runJson(task: string): Promise<Array<Record<string, unknown>>> {
 }
 
 test("every free sample declares no judging, so it cannot bill", async () => {
-  for (const task of ["custom-check", "chain-offline"]) {
+  for (const task of ["custom-check", "chain-offline", "docker-sandbox"]) {
     // Act
     const plan = planWorkflow(await loadWorkflow(path.join(EXAMPLES, task, "spec.yaml")));
 
@@ -70,6 +71,31 @@ test("chain-offline: both arms run and the combination beats the broken control"
   assert.deepEqual(arms, ["e2e-control", "e2e-proposed"]);
   const verdict = events.find((e) => e.type === "e2e.validated") as { verdict: string };
   assert.equal(verdict.verdict, "adopt-combination");
+});
+
+test("docker-sandbox: the same agent runs in a container and on the host, and each row says which", { timeout: 300_000 }, async (t) => {
+  if (!(await dockerAvailable())) return t.skip("docker not available");
+
+  // Arrange
+  const ws = await workspaceWith("docker-sandbox");
+
+  // Act
+  const code = await main(["run", "docker-sandbox", "--yes", "--workspace", ws], bufferIo());
+
+  // Assert - both pass the check; the evidence records where each one ran.
+  assert.equal(code, EXIT.ok);
+  const runsRoot = path.join(ws, "tasks", "docker-sandbox", "runs");
+  const runDir = path.join(runsRoot, (await fs.readdir(runsRoot))[0]);
+  const rows = (await fs.readFile(path.join(runDir, "scores.jsonl"), "utf-8"))
+    .trim().split("\n").map((l) => JSON.parse(l) as { candidate: string; isolation: string; task_outcome: string });
+  const byCandidate = Object.fromEntries(rows.map((r) => [r.candidate, r]));
+  assert.equal(byCandidate.contained.isolation, "docker");
+  assert.equal(byCandidate["on-host"].isolation, "none");
+  assert.deepEqual(rows.map((r) => r.task_outcome), ["success", "success"]);
+  const evidence = await fs.readFile(path.join(runDir, "evaluations.jsonl"), "utf-8");
+  assert.match(evidence, /ran in a container, without access to checks\//);
+
+  await fs.rm(ws, { recursive: true, force: true });
 });
 
 test("compare-models: loads, and plans 2 generations and 2 judge calls under a $0.50 ceiling", async () => {
