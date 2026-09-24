@@ -1,5 +1,5 @@
 {
-  "name": "@57blocks/agenteval",
+  "name": "agenteval",
   "version": "0.1.0",
   "description": "Model and workflow evaluation harness conforming to the Agent Evaluation Protocol v0.4",
   "license": "MIT",
@@ -79,6 +79,7 @@
     "vite.config.ts",
     "tsconfig.json",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "!examples/**/runs"
   ]
 }
