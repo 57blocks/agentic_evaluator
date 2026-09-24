@@ -110,6 +110,30 @@ function renderSteps(record: WorkflowRecord): string {
   </section>`;
 }
 
+function stepRow(s: WorkflowStepRecord): string {
+  const gated = (s.gated ?? []).length > 0 ? s.gated.map((g) => `${g.candidate} (${g.reason})`).join("; ") : "none";
+  const link = `<a href="${encodeURIComponent(s.dir)}/report.html">${escapeHtml(s.dir)}/report.html</a>`;
+  const firmness = FIRMNESS_LABEL[s.firmness as keyof typeof FIRMNESS_LABEL] ?? s.firmness;
+  return `<tr class="${s.chosen ? "chosen" : ""}">
+    <td class="cand">${escapeHtml(s.id)}<span class="model">${escapeHtml(modeLabel(s.operating_mode))}</span></td>
+    <td>${s.chosen ? escapeHtml(s.chosen) : '<span class="pill miss">no recommendation</span>'}<span class="sub">${escapeHtml(firmness)}</span></td>
+    <td class="small">${escapeHtml(gated)}</td>
+    <td class="num">${s.trials}</td>
+    <td class="num">${s.ledger_total == null ? "—" : usd(s.ledger_total)}</td>
+    <td class="small">${link}</td>
+  </tr>`;
+}
+
+function renderStepTable(record: WorkflowRecord): string {
+  return `<section class="card">
+    <h2>Recommendation per step <span class="hint">who each gate removed, trials, cost and the step report</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Step</th><th>Recommended</th><th>Gated out</th><th class="num">Trials</th><th class="num">Cost</th><th>Report</th></tr></thead>
+      <tbody>${record.steps.map(stepRow).join("")}</tbody>
+    </table></div>
+  </section>`;
+}
+
 function renderLedger(record: WorkflowRecord): string {
   const l = record.ledger;
   const row = (label: string, v: number, cls = ""): string =>
@@ -160,9 +184,10 @@ export function renderWorkflowReport(record: WorkflowRecord, gaps: string): stri
     </dl>
   </header>
   ${renderVerdict(record)}
+  ${renderSteps(record)}
   ${renderChain(record)}
   ${renderArms(record)}
-  ${renderSteps(record)}
+  ${renderStepTable(record)}
   ${renderLedger(record)}
   ${renderGaps(gaps)}
   <footer><span>${escapeHtml(record.run_id)}/</span><span>workflow.json · e2e-validation.json</span><span>each step's evidence is in its own directory</span></footer>

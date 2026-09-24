@@ -5,13 +5,15 @@
  * workflow was tested.
  */
 
+import { Tag } from "@/components/tag";
 import type { WorkflowReport as Model } from "../../../../report-model.js";
 import type { WorkflowArm } from "../../../../canon/workflow.js";
-import { plural, STEPS_NOT_VALIDATED } from "../../../../report-format.js";
+import { NO_PICK, plural, STEPS_NOT_VALIDATED } from "../../../../report-format.js";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { firmnessTone } from "@/lib/tone";
 import { ReportHeader } from "./sections/Header";
 import { Gaps } from "./sections/Evidence";
 import { Code, Fold, Note, Section } from "./Section";
@@ -151,6 +153,34 @@ function Verdict({ report, runId, root }: { report: Model; runId: string; root: 
   );
 }
 
+function Advice({ rows }: { rows: NonNullable<Model["digest"]>["advice"] }) {
+  return (
+    <Section title="Recommendations" hint="Each step is chosen by the spec's eligibility gates and operating mode, not by judge preference.">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Step</TableHead><TableHead>Recommended</TableHead><TableHead>Confidence</TableHead><TableHead>Reason</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((a) => (
+            <TableRow key={a.step}>
+              <TableCell className="align-top font-medium">{a.step}</TableCell>
+              <TableCell className="align-top">
+                {a.chosen ? <span className="font-mono font-semibold text-brand">{a.chosen}</span> : <Tag tone="bad">{NO_PICK}</Tag>}
+              </TableCell>
+              <TableCell className="align-top whitespace-nowrap">
+                <Tag tone={firmnessTone(a.firmnessKey)}>{a.firmness}</Tag>
+              </TableCell>
+              <TableCell className="align-top whitespace-normal text-muted-foreground">{a.reason}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Section>
+  );
+}
+
 export function WorkflowReport({ report, runId, dir }: Props) {
   const { record } = report;
   const d = report.digest;
@@ -186,6 +216,7 @@ export function WorkflowReport({ report, runId, dir }: Props) {
       {d?.steps.map((s, i) => <StepSection key={s.id} step={s} index={i} runId={runId} root={dir} colorOf={colorOf} />)}
       <Chain report={report} />
       <Arms report={report} />
+      {d && d.advice.length > 0 && <Advice rows={d.advice} />}
 
       <section aria-label="Details" className="flex flex-col gap-2">
         <h2 className="text-sm font-medium text-muted-foreground">Details</h2>
