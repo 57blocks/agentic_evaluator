@@ -67,7 +67,7 @@ test("estimated cost anywhere in the chain labels the whole workflow estimated",
 
 test("record keeps the fields the demo catalog reads", () => {
   const record = buildWorkflowRecord({
-    protocolVersion: "0.4",
+    protocolVersion: "0.3",
     runId: "r-1",
     runName: "r",
     steps: [step()],
@@ -86,7 +86,7 @@ test("record keeps the fields the demo catalog reads", () => {
 
 test("independent steps record no handoff and no validation", () => {
   const record = buildWorkflowRecord({
-    protocolVersion: "0.4",
+    protocolVersion: "0.3",
     runId: "r-1",
     runName: "r",
     steps: [step(), step({ id: "code", dir: "code" })],
@@ -121,7 +121,7 @@ test("workflow gaps say plainly that independent steps were never compared", () 
 
 test("page shows the verdict, both arms, the deciding metric and what was not compared", () => {
   const record = buildWorkflowRecord({
-    protocolVersion: "0.4",
+    protocolVersion: "0.3",
     runId: "r-1",
     runName: "chain",
     steps: [step(), step({ id: "code", dir: "code", chosen: "cand-b" })],
@@ -141,7 +141,7 @@ test("page shows the verdict, both arms, the deciding metric and what was not co
 
 test("page renders independent steps without claiming a workflow was validated", () => {
   const record = buildWorkflowRecord({
-    protocolVersion: "0.4",
+    protocolVersion: "0.3",
     runId: "r-1",
     runName: "independent",
     steps: [step()],
@@ -159,7 +159,7 @@ test("page renders independent steps without claiming a workflow was validated",
 
 test("a step with no eligible candidate is marked, not blank", () => {
   const record = buildWorkflowRecord({
-    protocolVersion: "0.4",
+    protocolVersion: "0.3",
     runId: "r-1",
     runName: "r",
     steps: [step({ chosen: null, firmness: "needs-review", eligible: [] })],

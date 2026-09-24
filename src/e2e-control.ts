@@ -33,7 +33,7 @@ export interface E2eTotals {
 }
 
 export interface E2eArmReport {
-  protocol_version: "0.4";
+  protocol_version: "0.3";
   arm_id: string;
   arm_kind: "proposed" | "control";
   assignment: StepAssignment;
@@ -167,7 +167,7 @@ export async function runChainArm(params: {
   }
 
   return {
-    protocol_version: "0.4",
+    protocol_version: "0.3",
     arm_id: armId,
     arm_kind: armKind,
     assignment,

@@ -61,7 +61,7 @@ test("smoke-e2e-control compiles a draft → review chain", async () => {
 
 test("input_from requires control_candidate and a preceding step", () => {
   const text = `
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: broken-e2e
 workflow:
   steps:

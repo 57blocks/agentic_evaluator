@@ -146,7 +146,7 @@ test("same-vendor check ignores agent-cli candidates that have no model", async 
 
 test("duplicate step ids are rejected", () => {
   const text = `
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: two-step
 workflow:
   steps:
@@ -174,7 +174,7 @@ x-harness:
 
 test("multi-step spec compiles independently per step", () => {
   const text = `
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: two-step
 workflow:
   steps:
@@ -230,7 +230,7 @@ x-harness:
 
 test("prompt step without prompt_file is rejected", () => {
   const text = `
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: two-step
 workflow:
   steps:

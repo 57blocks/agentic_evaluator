@@ -86,7 +86,7 @@ test("GAPS.md headings are kept only where the page shows sections", () => {
 
 test("independent workflow steps get the no-verdict wording and a neutral tone", () => {
   const record = buildWorkflowRecord({
-    protocolVersion: "0.4", runId: "r", runName: "r",
+    protocolVersion: "0.3", runId: "r", runName: "r",
     steps: [workflowStepFixture(), workflowStepFixture({ id: "code", dir: "code" })],
     control: null, proposed: null, validation: null,
   });

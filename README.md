@@ -130,7 +130,7 @@ Exit codes: `0` done · `1` failed · `2` usage error · `3` finished but partia
 A single step comparing two models, graded by a check script and a judge:
 
 ```yaml
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: notes
 budget_usd: 1                      # hard ceiling for the whole run
 

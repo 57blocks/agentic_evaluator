@@ -14,7 +14,7 @@ export const SPEC_SCHEMA = {
   additionalProperties: false,
   required: ["protocol_version", "run_name", "workflow", "candidates", "evaluators", "execution"],
   properties: {
-    protocol_version: { type: "string", enum: ["0.4"] },
+    protocol_version: { type: "string", enum: ["0.3"] },
     run_name: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{1,63}$" },
     budget_usd: { type: "number", minimum: 0 },
     workflow: {

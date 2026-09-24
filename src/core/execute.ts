@@ -320,7 +320,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
     const e2e = await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit });
     const control = e2e?.control ?? null;
     const record = buildWorkflowRecord({
-      protocolVersion: suites[0].protocolVersion ?? "0.4",
+      protocolVersion: suites[0].protocolVersion ?? "0.3",
       runId,
       runName,
       steps,

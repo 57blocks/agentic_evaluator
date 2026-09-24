@@ -81,7 +81,7 @@ test("the demo opens a run written with the current workflow record", async () =
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "eval-demo-record-"));
   await fs.mkdir(path.join(tmp, "wf", "plan"), { recursive: true });
   const record = buildWorkflowRecord({
-    protocolVersion: "0.4",
+    protocolVersion: "0.3",
     runId: "wf",
     runName: "chain",
     steps: [workflowStepFixture()],

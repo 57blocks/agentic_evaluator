@@ -28,7 +28,7 @@ const SPEC = (name: string): string => `# ${name} — created by \`agenteval ini
 # method is declared, so nothing is billed. Replace the candidates with models
 # and add \`methods: [pairwise-swap]\` when you want a judge.
 
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: ${name}
 budget_usd: 1
 
