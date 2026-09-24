@@ -14,6 +14,7 @@ import type { DimensionDetail, EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { Winner } from "./types.js";
 import { escapeHtml } from "./html.js";
 import { heatTint } from "./report-charts.js";
+import { dimensionPreference } from "./report-model.js";
 
 /** Longer outputs are cut for display only; the file on disk stays whole. */
 const MAX_OUTPUT_CHARS = 30_000;
@@ -219,46 +220,15 @@ pre.raw{max-height:460px;overflow:auto;background:var(--surface-2);border:1px so
  * This is judge opinion, shown next to the recommendation, never inside it.
  */
 export function renderDimensionPreference(evaluations: readonly EvaluationRow[]): string {
-  const duels = evaluations.filter((e) => e.subject.kind === "pair" && e.state === "pass" && e.dimensions);
-  if (duels.length === 0) return "";
-
-  const dims = [...new Set(duels.flatMap((d) => Object.keys(d.dimensions ?? {})))];
-  const tally = new Map<string, Map<string, { points: number; duels: number }>>();
-  const bump = (candidate: string, dim: string, points: number): void => {
-    const row = tally.get(candidate) ?? new Map<string, { points: number; duels: number }>();
-    const cell = row.get(dim) ?? { points: 0, duels: 0 };
-    row.set(dim, { points: cell.points + points, duels: cell.duels + 1 });
-    tally.set(candidate, row);
-  };
-
-  for (const duel of duels) {
-    if (duel.subject.kind !== "pair") continue;
-    const { a, b } = duel.subject;
-    for (const [dim, winner] of Object.entries(duel.dimensions ?? {})) {
-      if (winner !== "a" && winner !== "b" && winner !== "tie") continue;
-      bump(a, dim, winner === "a" ? 1 : winner === "tie" ? 0.5 : 0);
-      bump(b, dim, winner === "b" ? 1 : winner === "tie" ? 0.5 : 0);
-    }
-  }
-
-  const candidates = [...tally.keys()];
-  const rate = (candidate: string, dim: string): number | null => {
-    const cell = tally.get(candidate)?.get(dim);
-    return cell && cell.duels > 0 ? (cell.points / cell.duels) * 100 : null;
-  };
-  const overall = (candidate: string): number => {
-    const cells = [...(tally.get(candidate)?.values() ?? [])];
-    const duelCount = cells.reduce((s, c) => s + c.duels, 0);
-    return duelCount === 0 ? -1 : (cells.reduce((s, c) => s + c.points, 0) / duelCount) * 100;
-  };
+  const table = dimensionPreference(evaluations);
+  if (table === null) return "";
+  const { dims } = table;
 
   const head = dims.map((d) => `<th class="num">${escapeHtml(d)}</th>`).join("");
-  const rows = [...candidates]
-    .sort((x, y) => overall(y) - overall(x))
-    .map((candidate) => {
-      const cells = dims
-        .map((d) => {
-          const value = rate(candidate, d);
+  const rows = table.rows
+    .map(({ candidate, cells: values }) => {
+      const cells = values
+        .map((value) => {
           if (value === null) return `<td class="num muted">—</td>`;
           return `<td class="num" style="${heatTint(value, 0, 100)}">${value.toFixed(0)}</td>`;
         })

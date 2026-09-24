@@ -16,10 +16,11 @@ import { consoleSink } from "../print.js";
 import { jsonSink } from "../json.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
 import { numberFlag, rejectUnknown, stringFlag, UsageError, type ParsedArgs } from "../args.js";
-import type { Io } from "../io.js";
+import { processIo, type Io } from "../io.js";
+import { liveView, type LiveView } from "../live.js";
 import type { RunEvent } from "../../core/events.js";
 
-const KNOWN = ["yes", "html", "json", "reuse", "concurrency", "workspace"];
+const KNOWN = ["yes", "html", "json", "plain", "reuse", "concurrency", "workspace"];
 
 export const RUN_HELP = `agenteval run <task> [options]
 
@@ -31,6 +32,7 @@ export const RUN_HELP = `agenteval run <task> [options]
                       output as \`agenteval plan\`, and nothing is billed.
   --html              also write report.html
   --json              emit one JSON object per event on stdout, instead of lines
+  --plain             print one line per event even on an interactive terminal
   --reuse             reuse a prior identical generation (matched on trial hash)
   --concurrency N     max LLM calls in flight; overrides the spec
   --workspace DIR     workspace to resolve <task> and write runs under
@@ -87,13 +89,35 @@ export async function cmdRun(args: ParsedArgs, io: Io): Promise<ExitCode> {
     if (e.type === "budget.stopped" || e.type === "integrity.gaps") partial = true;
   };
   const write = (line: string): void => io.out(`${line}\n`);
-  const render = args.flags.json ? jsonSink(write) : consoleSink(write);
+  const live = wantsLiveView(args, io) ? liveView() : null;
+  const render = live?.sink ?? (args.flags.json ? jsonSink(write) : consoleSink(write));
   const onEvent = (e: RunEvent): void => {
     watch(e);
     render(e);
   };
 
-  const report = await runSuite(spec, args.flags.html === true, { yes: args.flags.yes === true, onEvent });
+  const report = await runWithView(live, () =>
+    runSuite(spec, args.flags.html === true, { yes: args.flags.yes === true, onEvent }),
+  );
   if (report === null && args.flags.yes !== true) return EXIT.ok; // planned, as asked
   return partial ? EXIT.partial : EXIT.ok;
+}
+
+/**
+ * The redrawn view is for a person watching an executing run. A preview is a
+ * handful of lines, and anything that is not the process's own interactive
+ * stdout — a pipe, a test's buffer, `--json` — must get lines it can read back.
+ */
+function wantsLiveView(args: ParsedArgs, io: Io): boolean {
+  if (args.flags.json || args.flags.plain || args.flags.yes !== true) return false;
+  return io === processIo && process.stdout.isTTY === true;
+}
+
+/** Give the terminal back even when the run throws. */
+async function runWithView<T>(live: LiveView | null, run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } finally {
+    await live?.close();
+  }
 }

@@ -14,7 +14,7 @@ import { pathToFileURL } from "node:url";
 import { INSTALL_ROOT } from "../paths.js";
 import { EXIT, type ExitCode } from "./exit-codes.js";
 import { parseArgs, UsageError, type ParsedArgs } from "./args.js";
-import { processIo, type Io } from "./io.js";
+import { processIo, tolerateClosedPipes, type Io } from "./io.js";
 import { NoSuchSpecError } from "../core/workspace.js";
 import { cmdPlan, cmdRun, PLAN_HELP, RUN_HELP } from "./commands/run.js";
 import { cmdLs, LS_HELP } from "./commands/ls.js";
@@ -101,6 +101,7 @@ export async function main(argv: readonly string[], io: Io = processIo): Promise
  * calling `process.exit`, so buffered stdout is not truncated on the way out.
  */
 export async function cli(argv: readonly string[] = process.argv.slice(2), io: Io = processIo): Promise<void> {
+  if (io === processIo) tolerateClosedPipes();
   const { loadEnvLocal } = await import("../run.js");
   await loadEnvLocal();
   try {

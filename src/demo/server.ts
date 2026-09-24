@@ -22,6 +22,7 @@ import { fixturesDir } from "../paths.js";
 import { findWorkspace, runsDir, tasksDir, type Workspace } from "../core/workspace.js";
 import { AlreadyRunning, PlanMismatch, RunRegistry, type PlanAck } from "../server/runs.js";
 import { buildOverview } from "../server/overview.js";
+import { hasReport, loadReportModel } from "../report-model.js";
 import { NoSuchSpecError } from "../core/workspace.js";
 import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun, safeId } from "./catalog.js";
 import { demoPage, DIST_DIR } from "./ui.js";
@@ -145,6 +146,28 @@ async function sendArtifact(ws: Workspace, res: http.ServerResponse, kind: strin
   }
   const type = MIME[path.extname(abs).toLowerCase()] ?? "application/octet-stream";
   send(res, 200, await fs.readFile(abs), type);
+}
+
+/**
+ * A run directory's report, as the data both renderers read.
+ *
+ * The directory is resolved through the same gate an artifact request goes
+ * through — the run id must be in the live index, and the rest must stay
+ * under it — so this route can read nothing `/artifact/` could not already
+ * serve. A directory that holds no report is a 404, not an empty page.
+ */
+async function sendReport(ws: Workspace, res: http.ServerResponse, kind: string, rel: string): Promise<void> {
+  const target = await artifactRoot(ws, kind, rel);
+  const abs = target ? underRoot(target.root, target.rel) : null;
+  if (!abs) {
+    sendJson(res, 403, { error: "forbidden" });
+    return;
+  }
+  if (!(await hasReport(abs))) {
+    sendJson(res, 404, { error: "这个目录里没有可生成报告的运行" });
+    return;
+  }
+  sendJson(res, 200, await loadReportModel(abs));
 }
 
 /**
@@ -286,6 +309,11 @@ async function handle(
       return;
     }
     sendJson(res, 200, view);
+    return;
+  }
+  const report = url.pathname.match(/^\/api\/report\/(run|fixture|task)\/(.+)$/);
+  if (report) {
+    await sendReport(ws, res, report[1], decodeURIComponent(report[2]));
     return;
   }
   const art = url.pathname.match(/^\/artifact\/(run|fixture|task)\/(.+)$/);

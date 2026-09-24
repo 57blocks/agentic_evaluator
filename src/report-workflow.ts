@@ -12,49 +12,30 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { E2eValidation } from "./canon/e2e.js";
 import type { CostLedger } from "./canon/cost.js";
 import { workflowGaps, workflowLedger, type WorkflowArm, type WorkflowRecord, type WorkflowStepRecord } from "./canon/workflow.js";
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
+import { workflowNoVerdictLine, workflowVerdictLine, workflowVerdictTone } from "./report-model.js";
+import { STEPS_NOT_VALIDATED } from "./report-format.js";
 
 const usd = (n: number): string => `$${n.toFixed(4)}`;
 const num = (n: number | null, digits = 2): string => (n === null ? "—" : n.toFixed(digits));
 
-/** adopt-combination reads as firm; not-validated is the one that needs a person. */
-function verdictClass(v: E2eValidation | null): string {
-  if (v === null) return "";
-  if (v.verdict === "adopt-combination") return "firm";
-  if (v.verdict === "not-validated") return "needs-review";
-  return "";
-}
-
-function verdictLine(v: E2eValidation): string {
-  if (v.verdict === "adopt-combination") {
-    return "提议的组合通过端到端验证，可以采纳。";
-  }
-  if (v.verdict === "keep-control") {
-    return "提议的组合没有在声明的最小有意义差异上胜过单模型对照，保留对照。";
-  }
-  return "本次运行不足以对组合下结论。";
-}
-
 function renderVerdict(record: WorkflowRecord): string {
   const v = record.e2e_validation ?? null;
   if (v === null) {
-    const note = record.handoff
-      ? "链上跑了端到端，但没有写出验证判决。"
-      : "各 step 相互独立（没有 input_from），没有组装工作流，也没有做端到端比较。";
+    const note = workflowNoVerdictLine(record.handoff);
     return `<div class="verdict">
     <span class="tag">no-validation</span>
     <div><p>${escapeHtml(note)}</p>
-    <p class="sub">下面的推荐是每个 step 各自的，未经工作流层验证。</p></div>
+    <p class="sub">${STEPS_NOT_VALIDATED}</p></div>
   </div>`;
   }
   const reasons = (v.reasons ?? []).length > 0 ? v.reasons.map(escapeHtml).join("；") : "—";
-  return `<div class="verdict ${verdictClass(v)}">
+  return `<div class="verdict ${workflowVerdictTone(v)}">
     <span class="tag">${escapeHtml(v.verdict)}</span>
-    <div><p>${escapeHtml(verdictLine(v))}</p>
+    <div><p>${escapeHtml(workflowVerdictLine(v))}</p>
     <p class="sub">${escapeHtml(v.firmness)} · 运行模式 ${escapeHtml(v.operating_mode ?? "—")} · 规则 ${escapeHtml(v.rule_version ?? "—")}<br>${reasons}</p></div>
   </div>`;
 }
@@ -220,7 +201,7 @@ export async function loadWorkflowRecord(root: string): Promise<WorkflowRecord> 
 }
 
 /** Root GAPS.md, or — for a run written before it existed — rebuilt from the steps'. */
-async function workflowGapsFor(root: string, record: WorkflowRecord): Promise<string> {
+export async function workflowGapsFor(root: string, record: WorkflowRecord): Promise<string> {
   const written = await fs.readFile(path.join(root, "GAPS.md"), "utf-8").catch(() => "");
   if (written !== "") return written;
   const steps = await Promise.all(

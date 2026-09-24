@@ -1,13 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/noto-sans";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-sans: 'Noto Sans Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -16,6 +16,16 @@
     --color-sidebar-primary: var(--sidebar-primary);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar: var(--sidebar);
+    --color-brand: var(--brand);
+    --color-brand-2: var(--brand-2);
+    --color-brand-soft: var(--brand-soft);
+    --color-champ: var(--champ);
+    --color-ok: var(--ok);
+    --color-ok-soft: var(--ok-soft);
+    --color-bad: var(--bad);
+    --color-bad-soft: var(--bad-soft);
+    --color-warn: var(--warn);
+    --color-warn-soft: var(--warn-soft);
     --color-chart-5: var(--chart-5);
     --color-chart-4: var(--chart-4);
     --color-chart-3: var(--chart-3);
@@ -55,7 +65,7 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --primary: var(--brand);
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -66,7 +76,7 @@
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    --ring: var(--brand-2);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -75,7 +85,7 @@
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary: var(--brand);
     --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.97 0 0);
     --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -90,8 +100,8 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
+    --primary: var(--brand);
+    --primary-foreground: oklch(0.145 0 0);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
@@ -101,7 +111,7 @@
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+    --ring: var(--brand-2);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -109,7 +119,7 @@
     --chart-5: oklch(0.269 0 0);
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary: var(--brand);
     --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -128,84 +138,53 @@
     @apply font-sans;
     }
 }
-/* ── Agentic Evaluator palette ───────────────────────────────────────────
- * The warm paper theme the demo already had, mapped onto shadcn's semantic
- * tokens so every component inherits it. Status colours (ok / warn / bad)
- * stay separate: a gated candidate and a destructive action are not the
- * same thing, and the report renderers use these same hues.
- *
- * `@theme inline` only *references* the variables — Tailwind hoists @theme
- * out of any media query it is nested in, so the values themselves live in
- * :root and are swapped by the media query below. Dark mode follows the OS,
- * as it did before; there is no toggle to carry a `.dark` class.
+
+/*
+ * Chart series colours — data encoding, not theme. Three categorical slots
+ * (blue / orange / aqua), the same values report.html draws with, validated
+ * for colour-blind separation against both surfaces. shadcn's neutral chart
+ * tokens are all grey, which cannot carry identity between series.
  */
-@theme inline {
-  --font-sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Source Han Sans SC",
-    ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
-
-  --color-ok: var(--ok);
-  --color-ok-bg: var(--ok-bg);
-  --color-warn: var(--warn);
-  --color-warn-bg: var(--warn-bg);
-  --color-bad: var(--bad);
-  --color-bad-bg: var(--bad-bg);
-}
-
 :root {
-  --background: #F1EFE8;
-  --foreground: #1C1915;
-  --card: #FBF9F4;
-  --card-foreground: #1C1915;
-  --popover: #FBF9F4;
-  --popover-foreground: #1C1915;
-  --primary: #1F4E46;
-  --primary-foreground: #FBF9F4;
-  --secondary: #E7E1D4;
-  --secondary-foreground: #1C1915;
-  --muted: #E7E1D4;
-  --muted-foreground: #5C564C;
-  --accent: #E7E1D4;
-  --accent-foreground: #1C1915;
-  --destructive: #9B2C25;
-  --border: #D9D1C3;
-  --input: #D9D1C3;
-  --ring: #1F4E46;
-
-  --ok: #1E6B3A;
-  --ok-bg: #DDF1E4;
-  --warn: #7D5410;
-  --warn-bg: #F8ECD2;
-  --bad: #9B2C25;
-  --bad-bg: #F8DEDC;
+    --viz-1: #2a78d6;
+    --viz-2: #eb6834;
+    --viz-3: #1baf7a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #161411;
-    --foreground: #F3EEE4;
-    --card: #1E1B16;
-    --card-foreground: #F3EEE4;
-    --popover: #1E1B16;
-    --popover-foreground: #F3EEE4;
-    --primary: #8FBFB4;
-    --primary-foreground: #161411;
-    --secondary: #2A261F;
-    --secondary-foreground: #F3EEE4;
-    --muted: #2A261F;
-    --muted-foreground: #B7AFA2;
-    --accent: #2A261F;
-    --accent-foreground: #F3EEE4;
-    --destructive: #F0A29C;
-    --border: #3A342C;
-    --input: #3A342C;
-    --ring: #8FBFB4;
+.dark {
+    --viz-1: #3987e5;
+    --viz-2: #d95926;
+    --viz-3: #199e70;
+}
 
-    --ok: #8FD6A8;
-    --ok-bg: #1F3A2A;
-    --warn: #EACB7C;
-    --warn-bg: #3F3319;
-    --bad: #F0A29C;
-    --bad-bg: #43231F;
-  }
+/*
+ * Colours that carry a report's meaning — brand, success, failure, warning,
+ * the chosen candidate's row. The same values report.html draws with
+ * (src/report-style.ts); tests/report-tokens.test.ts holds the two equal, so
+ * a candidate that failed reads the same red in both.
+ */
+:root {
+    --brand: #4f46e5;
+    --brand-2: #7c73f0;
+    --brand-soft: rgba(79,70,229,.08);
+    --champ: #eef2ff;
+    --ok: #16a34a;
+    --ok-soft: #dcfce7;
+    --bad: #dc2626;
+    --bad-soft: #fee2e2;
+    --warn: #b45309;
+    --warn-soft: #fff8ef;
+}
+
+.dark {
+    --brand: #8b84f5;
+    --brand-2: #a79ff8;
+    --brand-soft: rgba(139,132,245,.14);
+    --champ: #232045;
+    --ok: #8fd6a8;
+    --ok-soft: #1f3a2a;
+    --bad: #f0a29c;
+    --bad-soft: #43231f;
+    --warn: #eacb7c;
+    --warn-soft: #3f3319;
 }

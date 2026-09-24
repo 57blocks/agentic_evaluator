@@ -250,6 +250,13 @@ export async function maybeRunE2eValidation(params: {
       JSON.stringify(proposed, null, 2),
       "utf-8",
     );
+    emit({
+      type: "e2e.arm.done",
+      armId: "e2e-proposed",
+      success: proposed.totals.success,
+      failure: proposed.totals.failure,
+      undetermined: proposed.totals.undetermined,
+    });
     validation = decideValidation({
       ...shared,
       mode: mode.mode,

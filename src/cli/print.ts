@@ -51,7 +51,7 @@ export function formatEvent(e: RunEvent): string[] {
       if (e.error) return [`  ${e.state.padEnd(8)} ${who}: ${e.error}`];
       const cost = e.costUsd === undefined ? "" : `, ${usd(e.costUsd)} ${e.costSource ?? ""}`;
       const secs = e.ms === undefined ? "" : `${(e.ms / 1000).toFixed(1)}s`;
-      const check = e.check === undefined ? "" : ` · tsc ${e.check}`;
+      const check = e.check === undefined ? "" : ` · check ${e.check}`;
       return [`  ${e.state.padEnd(8)} ${who} (${secs}${cost})${check}`];
     }
     case "judge":
