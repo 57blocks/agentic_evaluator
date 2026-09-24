@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
+import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 
 /** Whether the steps hand their output to each other, said in words. */
 function handoffLabel(task: TaskView): string {
@@ -68,9 +69,9 @@ function RunsTable({ runs }: { runs: RunView[] }) {
               {run.totalUsd == null ? "—" : `$${run.totalUsd.toFixed(4)}`}
             </TableCell>
             <TableCell>
-              <span className="flex flex-wrap items-center gap-1">
+              <span className="flex flex-wrap items-center gap-1.5">
                 {run.steps.map((s, i) => (
-                  <span key={`${s.id}-${i}`} className="flex items-center gap-1">
+                  <span key={`${s.id}-${i}`} className="flex items-center gap-1.5">
                     {i > 0 && <span className="text-muted-foreground">/</span>}
                     {s.chosen ? (
                       <span className="font-mono text-[13px]">{s.chosen}</span>
@@ -107,7 +108,7 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h2 className="text-xl font-semibold">{task.name}</h2>
+        <h1 className="text-2xl font-extrabold tracking-tight">{task.name}</h1>
         <p className="text-[13px] text-muted-foreground">
           {task.specPath}
           {spend && (
@@ -121,25 +122,27 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
           {` · ${handoffLabel(task)}`}
         </p>
         <p className="text-xs text-muted-foreground">
-          The same from the command line: <code className="font-mono">agenteval plan {task.name}</code> only quotes the cost;
+          The same from the command line: <code className="font-mono">agenteval plan {task.name}</code> only quotes the cost;{" "}
           <code className="font-mono">agenteval run {task.name} --yes</code> actually runs it.
         </p>
       </header>
 
       <RunControl task={task.name} onFinished={onRunFinished} />
 
-      <section className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold">Runs ({task.runs.length})</h3>
-        <RunsTable runs={task.runs} />
+      <section aria-label="Runs" className={cn(SECTION_CARD, "flex flex-col gap-3 border border-border bg-card p-4")}>
+        <h2 className={SECTION_TITLE}>Runs ({task.runs.length})</h2>
+        <div className="overflow-x-auto">
+          <RunsTable runs={task.runs} />
+        </div>
       </section>
 
       <section aria-label="Test plan" className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold">Test plan</h3>
+        <h2 className={SECTION_TITLE}>Test plan</h2>
         <TestPlan plan={task.plan} />
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold">Definition files ({task.files.length})</h3>
+        <h2 className={SECTION_TITLE}>Definition files ({task.files.length})</h2>
         <p className="text-xs text-muted-foreground">The test plan above is read from these files; spec.yaml is the single source of truth.</p>
         <FileBrowser task={task.name} files={task.files} />
       </section>
