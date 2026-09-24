@@ -146,7 +146,7 @@ src/canon/            protocol layer: states, success decision, hash, usage, cos
 src/html.ts           escapeHtml, shared by the two report pages
 src/report-model.ts   what a report says: numbers and decided wording, read by both renderers
 src/report-format.ts  formatters and fixed wording, browser-safe
-src/report-copy.ts    the report's Chinese sentences, rebuilt from gates and rates — never selector English
+src/report-copy.ts    the report's sentences, rebuilt from gates and rates — never the selector's raw reasons
 src/test-plan.ts      a spec (or a run's manifest) read aloud: inputs, candidates, checks, gates, pick, scale
 src/report-v2.ts      the step report page (+ report-charts, report-evidence)
 src/report-workflow.ts the workflow page: verdict, arms, per-step links, ledger
@@ -266,8 +266,8 @@ It never spends: it reads runs you already produced.
 A run's report is rendered twice, on purpose, and both renderers read one
 model — `src/report-model.ts` computes every number and every sentence that
 carries a decision; `src/report-format.ts` and `src/report-copy.ts` hold the
-formatters and the Chinese sentences, with no Node imports so the browser
-bundle can use them too. The selector's own English reasons stay untouched in
+formatters and the sentences, with no Node imports so the browser
+bundle can use them too. The selector's own reasons stay untouched in
 `recommendation.json`; pages rebuild their sentences from the gates and rates.
 
 - `report.html` is **evidence**. `report-v2.ts` (one step) and
@@ -276,7 +276,7 @@ bundle can use them too. The selector's own English reasons stay untouched in
   network and no build, and pins nothing to a React version. It stays the
   durable record.
 - The dashboard's **report page** (`src/demo/client/features/report/`) renders
-  the same model as React, served by `/api/report/<kind>/<rel>`. Its **导出
+  the same model as React, served by `/api/report/<kind>/<rel>`. Its **Export
   HTML** button saves exactly what is on screen — the DOM plus the page's own
   stylesheet — as one file with no framework and no network requests, so an
   exported page can never say something the dashboard did not.

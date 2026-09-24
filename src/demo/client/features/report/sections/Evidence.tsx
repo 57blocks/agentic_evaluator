@@ -39,16 +39,16 @@ export function Trials({ trials }: { trials: TrialRow[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>候选</TableHead>
-          <TableHead>输入</TableHead>
-          <TableHead className="text-right">第几次</TableHead>
-          <TableHead>结果</TableHead>
-          <TableHead>必过检查</TableHead>
-          <TableHead className="text-right">总分</TableHead>
+          <TableHead>Candidate</TableHead>
+          <TableHead>Input</TableHead>
+          <TableHead className="text-right">Trial</TableHead>
+          <TableHead>Outcome</TableHead>
+          <TableHead>Required check</TableHead>
+          <TableHead className="text-right">Total score</TableHead>
           {dims.map((d) => <TableHead key={d} className="text-right">{d}</TableHead>)}
-          <TableHead className="text-right">输出 token</TableHead>
-          <TableHead className="text-right">成本</TableHead>
-          <TableHead className="text-right">耗时</TableHead>
+          <TableHead className="text-right">Output tokens</TableHead>
+          <TableHead className="text-right">Cost</TableHead>
+          <TableHead className="text-right">Duration</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -62,7 +62,7 @@ export function Trials({ trials }: { trials: TrialRow[] }) {
               {t.completion_state !== "success" && (
                 <span className="ml-1.5 text-bad">{completionLabel(t.completion_state)}</span>
               )}
-              {t.truncated && <span className="ml-1.5 text-muted-foreground" title="finish_reason=length">被截断</span>}
+              {t.truncated && <span className="ml-1.5 text-muted-foreground" title="finish_reason=length">Truncated</span>}
             </TableCell>
             <TableCell className="max-w-64 align-top text-xs"><CheckCell t={t} /></TableCell>
             <TableCell className="text-right font-mono">{t.judge?.absolute_overall ?? "—"}</TableCell>
@@ -85,20 +85,20 @@ export function Outputs({ outputs }: Pick<StepReport, "outputs">) {
   return (
     <div className="flex flex-col divide-y divide-border">
       {outputs.map((o) => {
-        const title = `${o.candidate} · ${o.input} · 第 ${o.trial + 1} 次`;
+        const title = `${o.candidate} · ${o.input} · trial ${o.trial + 1}`;
         return (
           <details key={title} className="py-2 text-sm">
             <summary className={cn("cursor-pointer font-mono text-xs", o.text === null && "text-muted-foreground")}>
               {title}
               <span className="ml-2 font-sans text-muted-foreground">
-                {o.text === null ? "没有保存原始输出" : `${o.totalChars.toLocaleString()} 字符`}
+                {o.text === null ? "No raw output saved" : `${o.totalChars.toLocaleString()} characters`}
               </span>
             </summary>
             {o.text !== null && (
               <>
                 {o.totalChars > o.text.length && (
                   <p className="mt-2 text-xs text-muted-foreground">
-                    只显示前 {o.text.length.toLocaleString()} 字符，完整内容在运行目录的 raw/ 里。
+                    Showing the first {o.text.length.toLocaleString()} characters; the full text is in the run directory's raw/.
                   </p>
                 )}
                 <pre className="mt-2 max-h-[460px] overflow-auto bg-muted p-3 font-mono text-xs whitespace-pre-wrap break-words">
@@ -114,7 +114,7 @@ export function Outputs({ outputs }: Pick<StepReport, "outputs">) {
 }
 
 export function Gaps({ gaps }: Pick<StepReport, "gaps">) {
-  if (gaps.length === 0) return <p className="text-sm text-muted-foreground">GAPS.md 为空或不存在。</p>;
+  if (gaps.length === 0) return <p className="text-sm text-muted-foreground">GAPS.md is empty or missing.</p>;
   return (
     <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
       {gaps.map((g, i) =>
@@ -132,7 +132,7 @@ export function RawRecords({ sampleTrial, manifest }: Pick<StepReport, "sampleTr
   return (
     <div className="flex flex-col gap-2">
       {[
-        ["scores.jsonl 的第一行", sampleTrial],
+        ["First line of scores.jsonl", sampleTrial],
         ["manifest.json", manifest],
       ].map(([label, body]) => (
         <details key={label} className="text-sm">

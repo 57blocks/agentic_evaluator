@@ -20,9 +20,9 @@ function Name({ c }: { c: CandidateRow }) {
       <span className="flex flex-wrap items-center gap-1.5">
         <span aria-hidden className="inline-block size-2.5" style={{ background: seriesColor(c.colorIndex) }} />
         <span className="font-mono font-medium">{c.id}</span>
-        {c.chosen && <Tag tone="brand">推荐</Tag>}
-        {c.gated && <Tag tone="bad">未通过门槛</Tag>}
-        {c.isControl && <Tag tone="neutral">对照</Tag>}
+        {c.chosen && <Tag tone="brand">Recommended</Tag>}
+        {c.gated && <Tag tone="bad">Gated out</Tag>}
+        {c.isControl && <Tag tone="neutral">Control</Tag>}
       </span>
       <span className="font-mono text-[11px] text-muted-foreground">{c.model} · {c.deployment}</span>
     </div>
@@ -40,10 +40,10 @@ function Success({ c }: { c: CandidateRow }) {
         {c.outcomes.success} / {tried}
       </span>
       {c.outcomes.undetermined > 0 && (
-        <span className="text-[11px] text-warn">{c.outcomes.undetermined} 次未判定</span>
+        <span className="text-[11px] text-warn">{c.outcomes.undetermined} undetermined</span>
       )}
       {abnormal.map(([state, n]) => (
-        <span key={state} className="text-[11px] text-bad">{n} 次{completionLabel(state)}</span>
+        <span key={state} className="text-[11px] text-bad">{n} × {completionLabel(state)}</span>
       ))}
     </div>
   );
@@ -70,17 +70,17 @@ function WinRate({ c }: { c: CandidateRow }) {
 
 export function Candidates({ candidates, control }: Pick<StepReport, "candidates" | "control">) {
   return (
-    <Section title="候选对比" hint="同一组输入上的结果。未通过门槛的候选保留在表里，方便对照。">
+    <Section title="Candidates" hint="Results on the same inputs. Gated-out candidates stay in the table for comparison.">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>候选</TableHead>
-            <TableHead>任务成功</TableHead>
-            <TableHead className="text-right">必过检查</TableHead>
-            <TableHead className="text-right">裁判胜率</TableHead>
-            <TableHead className="text-right">绝对分</TableHead>
-            <TableHead className="text-right">每次成功成本</TableHead>
-            <TableHead className="text-right">中位耗时</TableHead>
+            <TableHead>Candidate</TableHead>
+            <TableHead>Task success</TableHead>
+            <TableHead className="text-right">Required check</TableHead>
+            <TableHead className="text-right">Judge win rate</TableHead>
+            <TableHead className="text-right">Absolute score</TableHead>
+            <TableHead className="text-right">Cost per success</TableHead>
+            <TableHead className="text-right">Median duration</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -101,9 +101,9 @@ export function Candidates({ candidates, control }: Pick<StepReport, "candidates
         </TableBody>
       </Table>
       <Note>
-        必过检查按实际执行次数计。裁判胜率来自成对比较，平局算半场，只作参考，不参与推荐。
-        绝对分是裁判给每份输出单独打的 1–5 分。每次成功成本只算生成，不含裁判费用。
-        {control && ` 对照候选是 ${control}。`}
+        Required checks are counted over the times they actually ran. Judge win rate comes from pairwise comparison, a tie counts as half, and it is for reference only - it does not affect the recommendation.
+         Absolute score is the 1-5 score the judge gives each output on its own. Cost per success counts generation only, not judging.
+        {control && ` The control candidate is ${control}.`}
       </Note>
     </Section>
   );

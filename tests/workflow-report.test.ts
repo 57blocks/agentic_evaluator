@@ -23,7 +23,7 @@ test("a tied top is not a favourite, and the note says nobody led", async () => 
   const fav = judgeFavourite(b);
   assert.ok(fav);
   assert.equal(typeof fav.sole, "boolean");
-  assert.match(judgeNote({ ...fav, sole: false }, null), /没有分出高下/);
+  assert.match(judgeNote({ ...fav, sole: false }, null), /did not separate the candidates/);
 });
 
 type Row = { id: string; checkPass: number; checkExecuted: number; completed: { ok: number; total: number }; states: Array<[string, number]> };
@@ -68,14 +68,14 @@ test("a candidate that did not complete normally is gathered across steps", () =
   const flaky = { ...ok("sonnet"), completed: { ok: 3, total: 9 }, states: [["success", 3], ["timeout", 6]] as Array<[string, number]> };
   const steps = [step("prd", { rows: [flaky, ok("ds")] }), step("codegen", { rows: [flaky, ok("ds")] })];
   const [f] = workflowFindings(steps, "google/gemini", CANDS);
-  assert.equal(f.tag, "可靠性");
-  assert.match(f.body, /prd 33%、codegen 33%/);
+  assert.equal(f.tag, "Reliability");
+  assert.match(f.body, /prd 33%, codegen 33%/);
   assert.match(f.body, /timeout/);
 });
 
 test("a same-vendor judge is flagged only where it actually preferred its own", () => {
   const steps = [step("trd", { fav: "sonnet", chosen: "sonnet", rows: [ok("sonnet"), ok("ds")] })];
-  assert.equal(workflowFindings(steps, "anthropic/claude-opus", CANDS)[0]?.tag, "偏置");
+  assert.equal(workflowFindings(steps, "anthropic/claude-opus", CANDS)[0]?.tag, "Bias");
   assert.deepEqual(workflowFindings(steps, "google/gemini", CANDS), []);
   // A shared top is not a preference.
   const tied = [step("trd", { fav: "sonnet", sole: false, chosen: "sonnet", rows: [ok("sonnet"), ok("ds")] })];

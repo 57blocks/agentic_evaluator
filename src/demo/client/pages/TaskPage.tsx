@@ -26,8 +26,8 @@ import { cn } from "@/lib/utils";
 function handoffLabel(task: TaskView): string {
   const chained = task.steps.some((s) => s.inputFrom);
   return chained
-    ? `独立评测无交接；e2e 对照沿 ${task.steps.map((s) => s.id).join(" → ")}`
-    : `${task.steps.length} 个独立步骤（无交接）`;
+    ? `Evaluated independently, no handoff; e2e control along ${task.steps.map((s) => s.id).join(" → ")}`
+    : `${task.steps.length} independent step(s) (no handoff)`;
 }
 
 function RunsTable({ runs }: { runs: RunView[] }) {
@@ -35,8 +35,8 @@ function RunsTable({ runs }: { runs: RunView[] }) {
     return (
       <Empty>
         <EmptyHeader>
-          <EmptyTitle>这个任务还没跑过</EmptyTitle>
-          <EmptyDescription>定义已经就位，跑一次才会有证据。</EmptyDescription>
+          <EmptyTitle>This task has never run</EmptyTitle>
+          <EmptyDescription>The definition is in place; run it once to get evidence.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -45,10 +45,10 @@ function RunsTable({ runs }: { runs: RunView[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>运行</TableHead>
-          <TableHead>成本</TableHead>
-          <TableHead>各步推荐</TableHead>
-          <TableHead>类型</TableHead>
+          <TableHead>Run</TableHead>
+          <TableHead>Cost</TableHead>
+          <TableHead>Recommended per step</TableHead>
+          <TableHead>Type</TableHead>
           <TableHead />
         </TableRow>
       </TableHeader>
@@ -82,8 +82,8 @@ function RunsTable({ runs }: { runs: RunView[] }) {
               </span>
             </TableCell>
             <TableCell className="whitespace-nowrap text-muted-foreground">
-              {run.kind === "workflow" ? "多步骤" : "单步骤"}
-              {run.synthetic && " · 脚本"}
+              {run.kind === "workflow" ? "Multi-step" : "Single step"}
+              {run.synthetic && " · script"}
             </TableCell>
             <TableCell className="text-right">
               <Button
@@ -91,7 +91,7 @@ function RunsTable({ runs }: { runs: RunView[] }) {
                 variant="outline"
                 onClick={() => navigate({ view: "report", runId: run.id, dir: primaryReportDir(run) })}
               >
-                报告
+                Report
               </Button>
             </TableCell>
           </TableRow>
@@ -112,7 +112,7 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
           {task.specPath}
           {spend && (
             <>
-              {" · 已花 "}
+              {" · spent "}
               <span className={cn(spend.over && "font-semibold text-bad")}>
                 {spend.text}
               </span>
@@ -121,26 +121,26 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
           {` · ${handoffLabel(task)}`}
         </p>
         <p className="text-xs text-muted-foreground">
-          命令行里同样一件事：<code className="font-mono">agenteval plan {task.name}</code> 只报价，
-          <code className="font-mono">agenteval run {task.name} --yes</code> 才真跑。
+          The same from the command line: <code className="font-mono">agenteval plan {task.name}</code> only quotes the cost;
+          <code className="font-mono">agenteval run {task.name} --yes</code> actually runs it.
         </p>
       </header>
 
       <RunControl task={task.name} onFinished={onRunFinished} />
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold">运行（{task.runs.length} 次）</h3>
+        <h3 className="text-base font-semibold">Runs ({task.runs.length})</h3>
         <RunsTable runs={task.runs} />
       </section>
 
-      <section aria-label="测试方案" className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold">测试方案</h3>
+      <section aria-label="Test plan" className="flex flex-col gap-3">
+        <h3 className="text-base font-semibold">Test plan</h3>
         <TestPlan plan={task.plan} />
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold">定义文件（{task.files.length} 个）</h3>
-        <p className="text-xs text-muted-foreground">上面的测试方案就是从这些文件读出来的，spec.yaml 是唯一的来源。</p>
+        <h3 className="text-base font-semibold">Definition files ({task.files.length})</h3>
+        <p className="text-xs text-muted-foreground">The test plan above is read from these files; spec.yaml is the single source of truth.</p>
         <FileBrowser task={task.name} files={task.files} />
       </section>
 

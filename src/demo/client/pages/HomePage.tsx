@@ -30,7 +30,7 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 function StepRow({ standing }: { standing: StepStanding }) {
   const gate =
     standing.eligible.length > 0 || standing.gated.length > 0
-      ? `${standing.eligible.length} 合格 / ${standing.gated.length} 被门槛挡下`
+      ? `${standing.eligible.length} eligible / ${standing.gated.length} gated out`
       : "—";
   return (
     <TableRow>
@@ -55,7 +55,7 @@ function StepRow({ standing }: { standing: StepStanding }) {
           onClick={() => navigate({ view: "run", runId: standing.runId })}
           className="text-xs underline underline-offset-2"
         >
-          打开
+          Open
         </button>
         {standing.synthetic && (
           <Tag tone="neutral" className="ml-2 text-[10px]">{SELF_CHECK}</Tag>
@@ -67,25 +67,25 @@ function StepRow({ standing }: { standing: StepStanding }) {
 
 function Standings({ steps }: { steps: StepStanding[] }) {
   return (
-    <section aria-label="每一步的最新结论" className={cn(SECTION_CARD, "border border-border bg-card p-4")}>
-      <h2 className={cn(SECTION_TITLE, "mb-1")}>每一步的最新结论</h2>
+    <section aria-label="Latest verdict per step" className={cn(SECTION_CARD, "border border-border bg-card p-4")}>
+      <h2 className={cn(SECTION_TITLE, "mb-1")}>Latest verdict per step</h2>
       <p className="mb-3 text-xs text-muted-foreground">
-        同名步骤只留最新的一次，不论它来自哪个任务。
+        Only the latest run of each step name is kept, whichever task it came from.
       </p>
       {steps.length === 0 ? (
-        <p className="text-xs text-muted-foreground">还没有任何运行。</p>
+        <p className="text-xs text-muted-foreground">No runs yet.</p>
       ) : (
         <div className="overflow-x-auto">
           <Table className="min-w-[720px]">
             <TableHeader>
               <TableRow>
-                <TableHead>步骤</TableHead>
-                <TableHead>任务</TableHead>
-                <TableHead>选中</TableHead>
-                <TableHead>确信度</TableHead>
-                <TableHead>资格门</TableHead>
-                <TableHead className="text-right">花费</TableHead>
-                <TableHead>日期</TableHead>
+                <TableHead>Step</TableHead>
+                <TableHead>Task</TableHead>
+                <TableHead>Chosen</TableHead>
+                <TableHead>Confidence</TableHead>
+                <TableHead>Eligibility gates</TableHead>
+                <TableHead className="text-right">Spend</TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -107,22 +107,22 @@ export function HomePage({ data, catalog }: { data: Overview; catalog: Catalog }
   return (
     <div className="flex flex-col gap-5">
       <header>
-        <h1 className="text-2xl font-extrabold tracking-tight">工作区</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">Workspace</h1>
         <p className="mt-1 font-mono text-xs text-muted-foreground">{data.workspace}</p>
       </header>
 
-      <section aria-label="总览" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="任务" value={`${data.tasks.run} / ${data.tasks.total}`} hint="跑过 / 已定义" />
-        <Stat label="运行" value={String(data.spend.runs)} hint="工作区内全部" />
+      <section aria-label="Overview" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Stat label="Tasks" value={`${data.tasks.run} / ${data.tasks.total}`} hint="run / defined" />
+        <Stat label="Runs" value={String(data.spend.runs)} hint="all in this workspace" />
         <Stat
-          label="累计花费"
+          label="Total spend"
           value={runMoney(data.spend.totalUsd) || "—"}
-          hint="报告了账本的运行之和"
+          hint="sum over runs that reported a ledger"
         />
         <Stat
-          label="没有结论"
+          label="No verdict"
           value={String(tasksNeverRun.length + stepsWithNoChoice.length)}
-          hint="从没跑过的任务 + 选不出人的步骤"
+          hint="tasks never run + steps with no recommendation"
         />
       </section>
 

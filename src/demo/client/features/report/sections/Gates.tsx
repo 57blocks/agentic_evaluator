@@ -11,7 +11,7 @@ type Props = Pick<StepReport, "gates" | "eligible"> & { chosen: string | null; m
 
 export function Gates({ gates, eligible, chosen, modeLabel }: Props) {
   return (
-    <Section title="筛选过程" hint="逐道门槛淘汰，剩下的候选再按运行模式排序。">
+    <Section title="Selection" hint="Each eligibility gate removes candidates in turn; the remaining ones are ranked by the operating mode.">
       <ol className="flex flex-col">
         {gates.map((g, i) => (
           <li key={i} className="relative ml-2.5 border-l border-border pb-4 pl-6 last:border-transparent last:pb-0">
@@ -21,12 +21,12 @@ export function Gates({ gates, eligible, chosen, modeLabel }: Props) {
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium">{g.label}</p>
               {g.removed.length === 0 ? (
-                <p className="text-sm text-ok">全部通过</p>
+                <p className="text-sm text-ok">All passed</p>
               ) : (
                 <ul className="flex flex-col gap-0.5 text-sm">
                   {g.removed.map((r) => (
                     <li key={r.candidate}>
-                      <span className="font-medium text-bad">淘汰</span>{" "}
+                      <span className="font-medium text-bad">Removed</span>{" "}
                       <span className="font-mono">{r.candidate}</span>
                       <span className="text-muted-foreground"> · {r.detail}</span>
                     </li>
@@ -39,11 +39,11 @@ export function Gates({ gates, eligible, chosen, modeLabel }: Props) {
       </ol>
       <p className="border-l-2 border-brand bg-brand-soft px-3 py-2 text-sm">
         {eligible.length === 0 ? (
-          "没有候选通过全部门槛。"
+          "No candidate passed every eligibility gate."
         ) : (
           <>
-            剩下 <span className="font-mono">{eligible.join("、")}</span>
-            {chosen ? <> → 按「{modeLabel}」选出 <b className="font-mono">{chosen}</b></> : <>，但按「{modeLabel}」没能选出推荐</>}
+            Remaining: <span className="font-mono">{eligible.join(", ")}</span>
+            {chosen ? <> → by "{modeLabel}", chose <b className="font-mono">{chosen}</b></> : <>, but "{modeLabel}" could not choose a recommendation</>}
           </>
         )}
       </p>

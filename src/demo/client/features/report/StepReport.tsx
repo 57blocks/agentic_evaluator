@@ -5,6 +5,7 @@
  */
 
 import type { StepReport as Model } from "../../../../report-model.js";
+import { plural } from "../../../../report-format.js";
 import { ReportHeader, RunFacts } from "./sections/Header";
 import { Verdict } from "./sections/Verdict";
 import { Candidates } from "./sections/Candidates";
@@ -29,12 +30,12 @@ export function StepReport({ report: r }: { report: Model }) {
   return (
     <article className="flex flex-col gap-5">
       <ReportHeader
-        eyebrow={`运行报告 · ${r.stepId} 步骤`}
+        eyebrow={`Run report · step ${r.stepId}`}
         title={<span className="font-mono">{r.runName}</span>}
-        subtitle={`${r.startedAt} · ${plan.candidates} 个候选 × ${plan.inputs} 个输入 × 每组 ${plan.trialsPer} 次 = ${plan.trials} 次试验`}
+        subtitle={`${r.startedAt} · ${plural(plan.candidates, "candidate")} × ${plural(plan.inputs, "input")} × ${plural(plan.trialsPer, "trial")} each = ${plural(plan.trials, "trial")}`}
       />
 
-      <PlanStepCard step={r.tested} title="这次测了什么" />
+      <PlanStepCard step={r.tested} title="What was tested" />
       <Verdict verdict={r.verdict} eligible={r.eligible} total={r.candidates.length} />
       <Candidates candidates={r.candidates} control={r.control} />
       <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />
@@ -56,35 +57,35 @@ export function StepReport({ report: r }: { report: Model }) {
       />
 
       {shown.length > 0 && (
-        <Section title="对局证据" hint="裁判逐维度的判决和理由；两轮顺序不一致的按规则记平。">
+        <Section title="Duel evidence" hint="The judge's verdict and reason on each dimension; when the two orderings disagree, the rule records a tie.">
           <Duels duels={shown} />
         </Section>
       )}
 
-      <section aria-label="明细" className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-muted-foreground">明细</h2>
+      <section aria-label="Details" className="flex flex-col gap-2">
+        <h2 className="text-sm font-medium text-muted-foreground">Details</h2>
         {rest.length > 0 && (
-          <Fold title={shown.length > 0 ? "没有评出结果的对局" : "裁判的逐场判决"} count={`${rest.length} 场`}>
+          <Fold title={shown.length > 0 ? "Duels with no result" : "Judge verdicts, duel by duel"} count={`${rest.length} duels`}>
             <Duels duels={rest} />
           </Fold>
         )}
         {r.trials.length > 0 && (
-          <Fold title="每次试验" count={`${r.trials.length} 次`} defaultOpen><Trials trials={r.trials} /></Fold>
+          <Fold title="Every trial" count={`${r.trials.length} trials`} defaultOpen><Trials trials={r.trials} /></Fold>
         )}
         {r.outputs.length > 0 && (
-          <Fold title="候选的原始输出" count={`${r.outputs.length} 份`}><Outputs outputs={r.outputs} /></Fold>
+          <Fold title="Raw candidate outputs" count={`${r.outputs.length} outputs`}><Outputs outputs={r.outputs} /></Fold>
         )}
-        <Fold title="这次没有观测到的内容" count={r.gaps.length ? `${r.gaps.length} 条` : undefined}>
+        <Fold title="What this run did not observe" count={r.gaps.length ? `${r.gaps.length} items` : undefined}>
           <Gaps gaps={r.gaps} />
         </Fold>
-        <Fold title="运行信息">
+        <Fold title="Run information">
           <RunFacts facts={r.facts} />
           <RawRecords sampleTrial={r.sampleTrial} manifest={r.manifest} />
         </Fold>
       </section>
 
       <footer className="text-xs text-muted-foreground">
-        证据文件在运行目录 <span className="font-mono">{r.dirName}/</span> 下。
+        Evidence files are in the run directory <span className="font-mono">{r.dirName}/</span>.
       </footer>
     </article>
   );

@@ -28,7 +28,7 @@ export function FailureMatrix({ rows, onPick }: Props) {
   if (matrix.total === 0) {
     return (
       <Empty>
-        <EmptyHeader><EmptyTitle>这次运行没有 scores.jsonl</EmptyTitle></EmptyHeader>
+        <EmptyHeader><EmptyTitle>This run has no scores.jsonl</EmptyTitle></EmptyHeader>
       </Empty>
     );
   }
@@ -40,7 +40,7 @@ export function FailureMatrix({ rows, onPick }: Props) {
           <TableRow>
             {/* The label column takes the slack so the outcome columns stay
                 narrow and side by side, which is how the grid is read. */}
-            <TableHead className="w-full">完成状态 \ 任务结果</TableHead>
+            <TableHead className="w-full">Completion \ outcome</TableHead>
             {matrix.outcomes.map((o) => (
               <TableHead key={o} className="px-4 text-center whitespace-nowrap">
                 <Tag tone={outcomeTone(o)}>{o}</Tag>
@@ -79,11 +79,11 @@ export function FailureMatrix({ rows, onPick }: Props) {
         </TableBody>
       </Table>
       <p className="text-xs text-muted-foreground">
-        {matrix.total} 次试验。点数字看具体是哪几次。
+        {matrix.total} trials. Click a number to see which ones.
         {quiet > 0 && (
           <>
-            {" "}其中 <b>{quiet}</b> 次「跑完了但没做对」——
-            候选答了，答案没站住，这类最容易被平均分盖掉。
+            {" "}<b>{quiet}</b> of them "finished but got it wrong" -
+             the candidate answered and the answer did not hold up; these are the easiest to hide behind an average.
           </>
         )}
       </p>

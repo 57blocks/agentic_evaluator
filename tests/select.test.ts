@@ -229,5 +229,5 @@ test("canonical report for codegen fixture names the recommendation, not pairwis
   const html = renderRunReport(await loadBundle(path.join(FIXTURES, "codegen-w38")));
   assert.match(html, /sonnet-5/);
   assert.match(html, /select-v1/);
-  assert.doesNotMatch(html, /不给出选型推荐/);
+  assert.doesNotMatch(html, /makes no recommendation/);
 });

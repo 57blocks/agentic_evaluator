@@ -11,13 +11,13 @@ export function Preference({ table }: { table: PreferenceTable | null }) {
   return (
     <figure className="flex min-w-0 flex-col gap-2">
       <figcaption className="text-sm font-medium">
-        各维度成对胜率（0–100） <span className="text-xs font-normal text-muted-foreground">平局算半场</span>
+        Pairwise win rate by dimension (0-100) <span className="text-xs font-normal text-muted-foreground">a tie counts as half</span>
       </figcaption>
       <div className="overflow-x-auto">
         <table className="w-full border-separate border-spacing-0.5 text-sm">
           <thead>
             <tr>
-              <th className="px-2 text-left text-xs font-medium text-muted-foreground">候选</th>
+              <th className="px-2 text-left text-xs font-medium text-muted-foreground">Candidate</th>
               {table.dims.map((d) => (
                 <th key={d} className="px-2 text-right text-xs font-medium whitespace-nowrap text-muted-foreground">{d}</th>
               ))}

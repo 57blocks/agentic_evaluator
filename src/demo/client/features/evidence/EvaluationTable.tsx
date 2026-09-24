@@ -25,19 +25,19 @@ export function EvaluationTable({ rows }: { rows: EvaluationRow[] }) {
         ))}
       </div>
       <p className="text-xs text-muted-foreground">
-        <code className="font-mono">evaluator_error</code> 和{" "}
-        <code className="font-mono">not_evaluated</code> 是评估器的状态，不是候选的失败——
-        它们不计入候选得分，只让分母变小。
+        <code className="font-mono">evaluator_error</code> and{" "}
+        <code className="font-mono">not_evaluated</code> are evaluator states, not candidate failures -
+         they do not count against a candidate, they only shrink the denominator.
       </p>
       <ScrollArea className="max-h-[50vh] border border-border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>步骤</TableHead>
-              <TableHead>评估器</TableHead>
-              <TableHead>候选</TableHead>
-              <TableHead>状态</TableHead>
-              <TableHead>原因</TableHead>
+              <TableHead>Step</TableHead>
+              <TableHead>Evaluator</TableHead>
+              <TableHead>Candidate</TableHead>
+              <TableHead>State</TableHead>
+              <TableHead>Reason</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

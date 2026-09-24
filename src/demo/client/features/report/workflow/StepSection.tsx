@@ -6,7 +6,7 @@
 
 import { Tag } from "@/components/tag";
 import type { CandidateMeta, WorkflowStep } from "../../../../../workflow-report-model.js";
-import { fmtPct, fmtScore, fmtSec, fmtUsd } from "../../../../../report-format.js";
+import { fmtPct, fmtScore, fmtSec, fmtUsd, plural } from "../../../../../report-format.js";
 import { navigate } from "@/app/routes";
 import { firmnessTone } from "@/lib/tone";
 import { Badge } from "@/components/ui/badge";
@@ -47,12 +47,12 @@ function Dimensions({ step }: { step: WorkflowStep }) {
   return (
     <div className="flex flex-col gap-1.5">
       <p className="text-xs font-medium">
-        维度细分 · 绝对分 1–5 <span className="font-normal text-muted-foreground">加粗 ↓ 表示低于 {DIP}</span>
+        By dimension · absolute score 1-5 <span className="font-normal text-muted-foreground">bold ↓ means below {DIP}</span>
       </p>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>候选</TableHead>
+            <TableHead>Candidate</TableHead>
             {r.dims.map((d) => <TableHead key={d} className="text-right">{d}</TableHead>)}
           </TableRow>
         </TableHeader>
@@ -87,21 +87,21 @@ interface Props {
 
 export function StepSection({ step, index, runId, root, colorOf }: Props) {
   const r = step.report;
-  const title = `步骤 ${index + 1} · ${step.id}`;
+  const title = `Step ${index + 1} · ${step.id}`;
   if (!r) {
     return (
-      <Section title={title} hint="这一步的报告读不出来">
+      <Section title={title} hint="This step's report could not be read">
         <Note>{step.error}</Note>
       </Section>
     );
   }
   const fav = r.verdict.judge?.sole ? r.verdict.judge.candidate : null;
   return (
-    <Section title={title} hint={`${r.plan.inputs} 个输入 × 每组 ${r.plan.trialsPer} 次 · 运行模式：${r.verdict.modeLabel}`}>
+    <Section title={title} hint={`${plural(r.plan.inputs, "input")} × ${plural(r.plan.trialsPer, "trial")} each · operating mode: ${r.verdict.modeLabel}`}>
       <div className="flex flex-wrap items-center gap-2">
         <Tag tone={firmnessTone(r.verdict.firmness)}>{r.verdict.firmnessLabel}</Tag>
         <span className="text-xs">
-          {r.verdict.chosen ? <>推荐 <b className="font-mono text-brand">{r.verdict.chosen}</b></> : "没有可推荐的候选"}
+          {r.verdict.chosen ? <>Recommended: <b className="font-mono text-brand">{r.verdict.chosen}</b></> : "No candidate to recommend"}
         </span>
         <Button
           size="xs"
@@ -110,21 +110,21 @@ export function StepSection({ step, index, runId, root, colorOf }: Props) {
           data-export-omit=""
           onClick={() => navigate({ view: "report", runId, dir: `${root}/${step.dir}` })}
         >
-          这一步的完整报告
+          Full report for this step
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">{r.verdict.text}</p>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>候选</TableHead>
-            <TableHead className="text-right">绝对分 /5</TableHead>
-            <TableHead className="text-right">战绩 胜–负–平</TableHead>
-            <TableHead className="text-right">胜率</TableHead>
-            <TableHead className="text-right">必过检查</TableHead>
-            <TableHead className="text-right">正常完成</TableHead>
-            <TableHead className="text-right">每次成功成本</TableHead>
-            <TableHead className="text-right">中位耗时</TableHead>
+            <TableHead>Candidate</TableHead>
+            <TableHead className="text-right">Absolute /5</TableHead>
+            <TableHead className="text-right">Record W-L-T</TableHead>
+            <TableHead className="text-right">Win rate</TableHead>
+            <TableHead className="text-right">Required check</TableHead>
+            <TableHead className="text-right">Completed</TableHead>
+            <TableHead className="text-right">Cost per success</TableHead>
+            <TableHead className="text-right">Median duration</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -136,9 +136,9 @@ export function StepSection({ step, index, runId, root, colorOf }: Props) {
                   <span className="flex flex-wrap items-center gap-1.5">
                     <Swatch slot={slot} />
                     <span className="font-mono font-medium">{c.id}</span>
-                    {c.chosen && <Badge>推荐</Badge>}
-                    {fav === c.id && <Badge variant="secondary">裁判最偏好</Badge>}
-                    {c.gated && <Badge variant="outline">未通过门槛</Badge>}
+                    {c.chosen && <Badge>Recommended</Badge>}
+                    {fav === c.id && <Badge variant="secondary">Judge's favourite</Badge>}
+                    {c.gated && <Badge variant="outline">Gated out</Badge>}
                   </span>
                 </TableCell>
                 <TableCell className="text-right"><ScoreBar value={c.absolute} slot={slot} /></TableCell>

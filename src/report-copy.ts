@@ -1,10 +1,10 @@
 /**
- * The report's sentences, in Chinese, built from structured data.
+ * The report's sentences, built from structured data.
  *
- * The selector writes its reasons in English into recommendation.json, and
- * those stay as they are — they are a protocol artifact, read by tools and
- * by audits. A reader, though, should not get an English clause spliced into
- * a Chinese sentence. So every sentence here is rebuilt from the numbers the
+ * The selector writes its reasons into recommendation.json, and those stay
+ * as they are — they are a protocol artifact, read by tools and by audits,
+ * terse and machine-shaped. A reader should not get those raw clauses spliced
+ * into the page. So every sentence here is rebuilt from the numbers the
  * decision was made on (gates, thresholds, each candidate's rates), and only
  * a reason this file does not recognise falls through verbatim.
  *
@@ -18,57 +18,57 @@ import type { EligibilityThresholds } from "./canon/types.js";
 // ── labels ──────────────────────────────────────────────────────────────────
 
 const MODE_LABEL: Record<string, string> = {
-  "lowest-cost": "成本最低",
-  "fastest-within-cost-ceiling": "成本上限内最快",
-  "highest-assurance": "最稳妥",
-  "judge-preference": "裁判偏好",
+  "lowest-cost": "lowest cost",
+  "fastest-within-cost-ceiling": "fastest within cost ceiling",
+  "highest-assurance": "highest assurance",
+  "judge-preference": "judge preference",
 };
 
 export function modeLabel(mode: string | null | undefined): string {
-  if (!mode) return "未声明运行模式";
+  if (!mode) return "no operating mode declared";
   return MODE_LABEL[mode] ?? mode;
 }
 
 const MODE_EXPLAIN: Record<string, string> = {
-  "lowest-cost": "在通过全部门槛的候选里，选每次成功生成成本最低的。",
-  "fastest-within-cost-ceiling": "在成本上限以内，选中位耗时最短的。",
-  "highest-assurance": "选任务成功率最高的；并列时看必过检查通过率，再看成本。",
-  "judge-preference": "没有确定性检查可用，按裁判偏好排序；结论最多只能「仅供参考」。",
+  "lowest-cost": "Among the candidates that pass every gate, pick the one with the lowest generation cost per success.",
+  "fastest-within-cost-ceiling": "Within the cost ceiling, pick the one with the shortest median duration.",
+  "highest-assurance": "Pick the highest reliability; break ties on required-check pass rate, then on cost.",
+  "judge-preference": "No deterministic check is available, so candidates are ranked by judge preference; the result can be directional at best.",
 };
 
 /** What an operating mode does, in one sentence. */
 export function modeExplain(mode: string | null | undefined): string {
-  if (!mode) return "没有声明运行模式，合格候选之间不会做选择。";
-  return MODE_EXPLAIN[mode] ?? `运行模式 ${mode}。`;
+  if (!mode) return "No operating mode is declared, so no choice is made among eligible candidates.";
+  return MODE_EXPLAIN[mode] ?? `Operating mode ${mode}.`;
 }
 
 export const FIRMNESS_LABEL: Record<Recommendation["firmness"], string> = {
-  firm: "结论可靠",
-  directional: "仅供参考",
-  "needs-review": "需要人工判断",
+  firm: "firm",
+  directional: "directional",
+  "needs-review": "needs review",
 };
 
 const COMPLETION_LABEL: Record<string, string> = {
-  success: "正常完成",
-  refusal: "拒答",
-  timeout: "超时",
-  malformed: "输出格式错误",
-  cancelled: "已取消",
-  provider_error: "服务商出错",
-  skipped: "跳过",
+  success: "completed",
+  refusal: "refused",
+  timeout: "timed out",
+  malformed: "malformed output",
+  cancelled: "cancelled",
+  provider_error: "provider error",
+  skipped: "skipped",
 };
 
 const OUTCOME_LABEL: Record<string, string> = {
-  success: "成功",
-  failure: "失败",
-  undetermined: "未判定",
+  success: "success",
+  failure: "failure",
+  undetermined: "undetermined",
 };
 
 const EVALUATION_LABEL: Record<string, string> = {
-  pass: "通过",
-  fail: "未通过",
-  not_evaluated: "未评估",
-  evaluator_error: "评估器出错",
+  pass: "pass",
+  fail: "fail",
+  not_evaluated: "not evaluated",
+  evaluator_error: "evaluator error",
 };
 
 export const completionLabel = (s: string): string => COMPLETION_LABEL[s] ?? s;
@@ -79,12 +79,14 @@ export const evaluationLabel = (s: string): string => EVALUATION_LABEL[s] ?? s;
 
 const pct = (v: number): string => `${(v * 100).toFixed(v === 1 || v === 0 ? 0 : 1)}%`;
 
-/** `88.9%（8/9）`, or `无法计算（0/0）` when nothing was counted. */
+/** `88.9% (8/9)`, or `n/a (0/0)` when nothing was counted. */
 export function rateText(r: Rate): string {
-  return r.value === null ? `无法计算（${r.numerator}/${r.denominator}）` : `${pct(r.value)}（${r.numerator}/${r.denominator}）`;
+  return r.value === null ? `n/a (${r.numerator}/${r.denominator})` : `${pct(r.value)} (${r.numerator}/${r.denominator})`;
 }
 
 const usd = (v: number): string => `$${v.toFixed(4)}`;
+
+const capitalize = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
 // ── the gates ────────────────────────────────────────────────────────────────
 
@@ -97,15 +99,15 @@ export interface GateRow {
 function gateLabel(id: string, e: EligibilityThresholds, fallback: string): string {
   switch (id) {
     case "qualifying-success-criteria":
-      return "规格声明了必过检查";
+      return "spec declares a required check";
     case "required-check-pass-rate":
-      return e.minimum_required_check_pass_rate === null ? fallback : `必过检查通过率 ≥ ${pct(e.minimum_required_check_pass_rate)}`;
+      return e.minimum_required_check_pass_rate === null ? fallback : `required-check pass rate ≥ ${pct(e.minimum_required_check_pass_rate)}`;
     case "reliability":
-      return e.minimum_reliability === null ? fallback : `任务成功率 ≥ ${pct(e.minimum_reliability)}`;
+      return e.minimum_reliability === null ? fallback : `reliability ≥ ${pct(e.minimum_reliability)}`;
     case "p95-ceiling":
-      return e.maximum_p95_ms === null ? fallback : `p95 耗时 ≤ ${e.maximum_p95_ms} ms`;
+      return e.maximum_p95_ms === null ? fallback : `p95 duration ≤ ${e.maximum_p95_ms} ms`;
     case "cost-ceiling":
-      return e.cost_ceiling_per_success_usd === null ? fallback : `每次成功成本 ≤ $${e.cost_ceiling_per_success_usd}`;
+      return e.cost_ceiling_per_success_usd === null ? fallback : `cost per success ≤ $${e.cost_ceiling_per_success_usd}`;
     default:
       return fallback;
   }
@@ -113,7 +115,7 @@ function gateLabel(id: string, e: EligibilityThresholds, fallback: string): stri
 
 /**
  * The gates a step will apply, in the order the selector applies them —
- * the same order and the same words the report's 筛选过程 uses afterwards.
+ * the same order and the same words the report's gate walkthrough uses afterwards.
  */
 export function gateLabels(e: EligibilityThresholds, requiredChecks: readonly string[], mode: string | null | undefined): string[] {
   const ids: string[] = [];
@@ -130,15 +132,15 @@ function removedDetail(gate: string, candidate: string, rec: Recommendation, fal
   if (!t) return fallback;
   switch (gate) {
     case "qualifying-success-criteria":
-      return "规格没有声明必过检查";
+      return "spec declares no required check";
     case "required-check-pass-rate":
-      return `必过检查通过 ${rateText(t.required_check_pass_rate)}`;
+      return `required check passed ${rateText(t.required_check_pass_rate)}`;
     case "reliability":
-      return `任务成功 ${rateText(t.reliability)}`;
+      return `reliability ${rateText(t.reliability)}`;
     case "p95-ceiling":
-      return t.p95_ms === null ? "测不到 p95 耗时" : `p95 ${t.p95_ms} ms`;
+      return t.p95_ms === null ? "p95 duration not measured" : `p95 ${t.p95_ms} ms`;
     case "cost-ceiling":
-      return t.generation_cost_per_success === null ? "没有成功的任务，成本无法计算" : usd(t.generation_cost_per_success);
+      return t.generation_cost_per_success === null ? "no successful task, so cost is n/a" : usd(t.generation_cost_per_success);
     default:
       return fallback;
   }
@@ -159,22 +161,22 @@ function pickClause(rec: Recommendation): string {
   const chosen = rec.chosen as string;
   const t = rec.tradeoffs.find((x) => x.candidate === chosen);
   const n = rec.eligible.length;
-  const among = n > 1 ? `在通过全部门槛的 ${n} 个候选里，` : "它是唯一通过全部门槛的候选，";
+  const among = n > 1 ? `Of the ${n} candidates that pass every gate, ` : "It is the only candidate that passes every gate; ";
   switch (rec.operating_mode) {
     case "lowest-cost":
       return t?.generation_cost_per_success != null
-        ? `${among}${chosen} 每次成功的生成成本最低（${usd(t.generation_cost_per_success)}）。`
-        : `${among}按成本最低选出 ${chosen}。`;
+        ? `${among}${chosen} has the lowest generation cost per success (${usd(t.generation_cost_per_success)}). `
+        : `${among}${chosen} is picked by lowest cost. `;
     case "fastest-within-cost-ceiling":
       return t?.p50_ms != null
-        ? `${among}${chosen} 的中位耗时最短（${(t.p50_ms / 1000).toFixed(1)} s）。`
-        : `${among}按成本上限内最快选出 ${chosen}。`;
+        ? `${among}${chosen} has the shortest median duration (${(t.p50_ms / 1000).toFixed(1)} s). `
+        : `${among}${chosen} is picked as fastest within the cost ceiling. `;
     case "highest-assurance":
-      return t ? `${among}${chosen} 的任务成功率最高（${rateText(t.reliability)}）。` : `${among}按最稳妥选出 ${chosen}。`;
+      return t ? `${among}${chosen} has the highest reliability (${rateText(t.reliability)}). ` : `${among}${chosen} is picked by highest assurance. `;
     case "judge-preference":
-      return `这一步没有确定性检查可以判断对错，推荐只反映裁判模型的偏好：${chosen} 最受偏好。`;
+      return `This step has no deterministic check to tell right from wrong, so the recommendation reflects only the judge model's preference: ${chosen} is preferred most. `;
     default:
-      return `推荐 ${chosen}。`;
+      return `Recommend ${chosen}. `;
   }
 }
 
@@ -183,44 +185,44 @@ function keptControlClause(rec: Recommendation): string {
   const first = rec.reasons[0] ?? "";
   const m = first.match(/^(?:cheapest|fastest) eligible is (\S+)/);
   if (!m || !rec.control_candidate) return "";
-  return `${m[1]} 虽然更${first.startsWith("cheapest") ? "便宜" : "快"}，但差距没有达到规格声明的最小有意义差异，所以保留对照 ${rec.control_candidate}。`;
+  return `${m[1]} is ${first.startsWith("cheapest") ? "cheaper" : "faster"}, but not by the minimum meaningful difference the spec declares, so the control ${rec.control_candidate} is kept.`;
 }
 
 function controlClause(rec: Recommendation): string {
   const control = rec.control_candidate;
   if (!control || !rec.chosen) return "";
-  if (rec.chosen === control) return keptControlClause(rec) || "它同时也是对照候选。";
+  if (rec.chosen === control) return keptControlClause(rec) || "It is also the control candidate.";
   const beats = rec.compared_to_control?.beats_control;
-  if (beats === true) return `比对照 ${control} 更好。`;
-  if (beats === false) return `和对照 ${control} 相比没有优势。`;
+  if (beats === true) return `It beats the control ${control}.`;
+  if (beats === false) return `It has no advantage over the control ${control}.`;
   return "";
 }
 
 /** One paragraph: what is recommended and why, or why nothing is. */
 export function recommendationSentence(rec: Recommendation): string {
-  if (rec.chosen) return pickClause(rec) + controlClause(rec);
-  if (!rec.operating_mode) return "规格没有声明运行模式，所以无法在合格候选之间做选择。";
-  if (rec.eligible.length === 0) return "没有候选通过全部门槛，所以这一步不给推荐。";
-  return `有 ${rec.eligible.length} 个候选合格，但按「${modeLabel(rec.operating_mode)}」分不出高下。`;
+  if (rec.chosen) return (pickClause(rec) + controlClause(rec)).trim();
+  if (!rec.operating_mode) return "The spec declares no operating mode, so no choice can be made among eligible candidates.";
+  if (rec.eligible.length === 0) return "No candidate passes every gate, so this step makes no recommendation.";
+  return `${rec.eligible.length} candidates are eligible, but "${modeLabel(rec.operating_mode)}" cannot separate them.`;
 }
 
 // ── how firm, and what the judge thought ─────────────────────────────────────
 
 function directionalReason(reason: string): string {
   const inputs = reason.match(/^(\d+) inputs?; fewer than (\d+)/) ?? reason.match(/^fewer than (\d+) inputs/);
-  if (inputs && inputs.length === 3) return `只有 ${inputs[1]} 个输入（少于 ${inputs[2]} 个）`;
-  if (inputs) return `输入少于 ${inputs[1]} 个`;
-  if (/no minimum meaningful difference/.test(reason)) return "规格没有声明最小有意义差异";
-  if (/^judge-preference/.test(reason)) return "排序完全依赖裁判模型";
+  if (inputs && inputs.length === 3) return `only ${inputs[1]} input(s) (fewer than ${inputs[2]})`;
+  if (inputs) return `fewer than ${inputs[1]} inputs`;
+  if (/no minimum meaningful difference/.test(reason)) return "the spec declares no minimum meaningful difference";
+  if (/^judge-preference/.test(reason)) return "the ranking rests entirely on the judge model";
   return reason;
 }
 
 /** Why the recommendation is as firm as it is, in words a reader can act on. */
 export function firmnessNote(firmness: Recommendation["firmness"], directionalReasons: readonly string[]): string {
-  if (firmness === "firm") return "样本量和阈值都满足决策要求。";
-  if (firmness === "needs-review") return "这一步没有可采纳的推荐，需要有人看过下面的证据再决定。";
+  if (firmness === "firm") return "Sample size and thresholds both meet the bar for a decision.";
+  if (firmness === "needs-review") return "This step has no recommendation to adopt; someone needs to review the evidence below and decide.";
   const why = directionalReasons.map(directionalReason);
-  return why.length > 0 ? `${why.join("，")}，所以这个结论只能作为方向参考。` : "这个结论只能作为方向参考。";
+  return why.length > 0 ? `${capitalize(why.join(", "))}, so this result is directional only.` : "This result is directional only.";
 }
 
 export interface JudgePick {
@@ -235,11 +237,11 @@ export interface JudgePick {
 
 /** The judge's favourite, always kept apart from the recommendation. */
 export function judgeNote(j: JudgePick | null, chosen: string | null): string {
-  if (!j) return "这次没有可用的成对比较。";
-  if (!j.sole) return "裁判没有分出高下：胜率最高的候选不止一个。";
-  const record = `${j.wins} 胜 ${j.losses} 负 ${j.ties} 平，共 ${j.comparisons} 场`;
-  const head = `裁判最偏好 ${j.candidate}（${record}）`;
-  if (j.disagrees) return `${head}，和推荐不一致——推荐只在通过必过检查的候选之间按运行模式比较，不参考裁判偏好。`;
-  if (chosen === j.candidate) return `${head}，和推荐一致。`;
-  return `${head}。`;
+  if (!j) return "No pairwise comparison was available this run.";
+  if (!j.sole) return "The judge did not separate the candidates: more than one shares the top win rate.";
+  const record = `${j.wins} W ${j.losses} L ${j.ties} T of ${j.comparisons}`;
+  const head = `The judge preferred ${j.candidate} most (${record})`;
+  if (j.disagrees) return `${head}, which differs from the recommendation — the recommendation compares only candidates that pass the required checks, by operating mode, and does not use judge preference.`;
+  if (chosen === j.candidate) return `${head}, which matches the recommendation.`;
+  return `${head}.`;
 }

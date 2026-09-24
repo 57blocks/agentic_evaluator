@@ -8,7 +8,7 @@
 import { Tag } from "@/components/tag";
 import type { WorkflowReport as Model } from "../../../../report-model.js";
 import type { WorkflowArm } from "../../../../canon/workflow.js";
-import { NO_PICK, STEPS_NOT_VALIDATED } from "../../../../report-format.js";
+import { NO_PICK, plural, STEPS_NOT_VALIDATED } from "../../../../report-format.js";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -37,10 +37,10 @@ function Chain({ report }: { report: Model }) {
   const proposed = v?.assignment ?? null;
   if (control === null && proposed === null) return null;
   return (
-    <Section title="两组方案各用了谁" hint="两组跑的是同一批输入和试验次数。">
+    <Section title="Who each arm used" hint="Both arms ran the same inputs and the same number of trials.">
       <Table>
         <TableHeader>
-          <TableRow><TableHead>步骤</TableHead><TableHead>对照组</TableHead><TableHead>推荐组合</TableHead></TableRow>
+          <TableRow><TableHead>Step</TableHead><TableHead>Control arm</TableHead><TableHead>Recommended combination</TableHead></TableRow>
         </TableHeader>
         <TableBody>
           {report.record.steps.map(({ id }) => {
@@ -56,14 +56,14 @@ function Chain({ report }: { report: Model }) {
           })}
         </TableBody>
       </Table>
-      <Note>对照组每一步都用同一个对照候选；推荐组合每一步用该步推荐的候选。箭头标出两组不同的步骤。</Note>
+      <Note>The control arm uses the same control candidate on every step; the recommended combination uses each step's recommended candidate. Arrows mark the steps where the arms differ.</Note>
     </Section>
   );
 }
 
 function ArmRow({ arm, label }: { arm: WorkflowArm | null; label: string }) {
   if (arm === null) {
-    return <TableRow><TableCell>{label}</TableCell><TableCell colSpan={5} className="text-muted-foreground">未运行</TableCell></TableRow>;
+    return <TableRow><TableCell>{label}</TableCell><TableCell colSpan={5} className="text-muted-foreground">Not run</TableCell></TableRow>;
   }
   return (
     <TableRow>
@@ -82,28 +82,28 @@ function Arms({ report }: { report: Model }) {
   if (!record.e2e_control && !record.e2e_proposed) return null;
   const d = record.e2e_validation?.deltas ?? null;
   return (
-    <Section title="端到端结果" hint="把整条链从头跑到尾，两组各成功了多少。">
+    <Section title="End-to-end results" hint="The whole chain run start to finish: how often each arm succeeded.">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>组</TableHead><TableHead className="text-right">跑了几次</TableHead><TableHead className="text-right">成功</TableHead>
-            <TableHead className="text-right">失败</TableHead><TableHead className="text-right">未判定</TableHead><TableHead className="text-right">成本</TableHead>
+            <TableHead>Arm</TableHead><TableHead className="text-right">Runs</TableHead><TableHead className="text-right">Success</TableHead>
+            <TableHead className="text-right">Failure</TableHead><TableHead className="text-right">Undetermined</TableHead><TableHead className="text-right">Cost</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <ArmRow arm={record.e2e_control ?? null} label="对照组" />
-          <ArmRow arm={record.e2e_proposed ?? null} label="推荐组合" />
+          <ArmRow arm={record.e2e_control ?? null} label="Control arm" />
+          <ArmRow arm={record.e2e_proposed ?? null} label="Recommended combination" />
         </TableBody>
       </Table>
       {d ? (
         <Note>
-          按 <Code>{d.metric}</Code> 判定：推荐组合 {num(d.proposed, 4)}，对照组 {num(d.control, 4)}，提升 {num(d.improvement, 4)}；
-          规格要求的最小有意义差异是 {d.mmd === null ? "未声明" : d.mmd}。
+          Decided on <Code>{d.metric}</Code>: recommended combination {num(d.proposed, 4)}, control arm {num(d.control, 4)}, improvement {num(d.improvement, 4)};
+           the spec's minimum meaningful difference is {d.mmd === null ? "not declared" : d.mmd}.
           {d.paired &&
-            ` 逐例配对 ${d.paired.compared} 例：两组都成功 ${d.paired.both_success}，只有推荐组合成功 ${d.paired.proposed_only}，只有对照组成功 ${d.paired.control_only}，都失败 ${d.paired.neither}。`}
+            ` Paired by case, ${d.paired.compared} cases: both succeeded ${d.paired.both_success}, only the recommended combination ${d.paired.proposed_only}, only the control arm ${d.paired.control_only}, neither ${d.paired.neither}.`}
         </Note>
       ) : (
-        <Note>这次判定没有用到指标差值。</Note>
+        <Note>This verdict did not use a metric difference.</Note>
       )}
     </Section>
   );
@@ -112,11 +112,11 @@ function Arms({ report }: { report: Model }) {
 function Ledger({ report }: { report: Model }) {
   const l = report.record.ledger;
   const rows: Array<[string, number, boolean?]> = [
-    ["候选生成", l.generation], ["成对裁判", l.judging], ["绝对打分", l.scoring], ["确定性检查", l.checks], ["重试", l.retries],
-    ["各步骤小计", l.steps_total], ["端到端验证", l.e2e_total], ["合计", l.total, true],
+    ["Candidate generation", l.generation], ["Pairwise judging", l.judging], ["Absolute scoring", l.scoring], ["Deterministic checks", l.checks], ["Retries", l.retries],
+    ["Steps subtotal", l.steps_total], ["End-to-end validation", l.e2e_total], ["Total", l.total, true],
   ];
   return (
-    <Section title="花费" hint={`数据来源：${l.source}`}>
+    <Section title="Spend" hint={`Source: ${l.source}`}>
       <Table>
         <TableBody>
           {rows.map(([label, v, total]) => (
@@ -127,7 +127,7 @@ function Ledger({ report }: { report: Model }) {
           ))}
         </TableBody>
       </Table>
-      <Note>端到端验证是额外跑的，单独列出，没有和各步骤重复计算。</Note>
+      <Note>End-to-end validation is an extra run, listed separately and not double-counted with the steps.</Note>
     </Section>
   );
 }
@@ -136,11 +136,11 @@ function Verdict({ report }: { report: Model }) {
   const d = report.digest;
   const v = report.record.e2e_validation ?? null;
   return (
-    <section aria-label="结论" className="flex flex-col gap-2 rounded-lg border border-l-4 border-border border-l-foreground bg-card p-5 shadow-(--shadow-card)">
-      <p className="text-xs font-medium text-muted-foreground">结论</p>
+    <section aria-label="Verdict" className="flex flex-col gap-2 rounded-lg border border-l-4 border-border border-l-foreground bg-card p-5 shadow-(--shadow-card)">
+      <p className="text-xs font-medium text-muted-foreground">Verdict</p>
       <h2 className="text-lg font-semibold leading-snug">{d?.headline ?? report.verdictLine}</h2>
       <p className="text-sm text-muted-foreground">
-        {v ? `端到端验证：${report.verdictLine}` : `${report.verdictLine}${STEPS_NOT_VALIDATED}`}
+        {v ? `End-to-end validation: ${report.verdictLine}` : `${report.verdictLine}${STEPS_NOT_VALIDATED}`}
       </p>
     </section>
   );
@@ -148,11 +148,11 @@ function Verdict({ report }: { report: Model }) {
 
 function Advice({ rows }: { rows: NonNullable<Model["digest"]>["advice"] }) {
   return (
-    <Section title="选型建议" hint="每一步按规格声明的门槛和运行模式选出，不参考裁判偏好。">
+    <Section title="Recommendations" hint="Each step is chosen by the spec's eligibility gates and operating mode, not by judge preference.">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>步骤</TableHead><TableHead>推荐</TableHead><TableHead>确信度</TableHead><TableHead>理由</TableHead>
+            <TableHead>Step</TableHead><TableHead>Recommended</TableHead><TableHead>Confidence</TableHead><TableHead>Reason</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -181,23 +181,23 @@ export function WorkflowReport({ report, runId, dir }: Props) {
   return (
     <article className="flex flex-col gap-5">
       <ReportHeader
-        eyebrow="工作流报告"
+        eyebrow="Workflow report"
         title={<span className="font-mono">{record.run_name}</span>}
-        subtitle={`${record.steps.length} 个步骤（${record.steps.map((s) => s.id).join(" → ")}），${record.handoff ? "前一步的输出交给下一步" : "各自独立评测"}`}
+        subtitle={`${record.steps.length} steps (${record.steps.map((s) => s.id).join(" → ")}), ${record.handoff ? "each step's output feeds the next" : "each evaluated independently"}`}
       />
       {d && (
         <dl className="flex flex-wrap gap-x-6 gap-y-1 text-xs">
-          <div className="flex gap-1.5"><dt className="text-muted-foreground">裁判</dt><dd className="font-mono">{d.judge ?? "—"}</dd></div>
+          <div className="flex gap-1.5"><dt className="text-muted-foreground">Judge</dt><dd className="font-mono">{d.judge ?? "—"}</dd></div>
           <div className="flex gap-1.5">
-            <dt className="text-muted-foreground">候选</dt>
+            <dt className="text-muted-foreground">Candidates</dt>
             <dd className="flex flex-wrap gap-x-3">
               {d.candidates.map((c) => (
                 <span key={c.id} className="inline-flex items-center gap-1.5 font-mono"><Swatch slot={c.colorIndex} />{c.id}</span>
               ))}
             </dd>
           </div>
-          <div className="flex gap-1.5"><dt className="text-muted-foreground">样本</dt><dd>每步 {inputs} 个输入 × 每组 {d.trialsPer ?? "—"} 次</dd></div>
-          <div className="flex gap-1.5"><dt className="text-muted-foreground">总花费</dt><dd className="font-mono">{usd(d.totalUsd)}</dd></div>
+          <div className="flex gap-1.5"><dt className="text-muted-foreground">Sample</dt><dd>{plural(inputs, "input")} per step × {plural(d.trialsPer ?? "—", "trial")} each</dd></div>
+          <div className="flex gap-1.5"><dt className="text-muted-foreground">Total spend</dt><dd className="font-mono">{usd(d.totalUsd)}</dd></div>
         </dl>
       )}
 
@@ -209,23 +209,23 @@ export function WorkflowReport({ report, runId, dir }: Props) {
       <Arms report={report} />
       {d && d.advice.length > 0 && <Advice rows={d.advice} />}
 
-      <section aria-label="明细" className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-muted-foreground">明细</h2>
+      <section aria-label="Details" className="flex flex-col gap-2">
+        <h2 className="text-sm font-medium text-muted-foreground">Details</h2>
         {d?.steps.map((s, i) =>
           s.report && s.report.duels.length > 0 ? (
-            <Fold key={s.id} title={`步骤 ${i + 1} · ${s.id} 的逐场判决`} count={`${s.report.duels.length} 场`}>
+            <Fold key={s.id} title={`Step ${i + 1} · ${s.id}: judge verdicts, duel by duel`} count={`${s.report.duels.length} duels`}>
               <Duels duels={s.report.duels} />
             </Fold>
           ) : null,
         )}
-        <Fold title="花费明细" count={usd(record.ledger.total)}><Ledger report={report} /></Fold>
-        <Fold title="这次没有观测或比较的内容" count={report.gaps.length ? `${report.gaps.length} 条` : undefined}>
+        <Fold title="Spend breakdown" count={usd(record.ledger.total)}><Ledger report={report} /></Fold>
+        <Fold title="What this run did not observe or compare" count={report.gaps.length ? `${report.gaps.length} items` : undefined}>
           <Gaps gaps={report.gaps} />
         </Fold>
       </section>
 
       <footer className="text-xs text-muted-foreground">
-        每一步的证据在运行目录 <span className="font-mono">{record.run_id}/</span> 下各自的子目录里。
+        Each step's evidence is in its own subdirectory of the run directory <span className="font-mono">{record.run_id}/</span>.
       </footer>
     </article>
   );

@@ -34,10 +34,10 @@ export function Radar({ dims, profiles, saturated, colorOf }: Props) {
     return (
       <figure className="flex flex-col gap-2">
         <figcaption className="text-sm font-medium">
-          各维度平均分 <span className="text-xs font-normal text-muted-foreground">没有画</span>
+          Mean score by dimension <span className="text-xs font-normal text-muted-foreground">not drawn</span>
         </figcaption>
         <p className="text-xs text-muted-foreground">
-          每个维度上所有候选的分都一样，画出来会是完全重合的图形，容易被误读成「势均力敌」。
+          Every candidate scored the same on every dimension; the shapes would overlap exactly and read as "evenly matched".
         </p>
       </figure>
     );
@@ -54,7 +54,7 @@ export function Radar({ dims, profiles, saturated, colorOf }: Props) {
   return (
     <figure className="flex min-w-0 flex-col gap-2">
       <figcaption className="text-sm font-medium">
-        各维度平均分 <span className="text-xs font-normal text-muted-foreground">中心 1 分，外圈 5 分</span>
+        Mean score by dimension <span className="text-xs font-normal text-muted-foreground">1 at the centre, 5 at the rim</span>
       </figcaption>
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         {series.map((p) => (
@@ -64,7 +64,7 @@ export function Radar({ dims, profiles, saturated, colorOf }: Props) {
           </span>
         ))}
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="各候选的维度得分轮廓">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Each candidate's score profile across dimensions">
         {[2, 3, 4, SCORE_MAX].map((v) => (
           <g key={v}>
             <polygon points={ring(v)} fill="none" stroke="var(--border)" />
@@ -103,7 +103,7 @@ export function Radar({ dims, profiles, saturated, colorOf }: Props) {
       </svg>
       {dropped > 0 && (
         <p className="text-xs text-muted-foreground">
-          还有 {dropped} 个候选没画——超过三条就看不出形状了，数值见下方表格。
+          {dropped} more candidates not drawn - beyond three the shapes become unreadable; see the table below for the numbers.
         </p>
       )}
     </figure>

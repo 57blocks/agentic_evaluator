@@ -20,22 +20,22 @@ export function RunControl({ task, onFinished }: Props) {
   const { phase, ack, handle, events, error, fetchPlan, start, cancel } = useRun(task, onFinished);
 
   return (
-    <section aria-label="运行控制" className={cn(SECTION_CARD, "border border-border bg-card p-4")}>
+    <section aria-label="Run control" className={cn(SECTION_CARD, "border border-border bg-card p-4")}>
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className={SECTION_TITLE}>跑一次</h2>
-        {phase === "running" && <Tag tone="brand">进行中</Tag>}
+        <h2 className={SECTION_TITLE}>Run it</h2>
+        {phase === "running" && <Tag tone="brand">Running</Tag>}
         {phase === "ended" && handle && <Tag tone={handle.status === "done" ? "ok" : handle.status === "failed" ? "bad" : "warn"}>{handle.status}</Tag>}
         <div className="ml-auto flex gap-2">
           {phase !== "running" && (
             <Button size="sm" variant="outline" onClick={fetchPlan} disabled={phase === "planning"}>
-              {phase === "planning" ? "读取中…" : "看看要花多少"}
+              {phase === "planning" ? "Reading…" : "See what it would cost"}
             </Button>
           )}
           {phase === "ready" && ack && (
-            <Button size="sm" onClick={start}>确认这些数字，开跑</Button>
+            <Button size="sm" onClick={start}>Confirm these numbers and run</Button>
           )}
           {phase === "running" && (
-            <Button size="sm" variant="outline" onClick={cancel}>取消</Button>
+            <Button size="sm" variant="outline" onClick={cancel}>Cancel</Button>
           )}
         </div>
       </div>
@@ -44,10 +44,10 @@ export function RunControl({ task, onFinished }: Props) {
 
       {ack && phase !== "running" && (
         <p className="mt-2 text-xs text-muted-foreground">
-          {ack.generations} 次生成 · {ack.judgeCalls} 次裁判 · {ack.scoreCalls} 次打分 ·{" "}
-          {ack.budgetUsd === null ? "未声明预算" : `预算上限 $${ack.budgetUsd}`}
+          {ack.generations} generation(s) · {ack.judgeCalls} judge call(s) · {ack.scoreCalls} score call(s) ·{" "}
+          {ack.budgetUsd === null ? "no budget declared" : `budget cap $${ack.budgetUsd}`}
           <span className="block">
-            这几个数字会随请求一起发回去；服务端当场重算，对不上就不开跑。
+            These numbers are sent back with the request; the server recomputes them and refuses to start if they differ.
           </span>
         </p>
       )}

@@ -32,11 +32,11 @@ function renderVerdict(record: WorkflowRecord): string {
     <p class="sub">${STEPS_NOT_VALIDATED}</p></div>
   </div>`;
   }
-  const reasons = (v.reasons ?? []).length > 0 ? v.reasons.map(escapeHtml).join("；") : "—";
+  const reasons = (v.reasons ?? []).length > 0 ? v.reasons.map(escapeHtml).join("; ") : "—";
   return `<div class="verdict ${workflowVerdictTone(v)}">
     <span class="tag">${escapeHtml(v.verdict)}</span>
     <div><p>${escapeHtml(workflowVerdictLine(v))}</p>
-    <p class="sub">${escapeHtml(v.firmness)} · 运行模式 ${escapeHtml(v.operating_mode ?? "—")} · 规则 ${escapeHtml(v.rule_version ?? "—")}<br>${reasons}</p></div>
+    <p class="sub">${escapeHtml(v.firmness)} · operating mode ${escapeHtml(v.operating_mode ?? "—")} · rule ${escapeHtml(v.rule_version ?? "—")}<br>${reasons}</p></div>
   </div>`;
 }
 
@@ -55,17 +55,17 @@ function renderChain(record: WorkflowRecord): string {
     })
     .join("");
   return `<section class="card">
-    <h2>两个臂的指派 <span class="hint">同一批 (输入, trial)</span></h2>
+    <h2>Arm assignments <span class="hint">the same (input, trial) pairs</span></h2>
     <div class="table-wrap"><table>
-      <thead><tr><th>step</th><th>control 臂</th><th>proposed 臂</th></tr></thead>
+      <thead><tr><th>Step</th><th>Control arm</th><th>Proposed arm</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
-    <p class="note">control 臂全链用同一个对照候选；proposed 臂用各 step 推荐的候选。箭头标出两者不同的 step。</p>
+    <p class="note">The control arm runs the control candidate on every step; the proposed arm runs each step's recommended candidate. Arrows mark the steps where the two differ.</p>
   </section>`;
 }
 
 function armRow(arm: WorkflowArm | null, label: string): string {
-  if (arm === null) return `<tr><td>${escapeHtml(label)}</td><td colspan="5" class="note">未运行</td></tr>`;
+  if (arm === null) return `<tr><td>${escapeHtml(label)}</td><td colspan="5" class="note">not run</td></tr>`;
   return `<tr><td class="cand">${escapeHtml(label)}</td><td class="num">${arm.cases ?? "—"}</td><td class="num">${arm.success}</td><td class="num">${arm.failure}</td><td class="num">${arm.undetermined}</td><td class="num">${usd(arm.cost_usd)}</td></tr>`;
 }
 
@@ -73,12 +73,12 @@ function renderArms(record: WorkflowRecord): string {
   if (!record.e2e_control && !record.e2e_proposed) return "";
   const deltas = record.e2e_validation?.deltas ?? null;
   const delta = deltas
-    ? `<p class="note">判定指标 <code>${escapeHtml(deltas.metric)}</code>：proposed ${num(deltas.proposed, 4)} vs control ${num(deltas.control, 4)}，改进 ${num(deltas.improvement, 4)}，最小有意义差异 ${deltas.mmd === null ? "未声明" : deltas.mmd}。配对 ${deltas.paired ? `${deltas.paired.compared} 例（两臂都成功 ${deltas.paired.both_success}，只有 proposed ${deltas.paired.proposed_only}，只有 control ${deltas.paired.control_only}，都失败 ${deltas.paired.neither}）` : "无"}。</p>`
-    : `<p class="note">没有指标比较：判决不依赖差值。</p>`;
+    ? `<p class="note">Decision metric <code>${escapeHtml(deltas.metric)}</code>: proposed ${num(deltas.proposed, 4)} vs control ${num(deltas.control, 4)}, improvement ${num(deltas.improvement, 4)}, minimum meaningful difference ${deltas.mmd === null ? "not declared" : deltas.mmd}. Paired: ${deltas.paired ? `${deltas.paired.compared} cases (both arms succeeded ${deltas.paired.both_success}, only proposed ${deltas.paired.proposed_only}, only control ${deltas.paired.control_only}, neither ${deltas.paired.neither})` : "none"}.</p>`
+    : `<p class="note">No metric comparison: the verdict does not depend on a difference.</p>`;
   return `<section class="card">
-    <h2>端到端两臂</h2>
+    <h2>End-to-end arms</h2>
     <div class="table-wrap"><table>
-      <thead><tr><th>臂</th><th class="num">工作流数</th><th class="num">成功</th><th class="num">失败</th><th class="num">未判定</th><th class="num">成本</th></tr></thead>
+      <thead><tr><th>Arm</th><th class="num">Workflows</th><th class="num">Success</th><th class="num">Failure</th><th class="num">Undetermined</th><th class="num">Cost</th></tr></thead>
       <tbody>${armRow(record.e2e_control ?? null, "control")}${armRow(record.e2e_proposed ?? null, "proposed")}</tbody>
     </table></div>
     ${delta}
@@ -86,11 +86,11 @@ function renderArms(record: WorkflowRecord): string {
 }
 
 function stepRow(s: WorkflowStepRecord): string {
-  const gated = (s.gated ?? []).length > 0 ? s.gated.map((g) => `${g.candidate}（${g.reason}）`).join("；") : "无";
+  const gated = (s.gated ?? []).length > 0 ? s.gated.map((g) => `${g.candidate} (${g.reason})`).join("; ") : "none";
   const link = `<a href="${encodeURIComponent(s.dir)}/report.html">${escapeHtml(s.dir)}/report.html</a>`;
   return `<tr class="${s.chosen ? "chosen" : ""}">
-    <td class="cand">${escapeHtml(s.id)}<span class="model">${escapeHtml(s.operating_mode ?? "无运行模式")}</span></td>
-    <td>${s.chosen ? escapeHtml(s.chosen) : '<span class="pill warn">无人合格</span>'}<span class="sub">${escapeHtml(s.firmness)}</span></td>
+    <td class="cand">${escapeHtml(s.id)}<span class="model">${escapeHtml(s.operating_mode ?? "no operating mode")}</span></td>
+    <td>${s.chosen ? escapeHtml(s.chosen) : '<span class="pill warn">no recommendation</span>'}<span class="sub">${escapeHtml(s.firmness)}</span></td>
     <td class="small">${escapeHtml(gated)}</td>
     <td class="num">${s.trials}</td>
     <td class="num">${s.ledger_total == null ? "—" : usd(s.ledger_total)}</td>
@@ -100,9 +100,9 @@ function stepRow(s: WorkflowStepRecord): string {
 
 function renderSteps(record: WorkflowRecord): string {
   return `<section class="card">
-    <h2>各 step 的推荐 <span class="hint">独立评测，未经工作流验证</span></h2>
+    <h2>Recommendation per step <span class="hint">evaluated independently, not validated as a workflow</span></h2>
     <div class="table-wrap"><table>
-      <thead><tr><th>step</th><th>推荐</th><th>被资格门剔除</th><th class="num">trials</th><th class="num">成本</th><th>报告</th></tr></thead>
+      <thead><tr><th>Step</th><th>Recommended</th><th>Gated out</th><th class="num">Trials</th><th class="num">Cost</th><th>Report</th></tr></thead>
       <tbody>${record.steps.map(stepRow).join("")}</tbody>
     </table></div>
   </section>`;
@@ -113,14 +113,14 @@ function renderLedger(record: WorkflowRecord): string {
   const row = (label: string, v: number, cls = ""): string =>
     `<tr class="${cls}"><td>${escapeHtml(label)}</td><td class="num">${usd(v)}</td></tr>`;
   return `<section class="card">
-    <h2>全工作流成本 <span class="hint">来源：${escapeHtml(l.source)}</span></h2>
+    <h2>Whole-workflow cost <span class="hint">source: ${escapeHtml(l.source)}</span></h2>
     <div class="table-wrap"><table class="ledger">
       <tbody>
-        ${row("生成", l.generation)}${row("裁判", l.judging)}${row("打分", l.scoring)}${row("检查", l.checks)}${row("重试", l.retries)}
-        ${row("各 step 合计", l.steps_total)}${row("端到端两臂", l.e2e_total)}${row("总系统成本", l.total, "total")}
+        ${row("Generation", l.generation)}${row("Judging", l.judging)}${row("Scoring", l.scoring)}${row("Checks", l.checks)}${row("Retries", l.retries)}
+        ${row("All steps", l.steps_total)}${row("End-to-end arms", l.e2e_total)}${row("Total system cost", l.total, "total")}
       </tbody>
     </table></div>
-    <p class="note">端到端的臂单列：那是额外的生成，不是对 step 证据的重复计数。</p>
+    <p class="note">The end-to-end arms are listed separately: they are extra generations, not a double count of the step evidence.</p>
   </section>`;
 }
 
@@ -135,7 +135,7 @@ function renderGaps(gaps: string): string {
     )
     .join("");
   return `<section class="card">
-    <h2>未观测与未比较 <span class="hint">GAPS.md</span></h2>
+    <h2>Not observed and not compared <span class="hint">GAPS.md</span></h2>
     <ul class="gaps">${blocks}</ul>
   </section>`;
 }
@@ -143,18 +143,18 @@ function renderGaps(gaps: string): string {
 export function renderWorkflowReport(record: WorkflowRecord, gaps: string): string {
   const steps = record.steps.length;
   return `<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escapeHtml(record.run_name)} 工作流报告</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(record.run_name)} workflow report</title>
 <style>${PAGE_STYLE}</style></head>
 <body><div class="page">
   <header class="run">
     <p class="eyebrow">Agentic Evaluator · workflow report · protocol ${escapeHtml(record.protocol_version)}</p>
-    <h1>工作流 · <span class="id">${escapeHtml(record.run_name)}</span></h1>
+    <h1>Workflow · <span class="id">${escapeHtml(record.run_name)}</span></h1>
     <dl class="kv">
-      <div><dt>运行</dt><dd>${escapeHtml(record.run_id)}</dd></div>
-      <div><dt>step 数</dt><dd>${steps} 个${record.handoff ? " · 链式交接" : " · 相互独立"}</dd></div>
-      <div><dt>总系统成本</dt><dd>${usd(record.ledger.total)}</dd></div>
-      <div><dt>端到端</dt><dd>${record.e2e_validation ? escapeHtml(`${record.e2e_validation.verdict} · ${record.e2e_validation.firmness}`) : "未做"}</dd></div>
+      <div><dt>Run</dt><dd>${escapeHtml(record.run_id)}</dd></div>
+      <div><dt>Steps</dt><dd>${steps}${record.handoff ? " · chained handoff" : " · independent"}</dd></div>
+      <div><dt>Total system cost</dt><dd>${usd(record.ledger.total)}</dd></div>
+      <div><dt>End-to-end</dt><dd>${record.e2e_validation ? escapeHtml(`${record.e2e_validation.verdict} · ${record.e2e_validation.firmness}`) : "not run"}</dd></div>
     </dl>
   </header>
   ${renderVerdict(record)}
@@ -163,7 +163,7 @@ export function renderWorkflowReport(record: WorkflowRecord, gaps: string): stri
   ${renderSteps(record)}
   ${renderLedger(record)}
   ${renderGaps(gaps)}
-  <footer><span>${escapeHtml(record.run_id)}/</span><span>workflow.json · e2e-validation.json</span><span>每个 step 的证据在各自目录</span></footer>
+  <footer><span>${escapeHtml(record.run_id)}/</span><span>workflow.json · e2e-validation.json</span><span>each step's evidence is in its own directory</span></footer>
 </div></body></html>
 `;
 }

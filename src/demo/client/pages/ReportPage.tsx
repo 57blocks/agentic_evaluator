@@ -35,8 +35,8 @@ function useReport(dir: string): State {
 
 function titleOf(model: ReportModel): string {
   return model.kind === "workflow"
-    ? `${model.record.run_name} 工作流报告`
-    : `${model.runName} · ${model.stepId} 运行报告`;
+    ? `${model.record.run_name} workflow report`
+    : `${model.runName} · ${model.stepId} run report`;
 }
 
 function fileOf(model: ReportModel): string {
@@ -56,13 +56,13 @@ export function ReportPage({ run, dir }: { run: RunView; dir: string }) {
   const body = useRef<HTMLDivElement>(null);
 
   if (state.status === "loading") {
-    return <Empty><EmptyHeader><EmptyTitle>载入报告…</EmptyTitle></EmptyHeader></Empty>;
+    return <Empty><EmptyHeader><EmptyTitle>Loading report…</EmptyTitle></EmptyHeader></Empty>;
   }
   if (state.status === "error") {
     return (
       <Empty>
         <EmptyHeader>
-          <EmptyTitle>这份报告生成不出来</EmptyTitle>
+          <EmptyTitle>This report could not be built</EmptyTitle>
           <EmptyDescription>{state.message}</EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -84,10 +84,10 @@ export function ReportPage({ run, dir }: { run: RunView; dir: string }) {
             size="sm"
             render={<a href={offline} target="_blank" rel="noopener noreferrer" />}
           >
-            原始 report.html
+            Original report.html
           </Button>
         )}
-        <Button size="sm" onClick={exportIt}>导出 HTML</Button>
+        <Button size="sm" onClick={exportIt}>Export HTML</Button>
       </div>
       <div ref={body}>
         {model.kind === "workflow" ? (

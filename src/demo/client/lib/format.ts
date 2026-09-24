@@ -46,7 +46,7 @@ export function spendLabel(task: TaskView): Spend | null {
   const spent = `$${task.spentUsd.toFixed(2)}`;
   if (task.budgetUsd == null) return { text: spent, over: false };
   const over = task.spentUsd > task.budgetUsd;
-  return { text: `${spent} / $${task.budgetUsd}${over ? " 超支" : ""}`, over };
+  return { text: `${spent} / $${task.budgetUsd}${over ? " over budget" : ""}`, over };
 }
 
 /**

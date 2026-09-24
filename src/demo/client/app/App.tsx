@@ -43,9 +43,9 @@ function Shell({ crumbs, children }: { crumbs: Crumb[]; children: React.ReactNod
 
 /** What the last crumb of a report page says: which step, or the workflow above them. */
 function reportLabel(run: RunView, dir: string): string {
-  if (dir === run.dir && run.kind === "workflow") return "工作流报告";
+  if (dir === run.dir && run.kind === "workflow") return "Workflow report";
   const step = run.steps.find((s) => s.dir === dir);
-  return `${step?.id ?? "步骤"} 报告`;
+  return `${step?.id ?? "Step"} report`;
 }
 
 /** The trail back, built from whatever the route resolved to. */
@@ -67,8 +67,8 @@ export function App() {
   const route = useRoute();
   const { catalog, overview, error, reload } = useWorkspace();
 
-  if (error) return <Shell crumbs={[]}><Notice title="读不到这个工作区" detail={error} /></Shell>;
-  if (!catalog) return <Shell crumbs={[]}><Notice title="载入中…" /></Shell>;
+  if (error) return <Shell crumbs={[]}><Notice title="Cannot read this workspace" detail={error} /></Shell>;
+  if (!catalog) return <Shell crumbs={[]}><Notice title="Loading…" /></Shell>;
 
   const task =
     route.view === "task" ? catalog.tasks.find((t) => t.specPath === route.specPath) : undefined;
@@ -83,7 +83,7 @@ export function App() {
         overview ? (
           <HomePage data={overview} catalog={catalog} />
         ) : (
-          <Notice title="载入中…" />
+          <Notice title="Loading…" />
         )
       ) : task ? (
         <TaskPage task={task} onRunFinished={reload} />
@@ -93,8 +93,8 @@ export function App() {
         <RunPage run={run} />
       ) : (
         <Notice
-          title="这个地址指向的东西不在了"
-          detail="任务或运行可能已经被删掉。回总览重新选一个。"
+          title="Nothing is at this address any more"
+          detail="The task or run may have been deleted. Go back to the overview and pick another."
         />
       )}
     </Shell>

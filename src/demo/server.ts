@@ -164,7 +164,7 @@ async function sendReport(ws: Workspace, res: http.ServerResponse, kind: string,
     return;
   }
   if (!(await hasReport(abs))) {
-    sendJson(res, 404, { error: "这个目录里没有可生成报告的运行" });
+    sendJson(res, 404, { error: "no run in this directory to build a report from" });
     return;
   }
   sendJson(res, 200, await loadReportModel(abs));
