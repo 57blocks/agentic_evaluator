@@ -96,7 +96,7 @@ const source = fail
   ? "export function add(a: number, b: number): number {\\n  return \\"nope\\";\\n}\\n"
   : "export function add(a: number, b: number): number {\\n  return a + b;\\n}\\n";
 fs.writeFileSync("add.ts", source);
-io.out(fail ? "wrote a deliberate type error\\n" : "ok\\n");
+process.stdout.write(fail ? "wrote a deliberate type error\\n" : "ok\\n");
 `;
 
 const TSCONFIG = `{
