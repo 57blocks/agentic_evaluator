@@ -196,6 +196,34 @@ test("report re-renders a finished run without touching its numbers", async () =
   await fs.rm(ws, { recursive: true, force: true });
 });
 
+test("report on a workflow run re-renders every step's page, not just the workflow page", async () => {
+  // Arrange - a finished multi-step run whose step page is stale.
+  const ws = await tempWorkspace();
+  await fs.cp(path.join(INSTALL_ROOT, "tasks", "smoke-workflow"), path.join(ws, "tasks", "smoke-workflow"), {
+    recursive: true,
+    filter: (s) => !s.includes(`${path.sep}runs`),
+  });
+  await run(["run", "smoke-workflow", "--yes", "--workspace", ws]);
+  const runsRoot = path.join(ws, "tasks", "smoke-workflow", "runs");
+  const runId = (await fs.readdir(runsRoot))[0];
+  const stepDirs = (await fs.readdir(path.join(runsRoot, runId), { withFileTypes: true }))
+    .filter((e) => e.isDirectory())
+    .map((e) => path.join(runsRoot, runId, e.name));
+  assert.ok(stepDirs.length > 1, "expected a multi-step run");
+  for (const dir of stepDirs) await fs.writeFile(path.join(dir, "report.html"), "STALE");
+
+  // Act
+  const r = await run(["report", runId, "--workspace", ws]);
+
+  // Assert
+  assert.equal(r.code, EXIT.ok);
+  for (const dir of stepDirs) {
+    assert.notEqual(await fs.readFile(path.join(dir, "report.html"), "utf-8"), "STALE", `${dir} was not re-rendered`);
+  }
+
+  await fs.rm(ws, { recursive: true, force: true });
+});
+
 test("report on a run that does not exist is a usage error", async () => {
   const ws = await tempWorkspace();
   await assert.rejects(main(["report", "no-such-run", "--workspace", ws], bufferIo()), UsageError);

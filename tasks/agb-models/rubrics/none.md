@@ -1,3 +1,4 @@
-# 未启用
+# Not used
 
-这个任务不用裁判，成败只由每一步的必过检查判定。spec 要求声明一个 rubric，所以有这个文件。
+This task has no judge; each step's required check alone decides success.
+The spec requires a rubric to be declared, which is why this file exists.

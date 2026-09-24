@@ -161,7 +161,7 @@ export function judgeFavourite(b: RunBundle): JudgeFavourite | null {
 export function verdictFacts(rec: Recommendation, chosenView: CandidateView | undefined): string[] {
   if (!rec.chosen || !chosenView) return [];
   return [
-    chosenView.costPerSuccess !== null ? `$${chosenView.costPerSuccess.toFixed(4)} per success` : null,
+    chosenView.costPerSuccess != null ? `$${chosenView.costPerSuccess.toFixed(4)} per success` : null,
     chosenView.checkExecuted > 0 ? `required check ${chosenView.checkPass}/${chosenView.checkExecuted} passed` : null,
   ].filter((x): x is string => x !== null);
 }
