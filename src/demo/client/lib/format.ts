@@ -1,5 +1,5 @@
 /**
- * View-model helpers for the demo UI — data in, data out, no DOM and no JSX.
+ * View-model helpers — data in, data out, no DOM and no JSX.
  *
  * These are the functions that decide what a reader is told: "needs review"
  * instead of a blank cell, a budget overrun called out rather than left to
@@ -8,28 +8,20 @@
  * decisions without rendering anything.
  */
 
-import type { RunView, TaskView } from "../catalog.js";
-
-/**
- * The four questions the protocol exists to answer. The page states them
- * because a reader who does not know what is being claimed cannot judge the
- * evidence below them.
- */
-export const PROTOCOL_QUESTIONS = [
-  ["1. 做对了吗", "任务结果 × 必过检查，不用平均分冒充成功"],
-  ["2. 这一步用谁", "每步自己的推荐，资格门先于选型"],
-  ["3. 成本还是速度", "只在合格候选里按 operating mode 选"],
-  ["4. 证据能否复现", "打开本步 report.html"],
-] as const;
-
-/** Wording for a step that produced no recommendation. */
-export const NEEDS_REVIEW = "需人工评审";
-
-/** Wording for a task that exists but has never been run. */
-export const NEVER_RAN = "未跑过";
+import type { RunView, TaskView } from "../../catalog.js";
+import { NEEDS_REVIEW } from "./copy.js";
 
 export function runDate(iso: string | null): string {
   return iso ? iso.slice(0, 10) : "";
+}
+
+/**
+ * What identifies a run to a reader: when it started. Its `runName` is the
+ * task's, so on a task's own page every run would otherwise carry the same
+ * label — the clock is the only thing that tells two of them apart.
+ */
+export function runStamp(run: RunView): string {
+  return (run.startedAt ?? run.id).slice(0, 16).replace("T", " ");
 }
 
 export function runMoney(usd: number | null): string {
@@ -57,11 +49,14 @@ export function spendLabel(task: TaskView): Spend | null {
   return { text: `${spent} / $${task.budgetUsd}${over ? " 超支" : ""}`, over };
 }
 
-/** What the task's most recent run concluded — the column you scan down. */
-export function latestLabel(task: TaskView): string {
+/**
+ * What the task's most recent run concluded, per step — the column you scan
+ * down. Null means the task has never run, which the list must say out loud
+ * rather than leave as a blank cell.
+ */
+export function latestVerdict(task: TaskView): string[] | null {
   const run = task.runs[0];
-  if (!run) return NEVER_RAN;
-  return `${runDate(run.startedAt)} · ${run.steps.map((s) => s.chosen ?? NEEDS_REVIEW).join(" / ")}`;
+  return run ? run.steps.map((s) => s.chosen ?? NEEDS_REVIEW) : null;
 }
 
 /** A task whose every run used scripted stand-ins proves the pipeline, not a model. */
@@ -69,14 +64,15 @@ export function isSmokeTask(task: TaskView): boolean {
   return task.runs.length > 0 && task.runs.every((r) => r.synthetic);
 }
 
-/** Badge tone for a step's recommendation firmness. */
-export function firmTone(firmness: string): "ok" | "warn" | "bad" {
-  if (firmness === "firm") return "ok";
-  if (firmness === "needs-review") return "bad";
-  return "warn";
-}
-
 /** The definition file a task page should open on. */
 export function defaultFile(files: readonly string[]): string | undefined {
   return files.find((f) => f === "spec.yaml") ?? files[0];
+}
+
+/**
+ * The report a run opens on: the workflow page for a multi-step run (it links
+ * down to each step), the step's own report otherwise.
+ */
+export function primaryReportDir(run: RunView): string {
+  return run.kind === "workflow" ? run.dir : (run.steps[0]?.dir ?? run.dir);
 }

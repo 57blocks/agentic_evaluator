@@ -10,6 +10,7 @@ import { findWorkspace, listRunDirs, runsDir, tasksDir, type Workspace } from ".
 import { loadWorkflow } from "../spec/load-spec.js";
 import { loadBundle } from "../report-v2.js";
 import type { Recommendation } from "../canon/select.js";
+import { planFromSuites, type TestPlan } from "../test-plan.js";
 
 export interface SpecStepView {
   id: string;
@@ -28,6 +29,8 @@ export interface SpecView {
   runName: string;
   budgetUsd: number | null;
   steps: SpecStepView[];
+  /** The spec in words: what it tests, how it judges, how it picks. */
+  plan: TestPlan;
 }
 
 export interface RunStepView {
@@ -44,6 +47,8 @@ export interface RunStepView {
 
 export interface RunView {
   id: string;
+  /** Artifact-relative root: the workflow root for a multi-step run, the step dir otherwise. */
+  dir: string;
   /** Task directory that owns this run; null for a legacy top-level run or a fixture. */
   task: string | null;
   kind: "single" | "workflow";
@@ -77,6 +82,7 @@ export interface TaskView {
   runName: string;
   budgetUsd: number | null;
   steps: SpecStepView[];
+  plan: TestPlan;
   /**
    * Files that make up the definition, relative to the task dir, `runs/`
    * excluded — the inputs, rubrics, prompts, checks and scaffold a reader
@@ -221,6 +227,7 @@ export async function listSpecs(over?: CatalogRoots): Promise<SpecView[]> {
       path: rel,
       runName: suites[0].runName ?? suites[0].suiteId,
       budgetUsd: suites[0].budgetUsd ?? null,
+      plan: await planFromSuites(suites),
       steps: suites.map((s) => ({
         id: s.step,
         producer: s.producer ?? "prompt",
@@ -403,6 +410,7 @@ export async function listTasks(
       runName: spec.runName,
       budgetUsd: spec.budgetUsd,
       steps: spec.steps,
+      plan: spec.plan,
       files: await definitionFiles(path.join(tasksDir(ws), name)),
       runs: own,
       spentUsd: spent,
@@ -442,6 +450,7 @@ async function loadWorkflowRun(loc: RunLocation): Promise<RunView | null> {
   if (steps.length === 0) return null;
   return {
     id: loc.id,
+    dir: `${loc.kind}/${loc.diskId}`,
     task: loc.task,
     kind: "workflow",
     runName: wf.run_name ?? loc.diskId,
@@ -476,6 +485,7 @@ async function loadSingleRun(loc: RunLocation): Promise<RunView | null> {
   const steps = [step];
   return {
     id: loc.id,
+    dir: `${loc.kind}/${loc.diskId}`,
     task: loc.task,
     kind: "single",
     runName,

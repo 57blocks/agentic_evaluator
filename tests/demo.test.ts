@@ -7,7 +7,7 @@ import path from "node:path";
 import { listRuns, listSpecs, loadRun, safeId } from "../src/demo/catalog.js";
 import { createDemoServer, listenDemo, underRoot } from "../src/demo/server.js";
 import { demoPage } from "../src/demo/ui.js";
-import { PROTOCOL_QUESTIONS, latestLabel, runMeta, spendLabel } from "../src/demo/client/render.js";
+import { latestVerdict, runMeta, spendLabel } from "../src/demo/client/lib/format.js";
 import type { RunView, TaskView } from "../src/demo/catalog.js";
 import { buildWorkflowRecord } from "../src/canon/workflow.js";
 import { WORKFLOW_LEDGER_FIXTURE, workflowStepFixture } from "./helpers/workflow-fixture.js";
@@ -113,16 +113,6 @@ test("the demo opens a run written with the current workflow record", async () =
   assert.equal(record.ledger.total, WORKFLOW_LEDGER_FIXTURE.total + 0.2);
 });
 
-test("the page states the four protocol questions", () => {
-  const asked = PROTOCOL_QUESTIONS.map(([q]) => q);
-
-  assert.equal(asked.length, 4);
-  assert.match(asked.join(" "), /做对了吗/);
-  assert.match(asked.join(" "), /这一步用谁/);
-  assert.match(asked.join(" "), /成本还是速度/);
-  assert.match(asked.join(" "), /证据能否复现/);
-});
-
 test("the served page mounts the bundled client", async () => {
   const html = await demoPage();
 
@@ -137,7 +127,7 @@ test("demo server serves the page, catalog, fixture report, and blocks traversal
     const home = await get(origin + "/");
     assert.equal(home.status, 200);
     assert.match(home.type, /text\/html/);
-    assert.match(home.body, /这一步该用谁/);
+    assert.match(home.body, /<title>Agentic Evaluator<\/title>/);
 
     const catalog = await get(origin + "/api/catalog");
     assert.equal(catalog.status, 200);
@@ -198,11 +188,14 @@ test("the nav labels a step with no eligible candidate as needing human review",
               gated: [], operatingMode: null, ledgerTotal: null, reportHref: null }],
   } as unknown as RunView;
 
-  assert.match(runMeta(run), /需人工评审/);
+  assert.match(runMeta(run), /没选出推荐/);
 });
 
 test("a task row states its spend against budget and calls out an overrun", () => {
-  const base = { name: "t", specPath: "tasks/t/spec.yaml", runName: "t", steps: [], files: [], runs: [] };
+  const base = {
+    name: "t", specPath: "tasks/t/spec.yaml", runName: "t", steps: [], files: [], runs: [],
+    plan: { steps: [], budgetUsd: null, chain: null },
+  };
 
   const over = spendLabel({ ...base, budgetUsd: 3, spentUsd: 3.96 } as TaskView);
   assert.equal(over?.over, true);
@@ -222,5 +215,5 @@ test("a task that has never run says so rather than rendering blank", () => {
     runName: "smoke-e2e-control", budgetUsd: 1, spentUsd: null, steps: [], files: [], runs: [],
   } as unknown as TaskView;
 
-  assert.equal(latestLabel(task), "未跑过");
+  assert.equal(latestVerdict(task), null);
 });

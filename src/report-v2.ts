@@ -14,13 +14,18 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { modelRefOf } from "./adapters/types.js";
 import type { CostLedger } from "./canon/cost.js";
 import type { RunManifest } from "./canon/manifest.js";
 import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { CanonSummary } from "./canon/write.js";
 import { recommendFromCanon, type Recommendation } from "./canon/select.js";
-import { judgeStandings } from "./canon/judge-standings.js";
+import { FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel } from "./report-copy.js";
+import { NO_PICK } from "./report-format.js";
+import {
+  candidateViews, evaluatorErrorSubject, fmtPct, fmtScore, fmtSec, fmtUsd, judgeFavourite,
+  ledgerNote, sha8, stateTone, subtitleReasons, verdictFacts, verdictText,
+  type CandidateView,
+} from "./report-model.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
@@ -36,7 +41,7 @@ import {
   type RawOutput,
 } from "./report-evidence.js";
 
-interface RunBundle {
+export interface RunBundle {
   dir: string;
   manifest: RunManifest;
   trials: TrialRow[];
@@ -72,107 +77,17 @@ export async function loadBundle(dir: string): Promise<RunBundle> {
   };
 }
 
-// ── derived views ──────────────────────────────────────────────────────────
-
-interface CandidateView {
-  id: string;
-  model: string;
-  deployment: string;
-  attempts: number;
-  checkPass: number;
-  checkExecuted: number;
-  winRate: number | null;
-  comparisons: number;
-  absolute: number | null;
-  costPerSuccess: number | null;
-  p50: number | null;
-  states: Array<[string, number]>;
-  outcomes: { success: number; failure: number; undetermined: number };
-}
-
-function winRate(candidate: string, rows: EvaluationRow[]): { rate: number | null; comparisons: number } {
-  let wins = 0;
-  let comparisons = 0;
-  for (const r of rows) {
-    if (r.evaluator !== "pairwise-swap" || r.state !== "pass" || r.subject.kind !== "pair") continue;
-    const { a, b } = r.subject;
-    if (a !== candidate && b !== candidate) continue;
-    comparisons += 1;
-    const side = a === candidate ? "a" : "b";
-    if (r.overall === side) wins += 1;
-    else if (r.overall === "tie") wins += 0.5;
-  }
-  return { rate: comparisons > 0 ? (wins / comparisons) * 100 : null, comparisons };
-}
-
-function candidateViews(b: RunBundle): CandidateView[] {
-  return b.summary.candidates.map((c) => {
-    const own = b.trials.filter((t) => t.candidate === c.candidate);
-    const def = b.manifest.candidates[c.candidate];
-    const deployments = [...new Set(own.map((t) => t.deployment_ref).filter((d): d is string => d !== null))];
-    const abs = own.map((t) => t.judge.absolute_overall).filter((v): v is number => v !== null);
-    const wr = winRate(c.candidate, b.evaluations);
-    return {
-      id: c.candidate,
-      model: def ? modelRefOf(def) : c.candidate,
-      deployment: deployments.join(", ") || "—",
-      attempts: c.valid_attempts,
-      checkPass: c.check_states.pass,
-      checkExecuted: c.check_states.pass + c.check_states.fail,
-      winRate: wr.rate,
-      comparisons: wr.comparisons,
-      absolute: abs.length ? abs.reduce((s, v) => s + v, 0) / abs.length : null,
-      costPerSuccess: c.generation_cost_per_success,
-      p50: c.p50_ms,
-      states: Object.entries(c.completion_states).filter(([, n]) => n > 0),
-      outcomes: c.outcomes,
-    };
-  });
-}
-
-// ── formatting ─────────────────────────────────────────────────────────────
-
-const fmtUsd = (v: number | null | undefined): string => (v == null ? "—" : `$${v.toFixed(4)}`);
-const fmtPct = (v: number | null | undefined): string => (v == null ? "—" : `${v.toFixed(0)}%`);
-const fmtScore = (v: number | null | undefined): string => (v == null ? "—" : v.toFixed(1));
-const fmtSec = (ms: number | null | undefined): string => (ms == null ? "—" : `${(ms / 1000).toFixed(1)} s`);
-const sha8 = (s: string | null | undefined): string => (s ? s.slice(0, 8) : "—");
-
-function stateClass(state: string): string {
-  if (state === "success" || state === "pass") return "ok";
-  if (state === "undetermined" || state === "not_evaluated" || state === "evaluator_error") return "warn";
-  return "bad";
-}
-
-function withPeriod(text: string): string {
-  return text.endsWith("。") ? text : `${text}。`;
-}
-
-function verdictText(b: RunBundle): string {
-  const rec = b.recommendation;
-  const step = b.manifest.step.id;
-  const parts: string[] = [];
-  if (rec.eligible.length === 0) {
-    parts.push(`步骤 ${step} 没有合格候选，选择器不给出配置推荐。`);
-  } else if (rec.chosen) {
-    parts.push(`运行模式 ${rec.operating_mode ?? "未声明"} 下推荐 ${rec.chosen}。`);
-    if (rec.compared_to_control) parts.push(rec.compared_to_control.reason + "。");
-  } else {
-    parts.push(`步骤 ${step} 有合格候选，但选择器未能选出推荐。`);
-  }
-  if (rec.reasons[0]) parts.push(withPeriod(rec.reasons[0]));
-  return parts.join(" ");
-}
+// ── rendering helpers ──────────────────────────────────────────────────────
 
 function filterList(rec: Recommendation): string {
-  return rec.filters
-    .map((f) => {
+  return gateRows(rec)
+    .map((g) => {
       const removed =
-        f.removed.length === 0
-          ? "无人被剔除"
-          : f.removed.map((r) => `${escapeHtml(r.candidate)}（${escapeHtml(r.reason)}）`).join("；");
-      const remaining = f.remaining.length > 0 ? f.remaining.map(escapeHtml).join("、") : "无";
-      return `<li><b>${escapeHtml(f.id)}</b> — ${escapeHtml(f.description)}。剔除：${removed}。剩余：${remaining}。</li>`;
+        g.removed.length === 0
+          ? "无人淘汰"
+          : g.removed.map((r) => `${escapeHtml(r.candidate)}（${escapeHtml(r.detail)}）`).join("；");
+      const remaining = g.remaining.length > 0 ? g.remaining.map(escapeHtml).join("、") : "无";
+      return `<li><b>${escapeHtml(g.label)}</b> — 淘汰：${removed}。剩下：${remaining}。</li>`;
     })
     .join("");
 }
@@ -186,10 +101,6 @@ function firmnessTag(firmness: Recommendation["firmness"]): string {
     case "needs-review":
       return "NEEDS-REVIEW";
   }
-}
-
-function subtitleReasons(rec: Recommendation, directionality: { reasons: string[] }): string[] {
-  return rec.firmness === "directional" ? directionality.reasons : rec.reasons;
 }
 
 function candidateMark(gated: boolean, chosen: boolean): string {
@@ -211,38 +122,23 @@ function candidateMark(gated: boolean, chosen: boolean): string {
  */
 function renderHero(b: RunBundle, views: readonly CandidateView[], support: readonly string[]): string {
   const rec = b.recommendation;
-  const standings = judgeStandings(b.trials);
-  const best = [...standings].sort((a, z) => (z.win_rate ?? -1) - (a.win_rate ?? -1))[0];
-  const chosenView = views.find((v) => v.id === rec.chosen);
+  const best = judgeFavourite(b);
 
   const headline = rec.chosen
-    ? `<span class="trophy">🏆</span> <b>${escapeHtml(rec.chosen)}</b> · ${escapeHtml(rec.operating_mode ?? "未声明模式")} 推荐`
-    : `<b>无推荐</b> · ${escapeHtml(rec.operating_mode ?? "未声明模式")}`;
-  const facts = rec.chosen && chosenView
-    ? [
-        chosenView.costPerSuccess !== null ? `$${chosenView.costPerSuccess.toFixed(4)}/次成功` : null,
-        chosenView.checkExecuted > 0 ? `${chosenView.checkPass}/${chosenView.checkExecuted} 通过必过检查` : null,
-        rec.firmness,
-      ].filter((x): x is string => x !== null && x !== "")
-    : [rec.firmness];
+    ? `推荐 <b>${escapeHtml(rec.chosen)}</b> <span class="mode">· ${escapeHtml(modeLabel(rec.operating_mode))}</span>`
+    : `<b>没有可推荐的候选</b> <span class="mode">· ${escapeHtml(modeLabel(rec.operating_mode))}</span>`;
+  const facts = verdictFacts(rec, views.find((v) => v.id === rec.chosen));
 
-  const judgeLine =
-    best && best.comparisons > 0
-      ? `裁判偏好另列：<b>${escapeHtml(best.candidate)}</b> ${best.wins}–${best.losses}–${best.ties}（${best.comparisons} 场）${
-          rec.chosen && best.candidate !== rec.chosen
-            ? "。与推荐不一致：必过检查通过的候选之间，选择器按声明的运行模式比较，不读裁判偏好。"
-            : ""
-        }`
-      : "本次没有可用的成对判决。";
+  const judgeLine = escapeHtml(judgeNote(best, rec.chosen));
 
   return `<div class="verdict ${escapeHtml(rec.firmness)}">
-    <span class="tag">${escapeHtml(rec.firmness.toUpperCase())} · ${Object.keys(b.manifest.test_set.inputs ?? {}).length} INPUTS</span>
+    <span class="tag">${escapeHtml(FIRMNESS_LABEL[rec.firmness])}</span>
     <div>
       <p class="champ-line">${headline}</p>
       <p class="champ-facts">${facts.map(escapeHtml).join(" · ")}</p>
       <p class="sub">${escapeHtml(verdictText(b))}</p>
       <p class="sub">${judgeLine}</p>
-      <p class="sub">${support.map((r) => escapeHtml(r)).join("；") || "样本与阈值满足决策级要求"}</p>
+      <p class="sub">${escapeHtml(firmnessNote(rec.firmness, support))}</p>
     </div>
   </div>`;
 }
@@ -287,7 +183,7 @@ export function renderRunReport(b: RunBundle): string {
         .filter(Boolean)
         .join(" ");
       const states = v.states
-        .map(([s, n]) => `<span class="${stateClass(s)}">${n} ${escapeHtml(s)}</span>`)
+        .map(([s, n]) => `<span class="${stateTone(s)}">${n} ${escapeHtml(s)}</span>`)
         .join("");
       const outcomes = `<span class="ok">${v.outcomes.success} success</span><span class="bad">${v.outcomes.failure} failure</span><span class="warn">${v.outcomes.undetermined} undetermined</span>`;
       return `<tr${rowClass ? ` class="${rowClass}"` : ""}>
@@ -315,9 +211,7 @@ export function renderRunReport(b: RunBundle): string {
 
   const errorNotes = evaluatorErrors
     .map((e) => {
-      const subject =
-        e.subject.kind === "pair" ? `${e.subject.a} vs ${e.subject.b} · ${e.subject.input}` : `${e.subject.candidate} · ${e.subject.input} · t${e.subject.trial}`;
-      return `<li><code>${escapeHtml(e.evaluator)}</code> ${escapeHtml(subject)}: ${escapeHtml(e.reason ?? "")}</li>`;
+      return `<li><code>${escapeHtml(e.evaluator)}</code> ${escapeHtml(evaluatorErrorSubject(e))}: ${escapeHtml(e.reason ?? "")}</li>`;
     })
     .join("");
 
@@ -339,7 +233,7 @@ export function renderRunReport(b: RunBundle): string {
       <div><dt>裁判</dt><dd>${escapeHtml(m.judge.model)} · rubric ${sha8(m.evaluators.rubric_sha256)}</dd></div>
       <div><dt>模式</dt><dd>${escapeHtml(m.execution.benchmark_mode)} · ${escapeHtml(m.execution.cache_mode)} cache</dd></div>
       <div><dt>运行时间</dt><dd>${escapeHtml(m.started_at.slice(0, 16).replace("T", " "))} → ${escapeHtml((m.finished_at ?? "").slice(11, 16))}</dd></div>
-      <div><dt>运行模式</dt><dd>${escapeHtml(m.operating_mode ?? "—")} · ${escapeHtml(rec.firmness)}${rec.chosen ? ` · 推荐 ${escapeHtml(rec.chosen)}` : " · 无推荐"}</dd></div>
+      <div><dt>运行模式</dt><dd>${escapeHtml(modeLabel(m.operating_mode))} · ${escapeHtml(FIRMNESS_LABEL[rec.firmness])}${rec.chosen ? ` · 推荐 ${escapeHtml(rec.chosen)}` : ` · ${NO_PICK}`}</dd></div>
       <div><dt>harness</dt><dd>${escapeHtml(m.harness.version)} · ${escapeHtml(m.harness.git_sha ?? "—")}</dd></div>
     </dl>
   </header>
@@ -347,9 +241,9 @@ export function renderRunReport(b: RunBundle): string {
   ${renderHero(b, views, support)}
 
   <section class="card">
-    <h2>推荐轨迹 <span class="hint">select-v1 · 只读 summary.json，不重跑模型</span></h2>
+    <h2>筛选过程 <span class="hint">逐道门槛淘汰，剩下的按运行模式选 · 规则 ${escapeHtml(rec.rule_version)}</span></h2>
     <ol class="trace">${filterList(rec)}</ol>
-    <p class="note">合格：${rec.eligible.length ? rec.eligible.map(escapeHtml).join("、") : "无"}。成对胜率仍展示但不进入选择器。</p>
+    <p class="note">通过全部门槛：${rec.eligible.length ? rec.eligible.map(escapeHtml).join("、") : "无"}。裁判胜率只作参考，不参与筛选。</p>
   </section>
 
   <section class="card">
@@ -381,7 +275,7 @@ export function renderRunReport(b: RunBundle): string {
         <tr class="total"><td>合计</td><td class="num">${fmtUsd(led.total)}</td></tr>
         <tr><td>每次成功的全口径成本</td><td class="num">${fmtUsd(led.cost_per_success)}</td></tr>
       </tbody></table></div>
-      <p class="note">${led.generation > 0 ? `评估花费是生成的 ${((led.judging + led.scoring + led.retries) / led.generation).toFixed(1)} 倍。` : ""}${led.cost_per_success === null ? "没有成功的任务，每次成功成本无定义。" : ""}</p>
+      <p class="note">${ledgerNote(led)}</p>
     </section>
   </div>
 

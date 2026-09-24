@@ -201,3 +201,29 @@ test("report on a run that does not exist is a usage error", async () => {
   await assert.rejects(main(["report", "no-such-run", "--workspace", ws], bufferIo()), UsageError);
   await fs.rm(ws, { recursive: true, force: true });
 });
+
+test("a reader that closes the pipe early does not crash the run or cost it its evidence", async () => {
+  // Arrange - `agenteval run … | head -1` closes stdout long before the run ends.
+  const { spawn } = await import("node:child_process");
+  const ws = await tempWorkspace();
+  await fs.cp(path.join(INSTALL_ROOT, "tasks", "smoke-local"), path.join(ws, "tasks", "smoke-local"), {
+    recursive: true,
+    filter: (s) => !s.includes(`${path.sep}runs`),
+  });
+  const bin = path.join(INSTALL_ROOT, "bin", "agenteval.mjs");
+
+  // Act
+  const child = spawn(process.execPath, [bin, "run", "smoke-local", "--yes", "--workspace", ws], {
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  child.stdout.destroy();
+  let stderr = "";
+  child.stderr.on("data", (chunk: Buffer) => void (stderr += chunk.toString()));
+  const code = await new Promise<number | null>((resolve) => child.on("close", resolve));
+
+  // Assert
+  assert.equal(code, EXIT.ok, stderr);
+  assert.doesNotMatch(stderr, /EPIPE/);
+  const runs = await fs.readdir(path.join(ws, "tasks", "smoke-local", "runs"));
+  assert.equal(runs.length, 1, "the run still wrote its evidence");
+});

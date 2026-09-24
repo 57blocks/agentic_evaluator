@@ -7,7 +7,8 @@
  * so the UI can never collapse them by accident.
  */
 
-import type { RunView } from "../catalog.js";
+import type { RunView } from "../../../catalog.js";
+import { artifactUrl, getTextOrNull } from "@/lib/api";
 
 /** Protocol §5: what happened to the candidate's attempt. */
 export const COMPLETION_STATES = [
@@ -43,26 +44,25 @@ export interface EvaluationRow {
   reason?: string;
 }
 
+function parseLines<T>(text: string, step: string): T[] {
+  return text
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .flatMap((line) => {
+      try {
+        return [{ step, ...(JSON.parse(line) as object) } as T];
+      } catch {
+        return [];
+      }
+    });
+}
+
 /** Every step's copy of `name`, tagged with the step it came from. */
 export async function readJsonl<T>(run: RunView, name: string): Promise<T[]> {
   const perStep = await Promise.all(
     run.steps.map(async (step) => {
-      try {
-        const res = await fetch(`/artifact/${step.dir}/${name}`);
-        if (!res.ok) return [];
-        return (await res.text())
-          .split("\n")
-          .filter((l) => l.trim() !== "")
-          .flatMap((l) => {
-            try {
-              return [{ step: step.id, ...(JSON.parse(l) as object) } as T];
-            } catch {
-              return [];
-            }
-          });
-      } catch {
-        return [];
-      }
+      const text = await getTextOrNull(artifactUrl(step.dir, name));
+      return text === null ? [] : parseLines<T>(text, step.id);
     }),
   );
   return perStep.flat();
@@ -71,20 +71,10 @@ export async function readJsonl<T>(run: RunView, name: string): Promise<T[]> {
 /** First step that has `name`, as text. GAPS.md and the like. */
 export async function readText(run: RunView, name: string): Promise<string> {
   for (const step of run.steps) {
-    try {
-      const res = await fetch(`/artifact/${step.dir}/${name}`);
-      if (res.ok) return await res.text();
-    } catch {
-      // Try the next step.
-    }
+    const text = await getTextOrNull(artifactUrl(step.dir, name));
+    if (text !== null) return text;
   }
   return "";
-}
-
-export interface MatrixCell {
-  completion: string;
-  outcome: string;
-  rows: TrialRow[];
 }
 
 /**
@@ -102,11 +92,9 @@ export function failureMatrix(rows: readonly TrialRow[]): {
 } {
   const seenC = new Set(rows.map((r) => r.completion_state));
   const seenO = new Set(rows.map((r) => r.task_outcome));
-  const completions = COMPLETION_STATES.filter((c) => seenC.has(c));
-  const outcomes = TASK_OUTCOMES.filter((o) => seenO.has(o));
   return {
-    completions: [...completions],
-    outcomes: [...outcomes],
+    completions: COMPLETION_STATES.filter((c) => seenC.has(c)),
+    outcomes: TASK_OUTCOMES.filter((o) => seenO.has(o)),
     cell: (c, o) => rows.filter((r) => r.completion_state === c && r.task_outcome === o),
     total: rows.length,
   };

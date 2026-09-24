@@ -14,28 +14,15 @@
 import { judgeDiscrimination } from "./canon/discrimination.js";
 import type { TrialRow } from "./canon/rows.js";
 import { escapeHtml } from "./html.js";
+import { SCORE_MAX, SCORE_MIN, heatTint } from "./report-format.js";
+
+export { heatTint };
 
 /** All-pairs forms (radar) cap at three series; past that the shape is noise. */
 const RADAR_MAX_SERIES = 3;
-const SCORE_MIN = 1;
-const SCORE_MAX = 5;
 
 /** Sequential blue ramp, 100 → 700, light means "near zero". */
 const RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#2a78d6", "#1c5cab", "#104281"];
-
-/**
- * Diverging tint around a midpoint, as the legacy report coloured its matrix:
- * green above, red below, and the further from the middle the stronger the
- * wash. A solid ramp says "big number"; this says "better or worse than the
- * middle", which is what a grade or a win rate actually means.
- */
-export function heatTint(value: number | null, min: number, max: number): string {
-  if (value === null) return "";
-  const mid = (min + max) / 2;
-  const dist = Math.min(1, Math.abs(value - mid) / ((max - min) / 2));
-  const alpha = (0.1 + dist * 0.3).toFixed(3);
-  return `background:rgba(${value >= mid ? "34,197,94" : "239,68,68"},${alpha})`;
-}
 
 export interface CandidateProfile {
   candidate: string;

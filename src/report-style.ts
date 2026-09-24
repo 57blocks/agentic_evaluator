@@ -22,7 +22,7 @@ h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.022em}h1 .id{font-fa
 .verdict .tag{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
 .verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
 .verdict p{margin:0}
-.champ-line{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}.champ-line b{font-weight:700}
+.champ-line{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}.champ-line b{font-weight:700}.champ-line .mode{color:var(--ink-2);font-weight:400}
 .trophy{font-size:18px}
 .champ-facts{margin:3px 0 6px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-2)}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
 section.card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:20px 24px 22px;display:grid;gap:12px;box-shadow:var(--shadow)}
