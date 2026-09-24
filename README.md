@@ -30,13 +30,28 @@ agenteval --version
 
 Or without installing: `npx agenteval <command>`.
 
-Models are called through [OpenRouter](https://openrouter.ai). You only need a
-key for tasks that call models:
+### API key
+
+Models are called through [OpenRouter](https://openrouter.ai), with one key:
+`OPENROUTER_API_KEY`. You only need it for tasks that call models; `plan`,
+`init` and offline tasks never do.
 
 ```bash
-export OPENROUTER_API_KEY=sk-or-...
-# or put the same line in a .env.local file in the directory you run from
+export OPENROUTER_API_KEY=sk-or-...                   # this shell
+echo 'export OPENROUTER_API_KEY=sk-or-...' >> ~/.zshrc  # every new shell
+echo 'OPENROUTER_API_KEY=sk-or-...' > .env.local       # this directory only
 ```
+
+A variable already set in your environment wins over `.env.local`, which is
+read from the directory you run in. Keep `.env.local` out of git
+(`echo .env.local >> .gitignore`). To check the key works:
+`agenteval models <task>` sends each model one tiny request (a fraction of a
+cent); `--catalog-only` checks the ids and prices without a key.
+
+An agent candidate's own key (e.g. `ANTHROPIC_API_KEY` for Claude Code) is read
+by the agent, not by agenteval. On the host it inherits your environment; in a
+container, name it in the spec: `env: { ANTHROPIC_API_KEY: "" }` (`""` passes
+the host's value through).
 
 ## Quick start (free, offline)
 
