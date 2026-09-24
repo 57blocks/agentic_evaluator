@@ -171,6 +171,8 @@ export interface RunRecord {
   /** Objective check detail (codegen → tsc output; taskbreakdown → coverage
    *  summary), truncated. */
   checkOutput?: string;
+  /** Why the check failed, when the check said so. */
+  checkReason?: string;
 
   // ── Canonical (protocol v0.4) fields. `candidate` above holds the candidate
   // id. ──

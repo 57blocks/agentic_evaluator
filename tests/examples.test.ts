@@ -62,6 +62,26 @@ test("custom-check: the check passes the careful agent and gates the sloppy one"
   assert.deepEqual(done.gated.map((g) => g.candidate), ["sloppy"]);
 });
 
+test("custom-check: a check's reason is kept with the trial, beside its evidence", async () => {
+  // Arrange
+  const ws = await workspaceWith("custom-check");
+
+  // Act
+  await main(["run", "custom-check", "--yes", "--workspace", ws], bufferIo());
+
+  // Assert - the sloppy candidate's failed check says why, as the check printed it.
+  const runsRoot = path.join(ws, "tasks", "custom-check", "runs");
+  const runDir = path.join(runsRoot, (await fs.readdir(runsRoot))[0]);
+  const rows = (await fs.readFile(path.join(runDir, "scores.jsonl"), "utf-8"))
+    .trim().split("\n").map((l) => JSON.parse(l) as { candidate: string; checks: Record<string, { reason?: string; evidence?: string }> });
+  const sloppy = rows.find((r) => r.candidate === "sloppy")!;
+  const cell = Object.values(sloppy.checks)[0];
+  assert.match(cell.evidence ?? "", /PRs cited/);
+  assert.match(cell.reason ?? "", /not cited|missing/);
+
+  await fs.rm(ws, { recursive: true, force: true });
+});
+
 test("chain-offline: both arms run and the combination beats the broken control", async () => {
   // Act
   const events = await runJson("chain-offline");

@@ -102,6 +102,7 @@ export interface GenOutput {
   artifacts: ArtifactFile[];
   checkPassed?: boolean;
   checkOutput?: string;
+  checkReason?: string;
   checkState?: EvaluationState;
   checkVersion?: string;
 }
@@ -170,6 +171,7 @@ export async function generateOne(params: {
     ...out,
     checkPassed: check.passed,
     checkOutput: check.output,
+    checkReason: check.reason,
     checkState: check.state,
     checkVersion: check.version,
   };
@@ -274,6 +276,7 @@ function recordFromRow(row: TrialRow, text: string): RunRecord {
     checkState: check?.state,
     checkVersion: check?.version,
     checkOutput: check?.evidence,
+    checkReason: check?.reason,
     modelRef: row.model_ref,
     deploymentRef: row.deployment_ref ?? undefined,
     trialHash: row.trial_hash,
@@ -466,6 +469,7 @@ export async function runAll(params: {
         status: "ok",
         checkPassed: g.checkPassed,
         checkOutput: g.checkOutput,
+        checkReason: g.checkReason,
         checkState: g.checkState,
         checkVersion: g.checkVersion,
         modelRef: modelRefOf(def),
