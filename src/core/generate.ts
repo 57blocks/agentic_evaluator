@@ -24,16 +24,11 @@ import type { CandidateDef, CostSource, EvaluationState,
   Isolation,
 } from "../canon/types.js";
 import type { TrialRow } from "../canon/rows.js";
-import type { ProducerKind, Report, RunRecord, Suite } from "../types.js";
+import type { ProducerKind, RunRecord, Suite } from "../types.js";
 
 /** A task's input text. Every task owns its inputs; there is no shared pool. */
 export async function readInput(inputSlug: string, taskRoot: string | undefined): Promise<string> {
   return fs.readFile(taskInputPath(taskRoot, inputSlug), "utf-8");
-}
-
-/** Stable run id shared by the output dir and (for dashboards) reporting. */
-export function reportRunId(report: Report): string {
-  return `${report.suiteId}-${report.generatedAt.replace(/[:.]/g, "-")}`;
 }
 
 /** Candidate ids may be OpenRouter model ids (legacy) with `/` and `:` — make fs-safe. */
@@ -81,7 +76,7 @@ function slugify(name: string): string {
   return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-export function deploymentRef(def: CandidateDef, provider: string | undefined): string | undefined {
+function deploymentRef(def: CandidateDef, provider: string | undefined): string | undefined {
   const route = def.provider_route ?? "openrouter";
   return provider ? `${route}/${slugify(provider)}` : route;
 }

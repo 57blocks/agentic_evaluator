@@ -13,7 +13,7 @@ export type Route =
   /** `dir` is artifact-relative: a workflow root, or one step inside a run. */
   | { view: "report"; runId: string; dir: string };
 
-export const HOME: Route = { view: "home" };
+const HOME: Route = { view: "home" };
 
 export function parseRoute(hash: string): Route {
   const params = new URLSearchParams(hash.replace(/^#/, ""));

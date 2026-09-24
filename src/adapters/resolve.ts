@@ -26,5 +26,5 @@ export function trialAdapterFields(
 }
 
 export { AdapterError, adapterIdOf, modelRefOf } from "./types.js";
-export { agentCliAdapter, codegenAdapter, modelApiAdapter };
+export { agentCliAdapter };
 export type { CandidateAdapter, CandidateRequest, CandidateResult } from "./types.js";

@@ -141,7 +141,7 @@ async function openArmRunner(params: {
   return { outDir, generate, close: trace.close };
 }
 
-export function validationArm(
+function validationArm(
   report: E2eArmReport,
   kind: "proposed" | "control",
 ): ValidationArm {

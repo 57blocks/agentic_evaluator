@@ -11,7 +11,7 @@ export function tagTone(state: string): "ok" | "warn" | "bad" {
 }
 
 /** Categorical series colour by slot — follows the candidate, never its rank. */
-export const SERIES = ["var(--viz-1)", "var(--viz-2)", "var(--viz-3)"] as const;
+const SERIES = ["var(--viz-1)", "var(--viz-2)", "var(--viz-3)"] as const;
 
 /**
  * A candidate's colour. Only three hues are validated; a fourth candidate is

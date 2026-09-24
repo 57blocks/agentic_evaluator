@@ -67,7 +67,7 @@ export interface AdaptInput {
 const EVIDENCE_CHARS = 600;
 
 /** The legacy pairwise path judges only the first ok output per (candidate, input). */
-export function representativeTrial(records: readonly RunRecord[], candidate: string, input: string): number | null {
+function representativeTrial(records: readonly RunRecord[], candidate: string, input: string): number | null {
   const hit = records.find((r) => r.candidate === candidate && r.inputSlug === input && r.status === "ok" && r.text.trim() !== "");
   return hit ? hit.trial : null;
 }

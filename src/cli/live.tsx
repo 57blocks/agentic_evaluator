@@ -7,7 +7,7 @@
  * gets here and reads the plain line printer instead.
  */
 
-import React, { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Box, render, Static, Text } from "ink";
 import type { RunEventSink } from "../core/events.js";
 import { initialProgress, reduceProgress, type Progress, type Tally } from "./progress.js";

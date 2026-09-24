@@ -82,11 +82,6 @@ export function duelRecord(
   return { wins, losses, ties, comparisons, rate: comparisons > 0 ? ((wins + ties / 2) / comparisons) * 100 : null };
 }
 
-export function winRate(candidate: string, rows: readonly EvaluationRow[]): { rate: number | null; comparisons: number } {
-  const r = duelRecord(candidate, rows);
-  return { rate: r.rate, comparisons: r.comparisons };
-}
-
 export function candidateViews(b: RunBundle): CandidateView[] {
   return b.summary.candidates.map((c) => {
     const own = b.trials.filter((t) => t.candidate === c.candidate);

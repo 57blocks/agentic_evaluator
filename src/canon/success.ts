@@ -18,7 +18,7 @@ import type {
   SuccessDecision,
 } from "./types.js";
 
-export const SUCCESS_RULE_VERSION = "success-v1" as const;
+const SUCCESS_RULE_VERSION = "success-v1" as const;
 
 export interface SuccessInput {
   criteria?: SuccessCriteria;
