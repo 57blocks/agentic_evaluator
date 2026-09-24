@@ -19,8 +19,9 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
-import { INSTALL_ROOT, resolveTaskAssetSync } from "./paths.js";
+import { resolveTaskAssetSync } from "./paths.js";
 import { looksLikePath } from "./script-path.js";
 import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
@@ -28,6 +29,15 @@ import type { EvaluationState } from "./canon/types.js";
 /** Truncate captured compiler output so records / reports stay small. */
 const MAX_OUTPUT_CHARS = 8_000;
 const TSC_TIMEOUT_MS = 120_000;
+
+/**
+ * Resolve typescript the way Node would, not from INSTALL_ROOT/node_modules:
+ * an installed harness usually has its dependencies hoisted above it.
+ */
+const require = createRequire(import.meta.url);
+function typescriptFile(rel: string): string {
+  return path.join(path.dirname(require.resolve("typescript/package.json")), rel);
+}
 
 export const TSC_CHECK_ID = "tsc-noemit";
 
@@ -53,7 +63,7 @@ let cachedTscVersion: string | undefined;
 export async function tscVersion(): Promise<string> {
   if (cachedTscVersion) return cachedTscVersion;
   try {
-    const raw = await fs.readFile(path.join(INSTALL_ROOT, "node_modules", "typescript", "package.json"), "utf-8");
+    const raw = await fs.readFile(typescriptFile("package.json"), "utf-8");
     const parsed = JSON.parse(raw) as { version?: unknown };
     cachedTscVersion = typeof parsed.version === "string" ? parsed.version : "unknown";
   } catch {
@@ -123,7 +133,18 @@ export async function runCheck(params: {
 
 /** Spawn the harness's own tsc via node (no npx: deterministic binary, no npm noise). */
 function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
-  const tscJs = path.join(INSTALL_ROOT, "node_modules", "typescript", "lib", "tsc.js");
+  let tscJs: string;
+  try {
+    tscJs = typescriptFile(path.join("lib", "tsc.js"));
+  } catch {
+    return Promise.resolve({
+      state: "evaluator_error",
+      passed: false,
+      exitCode: -1,
+      output: "",
+      reason: "typescript is not installed next to the harness",
+    });
+  }
   return new Promise((resolve) => {
     execFile(
       process.execPath,
