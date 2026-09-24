@@ -24,12 +24,12 @@ candidate to use, why, what it cost, and what it could not observe.
 Requires Node.js 22 or newer.
 
 ```bash
-npm install -g agenteval
+npm install -g 57b-agenteval        # installs the `agenteval` command
 agenteval --version
 ```
 
-Or without installing: `npx agenteval <command>`. To update, run the install
-again; to remove it, `npm uninstall -g agenteval`.
+Or without installing: `npx 57b-agenteval <command>`. To update, run the
+install again; to remove it, `npm uninstall -g 57b-agenteval`.
 
 ### API key
 
@@ -246,8 +246,8 @@ workspace and run it by name:
 
 ```bash
 mkdir -p tasks
-cp -R "$(npm root -g)/agenteval/examples/tasks/custom-check" tasks/   # one
-cp -R "$(npm root -g)/agenteval/examples/tasks/"* tasks/             # or all seven
+cp -R "$(npm root -g)/57b-agenteval/examples/tasks/custom-check" tasks/   # one
+cp -R "$(npm root -g)/57b-agenteval/examples/tasks/"* tasks/             # or all seven
 agenteval ls                                                        # what you now have
 agenteval run custom-check --yes --html
 ```
