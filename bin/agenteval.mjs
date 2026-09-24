@@ -16,6 +16,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { register } from "tsx/esm/api";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-register();
+// Compile with the package's own tsconfig, not whatever tsconfig (or none)
+// sits in the directory the user runs from — without it the JSX in the live
+// view compiles for the wrong runtime ("React is not defined").
+register({ tsconfig: path.join(here, "..", "tsconfig.json") });
 const { cli } = await import(pathToFileURL(path.join(here, "..", "src", "cli", "index.ts")).href);
 await cli();
