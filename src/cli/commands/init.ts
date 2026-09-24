@@ -1,11 +1,14 @@
 /**
  * `agenteval init <name>` — a task you can actually run, immediately.
  *
- * The scaffold is a working check-only task, not a template with holes: two
- * command candidates, a required check, and no judging method declared. It
- * runs offline the moment it is created, which is the point — the first thing
- * a new user should see is the pipeline working, not a spec that needs four
- * more decisions before it does anything.
+ * The default scaffold is a working check-only task, not a template with
+ * holes: two command candidates, a required check, and no judging method
+ * declared. It runs offline the moment it is created, which is the point —
+ * the first thing a new user should see is the pipeline working, not a spec
+ * that needs four more decisions before it does anything, or a key.
+ *
+ * `--models` writes the real thing instead (see init-models.ts): two models,
+ * the same kind of gate, and a judge. It needs a key and costs about a cent.
  */
 
 import fs from "node:fs/promises";
@@ -14,11 +17,18 @@ import { findWorkspace, tasksDir, workspaceAt } from "../../core/workspace.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
 import { rejectUnknown, stringFlag, UsageError, type ParsedArgs } from "../args.js";
 import type { Io } from "../io.js";
+import { modelsTaskFiles } from "./init-models.js";
 
 export const INIT_HELP = `agenteval init <name> [options]
 
-  Create tasks/<name>/ — a runnable, offline, check-only task to edit.
+  Create tasks/<name>/ — a runnable task to edit.
 
+  By default it is offline and free: two local stand-in candidates and a
+  tsc check, no model calls.
+
+  --models            a small real evaluation instead: two cheap models, a
+                      tsc check and a judge from a third vendor. Needs
+                      OPENROUTER_API_KEY; about a cent per run
   --workspace DIR     workspace to create it in
   --force             overwrite an existing task of that name`;
 
@@ -26,7 +36,8 @@ const SPEC = (name: string): string => `# ${name} — created by \`agenteval ini
 #
 # Runnable as-is, offline: both candidates are local commands and no judging
 # method is declared, so nothing is billed. Replace the candidates with models
-# and add \`methods: [pairwise-swap]\` when you want a judge.
+# and add \`methods: [pairwise-swap]\` when you want a judge, or start from
+# \`agenteval init <name> --models\`, which does both.
 
 protocol_version: "0.3"
 run_name: ${name}
@@ -140,7 +151,7 @@ agenteval run ${name} --yes     # run it (offline, free, as created)
 `;
 
 export async function cmdInit(args: ParsedArgs, io: Io): Promise<ExitCode> {
-  rejectUnknown(args.flags, ["workspace", "force"]);
+  rejectUnknown(args.flags, ["workspace", "force", "models"]);
   const name = args.positional[0];
   if (name === undefined) throw new UsageError("name the task: agenteval init <name>");
   if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
@@ -155,7 +166,8 @@ export async function cmdInit(args: ParsedArgs, io: Io): Promise<ExitCode> {
     throw new UsageError(`${root} already exists (use --force to overwrite)`);
   }
 
-  const files: Array<[string, string]> = [
+  const withModels = args.flags.models === true;
+  const files: Array<[string, string]> = withModels ? modelsTaskFiles(name) : [
     ["spec.yaml", SPEC(name)],
     ["README.md", README(name)],
     [path.join("agents", "example.mjs"), AGENT],
@@ -169,6 +181,9 @@ export async function cmdInit(args: ParsedArgs, io: Io): Promise<ExitCode> {
     await fs.writeFile(abs, content, "utf-8");
   }
 
-  io.out(`created ${root}\n  agenteval run ${name} --yes\n`);
+  const next = withModels
+    ? `  agenteval plan ${name}          # free: what a run would do\n  agenteval run ${name} --yes     # needs OPENROUTER_API_KEY, about a cent\n`
+    : `  agenteval run ${name} --yes\n`;
+  io.out(`created ${root}\n${next}`);
   return EXIT.ok;
 }

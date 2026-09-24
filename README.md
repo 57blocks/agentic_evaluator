@@ -64,13 +64,26 @@ agenteval run my-task --yes --html  # run it
 agenteval dash                      # browse tasks and runs at http://127.0.0.1:4173
 ```
 
-The generated task compares two local commands and grades them with a
-TypeScript compile, so it costs nothing. The run prints where it wrote its
+The generated task compares two local stand-in commands and grades them with
+a TypeScript compile, so it costs nothing. The run prints where it wrote its
 evidence — open `report.html` there, or use the dashboard.
 
-From here, edit `tasks/my-task/spec.yaml`: swap the candidates for models or
-your own agent, add inputs, and turn on a judge. See
-[Writing a task](#writing-a-task).
+### A real one (about a cent)
+
+```bash
+export OPENROUTER_API_KEY=sk-or-...
+agenteval init real --models        # two cheap models, a tsc gate, a judge
+agenteval run real --yes --html
+```
+
+Two models from different vendors write the same small function; `tsc` gates
+what they wrote and a judge from a third vendor compares the ones that compile.
+The recommendation comes from the gates and the operating mode (here: lowest
+cost); the judge's preference is reported beside it, and the report says when
+the two disagree. Budget is capped at $0.05.
+
+From here, edit `tasks/<name>/spec.yaml`: swap the models or use your own
+agent, add inputs, and raise the trials. See [Writing a task](#writing-a-task).
 
 ## Samples
 
