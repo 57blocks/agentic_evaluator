@@ -59,7 +59,7 @@ your own agent, add inputs, and turn on a judge. See
 
 ## Samples
 
-The package ships six sample tasks. Copy one into your workspace to run it:
+The package ships seven sample tasks. Copy one into your workspace to run it:
 
 ```bash
 mkdir -p tasks
@@ -71,6 +71,7 @@ agenteval run custom-check --yes --html
 |---|---|---|
 | `custom-check` | grading with your own check script; wrapping any program as a candidate | free |
 | `chain-offline` | a two-step workflow and its end-to-end validation | free |
+| `docker-sandbox` | the same agent run in a Docker container and on the host; each trial records which | free (needs Docker) |
 | `compare-models` | two real models, a deterministic gate plus a pairwise judge | billed, capped at $0.50 |
 | `compare-agents` | Claude Code, OpenCode and pi on the same coding job, graded by behavioural tests | billed by the agents; judge capped at $1 |
 | `compare-agent-models` | one agent (OpenCode) with three models — the model's effect, agent held fixed | billed by OpenRouter; judge capped at $1 |
@@ -254,9 +255,11 @@ when chained, `e2e-validation.json` at the root.
 
 - A command (`agent-cli`) candidate runs **on your machine as you** — your
   files, network and credentials. To run it in a Docker container instead, add
-  `image:` to its `cli:` block; only the work dir is mounted, the network is off
-  unless you set `network:`, and only the variables you list in `env:` are
-  passed in. Every trial records whether it was isolated.
+  `image:` to its `cli:` block. Only the work dir is writable; a script the task
+  ships (`agents/...`) is mounted read-only, and `checks/` is not mounted. The
+  network is off unless you set `network:`, and only the variables you list in
+  `env:` are passed in. Every trial records whether it was isolated. The
+  `docker-sandbox` sample shows both ways side by side.
 - Check scripts and `tsc` always run on your machine. Declare only checks you
   would run yourself.
 - An agent's own spending is invisible to agenteval: it shows as unobserved,

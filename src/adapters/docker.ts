@@ -11,7 +11,8 @@
  *
  * Isolation is per candidate (`cli.image`) rather than global because the
  * command is the candidate: `claude -p` needs an image with that CLI in it,
- * while a task-local `node agents/run.mjs` only needs node. A candidate with
+ * while a task-local `node agents/run.mjs` only needs node — the directory
+ * the script lives in is mounted read-only under `/task`. A candidate with
  * no image still runs, on the host, and every trial records which of the two
  * happened.
  */
@@ -26,6 +27,15 @@ const MAX_BUFFER = 2 * 1024 * 1024;
 
 /** Where the work dir is mounted inside the container. */
 export const CONTAINER_WORKDIR = "/work";
+
+/** Where a task directory the command declared (e.g. `agents/`) is mounted, read-only. */
+export const TASK_MOUNT = "/task";
+
+/** A host path the container can read but not write. */
+export interface Mount {
+  host: string;
+  container: string;
+}
 
 export interface RunOutcome {
   stdout: string;
@@ -57,6 +67,7 @@ export function dockerArgs(
   name: string,
   workDir: string,
   argv: readonly string[],
+  mounts: readonly Mount[] = [],
 ): string[] {
   return [
     "run",
@@ -71,6 +82,9 @@ export function dockerArgs(
     // A fork bomb in generated code should not take the host down with it.
     "--pids-limit", "512",
     "-v", `${workDir}:${CONTAINER_WORKDIR}`,
+    // The task's own code, read-only and outside the work dir, so it can be
+    // run but neither changed nor collected as part of the deliverable.
+    ...mounts.flatMap((m) => ["-v", `${m.host}:${m.container}:ro`]),
     "-w", CONTAINER_WORKDIR,
     ...containerEnv(cli.env),
     cli.image!,
@@ -97,10 +111,10 @@ export function dockerAvailable(): Promise<boolean> {
 export function runInDocker(
   cli: AgentCliConfig,
   argv: readonly string[],
-  opts: { workDir: string; timeoutMs: number },
+  opts: { workDir: string; timeoutMs: number; mounts?: readonly Mount[] },
 ): Promise<RunOutcome> {
   const name = `ae-trial-${randomUUID().slice(0, 12)}`;
-  const args = dockerArgs(cli, name, opts.workDir, argv);
+  const args = dockerArgs(cli, name, opts.workDir, argv, opts.mounts);
 
   return new Promise((resolve, reject) => {
     const t0 = Date.now();
