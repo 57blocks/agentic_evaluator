@@ -197,7 +197,7 @@ than halfway through a run.
 A minimal single-step task, commented. `agenteval init` writes one like this.
 
 ```yaml
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: my-task
 budget_usd: 1                    # hard ceiling for the whole run
 

@@ -2,7 +2,7 @@
 # This file's sha256 goes into the manifest: changing any character (comments
 # included) changes the hash.
 
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: taskbreakdown   # output goes to runs/<run_name>-<timestamp>/
 budget_usd: 3             # enforced: the run stops starting new work once spend reaches it
 

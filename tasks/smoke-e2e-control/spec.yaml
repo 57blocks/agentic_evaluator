@@ -2,7 +2,7 @@
 # Independent eval still uses frozen code-utils for both steps. The e2e pass
 # feeds draft output into review (input_from). Generation is local; the
 # independent-step judge still needs OpenRouter if you --yes the full spec.
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: smoke-e2e-control
 budget_usd: 1
 

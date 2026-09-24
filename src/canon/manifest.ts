@@ -88,7 +88,7 @@ async function harnessVersion(): Promise<{ name: string; version: string; git_sh
 export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<RunManifest> {
   const harness = await harnessVersion();
   return {
-    protocol_version: suite.protocolVersion ?? "0.4",
+    protocol_version: suite.protocolVersion ?? "0.3",
     run_id: m.runId,
     run_name: suite.runName ?? suite.suiteId,
     step: { id: suite.stepId ?? suite.step, version: suite.stepVersion ?? null },

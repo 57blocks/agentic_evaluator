@@ -1,7 +1,7 @@
 # End-to-end validation smoke (protocol §8 step 3), fully local.
 # The declared control writes broken TypeScript, so the single-model control
 # arm fails its required check while the proposed combination passes it.
-protocol_version: "0.4"
+protocol_version: "0.3"
 run_name: smoke-e2e-validation
 budget_usd: 1
 
