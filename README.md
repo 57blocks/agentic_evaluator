@@ -40,9 +40,16 @@ runs/<runId>/
 
 ## Run
 
+**New here? Read [docs/GUIDE.md](docs/GUIDE.md)** — install, the samples,
+writing a task, reading a run, cost control. `examples/` holds three sample
+tasks to start from ([examples/README.md](examples/README.md)); two are free.
+
 ```bash
 pnpm install
 npm link                    # or: pnpm run agenteval <command>
+echo 'OPENROUTER_API_KEY=sk-or-...' > .env.local   # only for tasks that call models
+
+agenteval run examples/tasks/custom-check --yes --html   # free sample
 
 agenteval init my-task      # a runnable, offline task to edit
 agenteval ls                # what this workspace holds, and what it spent
@@ -50,6 +57,10 @@ agenteval plan my-task      # what a run would cost — no key, no call
 agenteval run my-task --yes # execute
 agenteval dash              # the dashboard, over this workspace
 ```
+
+On an interactive terminal `run --yes` draws a live progress block (Ink);
+piped, redirected, `--plain` or `--json`, it prints one line or one JSON object
+per event.
 
 A **workspace** is any directory holding `tasks/`, found by walking up from
 where you are standing; `--workspace DIR` names one explicitly. The harness
@@ -109,6 +120,7 @@ src/cli/              argv -> core, and the only place a run is formatted for a 
   index.ts            dispatch, --help, --version, exit codes
   commands/           run plan ls init models report dash
   print.ts            events -> terminal lines        json.ts  events -> NDJSON
+  progress.ts         events -> live-view state (pure)  live.tsx  the Ink view
 src/core/             the kernel: no terminal, no cwd, no process.exit
   workspace.ts        where the user's tasks and runs live
   plan.ts             what a run would do, before it does any of it (pure)
@@ -127,13 +139,24 @@ src/spec/             YAML spec loader + JSON Schema + semantic checks
 src/canon/            protocol layer: states, success decision, hash, usage, cost, trace,
                       manifest, rows, adapt, rates, write
 src/html.ts           escapeHtml, shared by the two report pages
+src/report-model.ts   what a report says: numbers and decided wording, read by both renderers
+src/report-format.ts  formatters and fixed wording, browser-safe
+src/report-copy.ts    the report's Chinese sentences, rebuilt from gates and rates — never selector English
+src/test-plan.ts      a spec (or a run's manifest) read aloud: inputs, candidates, checks, gates, pick, scale
 src/report-v2.ts      the step report page (+ report-charts, report-evidence)
 src/report-workflow.ts the workflow page: verdict, arms, per-step links, ledger
 src/server/           run control (plan gate, SSE, cancel) and the cross-run overview
 src/demo/             the dashboard server and its React client
+  server.ts           JSON API + artifact routes    catalog.ts  tasks, runs, samples
+  client/app/         shell, hash routing, workspace fetch, OS theme
+  client/pages/       one file per view: home (task list), task, run, report
+  client/features/    task-list, run-control, evidence, task-files, test-plan, report (+ HTML export)
+  client/lib/         api, format, tone, shared wording — no JSX, unit-testable
+  client/components/ui/  shadcn, stock theme, unmodified
 tests/                node:test; parity uses tests/legacy-aggregate.ts (pristine oracle)
+examples/             a workspace of sample tasks for new users; the free ones are tested
 fixtures/             committed real runs used by the parity test
-docs/                 protocol, implementation plan, harness-to-protocol map, runner design
+docs/                 GUIDE.md (user guide), protocol, implementation plan, harness-to-protocol map
 ```
 
 ## Judging methods
@@ -233,25 +256,30 @@ written.
 numbers on a live task — by capturing runs before and after and diffing them.
 It never spends: it reads runs you already produced.
 
-## Two renderers, on purpose
+## Two renderers, one model
 
-`report.html` is written by `report-v2.ts` (one step) and
-`report-workflow.ts` (a whole workflow). The dashboard is a separate React
-application. They are not a duplication to be collapsed, and the difference is
-the artifact's job:
+A run's report is rendered twice, on purpose, and both renderers read one
+model — `src/report-model.ts` computes every number and every sentence that
+carries a decision; `src/report-format.ts` and `src/report-copy.ts` hold the
+formatters and the Chinese sentences, with no Node imports so the browser
+bundle can use them too. The selector's own English reasons stay untouched in
+`recommendation.json`; pages rebuild their sentences from the gates and rates.
 
-- `report.html` is **evidence**. It is 16 KB of self-contained HTML that opens
-  from a file path with no server, no network and no build, and it sits in the
-  run directory next to the rows it renders. Bundling the dashboard into every
-  run instead would make each one ~900 KB and pin a durable record to a React
-  version.
-- The dashboard is **live**. It follows a run in progress over SSE, spans every
-  run in the workspace, and starts new ones.
+- `report.html` is **evidence**. `report-v2.ts` (one step) and
+  `report-workflow.ts` (a whole workflow) write it into the run directory at
+  run time. It is self-contained, opens from a file path with no server, no
+  network and no build, and pins nothing to a React version. It stays the
+  durable record.
+- The dashboard's **report page** (`src/demo/client/features/report/`) renders
+  the same model as React, served by `/api/report/<kind>/<rel>`. Its **导出
+  HTML** button saves exactly what is on screen — the DOM plus the page's own
+  stylesheet — as one file with no framework and no network requests, so an
+  exported page can never say something the dashboard did not.
 
 What must not drift is the wording — "needs review" rather than a blank cell,
-a gated candidate named with its reason. Those decisions live in view-model
-helpers (`src/demo/client/render.ts`, `src/cli/summary.ts`), separately from
-the markup that presents them.
+a gated candidate named with its reason, the judge's pick beside the
+recommendation and never inside it. `tests/report-model.test.ts` holds the
+model's numbers and sentences against what `report.html` prints.
 
 ## Not in this milestone
 

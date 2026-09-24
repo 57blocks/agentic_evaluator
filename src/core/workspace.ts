@@ -147,5 +147,28 @@ export async function resolveSpecPath(ws: Workspace, arg: string): Promise<strin
     }
     if (await fs.stat(c).then((s) => s.isFile()).catch(() => false)) return c;
   }
-  throw new NoSuchSpecError(`no spec found for "${arg}" (looked in ${candidates.join(", ")})`);
+  const looked = `no spec found for "${arg}" (looked in ${candidates.join(", ")})`;
+  const sample = await sampleNamed(arg);
+  const hint = sample
+    ? `did you mean ${path.relative(process.cwd(), sample) || "."}?`
+    : "try `agenteval ls` for this workspace's tasks";
+  throw new NoSuchSpecError(`${looked}\n${hint}`);
+}
+
+/**
+ * The installation's sample with this bare name, if there is one.
+ *
+ * The samples live in their own workspace (`examples/`), so from the checkout
+ * root or a user's workspace a sample's name alone does not resolve — the
+ * first thing a new user types. Naming the path is cheaper than explaining
+ * workspaces in an error message.
+ */
+async function sampleNamed(arg: string): Promise<string | null> {
+  if (arg.includes("/") || arg.includes(path.sep)) return null;
+  const dir = path.join(INSTALL_ROOT, "examples", "tasks", arg);
+  const hasSpec = await fs
+    .stat(path.join(dir, "spec.yaml"))
+    .then((s) => s.isFile())
+    .catch(() => false);
+  return hasSpec ? dir : null;
 }
