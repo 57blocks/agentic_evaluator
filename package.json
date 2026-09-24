@@ -1,9 +1,28 @@
 {
-  "name": "agentic-evaluator",
+  "name": "@57blocks/agenteval",
   "version": "0.1.0",
-  "private": true,
-  "type": "module",
   "description": "Model and workflow evaluation harness conforming to the Agent Evaluation Protocol v0.4",
+  "license": "MIT",
+  "author": "57blocks",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/57blocks/agentic_evaluator.git"
+  },
+  "homepage": "https://github.com/57blocks/agentic_evaluator#readme",
+  "bugs": {
+    "url": "https://github.com/57blocks/agentic_evaluator/issues"
+  },
+  "keywords": [
+    "llm",
+    "evaluation",
+    "agents",
+    "cli",
+    "benchmark"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
   "engines": {
     "node": ">=22"
   },
@@ -59,6 +78,7 @@
     "fixtures",
     "vite.config.ts",
     "tsconfig.json",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ]
 }
