@@ -80,6 +80,7 @@ function checkCells(input: AdaptInput, r: RunRecord): Record<string, CheckCell> 
       state: r.checkState,
       version: r.checkVersion ?? input.versions.check ?? "unknown",
       evidence: r.checkOutput ? r.checkOutput.slice(0, EVIDENCE_CHARS) : undefined,
+      ...(r.checkReason ? { reason: r.checkReason } : {}),
     },
   };
 }
