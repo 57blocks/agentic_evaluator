@@ -18,7 +18,8 @@ import type { WorkflowRecord } from "./canon/workflow.js";
 import { buildStepReport, type CandidateRow, type StepReport } from "./report-model.js";
 import { loadBundle } from "./report-v2.js";
 import { FIRMNESS_LABEL } from "./report-copy.js";
-import { NO_PICK } from "./report-format.js";
+import { stepsHeadline } from "./report-format.js";
+import type { Recommendation } from "./canon/select.js";
 
 /** A step's report, trimmed of what the workflow page never shows (raw outputs, trial rows). */
 export type StepDigest = Omit<StepReport, "outputs" | "trials" | "manifest" | "sampleTrial">;
@@ -49,7 +50,10 @@ export interface CandidateMeta {
 export interface AdviceRow {
   step: string;
   chosen: string | null;
+  /** Display label, e.g. "directional". */
   firmness: string;
+  /** The raw value, for choosing a tone. */
+  firmnessKey: Recommendation["firmness"];
   reason: string;
 }
 
@@ -173,15 +177,8 @@ export function workflowFindings(
 // ── headline ─────────────────────────────────────────────────────────────────
 
 function headlineOf(steps: readonly WorkflowStep[]): string {
-  const read = steps.filter((s) => s.report);
-  const picks = read.map((s) => `${s.id} → ${s.report!.verdict.chosen ?? NO_PICK}`).join(", ");
-  const open = read.filter((s) => !s.report!.verdict.chosen).length;
-  const missing = steps.length - read.length;
-  const tail = [
-    open > 0 ? `${open} step(s) have no candidate to recommend and need review` : "",
-    missing > 0 ? `${missing} step report(s) could not be read` : "",
-  ].filter(Boolean).join("; ");
-  return `Recommendation per step: ${picks}.${tail ? ` ${tail}.` : ""}`;
+  const read = steps.filter((s) => s.report).map((s) => ({ chosen: s.report!.verdict.chosen }));
+  return stepsHeadline(read, steps.length - read.length);
 }
 
 // ── assemble ─────────────────────────────────────────────────────────────────
@@ -208,7 +205,13 @@ export async function buildWorkflowDigest(root: string, record: WorkflowRecord):
     findings: workflowFindings(steps, judge, candidates),
     advice: steps.flatMap((s) =>
       s.report
-        ? [{ step: s.id, chosen: s.report.verdict.chosen, firmness: FIRMNESS_LABEL[s.report.verdict.firmness], reason: s.report.verdict.text }]
+        ? [{
+            step: s.id,
+            chosen: s.report.verdict.chosen,
+            firmness: FIRMNESS_LABEL[s.report.verdict.firmness],
+            firmnessKey: s.report.verdict.firmness,
+            reason: s.report.verdict.text,
+          }]
         : [],
     ),
   };

@@ -17,7 +17,8 @@ import { workflowGaps, workflowLedger, type WorkflowArm, type WorkflowRecord, ty
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
 import { workflowNoVerdictLine, workflowVerdictLine, workflowVerdictTone } from "./report-model.js";
-import { STEPS_NOT_VALIDATED } from "./report-format.js";
+import { plural, stepsHeadline, STEPS_NOT_VALIDATED } from "./report-format.js";
+import { FIRMNESS_LABEL, modeLabel } from "./report-copy.js";
 
 const usd = (n: number): string => `$${n.toFixed(4)}`;
 const num = (n: number | null, digits = 2): string => (n === null ? "—" : n.toFixed(digits));
@@ -85,26 +86,27 @@ function renderArms(record: WorkflowRecord): string {
   </section>`;
 }
 
-function stepRow(s: WorkflowStepRecord): string {
+const FIRMNESS_PILL: Record<string, string> = { firm: "pass", directional: "warn", "needs-review": "miss" };
+
+function stepCard(s: WorkflowStepRecord, index: number): string {
   const gated = (s.gated ?? []).length > 0 ? s.gated.map((g) => `${g.candidate} (${g.reason})`).join("; ") : "none";
   const link = `<a href="${encodeURIComponent(s.dir)}/report.html">${escapeHtml(s.dir)}/report.html</a>`;
-  return `<tr class="${s.chosen ? "chosen" : ""}">
-    <td class="cand">${escapeHtml(s.id)}<span class="model">${escapeHtml(s.operating_mode ?? "no operating mode")}</span></td>
-    <td>${s.chosen ? escapeHtml(s.chosen) : '<span class="pill warn">no recommendation</span>'}<span class="sub">${escapeHtml(s.firmness)}</span></td>
-    <td class="small">${escapeHtml(gated)}</td>
-    <td class="num">${s.trials}</td>
-    <td class="num">${s.ledger_total == null ? "—" : usd(s.ledger_total)}</td>
-    <td class="small">${link}</td>
-  </tr>`;
+  const cost = s.ledger_total == null ? "—" : usd(s.ledger_total);
+  return `<div class="step-card${s.chosen ? "" : " open"}">
+    <span class="idx">${index + 1} · ${escapeHtml(s.id)}</span>
+    <span class="pick">${s.chosen ? escapeHtml(s.chosen) : "no recommendation"}</span>
+    <span class="pill ${FIRMNESS_PILL[s.firmness] ?? "warn"}">${escapeHtml(FIRMNESS_LABEL[s.firmness as keyof typeof FIRMNESS_LABEL] ?? s.firmness)}</span>
+    <span class="small">${escapeHtml(modeLabel(s.operating_mode))} · gated out: ${escapeHtml(gated)}</span>
+    <span class="small">${plural(s.trials, "trial")} · ${cost} · ${link}</span>
+  </div>`;
 }
 
 function renderSteps(record: WorkflowRecord): string {
+  const arrow = record.handoff ? '<span class="arrow" aria-hidden="true">→</span>' : "";
+  const cards = record.steps.map(stepCard).join(arrow);
   return `<section class="card">
-    <h2>Recommendation per step <span class="hint">evaluated independently, not validated as a workflow</span></h2>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Step</th><th>Recommended</th><th>Gated out</th><th class="num">Trials</th><th class="num">Cost</th><th>Report</th></tr></thead>
-      <tbody>${record.steps.map(stepRow).join("")}</tbody>
-    </table></div>
+    <h2>${escapeHtml(stepsHeadline(record.steps))} <span class="hint">evaluated independently, not validated as a workflow</span></h2>
+    <div class="steps">${cards}</div>
   </section>`;
 }
 

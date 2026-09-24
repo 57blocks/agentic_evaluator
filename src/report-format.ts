@@ -44,4 +44,21 @@ export const NO_PICK = "no recommendation";
 export const SELF_CHECK = "self-check";
 
 /** Said on the workflow page when there is no §8 verdict. */
-export const STEPS_NOT_VALIDATED = "The recommendations below are per step; they have not been validated as a workflow.";
+export const STEPS_NOT_VALIDATED = "Each recommendation is per step; none has been validated as a workflow.";
+
+/**
+ * The workflow verdict's headline: how many steps have a pick, and what still
+ * needs a person. `unreadable` counts step reports that could not be read —
+ * counted, never dropped, so a missing step cannot make the tally look clean.
+ */
+export function stepsHeadline(steps: ReadonlyArray<{ chosen: string | null }>, unreadable = 0): string {
+  const total = steps.length + unreadable;
+  const picked = steps.filter((s) => s.chosen).length;
+  const open = steps.length - picked;
+  if (open === 0 && unreadable === 0) return `Every step has a recommendation (${picked} of ${total})`;
+  const tail = [
+    open > 0 ? `${open} ${open === 1 ? "needs" : "need"} review` : "",
+    unreadable > 0 ? `${plural(unreadable, "report")} could not be read` : "",
+  ].filter(Boolean);
+  return [`${picked} of ${total} steps have a recommendation`, ...tail].join(" · ");
+}
