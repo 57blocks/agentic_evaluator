@@ -1,0 +1,78 @@
+# Sample: compare two real models on the same task. BILLED — needs
+# OPENROUTER_API_KEY (in .env.local or the environment).
+#
+#   agenteval models examples/tasks/compare-models --catalog-only   # free: ids + prices
+#   agenteval plan   examples/tasks/compare-models                  # free: call counts
+#   caffeinate -i agenteval run examples/tasks/compare-models --yes --html
+#
+# Expected size: 2 generations + 2 judge calls (one pair, both orders), on a
+# ~300-token prompt. budget_usd is the hard ceiling: the run stops starting
+# work once spend reaches it, and says so in GAPS.md.
+#
+# What it shows:
+#   - `producer: prompt` with `prompt_file`: each model gets the prompt with
+#     `{{input}}` replaced by the test case.
+#   - A deterministic gate (the same release-notes check as custom-check)
+#     decides success; the pairwise judge adds a preference among candidates
+#     that pass it. `operating_mode: lowest-cost` then picks the cheapest one
+#     that qualified.
+#   - With one input and one trial, every result is directional: good for
+#     seeing the evidence, not for a decision. Add inputs and raise
+#     `trials_per_case` before trusting a ranking.
+
+protocol_version: "0.4"
+run_name: compare-models
+budget_usd: 0.5
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: notes
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/notes.md
+      rubric_file: rubrics/notes.md
+      test_set:
+        id: changelog-v1
+        inputs: [changelog]
+      candidate_ids: [sonnet-5, deepseek-v4-pro]
+      required_checks: [release-notes]
+      judged_dimensions: [faithfulness, grouping, clarity]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 120
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+
+evaluators:
+  required_checks:
+    release-notes:
+      kind: command
+      argv: [node, checks/release-notes.mjs]
+      version_files: [checks/release-notes.mjs]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/notes.md
+    methods: [pairwise-swap]
+
+execution:
+  trials_per_case: 1
+  concurrency: 2
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/notes.md
+  default_temperature: 0.3

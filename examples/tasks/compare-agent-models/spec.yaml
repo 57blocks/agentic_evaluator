@@ -1,0 +1,90 @@
+# Sample: one agent, three models, the same task. The other half of
+# `compare-agents`: there the model is fixed and the agent varies; here the
+# agent (OpenCode) is fixed and the model varies, so a difference in results
+# is the model's. BILLED, and NOT sandboxed — read both warnings first.
+#
+#   agenteval plan examples/tasks/compare-agent-models              # free
+#   caffeinate -i agenteval run examples/tasks/compare-agent-models --yes --html
+#
+# The task and grading are the same as compare-agents: implement a small
+# reactive-signals library (inputs/code-reactive.txt); checks/behaviour.mjs
+# runs spec.test.ts, all ten behaviours must pass, two trials each, and a
+# pairwise judge ranks the candidates that passed. Run it from inside the
+# repository — the check uses this checkout's tsx.
+#
+# BILLING. OpenCode bills OpenRouter directly and the harness cannot see that
+# spend: agent-cli cost is recorded as unobserved, the ledger shows $0 for
+# generation, and `budget_usd` cannot stop the agent. It does cap the judge:
+# 3 pairs × 2 orders = 6 judge calls. Check OpenRouter's activity page for
+# what the generations cost.
+#
+# NOT SANDBOXED. Without `cli.image` OpenCode runs on this machine as you, and
+# `--auto` approves its commands and edits. The work dir is a temp directory,
+# but nothing stops the agent leaving it (see "Isolation" in docs/GUIDE.md).
+#
+# FAIRNESS. Same agent, same flags, same task text — only `--model` differs.
+# `--pure` keeps external plugins out. Model ids are OpenCode's own
+# (`opencode models openrouter` lists them).
+#
+# Still directional: one task. Add comparable tasks before trusting a ranking.
+
+protocol_version: "0.4"
+run_name: compare-agent-models
+budget_usd: 1
+
+workflow:
+  control_candidate: opencode.sonnet-5
+  steps:
+    - id: codegen
+      version: "1"
+      rubric_file: rubrics/codegen.md
+      test_set:
+        id: reactive-agent-models-v1
+        inputs: [code-reactive]
+      candidate_ids: [opencode.sonnet-5, opencode.deepseek-v4-pro, opencode.kimi-k3]
+      required_checks: [code-reactive-behaviour]
+      judged_dimensions: [meets-spec, correctness, type-quality, simplicity, robustness]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: judge-preference
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 1800
+
+candidates:
+  - id: opencode.sonnet-5
+    adapter: agent-cli
+    cli:
+      argv: [opencode, run, --pure, --auto, --model, openrouter/anthropic/claude-sonnet-5, "{{input}}"]
+  - id: opencode.deepseek-v4-pro
+    adapter: agent-cli
+    cli:
+      argv: [opencode, run, --pure, --auto, --model, openrouter/deepseek/deepseek-v4-pro, "{{input}}"]
+  - id: opencode.kimi-k3
+    adapter: agent-cli
+    cli:
+      argv: [opencode, run, --pure, --auto, --model, openrouter/moonshotai/kimi-k3, "{{input}}"]
+
+evaluators:
+  required_checks:
+    code-reactive-behaviour:
+      kind: command
+      argv: [node, checks/behaviour.mjs]
+      version_files: [checks/behaviour.mjs, spec.test.ts]
+      timeout_seconds: 180
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/codegen.md
+    methods: [pairwise-swap]
+
+execution:
+  trials_per_case: 2
+  concurrency: 2
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2

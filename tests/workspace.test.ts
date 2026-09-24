@@ -51,3 +51,31 @@ test("a task copied outside the harness runs, and writes its runs beside itself"
 
   await fs.rm(workspace, { recursive: true, force: true });
 });
+
+test("a sample's bare name that misses the workspace points at the sample's path", async () => {
+  // Arrange - a workspace with no such task, the way the checkout root has none.
+  const { resolveSpecPath, workspaceAt, NoSuchSpecError } = await import("../src/core/workspace.js");
+  const empty = await fs.mkdtemp(path.join(os.tmpdir(), "eval-ws-"));
+  await fs.mkdir(path.join(empty, "tasks"));
+
+  // Act / Assert
+  await assert.rejects(resolveSpecPath(workspaceAt(empty), "compare-agents"), (err: unknown) => {
+    assert.ok(err instanceof NoSuchSpecError);
+    assert.match(err.message, /did you mean .*examples[/\\]tasks[/\\]compare-agents\?/);
+    return true;
+  });
+});
+
+test("a name that is no sample either gets no suggestion, only where it looked", async () => {
+  // Arrange
+  const { resolveSpecPath, workspaceAt } = await import("../src/core/workspace.js");
+  const empty = await fs.mkdtemp(path.join(os.tmpdir(), "eval-ws-"));
+
+  // Act / Assert
+  await assert.rejects(resolveSpecPath(workspaceAt(empty), "no-such-task"), (err: unknown) => {
+    assert.ok(err instanceof Error);
+    assert.doesNotMatch(err.message, /did you mean/);
+    assert.match(err.message, /agenteval ls/);
+    return true;
+  });
+});

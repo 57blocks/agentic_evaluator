@@ -1,0 +1,76 @@
+# Sample: grade a deliverable with your own check script. Free to run.
+#
+#   agenteval run examples/tasks/custom-check --yes --html
+#
+# What it shows:
+#   - `kind: command` — a required check is any program you write. It runs in
+#     the trial's work dir; exit 0 passes, 1 fails the candidate, anything else
+#     is an evaluator error. Here `checks/release-notes.mjs` fails notes that
+#     drop a PR or a section.
+#   - `version_files` hashes the check into the evaluator version, so editing
+#     the check is visible in the manifest instead of silently moving numbers.
+#   - Wrapping any agent: `adapter: agent-cli` runs a command in a clean work
+#     dir. `{{input}}` in argv is replaced by the task text, which is also in
+#     `.eval-input.txt`; the files the command leaves behind are graded.
+#
+# To grade a real agent, replace a candidate's argv, e.g.
+#     argv: [claude, -p, "{{input}}", --permission-mode, acceptEdits]
+# and to run it in a container instead of on this machine, add
+#     image: <an image with that CLI>, network: bridge, env: { ANTHROPIC_API_KEY: "" }
+# (see "Isolation" in docs/GUIDE.md).
+
+protocol_version: "0.4"
+run_name: custom-check
+budget_usd: 1
+
+workflow:
+  control_candidate: careful
+  steps:
+    - id: notes
+      version: "1"
+      test_set:
+        id: changelog-v1
+        inputs: [changelog]
+      candidate_ids: [careful, sloppy]
+      required_checks: [release-notes]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 30
+
+candidates:
+  - id: careful
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/notes-agent.mjs]
+  - id: sloppy
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/notes-agent.mjs, --mode, sloppy]
+
+evaluators:
+  required_checks:
+    release-notes:
+      kind: command
+      argv: [node, checks/release-notes.mjs]
+      version_files: [checks/release-notes.mjs]
+      timeout_seconds: 30
+  judge:
+    # Required by the schema, never called: no method is declared. Add
+    # `methods: [pairwise-swap]` to have a model compare the two (billed).
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/notes.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 2
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2

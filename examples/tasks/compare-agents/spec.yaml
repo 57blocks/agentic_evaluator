@@ -1,0 +1,114 @@
+# Sample: compare three coding agents on a task hard enough to separate them.
+# BILLED, and NOT sandboxed — read both warnings before running.
+#
+#   agenteval plan examples/tasks/compare-agents                    # free
+#   caffeinate -i agenteval run examples/tasks/compare-agents --yes --html
+#
+# The task (inputs/code-reactive.txt): implement a small reactive graph —
+# signals, lazy computed values and effects, the core under Vue refs, Solid or
+# Preact Signals — to a fixed public API, with ten behaviours that are easy to
+# get almost right (glitch-free diamonds, dynamic dependencies, batching,
+# cleanup order, cycle detection, no leaks).
+#
+# How it is graded:
+#   - checks/behaviour.mjs runs spec.test.ts, one test per numbered behaviour,
+#     against the files the agent left. All ten must pass; the trial's
+#     evidence records how many did. It needs this checkout's node_modules
+#     (for tsx), so run the task from inside the repository.
+#   - A pairwise judge ranks the agents that passed
+#     (`operating_mode: judge-preference`). The judge is what chooses: with
+#     `methods: []` every step ends "needs-review", even when agents pass.
+#   - Two trials per agent: an agent that passes once and fails once is
+#     gated out by `minimum_reliability: 1.0`, which is the point.
+#
+# Each candidate is an agent's headless mode, run as a command
+# (`adapter: agent-cli`) in a fresh, empty work dir; `{{input}}` is replaced
+# by the task text.
+#
+# BILLING. The agents bill their own providers, and the harness cannot see
+# that spend: an agent-cli trial records cost as unobserved ("none"), so the
+# ledger shows $0 for generation and `budget_usd` cannot stop the agents.
+# Expect ten minutes or more and a few dollars per agent per trial; the first
+# run saw Claude Code finish in ~630s while OpenCode and pi hit the old 900s
+# limit, hence 1800s. The budget does cap the judge: 3 pairs × 2 orders = 6
+# judge calls.
+#
+# NOT SANDBOXED. Without `cli.image` each agent runs on this machine as you,
+# and the flags below let it run commands and edit files without asking. The
+# work dir is a temp directory, but nothing stops the agent leaving it. Run
+# this only where that is acceptable, or give each candidate an image:
+#     image: <an image with that CLI>, network: bridge, env: { API_KEY_NAME: "" }
+# (see "Isolation" in docs/GUIDE.md).
+#
+# FAIRNESS. The point is to compare the agents, so all three use the same
+# model. Each agent also reads its own user config — MCP servers, skills,
+# memory, rules — which can move its result; the flags that switch that off
+# are used where the agent has one. Model id formats differ per agent and
+# depend on how its providers are configured on your machine: run each argv
+# once by hand before the first real run.
+#
+# Still directional: one task. Add comparable tasks to `inputs/` and the
+# test set before trusting the ranking.
+
+protocol_version: "0.4"
+run_name: compare-agents
+budget_usd: 1
+
+workflow:
+  control_candidate: claude-code
+  steps:
+    - id: codegen
+      version: "1"
+      rubric_file: rubrics/codegen.md
+      test_set:
+        id: reactive-agents-v1
+        inputs: [code-reactive]
+      candidate_ids: [claude-code, opencode, pi]
+      required_checks: [code-reactive-behaviour]
+      judged_dimensions: [meets-spec, correctness, type-quality, simplicity, robustness]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: judge-preference
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 1800
+
+candidates:
+  - id: claude-code
+    adapter: agent-cli
+    cli:
+      argv: [claude, -p, --model, claude-sonnet-5, --permission-mode, acceptEdits, "{{input}}"]
+  - id: opencode
+    adapter: agent-cli
+    cli:
+      # --pure: no external plugins. --auto approves permissions not explicitly denied.
+      argv: [opencode, run, --pure, --auto, --model, openrouter/anthropic/claude-sonnet-5, "{{input}}"]
+  - id: pi
+    adapter: agent-cli
+    cli:
+      # -p: print mode, exits when done. --no-session: nothing carried between trials.
+      argv: [pi, -p, --no-session, --provider, openrouter, --model, anthropic/claude-sonnet-5, "{{input}}"]
+
+evaluators:
+  required_checks:
+    code-reactive-behaviour:
+      kind: command
+      argv: [node, checks/behaviour.mjs]
+      version_files: [checks/behaviour.mjs, spec.test.ts]
+      timeout_seconds: 180
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/codegen.md
+    methods: [pairwise-swap]
+
+execution:
+  trials_per_case: 2
+  concurrency: 2
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2
