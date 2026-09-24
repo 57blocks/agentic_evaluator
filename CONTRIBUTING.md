@@ -1,11 +1,11 @@
 # Developing agenteval
 
 How the harness is built, and how to work on it from a checkout. For using the
-tool, see the [README](../README.md).
+tool, see the [README](README.md).
 
-Model and workflow evaluation harness that records protocol v0.4 evidence
-and a reproducible operating-mode recommendation. See the
-[Agent Evaluation Protocol v0.4](AGENT-EVALUATION-PROTOCOL%20(1).md).
+Model and workflow evaluation harness that records Agent Evaluation Protocol
+evidence and a reproducible operating-mode recommendation. The protocol itself
+is published at [agent-eval-protocol.vercel.app](https://agent-eval-protocol.vercel.app/).
 Started from the `agentic-builder/eval` model-eval harness (imported verbatim in
 the first commit) and reshaped so every run leaves protocol-shaped evidence.
 
@@ -43,9 +43,9 @@ runs/<runId>/
 
 ## Run
 
-**New here? Read [docs/GUIDE.md](GUIDE.md)** — install, the samples,
-writing a task, reading a run, cost control. `examples/` holds three sample
-tasks to start from ([examples/README.md](../examples/README.md)); two are free.
+**New here? Read the [README](README.md)** — install, the samples,
+writing a task, reading a run, cost control. `examples/` holds seven sample
+tasks to start from ([examples/README.md](examples/README.md)); the offline ones are free.
 
 From a checkout of this repository:
 
@@ -161,7 +161,6 @@ src/demo/             the dashboard server and its React client
 tests/                node:test; parity uses tests/legacy-aggregate.ts (pristine oracle)
 examples/             a workspace of sample tasks for new users; the free ones are tested
 fixtures/             committed real runs used by the parity test
-docs/                 GUIDE.md (user guide), protocol, implementation plan, harness-to-protocol map
 ```
 
 ## Judging methods
@@ -296,4 +295,3 @@ validation of a mixed assignment run today. In-process agentic-builder producers
 wrap an external agent with `adapter: agent-cli`. Eligibility gates and
 operating-mode selection now write `recommendation.json`; the canonical report
 uses that file. Pairwise win rate is still shown but does not choose.
-See `docs/HARNESS-TO-PROTOCOL-MAP.md` for the row-by-row status.

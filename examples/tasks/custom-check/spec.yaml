@@ -17,7 +17,7 @@
 #     argv: [claude, -p, "{{input}}", --permission-mode, acceptEdits]
 # and to run it in a container instead of on this machine, add
 #     image: <an image with that CLI>, network: bridge, env: { ANTHROPIC_API_KEY: "" }
-# (see "Isolation" in docs/GUIDE.md). A script the task ships, like the one
+# (see "Safety" in the README). A script the task ships, like the one
 # here, runs in a container too — see the docker-sandbox sample.
 
 protocol_version: "0.3"
