@@ -112,8 +112,8 @@ export interface Suite {
   dimensions?: string[];
 
   // ── Canonical (protocol v0.4) fields, populated by the YAML spec loader. ──
-  // All optional so a legacy suites/*.json still loads; `loadLegacySuite`
-  // synthesizes `candidateDefs` with id = model.
+  // Optional so a test can build a minimal Suite; `defOf` fills in a
+  // model-api definition (id = model) when `candidateDefs` is absent.
 
   /** Candidate definitions keyed by id. `candidates` holds the ids. */
   candidateDefs?: Record<string, CandidateDef>;
@@ -143,11 +143,9 @@ export interface Suite {
   /**
    * Absolute path to the task directory that owns this spec — the directory
    * the spec file sits in. Inputs, rubric, checks, scaffold and runs resolve
-   * against it, so a task can be copied or archived whole. Absent on Suites
-   * built by tests or older callers; `taskRootOf` then falls back to the repo
-   * root, which is the pre-migration behaviour.
+   * against it, so a task can be copied or archived whole.
    */
-  taskRoot?: string;
+  taskRoot: string;
 }
 
 /** One candidate run against one input, one trial. */
@@ -175,7 +173,7 @@ export interface RunRecord {
   checkOutput?: string;
 
   // ── Canonical (protocol v0.4) fields. `candidate` above holds the candidate
-  // id (which equals the model id for legacy suites). ──
+  // id. ──
   modelRef?: string;
   /** Provider route + upstream provider, e.g. "openrouter/anthropic". */
   deploymentRef?: string;

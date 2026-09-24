@@ -37,7 +37,7 @@ export interface ExecutionContext {
    * the harness happens to call its own root, which stops being meaningful
    * the moment the task lives somewhere else.
    */
-  taskRoot?: string;
+  taskRoot: string;
   emit?: LlmTrace;
   traceContext?: Record<string, unknown>;
 }

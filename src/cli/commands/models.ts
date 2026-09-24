@@ -15,7 +15,7 @@
  * questions, same probe, same states.
  */
 
-import { loadSuites } from "../../spec/load-spec.js";
+import { loadWorkflow } from "../../spec/load-spec.js";
 import { findWorkspace, resolveSpecPath, workspaceAt } from "../../core/workspace.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
 import { rejectUnknown, stringFlag, UsageError, type ParsedArgs } from "../args.js";
@@ -126,7 +126,7 @@ export async function cmdModels(args: ParsedArgs, io: Io): Promise<ExitCode> {
 
   const catalog = await fetchCatalog();
   const findings: Finding[] = [];
-  for (const [model, role] of modelsToCheck(await loadSuites(spec))) {
+  for (const [model, role] of modelsToCheck(await loadWorkflow(spec))) {
     const m = catalog.get(model);
     if (!m) {
       findings.push({

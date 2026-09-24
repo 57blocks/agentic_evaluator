@@ -106,9 +106,9 @@ one; that also turns on the end-to-end validation pass.
 neither. A step with no method declared is a check-only step — the manifest
 records the declaration and GAPS.md states the missing scores are a choice.
 
-Legacy `suites/*.json` still load (candidate id = model id) but no longer run:
-their `rubrics/` and `scaffold/` were workspace-level and moved into the tasks
-that own them. The path is **deprecated** — every new step belongs in a task.
+The old `suites/*.json` format is gone; loading one fails with a pointer to
+`tasks/<name>/spec.yaml`. Runs it wrote under the workspace's top-level
+`runs/` are still listed and viewable.
 
 Still its own script, because it compares two sets of runs rather than producing one:
 

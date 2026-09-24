@@ -28,6 +28,7 @@ function run(argv: string[], dir: string, over: Partial<Parameters<typeof runCom
     input: "the input",
     meta: { step: "taskbreakdown", candidate: "cand-a", input: "todo-app", trial: 0 },
     workDir: dir,
+    taskRoot: process.cwd(),
     ...over,
   });
 }
@@ -111,10 +112,10 @@ test("produced artifacts are materialized next to them", async () => {
 });
 
 test("the version changes when the check script changes, not when it is re-run", async () => {
-  const a = await commandCheckVersion([NODE, "checks/x.mjs"], ["package.json"]);
-  const again = await commandCheckVersion([NODE, "checks/x.mjs"], ["package.json"]);
-  const otherArgv = await commandCheckVersion([NODE, "checks/y.mjs"], ["package.json"]);
-  const otherFiles = await commandCheckVersion([NODE, "checks/x.mjs"], ["tsconfig.json"]);
+  const a = await commandCheckVersion([NODE, "checks/x.mjs"], ["package.json"], process.cwd());
+  const again = await commandCheckVersion([NODE, "checks/x.mjs"], ["package.json"], process.cwd());
+  const otherArgv = await commandCheckVersion([NODE, "checks/y.mjs"], ["package.json"], process.cwd());
+  const otherFiles = await commandCheckVersion([NODE, "checks/x.mjs"], ["tsconfig.json"], process.cwd());
 
   assert.equal(a, again);
   assert.notEqual(a, otherArgv);

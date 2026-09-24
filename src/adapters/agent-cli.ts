@@ -40,15 +40,15 @@ function subst(value: string, vars: Record<string, string>): string {
  * with MODULE_NOT_FOUND, and that stack trace would be recorded as the
  * candidate's deliverable — a broken path billed as a graded attempt.
  */
-async function resolveArg(arg: string, taskRoot: string | undefined): Promise<string> {
+async function resolveArg(arg: string, taskRoot: string): Promise<string> {
   if (path.isAbsolute(arg)) return arg;
   if (!looksLikePath(arg)) return arg;
-  const candidate = path.resolve(taskRoot ?? process.cwd(), arg);
+  const candidate = path.resolve(taskRoot, arg);
   try {
     await fs.access(candidate);
     return candidate;
   } catch {
-    throw new AdapterError(`declared script not found: ${arg} (looked in ${taskRoot ?? process.cwd()})`, {
+    throw new AdapterError(`declared script not found: ${arg} (looked in ${taskRoot})`, {
       kind: "spawn",
       ms: 0,
     });

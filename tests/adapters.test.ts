@@ -38,7 +38,7 @@ test("adapter id defaults from producer unless the candidate sets one", () => {
 
 test("agent-cli writes artifacts, costs nothing, and records stdout", async () => {
   const workDir = await tmpWorkDir();
-  const r = await agentCliAdapter.execute(request({ argv: [process.execPath, helper] }), { workDir });
+  const r = await agentCliAdapter.execute(request({ argv: [process.execPath, helper] }), { workDir, taskRoot: workDir });
   assert.equal(r.finishReason, "stop");
   assert.equal(r.costSource, "none");
   assert.equal(r.costUsd, 0);
@@ -52,7 +52,7 @@ test("agent-cli substitutes {{input}} and {{workdir}}", async () => {
   const inputText = "hello-subst";
   await agentCliAdapter.execute(
     request({ argv: [process.execPath, helper, "{{input}}", "{{workdir}}"] }, { inputText }),
-    { workDir },
+    { workDir, taskRoot: workDir },
   );
   const args = await fs.readFile(path.join(workDir, "args.txt"), "utf-8");
   assert.equal(args, `${inputText}\n${workDir}`);
@@ -62,7 +62,7 @@ test("agent-cli non-zero exit is a completed attempt, not an adapter error", asy
   const workDir = await tmpWorkDir();
   const r = await agentCliAdapter.execute(
     request({ argv: [process.execPath, helper, "--mode", "fail"] }),
-    { workDir },
+    { workDir, taskRoot: workDir },
   );
   assert.equal(r.finishReason, "exit 2");
   assert.match(r.text, /refused/);
@@ -71,7 +71,7 @@ test("agent-cli non-zero exit is a completed attempt, not an adapter error", asy
 test("agent-cli timeout throws AdapterError timeout", async () => {
   const workDir = await tmpWorkDir();
   await assert.rejects(
-    () => agentCliAdapter.execute(request({ argv: ["sleep", "8"] }, { timeoutMs: 300 }), { workDir }),
+    () => agentCliAdapter.execute(request({ argv: ["sleep", "8"] }, { timeoutMs: 300 }), { workDir, taskRoot: workDir }),
     (err: unknown) => {
       assert.ok(err instanceof AdapterError);
       assert.equal(err.kind, "timeout");
@@ -83,7 +83,7 @@ test("agent-cli timeout throws AdapterError timeout", async () => {
 test("agent-cli missing binary throws AdapterError spawn", async () => {
   const workDir = await tmpWorkDir();
   await assert.rejects(
-    () => agentCliAdapter.execute(request({ argv: ["eval-missing-binary-xyz"] }), { workDir }),
+    () => agentCliAdapter.execute(request({ argv: ["eval-missing-binary-xyz"] }), { workDir, taskRoot: workDir }),
     (err: unknown) => {
       assert.ok(err instanceof AdapterError);
       assert.equal(err.kind, "spawn");

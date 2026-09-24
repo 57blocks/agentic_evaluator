@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import os from "node:os";
 import { compileSpec, compileWorkflow, loadSpec, loadWorkflow, parseSpec, SpecError, type EvalSpec } from "../src/spec/load-spec.js";
 import path from "node:path";
 import { sha256 } from "../src/canon/hash.js";
@@ -312,4 +313,19 @@ test("an empty methods list turns judging off; only an absent one means both", a
   // Assert - declaring nothing is not the same as declaring none. Collapsing
   // the two billed a full judging pass on a run that asked for no judging.
   assert.deepEqual(suite.judgeMethods, []);
+});
+
+test("a legacy suites/*.json path is refused with a pointer to spec.yaml", async () => {
+  // Arrange - a JSON file that YAML would happily parse, then fail on schema.
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "eval-legacy-"));
+  const file = path.join(dir, "codegen.json");
+  await fs.writeFile(file, JSON.stringify({ suiteId: "codegen", candidates: ["a/b"] }));
+
+  // Act + Assert
+  await assert.rejects(loadWorkflow(file), (err: unknown) => {
+    assert.ok(err instanceof SpecError);
+    assert.match(err.message, /no longer supported/);
+    assert.match(err.message, /spec\.yaml/);
+    return true;
+  });
 });

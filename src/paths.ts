@@ -14,7 +14,7 @@
  * Install-rooted (here): the TypeScript compiler a `tsc` check spawns, the
  * harness version and commit a manifest records, the built demo assets, the
  * fixtures shipped as samples.
- * Workspace-rooted (there): `tasks/`, `runs/`, `suites/`.
+ * Workspace-rooted (there): `tasks/`, `runs/`.
  */
 
 import path from "node:path";
@@ -35,31 +35,20 @@ export function fixturesDir(): string {
  * been rather than to a shared copy elsewhere: silently grading against a
  * file the task does not own is how two runs of "the same" task end up
  * judged by different rubrics.
- *
- * `taskRoot` is absent only for a legacy `suites/*.json`, whose asset paths
- * the loader has already made absolute.
  */
-export async function resolveTaskAsset(taskRoot: string | undefined, p: string): Promise<string> {
+export async function resolveTaskAsset(taskRoot: string, p: string): Promise<string> {
   return resolveTaskAssetSync(taskRoot, p);
 }
 
 /** Sync twin of `resolveTaskAsset`, for the argv resolution in `check.ts`. */
-export function resolveTaskAssetSync(taskRoot: string | undefined, p: string): string {
+export function resolveTaskAssetSync(taskRoot: string, p: string): string {
   if (path.isAbsolute(p)) return p;
-  return path.resolve(taskRoot ?? process.cwd(), p);
-}
-
-/**
- * The task dir a Suite belongs to, or undefined for a legacy suite.
- * Structurally typed so this module stays free of a `types.js` import.
- */
-export function taskRootOf(suite: { taskRoot?: string }): string | undefined {
-  return suite.taskRoot;
+  return path.resolve(taskRoot, p);
 }
 
 /** Input text lives with its task: `<task>/inputs/<slug>.txt`. */
-export function taskInputPath(taskRoot: string | undefined, slug: string): string {
-  return path.join(taskRoot ?? process.cwd(), "inputs", `${slug}.txt`);
+export function taskInputPath(taskRoot: string, slug: string): string {
+  return path.join(taskRoot, "inputs", `${slug}.txt`);
 }
 
 /** Display a path the way a CLI should: relative to where the user is standing. */

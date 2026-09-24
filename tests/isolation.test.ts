@@ -60,7 +60,7 @@ test("a containerised candidate cannot read the host filesystem", { timeout: 180
       promptTemplate: "", temperature: 0, timeoutMs: 120_000,
       cli: { argv: probe, image: "alpine:3", network: "none" },
     },
-    { workDir },
+    { workDir, taskRoot: workDir },
   );
 
   assert.equal(contained.isolation, "docker");
@@ -68,13 +68,14 @@ test("a containerised candidate cannot read the host filesystem", { timeout: 180
 
   // The same probe without an image: it reads the repo, and the result says
   // so rather than leaving a reader to assume it was sandboxed.
+  const hostDir = await fs.mkdtemp(path.join(os.tmpdir(), "ae-host-"));
   const host = await agentCliAdapter.execute(
     {
       stepId: "s", candidateId: "c", inputId: "i", inputText: "x",
       promptTemplate: "", temperature: 0, timeoutMs: 120_000,
       cli: { argv: probe },
     },
-    { workDir: await fs.mkdtemp(path.join(os.tmpdir(), "ae-host-")) },
+    { workDir: hostDir, taskRoot: hostDir },
   );
 
   assert.equal(host.isolation, "none");

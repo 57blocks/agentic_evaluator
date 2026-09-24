@@ -20,7 +20,7 @@ import { INSTALL_ROOT } from "../paths.js";
 export class NoSuchSpecError extends Error {}
 
 export interface Workspace {
-  /** Directory holding `tasks/`; runs and legacy suites resolve under it. */
+  /** Directory holding `tasks/`. */
   readonly root: string;
 }
 
@@ -65,18 +65,17 @@ export function tasksDir(ws: Workspace): string {
   return path.join(ws.root, "tasks");
 }
 
-/** Legacy top-level runs — where a suite with no task of its own writes. */
+/** Top-level runs written by older versions of the harness; read, never written. */
 export function runsDir(ws: Workspace): string {
   return path.join(ws.root, "runs");
 }
 
 /**
  * Where a run is written: beside the task that produced it, so the definition
- * and its evidence travel together. A legacy suite owns no directory and
- * falls back to the workspace's own `runs/`.
+ * and its evidence travel together.
  */
-export function runsRootFor(taskRoot: string | undefined, ws: Workspace): string {
-  return taskRoot ? path.join(taskRoot, "runs") : runsDir(ws);
+export function runsRootFor(taskRoot: string): string {
+  return path.join(taskRoot, "runs");
 }
 
 export interface RunDirEntry {
@@ -102,7 +101,7 @@ async function readRunDirs(root: string, task: string | null): Promise<RunDirEnt
 
 /**
  * Every run directory in the workspace: each task's own `runs/`, plus the
- * top-level `runs/` a legacy suite writes to.
+ * top-level `runs/` that older versions of the harness wrote to.
  *
  * Generation reuse matches on `trialHash`, which is content-addressed, so a
  * result produced under one task is safely reusable under another — scanning
