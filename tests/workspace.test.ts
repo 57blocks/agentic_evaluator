@@ -15,6 +15,7 @@ import os from "node:os";
 import path from "node:path";
 import { INSTALL_ROOT } from "../src/paths.js";
 import { runSuite } from "../src/run.js";
+import { findWorkspace } from "../src/core/workspace.js";
 
 const SMOKE = path.join(INSTALL_ROOT, "tasks", "smoke-local");
 
@@ -78,4 +79,16 @@ test("a name that is no sample either gets no suggestion, only where it looked",
     assert.match(err.message, /agenteval ls/);
     return true;
   });
+});
+
+test("a directory with no tasks/ above it is its own workspace, not the installation", async () => {
+  // Arrange - an installed CLI run from a fresh project directory.
+  const fresh = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "eval-fresh-")));
+
+  // Act
+  const ws = await findWorkspace(fresh);
+
+  // Assert - runs and `init` land in the user's directory, never in node_modules.
+  assert.equal(ws.root, fresh);
+  assert.notEqual(ws.root, INSTALL_ROOT);
 });

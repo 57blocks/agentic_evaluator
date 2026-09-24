@@ -38,16 +38,17 @@ async function isDir(p: string): Promise<boolean> {
 /**
  * Walk up from `startDir` for a directory that holds `tasks/`.
  *
- * Falling back to the installation is what keeps `pnpm run run` working from
- * inside the checkout. It is a fallback, not the definition — the moment a
- * user has their own `tasks/`, theirs wins.
+ * With none found, `startDir` itself is the workspace: an installed CLI run
+ * from a fresh project must write there, never into its own node_modules.
+ * The checkout needs no special case — it has its own `tasks/`.
  */
 export async function findWorkspace(startDir: string = process.cwd()): Promise<Workspace> {
-  let dir = path.resolve(startDir);
+  const start = path.resolve(startDir);
+  let dir = start;
   for (;;) {
     if (await isDir(path.join(dir, "tasks"))) return workspaceAt(dir);
     const parent = path.dirname(dir);
-    if (parent === dir) return workspaceAt(INSTALL_ROOT);
+    if (parent === dir) return workspaceAt(start);
     dir = parent;
   }
 }
