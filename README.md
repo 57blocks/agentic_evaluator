@@ -1,4 +1,18 @@
-# agentic-evaluator
+# agenteval
+
+`@57blocks/agenteval` — a command-line tool for evaluating models and agent
+workflows.
+
+```bash
+npm i -g @57blocks/agenteval      # Node 22+; or: npx @57blocks/agenteval <command>
+export OPENROUTER_API_KEY=sk-or-...   # or put it in ./.env.local; only for tasks that call models
+
+agenteval init my-task            # a runnable, offline task in ./tasks/my-task
+agenteval run my-task --yes --html
+agenteval dash                    # the dashboard, over this directory
+```
+
+The rest of this README is about the harness itself.
 
 Model and workflow evaluation harness that records protocol v0.4 evidence
 and a reproducible operating-mode recommendation. See the
@@ -43,6 +57,8 @@ runs/<runId>/
 **New here? Read [docs/GUIDE.md](docs/GUIDE.md)** — install, the samples,
 writing a task, reading a run, cost control. `examples/` holds three sample
 tasks to start from ([examples/README.md](examples/README.md)); two are free.
+
+From a checkout of this repository:
 
 ```bash
 pnpm install
