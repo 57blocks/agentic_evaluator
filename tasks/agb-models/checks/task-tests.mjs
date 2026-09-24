@@ -33,31 +33,31 @@ function finish(code, evidence, reason) {
 
 const plan = JSON.parse(readFileSync(path.join(fixture, ".ab", "tasks.json"), "utf-8"));
 const task = plan.domains.flatMap((d) => d.tasks ?? []).find((t) => t.id === header.task);
-if (!task) finish(2, `快照的任务表里没有 ${header.task}`, "task not in plan");
+if (!task) finish(2, `${header.task} is not in the snapshot's task table`, "task not in plan");
 const tests = [...(task.files?.creates ?? []), ...(task.files?.modifies ?? [])]
   .filter((f) => /\.test\.[tj]sx?$/.test(f) && existsSync(path.join(fixture, f)));
-if (tests.length === 0) finish(2, `${header.task} 在快照里没有验收测试，这一格判不了`, "no acceptance tests");
+if (tests.length === 0) finish(2, `${header.task} has no acceptance tests in the snapshot, so this cell cannot be graded`, "no acceptance tests");
 
 const lines = [];
 const touched = [];
 for (const rel of tests) {
   const dest = path.join(cwd, rel);
   const original = readFileSync(path.join(fixture, rel), "utf-8");
-  if (!existsSync(dest)) touched.push(`${rel}（删了）`);
-  else if (readFileSync(dest, "utf-8") !== original) touched.push(`${rel}（改了）`);
+  if (!existsSync(dest)) touched.push(`${rel} (deleted)`);
+  else if (readFileSync(dest, "utf-8") !== original) touched.push(`${rel} (modified)`);
   mkdirSync(path.dirname(dest), { recursive: true });
   copyFileSync(path.join(fixture, rel), dest);
 }
-if (touched.length) lines.push(`候选动过这个任务的验收测试，已恢复原样再跑：${touched.join("、")}`);
+if (touched.length) lines.push(`the candidate touched this task's acceptance tests; restored before running: ${touched.join(", ")}`);
 
 const sides = [...new Set(tests.map((t) => t.split("/")[0]))];
 const missingPkg = sides.filter((s) => !existsSync(path.join(cwd, s, "package.json")));
-if (missingPkg.length) finish(1, [...lines, `${missingPkg.join("、")} 端没有 package.json，项目跑不起来`].join("\n"), "not runnable");
+if (missingPkg.length) finish(1, [...lines, `no package.json on the ${missingPkg.join(", ")} side, so the project cannot run`].join("\n"), "not runnable");
 
 const installDirs = existsSync(path.join(cwd, "package.json")) ? [cwd] : sides.map((s) => path.join(cwd, s));
 for (const dir of installDirs) {
   const r = spawnSync("npm", ["install", "--no-audit", "--no-fund", "--loglevel=error"], { cwd: dir, encoding: "utf-8" });
-  if (r.status !== 0) finish(1, [...lines, `npm install 失败：${(r.stderr || "").slice(-600)}`].join("\n"), "install failed");
+  if (r.status !== 0) finish(1, [...lines, `npm install failed: ${(r.stderr || "").slice(-600)}`].join("\n"), "install failed");
 }
 
 let passed = true;
@@ -70,7 +70,7 @@ for (const side of sides) {
   });
   if (!existsSync(report)) {
     passed = false;
-    lines.push(`${side}：vitest 没有产出结果（退出码 ${r.status}）：${(r.stderr || r.stdout || "").slice(-500)}`);
+    lines.push(`${side}: vitest produced no results (exit ${r.status}): ${(r.stderr || r.stdout || "").slice(-500)}`);
     continue;
   }
   const result = JSON.parse(readFileSync(report, "utf-8"));
@@ -83,11 +83,11 @@ for (const side of sides) {
     .slice(0, 4);
   if (notRun.length || failed || skipped || !result.numTotalTests) passed = false;
   lines.push(
-    `${side}：${result.numPassedTests ?? 0}/${result.numTotalTests ?? 0} 通过` +
-      (failed ? `，${failed} 失败（${failures.join("；")}）` : "") +
-      (skipped ? `，${skipped} 跳过` : "") +
-      (notRun.length ? `，没跑到：${notRun.join("、")}` : ""),
+    `${side}: ${result.numPassedTests ?? 0}/${result.numTotalTests ?? 0} passed` +
+      (failed ? `, ${failed} failed (${failures.join("; ")})` : "") +
+      (skipped ? `, ${skipped} skipped` : "") +
+      (notRun.length ? `, not run: ${notRun.join(", ")}` : ""),
   );
 }
 
-finish(passed ? 0 : 1, `${header.task} 的验收测试：${tests.length} 个文件\n${lines.join("\n")}`, passed ? undefined : "task tests not all passing");
+finish(passed ? 0 : 1, `${header.task} acceptance tests: ${tests.length} files\n${lines.join("\n")}`, passed ? undefined : "task tests not all passing");

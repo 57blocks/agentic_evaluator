@@ -39,22 +39,22 @@ function finish(code, evidence, reason) {
 }
 
 const planPath = path.join(cwd, ".ab", "tasks.json");
-if (!existsSync(planPath)) finish(1, "没有产出 .ab/tasks.json", "no plan written");
+if (!existsSync(planPath)) finish(1, "no .ab/tasks.json was produced", "no plan written");
 let tasks = 0;
 try {
   tasks = JSON.parse(readFileSync(planPath, "utf-8")).domains.reduce((n, d) => n + (d.tasks?.length ?? 0), 0);
 } catch (e) {
-  finish(1, `.ab/tasks.json 读不出来：${e.message}`, "plan unreadable");
+  finish(1, `.ab/tasks.json cannot be read: ${e.message}`, "plan unreadable");
 }
-if (tasks === 0) finish(1, ".ab/tasks.json 里一个任务都没有", "empty plan");
+if (tasks === 0) finish(1, ".ab/tasks.json contains no tasks", "empty plan");
 // Not the candidate's fault when the ruler is missing: exit 2 is an evaluator error.
-if (!existsSync(cli)) finish(2, `找不到 ab-gate：${cli}（设置 AGB_HOME）`, "ab-gate not found");
+if (!existsSync(cli)) finish(2, `ab-gate not found: ${cli} (set AGB_HOME)`, "ab-gate not found");
 
 const events = path.join(cwd, ".ab", "events.jsonl");
 rmSync(events, { force: true });
 for (const gate of GATES) {
   const r = spawnSync(tsx, [cli, "check", "--all", `--gate=${gate}`, "--quiet"], { cwd, encoding: "utf-8" });
-  if (r.status !== 0 && r.status !== 1) finish(2, `ab-gate ${gate} 退出码 ${r.status}：${(r.stderr || r.stdout).slice(-400)}`, "ab-gate did not run");
+  if (r.status !== 0 && r.status !== 1) finish(2, `ab-gate ${gate} exited with ${r.status}: ${(r.stderr || r.stdout).slice(-400)}`, "ab-gate did not run");
 }
 
 const findings = existsSync(events)
@@ -62,10 +62,10 @@ const findings = existsSync(events)
   : [];
 const blocking = findings.filter((f) => f.severity === "hard" || (f.severity === "partial" && REQUIRED.includes(f.gate)));
 const noted = findings.filter((f) => f.severity === "partial" && RECORDED.includes(f.gate));
-const byGate = RECORDED.map((g) => `${g} ${noted.filter((f) => f.gate === g).length}`).join("，");
+const byGate = RECORDED.map((g) => `${g} ${noted.filter((f) => f.gate === g).length}`).join(", ");
 const lines = [
-  `${tasks} 个任务；覆盖与结构问题 ${blocking.length} 条`,
+  `${tasks} tasks; ${blocking.length} coverage or structure findings`,
   ...blocking.slice(0, 6).map((f) => `· [${f.gate}] ${String(f.message).slice(0, 160)}`),
-  `经验规则（只记录，不判定）：${byGate}`,
+  `heuristics (recorded, not gating): ${byGate}`,
 ];
 finish(blocking.length === 0 ? 0 : 1, lines.join("\n"), blocking.length ? "plan has coverage or structure findings" : undefined);

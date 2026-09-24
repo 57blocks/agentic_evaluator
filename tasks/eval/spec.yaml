@@ -19,7 +19,7 @@ workflow:
       version: "1"
       test_set:
         id: code-v1
-        inputs: [code-utils.agent]    # agent 版：要求它把文件写到磁盘
+        inputs: [code-utils.agent]    # agent variant: asks it to write the files to disk
       candidate_ids: [cc-sonnet, cc-opus]
       required_checks: [tsc-noemit]
       judged_dimensions: [meets-spec, correctness, type-quality, simplicity, robustness]

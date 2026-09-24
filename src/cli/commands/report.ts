@@ -23,6 +23,16 @@ export const REPORT_HELP = `agenteval report <run> [options]
   <run>               a run id, or a path to a run directory
   --workspace DIR     workspace to look the run id up in`;
 
+const exists = (p: string): Promise<boolean> => fs.stat(p).then(() => true, () => false);
+
+/** A workflow run's step directories: the subdirectories holding a step manifest. */
+async function stepRunDirs(runDir: string): Promise<string[]> {
+  const entries = await fs.readdir(runDir, { withFileTypes: true });
+  const dirs = entries.filter((e) => e.isDirectory()).map((e) => path.join(runDir, e.name));
+  const isStep = await Promise.all(dirs.map((d) => exists(path.join(d, "manifest.json"))));
+  return dirs.filter((_, i) => isStep[i]);
+}
+
 export async function cmdReport(args: ParsedArgs, io: Io): Promise<ExitCode> {
   rejectUnknown(args.flags, ["workspace"]);
   const target = args.positional[0];
@@ -37,9 +47,15 @@ export async function cmdReport(args: ParsedArgs, io: Io): Promise<ExitCode> {
   if (runDir === undefined) throw new UsageError(`no run "${target}" in ${ws.root}`);
 
   // A workflow run carries workflow.json at its root; a single-step run does not.
-  const isWorkflow = await fs.stat(path.join(runDir, "workflow.json")).then(() => true).catch(() => false);
-  if (isWorkflow) await writeWorkflowReport(runDir);
-  else await writeRunReport(runDir);
+  const isWorkflow = await exists(path.join(runDir, "workflow.json"));
+  if (isWorkflow) {
+    // Each step's page first: the workflow page links to them, and a step
+    // page left stale would still speak the old wording.
+    for (const step of await stepRunDirs(runDir)) await writeRunReport(step);
+    await writeWorkflowReport(runDir);
+  } else {
+    await writeRunReport(runDir);
+  }
 
   io.out(`✔ ${displayPath(path.join(runDir, "report.html"))}\n`);
   return EXIT.ok;

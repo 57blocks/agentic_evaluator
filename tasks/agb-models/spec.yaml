@@ -1,21 +1,29 @@
-# agb 的任务拆分与编码两步，各该配哪个模型。
+# Which model agb should use for each of two steps: task breakdown and coding.
 #
-# 候选都是「agb + 某个模型」（.abrc.json 的 spec / coding / escalation 三档都设成它），
-# 只换模型。输入由 scripts/harvest.mjs 从 agb 项目的 git 历史里取：
+# Every candidate is "agb + one model" (.abrc.json's spec / coding / escalation
+# tiers all set to it); only the model changes. Inputs come from an agb
+# project's git history via scripts/harvest.mjs:
 #
-#   detail  写 .ab/tasks.json 那次提交的前一个状态（PRD、设计、契约都在，还没拆任务）
-#           → claude -p + stage-detail skill（这一步在 agb 里按设计没有 CLI 命令）
-#   code    每个 [T-xxx] 提交的前一个状态（前面的任务都做完了，轮到它）
-#           → agb run，计划裁成只剩这一个任务
+#   detail  the state just before the commit that wrote .ab/tasks.json (PRD,
+#           design and contracts in place, no task breakdown yet)
+#           -> claude -p + the stage-detail skill (by design agb has no CLI
+#              command for this step)
+#   code    the state just before each [T-xxx] commit (earlier tasks done,
+#           this one is next)
+#           -> agb run, with the plan trimmed to this one task
 #
-# 判定：
-#   detail  产出能解析的任务表，且 agb 的覆盖与结构门禁（page-coverage /
-#           contract-coverage / plan-domain-cycle）零问题；经验规则类门禁只记数
-#   code    这个任务在计划里列出的验收测试，恢复原样后全部通过
+# Success:
+#   detail  a parseable task table, and zero findings from agb's coverage and
+#           structure gates (page-coverage / contract-coverage /
+#           plan-domain-cycle); heuristic gates are only counted
+#   code    the acceptance tests the plan lists for this task, restored to
+#           their original form, all pass
 #
-# 花费上限在 agents/agb.mjs：每次 $10（agb 自己估一个任务 $2.46，算上重跑最多 $6.16）。
-# agent 候选的花费在账本里记 0，所以运行模式用 highest-assurance。
-# 真跑会花真钱，候选直接在本机运行。先 `pnpm agenteval plan agb-models`。
+# The spend cap lives in agents/agb.mjs: $10 per run (agb estimates $2.46 per
+# task, at most $6.16 with retries). An agent candidate's spend shows as 0 in
+# the ledger, so the operating mode is highest-assurance.
+# A real run spends real money and runs candidates on this machine. Start with
+# `pnpm agenteval plan agb-models`.
 protocol_version: "0.4"
 run_name: agb-models
 
@@ -81,7 +89,8 @@ evaluators:
     model: google/gemini-3.1-pro-preview
     provider_route: openrouter
     rubric_file: rubrics/none.md
-    # 不用裁判：候选的「输出」是执行器的终端日志，拿它两两比较没有意义。
+    # No judge: a candidate's "output" is the executor's terminal log, and
+    # comparing those pairwise means nothing.
     methods: []
 
 execution:
