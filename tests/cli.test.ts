@@ -168,6 +168,36 @@ test("init --models creates a small real evaluation: two models, a tsc gate and 
   await fs.rm(ws, { recursive: true, force: true });
 });
 
+test("ls in a directory with no tasks/ says how to start, instead of crashing", async () => {
+  // Arrange - a fresh directory, the first place a new user types `ls`.
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "eval-cli-bare-"));
+
+  // Act
+  const r = await run(["ls", "--workspace", dir]);
+
+  // Assert
+  assert.equal(r.code, EXIT.ok);
+  assert.match(r.out, /no tasks/);
+  assert.match(r.out, /agenteval init/);
+
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test("ls in a new workspace does not count the samples shipped with agenteval as its runs", async () => {
+  // Arrange
+  const ws = await tempWorkspace();
+  await run(["init", "only", "--workspace", ws]);
+
+  // Act
+  const r = await run(["ls", "--workspace", ws]);
+
+  // Assert - one task, never run, and no phantom runs "belonging to no task".
+  assert.equal(r.code, EXIT.ok);
+  assert.doesNotMatch(r.out, /belong to no task/);
+
+  await fs.rm(ws, { recursive: true, force: true });
+});
+
 test("init refuses a name that is not a task name, and refuses to overwrite", async () => {
   // Arrange
   const ws = await tempWorkspace();
