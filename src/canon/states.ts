@@ -33,6 +33,15 @@ export interface CompletionVerdict {
 
 const REFUSAL_FINISH = new Set(["content_filter", "refusal", "safety"]);
 
+/** A command candidate's non-zero exit, as the agent-cli adapter records it ("exit 1"). */
+const NONZERO_EXIT = /^exit ([1-9]\d*)$/;
+
+/** Why a finish reason means the command did not complete, or null when it does not. */
+export function nonZeroExitReason(finishReason: string | undefined): string | null {
+  const exit = NONZERO_EXIT.exec(finishReason ?? "");
+  return exit ? `candidate command exited with code ${exit[1]}` : null;
+}
+
 export function classifyCompletion(signal: CompletionSignal): CompletionVerdict {
   const err = signal.error;
   if (err) {
@@ -53,6 +62,14 @@ export function classifyCompletion(signal: CompletionSignal): CompletionVerdict 
       return { state: "malformed", truncated: false, reason: "empty completion" };
     }
     return { state: "malformed", truncated: false, reason: "unclassified error" };
+  }
+
+  // A command that exits non-zero says it did not finish — a crash after
+  // writing a file is still a crash. Classified before the files are looked
+  // at, so leftover output cannot make it read as completed.
+  const exited = nonZeroExitReason(signal.finishReason);
+  if (exited) {
+    return { state: "malformed", truncated: false, reason: exited };
   }
 
   if (signal.parsedUnits !== undefined && signal.parsedUnits === 0) {

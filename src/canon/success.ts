@@ -24,6 +24,8 @@ export interface SuccessInput {
   criteria?: SuccessCriteria;
   requiredChecks: readonly string[];
   completion: CompletionState;
+  /** Why the completion state is what it is, when there is more to say (e.g. an exit code). */
+  completionReason?: string | null;
   /** Results of the required checks for this trial (may be missing entries). */
   checks: readonly EvaluationResult[];
 }
@@ -32,9 +34,10 @@ export function decideTaskOutcome(input: SuccessInput): SuccessDecision {
   const { criteria, requiredChecks, completion, checks } = input;
 
   if (completion !== "success") {
+    const why = input.completionReason ? ` (${input.completionReason})` : "";
     return {
       outcome: "failure",
-      reasons: [`candidate completion state is ${completion}`],
+      reasons: [`candidate completion state is ${completion}${why}`],
       ruleVersion: SUCCESS_RULE_VERSION,
     };
   }

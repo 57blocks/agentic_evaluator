@@ -25,6 +25,22 @@ test("empty completion with content_filter finish reason is a refusal", () => {
   assert.equal(v.state, "refusal");
 });
 
+test("a command that exits non-zero did not complete, even if it left files", () => {
+  const v = classifyCompletion({ finishReason: "exit 1", parsedUnits: 1 });
+  assert.equal(v.state, "malformed");
+  assert.match(v.reason, /exited with code 1/);
+});
+
+test("a failed trial's reason names the exit code, not just the state", () => {
+  const d = decideTaskOutcome({ requiredChecks: [], completion: "malformed", completionReason: "candidate command exited with code 1", checks: [] });
+  assert.equal(d.outcome, "failure");
+  assert.deepEqual(d.reasons, ["candidate completion state is malformed (candidate command exited with code 1)"]);
+});
+
+test("a command that exits 0 completed", () => {
+  assert.equal(classifyCompletion({ finishReason: "stop", parsedUnits: 1 }).state, "success");
+});
+
 test("empty completion without refusal signal is malformed", () => {
   assert.equal(classifyCompletion({ error: { kind: "empty" } }).state, "malformed");
 });
