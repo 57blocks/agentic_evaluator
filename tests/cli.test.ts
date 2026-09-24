@@ -172,6 +172,27 @@ test("ls reports an empty workspace as empty rather than as nothing", async () =
   await fs.rm(ws, { recursive: true, force: true });
 });
 
+test("init's stand-in agents run cleanly, each writing its file and exiting 0", async () => {
+  // Arrange
+  const ws = await tempWorkspace();
+  await run(["init", "demo", "--workspace", ws]);
+  const task = path.join(ws, "tasks", "demo");
+  const { execFileSync } = await import("node:child_process");
+
+  for (const extra of [[], ["--mode", "fail"]]) {
+    const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "eval-init-agent-"));
+
+    // Act - execFileSync throws on a non-zero exit, e.g. a ReferenceError.
+    const out = execFileSync(process.execPath, [path.join(task, "agents", "example.mjs"), ...extra], { cwd: workDir, encoding: "utf-8" });
+
+    // Assert
+    assert.match(await fs.readFile(path.join(workDir, "add.ts"), "utf-8"), /export function add/);
+    assert.match(out, extra.length ? /deliberate type error/ : /ok/);
+  }
+
+  await fs.rm(ws, { recursive: true, force: true });
+});
+
 test("report re-renders a finished run without touching its numbers", async () => {
   // Arrange - a real run, in a workspace of its own.
   const ws = await tempWorkspace();
