@@ -73,8 +73,8 @@ function StepCard({ step, runId }: { step: RunStepView; runId: string }) {
 function ReportLinks({ run }: { run: RunView }) {
   const open = (dir: string) => navigate({ view: "report", runId: run.id, dir });
   return (
-    <section aria-label="Reports" className="flex flex-wrap items-center gap-2 border border-border bg-card p-4">
-      <h3 className="mr-2 text-sm font-semibold">Reports</h3>
+    <section aria-label="Reports" className={cn(SECTION_CARD, "flex flex-wrap items-center gap-2 border border-border bg-card p-4")}>
+      <h3 className={cn(SECTION_TITLE, "mr-2")}>Reports</h3>
       {run.kind === "workflow" && <Button size="sm" onClick={() => open(run.dir)}>Workflow report</Button>}
       {run.steps.map((s) => (
         <Button key={s.dir} size="sm" variant={run.kind === "workflow" ? "outline" : "default"} onClick={() => open(s.dir)}>
@@ -118,7 +118,7 @@ export function RunPage({ run }: { run: RunView }) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold">Evidence</h3>
+        <h2 className={SECTION_TITLE}>Evidence</h2>
         <Evidence run={run} />
       </section>
 
