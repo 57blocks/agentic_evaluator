@@ -6,8 +6,9 @@
  * listing hides it, the absence of evidence starts looking like evidence.
  */
 
+import fs from "node:fs/promises";
 import { listTasks } from "../../demo/catalog.js";
-import { findWorkspace, workspaceAt } from "../../core/workspace.js";
+import { findWorkspace, tasksDir, workspaceAt } from "../../core/workspace.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
 import { rejectUnknown, stringFlag, type ParsedArgs } from "../args.js";
 import type { Io } from "../io.js";
@@ -19,6 +20,11 @@ export const LS_HELP = `agenteval ls [options]
   --json              print the listing as JSON
   --workspace DIR     workspace to list`;
 
+const NO_TASKS = "no tasks yet (a task is a directory under tasks/ with a spec.yaml)\n  agenteval init <name>    creates one\n";
+
+/** Id prefix of the sample runs shipped with agenteval (see src/demo/catalog.ts). */
+const SAMPLE_PREFIX = "fixture:";
+
 function money(n: number | null): string {
   return n === null ? "     —" : `$${n.toFixed(4)}`;
 }
@@ -27,7 +33,17 @@ export async function cmdLs(args: ParsedArgs, io: Io): Promise<ExitCode> {
   rejectUnknown(args.flags, ["json", "workspace"]);
   const dir = stringFlag(args.flags, "workspace");
   const ws = dir ? workspaceAt(dir) : await findWorkspace();
-  const { tasks, unfiled, broken } = await listTasks({ ws });
+  const hasTasksDir = await fs.stat(tasksDir(ws)).then((st) => st.isDirectory(), () => false);
+  if (!hasTasksDir && !args.flags.json) {
+    io.out(`workspace ${ws.root}\n\n${NO_TASKS}`);
+    return EXIT.ok;
+  }
+  const listed = hasTasksDir ? await listTasks({ ws }) : { tasks: [], unfiled: [], broken: [] };
+  const { tasks, broken } = listed;
+  // Runs this workspace holds outside any task — not the sample runs that ship
+  // with agenteval, which the dashboard shows as samples and which a user
+  // never made.
+  const unfiled = listed.unfiled.filter((r) => !r.id.startsWith(SAMPLE_PREFIX));
 
   if (args.flags.json) {
     io.out(`${JSON.stringify({ workspace: ws.root, tasks, unfiled, broken }, null, 2)}\n`);
@@ -36,7 +52,7 @@ export async function cmdLs(args: ParsedArgs, io: Io): Promise<ExitCode> {
 
   io.out(`workspace ${ws.root}\n\n`);
   if (tasks.length === 0 && broken.length === 0) {
-    io.out("no tasks (a task is a directory under tasks/ with a spec.yaml)\n");
+    io.out(NO_TASKS);
     return EXIT.ok;
   }
   const width = Math.max(0, ...tasks.map((t) => t.name.length));
@@ -55,7 +71,7 @@ export async function cmdLs(args: ParsedArgs, io: Io): Promise<ExitCode> {
     for (const b of broken) io.out(`  ✖ ${b.path}\n      ${b.error}\n`);
   }
   if (unfiled.length > 0) {
-    io.out(`\n  ${unfiled.length} run(s) belong to no task (legacy top-level runs/ and samples)\n`);
+    io.out(`\n  ${unfiled.length} run(s) belong to no task (in the workspace's top-level runs/)\n`);
   }
   return EXIT.ok;
 }
