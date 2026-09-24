@@ -10,7 +10,7 @@ import {
 
 export function TrialTable({ rows }: { rows: TrialRow[] }) {
   return (
-    <ScrollArea className="max-h-[50vh] border border-border">
+    <ScrollArea className="max-h-[50vh]">
       <Table>
         <TableHeader>
           <TableRow>

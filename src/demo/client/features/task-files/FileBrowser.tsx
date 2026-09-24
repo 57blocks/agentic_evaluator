@@ -12,7 +12,7 @@ import { getText, taskFileUrl } from "@/lib/api";
 import type { DefinitionFiles, FileRole } from "../../../definition-files.js";
 import { Tag } from "@/components/tag";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SECTION_CARD } from "@/components/section-style";
+import { CARD_TAB, CARD_TAB_ROW, SECTION_CARD } from "@/components/section-style";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -101,13 +101,6 @@ const OVERVIEW = "__overview";
 const PANE_HEIGHT = "h-[32rem]";
 const LIST_HEIGHT = "h-48 md:h-[32rem]";
 
-/** An underlined tab row across the top of the card, the way the protocol site's tabs look. */
-const TAB_ROW =
-  "w-full justify-start gap-2 border-b border-border p-0 px-3 group-data-horizontal/tabs:h-auto";
-const TAB = cn(
-  "h-12 flex-none gap-1.5 px-3 text-sm font-medium text-muted-foreground hover:text-foreground",
-  "data-active:text-brand after:bg-brand group-data-horizontal/tabs:after:bottom-[-1px]",
-);
 
 /**
  * One tab per step when there is more than one; a single list otherwise,
@@ -181,9 +174,9 @@ export function FileBrowser({ task, files, definition }: FileBrowserProps) {
     <div className={cn(SECTION_CARD, "overflow-hidden border border-border bg-card")}>
       {panels.length > 1 && (
         <Tabs value={panel.key} onValueChange={(v) => setActive(String(v))} className="gap-0">
-          <TabsList variant="line" className={TAB_ROW}>
+          <TabsList variant="line" className={CARD_TAB_ROW}>
             {panels.map((p) => (
-              <TabsTrigger key={p.key} value={p.key} className={cn(TAB, p.key !== OVERVIEW && "font-mono")}>
+              <TabsTrigger key={p.key} value={p.key} className={cn(CARD_TAB, p.key !== OVERVIEW && "font-mono")}>
                 {p.label}
                 <span className="text-xs font-normal text-muted-foreground">{p.items.length}</span>
               </TabsTrigger>

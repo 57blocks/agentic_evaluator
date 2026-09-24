@@ -29,7 +29,7 @@ export function EvaluationTable({ rows }: { rows: EvaluationRow[] }) {
         <code className="font-mono">not_evaluated</code> are evaluator states, not candidate failures -
          they do not count against a candidate, they only shrink the denominator.
       </p>
-      <ScrollArea className="max-h-[50vh] border border-border">
+      <ScrollArea className="max-h-[50vh]">
         <Table>
           <TableHeader>
             <TableRow>
