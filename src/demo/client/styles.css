@@ -223,3 +223,42 @@
 [data-slot="badge"] {
     border-radius: 999px;
 }
+
+/*
+ * Syntax colours for the task page's file viewer (highlight.js class names).
+ * GitHub's palette, as tokens so dark mode is a second set of values rather
+ * than a second stylesheet.
+ */
+:root {
+    --code-keyword: #cf222e;
+    --code-string: #0a3069;
+    --code-number: #0550ae;
+    --code-key: #116329;
+    --code-comment: #6e7781;
+    --code-title: #8250df;
+    --code-section: #0550ae;
+    --code-bullet: #953800;
+}
+
+.dark {
+    --code-keyword: #ff7b72;
+    --code-string: #a5d6ff;
+    --code-number: #79c0ff;
+    --code-key: #7ee787;
+    --code-comment: #8b949e;
+    --code-title: #d2a8ff;
+    --code-section: #79c0ff;
+    --code-bullet: #ffa657;
+}
+
+.hljs-keyword, .hljs-selector-tag, .hljs-type, .hljs-doctag { color: var(--code-keyword); }
+.hljs-string, .hljs-regexp, .hljs-code, .hljs-quote { color: var(--code-string); }
+.hljs-number, .hljs-literal, .hljs-symbol, .hljs-variable.constant_ { color: var(--code-number); }
+.hljs-attr, .hljs-attribute, .hljs-property, .hljs-name, .hljs-selector-class { color: var(--code-key); }
+.hljs-comment, .hljs-meta { color: var(--code-comment); font-style: italic; }
+.hljs-title, .hljs-title.function_, .hljs-title.class_ { color: var(--code-title); }
+.hljs-section { color: var(--code-section); font-weight: 600; }
+.hljs-bullet, .hljs-built_in, .hljs-variable, .hljs-template-variable, .hljs-params { color: var(--code-bullet); }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 600; }
+.hljs-link { text-decoration: underline; }

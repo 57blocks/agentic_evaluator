@@ -9,6 +9,7 @@ import { Tag } from "@/components/tag";
 import type { Overview, StepStanding } from "../../../server/overview.js";
 import type { Catalog } from "@/app/useWorkspace";
 import { TaskList } from "@/features/task-list/TaskList";
+import { BrokenSpecs } from "@/features/task-list/BrokenSpecs";
 import { navigate } from "@/app/routes";
 import { NEEDS_REVIEW, SELF_CHECK } from "@/lib/copy";
 import { FIRMNESS_LABEL } from "../../../report-copy.js";
@@ -126,6 +127,7 @@ export function HomePage({ data, catalog }: { data: Overview; catalog: Catalog }
         />
       </section>
 
+      <BrokenSpecs broken={catalog.broken ?? []} />
       <TaskList tasks={catalog.tasks} />
       <Standings steps={data.steps} />
     </div>

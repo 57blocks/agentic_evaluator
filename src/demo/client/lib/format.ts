@@ -64,11 +64,6 @@ export function isSmokeTask(task: TaskView): boolean {
   return task.runs.length > 0 && task.runs.every((r) => r.synthetic);
 }
 
-/** The definition file a task page should open on. */
-export function defaultFile(files: readonly string[]): string | undefined {
-  return files.find((f) => f === "spec.yaml") ?? files[0];
-}
-
 /**
  * The report a run opens on: the workflow page for a multi-step run (it links
  * down to each step), the step's own report otherwise.

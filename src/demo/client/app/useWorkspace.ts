@@ -5,13 +5,15 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import type { RunView, TaskView } from "../../catalog.js";
+import type { BrokenSpec, RunView, TaskView } from "../../catalog.js";
 import type { Overview } from "../../../server/overview.js";
 import { getJson } from "@/lib/api";
 
 export interface Catalog {
   tasks: TaskView[];
   unfiled: RunView[];
+  /** Specs that failed to load, with the reason. */
+  broken: BrokenSpec[];
 }
 
 export interface Workspace {

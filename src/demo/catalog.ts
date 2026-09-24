@@ -11,6 +11,8 @@ import { loadWorkflow } from "../spec/load-spec.js";
 import { loadBundle } from "../report-v2.js";
 import type { Recommendation } from "../canon/select.js";
 import { planFromSuites, type TestPlan } from "../test-plan.js";
+import { attributeFiles, type DefinitionFiles } from "./definition-files.js";
+import type { Suite } from "../types.js";
 
 export interface SpecStepView {
   id: string;
@@ -31,6 +33,18 @@ export interface SpecView {
   steps: SpecStepView[];
   /** The spec in words: what it tests, how it judges, how it picks. */
   plan: TestPlan;
+}
+
+/**
+ * A spec that failed to load, named with its reason. One bad spec used to
+ * fail the whole catalog — every task vanished behind "cannot read this
+ * workspace" and nothing said which file to fix.
+ */
+export interface BrokenSpec {
+  /** Workspace-relative path to the spec. */
+  path: string;
+  task: string;
+  error: string;
 }
 
 export interface RunStepView {
@@ -90,6 +104,8 @@ export interface TaskView {
    * the page.
    */
   files: string[];
+  /** The same files grouped by the step that references them, with each file's role. */
+  definition: DefinitionFiles;
   /** Newest first. */
   runs: RunView[];
   /** Summed over runs that reported a ledger; null when none did. */
@@ -217,31 +233,53 @@ async function specPaths(over?: CatalogRoots): Promise<string[]> {
   return out;
 }
 
-export async function listSpecs(over?: CatalogRoots): Promise<SpecView[]> {
+async function specView(rel: string, suites: Suite[]): Promise<SpecView> {
+  return {
+    path: rel,
+    runName: suites[0].runName ?? suites[0].suiteId,
+    budgetUsd: suites[0].budgetUsd ?? null,
+    plan: await planFromSuites(suites),
+    steps: suites.map((s) => ({
+      id: s.step,
+      producer: s.producer ?? "prompt",
+      rubricFile: s.rubricFile,
+      promptFile: s.promptFile,
+      inputs: [...s.inputs],
+      candidates: [...s.candidates],
+      requiredChecks: [...(s.requiredChecks ?? [])],
+      operatingMode: s.operatingMode ?? null,
+      inputFrom: s.inputFrom,
+    })),
+  };
+}
+
+interface LoadedSpecs {
+  loaded: Array<{ view: SpecView; suites: Suite[] }>;
+  broken: BrokenSpec[];
+}
+
+/** Every spec in the workspace, each loaded on its own so one bad file cannot hide the rest. */
+async function loadSpecs(over?: CatalogRoots): Promise<LoadedSpecs> {
   const ws = await wsOf(over);
-  const out: SpecView[] = [];
+  const out: LoadedSpecs = { loaded: [], broken: [] };
   for (const abs of await specPaths(over)) {
     const rel = path.relative(ws.root, abs);
-    const suites = await loadWorkflow(abs);
-    out.push({
-      path: rel,
-      runName: suites[0].runName ?? suites[0].suiteId,
-      budgetUsd: suites[0].budgetUsd ?? null,
-      plan: await planFromSuites(suites),
-      steps: suites.map((s) => ({
-        id: s.step,
-        producer: s.producer ?? "prompt",
-        rubricFile: s.rubricFile,
-        promptFile: s.promptFile,
-        inputs: [...s.inputs],
-        candidates: [...s.candidates],
-        requiredChecks: [...(s.requiredChecks ?? [])],
-        operatingMode: s.operatingMode ?? null,
-        inputFrom: s.inputFrom,
-      })),
-    });
+    try {
+      const suites = await loadWorkflow(abs);
+      out.loaded.push({ view: await specView(rel, suites), suites });
+    } catch (err) {
+      out.broken.push({
+        path: rel,
+        task: path.basename(path.dirname(abs)),
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
   return out;
+}
+
+export async function listSpecs(over?: CatalogRoots): Promise<SpecView[]> {
+  return (await loadSpecs(over)).loaded.map((l) => l.view);
 }
 
 async function fileExists(p: string): Promise<boolean> {
@@ -385,21 +423,24 @@ async function definitionFiles(taskDir: string): Promise<string[]> {
  */
 export async function listTasks(
   over?: CatalogRoots,
-): Promise<{ tasks: TaskView[]; unfiled: RunView[] }> {
+): Promise<{ tasks: TaskView[]; unfiled: RunView[]; broken: BrokenSpec[] }> {
   const ws = await wsOf(over);
-  const [specs, runs] = await Promise.all([listSpecs({ ...over, ws }), listRuns({ ...over, ws })]);
+  const [{ loaded, broken }, runs] = await Promise.all([loadSpecs({ ...over, ws }), listRuns({ ...over, ws })]);
+  // A broken task's runs are still evidence: list them as unfiled rather than lose them.
+  const brokenTasks = new Set(broken.map((b) => b.task));
   const byTask = new Map<string, RunView[]>();
   const unfiled: RunView[] = [];
   for (const r of runs) {
-    if (r.task === null) unfiled.push(r);
+    if (r.task === null || brokenTasks.has(r.task)) unfiled.push(r);
     else (byTask.get(r.task) ?? byTask.set(r.task, []).get(r.task)!).push(r);
   }
 
-  const tasks = await Promise.all(specs.map(async (spec) => {
+  const tasks = await Promise.all(loaded.map(async ({ view: spec, suites }) => {
     const name = path.basename(path.dirname(spec.path));
     const own = (byTask.get(name) ?? []).sort((a, b) =>
       (b.startedAt ?? "").localeCompare(a.startedAt ?? ""),
     );
+    const files = await definitionFiles(path.join(tasksDir(ws), name));
     const spent = own.reduce<number | null>(
       (acc, r) => (r.totalUsd === null ? acc : (acc ?? 0) + r.totalUsd),
       null,
@@ -411,7 +452,8 @@ export async function listTasks(
       budgetUsd: spec.budgetUsd,
       steps: spec.steps,
       plan: spec.plan,
-      files: await definitionFiles(path.join(tasksDir(ws), name)),
+      files,
+      definition: attributeFiles(suites, files),
       runs: own,
       spentUsd: spent,
     };
@@ -423,7 +465,7 @@ export async function listTasks(
     const bt = b.runs[0]?.startedAt ?? "";
     return bt.localeCompare(at) || a.name.localeCompare(b.name);
   });
-  return { tasks, unfiled };
+  return { tasks, unfiled, broken };
 }
 
 export async function loadRun(id: string, over?: CatalogRoots): Promise<RunView | null> {
