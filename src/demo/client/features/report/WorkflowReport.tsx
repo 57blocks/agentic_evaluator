@@ -136,7 +136,7 @@ function Verdict({ report }: { report: Model }) {
   const d = report.digest;
   const v = report.record.e2e_validation ?? null;
   return (
-    <section aria-label="结论" className="flex flex-col gap-2 border border-l-4 border-border border-l-foreground bg-card p-5">
+    <section aria-label="结论" className="flex flex-col gap-2 rounded-lg border border-l-4 border-border border-l-foreground bg-card p-5 shadow-(--shadow-card)">
       <p className="text-xs font-medium text-muted-foreground">结论</p>
       <h2 className="text-lg font-semibold leading-snug">{d?.headline ?? report.verdictLine}</h2>
       <p className="text-sm text-muted-foreground">

@@ -8,7 +8,7 @@
  */
 
 import { Tag } from "@/components/tag";
-import { ACCENT_CARD, ACCENT_TITLE } from "@/components/accent";
+import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 import type { ReactNode } from "react";
 import type { PlanStep, TestPlan as Plan } from "../../../../test-plan.js";
 import { Badge } from "@/components/ui/badge";
@@ -97,9 +97,9 @@ function Scale({ step }: { step: PlanStep }) {
 
 export function PlanStepCard({ step, title }: { step: PlanStep; title?: string }) {
   return (
-    <Card className={ACCENT_CARD}>
+    <Card className={SECTION_CARD}>
       <CardHeader>
-        <CardTitle className={ACCENT_TITLE}>{title ?? `步骤 ${step.id}`}</CardTitle>
+        <CardTitle className={SECTION_TITLE}>{title ?? `步骤 ${step.id}`}</CardTitle>
         {(step.task || step.inputFrom) && (
           <CardDescription>
             {step.task}

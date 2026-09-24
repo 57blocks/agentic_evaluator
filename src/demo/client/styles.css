@@ -1,13 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/noto-sans";
+@import "@fontsource-variable/public-sans";
+@import "@fontsource-variable/jetbrains-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Noto Sans Variable', sans-serif;
+    --font-sans: 'Public Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -58,73 +60,83 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * Theme tokens from the protocol site (agent-eval-protocol.vercel.app):
+ * grey page, white cards, one blue. Mapped onto shadcn's names so the stock
+ * components pick them up unmodified.
+ */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: var(--brand);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
+    --background: #F4F6F9;
+    --foreground: #2B3038;
+    --card: #FFFFFF;
+    --card-foreground: #2B3038;
+    --popover: #FFFFFF;
+    --popover-foreground: #2B3038;
+    --primary: var(--brand-2);
+    --primary-foreground: #FFFFFF;
+    --secondary: #EEF0F3;
+    --secondary-foreground: #2B3038;
+    --muted: #F4F6F9;
+    --muted-foreground: #6B7079;
+    --accent: #F4F9FF;
+    --accent-foreground: #1E78EE;
+    --destructive: #F95252;
+    --border: #E2E5EA;
+    --input: #D2D6DC;
     --ring: var(--brand-2);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: var(--brand);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --chart-1: #D2D6DC;
+    --chart-2: #919499;
+    --chart-3: #6B7079;
+    --chart-4: #3C424C;
+    --chart-5: #2B3038;
+    --radius: 0.75rem;
+    --shadow-card: 0 2px 6px rgba(27, 43, 75, 0.08);
+    --shadow-bar: 0 1px 2px rgba(27, 43, 75, 0.06);
+    --sidebar: #FAFBFC;
+    --sidebar-foreground: #2B3038;
+    --sidebar-primary: var(--brand-2);
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #F4F9FF;
+    --sidebar-accent-foreground: #1E78EE;
+    --sidebar-border: #E2E5EA;
+    --sidebar-ring: var(--brand-2);
 }
 
+/* The site has no dark theme; this one is derived from the same scales. */
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: var(--brand);
-    --primary-foreground: oklch(0.145 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
+    --background: #16191E;
+    --foreground: #E6E8EC;
+    --card: #1F2329;
+    --card-foreground: #E6E8EC;
+    --popover: #1F2329;
+    --popover-foreground: #E6E8EC;
+    --primary: var(--brand-2);
+    --primary-foreground: #FFFFFF;
+    --secondary: #272C33;
+    --secondary-foreground: #E6E8EC;
+    --muted: #272C33;
+    --muted-foreground: #ABAEB2;
+    --accent: #1A2A3F;
+    --accent-foreground: #93C1FF;
+    --destructive: #F95252;
+    --border: #2E343C;
+    --input: #3A414A;
     --ring: var(--brand-2);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: var(--brand);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --chart-1: #3A414A;
+    --chart-2: #6B7079;
+    --chart-3: #919499;
+    --chart-4: #D2D6DC;
+    --chart-5: #E6E8EC;
+    --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.3);
+    --shadow-bar: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --sidebar: #1F2329;
+    --sidebar-foreground: #E6E8EC;
+    --sidebar-primary: var(--brand-2);
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #1A2A3F;
+    --sidebar-accent-foreground: #93C1FF;
+    --sidebar-border: #2E343C;
+    --sidebar-ring: var(--brand-2);
 }
 
 @layer base {
@@ -158,33 +170,56 @@
 }
 
 /*
- * Colours that carry a report's meaning — brand, success, failure, warning,
- * the chosen candidate's row. The same values report.html draws with
+ * Colours that carry a report's meaning — brand (`--brand` for text,
+ * `--brand-2` for fills), success, failure, warning, the chosen candidate's
+ * row. The same values report.html draws with
  * (src/report-style.ts); tests/report-tokens.test.ts holds the two equal, so
  * a candidate that failed reads the same red in both.
  */
 :root {
-    --brand: #4f46e5;
-    --brand-2: #7c73f0;
-    --brand-soft: rgba(79,70,229,.08);
-    --champ: #eef2ff;
-    --ok: #16a34a;
-    --ok-soft: #dcfce7;
-    --bad: #dc2626;
-    --bad-soft: #fee2e2;
-    --warn: #b45309;
-    --warn-soft: #fff8ef;
+    --brand: #1e78ee;
+    --brand-2: #469bff;
+    --brand-soft: #ebf4ff;
+    --champ: #f4f9ff;
+    --ok: #1b9a6a;
+    --ok-soft: #ebf9f2;
+    --bad: #f03b3b;
+    --bad-soft: #fff0f0;
+    --warn: #8a5a00;
+    --warn-soft: #fcf1d6;
 }
 
 .dark {
-    --brand: #8b84f5;
-    --brand-2: #a79ff8;
-    --brand-soft: rgba(139,132,245,.14);
-    --champ: #232045;
-    --ok: #8fd6a8;
-    --ok-soft: #1f3a2a;
-    --bad: #f0a29c;
-    --bad-soft: #43231f;
-    --warn: #eacb7c;
-    --warn-soft: #3f3319;
+    --brand: #93c1ff;
+    --brand-2: #469bff;
+    --brand-soft: rgba(70,155,255,.14);
+    --champ: #1a2a3f;
+    --ok: #8fe0bc;
+    --ok-soft: #173a2c;
+    --bad: #ffb9b9;
+    --bad-soft: #45211f;
+    --warn: #f6d58a;
+    --warn-soft: #3d3218;
+}
+
+/*
+ * The site's shape: rounded cards with a soft shadow, rounded controls.
+ * shadcn's base-lyra components are square (`rounded-none`); these rules are
+ * unlayered, so they win over the utility layer without editing
+ * components/ui/.
+ */
+[data-slot="card"] {
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+}
+[data-slot="button"],
+[data-slot="tabs-list"],
+[data-slot="empty-icon"] {
+    border-radius: calc(var(--radius) * 0.67);
+}
+[data-slot="tabs-trigger"] {
+    border-radius: calc(var(--radius) * 0.5);
+}
+[data-slot="badge"] {
+    border-radius: 999px;
 }

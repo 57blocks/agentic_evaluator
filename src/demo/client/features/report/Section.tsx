@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ACCENT_CARD, ACCENT_TITLE } from "@/components/accent";
+import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 
 interface SectionProps {
   title: string;
@@ -13,9 +13,9 @@ interface SectionProps {
 
 export function Section({ title, hint, children }: SectionProps) {
   return (
-    <Card className={ACCENT_CARD}>
+    <Card className={SECTION_CARD}>
       <CardHeader>
-        <CardTitle className={ACCENT_TITLE}>{title}</CardTitle>
+        <CardTitle className={SECTION_TITLE}>{title}</CardTitle>
         {hint && <CardDescription>{hint}</CardDescription>}
       </CardHeader>
       <CardContent className="flex min-w-0 flex-col gap-3">{children}</CardContent>

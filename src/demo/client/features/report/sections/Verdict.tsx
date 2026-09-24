@@ -35,7 +35,7 @@ export function Verdict({ verdict: v, eligible, total }: Props) {
   return (
     <section
       aria-label="结论"
-      className={cn("flex flex-col gap-4 border border-l-4 border-border bg-card p-5 shadow-sm", EDGE[tone])}
+      className={cn("flex flex-col gap-4 rounded-lg border border-l-4 border-border bg-card p-5 shadow-(--shadow-card)", EDGE[tone])}
     >
       <div className="flex flex-wrap items-center gap-2">
         <Tag tone={tone} className="tracking-wider">{v.firmnessLabel}</Tag>

@@ -11,7 +11,7 @@ interface Props {
 export function ReportHeader({ eyebrow, title, subtitle }: Props) {
   return (
     <header className="flex flex-col gap-1">
-      <p className="text-[11px] font-bold tracking-[0.16em] text-brand uppercase">{eyebrow}</p>
+      <p className="text-[13px] font-semibold text-brand">{eyebrow}</p>
       <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
       <p className="text-sm text-muted-foreground">{subtitle}</p>
     </header>
