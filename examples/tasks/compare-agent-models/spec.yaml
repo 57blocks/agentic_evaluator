@@ -20,7 +20,7 @@
 #
 # NOT SANDBOXED. Without `cli.image` OpenCode runs on this machine as you, and
 # `--auto` approves its commands and edits. The work dir is a temp directory,
-# but nothing stops the agent leaving it (see "Isolation" in docs/GUIDE.md).
+# but nothing stops the agent leaving it (see "Safety" in the README).
 #
 # FAIRNESS. Same agent, same flags, same task text — only `--model` differs.
 # `--pure` keeps external plugins out. Model ids are OpenCode's own

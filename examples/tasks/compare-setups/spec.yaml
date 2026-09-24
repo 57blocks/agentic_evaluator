@@ -23,8 +23,8 @@
 # 3 pairs × 2 orders = 6 judge calls.
 #
 # NOT SANDBOXED. Without `cli.image` each agent runs on this machine as you,
-# with the flags below approving its commands and edits (see "Isolation" in
-# docs/GUIDE.md).
+# with the flags below approving its commands and edits (see "Safety" in the
+# README).
 #
 # Model ids are each agent's own: `opencode models openrouter` and
 # `pi --list-models` list them. Run each argv once by hand first.

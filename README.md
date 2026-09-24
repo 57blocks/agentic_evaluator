@@ -136,7 +136,20 @@ Every command takes `--help`.
 
 Useful `run` options: `--html` (write `report.html`), `--json` (one JSON event
 per line, for scripts), `--reuse` (reuse identical earlier generations),
-`--concurrency N`.
+`--concurrency N`. On an interactive terminal `run --yes` shows a live progress
+block; piped, redirected or with `--plain` it prints one line per event.
+
+`plan` reads the spec and counts; it makes no call and needs no key. Per step:
+
+```
+▶ <task> / <step> [<producer>] — <candidates> candidates × <inputs> inputs × <trials> trials
+  generations N · pairwise P pairs (2P judge calls, up to 3 attempts each) · absolute S calls
+  judge <model> · concurrency C · budget $B
+  benchmark <mode> · cache <mode> · directional yes|no
+```
+
+`pairwise off` and `absolute off` mean no judge call will be made. `plan`
+counts calls; `models` gives per-token prices, and `budget_usd` is the ceiling.
 
 Exit codes: `0` done · `1` failed · `2` usage error · `3` finished but partial
 (the budget stopped it, or the machine slept and durations are unreliable).
@@ -296,7 +309,7 @@ when chained, `e2e-validation.json` at the root.
 ## Development
 
 Working on agenteval itself — architecture, tests, the evidence format — is
-covered in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+covered in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

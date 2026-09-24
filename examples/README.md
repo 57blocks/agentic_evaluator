@@ -29,4 +29,4 @@ Each spec's header comment says what to look at. The free tasks declare
 shows `pairwise off · absolute off` for every step.
 
 To make your own, copy the closest task into your workspace's `tasks/` and
-edit it. The full walkthrough is [docs/GUIDE.md](../docs/GUIDE.md).
+edit it. The full walkthrough is the [README](../README.md).

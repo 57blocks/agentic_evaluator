@@ -38,7 +38,7 @@
 # work dir is a temp directory, but nothing stops the agent leaving it. Run
 # this only where that is acceptable, or give each candidate an image:
 #     image: <an image with that CLI>, network: bridge, env: { API_KEY_NAME: "" }
-# (see "Isolation" in docs/GUIDE.md).
+# (see "Safety" in the README).
 #
 # FAIRNESS. The point is to compare the agents, so all three use the same
 # model. Each agent also reads its own user config — MCP servers, skills,
