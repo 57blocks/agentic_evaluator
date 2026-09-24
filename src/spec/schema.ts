@@ -7,6 +7,9 @@
  * the protocol deliberately leaves to implementations.
  */
 
+/** The protocol version a spec must declare; the dashboard shows the same value. */
+export const PROTOCOL_VERSION = "0.3";
+
 export const SPEC_SCHEMA = {
   $schema: "http://json-schema.org/draft-07/schema#",
   $id: "https://57blocks.com/agentic-evaluator/spec-v0.4.schema.json",
@@ -14,7 +17,7 @@ export const SPEC_SCHEMA = {
   additionalProperties: false,
   required: ["protocol_version", "run_name", "workflow", "candidates", "evaluators", "execution"],
   properties: {
-    protocol_version: { type: "string", enum: ["0.3"] },
+    protocol_version: { type: "string", enum: [PROTOCOL_VERSION] },
     run_name: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{1,63}$" },
     budget_usd: { type: "number", minimum: 0 },
     workflow: {
