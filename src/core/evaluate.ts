@@ -15,9 +15,9 @@ import type { RunEventSink } from "./events.js";
 import { BudgetGuard } from "../canon/budget.js";
 import type { PairFailure, ScoredRecord, SkippedPair, TrialFailure } from "../canon/adapt.js";
 import { EvaluatorCallError, summarizeAttempts, type EvaluatorUsage } from "../canon/usage.js";
-import type { Judgement, RunRecord, Suite, Winner } from "../types.js";
+import type { RunRecord, Suite } from "../types.js";
 
-export function representative(records: readonly RunRecord[], candidate: string, inputSlug: string): string | null {
+function representative(records: readonly RunRecord[], candidate: string, inputSlug: string): string | null {
   const hit = records.find((r) => r.candidate === candidate && r.inputSlug === inputSlug && r.status === "ok" && r.text.trim() !== "");
   return hit ? hit.text : null;
 }
@@ -164,29 +164,6 @@ export async function scoreAll(
       hooks.onFailure?.({ candidate: r.candidate, input: r.inputSlug, trial: r.trial, message, usage: failureUsage });
     }
   });
-}
-
-/**
- * Win rate (0..100, tie = 0.5) for one candidate on one axis, or null when it
- * had no comparisons on that axis.
- */
-export function winRateFor(candidate: string, judgements: readonly Judgement[], pick: (jm: Judgement) => Winner | undefined): number | null {
-  let wins = 0;
-  let comparisons = 0;
-  for (const jm of judgements) {
-    const resolved = pick(jm);
-    if (resolved === undefined) continue;
-    if (jm.a === candidate) {
-      comparisons++;
-      if (resolved === "a") wins += 1;
-      else if (resolved === "tie") wins += 0.5;
-    } else if (jm.b === candidate) {
-      comparisons++;
-      if (resolved === "b") wins += 1;
-      else if (resolved === "tie") wins += 0.5;
-    }
-  }
-  return comparisons > 0 ? (wins / comparisons) * 100 : null;
 }
 
 /** Legacy aggregate — semantics unchanged from the original harness. */

@@ -72,7 +72,7 @@ export class AlreadyRunning extends Error {
 }
 
 /** The acknowledgement a caller must send for this task, right now. */
-export function ackOf(plan: WorkflowPlan): PlanAck {
+function ackOf(plan: WorkflowPlan): PlanAck {
   return {
     generations: plan.totalGenerations,
     judgeCalls: plan.totalJudgeCalls,

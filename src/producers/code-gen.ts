@@ -68,7 +68,7 @@ function looksLikeJsx(lang: string, content: string): boolean {
  * file, naming it `mod.ts` / `mod.tsx` (or `fallbackName`). Returns [] when the
  * output has no code at all — the caller records that as a failed check.
  */
-export function parseFileBlocks(
+function parseFileBlocks(
   text: string,
   fallbackName?: string,
 ): CodeFile[] {

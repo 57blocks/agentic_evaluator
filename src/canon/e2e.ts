@@ -20,7 +20,7 @@ export const VALIDATE_RULE_VERSION = "e2e-validate-v1" as const;
  * production workflow. This implementation runs the proposed combination and
  * the declared single-model control only; the rest are named, never implied.
  */
-export const ARMS_NOT_RUN: readonly string[] = [
+const ARMS_NOT_RUN: readonly string[] = [
   "single-configuration workflows other than the declared control",
   "the current production workflow",
 ];

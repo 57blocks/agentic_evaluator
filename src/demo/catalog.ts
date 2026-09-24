@@ -118,7 +118,7 @@ const FIXTURE_PREFIX = "fixture:";
 const SYNTHETIC_CANDIDATE_PREFIX = "fake-";
 
 /** The run the demo opens on: real models, one gated by a required check, one recommended on cost. */
-export const FEATURED_RUN_ID = "fixture:codegen-w38";
+const FEATURED_RUN_ID = "fixture:codegen-w38";
 
 interface RunLocation {
   id: string;

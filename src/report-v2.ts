@@ -92,17 +92,6 @@ function filterList(rec: Recommendation): string {
     .join("");
 }
 
-function firmnessTag(firmness: Recommendation["firmness"]): string {
-  switch (firmness) {
-    case "firm":
-      return "FIRM";
-    case "directional":
-      return "DIRECTIONAL";
-    case "needs-review":
-      return "NEEDS-REVIEW";
-  }
-}
-
 function candidateMark(gated: boolean, chosen: boolean): string {
   if (gated) return `<span class="model">gated out</span>`;
   if (chosen) return `<span class="model">recommended</span>`;
@@ -162,7 +151,6 @@ export function renderRunReport(b: RunBundle): string {
   const rec = b.recommendation;
   const views = candidateViews(b);
   const absoluteRan = b.trials.some((t) => t.judge.absolute_overall !== null);
-  const tag = firmnessTag(rec.firmness);
   const support = subtitleReasons(rec, b.summary.directionality);
   const inputs = m.test_set.inputs;
   const trialsPer = m.execution.trials_per_case;

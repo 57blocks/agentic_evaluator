@@ -99,7 +99,7 @@ const { $schema: _dropped, ...schemaBody } = SPEC_SCHEMA as unknown as Record<st
 const validateSpec = ajv.compile(schemaBody);
 
 /** Vendor prefix of an OpenRouter model id ("anthropic/claude-x" → "anthropic"). */
-export function vendorOf(modelId: string): string {
+function vendorOf(modelId: string): string {
   return modelId.split("/")[0] ?? modelId;
 }
 

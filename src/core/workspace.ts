@@ -70,10 +70,6 @@ export function runsDir(ws: Workspace): string {
   return path.join(ws.root, "runs");
 }
 
-export function suitesDir(ws: Workspace): string {
-  return path.join(ws.root, "suites");
-}
-
 /**
  * Where a run is written: beside the task that produced it, so the definition
  * and its evidence travel together. A legacy suite owns no directory and

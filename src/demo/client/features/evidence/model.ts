@@ -11,12 +11,12 @@ import type { RunView } from "../../../catalog.js";
 import { artifactUrl, getTextOrNull } from "@/lib/api";
 
 /** Protocol §5: what happened to the candidate's attempt. */
-export const COMPLETION_STATES = [
+const COMPLETION_STATES = [
   "success", "refusal", "timeout", "malformed", "cancelled", "provider_error",
 ] as const;
 
 /** Protocol §5: whether the task was actually done. */
-export const TASK_OUTCOMES = ["success", "failure", "undetermined"] as const;
+const TASK_OUTCOMES = ["success", "failure", "undetermined"] as const;
 
 /** Protocol §5: what happened to the evaluator, never blamed on the candidate. */
 export const EVALUATION_STATES = ["pass", "fail", "not_evaluated", "evaluator_error"] as const;

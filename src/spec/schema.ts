@@ -1,8 +1,8 @@
 /**
  * JSON Schema for the protocol-style evaluation spec (YAML on disk).
  *
- * Kept as a plain object (not a .json import) so it type-checks with the loader
- * and can be reused by any other language via `printSchema()`. Only fields the
+ * Kept as a plain object (not a .json import) so it type-checks with the
+ * loader. Only fields the
  * v0.4 protocol names plus one `x-harness` extension block for producer details
  * the protocol deliberately leaves to implementations.
  */
@@ -181,7 +181,3 @@ export const SPEC_SCHEMA = {
     },
   },
 } as const;
-
-export function printSchema(): string {
-  return JSON.stringify(SPEC_SCHEMA, null, 2);
-}

@@ -64,23 +64,15 @@ const OUTCOME_LABEL: Record<string, string> = {
   undetermined: "undetermined",
 };
 
-const EVALUATION_LABEL: Record<string, string> = {
-  pass: "pass",
-  fail: "fail",
-  not_evaluated: "not evaluated",
-  evaluator_error: "evaluator error",
-};
-
 export const completionLabel = (s: string): string => COMPLETION_LABEL[s] ?? s;
 export const outcomeLabel = (s: string): string => OUTCOME_LABEL[s] ?? s;
-export const evaluationLabel = (s: string): string => EVALUATION_LABEL[s] ?? s;
 
 // ── numbers in words ─────────────────────────────────────────────────────────
 
 const pct = (v: number): string => `${(v * 100).toFixed(v === 1 || v === 0 ? 0 : 1)}%`;
 
 /** `88.9% (8/9)`, or `n/a (0/0)` when nothing was counted. */
-export function rateText(r: Rate): string {
+function rateText(r: Rate): string {
   return r.value === null ? `n/a (${r.numerator}/${r.denominator})` : `${pct(r.value)} (${r.numerator}/${r.denominator})`;
 }
 

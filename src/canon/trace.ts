@@ -41,7 +41,7 @@ export interface TraceIntegrity {
   in_flight_gaps: number;
 }
 
-export const GAP_THRESHOLD_MS = 5 * 60 * 1000;
+const GAP_THRESHOLD_MS = 5 * 60 * 1000;
 
 /**
  * Wall-clock integrity of a finished trace. Regular multi-minute gaps with

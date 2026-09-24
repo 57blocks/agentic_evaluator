@@ -60,7 +60,7 @@ export interface CheckResult {
 let cachedTscVersion: string | undefined;
 
 /** TypeScript version from the harness's own installed package; "unknown" if absent. */
-export async function tscVersion(): Promise<string> {
+async function tscVersion(): Promise<string> {
   if (cachedTscVersion) return cachedTscVersion;
   try {
     const raw = await fs.readFile(typescriptFile("package.json"), "utf-8");
@@ -72,7 +72,7 @@ export async function tscVersion(): Promise<string> {
   return cachedTscVersion;
 }
 
-export async function scaffoldSha(scaffoldDir: string): Promise<string> {
+async function scaffoldSha(scaffoldDir: string): Promise<string> {
   const tsconfig = await fs.readFile(path.join(scaffoldDir, "tsconfig.json"), "utf-8");
   return sha256(tsconfig);
 }
@@ -203,7 +203,7 @@ const COMMAND_EXIT_FAIL = 1;
  * otherwise be indistinguishable from the check failing the candidate — and
  * that is exactly how a broken path once marked every candidate as failed.
  */
-export function resolveArgv(
+function resolveArgv(
   argv: readonly string[],
   taskRoot?: string,
 ): { argv: string[]; missing: string[] } {
