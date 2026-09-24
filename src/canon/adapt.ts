@@ -10,6 +10,7 @@
 import type { JudgedPair } from "../judge.js";
 import type { RunRecord, ScoreRecord, Winner } from "../types.js";
 import { decideTaskOutcome } from "./success.js";
+import { nonZeroExitReason } from "./states.js";
 import type { CheckCell, DimensionDetail, EvaluationRow, TrialRow } from "./rows.js";
 import type { EvaluatorUsage } from "./usage.js";
 import type { SuccessCriteria } from "./types.js";
@@ -102,6 +103,7 @@ export function toTrialRows(input: AdaptInput): TrialRow[] {
       criteria: input.successCriteria,
       requiredChecks: input.requiredChecks,
       completion,
+      completionReason: nonZeroExitReason(r.finishReason),
       checks: Object.entries(checks).map(([evaluator, c]) => ({ evaluator, version: c.version, state: c.state, reason: c.reason })),
     });
     const score = input.scores.find((s) => s.candidate === r.candidate && s.inputSlug === r.inputSlug && s.trial === r.trial);

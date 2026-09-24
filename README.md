@@ -243,7 +243,9 @@ any unknown or contradictory field.
 It runs in a fresh, empty work dir. `{{input}}` is replaced by the test case
 (also written to `.eval-input.txt`) and `{{workdir}}` by the work dir's path.
 The files it leaves behind are its deliverable; if it leaves none, its stdout
-is. Relative paths resolve against the task directory.
+is. It must exit 0: a non-zero exit is recorded as a failed attempt (with the
+exit code as the reason), even if it left files behind. Relative paths resolve
+against the task directory.
 
 **Check scripts.** A `kind: command` check runs in the trial's work dir, next
 to the candidate's files, `output.txt` (the deliverable), `input.txt` (the test
