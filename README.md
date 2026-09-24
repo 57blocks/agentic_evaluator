@@ -87,27 +87,39 @@ agent, add inputs, and raise the trials. See [Writing a task](#writing-a-task).
 
 ## Samples
 
-The package ships seven sample tasks. Copy one into your workspace to run it:
+The package ships seven sample tasks. Copy one — or all of them — into your
+workspace and run it by name:
 
 ```bash
 mkdir -p tasks
-cp -R "$(npm root -g)/agenteval/examples/tasks/custom-check" tasks/
+cp -R "$(npm root -g)/agenteval/examples/tasks/custom-check" tasks/   # one
+cp -R "$(npm root -g)/agenteval/examples/tasks/"* tasks/             # or all seven
+agenteval ls                                                        # what you now have
 agenteval run custom-check --yes --html
 ```
 
-| sample | shows | cost |
-|---|---|---|
-| `custom-check` | grading with your own check script; wrapping any program as a candidate | free |
-| `chain-offline` | a two-step workflow and its end-to-end validation | free |
-| `docker-sandbox` | the same agent run in a Docker container and on the host; each trial records which | free (needs Docker) |
-| `compare-models` | two real models, a deterministic gate plus a pairwise judge | billed, capped at $0.50 |
-| `compare-agents` | Claude Code, OpenCode and pi on the same coding job, graded by behavioural tests | billed by the agents; judge capped at $1 |
-| `compare-agent-models` | one agent (OpenCode) with three models — the model's effect, agent held fixed | billed by OpenRouter; judge capped at $1 |
-| `compare-setups` | concrete agent + model combinations head to head | billed by the agents; judge capped at $1 |
+Copying keeps their runs in your workspace instead of in the global install.
 
-The agent samples need those agents installed, and run them **unsandboxed on
-your machine** — read the warnings in their `spec.yaml` and see
-[Safety](#safety) first.
+| sample | shows | needs | cost |
+|---|---|---|---|
+| `custom-check` | grading with your own check script; wrapping any program as a candidate | nothing | free |
+| `chain-offline` | a two-step workflow and its end-to-end validation | nothing | free |
+| `docker-sandbox` | the same agent run in a Docker container and on the host; each trial records which | Docker running | free |
+| `compare-models` | two real models, a deterministic gate plus a pairwise judge | `OPENROUTER_API_KEY` | capped at $0.50 |
+| `compare-agents` | Claude Code, OpenCode and pi on the same coding job, graded by behavioural tests | the three agents and their keys; `OPENROUTER_API_KEY` for the judge | agents bill their own providers; judge capped at $1 |
+| `compare-agent-models` | one agent (OpenCode) with three models — the model's effect, agent held fixed | OpenCode; `OPENROUTER_API_KEY` | billed by OpenRouter; judge capped at $1 |
+| `compare-setups` | concrete agent + model combinations head to head | the three agents and their keys; `OPENROUTER_API_KEY` | agents bill their own providers; judge capped at $1 |
+
+Before a billed sample, look first — both are free:
+
+```bash
+agenteval models compare-models --catalog-only   # every model id listed, and its price
+agenteval plan compare-models                    # how many calls, and the budget ceiling
+```
+
+The agent samples run those agents **unsandboxed on your machine** — read the
+warnings in their `spec.yaml` and see [Safety](#safety) first. What an agent
+spends on its own provider is invisible to agenteval and its budget.
 
 ## Concepts
 
