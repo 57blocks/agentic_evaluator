@@ -1,7 +1,7 @@
 # agenteval user guide
 
 How to install the tool, run the samples, write your own task, and read what a
-run produced. For how the harness is built, see the [README](../README.md).
+run produced. For how the harness is built, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 - [Install](#install)
 - [Five minutes with the samples](#five-minutes-with-the-samples)
@@ -249,6 +249,10 @@ evaluators:
 execution:
   trials_per_case: 1
   concurrency: 2
+
+x-harness:                       # still required this milestone
+  producer: prompt
+  prompt_file: prompts/notes.md
 ```
 
 The full schema is `src/spec/schema.ts`; loading validates the spec and

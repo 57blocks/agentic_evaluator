@@ -1,310 +1,285 @@
 # agenteval
 
-`@57blocks/agenteval` — a command-line tool for evaluating models and agent
-workflows.
+Pick the right model — or agent, or combination of both — for each step of
+your AI workflow, with evidence you can check.
+
+You give agenteval a task: some test inputs, the candidates to compare, and how
+to judge them. It runs every candidate on every input, grades the results with
+deterministic checks and (optionally) a judge model, and tells you which
+candidate to use, why, what it cost, and what it could not observe.
+
+- **Compare** models on one prompt, coding agents on one job, or one agent
+  across several models.
+- **Grade** with a check you write (any program that exits 0 or 1), a
+  TypeScript compile, and/or a judge model from a different vendor.
+- **Decide** by explicit gates and an operating mode (`lowest-cost`,
+  `highest-assurance`, …), not by eyeballing a leaderboard.
+- **Validate workflows**: chain steps, then test the per-step picks end to end
+  against a single-model baseline.
+- **Keep the evidence**: every run writes its scores, costs, gaps and a
+  self-contained `report.html` beside the task. A local dashboard browses them.
+
+## Install
+
+Requires Node.js 22 or newer.
 
 ```bash
-npm i -g @57blocks/agenteval      # Node 22+; or: npx @57blocks/agenteval <command>
-export OPENROUTER_API_KEY=sk-or-...   # or put it in ./.env.local; only for tasks that call models
-
-agenteval init my-task            # a runnable, offline task in ./tasks/my-task
-agenteval run my-task --yes --html
-agenteval dash                    # the dashboard, over this directory
+npm install -g agenteval
+agenteval --version
 ```
 
-The rest of this README is about the harness itself.
+Or without installing: `npx agenteval <command>`.
 
-Model and workflow evaluation harness that records protocol v0.4 evidence
-and a reproducible operating-mode recommendation. See the
-[Agent Evaluation Protocol v0.4](docs/AGENT-EVALUATION-PROTOCOL%20(1).md).
-Started from the `agentic-builder/eval` model-eval harness (imported verbatim in
-the first commit) and reshaped so every run leaves protocol-shaped evidence.
-
-## What a run produces
-
-```
-runs/<runId>/
-  manifest.json       what was tested: spec/rubric/template hashes, models, judge, modes
-  trace.jsonl         one event per LLM call (generation, judge, scorer), no prompt text
-  scores.jsonl        one row per trial: completion_state × task_outcome, checks, judge, cost
-  evaluations.jsonl   one row per evaluator invocation, incl. evaluator_error / not_evaluated
-  ledger.json         cost by component: generation, judging, scoring, retries, total
-  summary.json        per-candidate rates with numerators and denominators; directionality
-  recommendation.json eligibility filters + operating-mode choice
-  GAPS.md             protocol fields this run could not observe (recorded null, never defaulted)
-  report.html         the page: standings, evidence, what was not observed
-  raw/                each candidate's deliverable, one file per trial
-```
-
-A multi-step spec writes each step under `runs/<runId>/<stepId>/` plus, at the
-root, `workflow.json` (per-step recommendations, the whole-workflow ledger and
-the validation verdict), a workflow `GAPS.md` collected from the steps, and
-`report.html` — the workflow page, the only view of the §8 verdict, both arms
-and what was not compared. When steps declare `input_from`, the run also
-validates the workflow end to end (protocol §8):
-
-```
-runs/<runId>/
-  e2e-control/  e2e-control.json    single-model control arm: one candidate, whole chain
-  e2e-proposed/ e2e-proposed.json   the combination each step's recommendation proposes
-  e2e-validation.json               adopt-combination / keep-control / not-validated,
-                                    with the metric delta, paired case counts and the
-                                    comparisons this run did not make (not_compared)
-```
-
-## Run
-
-**New here? Read [docs/GUIDE.md](docs/GUIDE.md)** — install, the samples,
-writing a task, reading a run, cost control. `examples/` holds three sample
-tasks to start from ([examples/README.md](examples/README.md)); two are free.
-
-From a checkout of this repository:
+Models are called through [OpenRouter](https://openrouter.ai). You only need a
+key for tasks that call models:
 
 ```bash
-pnpm install
-npm link                    # or: pnpm run agenteval <command>
-echo 'OPENROUTER_API_KEY=sk-or-...' > .env.local   # only for tasks that call models
-
-agenteval run examples/tasks/custom-check --yes --html   # free sample
-
-agenteval init my-task      # a runnable, offline task to edit
-agenteval ls                # what this workspace holds, and what it spent
-agenteval plan my-task      # what a run would cost — no key, no call
-agenteval run my-task --yes # execute
-agenteval dash              # the dashboard, over this workspace
+export OPENROUTER_API_KEY=sk-or-...
+# or put the same line in a .env.local file in the directory you run from
 ```
 
-On an interactive terminal `run --yes` draws a live progress block (Ink);
-piped, redirected, `--plain` or `--json`, it prints one line or one JSON object
-per event.
-
-A **workspace** is any directory holding `tasks/`, found by walking up from
-where you are standing; `--workspace DIR` names one explicitly. The harness
-itself is a workspace, which is why running inside this checkout needs no
-flags. A task is self-contained — spec, inputs, rubric, agents, checks,
-scaffold and its own `runs/` — so copying the directory somewhere else and
-running it there is the supported thing to do, not a trick.
+## Quick start (free, offline)
 
 ```bash
-agenteval models my-task              # reachable from here? at what price?
-agenteval models my-task --catalog-only   # no key, nothing billed
-agenteval report <runId>              # re-render report.html; no number moves
-agenteval run my-task --yes --json    # one JSON event per line, for a script
+mkdir my-evals && cd my-evals
+
+agenteval init my-task              # creates tasks/my-task/, runnable as-is
+agenteval plan my-task              # what a run would do — no key, no calls
+agenteval run my-task --yes --html  # run it
+agenteval dash                      # browse tasks and runs at http://127.0.0.1:4173
 ```
 
-Exit codes: `0` done · `1` failed · `2` usage · `3` completed but partial —
-the budget stopped it early, or the trace shows gaps that make its durations
-unreliable. The third is why they are separate: a script that cannot tell a
-spending cap from an outage will treat a half-run as a whole one.
+The generated task compares two local commands and grades them with a
+TypeScript compile, so it costs nothing. The run prints where it wrote its
+evidence — open `report.html` there, or use the dashboard.
 
-Run paid tasks under `caffeinate -i` (macOS). A suspended host leaves regular
-multi-minute gaps between trace events and every timeout and duration in that
-run becomes meaningless; `summary.json.integrity` counts such gaps, GAPS.md
-warns, and `agenteval run` exits 3.
+From here, edit `tasks/my-task/spec.yaml`: swap the candidates for models or
+your own agent, add inputs, and turn on a judge. See
+[Writing a task](#writing-a-task).
 
-`tasks/smoke-local` is the free full-pipeline smoke: local command candidates
-and no declared judging method, so it exercises spec load, adapter dispatch,
-the required check, the ledger and the recommendation without a single network
-call. It is what gates every refactor here.
+## Samples
 
-A spec is the versioned source of truth (`tasks/<name>/spec.yaml`, schema in
-`src/spec/schema.ts`). A spec may list several **independent** steps; each
-gets its own recommendation. Add `input_from` to chain a step onto the previous
-one; that also turns on the end-to-end validation pass.
-
-`evaluators.judge.methods` is honoured exactly: absent means both methods run
-(what every spec written before the key existed meant), an empty list means
-neither. A step with no method declared is a check-only step — the manifest
-records the declaration and GAPS.md states the missing scores are a choice.
-
-Legacy `suites/*.json` still load (candidate id = model id) but no longer run:
-their `rubrics/` and `scaffold/` were workspace-level and moved into the tasks
-that own them. The path is **deprecated** — every new step belongs in a task.
-
-Still its own script, because it compares two sets of runs rather than producing one:
+The package ships six sample tasks. Copy one into your workspace to run it:
 
 ```bash
-pnpm run parity       # capture/compare: did a change move the numbers?
-pnpm test
+mkdir -p tasks
+cp -R "$(npm root -g)/agenteval/examples/tasks/custom-check" tasks/
+agenteval run custom-check --yes --html
 ```
 
-## Layout
+| sample | shows | cost |
+|---|---|---|
+| `custom-check` | grading with your own check script; wrapping any program as a candidate | free |
+| `chain-offline` | a two-step workflow and its end-to-end validation | free |
+| `compare-models` | two real models, a deterministic gate plus a pairwise judge | billed, capped at $0.50 |
+| `compare-agents` | Claude Code, OpenCode and pi on the same coding job, graded by behavioural tests | billed by the agents; judge capped at $1 |
+| `compare-agent-models` | one agent (OpenCode) with three models — the model's effect, agent held fixed | billed by OpenRouter; judge capped at $1 |
+| `compare-setups` | concrete agent + model combinations head to head | billed by the agents; judge capped at $1 |
 
-```
-bin/agenteval.mjs     the installed entry point
-src/cli/              argv -> core, and the only place a run is formatted for a human
-  index.ts            dispatch, --help, --version, exit codes
-  commands/           run plan ls init models report dash
-  print.ts            events -> terminal lines        json.ts  events -> NDJSON
-  progress.ts         events -> live-view state (pure)  live.tsx  the Ink view
-src/core/             the kernel: no terminal, no cwd, no process.exit
-  workspace.ts        where the user's tasks and runs live
-  plan.ts             what a run would do, before it does any of it (pure)
-  events.ts           what a run emits while it happens
-  generate.ts         candidate × input × trial through an adapter
-  evaluate.ts         judge and scorer      scorecard.ts  the frozen legacy aggregate
-  e2e-arms.ts         the two end-to-end arms and the §8 verdict
-  execute.ts          one step, then the run around it
-src/paths.ts          the installation: its own tsc, version, built assets, fixtures
-src/adapters/         candidate adapters: model-api, codegen, agent-cli (protocol §5)
-src/llm.ts            OpenRouter client; provider, finish reason, labeled cost source, LlmError
-src/judge.ts          pairwise with order swap; keeps every attempt's cost
-src/score.ts          absolute 1–5 with anchors
-src/check.ts          tsc --noEmit required check with four-state result and version
-src/spec/             YAML spec loader + JSON Schema + semantic checks
-src/canon/            protocol layer: states, success decision, hash, usage, cost, trace,
-                      manifest, rows, adapt, rates, write
-src/html.ts           escapeHtml, shared by the two report pages
-src/report-model.ts   what a report says: numbers and decided wording, read by both renderers
-src/report-format.ts  formatters and fixed wording, browser-safe
-src/report-copy.ts    the report's Chinese sentences, rebuilt from gates and rates — never selector English
-src/test-plan.ts      a spec (or a run's manifest) read aloud: inputs, candidates, checks, gates, pick, scale
-src/report-v2.ts      the step report page (+ report-charts, report-evidence)
-src/report-workflow.ts the workflow page: verdict, arms, per-step links, ledger
-src/server/           run control (plan gate, SSE, cancel) and the cross-run overview
-src/demo/             the dashboard server and its React client
-  server.ts           JSON API + artifact routes    catalog.ts  tasks, runs, samples
-  client/app/         shell, hash routing, workspace fetch, OS theme
-  client/pages/       one file per view: home (task list), task, run, report
-  client/features/    task-list, run-control, evidence, task-files, test-plan, report (+ HTML export)
-  client/lib/         api, format, tone, shared wording — no JSX, unit-testable
-  client/components/ui/  shadcn, stock theme, unmodified
-tests/                node:test; parity uses tests/legacy-aggregate.ts (pristine oracle)
-examples/             a workspace of sample tasks for new users; the free ones are tested
-fixtures/             committed real runs used by the parity test
-docs/                 GUIDE.md (user guide), protocol, implementation plan, harness-to-protocol map
-```
+The agent samples need those agents installed, and run them **unsandboxed on
+your machine** — read the warnings in their `spec.yaml` and see
+[Safety](#safety) first.
 
-## Judging methods
+## Concepts
+
+- **Workspace** — a directory with a `tasks/` folder. Commands find it by
+  walking up from where you stand; with none found, the current directory is
+  the workspace. `--workspace DIR` names one explicitly.
+- **Task** — `tasks/<name>/`, self-contained: `spec.yaml` plus the inputs,
+  prompts, rubrics, agents and checks it refers to, and its own `runs/`. Copy
+  the directory anywhere and it still runs.
+- **Step** — one thing being evaluated, e.g. "write release notes". A task has
+  one or more.
+- **Candidate** — what competes on a step: a model (`model: vendor/name`) or a
+  command (`adapter: agent-cli`), such as `claude -p` or your own script.
+- **Input** — a test case, `inputs/<id>.txt`. Every candidate runs every input,
+  `trials_per_case` times.
+- **Required check** — the deterministic gate that decides success or failure:
+  a `tsc` compile, or any program you write.
+- **Judge** — an optional model that compares outputs pairwise (in both orders)
+  and/or scores them 1–5 against a rubric.
+- **Recommendation** — per step: which candidates passed the eligibility gates,
+  and which one the step's `operating_mode` picks among them.
+
+## Commands
+
+Every command takes `--help`.
+
+| command | does | needs a key? |
+|---|---|---|
+| `agenteval init <name>` | create a runnable offline task | no |
+| `agenteval ls` | list tasks, their runs, and what the runs spent | no |
+| `agenteval plan <task>` | count what a run would do: generations, judge calls, budget | no |
+| `agenteval models <task>` | check each model id is listed and reachable, and its price | yes (`--catalog-only`: no) |
+| `agenteval run <task> --yes` | execute (without `--yes` it only prints the plan) | if the task calls models |
+| `agenteval report <run>` | re-render a run's `report.html` | no |
+| `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
+
+`<task>` is a task name in the workspace (`my-task`), a task directory
+(`./somewhere/my-task`), or a path to a `spec.yaml`.
+
+Useful `run` options: `--html` (write `report.html`), `--json` (one JSON event
+per line, for scripts), `--reuse` (reuse identical earlier generations),
+`--concurrency N`.
+
+Exit codes: `0` done · `1` failed · `2` usage error · `3` finished but partial
+(the budget stopped it, or the machine slept and durations are unreliable).
+
+## Writing a task
+
+A single step comparing two models, graded by a check script and a judge:
 
 ```yaml
-evaluators:
-  judge:
-    methods: [pairwise-swap]        # absolute-1-5 omitted → not run
-```
+protocol_version: "0.4"
+run_name: notes
+budget_usd: 1                      # hard ceiling for the whole run
 
-`methods` is now honoured (it used to be parsed and ignored). A method left
-out is not run, not planned, and not billed; the manifest records what was
-declared and GAPS.md states that the missing scores are a declaration rather
-than a failure, so an old run and a deliberately narrowed one can be told
-apart. Absolute scoring is off in `specs/prd-chain-trial.yaml`: with no
-per-dimension thresholds the grader returned 5 for everything, once graded
-the same prototype-key defect 3 and once 5, and cost a third of the run.
+workflow:
+  control_candidate: sonnet        # the single-model baseline for chained workflows
+  steps:
+    - id: notes
+      version: "1"                 # bump when you change what the step means
+      producer: prompt
+      prompt_file: prompts/notes.md      # {{input}} is replaced by the test case
+      rubric_file: rubrics/notes.md      # what the judge grades against
+      test_set:
+        id: changelog-v1
+        inputs: [changelog]        # inputs/changelog.txt
+      candidate_ids: [sonnet, deepseek]
+      required_checks: [release-notes]
+      judged_dimensions: [faithfulness, clarity]
+      success_criteria:
+        mandatory_checks: all      # success = every required check passed
+      operating_mode: lowest-cost  # or fastest-within-cost-ceiling | highest-assurance | judge-preference
+      eligibility:                 # candidates below these are gated out, with the reason
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 120
 
-## Run guards
+candidates:
+  - id: sonnet
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+  - id: deepseek
+    model: deepseek/deepseek-v4-pro
+    provider_route: openrouter
 
-- **Transport retry.** Network faults, 408/409/425/429 and 5xx are retried
-  twice with exponential backoff and are not candidate attempts (protocol §7).
-  A 403 is retried only when OpenRouter's body shows endpoint routing or geo
-  gating — that pool flaps, and one run recorded a candidate as failed on
-  every step because of it; a plain 403 is an access problem and is not
-  retried. A timeout is never retried: the candidate had its declared budget.
-  What the abandoned attempts were billed lands in the ledger's `retries`,
-  not in `generation`.
-- **`budget_usd` is enforced**, not just printed. The guard is consulted
-  before each generation, judged pair and scored output; once spend reaches
-  the ceiling the run stops starting work, counts what it skipped by kind into
-  `summary.json.budget`, and GAPS.md says the run is partial. One spec, one
-  ceiling — the steps of a multi-step run share it.
-- **Wall-clock integrity** only accuses the host when a long quiet stretch had
-  *nothing* in flight. A 600s timeout produces a ten-minute silence by design;
-  those are counted separately as `in_flight_gaps`.
-
-## Required checks
-
-A step's required check is what turns a trial outcome from `undetermined` into
-measured success or failure. Two kinds:
-
-```yaml
 evaluators:
   required_checks:
-    tsc-noemit:
-      kind: tsc                       # compile the produced files
-      scaffold_dir: scaffold
-    task-coverage:
-      kind: command                   # run a program you declare
-      argv: ["node", "checks/task-coverage.mjs"]
-      version_files: [checks/task-coverage.mjs]   # hashed into the evaluator version
+    release-notes:
+      kind: command
+      argv: [node, checks/release-notes.mjs]
+      version_files: [checks/release-notes.mjs]
       timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/notes.md
+    methods: [pairwise-swap]       # [] = no judge; add absolute-1-5 for 1–5 scores
+
+execution:
+  trials_per_case: 1
+  concurrency: 2
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/notes.md
 ```
 
-A command check runs with `cwd` set to the trial's work dir, which already
-holds the candidate's parsed artifacts plus `output.txt` (the deliverable),
-`input.txt` (the test case) and `meta.json` (`{step, candidate, input,
-trial}`). Exit 0 passes, exit 1 fails the candidate, and **anything else — a
-missing program, a timeout, any other exit code — is an evaluator error**,
-never a candidate failure. stdout may be `{"evidence": "...", "reason": "..."}`
-or plain text kept as the evidence.
+Run `agenteval plan <task>` after every edit: it validates the spec and names
+any unknown or contradictory field.
 
-`checks/task-coverage.mjs` is a worked example: it fails a task breakdown that
-cites a requirement id the PRD never defines, or that leaves one uncovered.
+**Command candidates.** Any program can compete:
 
-One required check per step; declaring two is rejected at load time rather
-than silently gating on one. The command runs on this host with your
-privileges — the Docker sandbox is still deferred, so only declare checks you
-would run yourself.
+```yaml
+  - id: my-agent
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/run.mjs, "{{input}}"]
+```
 
-## One layer, and one permanent oracle
+It runs in a fresh, empty work dir. `{{input}}` is replaced by the test case
+(also written to `.eval-input.txt`) and `{{workdir}}` by the work dir's path.
+The files it leaves behind are its deliverable; if it leaves none, its stdout
+is. Relative paths resolve against the task directory.
 
-A run writes canonical files only: `manifest.json`, `trace.jsonl`,
-`scores.jsonl`, `evaluations.jsonl`, `ledger.json`, `summary.json`,
-`recommendation.json`, `GAPS.md`, `report.html`, and `raw/`. The legacy layer
-the original harness wrote — `records.json`, `report.json`, `report.md`,
-`legacy-report.html` — is gone, along with the renderer behind it
-(`render.ts`, `report.ts`, `dashboard.ts`, `summarize.ts`, `i18n.ts`) and
-`rescore.ts`, which only ever refreshed it.
+**Check scripts.** A `kind: command` check runs in the trial's work dir, next
+to the candidate's files, `output.txt` (the deliverable), `input.txt` (the test
+case) and `meta.json`. Exit `0` passes, exit `1` fails the candidate; anything
+else — a crash, a timeout — is recorded as an evaluator error, never blamed on
+the candidate. Print `{"evidence": "...", "reason": "..."}` to keep evidence
+with the trial. `kind: tsc` with `scaffold_dir: scaffold` instead compiles the
+produced TypeScript against `scaffold/tsconfig.json`.
 
-Both retirement conditions were met before it went: the dashboard's cross-run
-view covers what `dashboard.ts` uniquely showed, and parity holds on every
-fixture.
+**Workflows.** A task can have several steps, each evaluated on its own inputs.
+Add `input_from: <earlier step id>` to chain them: the run then also executes
+the whole chain twice — once with `control_candidate` on every step, once with
+each step's recommended candidate — and reports whether the combination beats
+the single model. The `chain-offline` sample shows this.
 
-**`tests/legacy-aggregate.ts` stays, permanently.** It is a pristine copy of
-the original harness's aggregate, and `tests/parity.test.ts` feeds it the
-canonical rows of each committed fixture and checks that it reproduces the
-`report.json` that fixture shipped with. The fixtures keep their legacy files
-forever — that is what makes them an oracle. The invariant it now guards is
-the one worth guarding: **the canonical rows still carry everything the
-original computation needed.** If a change to `canon/` quietly drops a field,
-this fails, and it fails against numbers produced before any of this code was
-written.
+**How much to trust a result.** With one input and one trial every result is
+marked *directional*: enough to look at the evidence, not to decide. Add inputs
+and trials before trusting a ranking.
 
-`scripts/parity.ts` answers the other question — whether a change moved the
-numbers on a live task — by capturing runs before and after and diffing them.
-It never spends: it reads runs you already produced.
+## Reading a run
 
-## Two renderers, one model
+Each run writes `tasks/<task>/runs/<runId>/`:
 
-A run's report is rendered twice, on purpose, and both renderers read one
-model — `src/report-model.ts` computes every number and every sentence that
-carries a decision; `src/report-format.ts` and `src/report-copy.ts` hold the
-formatters and the Chinese sentences, with no Node imports so the browser
-bundle can use them too. The selector's own English reasons stay untouched in
-`recommendation.json`; pages rebuild their sentences from the gates and rates.
+| file | holds |
+|---|---|
+| `report.html` | the page to read first — standings, evidence, what was not observed |
+| `recommendation.json` | the eligibility gates and the pick, with reasons |
+| `summary.json` | per-candidate rates, with numerators and denominators |
+| `scores.jsonl` | one row per trial: outcome, check result and evidence, judge, cost |
+| `ledger.json` | cost by component: generation, judging, scoring, retries |
+| `GAPS.md` | what this run could not observe — recorded as unknown, never guessed |
+| `trace.jsonl` | one event per model call, without prompt text |
+| `raw/` | each candidate's deliverable, one file per trial |
 
-- `report.html` is **evidence**. `report-v2.ts` (one step) and
-  `report-workflow.ts` (a whole workflow) write it into the run directory at
-  run time. It is self-contained, opens from a file path with no server, no
-  network and no build, and pins nothing to a React version. It stays the
-  durable record.
-- The dashboard's **report page** (`src/demo/client/features/report/`) renders
-  the same model as React, served by `/api/report/<kind>/<rel>`. Its **导出
-  HTML** button saves exactly what is on screen — the DOM plus the page's own
-  stylesheet — as one file with no framework and no network requests, so an
-  exported page can never say something the dashboard did not.
+A multi-step run has one such directory per step, plus `workflow.json` and,
+when chained, `e2e-validation.json` at the root.
 
-What must not drift is the wording — "needs review" rather than a blank cell,
-a gated candidate named with its reason, the judge's pick beside the
-recommendation and never inside it. `tests/report-model.test.ts` holds the
-model's numbers and sentences against what `report.html` prints.
+## Controlling cost
 
-## Not in this milestone
+- Run `plan` first. `run` without `--yes` is the same preview, so a typo cannot
+  bill you.
+- `budget_usd` is enforced: once spend reaches it, the run stops starting new
+  work, records what it skipped, and exits `3`.
+- `methods: []` plus command-only candidates make a task free.
+- `agenteval models <task> --catalog-only` catches a mistyped model id for free.
+- On macOS, run billed tasks under `caffeinate -i`. If the machine sleeps, the
+  run detects the gaps, says so in `GAPS.md`, and exits `3`.
 
-Multi-trial pairwise, confidence intervals, Docker sandbox, human calibration,
-and the remaining §8 comparison arms (every single-configuration workflow, the
-current production workflow — named in `e2e-validation.json.not_compared`).
-Independent multi-step specs, `input_from` handoff, and the two-arm end-to-end
-validation of a mixed assignment run today. In-process agentic-builder producers are not imported;
-wrap an external agent with `adapter: agent-cli`. Eligibility gates and
-operating-mode selection now write `recommendation.json`; the canonical report
-uses that file. Pairwise win rate is still shown but does not choose.
-See `docs/HARNESS-TO-PROTOCOL-MAP.md` for the row-by-row status.
+## Safety
+
+- A command (`agent-cli`) candidate runs **on your machine as you** — your
+  files, network and credentials. To run it in a Docker container instead, add
+  `image:` to its `cli:` block; only the work dir is mounted, the network is off
+  unless you set `network:`, and only the variables you list in `env:` are
+  passed in. Every trial records whether it was isolated.
+- Check scripts and `tsc` always run on your machine. Declare only checks you
+  would run yourself.
+- An agent's own spending is invisible to agenteval: it shows as unobserved,
+  and `budget_usd` cannot stop it. Only model candidates and the judge count
+  against the budget.
+- The dashboard listens on 127.0.0.1 only and has no authentication.
+
+## Troubleshooting
+
+| symptom | what to do |
+|---|---|
+| `OPENROUTER_API_KEY is not set` | export it or put it in `./.env.local`; `plan` and `models --catalog-only` need no key |
+| `no spec found for "..."` | you are outside the workspace holding it — `cd` there, pass `--workspace`, or give the task's path |
+| `unknown flag --...` | flags are strict; see `agenteval <command> --help` |
+| a candidate shows `evaluator_error` | your check crashed or exited with something other than 0/1 — the check's fault, not the candidate's |
+| exit code `3` | the run finished but is partial: read its `GAPS.md` |
+| a model fails mid-run | run `agenteval models <task>` after editing candidate ids |
+
+## Development
+
+Working on agenteval itself — architecture, tests, the evidence format — is
+covered in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+## License
+
+[MIT](LICENSE) © 57blocks
