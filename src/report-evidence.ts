@@ -55,7 +55,7 @@ export async function loadRawOutputs(
 }
 
 function winnerChip(winner: Winner, a: string, b: string): string {
-  if (winner === "tie") return `<span class="chip tie">平</span>`;
+  if (winner === "tie") return `<span class="chip tie">tie</span>`;
   const label = winner === "a" ? a : b;
   return `<span class="chip win">${escapeHtml(label)}</span>`;
 }
@@ -68,9 +68,9 @@ function detailRow(
 ): string {
   const disagreed = detail.forward !== detail.reverse;
   const rounds = disagreed
-    ? `<span class="chip warn" title="正反两轮判决相反，按规则记平">正反不一致：${escapeHtml(detail.forward)} / ${escapeHtml(detail.reverse)}</span>`
+    ? `<span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: ${escapeHtml(detail.forward)} / ${escapeHtml(detail.reverse)}</span>`
     : "";
-  const reason = detail.reason ? escapeHtml(detail.reason) : `<span class="muted">裁判未给理由</span>`;
+  const reason = detail.reason ? escapeHtml(detail.reason) : `<span class="muted">the judge gave no reason</span>`;
   return `<tr><th>${escapeHtml(key)}</th><td>${winnerChip(detail.resolved, a, b)} ${rounds}</td><td>${reason}</td></tr>`;
 }
 
@@ -89,11 +89,11 @@ export function renderDuels(rows: readonly EvaluationRow[]): string {
         : Object.entries(row.dimensions ?? {})
             .map(
               ([k, v]) =>
-                `<tr><th>${escapeHtml(k)}</th><td>${winnerChip(v as Winner, a, b)}</td><td><span class="muted">该次运行未记录逐维度理由</span></td></tr>`,
+                `<tr><th>${escapeHtml(k)}</th><td>${winnerChip(v as Winner, a, b)}</td><td><span class="muted">this run did not record per-dimension reasons</span></td></tr>`,
             )
             .join("");
       const calls = row.cost?.calls ?? 0;
-      const retries = calls > 2 ? `<span class="chip warn">${calls} 次调用（含重试）</span>` : "";
+      const retries = calls > 2 ? `<span class="chip warn">${calls} calls (incl. retries)</span>` : "";
       const overall = row.overall === undefined ? "" : winnerChip(row.overall as Winner, a, b);
       return `
       <article class="duel">
@@ -102,7 +102,7 @@ export function renderDuels(rows: readonly EvaluationRow[]): string {
           <span class="muted">${escapeHtml(subject.input)}</span>
           ${overall} ${retries}
         </header>
-        <p class="evidence">${row.evidence ? escapeHtml(row.evidence) : '<span class="muted">裁判未给总体理由</span>'}</p>
+        <p class="evidence">${row.evidence ? escapeHtml(row.evidence) : '<span class="muted">the judge gave no overall reason</span>'}</p>
         <table class="dims"><tbody>${body}</tbody></table>
       </article>`;
     })
@@ -110,14 +110,14 @@ export function renderDuels(rows: readonly EvaluationRow[]): string {
 
   return `
   <section class="card">
-    <h2>对局证据 <span class="hint">每维度独立判决；正反两轮不一致的按规则记平</span></h2>
+    <h2>Match evidence <span class="hint">each dimension judged separately; an order disagreement is recorded as a tie by rule</span></h2>
     ${cards}
   </section>`;
 }
 
 function truncatedChip(trial: TrialRow): string {
   return trial.truncated
-    ? `<span class="chip warn" title="finish_reason=length：输出在上限处被截断">截断</span>`
+    ? `<span class="chip warn" title="finish_reason=length: the output was cut off at the limit">truncated</span>`
     : "";
 }
 
@@ -137,7 +137,7 @@ export function renderTrials(trials: readonly TrialRow[]): string {
     .map((t) => {
       const pairwise = (t.judge?.pairwise ?? [])
         .map((p) => `${escapeHtml(p.resolved)} vs ${escapeHtml(p.vs)}`)
-        .join("；");
+        .join("; ");
       return `<tr>
         <td>${escapeHtml(t.candidate)}</td>
         <td>${escapeHtml(t.input)}</td>
@@ -156,12 +156,12 @@ export function renderTrials(trials: readonly TrialRow[]): string {
 
   return `
   <section class="card">
-    <h2>每次试验 <span class="hint">排名表里的均值就是这些行算出来的</span></h2>
+    <h2>Every trial <span class="hint">the averages in the standings are computed from these rows</span></h2>
     <table>
       <thead><tr>
-        <th>候选</th><th>输入</th><th class="num">次</th><th>完成状态</th><th>任务结果</th>
-        <th class="num">总分</th>${head}<th>成对</th>
-        <th class="num">输出 token</th><th class="num">成本</th><th class="num">耗时</th>
+        <th>Candidate</th><th>Input</th><th class="num">#</th><th>Completion</th><th>Outcome</th>
+        <th class="num">Overall</th>${head}<th>Pairwise</th>
+        <th class="num">Output tokens</th><th class="num">Cost</th><th class="num">Duration</th>
       </tr></thead>
       <tbody>${body}</tbody>
     </table>
@@ -175,14 +175,14 @@ export function renderOutputs(outputs: readonly RawOutput[]): string {
     .map((o) => {
       const title = `${escapeHtml(o.candidate)} · ${escapeHtml(o.input)} · t${o.trial}`;
       if (o.text === null) {
-        return `<details><summary>${title} <span class="muted">— raw/ 里没有这个文件</span></summary></details>`;
+        return `<details><summary>${title} <span class="muted">— this file is not in raw/</span></summary></details>`;
       }
       const cut =
         o.totalChars > o.text.length
-          ? `<p class="muted">仅显示前 ${o.text.length.toLocaleString()} 字符，共 ${o.totalChars.toLocaleString()} 字符；完整内容见 raw/</p>`
+          ? `<p class="muted">Showing the first ${o.text.length.toLocaleString()} of ${o.totalChars.toLocaleString()} characters; the full text is in raw/</p>`
           : "";
       return `<details>
-        <summary>${title} <span class="muted">${o.totalChars.toLocaleString()} 字符</span></summary>
+        <summary>${title} <span class="muted">${o.totalChars.toLocaleString()} characters</span></summary>
         ${cut}<pre class="raw">${escapeHtml(o.text)}</pre>
       </details>`;
     })
@@ -190,7 +190,7 @@ export function renderOutputs(outputs: readonly RawOutput[]): string {
 
   return `
   <section class="card">
-    <h2>候选输出 <span class="hint">裁判看到的就是这些正文</span></h2>
+    <h2>Candidate outputs <span class="hint">exactly the text the judge saw</span></h2>
     ${blocks}
   </section>`;
 }
@@ -238,9 +238,9 @@ export function renderDimensionPreference(evaluations: readonly EvaluationRow[])
     .join("");
 
   return `<figure class="viz">
-    <figcaption>方向 · 成对胜率 0–100 <span class="hint">谁被偏好，tie 记 0.5</span></figcaption>
+    <figcaption>Direction · pairwise win rate 0–100 <span class="hint">who was preferred; a tie counts 0.5</span></figcaption>
     <div class="table-wrap"><table class="pref">
-      <thead><tr><th>候选</th>${head}</tr></thead>
+      <thead><tr><th>Candidate</th>${head}</tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
   </figure>`;

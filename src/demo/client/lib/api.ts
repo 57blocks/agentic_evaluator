@@ -47,9 +47,9 @@ export async function getText(url: string): Promise<string> {
   try {
     res = await fetch(url);
   } catch {
-    throw new Error("连不上看板服务（agenteval dash 还在跑吗？）");
+    throw new Error("Cannot reach the dashboard server (is agenteval dash still running?)");
   }
-  if (res.status === 404) throw new Error("服务器上没有这个文件");
+  if (res.status === 404) throw new Error("That file is not on the server");
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
 }

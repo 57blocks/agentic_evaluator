@@ -14,12 +14,12 @@ export function TrialTable({ rows }: { rows: TrialRow[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>步骤</TableHead>
-            <TableHead>候选</TableHead>
-            <TableHead>输入</TableHead>
-            <TableHead>完成</TableHead>
-            <TableHead>结果</TableHead>
-            <TableHead>说明</TableHead>
+            <TableHead>Step</TableHead>
+            <TableHead>Candidate</TableHead>
+            <TableHead>Input</TableHead>
+            <TableHead>Completion</TableHead>
+            <TableHead>Outcome</TableHead>
+            <TableHead>Note</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -33,7 +33,7 @@ export function TrialTable({ rows }: { rows: TrialRow[] }) {
                 <Tag tone={outcomeTone(r.task_outcome)}>{r.task_outcome}</Tag>
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
-                {(r.outcome_reasons ?? []).join("；")}
+                {(r.outcome_reasons ?? []).join("; ")}
               </TableCell>
             </TableRow>
           ))}

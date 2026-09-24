@@ -53,20 +53,20 @@ function trial(over: Partial<TrialRow> = {}): TrialRow {
 test("a duel card shows the cited rationale and both rounds when they disagree", () => {
   const html = renderDuels([duel]);
   assert.match(html, /B splits FR-7 and FR-8 into T-4 and T-5/);
-  assert.match(html, /正反不一致/, "an order-swap disagreement was rendered as a plain tie");
-  assert.match(html, /3 次调用（含重试）/);
+  assert.match(html, /order disagreement:/, "an order-swap disagreement was rendered as a plain tie");
+  assert.match(html, /3 calls \(incl\. retries\)/);
 });
 
 test("a duel without per-dimension detail says so instead of inventing one", () => {
   const { dimension_detail: _dropped, ...legacy } = duel;
   const html = renderDuels([legacy as EvaluationRow]);
-  assert.match(html, /未记录逐维度理由/);
-  assert.doesNotMatch(html, /正反不一致/);
+  assert.match(html, /did not record per-dimension reasons/);
+  assert.doesNotMatch(html, /order disagreement:/);
 });
 
 test("the trial table flags a truncated completion", () => {
   const html = renderTrials([trial(), trial({ trial: 1, truncated: true, finish_reason: "length" })]);
-  assert.match(html, /截断/);
+  assert.match(html, /truncated/);
   assert.match(html, /loss vs beta/);
 });
 
@@ -92,7 +92,7 @@ test("loadRawOutputs reports a missing raw file instead of throwing", async () =
   const outputs = await loadRawOutputs(dir, [trial(), trial({ candidate: "beta" })]);
   assert.equal(outputs[0].text, "hello");
   assert.equal(outputs[1].text, null);
-  assert.match(renderOutputs(outputs), /raw\/ 里没有这个文件/);
+  assert.match(renderOutputs(outputs), /this file is not in raw\//);
   await fs.rm(dir, { recursive: true, force: true });
 });
 

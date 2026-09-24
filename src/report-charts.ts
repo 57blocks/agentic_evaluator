@@ -92,8 +92,8 @@ export function renderRadar(trials: readonly TrialRow[]): string {
   const spread = judgeDiscrimination(trials);
   if (dims.every((d) => spread.saturated.includes(d))) {
     return `<figure class="viz viz-void">
-    <figcaption>维度轮廓 <span class="hint">未绘制</span></figcaption>
-    <p class="viz-note">每个维度上所有候选得分相同，轮廓会完全重合。绝对打分在这次运行里没有区分度，不画图形以免被读成"势均力敌"。见下方矩阵与 GAPS.md。</p>
+    <figcaption>Dimension profile <span class="hint">not drawn</span></figcaption>
+    <p class="viz-note">Every candidate scored the same on every dimension, so the outlines would overlap exactly. Absolute scoring had no discrimination in this run; no shape is drawn so it is not read as "evenly matched". See the matrix below and GAPS.md.</p>
   </figure>`;
   }
   const series = drawable.slice(0, RADAR_MAX_SERIES);
@@ -138,12 +138,12 @@ export function renderRadar(trials: readonly TrialRow[]): string {
   const legend = series
     .map((p, si) => `<span class="viz-lg">${swatch(si)}${escapeHtml(p.candidate)} · ${p.overall === null ? "—" : p.overall.toFixed(1)}/5</span>`)
     .join("");
-  const note = dropped > 0 ? `<p class="viz-note">另有 ${dropped} 个候选未画：一次最多三条轮廓，更多会读不出形状，精确值见下方矩阵。</p>` : "";
+  const note = dropped > 0 ? `<p class="viz-note">${dropped} more candidate(s) not drawn: at most three outlines at once, more would be unreadable. Exact values are in the matrix below.</p>` : "";
 
   return `<figure class="viz">
-    <figcaption>维度轮廓 <span class="hint">绝对分均值，中心 1 分、外圈 5 分</span></figcaption>
+    <figcaption>Dimension profile <span class="hint">mean absolute score, 1 at the centre, 5 at the rim</span></figcaption>
     <div class="viz-legend">${legend}</div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="各候选的维度得分轮廓">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Each candidate's dimension score profile">
       ${grid}${axes}${marks}
     </svg>${note}
   </figure>`;
@@ -160,7 +160,7 @@ export function renderHeatmap(trials: readonly TrialRow[]): string {
   const head = dims
     .map((d) =>
       flat.has(d)
-        ? `<th class="num viz-flat" title="所有候选同分，无区分度">${escapeHtml(d)} <span class="viz-flag">无区分</span></th>`
+        ? `<th class="num viz-flat" title="Every candidate scored the same; no discrimination">${escapeHtml(d)} <span class="viz-flag">no spread</span></th>`
         : `<th class="num">${escapeHtml(d)}</th>`,
     )
     .join("");
@@ -170,7 +170,7 @@ export function renderHeatmap(trials: readonly TrialRow[]): string {
         .map((d) => {
           const v = p.scores[d];
           if (v === null) {
-            return `<td class="viz-cell viz-none" title="${escapeHtml(d)}：未打分">—</td>`;
+            return `<td class="viz-cell viz-none" title="${escapeHtml(d)}: not scored">—</td>`;
           }
           return `<td class="viz-cell" style="${heatTint(v, SCORE_MIN, SCORE_MAX)}" title="${escapeHtml(p.candidate)} · ${escapeHtml(d)}: ${v.toFixed(1)}/5">${v.toFixed(1)}</td>`;
         })
@@ -184,12 +184,12 @@ export function renderHeatmap(trials: readonly TrialRow[]): string {
     .join("");
 
   return `<figure class="viz">
-    <figcaption>幅度 · 绝对分 1–5 <span class="hint">高于 3 分偏绿、低于 3 分偏红，越远越浓</span></figcaption>
-    <div class="table-wrap"><table class="viz-heat"><thead><tr><th>候选</th>${head}<th class="num">总分</th></tr></thead><tbody>${body}</tbody></table></div>
+    <figcaption>Magnitude · absolute score 1–5 <span class="hint">above 3 leans green, below 3 leans red, stronger the further away</span></figcaption>
+    <div class="table-wrap"><table class="viz-heat"><thead><tr><th>Candidate</th>${head}<th class="num">Overall</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="viz-scale"><span>1</span>${scale}<span>5</span></div>
     ${
       flat.size > 0
-        ? `<p class="viz-note">标注「无区分」的维度上，每个候选拿到的分完全一样——那是打分器没有分辨出差异，不是候选真的相当。这些列不参与推荐。</p>`
+        ? `<p class="viz-note">On dimensions marked "no spread", every candidate got exactly the same score: the scorer did not tell them apart, which is not the same as the candidates being equal. These columns do not count toward the recommendation.</p>`
         : ""
     }
   </figure>`;
@@ -229,9 +229,9 @@ export function renderTrialStrip(trials: readonly TrialRow[]): string {
       const marks = own
         .map((t) => {
           const score = t.judge?.absolute_overall;
-          const state = `${escapeHtml(t.completion_state)}${t.truncated ? " · 截断" : ""}`;
+          const state = `${escapeHtml(t.completion_state)}${t.truncated ? " · truncated" : ""}`;
           if (typeof score !== "number") {
-            return `<text class="viz-miss" x="${left + 6}" y="${cy + 4}">${state}（未打分）</text>`;
+            return `<text class="viz-miss" x="${left + 6}" y="${cy + 4}">${state} (not scored)</text>`;
           }
           const stack = seen.get(score) ?? 0;
           seen.set(score, stack + 1);
@@ -245,8 +245,8 @@ export function renderTrialStrip(trials: readonly TrialRow[]): string {
     .join("");
 
   return `<figure class="viz">
-    <figcaption>每次试验的总分 <span class="hint">一次试验一个点，不取平均；空心点是未正常完成的试验</span></figcaption>
-    <svg viewBox="0 0 ${W} ${order.length * rowH + 28}" width="100%" role="img" aria-label="每个候选每次试验的绝对总分">
+    <figcaption>Overall score per trial <span class="hint">one dot per trial, no averaging; hollow dots are trials that did not complete</span></figcaption>
+    <svg viewBox="0 0 ${W} ${order.length * rowH + 28}" width="100%" role="img" aria-label="Absolute overall score for each candidate's each trial">
       ${ticks}${rows}
     </svg>
   </figure>`;

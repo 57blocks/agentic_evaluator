@@ -56,7 +56,7 @@ test("the radar plots at most three profiles and says what it dropped", () => {
   // Scores differ per candidate: an all-equal grader draws no radar at all.
   const many = ["a1", "a2", "a3", "a4"].map((c, i) => trial(c, 0, { a: 2 + i, b: 4, c: 5 - i }, 4));
   const html = renderRadar(many);
-  assert.match(html, /另有 1 个候选未画/);
+  assert.match(html, /1 more candidate\(s\) not drawn/);
   assert.equal((html.match(/viz-poly/g) ?? []).length, 3);
 });
 
@@ -82,7 +82,7 @@ test("the trial strip marks a truncated or failed trial as not normal", () => {
     trial("beta", 0, null, null, { completion_state: "timeout" }),
   ]);
   assert.match(html, /viz-bad/);
-  assert.match(html, /timeout（未打分）/);
+  assert.match(html, /timeout \(not scored\)/);
 });
 
 test("candidate names are escaped", () => {
@@ -103,7 +103,7 @@ test("a saturated grader gets no radar, only a statement of what happened", () =
 
   // Assert
   assert.doesNotMatch(svg, /<polygon class="viz-poly/, "no outline is drawn");
-  assert.match(svg, /没有区分度/);
+  assert.match(svg, /no discrimination/);
 });
 
 test("the heatmap flags the columns where every candidate scored alike", () => {
@@ -114,6 +114,6 @@ test("the heatmap flags the columns where every candidate scored alike", () => {
 
   const html = renderHeatmap(trials);
 
-  assert.match(html, /completeness <span class="viz-flag">无区分<\/span>/);
+  assert.match(html, /completeness <span class="viz-flag">no spread<\/span>/);
   assert.doesNotMatch(html, /testability <span class="viz-flag">/);
 });

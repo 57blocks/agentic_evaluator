@@ -84,12 +84,12 @@ function Rows({ tasks }: { tasks: TaskView[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="whitespace-nowrap">名称</TableHead>
-          <TableHead className="text-right">步骤</TableHead>
-          <TableHead className="text-right">运行</TableHead>
-          <TableHead className="w-full">最新结论</TableHead>
-          <TableHead className="text-right">花费</TableHead>
-          <TableHead>最近</TableHead>
+          <TableHead className="whitespace-nowrap">Name</TableHead>
+          <TableHead className="text-right">Steps</TableHead>
+          <TableHead className="text-right">Runs</TableHead>
+          <TableHead className="w-full">Latest verdict</TableHead>
+          <TableHead className="text-right">Spend</TableHead>
+          <TableHead>Latest</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -106,10 +106,10 @@ export function TaskList({ tasks }: { tasks: TaskView[] }) {
   const real = tasks.filter((t) => !isSmokeTask(t));
 
   return (
-    <section aria-label="任务" className={cn(SECTION_CARD, "flex flex-col gap-3 border border-border bg-card p-4")}>
-      <h2 className={SECTION_TITLE}>任务（{real.length}）</h2>
+    <section aria-label="Tasks" className={cn(SECTION_CARD, "flex flex-col gap-3 border border-border bg-card p-4")}>
+      <h2 className={SECTION_TITLE}>Tasks ({real.length})</h2>
       {real.length === 0 ? (
-        <p className="text-xs text-muted-foreground">这个工作区还没有任务。</p>
+        <p className="text-xs text-muted-foreground">This workspace has no tasks yet.</p>
       ) : (
         <Rows tasks={real} />
       )}
@@ -117,7 +117,7 @@ export function TaskList({ tasks }: { tasks: TaskView[] }) {
       {smoke.length > 0 && (
         <details className="border border-border">
           <summary className="cursor-pointer px-3 py-2 text-xs text-muted-foreground">
-            {SELF_CHECK} {smoke.length} 个 —— 候选是本地脚本，只验证评测流程能跑通，不说明模型好坏
+            {SELF_CHECK} ({smoke.length}) — the candidates are local scripts; they only prove the pipeline runs, and say nothing about model quality
           </summary>
           <div className="px-3 pb-3">
             <Rows tasks={smoke} />

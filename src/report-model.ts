@@ -28,7 +28,7 @@ import type { RunBundle } from "./report-v2.js";
 import type { WorkflowRecord } from "./canon/workflow.js";
 import { planFromRun, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
-import { NO_PICK, sha8 } from "./report-format.js";
+import { NO_PICK, plural, sha8 } from "./report-format.js";
 import {
   FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, recommendationSentence, type GateRow,
 } from "./report-copy.js";
@@ -166,8 +166,8 @@ export function judgeFavourite(b: RunBundle): JudgeFavourite | null {
 export function verdictFacts(rec: Recommendation, chosenView: CandidateView | undefined): string[] {
   if (!rec.chosen || !chosenView) return [];
   return [
-    chosenView.costPerSuccess !== null ? `每次成功 $${chosenView.costPerSuccess.toFixed(4)}` : null,
-    chosenView.checkExecuted > 0 ? `必过检查 ${chosenView.checkPass}/${chosenView.checkExecuted} 通过` : null,
+    chosenView.costPerSuccess !== null ? `$${chosenView.costPerSuccess.toFixed(4)} per success` : null,
+    chosenView.checkExecuted > 0 ? `required check ${chosenView.checkPass}/${chosenView.checkExecuted} passed` : null,
   ].filter((x): x is string => x !== null);
 }
 
@@ -181,10 +181,10 @@ export function evaluatorErrorSubject(e: EvaluationRow): string {
 export function ledgerNote(led: CostLedger): string {
   const ratio =
     led.generation > 0
-      ? `评估花费是生成的 ${((led.judging + led.scoring + led.retries) / led.generation).toFixed(1)} 倍。`
+      ? `Evaluation spend is ${((led.judging + led.scoring + led.retries) / led.generation).toFixed(1)}× generation spend. `
       : "";
-  const undefinedCps = led.cost_per_success === null ? "没有成功的任务，每次成功成本无定义。" : "";
-  return ratio + undefinedCps;
+  const undefinedCps = led.cost_per_success === null ? "No task succeeded, so cost per success is undefined." : "";
+  return (ratio + undefinedCps).trim();
 }
 
 // ── dimension preference ──────────────────────────────────────────────────
@@ -340,14 +340,14 @@ export function buildStepReport(b: RunBundle): StepReport {
     plan: { candidates: views.length, inputs, trialsPer: m.execution.trials_per_case, trials: b.trials.length },
     tested: planFromRun(b),
     facts: [
-      { label: "规格", value: `${m.spec.path ?? "—"} · sha256 ${sha8(m.spec.sha256)}` },
-      { label: "测试集", value: `${m.test_set.id ?? "—"} · ${inputs} 个输入` },
-      { label: "试验计划", value: `${views.length} 候选 × ${inputs} 输入 × ${m.execution.trials_per_case} 次 = ${b.trials.length}` },
-      { label: "裁判", value: `${m.judge.model} · rubric ${sha8(m.evaluators.rubric_sha256)}` },
-      { label: "模式", value: `${m.execution.benchmark_mode} · ${m.execution.cache_mode} cache` },
-      { label: "运行时间", value: `${m.started_at.slice(0, 16).replace("T", " ")} → ${(m.finished_at ?? "").slice(11, 16)}` },
-      { label: "运行模式", value: `${modeLabel(m.operating_mode)} · ${FIRMNESS_LABEL[rec.firmness]}${rec.chosen ? ` · 推荐 ${rec.chosen}` : ` · ${NO_PICK}`}` },
-      { label: "选择规则", value: rec.rule_version },
+      { label: "Spec", value: `${m.spec.path ?? "—"} · sha256 ${sha8(m.spec.sha256)}` },
+      { label: "Test set", value: `${m.test_set.id ?? "—"} · ${inputs} input(s)` },
+      { label: "Trial plan", value: `${plural(views.length, "candidate")} × ${plural(inputs, "input")} × ${plural(m.execution.trials_per_case, "trial")} = ${b.trials.length}` },
+      { label: "Judge", value: `${m.judge.model} · rubric ${sha8(m.evaluators.rubric_sha256)}` },
+      { label: "Mode", value: `${m.execution.benchmark_mode} · ${m.execution.cache_mode} cache` },
+      { label: "Run time", value: `${m.started_at.slice(0, 16).replace("T", " ")} → ${(m.finished_at ?? "").slice(11, 16)}` },
+      { label: "Operating mode", value: `${modeLabel(m.operating_mode)} · ${FIRMNESS_LABEL[rec.firmness]}${rec.chosen ? ` · recommend ${rec.chosen}` : ` · ${NO_PICK}`}` },
+      { label: "Selection rule", value: rec.rule_version },
       { label: "harness", value: `${m.harness.version} · ${m.harness.git_sha ?? "—"}` },
     ],
     verdict: {
@@ -411,16 +411,16 @@ export function workflowVerdictTone(v: E2eValidation | null): "firm" | "needs-re
 }
 
 export function workflowVerdictLine(v: E2eValidation): string {
-  if (v.verdict === "adopt-combination") return "提议的组合通过端到端验证，可以采纳。";
-  if (v.verdict === "keep-control") return "提议的组合没有在声明的最小有意义差异上胜过单模型对照，保留对照。";
-  return "本次运行不足以对组合下结论。";
+  if (v.verdict === "adopt-combination") return "The proposed combination passed end-to-end validation and can be adopted.";
+  if (v.verdict === "keep-control") return "The proposed combination did not beat the single-model control by the declared minimum meaningful difference, so the control is kept.";
+  return "This run is not enough to conclude on the combination.";
 }
 
 /** Said when there is no §8 verdict, which depends on whether steps were chained. */
 export function workflowNoVerdictLine(handoff: boolean): string {
   return handoff
-    ? "链上跑了端到端，但没有写出验证判决。"
-    : "各 step 相互独立（没有 input_from），没有组装工作流，也没有做端到端比较。";
+    ? "The chain ran end to end, but no validation verdict was written."
+    : "The steps are independent (no input_from): no workflow was assembled and no end-to-end comparison was made.";
 }
 
 export interface WorkflowReport {

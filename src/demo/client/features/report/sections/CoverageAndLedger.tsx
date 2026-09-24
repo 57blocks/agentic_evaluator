@@ -14,15 +14,15 @@ import { Code, Note, Section } from "../Section";
 function Evaluators({ coverage, evaluatorErrors }: Pick<StepReport, "coverage" | "evaluatorErrors">) {
   const problems = coverage.some((c) => c.not_evaluated + c.evaluator_error > 0);
   return (
-    <Section title="评估器状态" hint="评估器自己有没有跑成功。出错的不算候选失败，只会让分母变小。">
+    <Section title="Evaluator status" hint="Whether the evaluators themselves ran. An evaluator error is not a candidate failure; it only shrinks the denominator.">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>评估器</TableHead>
-            <TableHead className="text-right">通过</TableHead>
-            <TableHead className="text-right">未通过</TableHead>
-            <TableHead className="text-right">未评估</TableHead>
-            <TableHead className="text-right">出错</TableHead>
+            <TableHead>Evaluator</TableHead>
+            <TableHead className="text-right">Pass</TableHead>
+            <TableHead className="text-right">Fail</TableHead>
+            <TableHead className="text-right">Not evaluated</TableHead>
+            <TableHead className="text-right">Error</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -45,25 +45,25 @@ function Evaluators({ coverage, evaluatorErrors }: Pick<StepReport, "coverage" |
       {evaluatorErrors.length > 0 && (
         <ul className="flex flex-col gap-1 text-xs text-muted-foreground">
           {evaluatorErrors.map((e, i) => (
-            <li key={i}><Code>{e.evaluator}</Code> {e.subject}：{e.reason}</li>
+            <li key={i}><Code>{e.evaluator}</Code> {e.subject}: {e.reason}</li>
           ))}
         </ul>
       )}
-      {!problems && <Note>所有评估都正常执行了。</Note>}
+      {!problems && <Note>Every evaluation ran normally.</Note>}
     </Section>
   );
 }
 
 function Ledger({ ledger, ledgerNote, trialCount }: Pick<StepReport, "ledger" | "ledgerNote" | "trialCount">) {
   const rows: Array<[string, number]> = [
-    [`候选生成（${trialCount} 次）`, ledger.generation],
-    ["成对裁判", ledger.judging],
-    ["绝对打分", ledger.scoring],
-    ["确定性检查", ledger.checks],
-    ["重试", ledger.retries],
+    [`Candidate generation (${trialCount} trials)`, ledger.generation],
+    ["Pairwise judging", ledger.judging],
+    ["Absolute scoring", ledger.scoring],
+    ["Deterministic checks", ledger.checks],
+    ["Retries", ledger.retries],
   ];
   return (
-    <Section title="花费" hint={`数据来源：${ledger.source}`}>
+    <Section title="Spend" hint={`Source: ${ledger.source}`}>
       <Table>
         <TableBody>
           {rows.map(([label, value]) => (
@@ -73,11 +73,11 @@ function Ledger({ ledger, ledgerNote, trialCount }: Pick<StepReport, "ledger" | 
             </TableRow>
           ))}
           <TableRow className="font-semibold">
-            <TableCell>合计</TableCell>
+            <TableCell>Total</TableCell>
             <TableCell className="text-right font-mono">{fmtUsd(ledger.total)}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="text-muted-foreground">每次成功（含评估）</TableCell>
+            <TableCell className="text-muted-foreground">Per success (incl. evaluation)</TableCell>
             <TableCell className="text-right font-mono">{fmtUsd(ledger.cost_per_success)}</TableCell>
           </TableRow>
         </TableBody>

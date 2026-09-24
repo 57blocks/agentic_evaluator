@@ -99,10 +99,10 @@ function judgeVsChecks(steps: readonly WorkflowStep[]): Finding[] {
     const chosen = r.verdict.chosen;
     return [{
       tag: s.id,
-      title: `裁判最偏好 ${fav.candidate}，但它的必过检查只通过 ${pct(row.checkPass, row.checkExecuted)}`,
-      body: `${fav.candidate} 在 ${s.id} 拿到了最高的裁判胜率（${fav.wins} 胜 ${fav.losses} 负 ${fav.ties} 平），`
-        + `可是必过检查 ${row.checkPass}/${row.checkExecuted} 通过——裁判被看起来好的输出带偏了。`
-        + (chosen ? `这一步按检查推荐 ${chosen}。` : "这一步没有候选通过全部门槛。"),
+      title: `The judge preferred ${fav.candidate} most, but it passed only ${pct(row.checkPass, row.checkExecuted)} of required checks`,
+      body: `${fav.candidate} had the highest judge win rate on ${s.id} (${fav.wins} W ${fav.losses} L ${fav.ties} T), `
+        + `yet passed ${row.checkPass}/${row.checkExecuted} required checks — the judge was swayed by output that looked good. `
+        + (chosen ? `By the checks, this step recommends ${chosen}.` : "No candidate on this step passes every gate."),
     }];
   });
 }
@@ -118,12 +118,12 @@ function unreliable(steps: readonly WorkflowStep[]): Finding[] {
     }
   }
   return [...byCandidate.entries()].map(([candidate, hits]) => {
-    const where = hits.map((h) => `${h.step} ${pct(h.row.completed.ok, h.row.completed.total)}`).join("、");
+    const where = hits.map((h) => `${h.step} ${pct(h.row.completed.ok, h.row.completed.total)}`).join(", ");
     const why = [...new Set(hits.flatMap((h) => h.row.states.filter(([st]) => st !== "success").map(([st]) => st)))];
     return {
-      tag: "可靠性",
-      title: `${candidate} 有 ${hits.length} 个步骤没能每次正常完成`,
-      body: `正常完成率：${where}。没完成的原因：${why.join("、")}。它在这些步骤的胜率和分数，是在缩水的样本上算的。`,
+      tag: "Reliability",
+      title: `${candidate} did not complete every time on ${hits.length} step(s)`,
+      body: `Completion rate: ${where}. Reasons for not completing: ${why.join(", ")}. Its win rates and scores on these steps are computed on a shrunken sample.`,
     };
   });
 }
@@ -139,10 +139,10 @@ function sameVendor(steps: readonly WorkflowStep[], judge: string | null, candid
       .map((s) => s.id);
     if (favoured.length === 0) return [];
     return [{
-      tag: "偏置",
-      title: `${c.id} 和裁判同属 ${jv}`,
-      body: `裁判是 ${judge}，${c.id}（${c.model}）也来自 ${jv}，而它在 ${favoured.join("、")} 是裁判最偏好的候选——`
-        + "这可能是同门偏好。建议换一个其他厂商的裁判复评这几步。",
+      tag: "Bias",
+      title: `${c.id} and the judge are both from ${jv}`,
+      body: `The judge is ${judge}, ${c.id} (${c.model}) is also from ${jv}, and it is the judge's favourite on ${favoured.join(", ")} — `
+        + "this may be same-vendor preference. Re-judge these steps with a judge from another vendor.",
     }];
   });
 }
@@ -154,10 +154,10 @@ function thinSample(steps: readonly WorkflowStep[]): Finding[] {
   const inputs = thin.map((s) => s.report!.plan.inputs);
   const few = Math.max(...inputs);
   return [{
-    tag: "样本",
-    title: thin.length === steps.length ? "所有步骤的结论都只能作方向参考" : `${thin.length} 个步骤的结论只能作方向参考`,
-    body: `${thin.map((s) => s.id).join("、")} 每步最多 ${few} 个输入，少于判定所需的 10 个，或者规格没有声明最小有意义差异。`
-      + "加输入、声明最小有意义差异之后，结论才能变成「结论可靠」。",
+    tag: "Sample",
+    title: thin.length === steps.length ? "Every step's result is directional only" : `${thin.length} step(s) have directional results only`,
+    body: `${thin.map((s) => s.id).join(", ")}: at most ${few} input(s) per step, fewer than the 10 a decision needs, or the spec declares no minimum meaningful difference. `
+      + "Add inputs and declare a minimum meaningful difference before a result can become firm.",
   }];
 }
 
@@ -174,14 +174,14 @@ export function workflowFindings(
 
 function headlineOf(steps: readonly WorkflowStep[]): string {
   const read = steps.filter((s) => s.report);
-  const picks = read.map((s) => `${s.id} → ${s.report!.verdict.chosen ?? NO_PICK}`).join("，");
+  const picks = read.map((s) => `${s.id} → ${s.report!.verdict.chosen ?? NO_PICK}`).join(", ");
   const open = read.filter((s) => !s.report!.verdict.chosen).length;
   const missing = steps.length - read.length;
   const tail = [
-    open > 0 ? `${open} 个步骤没有可推荐的候选，需要人工判断` : "",
-    missing > 0 ? `${missing} 个步骤的报告读不出来` : "",
-  ].filter(Boolean).join("；");
-  return `每一步的推荐：${picks}。${tail ? `${tail}。` : ""}`;
+    open > 0 ? `${open} step(s) have no candidate to recommend and need review` : "",
+    missing > 0 ? `${missing} step report(s) could not be read` : "",
+  ].filter(Boolean).join("; ");
+  return `Recommendation per step: ${picks}.${tail ? ` ${tail}.` : ""}`;
 }
 
 // ── assemble ─────────────────────────────────────────────────────────────────
@@ -195,7 +195,7 @@ export async function buildWorkflowDigest(root: string, record: WorkflowRecord):
   const candidates = [...seen.entries()].map(([id, model], i) => ({ id, model, colorIndex: i }));
 
   const firstReport = steps.find((s) => s.report)?.report ?? null;
-  const judge = firstReport?.facts.find((f) => f.label === "裁判")?.value.split(" · ")[0] ?? null;
+  const judge = firstReport?.facts.find((f) => f.label === "Judge")?.value.split(" · ")[0] ?? null;
 
   return {
     steps,

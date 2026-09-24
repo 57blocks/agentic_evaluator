@@ -102,7 +102,7 @@ export function useRun(task: string, onFinished: () => void): Run {
       if (res.status === 409 && res.body.ack) {
         // The plan moved under us. Show the new numbers; do not start.
         setPlanned({ plan: planned.plan, ack: res.body.ack });
-        throw new Error(`${res.body.error} — 数字已更新，请再看一遍`);
+        throw new Error(`${res.body.error} — the numbers have changed, please review them again`);
       }
       if (!res.ok) throw new Error(res.body.error ?? `HTTP ${res.status}`);
       setHandle(res.body);

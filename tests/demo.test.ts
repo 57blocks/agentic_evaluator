@@ -188,7 +188,7 @@ test("the nav labels a step with no eligible candidate as needing human review",
               gated: [], operatingMode: null, ledgerTotal: null, reportHref: null }],
   } as unknown as RunView;
 
-  assert.match(runMeta(run), /没选出推荐/);
+  assert.match(runMeta(run), /no recommendation/i);
 });
 
 test("a task row states its spend against budget and calls out an overrun", () => {
@@ -199,11 +199,11 @@ test("a task row states its spend against budget and calls out an overrun", () =
 
   const over = spendLabel({ ...base, budgetUsd: 3, spentUsd: 3.96 } as TaskView);
   assert.equal(over?.over, true);
-  assert.match(over?.text ?? "", /超支/);
+  assert.match(over?.text ?? "", /over budget/);
 
   const under = spendLabel({ ...base, budgetUsd: 3, spentUsd: 1.5 } as TaskView);
   assert.equal(under?.over, false);
-  assert.doesNotMatch(under?.text ?? "", /超支/);
+  assert.doesNotMatch(under?.text ?? "", /over budget/);
 
   // Never run: no spend line at all, rather than a misleading $0.
   assert.equal(spendLabel({ ...base, budgetUsd: 3, spentUsd: null } as TaskView), null);

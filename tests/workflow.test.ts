@@ -154,7 +154,7 @@ test("page renders independent steps without claiming a workflow was validated",
 
   assert.match(html, /no-validation/);
   assert.doesNotMatch(html, /adopt-combination/);
-  assert.doesNotMatch(html, /工作流数/, "no arm table when no arm ran");
+  assert.doesNotMatch(html, /<th class="num">Workflows<\/th>/, "no arm table when no arm ran");
 });
 
 test("a step with no eligible candidate is marked, not blank", () => {
@@ -168,5 +168,5 @@ test("a step with no eligible candidate is marked, not blank", () => {
     validation: null,
   });
 
-  assert.match(renderWorkflowReport(record, ""), /无人合格/);
+  assert.match(renderWorkflowReport(record, ""), /no recommendation/);
 });

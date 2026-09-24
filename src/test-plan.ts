@@ -64,25 +64,25 @@ export interface TestPlan {
 // ── words ────────────────────────────────────────────────────────────────────
 
 const PRODUCER: Record<string, string> = {
-  prompt: "模型直接回答输入里的任务",
-  codegen: "模型按输入写出代码文件",
-  agent: "命令行 agent 在独立的工作目录里完成任务",
+  prompt: "the model answers the task in the input directly",
+  codegen: "the model writes code files from the input",
+  agent: "a command-line agent does the task in its own work dir",
 };
 
 const METHOD: Record<string, string> = {
-  "pairwise-swap": "两两对比（正反各判一次）",
-  "absolute-1-5": "逐份打分 1–5",
+  "pairwise-swap": "pairwise (judged once in each order)",
+  "absolute-1-5": "each output scored 1–5",
 };
 
 /** How a candidate is called. */
 export function candidateVia(def: CandidateDef | undefined): string {
   if (!def) return "—";
   if (def.adapter === "agent-cli" || def.cli) {
-    return def.cli?.image ? `命令行 agent，在 docker（${def.cli.image}）里隔离运行` : "命令行 agent，直接在本机运行";
+    return def.cli?.image ? `command-line agent, isolated in docker (${def.cli.image})` : "command-line agent, run directly on this machine";
   }
-  const route = def.provider_route ? `经 ${def.provider_route} 调用` : "调用模型 API";
+  const route = def.provider_route ? `called via ${def.provider_route}` : "calls the model API";
   const temp = def.generation_settings?.temperature;
-  return temp === undefined ? route : `${route}，temperature ${temp}`;
+  return temp === undefined ? route : `${route}, temperature ${temp}`;
 }
 
 function candidateModel(def: CandidateDef | undefined, id: string): string {
@@ -104,8 +104,8 @@ export function inputTitle(text: string): string {
 function checkHow(suite: Suite): Array<{ id: string; how: string }> {
   const c = suite.check;
   if (!c) return (suite.requiredChecks ?? []).map((id) => ({ id, how: "—" }));
-  if (c.kind === "tsc") return [{ id: c.id, how: `用 tsc --noEmit 编译候选写出的文件（配置取自 ${c.scaffoldDir}/）` }];
-  return [{ id: c.id, how: `在试验目录里运行 ${c.argv.join(" ")}，${Math.round(c.timeoutMs / 1000)} 秒超时` }];
+  if (c.kind === "tsc") return [{ id: c.id, how: `compile the candidate's files with tsc --noEmit (config from ${c.scaffoldDir}/)` }];
+  return [{ id: c.id, how: `run ${c.argv.join(" ")} in the trial dir, ${Math.round(c.timeoutMs / 1000)} s timeout` }];
 }
 
 // ── from the spec ────────────────────────────────────────────────────────────
@@ -190,7 +190,7 @@ export function planFromRun(b: RunBundle): PlanStep {
     trials,
     checks: m.evaluators.required_checks.map((id) => ({
       id,
-      how: m.evaluators.check_version ? `版本 ${m.evaluators.check_version}` : "—",
+      how: m.evaluators.check_version ? `version ${m.evaluators.check_version}` : "—",
     })),
     gates: gateLabels(rec.eligibility, m.evaluators.required_checks, m.operating_mode),
     mode: { id: m.operating_mode ?? null, label: modeLabel(m.operating_mode), explain: modeExplain(m.operating_mode) },

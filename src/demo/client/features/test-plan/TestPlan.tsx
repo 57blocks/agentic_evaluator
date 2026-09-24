@@ -46,7 +46,7 @@ function Candidates({ step }: { step: PlanStep }) {
         <li key={c.id} className="flex min-w-0 flex-col">
           <span className="flex flex-wrap items-center gap-1.5">
             <span className="font-mono font-medium">{c.id}</span>
-            {c.isControl && <Tag tone="neutral">对照</Tag>}
+            {c.isControl && <Tag tone="neutral">control</Tag>}
             <span className="font-mono text-muted-foreground">{c.model}</span>
           </span>
           <span className="text-[11px] break-all text-muted-foreground">{c.via}</span>
@@ -60,11 +60,11 @@ function Checks({ step }: { step: PlanStep }) {
   if (step.checks.length === 0) {
     return step.mode.id === "judge-preference" ? (
       <p className="text-muted-foreground">
-        这一步没有确定性检查，做得好不好只由裁判判断，所以结论最多「仅供参考」。
+        This step has no deterministic check; quality is judged by the judge alone, so the verdict is at most "directional".
       </p>
     ) : (
       <p className="text-bad">
-        没有必过检查——任务做没做对无法判定，候选不能凭结果通过门槛。
+        No required check: whether the task was done right cannot be decided, so no candidate can pass the gates on outcome.
       </p>
     );
   }
@@ -76,7 +76,7 @@ function Checks({ step }: { step: PlanStep }) {
           <span className="text-muted-foreground"> · {c.how}</span>
         </li>
       ))}
-      <li className="text-muted-foreground">每次试验都要通过它，才算这次任务成功。</li>
+      <li className="text-muted-foreground">A trial counts as a task success only if it passes this.</li>
     </ul>
   );
 }
@@ -85,11 +85,11 @@ function Scale({ step }: { step: PlanStep }) {
   const { generations, judgeCalls, scoreCalls } = step.scale;
   return (
     <p>
-      {step.candidates.length} 个候选 × {step.inputs.length} 个输入 × 每组 {step.trials} 次 ={" "}
-      <b>{generations} 次生成</b>
+      {step.candidates.length} candidate(s) × {step.inputs.length} input(s) × {step.trials} trial(s) each ={" "}
+      <b>{generations} generation(s)</b>
       <span className="text-muted-foreground">
-        {judgeCalls > 0 && ` · 裁判 ${judgeCalls} 次`}
-        {scoreCalls > 0 && ` · 打分 ${scoreCalls} 次`}
+        {judgeCalls > 0 && ` · ${judgeCalls} judge call(s)`}
+        {scoreCalls > 0 && ` · ${scoreCalls} score call(s)`}
       </span>
     </p>
   );
@@ -99,36 +99,36 @@ export function PlanStepCard({ step, title }: { step: PlanStep; title?: string }
   return (
     <Card className={SECTION_CARD}>
       <CardHeader>
-        <CardTitle className={SECTION_TITLE}>{title ?? `步骤 ${step.id}`}</CardTitle>
+        <CardTitle className={SECTION_TITLE}>{title ?? `Step ${step.id}`}</CardTitle>
         {(step.task || step.inputFrom) && (
           <CardDescription>
             {step.task}
-            {step.inputFrom && `${step.task ? "；" : ""}输入来自上一步 ${step.inputFrom} 的输出`}
+            {step.inputFrom && `${step.task ? "; " : ""}input is the output of the previous step ${step.inputFrom}`}
           </CardDescription>
         )}
       </CardHeader>
       <CardContent className="flex flex-col">
-        <Row label="测试输入" hint={`${step.inputs.length} 个`}><Inputs step={step} /></Row>
-        <Row label="参赛候选" hint={`${step.candidates.length} 个`}><Candidates step={step} /></Row>
-        <Row label="怎么判对错" hint="必过检查"><Checks step={step} /></Row>
-        <Row label="门槛" hint="不满足就淘汰">
+        <Row label="Test inputs" hint={`${step.inputs.length}`}><Inputs step={step} /></Row>
+        <Row label="Candidates" hint={`${step.candidates.length}`}><Candidates step={step} /></Row>
+        <Row label="How success is decided" hint="required check"><Checks step={step} /></Row>
+        <Row label="Eligibility gates" hint="fail one and you are out">
           {step.gates.length === 0 ? (
-            <p className="text-muted-foreground">没有声明门槛，所有候选都参与选择。</p>
+            <p className="text-muted-foreground">No gates declared; every candidate takes part in the choice.</p>
           ) : (
             <ul className="flex list-disc flex-col gap-0.5 pl-4">{step.gates.map((g) => <li key={g}>{g}</li>)}</ul>
           )}
         </Row>
-        <Row label="怎么选" hint="运行模式">
+        <Row label="How the pick is made" hint="operating mode">
           <p><b>{step.mode.label}</b><span className="text-muted-foreground"> · {step.mode.explain}</span></p>
           <p className="text-muted-foreground">
-            最小有意义差异：{step.mmd === null ? "未声明——差距再小也算数，结论最多「仅供参考」" : step.mmd}
+            Minimum meaningful difference: {step.mmd === null ? "not declared: any gap counts, so the verdict is at most \"directional\"" : step.mmd}
           </p>
         </Row>
         {step.judge && (
-          <Row label="裁判" hint="只作参考，不参与推荐">
+          <Row label="Judge" hint="for reference only; does not decide the recommendation">
             <p>
               <span className="font-mono">{step.judge.model}</span>
-              <span className="text-muted-foreground"> · {step.judge.methods.join("，")}</span>
+              <span className="text-muted-foreground"> · {step.judge.methods.join(", ")}</span>
             </p>
             {step.judge.dimensions.length > 0 && (
               <p className="flex flex-wrap gap-1">
@@ -137,7 +137,7 @@ export function PlanStepCard({ step, title }: { step: PlanStep; title?: string }
             )}
           </Row>
         )}
-        <Row label="规模"><Scale step={step} /></Row>
+        <Row label="Scale"><Scale step={step} /></Row>
       </CardContent>
     </Card>
   );
@@ -148,9 +148,9 @@ export function TestPlan({ plan }: { plan: Plan }) {
     <div className="flex flex-col gap-3">
       {(plan.chain || plan.budgetUsd !== null) && (
         <p className="text-xs text-muted-foreground">
-          {plan.chain && <>链路：<span className="font-mono">{plan.chain.join(" → ")}</span>，前一步的输出交给下一步，另外会端到端跑整条链做验证。</>}
+          {plan.chain && <>Chain: <span className="font-mono">{plan.chain.join(" → ")}</span>. Each step's output feeds the next, and the whole chain is also run end to end for validation.</>}
           {plan.chain && plan.budgetUsd !== null && " "}
-          {plan.budgetUsd !== null && <>整个任务的花费上限 <b className="text-foreground">${plan.budgetUsd}</b>，花到顶就停。</>}
+          {plan.budgetUsd !== null && <>Spend cap for the whole task: <b className="text-foreground">${plan.budgetUsd}</b>; the run stops when it is reached.</>}
         </p>
       )}
       {plan.steps.map((s) => <PlanStepCard key={s.id} step={s} />)}

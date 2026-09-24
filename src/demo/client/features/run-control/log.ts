@@ -12,43 +12,43 @@ import type { RunEvent } from "../../../../core/events.js";
 export function eventLine(event: RunEvent): string {
   switch (event.type) {
     case "step.planned":
-      return `▶ ${event.plan.step} — ${event.plan.generations} 次生成`;
+      return `▶ ${event.plan.step} — ${event.plan.generations} generation(s)`;
     case "phase":
-      return `▶ ${event.phase}${event.declared ? "" : " — 规格里没声明，不跑"}`;
+      return `▶ ${event.phase}${event.declared ? "" : " — not declared in the spec, skipped"}`;
     case "trial":
       return trialLine(event);
     case "judge":
-      return `  裁判 ${event.a} vs ${event.b} · ${event.input}${event.ok ? "" : ` — 失败: ${event.error ?? ""}`}`;
+      return `  judge ${event.a} vs ${event.b} · ${event.input}${event.ok ? "" : ` — failed: ${event.error ?? ""}`}`;
     case "score":
-      return `  打分 ${event.candidate} · ${event.input} · t${event.trial}${event.ok ? "" : ` — 失败: ${event.error ?? ""}`}`;
+      return `  score ${event.candidate} · ${event.input} · t${event.trial}${event.ok ? "" : ` — failed: ${event.error ?? ""}`}`;
     case "budget.stopped":
-      return `⚠ 预算到顶，已花 $${event.spentUsd.toFixed(4)}，本次运行不完整`;
+      return `⚠ Budget reached at $${event.spentUsd.toFixed(4)}; this run is incomplete`;
     case "run.cancelled":
-      return `⚠ 已取消：${event.step} 已派出 ${event.dispatched} 次，${event.skipped} 次没轮到`;
+      return `⚠ Cancelled: ${event.step} dispatched ${event.dispatched}, ${event.skipped} never started`;
     case "integrity.gaps":
-      return `⚠ trace 里有 ${event.gaps} 段长空档，本次耗时不可信`;
+      return `⚠ The trace has ${event.gaps} long gap(s); this run's durations are unreliable`;
     case "step.done":
-      return `✔ ${event.step} — ${event.trials} 次试验，账本 $${event.ledgerTotal.toFixed(4)}，推荐 ${event.chosen ?? "无"}（${event.firmness}）`;
+      return `✔ ${event.step} — ${event.trials} trial(s), ledger $${event.ledgerTotal.toFixed(4)}, recommended ${event.chosen ?? "none"} (${event.firmness})`;
     case "e2e.arm.start":
       return `▶ ${event.armId}`;
     case "e2e.arm.done":
-      return `✔ ${event.armId}: ${event.success} 成功 / ${event.failure} 失败 / ${event.undetermined} 未判定`;
+      return `✔ ${event.armId}: ${event.success} success / ${event.failure} failure / ${event.undetermined} undetermined`;
     case "e2e.validated":
-      return `✔ 端到端验证：${event.verdict}（${event.firmness}）— ${event.reason}`;
+      return `✔ End-to-end validation: ${event.verdict} (${event.firmness}) — ${event.reason}`;
     case "run.done":
-      return `✔ 完成 — 合计 $${event.totalUsd.toFixed(4)}`;
+      return `✔ Done — total $${event.totalUsd.toFixed(4)}`;
     case "preview.only":
-      return "仅预览。";
+      return "Preview only.";
     case "workflow.planned":
-      return `▶ 端到端：${event.e2e.chain.join(" → ")}，每臂 ${event.e2e.perArm} 次生成`;
+      return `▶ End to end: ${event.e2e.chain.join(" → ")}, ${event.e2e.perArm} generation(s) per arm`;
   }
 }
 
 function trialLine(event: Extract<RunEvent, { type: "trial" }>): string {
   const who = `${event.candidate} · ${event.input} · t${event.trial}`;
-  if (event.reusedFrom) return `  复用 ${who}`;
-  if (event.state === "skipped") return `  跳过 ${who} — 预算到顶`;
-  const check = event.check ? ` · 检查 ${event.check}` : "";
+  if (event.reusedFrom) return `  reused ${who}`;
+  if (event.state === "skipped") return `  skipped ${who} — budget reached`;
+  const check = event.check ? ` · check ${event.check}` : "";
   const error = event.error ? `: ${event.error}` : "";
   return `  ${event.state} ${who}${check}${error}`;
 }

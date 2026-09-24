@@ -21,11 +21,11 @@ function useFileText(task: string, rel: string | undefined): string {
       return;
     }
     let live = true;
-    setText("载入中…");
+    setText("Loading…");
     getText(taskFileUrl(task, rel))
       .then((t) => live && setText(t))
       .catch((e: unknown) => {
-        if (live) setText(`读不到 ${rel} —— ${e instanceof Error ? e.message : String(e)}`);
+        if (live) setText(`Cannot read ${rel} — ${e instanceof Error ? e.message : String(e)}`);
       });
     return () => {
       live = false;

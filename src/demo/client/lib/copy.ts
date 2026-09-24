@@ -11,4 +11,4 @@
 export { NO_PICK as NEEDS_REVIEW, SELF_CHECK } from "../../../report-format.js";
 
 /** A task that is defined but has never been run. */
-export const NEVER_RAN = "未跑过";
+export const NEVER_RAN = "never run";

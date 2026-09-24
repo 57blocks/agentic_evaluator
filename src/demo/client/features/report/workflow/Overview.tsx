@@ -1,7 +1,7 @@
 /**
  * Candidates × steps. Each cell is that candidate's pairwise win rate on that
  * step (tinted: stronger green above 50, red below) with its mean absolute
- * score underneath. ⬢ marks the judge's favourite on the step; 推荐 marks the
+ * score underneath. ⬢ marks the judge's favourite on the step; "Recommended" marks the
  * selector's choice — the two are not the same thing and the grid shows both.
  */
 
@@ -25,22 +25,22 @@ function Cell({ step, candidate }: { step: WorkflowStep; candidate: string }) {
     <td className="border border-border px-3 py-2 text-center" style={tintStyle(row.winRate, 0, 100)}>
       <div className="flex items-center justify-center gap-1 font-mono text-sm font-semibold">
         {fmtPct(row.winRate)}
-        {fav && <span title="该步裁判最偏好">⬢</span>}
+        {fav && <span title="The judge's favourite on this step">⬢</span>}
       </div>
       <div className="font-mono text-[11px] text-muted-foreground">{fmtScore(row.absolute)}</div>
-      {row.chosen && <Badge className="mt-1">推荐</Badge>}
+      {row.chosen && <Badge className="mt-1">Recommended</Badge>}
     </td>
   );
 }
 
 export function Overview({ steps, candidates }: { steps: WorkflowStep[]; candidates: CandidateMeta[] }) {
   return (
-    <Section title="全局总览" hint={`${candidates.length} 个候选 × ${steps.length} 个步骤`}>
+    <Section title="Overview" hint={`${candidates.length} candidates × ${steps.length} steps`}>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-xs">
           <thead>
             <tr>
-              <th className="px-3 py-2 text-left font-medium text-muted-foreground">候选</th>
+              <th className="px-3 py-2 text-left font-medium text-muted-foreground">Candidate</th>
               {steps.map((s, i) => (
                 <th key={s.id} className="px-3 py-2 text-center font-medium text-muted-foreground">
                   {i + 1} · {s.id}
@@ -64,8 +64,8 @@ export function Overview({ steps, candidates }: { steps: WorkflowStep[]; candida
         </table>
       </div>
       <Note>
-        大字是成对胜率（平局算半场），小字是绝对分 /5。胜率只说明谁更受裁判偏好，样本少时波动大；
-        绝对分才看质量差多少。⬢ 是该步裁判最偏好的候选，「推荐」是选择器按门槛和运行模式选出的。
+        The large number is the pairwise win rate (a tie counts as half); the small one is the absolute score out of 5. Win rate only shows who the judge prefers and swings widely on small samples;
+         the absolute score shows how far apart the quality is. ⬢ is the judge's favourite on the step; "Recommended" is what the selector chose by eligibility gates and operating mode.
       </Note>
     </Section>
   );

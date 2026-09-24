@@ -9,7 +9,7 @@ import type { Winner } from "../../../../../types.js";
 import { Tag } from "../Section";
 
 function Pick({ winner, a, b }: { winner: Winner; a: string; b: string }) {
-  if (winner === "tie") return <Tag tone="neutral">平</Tag>;
+  if (winner === "tie") return <Tag tone="neutral">Tie</Tag>;
   return <Tag tone="ok" className="font-mono">{winner === "a" ? a : b}</Tag>;
 }
 
@@ -33,9 +33,9 @@ function Dimensions({ row, a, b }: { row: EvaluationRow; a: string; b: string })
             <th className="w-px py-1.5 pr-4 text-left align-top text-xs font-medium whitespace-nowrap text-muted-foreground">{key}</th>
             <td className="w-px py-1.5 pr-3 align-top whitespace-nowrap">
               <Pick winner={d.resolved} a={a} b={b} />
-              {d.forward !== d.reverse && <Tag tone="warn" className="ml-1">两轮不一致</Tag>}
+              {d.forward !== d.reverse && <Tag tone="warn" className="ml-1">Orderings disagree</Tag>}
             </td>
-            <td className="py-1.5 align-top text-xs">{d.reason || <span className="text-muted-foreground">没有给理由</span>}</td>
+            <td className="py-1.5 align-top text-xs">{d.reason || <span className="text-muted-foreground">No reason given</span>}</td>
           </tr>
         ))}
       </tbody>
@@ -54,9 +54,9 @@ function Duel({ row }: { row: EvaluationRow }) {
         <span className="text-muted-foreground">vs</span>
         <span className="font-mono font-semibold">{b}</span>
         <span className="text-xs text-muted-foreground">· {input}</span>
-        {row.overall !== undefined && <><span className="text-xs text-muted-foreground">胜者</span><Pick winner={row.overall as Winner} a={a} b={b} /></>}
-        {row.state !== "pass" && <Tag tone="warn">{row.state === "evaluator_error" ? "裁判出错" : "未评估"}</Tag>}
-        {calls > 2 && <Tag tone="neutral">调用 {calls} 次（含重试）</Tag>}
+        {row.overall !== undefined && <><span className="text-xs text-muted-foreground">Winner</span><Pick winner={row.overall as Winner} a={a} b={b} /></>}
+        {row.state !== "pass" && <Tag tone="warn">{row.state === "evaluator_error" ? "Judge error" : "Not evaluated"}</Tag>}
+        {calls > 2 && <Tag tone="neutral">{calls} calls (incl. retries)</Tag>}
       </header>
       {row.evidence && <p className="text-sm text-muted-foreground">{row.evidence}</p>}
       <Dimensions row={row} a={a} b={b} />

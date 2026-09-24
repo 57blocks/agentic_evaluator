@@ -20,18 +20,18 @@ export function Profile({ absoluteRan, saturated, dims, profiles, preference, tr
   if (!absoluteRan && preference === null) return null;
   return (
     <Section
-      title="裁判评分"
-      hint={absoluteRan ? "绝对分看差距有多大，成对胜率看谁更受偏好。两者都只作参考，不参与推荐。" : "这一步没有声明绝对打分，只有成对比较。"}
+      title="Judge scores"
+      hint={absoluteRan ? "Absolute scores show how large the gaps are; pairwise win rate shows who the judge prefers. Both are for reference only and do not affect the recommendation." : "This step declared no absolute scoring, only pairwise comparison."}
     >
       {absoluteRan && saturated.length > 0 && (
         <p className="bg-muted/60 px-3 py-2 text-sm">
-          在 {saturated.map((d, i) => <span key={d}>{i > 0 && "、"}<Code>{d}</Code></span>)} 上，所有候选拿到了同一个分——
-          打分器没有分出差异，这些分数不能说明谁更好。
+          On {saturated.map((d, i) => <span key={d}>{i > 0 && ", "}<Code>{d}</Code></span>)}, every candidate got the same score -
+           the scorer did not tell them apart, so these scores say nothing about which is better.
         </p>
       )}
       {!absoluteRan && (
         <Note>
-          规格的 <Code>methods</Code> 里没有 <Code>absolute-1-5</Code>，所以没有绝对分。这是声明的结果，不是漏跑。
+          The spec's <Code>methods</Code> does not include <Code>absolute-1-5</Code>, so there are no absolute scores. That was declared, not missed.
         </Note>
       )}
       {absoluteRan && (
@@ -45,7 +45,7 @@ export function Profile({ absoluteRan, saturated, dims, profiles, preference, tr
       )}
       <Preference table={preference} />
       <Note>
-        成对胜率的分母只有该候选参加过的比较。<Code>0</Code> 表示「每场都输」，不代表输出很差。
+        A pairwise win rate counts only the comparisons that candidate took part in. <Code>0</Code> means "lost every duel", not that the output was bad.
       </Note>
     </Section>
   );

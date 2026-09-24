@@ -28,11 +28,11 @@ function Row({ candidate, trials, index, color }: { candidate: string; trials: T
       <text x={LEFT - 10} y={cy + 4} textAnchor="end" className="fill-foreground font-mono text-[11px]">{candidate}</text>
       {trials.map((t) => {
         const score = t.judge?.absolute_overall;
-        const state = `${t.completion_state}${t.truncated ? " · 截断" : ""}`;
+        const state = `${t.completion_state}${t.truncated ? " · truncated" : ""}`;
         if (typeof score !== "number") {
           return (
             <text key={t.trial} x={LEFT + 6} y={cy + 4} className="fill-muted-foreground text-[11px]">
-              {state}，没有打分
+              {state}, not scored
             </text>
           );
         }
@@ -67,10 +67,10 @@ export function TrialStrip({ trials, colorOf }: Props) {
   return (
     <figure className="flex min-w-0 flex-col gap-2">
       <figcaption className="text-sm font-medium">
-        每次试验的得分{" "}
-        <span className="text-xs font-normal text-muted-foreground">一个点是一次试验，空心点表示没有正常完成</span>
+        Score of every trial{" "}
+        <span className="text-xs font-normal text-muted-foreground">one dot per trial; hollow dots did not complete normally</span>
       </figcaption>
-      <svg viewBox={`0 0 ${W} ${height}`} width="100%" role="img" aria-label="每个候选每次试验的绝对总分">
+      <svg viewBox={`0 0 ${W} ${height}`} width="100%" role="img" aria-label="Absolute total score of every trial, per candidate">
         {TICKS.map((v) => (
           <g key={v}>
             <line x1={LEFT + scale(v, PLOT)} y1={18} x2={LEFT + scale(v, PLOT)} y2={order.length * ROW_H + 16} stroke="var(--border)" />

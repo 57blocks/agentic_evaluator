@@ -34,17 +34,17 @@ export function Verdict({ verdict: v, eligible, total }: Props) {
   const tone = firmnessTone(v.firmness);
   return (
     <section
-      aria-label="结论"
+      aria-label="Verdict"
       className={cn("flex flex-col gap-4 rounded-lg border border-l-4 border-border bg-card p-5 shadow-(--shadow-card)", EDGE[tone])}
     >
       <div className="flex flex-wrap items-center gap-2">
         <Tag tone={tone} className="tracking-wider">{v.firmnessLabel}</Tag>
-        <Tag tone="neutral">运行模式：{v.modeLabel}</Tag>
+        <Tag tone="neutral">Operating mode: {v.modeLabel}</Tag>
       </div>
 
       <div className="flex flex-col gap-1.5">
         <h2 className="text-xl font-semibold">
-          {v.chosen ? <>推荐 <span className="font-mono font-bold text-brand">{v.chosen}</span></> : "没有可推荐的候选"}
+          {v.chosen ? <>Recommended: <span className="font-mono font-bold text-brand">{v.chosen}</span></> : "No candidate to recommend"}
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">{v.text}</p>
       </div>
@@ -52,22 +52,22 @@ export function Verdict({ verdict: v, eligible, total }: Props) {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {h ? (
           <>
-            <Stat label="每次成功的生成成本" value={fmtUsd(h.costPerSuccess)} />
+            <Stat label="Generation cost per success" value={fmtUsd(h.costPerSuccess)} />
             <Stat
-              label="必过检查"
+              label="Required check"
               value={h.checkExecuted > 0 ? `${h.checkPass} / ${h.checkExecuted}` : "—"}
-              hint={h.checkExecuted > 0 ? "通过 / 实际执行" : "没有执行过"}
+              hint={h.checkExecuted > 0 ? "passed / ran" : "never ran"}
             />
           </>
         ) : (
-          <Stat label="通过全部门槛" value={`${eligible.length} / ${total}`} hint="个候选" />
+          <Stat label="Passed every gate" value={`${eligible.length} / ${total}`} hint="candidates" />
         )}
-        <Stat label="本次评测总花费" value={fmtUsd(v.spend)} hint="含生成、裁判、打分" />
+        <Stat label="Total spend of this run" value={fmtUsd(v.spend)} hint="generation, judging and scoring" />
       </div>
 
       <div className="flex flex-col gap-1.5 border-t border-border pt-3">
-        <Line label="确信度">{v.firmnessNote}</Line>
-        <Line label="裁判意见">{v.judgeNote}</Line>
+        <Line label="Confidence">{v.firmnessNote}</Line>
+        <Line label="Judge's view">{v.judgeNote}</Line>
       </div>
     </section>
   );

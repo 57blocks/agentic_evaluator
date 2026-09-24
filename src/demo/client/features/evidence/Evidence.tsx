@@ -43,9 +43,9 @@ export function Evidence({ run }: { run: RunView }) {
   return (
     <Tabs defaultValue="matrix" className="w-full">
       <TabsList>
-        <TabsTrigger value="matrix">失败分布</TabsTrigger>
-        <TabsTrigger value="trials">试验 {trials.length}</TabsTrigger>
-        <TabsTrigger value="evals">评估 {evaluations.length}</TabsTrigger>
+        <TabsTrigger value="matrix">Failure breakdown</TabsTrigger>
+        <TabsTrigger value="trials">Trials {trials.length}</TabsTrigger>
+        <TabsTrigger value="evals">Evaluations {evaluations.length}</TabsTrigger>
         <TabsTrigger value="gaps">GAPS</TabsTrigger>
       </TabsList>
 
@@ -53,7 +53,7 @@ export function Evidence({ run }: { run: RunView }) {
         <FailureMatrix rows={trials} onPick={setPicked} />
         {picked && (
           <div className="flex flex-col gap-2">
-            <h4 className="text-sm font-semibold">选中的 {picked.length} 次试验</h4>
+            <h4 className="text-sm font-semibold">{picked.length} selected trials</h4>
             <TrialTable rows={picked} />
           </div>
         )}
@@ -76,7 +76,7 @@ export function Evidence({ run }: { run: RunView }) {
           </ScrollArea>
         ) : (
           <Empty>
-            <EmptyHeader><EmptyTitle>这次运行没有 GAPS.md</EmptyTitle></EmptyHeader>
+            <EmptyHeader><EmptyTitle>This run has no GAPS.md</EmptyTitle></EmptyHeader>
           </Empty>
         )}
       </TabsContent>

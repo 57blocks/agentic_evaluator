@@ -25,7 +25,7 @@ test("every number the model derives is the number report.html prints", async ()
   assert.ok(page.includes(model.verdict.text), "verdict sentence");
   assert.ok(page.includes(fmtUsd(model.ledger.total)), "ledger total");
   for (const c of model.candidates) {
-    assert.ok(page.includes(`${fmtPct(c.winRate)}<span class="sub">${c.comparisons} 场</span>`), `win rate of ${c.id}`);
+    assert.ok(page.includes(`${fmtPct(c.winRate)}<span class="sub">${c.comparisons} matches</span>`), `win rate of ${c.id}`);
     assert.ok(page.includes(fmtUsd(c.costPerSuccess)), `cost per success of ${c.id}`);
   }
   for (const f of model.facts) assert.ok(page.includes(f.value.split(" · ")[0]), `fact ${f.label}`);
@@ -34,8 +34,8 @@ test("every number the model derives is the number report.html prints", async ()
 test("the verdict names the recommendation and marks everyone else it gated", async () => {
   const model = buildStepReport(await loadBundle(FIXTURE));
   assert.equal(model.verdict.chosen, "sonnet-5");
-  assert.match(model.verdict.text, /sonnet-5 每次成功的生成成本最低/);
-  assert.doesNotMatch(model.verdict.text, /[a-z]{4,} [a-z]{4,}/, "no English clause spliced into the sentence");
+  assert.match(model.verdict.text, /sonnet-5 has the lowest generation cost per success/);
+  assert.doesNotMatch(model.verdict.text, /among eligible|eligible is/, "no raw selector reason spliced into the sentence");
   for (const c of model.candidates) assert.equal(c.gated, !model.eligible.includes(c.id), c.id);
   assert.equal(model.candidates.filter((c) => c.chosen).length, 1);
 });
@@ -46,7 +46,7 @@ test("a step with no eligible candidate says so, rather than naming nobody quiet
   const model = buildStepReport(empty);
 
   assert.equal(model.verdict.chosen, null);
-  assert.match(model.verdict.text, /没有候选通过全部门槛，所以这一步不给推荐/);
+  assert.match(model.verdict.text, /No candidate passes every gate, so this step makes no recommendation/);
   assert.ok(model.candidates.every((c) => c.gated && !c.chosen));
   // The offline page says the same sentence from the same model.
   assert.ok(renderRunReport(empty).includes(model.verdict.text));
@@ -94,7 +94,7 @@ test("independent workflow steps get the no-verdict wording and a neutral tone",
 
   assert.equal(model.kind, "workflow");
   assert.equal(model.tone, "");
-  assert.match(model.verdictLine, /相互独立/);
+  assert.match(model.verdictLine, /independent/);
 });
 
 test("loadReportModel picks the step report for a step directory", async () => {
