@@ -8,7 +8,7 @@
  */
 
 import { Tag } from "@/components/tag";
-import { ACCENT_CARD, ACCENT_TITLE } from "@/components/accent";
+import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 import type { RunStepView, RunView } from "../../catalog.js";
 import { navigate } from "@/app/routes";
 import { Evidence } from "@/features/evidence/Evidence";
@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 function StepCard({ step, runId }: { step: RunStepView; runId: string }) {
   const gatedIds = step.gated.map((g) => g.candidate);
   return (
-    <Card className={ACCENT_CARD}>
+    <Card className={SECTION_CARD}>
       <CardHeader>
-        <CardTitle className={cn(ACCENT_TITLE, "flex items-center justify-between gap-2")}>
+        <CardTitle className={cn(SECTION_TITLE, "flex items-center justify-between gap-2")}>
           <span>{step.id}</span>
           <Tag tone={firmnessTone(step.firmness)}>{step.firmness}</Tag>
         </CardTitle>

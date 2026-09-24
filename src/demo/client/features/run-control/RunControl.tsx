@@ -4,7 +4,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { ACCENT_CARD, ACCENT_TITLE } from "@/components/accent";
+import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 import { Tag } from "@/components/tag";
 import { useRun } from "./useRun";
 import { eventLine } from "./log";
@@ -20,9 +20,9 @@ export function RunControl({ task, onFinished }: Props) {
   const { phase, ack, handle, events, error, fetchPlan, start, cancel } = useRun(task, onFinished);
 
   return (
-    <section aria-label="运行控制" className={cn(ACCENT_CARD, "border border-border bg-card p-4")}>
+    <section aria-label="运行控制" className={cn(SECTION_CARD, "border border-border bg-card p-4")}>
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className={ACCENT_TITLE}>跑一次</h2>
+        <h2 className={SECTION_TITLE}>跑一次</h2>
         {phase === "running" && <Tag tone="brand">进行中</Tag>}
         {phase === "ended" && handle && <Tag tone={handle.status === "done" ? "ok" : handle.status === "failed" ? "bad" : "warn"}>{handle.status}</Tag>}
         <div className="ml-auto flex gap-2">

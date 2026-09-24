@@ -61,7 +61,7 @@ function WinRate({ c }: { c: CandidateRow }) {
   return (
     <div className="flex items-center justify-end gap-2">
       <span className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-muted sm:inline-block">
-        <span className="block h-full rounded-full bg-linear-to-r from-brand to-brand-2" style={{ width: `${width.toFixed(0)}%` }} />
+        <span className="block h-full rounded-full bg-brand-2" style={{ width: `${width.toFixed(0)}%` }} />
       </span>
       <span className="font-mono">{fmtPct(c.winRate)}</span>
     </div>

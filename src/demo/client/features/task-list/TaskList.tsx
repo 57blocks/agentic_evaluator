@@ -10,7 +10,7 @@
  * model; mixed into the same table a reader would count them as evidence.
  */
 
-import { ACCENT_CARD, ACCENT_TITLE } from "@/components/accent";
+import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 import { Tag } from "@/components/tag";
 import type { TaskView } from "../../../catalog.js";
 import { navigate } from "@/app/routes";
@@ -106,8 +106,8 @@ export function TaskList({ tasks }: { tasks: TaskView[] }) {
   const real = tasks.filter((t) => !isSmokeTask(t));
 
   return (
-    <section aria-label="任务" className={cn(ACCENT_CARD, "flex flex-col gap-3 border border-border bg-card p-4")}>
-      <h2 className={ACCENT_TITLE}>任务（{real.length}）</h2>
+    <section aria-label="任务" className={cn(SECTION_CARD, "flex flex-col gap-3 border border-border bg-card p-4")}>
+      <h2 className={SECTION_TITLE}>任务（{real.length}）</h2>
       {real.length === 0 ? (
         <p className="text-xs text-muted-foreground">这个工作区还没有任务。</p>
       ) : (

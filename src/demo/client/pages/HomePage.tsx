@@ -4,7 +4,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { ACCENT_CARD, ACCENT_TITLE } from "@/components/accent";
+import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 import { Tag } from "@/components/tag";
 import type { Overview, StepStanding } from "../../../server/overview.js";
 import type { Catalog } from "@/app/useWorkspace";
@@ -19,10 +19,10 @@ import {
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="border border-border bg-card p-3">
-      <span className="block text-xs text-muted-foreground">{label}</span>
-      <b className="block text-lg tabular-nums">{value}</b>
-      {hint && <span className="block text-[11px] text-muted-foreground">{hint}</span>}
+    <div className={cn(SECTION_CARD, "border border-border bg-card px-4 py-3.5")}>
+      <span className="block text-xs font-medium text-muted-foreground">{label}</span>
+      <b className="mt-1 block text-2xl font-bold tracking-tight tabular-nums">{value}</b>
+      {hint && <span className="mt-0.5 block text-[11px] text-muted-foreground">{hint}</span>}
     </div>
   );
 }
@@ -67,8 +67,8 @@ function StepRow({ standing }: { standing: StepStanding }) {
 
 function Standings({ steps }: { steps: StepStanding[] }) {
   return (
-    <section aria-label="每一步的最新结论" className={cn(ACCENT_CARD, "border border-border bg-card p-4")}>
-      <h2 className={cn(ACCENT_TITLE, "mb-1")}>每一步的最新结论</h2>
+    <section aria-label="每一步的最新结论" className={cn(SECTION_CARD, "border border-border bg-card p-4")}>
+      <h2 className={cn(SECTION_TITLE, "mb-1")}>每一步的最新结论</h2>
       <p className="mb-3 text-xs text-muted-foreground">
         同名步骤只留最新的一次，不论它来自哪个任务。
       </p>
@@ -107,7 +107,7 @@ export function HomePage({ data, catalog }: { data: Overview; catalog: Catalog }
   return (
     <div className="flex flex-col gap-5">
       <header>
-        <h1 className="text-base font-semibold">工作区</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">工作区</h1>
         <p className="mt-1 font-mono text-xs text-muted-foreground">{data.workspace}</p>
       </header>
 

@@ -11,7 +11,7 @@ import type { RunView, TaskView } from "../../catalog.js";
 import { allRuns, useWorkspace, type Catalog } from "./useWorkspace";
 import { useRoute, type Route } from "./routes";
 import { runStamp } from "@/lib/format";
-import { AppHeader, type Crumb } from "./AppHeader";
+import { AppHeader, Crumbs, type Crumb } from "./AppHeader";
 import { HomePage } from "@/pages/HomePage";
 import { TaskPage } from "@/pages/TaskPage";
 import { RunPage } from "@/pages/RunPage";
@@ -31,9 +31,12 @@ function Notice({ title, detail }: { title: string; detail?: string }) {
 
 function Shell({ crumbs, children }: { crumbs: Crumb[]; children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-5 px-6 py-6">
-      <AppHeader crumbs={crumbs} />
-      <main className="min-w-0">{children}</main>
+    <div className="flex min-h-screen flex-col">
+      <AppHeader />
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-6 py-8">
+        <Crumbs crumbs={crumbs} />
+        <main className="min-w-0">{children}</main>
+      </div>
     </div>
   );
 }
