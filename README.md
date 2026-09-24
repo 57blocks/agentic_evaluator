@@ -1,5 +1,7 @@
 # agenteval
 
+[![npm](https://img.shields.io/npm/v/57b-agenteval)](https://www.npmjs.com/package/57b-agenteval)
+
 Pick the right model — or agent, or combination of both — for each step of
 your AI workflow, with evidence you can check.
 
@@ -21,6 +23,7 @@ candidate to use, why, what it cost, and what it could not observe.
 
 ## Install
 
+Published on npm as [`57b-agenteval`](https://www.npmjs.com/package/57b-agenteval).
 Requires Node.js 22 or newer.
 
 ```bash
