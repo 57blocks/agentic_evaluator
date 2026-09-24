@@ -1,0 +1,96 @@
+# agb 的任务拆分与编码两步，各该配哪个模型。
+#
+# 候选都是「agb + 某个模型」（.abrc.json 的 spec / coding / escalation 三档都设成它），
+# 只换模型。输入由 scripts/harvest.mjs 从 agb 项目的 git 历史里取：
+#
+#   detail  写 .ab/tasks.json 那次提交的前一个状态（PRD、设计、契约都在，还没拆任务）
+#           → claude -p + stage-detail skill（这一步在 agb 里按设计没有 CLI 命令）
+#   code    每个 [T-xxx] 提交的前一个状态（前面的任务都做完了，轮到它）
+#           → agb run，计划裁成只剩这一个任务
+#
+# 判定：
+#   detail  产出能解析的任务表，且 agb 的覆盖与结构门禁（page-coverage /
+#           contract-coverage / plan-domain-cycle）零问题；经验规则类门禁只记数
+#   code    这个任务在计划里列出的验收测试，恢复原样后全部通过
+#
+# 花费上限在 agents/agb.mjs：每次 $10（agb 自己估一个任务 $2.46，算上重跑最多 $6.16）。
+# agent 候选的花费在账本里记 0，所以运行模式用 highest-assurance。
+# 真跑会花真钱，候选直接在本机运行。先 `pnpm agenteval plan agb-models`。
+protocol_version: "0.4"
+run_name: agb-models
+
+workflow:
+  control_candidate: agb-sonnet-5
+  steps:
+    - id: detail
+      version: "1"
+      test_set:
+        id: detail-v1
+        inputs: [demo-todo-detail]
+      candidate_ids: [agb-opus-5, agb-opus-5-5, agb-sonnet-5]
+      required_checks: [plan-gates]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: highest-assurance
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 1800
+    - id: code
+      version: "1"
+      test_set:
+        id: code-v1
+        inputs: [demo-todo-T-001, demo-todo-T-002, demo-todo-T-003, demo-todo-T-004, demo-todo-T-005, demo-todo-T-006, demo-todo-T-007, demo-todo-T-008]
+      candidate_ids: [agb-opus-5, agb-opus-5-5, agb-sonnet-5]
+      required_checks: [task-tests]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: highest-assurance
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 2400
+
+candidates:
+  - id: agb-opus-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, claude-opus-5]
+  - id: agb-opus-5-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, claude-opus-5-5]
+  - id: agb-sonnet-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, claude-sonnet-5]
+
+evaluators:
+  required_checks:
+    plan-gates:
+      kind: command
+      argv: ["node", "checks/plan-gates.mjs"]
+      version_files: [checks/plan-gates.mjs]
+      timeout_seconds: 300
+    task-tests:
+      kind: command
+      argv: ["node", "checks/task-tests.mjs"]
+      version_files: [checks/task-tests.mjs]
+      timeout_seconds: 600
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/none.md
+    # 不用裁判：候选的「输出」是执行器的终端日志，拿它两两比较没有意义。
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 1
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0
