@@ -4,7 +4,9 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { listRuns, listSpecs, loadRun, safeId } from "../src/demo/catalog.js";
+import { listRuns, listSpecs, listTasks, loadRun, safeId } from "../src/demo/catalog.js";
+import { workspaceAt } from "../src/core/workspace.js";
+import { INSTALL_ROOT } from "../src/paths.js";
 import { createDemoServer, listenDemo, underRoot } from "../src/demo/server.js";
 import { demoPage } from "../src/demo/ui.js";
 import { latestVerdict, runMeta, spendLabel } from "../src/demo/client/lib/format.js";
@@ -193,7 +195,7 @@ test("the nav labels a step with no eligible candidate as needing human review",
 
 test("a task row states its spend against budget and calls out an overrun", () => {
   const base = {
-    name: "t", specPath: "tasks/t/spec.yaml", runName: "t", steps: [], files: [], runs: [],
+    name: "t", specPath: "tasks/t/spec.yaml", runName: "t", steps: [], files: [], definition: { spec: null, steps: [], other: [] }, runs: [],
     plan: { steps: [], budgetUsd: null, chain: null },
   };
 
@@ -212,8 +214,27 @@ test("a task row states its spend against budget and calls out an overrun", () =
 test("a task that has never run says so rather than rendering blank", () => {
   const task = {
     name: "smoke-e2e-control", specPath: "tasks/smoke-e2e-control/spec.yaml",
-    runName: "smoke-e2e-control", budgetUsd: 1, spentUsd: null, steps: [], files: [], runs: [],
+    runName: "smoke-e2e-control", budgetUsd: 1, spentUsd: null, steps: [], files: [], definition: { spec: null, steps: [], other: [] }, runs: [],
   } as unknown as TaskView;
 
   assert.equal(latestVerdict(task), null);
+});
+
+test("one spec that fails to load is reported as broken, and the other tasks still list", async () => {
+  // Arrange - a workspace with a runnable task and one whose spec is invalid.
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "eval-broken-"));
+  await fs.cp(path.join(INSTALL_ROOT, "tasks", "smoke-local"), path.join(root, "tasks", "smoke-local"), {
+    recursive: true,
+    filter: (s) => !s.includes(`${path.sep}runs`),
+  });
+  await fs.mkdir(path.join(root, "tasks", "bad"), { recursive: true });
+  await fs.writeFile(path.join(root, "tasks", "bad", "spec.yaml"), 'protocol_version: "9.9"\nrun_name: bad\n');
+
+  // Act
+  const { tasks, broken } = await listTasks({ ws: workspaceAt(root) });
+
+  // Assert
+  assert.deepEqual(tasks.map((t) => t.name), ["smoke-local"]);
+  assert.deepEqual(broken.map((b) => [b.task, b.path]), [["bad", "tasks/bad/spec.yaml"]]);
+  assert.match(broken[0].error, /protocol_version/);
 });

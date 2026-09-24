@@ -144,7 +144,7 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
       <section className="flex flex-col gap-3">
         <h2 className={SECTION_TITLE}>Definition files ({task.files.length})</h2>
         <p className="text-xs text-muted-foreground">The test plan above is read from these files; spec.yaml is the single source of truth.</p>
-        <FileBrowser task={task.name} files={task.files} />
+        <FileBrowser task={task.name} files={task.files} definition={task.definition} />
       </section>
 
     </div>

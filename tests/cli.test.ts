@@ -255,3 +255,23 @@ test("a reader that closes the pipe early does not crash the run or cost it its 
   const runs = await fs.readdir(path.join(ws, "tasks", "smoke-local", "runs"));
   assert.equal(runs.length, 1, "the run still wrote its evidence");
 });
+
+test("ls names a task whose spec does not load, with the reason, and still lists the rest", async () => {
+  // Arrange
+  const ws = await tempWorkspace();
+  await fs.cp(path.join(INSTALL_ROOT, "tasks", "smoke-local"), path.join(ws, "tasks", "smoke-local"), {
+    recursive: true,
+    filter: (s) => !s.includes(`${path.sep}runs`),
+  });
+  await fs.mkdir(path.join(ws, "tasks", "bad"));
+  await fs.writeFile(path.join(ws, "tasks", "bad", "spec.yaml"), 'protocol_version: "9.9"\nrun_name: bad\n');
+
+  // Act
+  const r = await run(["ls", "--workspace", ws]);
+
+  // Assert
+  assert.equal(r.code, EXIT.ok);
+  assert.match(r.out, /smoke-local/);
+  assert.match(r.out, /could not be read/);
+  assert.match(r.out, /tasks\/bad\/spec\.yaml/);
+});

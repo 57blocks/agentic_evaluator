@@ -297,8 +297,8 @@ async function handle(
   if (url.pathname === "/api/catalog") {
     // `tasks` is what the UI renders; `specs`/`runs` stay as the flat views
     // for anything reading the catalog directly.
-    const [{ tasks, unfiled }, specs, runs] = await Promise.all([listTasks({ ws }), listSpecs({ ws }), listRuns({ ws })]);
-    sendJson(res, 200, { tasks, unfiled, specs, runs });
+    const [{ tasks, unfiled, broken }, specs, runs] = await Promise.all([listTasks({ ws }), listSpecs({ ws }), listRuns({ ws })]);
+    sendJson(res, 200, { tasks, unfiled, broken, specs, runs });
     return;
   }
   const runMatch = url.pathname.match(/^\/api\/run\/([^/]+)$/);
