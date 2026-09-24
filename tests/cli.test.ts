@@ -146,6 +146,28 @@ test("init creates a task that runs offline, immediately", async () => {
   await fs.rm(ws, { recursive: true, force: true });
 });
 
+test("init --models creates a small real evaluation: two models, a tsc gate and a judge", async () => {
+  // Arrange
+  const ws = await tempWorkspace();
+
+  // Act
+  const created = await run(["init", "real", "--models", "--workspace", ws]);
+  const plan = await run(["plan", "real", "--json", "--workspace", ws]);
+
+  // Assert - it loads (the judge's vendor differs from every candidate's, or
+  // the loader would refuse it) and plans what its header promises, for free.
+  assert.equal(created.code, EXIT.ok);
+  assert.equal(plan.code, EXIT.ok, plan.err);
+  const { steps } = JSON.parse(plan.out) as { steps: Array<{ generations: number; judgeCalls: number; budgetUsd: number }> };
+  assert.equal(steps[0].generations, 2);
+  assert.equal(steps[0].judgeCalls, 2, "one pair, judged in both orders");
+  assert.equal(steps[0].budgetUsd, 0.05);
+  // Models, not stand-ins: there is no agent script to run.
+  await assert.rejects(fs.access(path.join(ws, "tasks", "real", "agents")));
+
+  await fs.rm(ws, { recursive: true, force: true });
+});
+
 test("init refuses a name that is not a task name, and refuses to overwrite", async () => {
   // Arrange
   const ws = await tempWorkspace();
