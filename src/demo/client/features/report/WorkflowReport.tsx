@@ -5,10 +5,9 @@
  * workflow was tested.
  */
 
-import { Tag } from "@/components/tag";
 import type { WorkflowReport as Model } from "../../../../report-model.js";
 import type { WorkflowArm } from "../../../../canon/workflow.js";
-import { NO_PICK, plural, STEPS_NOT_VALIDATED } from "../../../../report-format.js";
+import { plural, STEPS_NOT_VALIDATED } from "../../../../report-format.js";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -20,6 +19,7 @@ import { Duels } from "./sections/Duels";
 import { Findings } from "./workflow/Findings";
 import { Overview, Swatch } from "./workflow/Overview";
 import { StepSection } from "./workflow/StepSection";
+import { StepCards } from "./workflow/StepCards";
 
 const usd = (n: number): string => `$${n.toFixed(4)}`;
 const num = (n: number | null, digits = 2): string => (n === null ? "—" : n.toFixed(digits));
@@ -132,43 +132,22 @@ function Ledger({ report }: { report: Model }) {
   );
 }
 
-function Verdict({ report }: { report: Model }) {
+function Verdict({ report, runId, root }: { report: Model; runId: string; root: string }) {
   const d = report.digest;
   const v = report.record.e2e_validation ?? null;
   return (
-    <section aria-label="Verdict" className="flex flex-col gap-2 rounded-lg border border-l-4 border-border border-l-foreground bg-card p-5 shadow-(--shadow-card)">
-      <p className="text-xs font-medium text-muted-foreground">Verdict</p>
-      <h2 className="text-lg font-semibold leading-snug">{d?.headline ?? report.verdictLine}</h2>
+    <section aria-label="Verdict" className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 shadow-(--shadow-card)">
+      <div className="flex flex-col gap-1">
+        <p className="text-xs font-medium text-muted-foreground">Verdict</p>
+        <h2 className="text-lg font-semibold leading-snug">{d?.headline ?? report.verdictLine}</h2>
+      </div>
+      {d && d.steps.length > 0 && (
+        <StepCards steps={d.steps} advice={d.advice} chained={report.record.handoff} runId={runId} root={root} />
+      )}
       <p className="text-sm text-muted-foreground">
-        {v ? `End-to-end validation: ${report.verdictLine}` : `${report.verdictLine}${STEPS_NOT_VALIDATED}`}
+        {v ? `End-to-end validation: ${report.verdictLine}` : `${report.verdictLine} ${STEPS_NOT_VALIDATED}`}
       </p>
     </section>
-  );
-}
-
-function Advice({ rows }: { rows: NonNullable<Model["digest"]>["advice"] }) {
-  return (
-    <Section title="Recommendations" hint="Each step is chosen by the spec's eligibility gates and operating mode, not by judge preference.">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Step</TableHead><TableHead>Recommended</TableHead><TableHead>Confidence</TableHead><TableHead>Reason</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((a) => (
-            <TableRow key={a.step}>
-              <TableCell className="align-top font-medium">{a.step}</TableCell>
-              <TableCell className="align-top">
-                {a.chosen ? <span className="font-mono font-semibold text-brand">{a.chosen}</span> : <Tag tone="bad">{NO_PICK}</Tag>}
-              </TableCell>
-              <TableCell className="align-top whitespace-nowrap">{a.firmness}</TableCell>
-              <TableCell className="align-top whitespace-normal text-muted-foreground">{a.reason}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Section>
   );
 }
 
@@ -201,13 +180,12 @@ export function WorkflowReport({ report, runId, dir }: Props) {
         </dl>
       )}
 
-      <Verdict report={report} />
+      <Verdict report={report} runId={runId} root={dir} />
       {d && <Findings findings={d.findings} />}
       {d && <Overview steps={d.steps} candidates={d.candidates} />}
       {d?.steps.map((s, i) => <StepSection key={s.id} step={s} index={i} runId={runId} root={dir} colorOf={colorOf} />)}
       <Chain report={report} />
       <Arms report={report} />
-      {d && d.advice.length > 0 && <Advice rows={d.advice} />}
 
       <section aria-label="Details" className="flex flex-col gap-2">
         <h2 className="text-sm font-medium text-muted-foreground">Details</h2>
