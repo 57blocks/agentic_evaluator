@@ -10,6 +10,7 @@
 import { useEffect, useState } from "react";
 import { getText, taskFileUrl } from "@/lib/api";
 import { defaultFile } from "@/lib/format";
+import { SECTION_CARD } from "@/components/section-style";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -41,8 +42,8 @@ export function FileBrowser({ task, files }: { task: string; files: readonly str
 
   return (
     <div className="grid gap-3 md:grid-cols-[minmax(180px,240px)_1fr]">
-      <ScrollArea className="max-h-[60vh] border border-border">
-        <ul className="flex flex-col gap-0.5 p-1">
+      <ScrollArea className={cn(SECTION_CARD, "max-h-[60vh] overflow-hidden border border-border bg-card")}>
+        <ul className="flex flex-col gap-0.5 p-1.5">
           {files.map((file) => (
             <li key={file}>
               <button
@@ -50,9 +51,9 @@ export function FileBrowser({ task, files }: { task: string; files: readonly str
                 onClick={() => setSelected(file)}
                 aria-current={file === selected ? "true" : undefined}
                 className={cn(
-                  "w-full  border border-transparent px-2 py-1.5 text-left font-mono text-xs",
-                  "hover:bg-accent focus-visible:bg-accent focus-visible:outline-none",
-                  "aria-[current]:border-border aria-[current]:bg-accent",
+                  "w-full rounded-md px-2.5 py-1.5 text-left font-mono text-xs text-muted-foreground transition-colors",
+                  "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-none",
+                  "aria-[current]:bg-brand-soft aria-[current]:font-semibold aria-[current]:text-brand",
                 )}
               >
                 {file}
@@ -61,8 +62,8 @@ export function FileBrowser({ task, files }: { task: string; files: readonly str
           ))}
         </ul>
       </ScrollArea>
-      <ScrollArea className="max-h-[60vh] border border-border bg-card">
-        <pre className="p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap break-words">
+      <ScrollArea className={cn(SECTION_CARD, "max-h-[60vh] overflow-hidden border border-border bg-card")}>
+        <pre className="p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap break-words">
           {text}
         </pre>
       </ScrollArea>

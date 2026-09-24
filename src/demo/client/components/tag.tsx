@@ -29,7 +29,7 @@ interface TagProps {
 
 export function Tag({ tone, className, children }: TagProps) {
   return (
-    <span className={cn("inline-flex h-5 w-fit items-center px-2 text-xs font-semibold whitespace-nowrap", TAG[tone], className)}>
+    <span className={cn("inline-flex h-5 w-fit items-center rounded-md px-2 text-xs font-semibold whitespace-nowrap", TAG[tone], className)}>
       {children}
     </span>
   );
