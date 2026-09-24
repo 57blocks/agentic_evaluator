@@ -5,6 +5,7 @@
  * detail page: the crumbs are links, not decoration.
  */
 
+import { PROTOCOL_VERSION } from "../../../spec/schema.js";
 import { Moon, Sun } from "lucide-react";
 import { navigate, type Route } from "./routes";
 import { useTheme } from "./theme";
@@ -61,7 +62,7 @@ export function AppHeader() {
         >
           <Mark />
           Agentic Evaluator
-          <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand">Protocol v0.3</span>
+          <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand">Protocol v{PROTOCOL_VERSION}</span>
         </button>
         <ThemeToggle />
       </div>

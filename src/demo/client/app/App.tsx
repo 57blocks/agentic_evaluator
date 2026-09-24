@@ -7,6 +7,7 @@
  * what keeps this file from growing a little of every page.
  */
 
+import { AppFooter } from "./AppFooter";
 import type { RunView, TaskView } from "../../catalog.js";
 import { allRuns, useWorkspace, type Catalog } from "./useWorkspace";
 import { useRoute, type Route } from "./routes";
@@ -37,6 +38,7 @@ function Shell({ crumbs, children }: { crumbs: Crumb[]; children: React.ReactNod
         <Crumbs crumbs={crumbs} />
         <main className="min-w-0">{children}</main>
       </div>
+      <AppFooter />
     </div>
   );
 }
