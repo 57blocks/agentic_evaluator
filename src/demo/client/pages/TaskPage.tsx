@@ -14,7 +14,8 @@ import { NEEDS_REVIEW } from "@/lib/copy";
 import { primaryReportDir, runStamp, spendLabel } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { FileBrowser } from "@/features/task-files/FileBrowser";
-import { RunControl } from "@/features/run-control/RunControl";
+import { RunButton, RunPanel } from "@/features/run-control/RunControl";
+import { useRun } from "@/features/run-control/useRun";
 import { TestPlan } from "@/features/test-plan/TestPlan";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -104,11 +105,15 @@ function RunsTable({ runs }: { runs: RunView[] }) {
 
 export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinished: () => void }) {
   const spend = spendLabel(task);
+  const run = useRun(task.name, onRunFinished);
 
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-extrabold tracking-tight">{task.name}</h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-2xl font-extrabold tracking-tight">{task.name}</h1>
+          <RunButton run={run} />
+        </div>
         <p className="text-[13px] text-muted-foreground">
           {task.specPath}
           {spend && (
@@ -127,7 +132,7 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
         </p>
       </header>
 
-      <RunControl task={task.name} onFinished={onRunFinished} />
+      <RunPanel run={run} />
 
       <section aria-label="Runs" className={cn(SECTION_CARD, "flex flex-col gap-3 border border-border bg-card p-4")}>
         <h2 className={SECTION_TITLE}>Runs ({task.runs.length})</h2>

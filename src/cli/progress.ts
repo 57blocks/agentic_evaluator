@@ -54,7 +54,8 @@ function tally(total: number | null): Tally {
   return { done: 0, total, failed: 0 };
 }
 
-function countsFor(p: Progress, key: string): Counts {
+/** A step's or arm's counts so far — its planned totals with nothing done, before its first event. */
+export function countsFor(p: Progress, key: string): Counts {
   const existing = p.counts[key];
   if (existing) return existing;
   const plan = p.plans[key];
