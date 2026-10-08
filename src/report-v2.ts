@@ -22,7 +22,7 @@ import { recommendFromCanon, type Recommendation } from "./canon/select.js";
 import { FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel } from "./report-copy.js";
 import { NO_PICK, plural } from "./report-format.js";
 import {
-  candidateViews, evaluatorErrorSubject, fmtPct, fmtScore, fmtSec, fmtUsd, judgeFavourite,
+  candidateViews, evaluatorErrorSubject, fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, judgeFavourite,
   ledgerNote, sha8, stateTone, subtitleReasons, verdictFacts, verdictText,
   type CandidateView,
 } from "./report-model.js";
@@ -180,7 +180,7 @@ export function renderRunReport(b: RunBundle): string {
         <td class="num">${checkPill(v)}</td>
         <td class="num">${winBar(v.winRate)}${fmtPct(v.winRate)}<span class="sub">${v.comparisons} matches</span></td>
         <td class="num">${fmtScore(v.absolute)}</td>
-        <td class="num">${fmtUsd(v.costPerSuccess)}</td>
+        <td class="num">${fmtCost(v.costPerSuccess, v.costObserved)}</td>
         <td class="num">${fmtSec(v.p50)}</td>
         <td><div class="state-list">${states}</div></td>
       </tr>`;
@@ -263,7 +263,7 @@ export function renderRunReport(b: RunBundle): string {
         <tr class="total"><td>Total</td><td class="num">${fmtUsd(led.total)}</td></tr>
         <tr><td>Full cost per success</td><td class="num">${fmtUsd(led.cost_per_success)}</td></tr>
       </tbody></table></div>
-      <p class="note">${ledgerNote(led)}</p>
+      <p class="note">${ledgerNote(led, b.trials)}</p>
     </section>
   </div>
 

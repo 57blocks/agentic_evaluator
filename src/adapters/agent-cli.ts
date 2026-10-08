@@ -1,6 +1,7 @@
 /**
  * Run a candidate's command in a clean work directory. The candidate is the
- * command, not a model id. Cost is unobserved (source "none").
+ * command, not a model id. Cost is unobserved (source "none") unless the
+ * command reports it in `.eval-usage.json` (see reported-usage.ts).
  *
  * With `cli.image` the command runs under `docker run` with only the work dir
  * mounted; without it, it runs as this process. Every result records which,
@@ -14,6 +15,7 @@ import path from "node:path";
 import { sha256 } from "../canon/hash.js";
 import { looksLikePath } from "../script-path.js";
 import { CONTAINER_WORKDIR, runInDocker, TASK_MOUNT, type Mount } from "./docker.js";
+import { readReportedUsage, USAGE_FILE } from "./reported-usage.js";
 import {
   AdapterError,
   type ArtifactFile,
@@ -25,7 +27,7 @@ import {
 
 const INPUT_FILE = ".eval-input.txt";
 const MAX_BUFFER = 2 * 1024 * 1024;
-const SKIP_NAMES = new Set(["node_modules", INPUT_FILE]);
+const SKIP_NAMES = new Set(["node_modules", INPUT_FILE, USAGE_FILE]);
 
 function subst(value: string, vars: Record<string, string>): string {
   return value.replace(/\{\{(\w+)\}\}/g, (_, key: string) => vars[key] ?? "");
@@ -187,16 +189,19 @@ export const agentCliAdapter: CandidateAdapter = {
             timeoutMs: request.timeoutMs,
             env: cli.env,
           });
-      const artifacts = await collectFiles(context.workDir);
+      const [artifacts, usage] = await Promise.all([
+        collectFiles(context.workDir),
+        readReportedUsage(context.workDir),
+      ]);
       const ms = Date.now() - t0;
       context.emit?.({ type: "model.response", ...base, ms });
       return {
         text: ran.stdout.trim() !== "" ? ran.stdout : ran.stderr,
         artifacts,
-        promptTokens: 0,
-        completionTokens: 0,
-        costUsd: 0,
-        costSource: "none",
+        promptTokens: usage.promptTokens,
+        completionTokens: usage.completionTokens,
+        costUsd: usage.costUsd,
+        costSource: usage.costSource,
         ms,
         isolation: inDocker ? "docker" : "none",
         provider: inDocker ? `docker:${cli.image}` : "local-cli",

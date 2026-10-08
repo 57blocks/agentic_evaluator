@@ -47,6 +47,36 @@ test("agent-cli writes artifacts, costs nothing, and records stdout", async () =
   assert.ok(!r.artifacts.some((f) => f.path === ".eval-input.txt"));
 });
 
+test("agent-cli records the usage a candidate reports in .eval-usage.json", async () => {
+  const workDir = await tmpWorkDir();
+  const usage = { cost_usd: 0.0727, prompt_tokens: 60180, completion_tokens: 4070, source: "estimated" };
+
+  const r = await agentCliAdapter.execute(
+    request({ argv: [process.execPath, helper], env: { FAKE_AGENT_USAGE: JSON.stringify(usage) } }),
+    { workDir, taskRoot: workDir },
+  );
+
+  assert.equal(r.costUsd, 0.0727);
+  assert.equal(r.costSource, "estimated");
+  assert.equal(r.promptTokens, 60180);
+  assert.equal(r.completionTokens, 4070);
+  assert.ok(!r.artifacts.some((f) => f.path === ".eval-usage.json"));
+});
+
+test("agent-cli treats a malformed usage file as unobserved, not as a measured cost", async () => {
+  for (const usage of [{ cost_usd: -1 }, { cost_usd: "0.07" }, { cost_usd: 0.07, source: "made-up" }]) {
+    const workDir = await tmpWorkDir();
+
+    const r = await agentCliAdapter.execute(
+      request({ argv: [process.execPath, helper], env: { FAKE_AGENT_USAGE: JSON.stringify(usage) } }),
+      { workDir, taskRoot: workDir },
+    );
+
+    assert.equal(r.costSource, "none", JSON.stringify(usage));
+    assert.equal(r.costUsd, 0);
+  }
+});
+
 test("agent-cli substitutes {{input}} and {{workdir}}", async () => {
   const workDir = await tmpWorkDir();
   const inputText = "hello-subst";

@@ -107,6 +107,9 @@ const source = fail
   ? "export function add(a: number, b: number): number {\\n  return \\"nope\\";\\n}\\n"
   : "export function add(a: number, b: number): number {\\n  return a + b;\\n}\\n";
 fs.writeFileSync("add.ts", source);
+// This script calls no model, so its spend is known: zero. A candidate that
+// does not write .eval-usage.json has its cost recorded as unobserved.
+fs.writeFileSync(".eval-usage.json", JSON.stringify({ cost_usd: 0 }));
 process.stdout.write(fail ? "wrote a deliberate type error\\n" : "ok\\n");
 `;
 

@@ -33,7 +33,7 @@ import {
   FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, recommendationSentence, type GateRow,
 } from "./report-copy.js";
 
-export { fmtPct, fmtScore, fmtSec, fmtUsd, sha8, stateTone } from "./report-format.js";
+export { fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, sha8, stateTone } from "./report-format.js";
 
 // ── candidates ─────────────────────────────────────────────────────────────
 
@@ -48,6 +48,8 @@ export interface CandidateView {
   comparisons: number;
   absolute: number | null;
   costPerSuccess: number | null;
+  /** False when any attempt's generation spend was not reported (cost source "none"). */
+  costObserved: boolean;
   p50: number | null;
   states: Array<[string, number]>;
   outcomes: { success: number; failure: number; undetermined: number };
@@ -101,6 +103,7 @@ export function candidateViews(b: RunBundle): CandidateView[] {
       comparisons: duel.comparisons,
       absolute: abs.length ? abs.reduce((s, v) => s + v, 0) / abs.length : null,
       costPerSuccess: c.generation_cost_per_success,
+      costObserved: own.every((t) => t.cost.source !== "none"),
       p50: c.p50_ms,
       states: Object.entries(c.completion_states).filter(([, n]) => n > 0),
       outcomes: c.outcomes,
@@ -161,7 +164,9 @@ export function judgeFavourite(b: RunBundle): JudgeFavourite | null {
 export function verdictFacts(rec: Recommendation, chosenView: CandidateView | undefined): string[] {
   if (!rec.chosen || !chosenView) return [];
   return [
-    chosenView.costPerSuccess != null ? `$${chosenView.costPerSuccess.toFixed(4)} per success` : null,
+    !chosenView.costObserved
+      ? "cost per success unobserved"
+      : chosenView.costPerSuccess != null ? `$${chosenView.costPerSuccess.toFixed(4)} per success` : null,
     chosenView.checkExecuted > 0 ? `required check ${chosenView.checkPass}/${chosenView.checkExecuted} passed` : null,
   ].filter((x): x is string => x !== null);
 }
@@ -172,13 +177,24 @@ export function evaluatorErrorSubject(e: EvaluationRow): string {
     : `${e.subject.candidate} · ${e.subject.input} · t${e.subject.trial}`;
 }
 
-/** The ratio of evaluation spend to generation spend, stated when it exists. */
-export function ledgerNote(led: CostLedger): string {
+/** Candidates with at least one trial whose generation spend was not reported. */
+export function unobservedCostCandidates(trials: readonly TrialRow[]): string[] {
+  return [...new Set(trials.filter((t) => t.cost.source === "none").map((t) => t.candidate))].sort();
+}
+
+/** The ratio of evaluation spend to generation spend, and why per-success cost may be undefined. */
+export function ledgerNote(led: CostLedger, trials: readonly TrialRow[]): string {
   const ratio =
     led.generation > 0
       ? `Evaluation spend is ${((led.judging + led.scoring + led.retries) / led.generation).toFixed(1)}× generation spend. `
       : "";
-  const undefinedCps = led.cost_per_success === null ? "No task succeeded, so cost per success is undefined." : "";
+  const unobserved = unobservedCostCandidates(trials);
+  const undefinedCps =
+    unobserved.length > 0
+      ? `Generation cost was not observed for ${unobserved.join(", ")}, so the totals are a lower bound and cost per success is undefined.`
+      : led.cost_per_success === null
+        ? "No task succeeded, so cost per success is undefined."
+        : "";
   return (ratio + undefinedCps).trim();
 }
 
@@ -287,7 +303,7 @@ export interface StepReport {
     judge: JudgeFavourite | null;
     judgeNote: string;
     /** The chosen candidate's headline numbers; null when nobody was chosen. */
-    headline: { costPerSuccess: number | null; checkPass: number; checkExecuted: number } | null;
+    headline: { costPerSuccess: number | null; costObserved: boolean; checkPass: number; checkExecuted: number } | null;
     /** Everything this evaluation spent, all-in. */
     spend: number;
   };
@@ -358,7 +374,7 @@ export function buildStepReport(b: RunBundle): StepReport {
       judge,
       judgeNote: judgeNote(judge, rec.chosen),
       headline: chosenView
-        ? { costPerSuccess: chosenView.costPerSuccess, checkPass: chosenView.checkPass, checkExecuted: chosenView.checkExecuted }
+        ? { costPerSuccess: chosenView.costPerSuccess, costObserved: chosenView.costObserved, checkPass: chosenView.checkPass, checkExecuted: chosenView.checkExecuted }
         : null,
       spend: b.ledger.total,
     },
@@ -379,7 +395,7 @@ export function buildStepReport(b: RunBundle): StepReport {
       .filter((e) => e.state === "evaluator_error")
       .map((e) => ({ evaluator: e.evaluator, subject: evaluatorErrorSubject(e), reason: e.reason ?? "" })),
     ledger: b.ledger,
-    ledgerNote: ledgerNote(b.ledger),
+    ledgerNote: ledgerNote(b.ledger, b.trials),
     trialCount: b.trials.length,
     absoluteRan: b.trials.some((t) => t.judge.absolute_overall !== null),
     saturated: judgeDiscrimination(b.trials).saturated,

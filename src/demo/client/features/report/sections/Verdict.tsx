@@ -6,7 +6,7 @@
  */
 
 import type { StepReport } from "../../../../../report-model.js";
-import { fmtUsd } from "../../../../../report-format.js";
+import { fmtCost, fmtUsd } from "../../../../../report-format.js";
 import { cn } from "@/lib/utils";
 import { firmnessTone } from "@/lib/tone";
 import { Stat, Tag } from "../Section";
@@ -52,7 +52,7 @@ export function Verdict({ verdict: v, eligible, total }: Props) {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {h ? (
           <>
-            <Stat label="Generation cost per success" value={fmtUsd(h.costPerSuccess)} />
+            <Stat label="Generation cost per success" value={fmtCost(h.costPerSuccess, h.costObserved)} />
             <Stat
               label="Required check"
               value={h.checkExecuted > 0 ? `${h.checkPass} / ${h.checkExecuted}` : "—"}
