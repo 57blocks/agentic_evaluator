@@ -61,6 +61,14 @@ export function evaluationCoverage(rows: readonly EvaluationRow[]): CanonSummary
   return [...byKey.values()];
 }
 
+/** Trials whose generation spend the harness could not see (cost source "none"). */
+function unobservedCostGap(trials: readonly TrialRow[]): string | null {
+  const unobserved = trials.filter((t) => t.cost.source === "none");
+  if (unobserved.length === 0) return null;
+  const candidates = [...new Set(unobserved.map((t) => t.candidate))].sort().join(", ");
+  return `- generation cost: **not observed** for ${unobserved.length} trial(s) (${candidates}). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger \`generation\` and \`total\` are lower bounds, and \`cost_per_success\` / \`cost_per_attempt\` are null.`;
+}
+
 export function buildGaps(
   trials: readonly TrialRow[],
   evaluations: readonly EvaluationRow[],
@@ -86,6 +94,8 @@ export function buildGaps(
   const providerErrors = trials.filter((t) => t.completion_state === "provider_error").length;
   const evaluatorErrors = evaluations.filter((e) => e.state === "evaluator_error").length;
 
+  const unpriced = unobservedCostGap(trials);
+  if (unpriced !== null) lines.push(unpriced);
   lines.push("- `ttft_ms`: non-streaming calls; no time to first token.");
   lines.push(
     sawCache

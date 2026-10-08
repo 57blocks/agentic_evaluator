@@ -40,4 +40,7 @@ const fail = `export function parseQueryString(qs: string): Record<string, strin
 `;
 
 fs.writeFileSync(path.join(process.cwd(), "utils.ts"), mode === "fail" ? fail : pass, "utf8");
+// This script calls no model, so its spend is known: zero. A candidate that
+// does not write .eval-usage.json has its cost recorded as unobserved.
+fs.writeFileSync(".eval-usage.json", JSON.stringify({ cost_usd: 0 }));
 console.log(mode === "fail" ? "wrote broken utils.ts" : "wrote utils.ts");

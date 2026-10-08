@@ -5,7 +5,7 @@
  */
 
 import type { CandidateRow, StepReport } from "../../../../../report-model.js";
-import { fmtPct, fmtScore, fmtSec, fmtUsd } from "../../../../../report-format.js";
+import { fmtCost, fmtPct, fmtScore, fmtSec } from "../../../../../report-format.js";
 import { completionLabel } from "../../../../../report-copy.js";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -94,7 +94,7 @@ export function Candidates({ candidates, control }: Pick<StepReport, "candidates
               <TableCell className="text-right align-top"><Checks c={c} /></TableCell>
               <TableCell className="text-right align-top"><WinRate c={c} /></TableCell>
               <TableCell className="text-right align-top font-mono">{fmtScore(c.absolute)}</TableCell>
-              <TableCell className="text-right align-top font-mono">{fmtUsd(c.costPerSuccess)}</TableCell>
+              <TableCell className="text-right align-top font-mono">{fmtCost(c.costPerSuccess, c.costObserved)}</TableCell>
               <TableCell className="text-right align-top font-mono">{fmtSec(c.p50)}</TableCell>
             </TableRow>
           ))}
