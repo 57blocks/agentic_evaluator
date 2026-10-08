@@ -263,7 +263,7 @@ export function renderRunReport(b: RunBundle): string {
         <tr class="total"><td>Total</td><td class="num">${fmtUsd(led.total)}</td></tr>
         <tr><td>Full cost per success</td><td class="num">${fmtUsd(led.cost_per_success)}</td></tr>
       </tbody></table></div>
-      <p class="note">${ledgerNote(led, b.trials)}</p>
+      <p class="note">${escapeHtml(ledgerNote(led, b.trials))}</p>
     </section>
   </div>
 
