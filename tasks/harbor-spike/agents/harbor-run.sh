@@ -44,9 +44,10 @@ STATUS=$?
 TRIAL_RESULT="$(find "$JOBS" -mindepth 3 -maxdepth 3 -name result.json | head -1)"
 if [ -n "$TRIAL_RESULT" ] && [ "${HARBOR_SPIKE_DROP_RESULT:-0}" != "1" ]; then
   cp "$TRIAL_RESULT" harbor-trial.json
-  # Hand Harbor's own spend figure to the harness. Harbor prices terminus-2
-  # through LiteLLM, so it is an estimate; an agent that reports nothing
-  # (oracle, nop) leaves no file and its cost stays unobserved.
+  # Hand Harbor's own spend figure to the harness (read because the spec
+  # declares reports_usage; recorded as an estimate). The agent ran inside
+  # Harbor's container and cannot write this work dir. An agent that reports
+  # nothing (oracle, nop) leaves no file and its cost stays unobserved.
   node -e '
     const r = require("./harbor-trial.json").agent_result ?? {};
     if (typeof r.cost_usd !== "number") process.exit(0);
@@ -54,7 +55,6 @@ if [ -n "$TRIAL_RESULT" ] && [ "${HARBOR_SPIKE_DROP_RESULT:-0}" != "1" ]; then
       cost_usd: r.cost_usd,
       prompt_tokens: r.n_input_tokens ?? 0,
       completion_tokens: r.n_output_tokens ?? 0,
-      source: "estimated",
     }));
   '
 fi

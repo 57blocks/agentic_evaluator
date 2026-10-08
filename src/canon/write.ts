@@ -69,12 +69,23 @@ function unobservedCostGap(trials: readonly TrialRow[]): string | null {
   return `- generation cost: **not observed** for ${unobserved.length} trial(s) (${candidates}). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger \`generation\` and \`total\` are lower bounds, and \`cost_per_success\` / \`cost_per_attempt\` are null.`;
 }
 
+/** Spend a candidate's own command reported: recorded, but nothing the harness saw. */
+function selfReportedCostGap(trials: readonly TrialRow[], selfReporting: readonly string[]): string | null {
+  const reported = [...new Set(
+    trials.filter((t) => selfReporting.includes(t.candidate) && t.cost.source !== "none").map((t) => t.candidate),
+  )].sort();
+  if (reported.length === 0) return null;
+  return `- generation cost: **self-reported** by ${reported.join(", ")} through \`.eval-usage.json\` (the spec declares \`cli.reports_usage\`). Recorded as \`estimated\`; not verified by the harness, so it is only as trustworthy as the command that wrote it.`;
+}
+
 export function buildGaps(
   trials: readonly TrialRow[],
   evaluations: readonly EvaluationRow[],
   integrity?: TraceIntegrity,
   budget?: BudgetState,
   judgeMethods?: readonly string[],
+  /** Candidates whose spec lets them report their own spend (`cli.reports_usage`). */
+  selfReporting: readonly string[] = [],
 ): string {
   const lines: string[] = [
     "# GAPS — fields the protocol wants that this run did not observe",
@@ -96,6 +107,8 @@ export function buildGaps(
 
   const unpriced = unobservedCostGap(trials);
   if (unpriced !== null) lines.push(unpriced);
+  const selfReported = selfReportedCostGap(trials, selfReporting);
+  if (selfReported !== null) lines.push(selfReported);
   lines.push("- `ttft_ms`: non-streaming calls; no time to first token.");
   lines.push(
     sawCache
@@ -162,6 +175,9 @@ export async function writeCanonBundle(
         bundle.summary.integrity,
         bundle.summary.budget,
         bundle.manifest.judge.methods,
+        Object.entries(bundle.manifest.candidates)
+          .filter(([, def]) => def.cli?.reports_usage === true)
+          .map(([id]) => id),
       ),
       "utf-8",
     ),

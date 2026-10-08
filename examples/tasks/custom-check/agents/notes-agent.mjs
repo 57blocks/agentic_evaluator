@@ -24,7 +24,7 @@ const notes =
   (sloppy ? "" : section("Breaking changes", kept.filter((p) => p.isBreaking)));
 
 fs.writeFileSync("RELEASE_NOTES.md", notes);
-// This script calls no model, so its spend is known: zero. A candidate that
-// does not write .eval-usage.json has its cost recorded as unobserved.
+// This script calls no model, so its spend is known: zero. The spec declares
+// `reports_usage: true` for it; without that, cost is recorded as unobserved.
 fs.writeFileSync(".eval-usage.json", JSON.stringify({ cost_usd: 0 }));
 console.log(`wrote RELEASE_NOTES.md (${kept.length} PRs)`);

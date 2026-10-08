@@ -419,6 +419,23 @@ against the task directory. Use `x-harness: { producer: codegen }`. Add
 `image:` to run it in Docker (see [Safety](#safety)); `agenteval init` and the
 `custom-check` sample are working examples.
 
+agenteval cannot see what a command spends, so its cost is recorded as
+unobserved: `unobserved` in the tables, `null` per success, named in
+`GAPS.md`. A command that knows its spend can report it. Declare
+`reports_usage: true` under `cli:` and have the command write
+`.eval-usage.json` in its work dir:
+
+```json
+{ "cost_usd": 0.0727, "prompt_tokens": 60180, "completion_tokens": 4070 }
+```
+
+Declare it only for a command you trust to write that file. The agent under
+evaluation can write to its work dir too, so an agent you run directly could
+price itself. A wrapper that copies the figure from a harness it ran, as
+`tasks/harbor-spike` does with Harbor, is the intended use. The figure is
+recorded as `estimated`, and `GAPS.md` names the candidates that reported
+their own cost.
+
 ### Check scripts
 
 A `kind: command` check runs in the trial's work dir: the candidate's files,
@@ -490,8 +507,10 @@ Words you will meet:
 - **pairwise, both orders** — the judge compares A with B, then B with A. If
   the two disagree on a dimension, that dimension is a tie. "Output A/B" in the
   judge's text is the pair's first/second candidate, as the report labels them.
-- **cost source** — `provider-reported` is what OpenRouter billed; `none` means
-  not observed (command candidates, whose spending agenteval cannot see).
+- **cost source**: `provider-reported` is what OpenRouter billed.
+  `estimated` is priced from tokens, or self-reported by a command through
+  `reports_usage`. `none` means not observed: a command candidate that
+  reports nothing. Its cost per success is undefined, never $0.
 
 | file | holds |
 |---|---|

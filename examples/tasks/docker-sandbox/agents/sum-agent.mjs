@@ -11,8 +11,8 @@ import fs from "node:fs";
 
 const numbers = fs.readFileSync(".eval-input.txt", "utf8").trim().split(/\s+/).map(Number);
 fs.writeFileSync("SUM.txt", String(numbers.reduce((a, b) => a + b, 0)));
-// This script calls no model, so its spend is known: zero. A candidate that
-// does not write .eval-usage.json has its cost recorded as unobserved.
+// This script calls no model, so its spend is known: zero. The spec declares
+// `reports_usage: true` for it; without that, cost is recorded as unobserved.
 fs.writeFileSync(".eval-usage.json", JSON.stringify({ cost_usd: 0 }));
 fs.writeFileSync(
   "ENVIRONMENT.json",

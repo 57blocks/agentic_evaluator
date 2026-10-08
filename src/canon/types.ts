@@ -57,6 +57,13 @@ export interface AgentCliConfig {
   memory?: string;
   /** CPU ceiling, e.g. "2". Defaults to 2. */
   cpus?: string;
+  /**
+   * Read the candidate's spend from `.eval-usage.json` in its work dir.
+   * Off by default: the file sits where the evaluated agent can write, so
+   * only a spec author vouching for the command (a wrapper that copies a
+   * figure from a harness it runs) turns it on. Recorded as "estimated".
+   */
+  reports_usage?: boolean;
 }
 
 /** How a candidate's command was executed — recorded, never inferred. */

@@ -139,3 +139,13 @@ test("the ledger note names unobserved candidates rather than blaming zero succe
   assert.match(note, /lower bound/);
   assert.doesNotMatch(note, /No task succeeded/);
 });
+
+test("GAPS says which candidates' cost is self-reported and unverified", () => {
+  const rows = [trial("harbor", 0, 0.07, "estimated"), trial("model", 0, 0.01, "provider-reported")];
+
+  const gaps = buildGaps(rows, [], undefined, undefined, undefined, ["harbor"]);
+
+  assert.match(gaps, /generation cost: \*\*self-reported\*\* by harbor/);
+  assert.match(gaps, /not verified/);
+  assert.doesNotMatch(buildGaps(rows, []), /self-reported/);
+});
