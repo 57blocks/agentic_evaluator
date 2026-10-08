@@ -1,0 +1,20 @@
+{
+    "job_name": "2026-10-08__15-11-00",
+    "jobs_dir": "/var/folders/x9/jz03zj757v39tfvthwxcm3gh0000gp/T/tmp.z5LjUk6m0T",
+    "n_concurrent_trials": 1,
+    "quiet": true,
+    "agents": [
+        {
+            "name": "nop"
+        }
+    ],
+    "datasets": [
+        {
+            "name": "terminal-bench",
+            "version": "2.0",
+            "task_names": [
+                "fix-git"
+            ]
+        }
+    ]
+}
