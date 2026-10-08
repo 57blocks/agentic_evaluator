@@ -47,12 +47,26 @@ test("agent-cli writes artifacts, costs nothing, and records stdout", async () =
   assert.ok(!r.artifacts.some((f) => f.path === ".eval-input.txt"));
 });
 
-test("agent-cli records the usage a candidate reports in .eval-usage.json", async () => {
+test("agent-cli ignores a usage file unless the spec declares reports_usage", async () => {
   const workDir = await tmpWorkDir();
-  const usage = { cost_usd: 0.0727, prompt_tokens: 60180, completion_tokens: 4070, source: "estimated" };
+  const usage = { cost_usd: 0.0001, prompt_tokens: 1, completion_tokens: 1 };
 
   const r = await agentCliAdapter.execute(
     request({ argv: [process.execPath, helper], env: { FAKE_AGENT_USAGE: JSON.stringify(usage) } }),
+    { workDir, taskRoot: workDir },
+  );
+
+  assert.equal(r.costSource, "none");
+  assert.equal(r.costUsd, 0);
+  assert.equal(r.promptTokens, 0);
+});
+
+test("agent-cli records declared usage as an estimate, whatever source the file claims", async () => {
+  const workDir = await tmpWorkDir();
+  const usage = { cost_usd: 0.0727, prompt_tokens: 60180, completion_tokens: 4070, source: "provider-reported" };
+
+  const r = await agentCliAdapter.execute(
+    request({ argv: [process.execPath, helper], env: { FAKE_AGENT_USAGE: JSON.stringify(usage) }, reports_usage: true }),
     { workDir, taskRoot: workDir },
   );
 
@@ -64,11 +78,11 @@ test("agent-cli records the usage a candidate reports in .eval-usage.json", asyn
 });
 
 test("agent-cli treats a malformed usage file as unobserved, not as a measured cost", async () => {
-  for (const usage of [{ cost_usd: -1 }, { cost_usd: "0.07" }, { cost_usd: 0.07, source: "made-up" }]) {
+  for (const usage of [{ cost_usd: -1 }, { cost_usd: "0.07" }, { cost_usd: 0.07, prompt_tokens: 1.5 }]) {
     const workDir = await tmpWorkDir();
 
     const r = await agentCliAdapter.execute(
-      request({ argv: [process.execPath, helper], env: { FAKE_AGENT_USAGE: JSON.stringify(usage) } }),
+      request({ argv: [process.execPath, helper], env: { FAKE_AGENT_USAGE: JSON.stringify(usage) }, reports_usage: true }),
       { workDir, taskRoot: workDir },
     );
 

@@ -52,20 +52,24 @@ candidates:
     adapter: agent-cli
     cli:
       argv: [bash, agents/harbor-run.sh, oracle, "", "{{input}}"]
+      reports_usage: true
   - id: nop
     adapter: agent-cli
     cli:
       argv: [bash, agents/harbor-run.sh, nop, "", "{{input}}"]
+      reports_usage: true
   - id: oracle-lost-result
     adapter: agent-cli
     cli:
       argv: [bash, agents/harbor-run.sh, oracle, "", "{{input}}"]
+      reports_usage: true
       env: { HARBOR_SPIKE_DROP_RESULT: "1" }
   - id: claude-code-sonnet
     adapter: agent-cli
     cli:
       # BILLED through OpenRouter; spend is unobserved by the harness.
       argv: [bash, agents/harbor-run.sh, claude-code, anthropic/claude-sonnet-5, "{{input}}"]
+      reports_usage: true
       env: { HARBOR_VIA_OPENROUTER: "1" }
   - id: terminus-sonnet
     adapter: agent-cli
@@ -74,6 +78,7 @@ candidates:
       # LiteLLM, so nothing is installed in the task image. BILLED through
       # OpenRouter (OPENROUTER_API_KEY).
       argv: [bash, agents/harbor-run.sh, terminus-2, openrouter/anthropic/claude-sonnet-5, "{{input}}"]
+      reports_usage: true
 
 evaluators:
   required_checks:
