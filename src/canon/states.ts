@@ -32,9 +32,11 @@ export interface CompletionVerdict {
 }
 
 /**
- * Completion states the candidate did not cause: the provider, transport or
- * harness failed, or the run was cancelled. They make a trial undetermined and
- * leave it out of task-success and reliability denominators.
+ * Completion states the candidate cannot cause: the provider or transport
+ * failed after retries, the command could not be started, or the run was
+ * cancelled. They make a trial undetermined and leave it out of task-success
+ * and reliability denominators. Anything a candidate could trigger itself
+ * stays a failure (fail closed), or a candidate could excuse its misses.
  */
 export const INFRA_COMPLETION_STATES: ReadonlySet<CompletionState> = new Set(["provider_error", "cancelled"]);
 
@@ -68,9 +70,10 @@ export function classifyCompletion(signal: CompletionSignal): CompletionVerdict 
       }
       return { state: "malformed", truncated: false, reason: "empty completion" };
     }
-    // The adapter could not say what went wrong (e.g. the harness's own output
-    // buffer overflowed): that is the plumbing, not the candidate.
-    return { state: "provider_error", truncated: false, reason: "unclassified harness or transport error" };
+    // Fail closed: an error nobody could classify may be the candidate's own
+    // doing (e.g. flooding stdout past the harness's buffer), so it stays a
+    // candidate failure rather than an excuse.
+    return { state: "malformed", truncated: false, reason: "unclassified error" };
   }
 
   // A command that exits non-zero says it did not finish — a crash after

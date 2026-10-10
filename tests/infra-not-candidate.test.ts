@@ -18,8 +18,12 @@ const all = { mandatory_checks: "all" as const };
 const pass: EvaluationResult = { evaluator: "reward", version: "v", state: "pass" };
 const evErr: EvaluationResult = { evaluator: "reward", version: "v", state: "evaluator_error", reason: "no result" };
 
-test("an error the adapter could not classify is a provider failure, not malformed output", () => {
-  assert.equal(classifyCompletion({ error: { kind: "unknown" } }).state, "provider_error");
+test("an error nobody could classify stays the candidate's failure (fail closed)", () => {
+  // e.g. a command that floods stdout past the harness's buffer: candidate-triggerable.
+  const v = classifyCompletion({ error: { kind: "unknown" } });
+
+  assert.equal(v.state, "malformed");
+  assert.equal(decideTaskOutcome({ criteria: all, requiredChecks: ["reward"], completion: v.state, checks: [] }).outcome, "failure");
 });
 
 for (const completion of ["provider_error", "cancelled"] as const) {
@@ -37,14 +41,14 @@ test("a timeout is still the candidate's failure", () => {
   assert.equal(d.outcome, "failure");
 });
 
-test("a required check that could not run makes the trial undetermined, even when output was malformed", () => {
+test("malformed output stays a failure even when the check then crashed (fail closed)", () => {
+  // A candidate must not escape a miss by leaving output that breaks the check.
   const d = decideTaskOutcome({
     criteria: all, requiredChecks: ["reward"], completion: "malformed",
     completionReason: "output contained no parseable units", checks: [evErr],
   });
 
-  assert.equal(d.outcome, "undetermined");
-  assert.match(d.reasons.join(" "), /reward: evaluator_error/);
+  assert.equal(d.outcome, "failure");
 });
 
 test("malformed output with a check that ran is still the candidate's failure", () => {
