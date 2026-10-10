@@ -31,6 +31,13 @@ export interface CompletionVerdict {
   reason: string;
 }
 
+/**
+ * Completion states the candidate did not cause: the provider, transport or
+ * harness failed, or the run was cancelled. They make a trial undetermined and
+ * leave it out of task-success and reliability denominators.
+ */
+export const INFRA_COMPLETION_STATES: ReadonlySet<CompletionState> = new Set(["provider_error", "cancelled"]);
+
 const REFUSAL_FINISH = new Set(["content_filter", "refusal", "safety"]);
 
 /** A command candidate's non-zero exit, as the agent-cli adapter records it ("exit 1"). */
@@ -61,7 +68,9 @@ export function classifyCompletion(signal: CompletionSignal): CompletionVerdict 
       }
       return { state: "malformed", truncated: false, reason: "empty completion" };
     }
-    return { state: "malformed", truncated: false, reason: "unclassified error" };
+    // The adapter could not say what went wrong (e.g. the harness's own output
+    // buffer overflowed): that is the plumbing, not the candidate.
+    return { state: "provider_error", truncated: false, reason: "unclassified harness or transport error" };
   }
 
   // A command that exits non-zero says it did not finish — a crash after

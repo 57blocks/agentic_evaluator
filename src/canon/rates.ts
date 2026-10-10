@@ -4,8 +4,10 @@
  *   valid attempts        every trial of the candidate
  *   classified            success + candidate-caused failure (undetermined excluded)
  *   task-success rate     success / classified
- *   reliability           success / valid attempts (refusal, timeout … stay in)
- *   evaluation coverage   classified / valid attempts
+ *   reliability           success / (valid attempts − infra failures)
+ *                         (refusal, timeout, malformed stay in; provider_error
+ *                         and cancelled are not the candidate's, so they leave)
+ *   evaluation coverage   classified / valid attempts — infra failures show here
  *   required-check pass   pass / (pass + fail) — executed checks only
  *
  * A result is `directional` unless the sample and a predeclared minimum
@@ -13,6 +15,7 @@
  */
 
 import type { TrialRow } from "./rows.js";
+import { INFRA_COMPLETION_STATES } from "./states.js";
 import type { CompletionState, EvaluationState } from "./types.js";
 
 export interface Rate {
@@ -70,6 +73,7 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
   const failures = own.filter((r) => r.task_outcome === "failure").length;
   const undetermined = own.length - successes - failures;
   const classified = successes + failures;
+  const infra = own.filter((r) => INFRA_COMPLETION_STATES.has(r.completion_state)).length;
 
   const completion = own.reduce<Record<CompletionState, number>>(
     (acc, r) => ({ ...acc, [r.completion_state]: acc[r.completion_state] + 1 }),
@@ -91,7 +95,7 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
     valid_attempts: own.length,
     classified,
     task_success_rate: rate(successes, classified),
-    reliability: rate(successes, own.length),
+    reliability: rate(successes, own.length - infra),
     evaluation_coverage: rate(classified, own.length),
     required_check_pass_rate: rate(checkStates.pass, checkStates.pass + checkStates.fail),
     completion_states: completion,

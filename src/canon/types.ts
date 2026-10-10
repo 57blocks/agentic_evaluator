@@ -130,7 +130,7 @@ export interface EvaluationResult {
 export interface SuccessDecision {
   outcome: TaskOutcome;
   reasons: string[];
-  ruleVersion: "success-v1";
+  ruleVersion: "success-v2";
 }
 
 /** Usage and cost for one LLM call (or the sum over retries). */
