@@ -312,6 +312,7 @@ Every command takes `--help`.
 | `agenteval models <task>` | check each model id is listed and reachable, and its price | yes (`--catalog-only`: no) |
 | `agenteval run <task> --yes` | execute (without `--yes` it only prints the plan) | if the task calls models |
 | `agenteval report <run>` | re-render a run's `report.html` (run id or path) | no |
+| `agenteval install-skill` | add the `/agenteval-new-task` skill for Claude Code to this workspace | no |
 | `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
 
 `<task>` is a task name in the workspace (`my-task`), a task directory
@@ -362,6 +363,20 @@ model and needs no key:
 
 It exits 1 when anything blocks, and `--json` prints the findings for
 scripts.
+
+**Building a task with Claude Code.** `agenteval install-skill` adds a
+`/agenteval-new-task` skill to the workspace, in `.claude/skills/`. In Claude
+Code it walks you through one task:
+
+1. The decision the task informs.
+2. Where realistic inputs come from: logs, past failures, cases you write.
+   Synthetic inputs come last.
+3. A check that tells right from wrong, plus reference answers.
+4. Candidates and gates.
+
+You sign off twice: once on the inputs, and once on how the check grades
+real answers. It runs `check-task` before anything is paid, and never
+starts a billed run without your yes.
 
 **Rules `plan` enforces**
 
