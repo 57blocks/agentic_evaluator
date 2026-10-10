@@ -307,6 +307,7 @@ Every command takes `--help`.
 |---|---|---|
 | `agenteval init <name>` | create a runnable offline task (`--models`: a small real one) | no |
 | `agenteval ls` | list tasks, their runs, and what the runs spent | no |
+| `agenteval check-task <task>` | before a run: can the task tell right from wrong? (inputs, check, candidates) | no |
 | `agenteval plan <task>` | count what a run would do: generations, judge calls, budget | no |
 | `agenteval models <task>` | check each model id is listed and reachable, and its price | yes (`--catalog-only`: no) |
 | `agenteval run <task> --yes` | execute (without `--yes` it only prints the plan) | if the task calls models |
@@ -342,6 +343,25 @@ Exit codes: `0` done · `1` failed · `2` usage error · `3` finished but partia
 The [tutorial](#tutorial-compare-two-models-on-your-own-prompt) has a complete
 spec; this section is the reference. Run `agenteval plan <task>` after every
 edit — it validates the spec and names the field it rejects.
+
+**Before you pay for a run**, run `agenteval check-task <task>`. It calls no
+model and needs no key:
+
+- **Inputs**: it counts them and flags empty or duplicated ones. It also
+  says how far a pass rate can move by chance at that size. With 1 input × 2
+  trials the swing is about ±71 points, so aim for 10 or more inputs.
+- **Check**: it feeds the required check an empty answer, which must fail.
+  It also feeds it a correct answer, which must pass. Put correct answers in
+  `references/<input>/` as the files a good candidate would leave, with an
+  optional `output.txt`, or in `references/<input>.txt` as the deliverable
+  text. A check that passes nothing-at-all, or rejects a correct answer,
+  blocks.
+- **Candidates**: a declared script that does not exist blocks. A command
+  that runs without `image:` gets a warning, because it can read
+  `checks/`, `rubrics/` and `references/`.
+
+It exits 1 when anything blocks, and `--json` prints the findings for
+scripts.
 
 **Rules `plan` enforces**
 

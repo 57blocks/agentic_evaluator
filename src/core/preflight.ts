@@ -1,0 +1,149 @@
+/**
+ * `agenteval check-task`: what can be known about a task before a run is paid.
+ *
+ * A run tells you which candidate won; it cannot tell you the task was able
+ * to tell them apart. This answers that first, for free — no key, no model
+ * call, nothing written outside the task's `runs/`:
+ *
+ *   inputs      how many, empty or duplicated, and how far a pass rate can
+ *               move by chance at that size
+ *   check       an empty answer must fail; each reference answer must pass
+ *   candidates  a declared script that does not exist; a command running on
+ *               the host where it can read the answer key
+ *   step        a step that can never qualify anyone
+ *
+ * Findings are `blocking` (the run would measure the wrong thing), `warning`
+ * (it would be weaker than it looks) or `ok`.
+ */
+
+import { existsSync } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { adapterIdOf } from "../adapters/types.js";
+import { sha256 } from "../canon/hash.js";
+import { directionality } from "../canon/rates.js";
+import { taskInputPath } from "../paths.js";
+import { looksLikePath } from "../script-path.js";
+import { loadWorkflow } from "../spec/load-spec.js";
+import type { Suite } from "../types.js";
+import { probeCheck } from "./preflight-check.js";
+
+export type Severity = "blocking" | "warning" | "ok";
+
+export interface Finding {
+  severity: Severity;
+  /** Stable id, e.g. "check.null", for scripts and the authoring skill. */
+  code: string;
+  message: string;
+}
+
+export interface PreflightReport {
+  spec: string;
+  steps: Array<{ step: string; findings: Finding[] }>;
+  blocking: number;
+  warnings: number;
+}
+
+/** Trials per case when the spec does not say (matches the run default). */
+const DEFAULT_TRIALS = 2;
+
+interface LoadedInput {
+  slug: string;
+  text: string;
+}
+
+async function loadInputs(suite: Suite): Promise<LoadedInput[]> {
+  return Promise.all(
+    suite.inputs.map(async (slug) => ({ slug, text: await fs.readFile(taskInputPath(suite.taskRoot, slug), "utf-8") })),
+  );
+}
+
+function inputFindings(suite: Suite, inputs: readonly LoadedInput[]): Finding[] {
+  const out: Finding[] = [];
+  const empty = inputs.filter((i) => i.text.trim() === "").map((i) => i.slug);
+  if (empty.length > 0) out.push({ severity: "blocking", code: "inputs.empty", message: `empty input(s): ${empty.join(", ")}` });
+
+  const seen = new Map<string, string>();
+  const dupes: string[] = [];
+  for (const i of inputs) {
+    const key = sha256(i.text.trim());
+    const first = seen.get(key);
+    if (first) dupes.push(`${i.slug} = ${first}`);
+    else seen.set(key, i.slug);
+  }
+  if (dupes.length > 0) out.push({ severity: "warning", code: "inputs.duplicate", message: `same text as another input: ${dupes.join(", ")}` });
+
+  const n = inputs.length;
+  const trials = suite.trials ?? DEFAULT_TRIALS;
+  const noise = Math.round(100 / Math.sqrt(Math.max(1, n * trials)));
+  const dir = directionality(n, suite.mmd);
+  const size = `${n} input${n === 1 ? "" : "s"} × ${trials} trial${trials === 1 ? "" : "s"}: a pass rate moves about ±${noise} points by chance`;
+  out.push(
+    dir.directional
+      ? { severity: "warning", code: "inputs.count", message: `${size}; results will be directional (${dir.reasons.join("; ")})` }
+      : { severity: "ok", code: "inputs.count", message: size },
+  );
+  return out;
+}
+
+function candidateFindings(suite: Suite): Finding[] {
+  const out: Finding[] = [];
+  const onHost: string[] = [];
+  for (const [id, def] of Object.entries(suite.candidateDefs ?? {})) {
+    if (adapterIdOf(def, suite.producer ?? "prompt") !== "agent-cli" || !def.cli) continue;
+    // Same rule the adapter uses to resolve a declared script against the task.
+    const missing = def.cli.argv.filter(
+      (arg) => !path.isAbsolute(arg) && !arg.includes("{{") && looksLikePath(arg) && !existsSync(path.resolve(suite.taskRoot, arg)),
+    );
+    for (const arg of missing) {
+      out.push({ severity: "blocking", code: "candidate.script-missing", message: `${id}: declared script ${arg} not found in ${suite.taskRoot}` });
+    }
+    if (!def.cli.image) onHost.push(id);
+  }
+  if (onHost.length > 0 && suite.check) {
+    out.push({
+      severity: "warning",
+      code: "candidate.host-reads-answers",
+      message: `${onHost.join(", ")} run on this machine without an image: they can read the task's checks/, rubrics/ and references/ (the answer key). Give them cli.image to keep those out of reach.`,
+    });
+  }
+  return out;
+}
+
+function stepFindings(suite: Suite): Finding[] {
+  const checks = suite.requiredChecks ?? [];
+  if (checks.length === 0 && suite.operatingMode !== "judge-preference") {
+    return [{
+      severity: "blocking",
+      code: "step.no-checks",
+      message: `no required checks and operating mode ${suite.operatingMode ?? "(none)"}: every trial is undetermined, so no candidate can qualify. Declare a check, or use judge-preference.`,
+    }];
+  }
+  return [];
+}
+
+async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Finding[]> {
+  const findings: Finding[] = [...stepFindings(suite), ...candidateFindings(suite)];
+  if (suite.inputFrom) {
+    findings.push({ severity: "ok", code: "inputs.from-step", message: `inputs come from step ${suite.inputFrom} at run time; input checks skipped, the check is probed with an empty input` });
+    if (suite.check) findings.push(...(await probeCheck(suite, [{ slug: "from-previous-step", text: "" }], opts)).filter((f) => f.code === "check.null"));
+    return findings;
+  }
+  const inputs = await loadInputs(suite);
+  findings.push(...inputFindings(suite, inputs));
+  if (suite.check) findings.push(...(await probeCheck(suite, inputs, opts)));
+  return findings;
+}
+
+export async function preflightTask(specPath: string, opts: { keep?: boolean } = {}): Promise<PreflightReport> {
+  const suites = await loadWorkflow(specPath);
+  const steps: PreflightReport["steps"] = [];
+  for (const suite of suites) steps.push({ step: suite.stepId ?? suite.step, findings: await preflightStep(suite, opts) });
+  const all = steps.flatMap((s) => s.findings);
+  return {
+    spec: specPath,
+    steps,
+    blocking: all.filter((f) => f.severity === "blocking").length,
+    warnings: all.filter((f) => f.severity === "warning").length,
+  };
+}

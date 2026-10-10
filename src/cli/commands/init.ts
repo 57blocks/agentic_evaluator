@@ -138,12 +138,14 @@ const INPUT = `Write a function \`add(a: number, b: number): number\` that retur
 const README = (name: string): string => `# Task: ${name}
 
 \`\`\`bash
+agenteval check-task ${name}    # free: can this task tell right from wrong?
 agenteval plan ${name}          # what a run would cost
 agenteval run ${name} --yes     # run it (offline, free, as created)
 \`\`\`
 
 - \`spec.yaml\` — the versioned source of truth for this task
 - \`inputs/\` — the frozen inputs every candidate sees
+- \`references/\` — optional: a correct answer per input (\`references/<input>/\` files or \`references/<input>.txt\`), which \`check-task\` confirms the check passes
 - \`rubrics/\` — what a judge would score, one numbered item per dimension
 - \`agents/\` — local command candidates; a task owns its agents
 - \`scaffold/\` — the tsconfig the required check compiles against
@@ -182,8 +184,8 @@ export async function cmdInit(args: ParsedArgs, io: Io): Promise<ExitCode> {
   }
 
   const next = withModels
-    ? `  agenteval plan ${name}          # free: what a run would do\n  agenteval run ${name} --yes     # needs OPENROUTER_API_KEY, about a cent\n`
-    : `  agenteval run ${name} --yes\n`;
+    ? `  agenteval check-task ${name}    # free: can this task tell right from wrong?\n  agenteval plan ${name}          # free: what a run would do\n  agenteval run ${name} --yes     # needs OPENROUTER_API_KEY, about a cent\n`
+    : `  agenteval check-task ${name}\n  agenteval run ${name} --yes\n`;
   io.out(`created ${root}\n${next}`);
   return EXIT.ok;
 }

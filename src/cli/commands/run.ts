@@ -48,7 +48,8 @@ export const PLAN_HELP = `agenteval plan <task> [options]
   --json              print the plan as JSON
   --workspace DIR     workspace to resolve <task> under`;
 
-async function resolve(args: ParsedArgs): Promise<string> {
+/** The spec path a `<task>` argument names, in the workspace the flags select. */
+export async function resolveTask(args: ParsedArgs): Promise<string> {
   const target = args.positional[0];
   if (target === undefined) throw new UsageError("which task? (try `agenteval ls`)");
   const dir = stringFlag(args.flags, "workspace");
@@ -58,7 +59,7 @@ async function resolve(args: ParsedArgs): Promise<string> {
 
 export async function cmdPlan(args: ParsedArgs, io: Io): Promise<ExitCode> {
   rejectUnknown(args.flags, ["json", "workspace"]);
-  const spec = await resolve(args);
+  const spec = await resolveTask(args);
   const suites = await loadWorkflow(spec);
   const plan = planWorkflow(suites, { reuse: process.env.EVAL_REUSE === "1" });
   if (args.flags.json) {
@@ -74,7 +75,7 @@ export async function cmdPlan(args: ParsedArgs, io: Io): Promise<ExitCode> {
 
 export async function cmdRun(args: ParsedArgs, io: Io): Promise<ExitCode> {
   rejectUnknown(args.flags, KNOWN);
-  const spec = await resolve(args);
+  const spec = await resolveTask(args);
 
   const concurrency = numberFlag(args.flags, "concurrency");
   if (concurrency !== undefined) {
