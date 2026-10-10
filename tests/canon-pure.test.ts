@@ -71,7 +71,7 @@ const all = { mandatory_checks: "all" as const };
 test("all mandatory checks pass → success", () => {
   const d = decideTaskOutcome({ criteria: all, requiredChecks: ["tsc-noemit"], completion: "success", checks: [pass] });
   assert.equal(d.outcome, "success");
-  assert.equal(d.ruleVersion, "success-v1");
+  assert.equal(d.ruleVersion, "success-v2");
 });
 
 test("a failing mandatory check → failure", () => {

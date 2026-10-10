@@ -115,6 +115,18 @@ function fmtRate(rate: Rate): string {
   return `${rate.value.toFixed(3)} (${rate.numerator}/${rate.denominator})`;
 }
 
+const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+/** Why a rate is undefined when no attempt could be attributed to the candidate. */
+function infraOnly(c: CandidateRates, r: Rate): string | null {
+  if (r.denominator > 0) return null;
+  const infra = c.completion_states.provider_error + c.completion_states.cancelled;
+  if (infra > 0) return `no attempt completed (${plural(infra, "infra error")})`;
+  const ungraded = c.check_states.evaluator_error;
+  if (ungraded > 0) return `no attempt could be graded (${plural(ungraded, "evaluator error")})`;
+  return null;
+}
+
 function meetsMin(rate: Rate, min: number): boolean {
   return rate.value !== null && rate.value + 1e-12 >= min;
 }
@@ -441,7 +453,8 @@ export function recommend(input: RecommendInput): Recommendation {
       (c) =>
         meetsMin(c.required_check_pass_rate, min)
           ? null
-          : `required-check pass rate ${fmtRate(c.required_check_pass_rate)} < ${min}`,
+          : infraOnly(c, c.required_check_pass_rate) ??
+            `required-check pass rate ${fmtRate(c.required_check_pass_rate)} < ${min}`,
     );
   }
 
@@ -450,7 +463,10 @@ export function recommend(input: RecommendInput): Recommendation {
     runFilter(
       "reliability",
       `reliability ≥ ${min}`,
-      (c) => (meetsMin(c.reliability, min) ? null : `reliability ${fmtRate(c.reliability)} < ${min}`),
+      (c) =>
+        meetsMin(c.reliability, min)
+          ? null
+          : infraOnly(c, c.reliability) ?? `reliability ${fmtRate(c.reliability)} < ${min}`,
     );
   }
 
