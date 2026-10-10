@@ -108,6 +108,25 @@ export function dockerAvailable(): Promise<boolean> {
  * timeout only kills the `docker run` process, leaving the candidate running
  * — and still holding the work dir the next trial is about to use.
  */
+/**
+ * Docker's own faults, found before the candidate starts: docker missing, or
+ * the image neither local nor pullable. These are the harness's (spawn →
+ * provider_error); after this point nothing the container does can be blamed
+ * on docker.
+ */
+function dockerOk(args: readonly string[]): Promise<NodeJS.ErrnoException | null> {
+  return new Promise((resolve) => execFile("docker", args, (error) => resolve(error as NodeJS.ErrnoException | null)));
+}
+
+async function assertImage(image: string): Promise<void> {
+  const inspected = await dockerOk(["image", "inspect", "--format", "{{.Id}}", image]);
+  if (!inspected) return;
+  if (inspected.code === "ENOENT") throw new AdapterError("docker not found on PATH", { kind: "spawn", ms: 0 });
+  // `docker run` would pull a missing image; do it here so a failed pull is docker's fault, not the candidate's.
+  const pulled = await dockerOk(["pull", "--quiet", image]);
+  if (pulled) throw new AdapterError(`image not available and could not be pulled: ${image}`, { kind: "spawn", ms: 0 });
+}
+
 export function runInDocker(
   cli: AgentCliConfig,
   argv: readonly string[],
@@ -116,7 +135,7 @@ export function runInDocker(
   const name = `ae-trial-${randomUUID().slice(0, 12)}`;
   const args = dockerArgs(cli, name, opts.workDir, argv, opts.mounts);
 
-  return new Promise((resolve, reject) => {
+  return assertImage(cli.image as string).then(() => new Promise((resolve, reject) => {
     const t0 = Date.now();
     execFile(
       "docker",
@@ -140,19 +159,18 @@ export function runInDocker(
           reject(new AdapterError("docker not found on PATH", { kind: "spawn", ms }));
           return;
         }
-        // 125 is docker itself failing (no such image, bad flag) — an
-        // adapter fault. Anything else is the candidate's own exit code.
-        if (typeof e.code === "number" && e.code !== 125) {
+        // Once the container ran, every exit code is the candidate's — a
+        // command inside can exit 125 too, so it cannot pass for docker
+        // failing. Docker's own faults (no such image) are caught before the
+        // candidate starts, in assertImage.
+        if (typeof e.code === "number") {
           resolve({ ...out, exitCode: e.code });
           return;
         }
-        reject(
-          new AdapterError(`docker run failed: ${out.stderr.trim() || e.message}`, {
-            kind: "spawn",
-            ms,
-          }),
-        );
+        // Not an exit code (e.g. output past the buffer): unclassified, which
+        // fails closed as the candidate's.
+        reject(new AdapterError(`docker run failed: ${out.stderr.trim() || e.message}`, { kind: "unknown", ms }));
       },
     );
-  });
+  }));
 }

@@ -6,8 +6,6 @@
  *   - all mandatory checks `pass`                        → success
  *   - no required checks declared for the step          → undetermined
  *   - provider/transport/harness failure or cancelled    → undetermined (not the candidate's)
- *   - a mandatory check could not run (evaluator_error) → undetermined, even when
- *     the output was malformed: nothing graded the attempt
  *   - candidate did not complete                        → failure (candidate-caused)
  *
  * Every decision cites the criteria it used and the rule version, so a report
@@ -42,20 +40,6 @@ export function decideTaskOutcome(input: SuccessInput): SuccessDecision {
     return {
       outcome: "undetermined",
       reasons: [`completion state ${completion}${why} is not the candidate's doing`],
-      ruleVersion: SUCCESS_RULE_VERSION,
-    };
-  }
-
-  const unrunnable = requiredChecks
-    .map((id) => checks.find((c) => c.evaluator === id))
-    .filter((c): c is EvaluationResult => c?.state === "evaluator_error");
-  if (completion !== "success" && unrunnable.length > 0) {
-    return {
-      outcome: "undetermined",
-      reasons: [
-        `candidate completion state is ${completion}`,
-        ...unrunnable.map((c) => `${c.evaluator}: evaluator_error${c.reason ? ` (${c.reason})` : ""}`),
-      ],
       ruleVersion: SUCCESS_RULE_VERSION,
     };
   }
