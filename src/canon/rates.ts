@@ -81,6 +81,9 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
     { ...EMPTY_EVAL },
   );
   const generation = own.reduce((s, r) => s + r.cost.generation, 0);
+  // One attempt whose spend nobody saw makes the sum, and so the per-success
+  // figure, unknown — not a cheaper number.
+  const costObserved = own.every((r) => r.cost.source !== "none");
   const durations = own.filter((r) => r.completion_state === "success").map((r) => r.ms).sort((a, b) => a - b);
 
   return {
@@ -94,7 +97,8 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
     completion_states: completion,
     outcomes: { success: successes, failure: failures, undetermined },
     check_states: checkStates,
-    generation_cost_per_success: successes > 0 ? Math.round((generation / successes) * 1e6) / 1e6 : null,
+    generation_cost_per_success:
+      successes > 0 && costObserved ? Math.round((generation / successes) * 1e6) / 1e6 : null,
     p50_ms: percentile(durations, 0.5),
     p95_ms: percentile(durations, 0.95),
   };

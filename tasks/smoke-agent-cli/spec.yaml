@@ -28,10 +28,12 @@ candidates:
     adapter: agent-cli
     cli:
       argv: [node, agents/fake-codegen-agent.mjs]
+      reports_usage: true
   - id: fake-fail
     adapter: agent-cli
     cli:
       argv: [node, agents/fake-codegen-agent.mjs, --mode, fail]
+      reports_usage: true
 
 evaluators:
   required_checks:

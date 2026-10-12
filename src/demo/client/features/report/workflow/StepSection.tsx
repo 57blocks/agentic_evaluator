@@ -6,7 +6,7 @@
 
 import { Tag } from "@/components/tag";
 import type { CandidateMeta, WorkflowStep } from "../../../../../workflow-report-model.js";
-import { fmtPct, fmtScore, fmtSec, fmtUsd, plural } from "../../../../../report-format.js";
+import { fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, plural } from "../../../../../report-format.js";
 import { navigate } from "@/app/routes";
 import { firmnessTone } from "@/lib/tone";
 import { Badge } from "@/components/ui/badge";
@@ -146,7 +146,7 @@ export function StepSection({ step, index, runId, root, colorOf }: Props) {
                 <TableCell className="text-right font-mono">{fmtPct(c.winRate)}</TableCell>
                 <TableCell className="text-right"><Rate ok={c.checkPass} total={c.checkExecuted} /></TableCell>
                 <TableCell className="text-right"><Rate ok={c.completed.ok} total={c.completed.total} /></TableCell>
-                <TableCell className="text-right font-mono">{fmtUsd(c.costPerSuccess)}</TableCell>
+                <TableCell className="text-right font-mono">{fmtCost(c.costPerSuccess, c.costObserved)}</TableCell>
                 <TableCell className="text-right font-mono">{fmtSec(c.p50)}</TableCell>
               </TableRow>
             );

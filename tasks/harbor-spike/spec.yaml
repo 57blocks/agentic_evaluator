@@ -1,0 +1,103 @@
+# Spike: Harbor tasks as agenteval inputs (option 2 in the Harbor comparison doc).
+#
+#   agenteval plan tasks/harbor-spike                       # free
+#   caffeinate -i agenteval run tasks/harbor-spike --yes --html
+#
+# Each input is a Terminal-Bench 2.0 task name. Each candidate is a Harbor
+# agent run as a command (agents/harbor-run.sh): Harbor builds the task's
+# container, runs the agent, runs the task's verifier. checks/reward.mjs turns
+# the verifier's reward into pass / fail, and a missing reward into an
+# evaluator error rather than the candidate's failure.
+#
+# As written it runs oracle (applies the task's reference solution, free),
+# nop (does nothing, free) and terminus-sonnet (Harbor's own agent through
+# OpenRouter, BILLED, about $0.07-0.10 on fix-git). Harbor reports
+# terminus-2's spend; the wrapper hands it over in .eval-usage.json, so it
+# lands in the ledger as "estimated". oracle and nop report none and are
+# recorded as unobserved, not $0.
+#
+# Also defined, not in candidate_ids:
+#   oracle-lost-result  runs oracle, then discards Harbor's result, to show
+#                       a missing reward becomes an evaluator error
+#   claude-code-sonnet  Claude Code inside the task container; it downloads a
+#                       ~250 MB binary per trial, which timed out on a slow link
+#
+# Needs Docker running, uv on PATH, and OPENROUTER_API_KEY for terminus.
+
+protocol_version: "0.3"
+run_name: harbor-spike
+budget_usd: 1
+
+workflow:
+  control_candidate: oracle
+  steps:
+    - id: terminal
+      version: "1"
+      test_set:
+        id: terminal-bench-2-sample
+        inputs: [fix-git]
+      candidate_ids: [oracle, nop, terminus-sonnet]
+      required_checks: [harbor-reward]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 3000
+
+candidates:
+  - id: oracle
+    adapter: agent-cli
+    cli:
+      argv: [bash, agents/harbor-run.sh, oracle, "", "{{input}}"]
+      reports_usage: true
+  - id: nop
+    adapter: agent-cli
+    cli:
+      argv: [bash, agents/harbor-run.sh, nop, "", "{{input}}"]
+      reports_usage: true
+  - id: oracle-lost-result
+    adapter: agent-cli
+    cli:
+      argv: [bash, agents/harbor-run.sh, oracle, "", "{{input}}"]
+      reports_usage: true
+      env: { HARBOR_SPIKE_DROP_RESULT: "1" }
+  - id: claude-code-sonnet
+    adapter: agent-cli
+    cli:
+      # BILLED through OpenRouter; spend is unobserved by the harness.
+      argv: [bash, agents/harbor-run.sh, claude-code, anthropic/claude-sonnet-5, "{{input}}"]
+      reports_usage: true
+      env: { HARBOR_VIA_OPENROUTER: "1" }
+  - id: terminus-sonnet
+    adapter: agent-cli
+    cli:
+      # Harbor's own agent: drives the container from the host through
+      # LiteLLM, so nothing is installed in the task image. BILLED through
+      # OpenRouter (OPENROUTER_API_KEY).
+      argv: [bash, agents/harbor-run.sh, terminus-2, openrouter/anthropic/claude-sonnet-5, "{{input}}"]
+      reports_usage: true
+
+evaluators:
+  required_checks:
+    harbor-reward:
+      kind: command
+      argv: [node, checks/reward.mjs]
+      version_files: [checks/reward.mjs, agents/harbor-run.sh]
+      timeout_seconds: 30
+  judge:
+    # Required by the schema, never called: the Harbor verifier decides.
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/harbor.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 3
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2

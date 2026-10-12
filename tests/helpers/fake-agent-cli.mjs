@@ -3,6 +3,8 @@
  * Deterministic stand-in for an agent CLI. Reads `.eval-input.txt` from cwd,
  * writes `src/index.ts`, and optionally records leftover argv in `args.txt`.
  *
+ * FAKE_AGENT_USAGE, when set, is written verbatim to `.eval-usage.json`.
+ *
  * Usage: fake-agent-cli.mjs [--mode ok|fail] [extra...]
  */
 import fs from "node:fs";
@@ -30,4 +32,7 @@ if (argv.length > 0) {
 
 fs.mkdirSync(path.join(workDir, "src"), { recursive: true });
 fs.writeFileSync(path.join(workDir, "src", "index.ts"), `export const inputLen = ${input.length};\n`, "utf8");
+if (process.env.FAKE_AGENT_USAGE) {
+  fs.writeFileSync(path.join(workDir, ".eval-usage.json"), process.env.FAKE_AGENT_USAGE, "utf8");
+}
 console.log("ok");

@@ -46,6 +46,7 @@ candidates:
     adapter: agent-cli
     cli:
       argv: [node, agents/fake-codegen-agent.mjs]
+      reports_usage: true
 
 evaluators:
   required_checks:

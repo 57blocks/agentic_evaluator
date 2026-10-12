@@ -187,9 +187,16 @@ function pickLowestCost(
   mmd: number | null,
 ): { chosen: string | null; reason: string } {
   const priced = eligible.filter(hasCost);
+  const unpriced = eligible.filter((c) => !hasCost(c)).map((c) => c.candidate).sort();
   if (priced.length === 0) {
-    return { chosen: null, reason: "no eligible candidate has a defined cost per successful task" };
+    return {
+      chosen: null,
+      reason: `no eligible candidate has a defined cost: cost per successful task is undefined for ${unpriced.join(", ")} (no success, or spend not observed — see GAPS.md)`,
+    };
   }
+  const notRanked = unpriced.length > 0
+    ? `; not ranked, cost per success undefined: ${unpriced.join(", ")}`
+    : "";
   const best = rankAscending(priced, control, (c) => c.generation_cost_per_success)[0];
   const ctrl = control ? priced.find((c) => c.candidate === control) : undefined;
   if (ctrl && best.candidate !== control && mmd !== null) {
@@ -197,13 +204,13 @@ function pickLowestCost(
     if (delta < mmd) {
       return {
         chosen: control,
-        reason: `cheapest eligible is ${best.candidate} ($${best.generation_cost_per_success}) but the saving versus control ${control} ($${ctrl.generation_cost_per_success}) is ${delta.toFixed(6)}, below the declared minimum meaningful difference ${mmd}`,
+        reason: `cheapest eligible is ${best.candidate} ($${best.generation_cost_per_success}) but the saving versus control ${control} ($${ctrl.generation_cost_per_success}) is ${delta.toFixed(6)}, below the declared minimum meaningful difference ${mmd}${notRanked}`,
       };
     }
   }
   return {
     chosen: best.candidate,
-    reason: `lowest generation cost per successful task among eligible: $${best.generation_cost_per_success}`,
+    reason: `lowest generation cost per successful task among eligible: $${best.generation_cost_per_success}${notRanked}`,
   };
 }
 
