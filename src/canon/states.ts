@@ -31,6 +31,15 @@ export interface CompletionVerdict {
   reason: string;
 }
 
+/**
+ * Completion states the candidate cannot cause: the provider or transport
+ * failed after retries, the command could not be started, or the run was
+ * cancelled. They make a trial undetermined and leave it out of task-success
+ * and reliability denominators. Anything a candidate could trigger itself
+ * stays a failure (fail closed), or a candidate could excuse its misses.
+ */
+export const INFRA_COMPLETION_STATES: ReadonlySet<CompletionState> = new Set(["provider_error", "cancelled"]);
+
 const REFUSAL_FINISH = new Set(["content_filter", "refusal", "safety"]);
 
 /** A command candidate's non-zero exit, as the agent-cli adapter records it ("exit 1"). */
@@ -61,6 +70,9 @@ export function classifyCompletion(signal: CompletionSignal): CompletionVerdict 
       }
       return { state: "malformed", truncated: false, reason: "empty completion" };
     }
+    // Fail closed: an error nobody could classify may be the candidate's own
+    // doing (e.g. flooding stdout past the harness's buffer), so it stays a
+    // candidate failure rather than an excuse.
     return { state: "malformed", truncated: false, reason: "unclassified error" };
   }
 

@@ -122,6 +122,8 @@ export function gateLabels(e: EligibilityThresholds, requiredChecks: readonly st
 function removedDetail(gate: string, candidate: string, rec: Recommendation, fallback: string): string {
   const t = rec.tradeoffs.find((x) => x.candidate === candidate);
   if (!t) return fallback;
+  // The selector already said why nothing could be measured; a rate of 0/0 would hide it.
+  if (fallback.startsWith("no attempt ")) return fallback;
   switch (gate) {
     case "qualifying-success-criteria":
       return "spec declares no required check";
