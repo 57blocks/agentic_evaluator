@@ -67,10 +67,12 @@ candidates:
     adapter: agent-cli
     cli:
       argv: [node, agents/example.mjs]
+      reports_usage: true # the stand-in writes .eval-usage.json: it calls no model, so $0
   - id: variant
     adapter: agent-cli
     cli:
       argv: [node, agents/example.mjs, --mode, fail]
+      reports_usage: true # the stand-in writes .eval-usage.json: it calls no model, so $0
 
 evaluators:
   required_checks:
@@ -107,6 +109,9 @@ const source = fail
   ? "export function add(a: number, b: number): number {\\n  return \\"nope\\";\\n}\\n"
   : "export function add(a: number, b: number): number {\\n  return a + b;\\n}\\n";
 fs.writeFileSync("add.ts", source);
+// This script calls no model, so its spend is known: zero. The spec declares
+// \`reports_usage: true\` for it; without that, cost is recorded as unobserved.
+fs.writeFileSync(".eval-usage.json", JSON.stringify({ cost_usd: 0 }));
 process.stdout.write(fail ? "wrote a deliberate type error\\n" : "ok\\n");
 `;
 

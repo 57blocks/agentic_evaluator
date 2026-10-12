@@ -114,6 +114,7 @@ export const SPEC_SCHEMA = {
               network: { type: "string", enum: ["none", "bridge"] },
               memory: { type: "string", minLength: 1 },
               cpus: { type: "string", minLength: 1 },
+              reports_usage: { type: "boolean" },
             },
           },
         },

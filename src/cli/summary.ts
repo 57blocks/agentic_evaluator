@@ -33,6 +33,8 @@ interface Row {
   duels: number;
   absolute: number | null;
   costUsd: number;
+  /** False when any attempt's spend was not reported: the sum is then a floor, not a cost. */
+  costObserved: boolean;
   medianMs: number | null;
 }
 
@@ -57,8 +59,16 @@ function rowFor(candidate: string, trials: readonly TrialRow[]): Row {
     duels: duels.length,
     absolute: scores.length === 0 ? null : scores.reduce((a, b) => a + b, 0) / scores.length,
     costUsd: mine.reduce((sum, t) => sum + t.cost.generation + (t.cost.retry ?? 0), 0),
+    costObserved: mine.every((t) => t.cost.source !== "none"),
     medianMs: median(mine.map((t) => t.ms)),
   };
+}
+
+/** "$0.0700"; "unobserved" when nothing was reported; "≥$0.0700" when only some of it was. */
+function costCell(r: Row): string {
+  const usd = `$${r.costUsd.toFixed(4)}`;
+  if (r.costObserved) return usd;
+  return r.costUsd > 0 ? `≥${usd}` : "unobserved";
 }
 
 function pad(text: string, width: number, right = false): string {
@@ -91,7 +101,7 @@ export function summaryLines(input: SummaryInput): string[] {
     ...(showCheck ? [r.checkTotal === 0 ? "—" : `${r.checkPass}/${r.checkTotal}`] : []),
     ...(showDuels ? [r.duels === 0 ? "—" : `${r.wins}/${r.duels}`] : []),
     ...(showScore ? [r.absolute === null ? "—" : r.absolute.toFixed(1)] : []),
-    `$${r.costUsd.toFixed(4)}`,
+    costCell(r),
     r.medianMs === null ? "—" : `${(r.medianMs / 1000).toFixed(1)}s`,
   ]);
 
@@ -99,6 +109,7 @@ export function summaryLines(input: SummaryInput): string[] {
   const line = (cells: readonly string[]): string =>
     cells.map((c, i) => pad(c, widths[i], i > 0)).join("  ");
 
+  const lowerBound = rows.every((r) => r.costObserved) ? "" : ", lower bound";
   const gated = input.gated.map((g) => `  gated  ${g.candidate} — ${g.reason}`);
 
   return [
@@ -108,7 +119,7 @@ export function summaryLines(input: SummaryInput): string[] {
     ...body.map((b) => `  ${line(b)}`),
     "",
     ...gated,
-    `  → ${input.chosen ?? "no candidate qualified"} (${input.firmness}) · total $${input.ledgerTotal.toFixed(4)} (${input.ledgerSource})`,
+    `  → ${input.chosen ?? "no candidate qualified"} (${input.firmness}) · total $${input.ledgerTotal.toFixed(4)} (${input.ledgerSource}${lowerBound})`,
     "",
   ];
 }

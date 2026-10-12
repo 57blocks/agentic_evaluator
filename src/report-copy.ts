@@ -132,7 +132,7 @@ function removedDetail(gate: string, candidate: string, rec: Recommendation, fal
     case "p95-ceiling":
       return t.p95_ms === null ? "p95 duration not measured" : `p95 ${t.p95_ms} ms`;
     case "cost-ceiling":
-      return t.generation_cost_per_success === null ? "no successful task, so cost is n/a" : usd(t.generation_cost_per_success);
+      return t.generation_cost_per_success === null ? "cost per success undefined (no success, or spend not observed)" : usd(t.generation_cost_per_success);
     default:
       return fallback;
   }

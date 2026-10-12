@@ -48,10 +48,12 @@ candidates:
     adapter: agent-cli
     cli:
       argv: [node, agents/notes-agent.mjs]
+      reports_usage: true
   - id: sloppy
     adapter: agent-cli
     cli:
       argv: [node, agents/notes-agent.mjs, --mode, sloppy]
+      reports_usage: true
 
 evaluators:
   required_checks:

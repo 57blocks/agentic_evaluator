@@ -6,6 +6,8 @@
  */
 
 export const fmtUsd = (v: number | null | undefined): string => (v == null ? "—" : `$${v.toFixed(4)}`);
+/** A cost cell: "unobserved" when the spend was never reported, never "$0". */
+export const fmtCost = (v: number | null | undefined, observed: boolean): string => (observed ? fmtUsd(v) : "unobserved");
 export const fmtPct = (v: number | null | undefined): string => (v == null ? "—" : `${v.toFixed(0)}%`);
 export const fmtScore = (v: number | null | undefined): string => (v == null ? "—" : v.toFixed(1));
 export const fmtSec = (ms: number | null | undefined): string => (ms == null ? "—" : `${(ms / 1000).toFixed(1)} s`);

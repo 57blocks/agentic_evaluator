@@ -21,6 +21,10 @@ export interface CostLedger {
   source: CostSource;
   /** Number of successful task outcomes; cost per success is undefined at 0. */
   successes: number;
+  /**
+   * Undefined at 0 successes, and whenever any trial's generation cost was
+   * unobserved: `generation` and `total` are then lower bounds, not totals.
+   */
   cost_per_success: number | null;
   cost_per_attempt: number | null;
 }
@@ -43,6 +47,7 @@ export function buildLedger(
     trials.reduce((s, t) => s + (t.cost.retry ?? 0), 0);
   const total = generation + judging + scoring + retries;
   const successes = trials.filter((t) => t.task_outcome === "success").length;
+  const observed = trials.every((t) => t.cost.source !== "none");
   const sources: CostSource[] = [
     ...trials.map((t) => t.cost.source),
     ...evaluations.filter((e) => e.cost).map((e) => e.cost!.source),
@@ -56,7 +61,7 @@ export function buildLedger(
     total: round(total),
     source: mergeCostSource(sources),
     successes,
-    cost_per_success: successes > 0 ? round(total / successes) : null,
-    cost_per_attempt: trials.length > 0 ? round(total / trials.length) : null,
+    cost_per_success: successes > 0 && observed ? round(total / successes) : null,
+    cost_per_attempt: trials.length > 0 && observed ? round(total / trials.length) : null,
   };
 }

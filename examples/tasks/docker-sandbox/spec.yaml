@@ -51,10 +51,12 @@ candidates:
       image: node:22-bookworm-slim
       network: none
       argv: [node, agents/sum-agent.mjs]
+      reports_usage: true
   - id: on-host
     adapter: agent-cli
     cli:
       argv: [node, agents/sum-agent.mjs]
+      reports_usage: true
 
 evaluators:
   required_checks:
