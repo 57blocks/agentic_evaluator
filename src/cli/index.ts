@@ -22,6 +22,8 @@ import { cmdInit, INIT_HELP } from "./commands/init.js";
 import { cmdModels, MODELS_HELP } from "./commands/models.js";
 import { cmdReport, REPORT_HELP } from "./commands/report.js";
 import { cmdDash, DASH_HELP } from "./commands/dash.js";
+import { cmdCheckTask, CHECK_TASK_HELP } from "./commands/check-task.js";
+import { cmdInstallSkill, INSTALL_SKILL_HELP } from "./commands/install-skill.js";
 
 interface Command {
   summary: string;
@@ -34,6 +36,7 @@ interface Command {
 const VALUED = ["workspace", "concurrency", "port"] as const;
 
 export const COMMANDS: Record<string, Command> = {
+  "check-task": { summary: "check a task before paying for a run", help: CHECK_TASK_HELP, valued: VALUED, run: cmdCheckTask },
   plan: { summary: "say what a run would cost, and do none of it", help: PLAN_HELP, valued: VALUED, run: cmdPlan },
   run: { summary: "execute a task", help: RUN_HELP, valued: VALUED, run: cmdRun },
   ls: { summary: "list the workspace's tasks and their runs", help: LS_HELP, valued: VALUED, run: cmdLs },
@@ -41,6 +44,7 @@ export const COMMANDS: Record<string, Command> = {
   models: { summary: "are this task's models reachable from here, and at what price", help: MODELS_HELP, valued: VALUED, run: cmdModels },
   report: { summary: "re-render a run's report.html", help: REPORT_HELP, valued: VALUED, run: cmdReport },
   dash: { summary: "serve the dashboard", help: DASH_HELP, valued: VALUED, run: cmdDash },
+  "install-skill": { summary: "add the /agenteval-new-task skill for Claude Code", help: INSTALL_SKILL_HELP, valued: VALUED, run: cmdInstallSkill },
 };
 
 function usage(): string {

@@ -307,10 +307,12 @@ Every command takes `--help`.
 |---|---|---|
 | `agenteval init <name>` | create a runnable offline task (`--models`: a small real one) | no |
 | `agenteval ls` | list tasks, their runs, and what the runs spent | no |
+| `agenteval check-task <task>` | before a run: can the task tell right from wrong? (inputs, check, candidates) | no |
 | `agenteval plan <task>` | count what a run would do: generations, judge calls, budget | no |
 | `agenteval models <task>` | check each model id is listed and reachable, and its price | yes (`--catalog-only`: no) |
 | `agenteval run <task> --yes` | execute (without `--yes` it only prints the plan) | if the task calls models |
 | `agenteval report <run>` | re-render a run's `report.html` (run id or path) | no |
+| `agenteval install-skill` | add the `/agenteval-new-task` skill for Claude Code to this workspace | no |
 | `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
 
 `<task>` is a task name in the workspace (`my-task`), a task directory
@@ -342,6 +344,39 @@ Exit codes: `0` done · `1` failed · `2` usage error · `3` finished but partia
 The [tutorial](#tutorial-compare-two-models-on-your-own-prompt) has a complete
 spec; this section is the reference. Run `agenteval plan <task>` after every
 edit — it validates the spec and names the field it rejects.
+
+**Before you pay for a run**, run `agenteval check-task <task>`. It calls no
+model and needs no key:
+
+- **Inputs**: it counts them and flags empty or duplicated ones. It also
+  says how far a pass rate can move by chance at that size. With 1 input × 2
+  trials the swing is about ±71 points, so aim for 10 or more inputs.
+- **Check**: it feeds the required check an empty answer, which must fail.
+  It also feeds it a correct answer, which must pass. Put correct answers in
+  `references/<input>/` as the files a good candidate would leave, with an
+  optional `output.txt`, or in `references/<input>.txt` as the deliverable
+  text. A check that passes nothing-at-all, or rejects a correct answer,
+  blocks.
+- **Candidates**: a declared script that does not exist blocks. A command
+  that runs without `image:` gets a warning, because it can read
+  `checks/`, `rubrics/` and `references/`.
+
+It exits 1 when anything blocks, and `--json` prints the findings for
+scripts.
+
+**Building a task with Claude Code.** `agenteval install-skill` adds a
+`/agenteval-new-task` skill to the workspace, in `.claude/skills/`. In Claude
+Code it walks you through one task:
+
+1. The decision the task informs.
+2. Where realistic inputs come from: logs, past failures, cases you write.
+   Synthetic inputs come last.
+3. A check that tells right from wrong, plus reference answers.
+4. Candidates and gates.
+
+You sign off twice: once on the inputs, and once on how the check grades
+real answers. It runs `check-task` before anything is paid, and never
+starts a billed run without your yes.
 
 **Rules `plan` enforces**
 
