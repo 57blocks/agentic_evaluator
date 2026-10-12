@@ -5,6 +5,7 @@
  *   - any mandatory check `evaluator_error`/`not_evaluated` → undetermined
  *   - all mandatory checks `pass`                        → success
  *   - no required checks declared for the step          → undetermined
+ *   - provider/transport/harness failure or cancelled    → undetermined (not the candidate's)
  *   - candidate did not complete                        → failure (candidate-caused)
  *
  * Every decision cites the criteria it used and the rule version, so a report
@@ -17,8 +18,9 @@ import type {
   SuccessCriteria,
   SuccessDecision,
 } from "./types.js";
+import { INFRA_COMPLETION_STATES } from "./states.js";
 
-const SUCCESS_RULE_VERSION = "success-v1" as const;
+const SUCCESS_RULE_VERSION = "success-v2" as const;
 
 export interface SuccessInput {
   criteria?: SuccessCriteria;
@@ -32,6 +34,15 @@ export interface SuccessInput {
 
 export function decideTaskOutcome(input: SuccessInput): SuccessDecision {
   const { criteria, requiredChecks, completion, checks } = input;
+
+  if (INFRA_COMPLETION_STATES.has(completion)) {
+    const why = input.completionReason ? ` (${input.completionReason})` : "";
+    return {
+      outcome: "undetermined",
+      reasons: [`completion state ${completion}${why} is not the candidate's doing`],
+      ruleVersion: SUCCESS_RULE_VERSION,
+    };
+  }
 
   if (completion !== "success") {
     const why = input.completionReason ? ` (${input.completionReason})` : "";

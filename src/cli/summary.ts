@@ -27,6 +27,8 @@ interface Row {
   candidate: string;
   trials: number;
   success: number;
+  /** Trials no one could attribute (infra failure, check could not run): not misses. */
+  undetermined: number;
   checkPass: number;
   checkTotal: number;
   wins: number;
@@ -46,13 +48,17 @@ function median(values: readonly number[]): number | null {
 
 function rowFor(candidate: string, trials: readonly TrialRow[]): Row {
   const mine = trials.filter((t) => t.candidate === candidate);
-  const checked = mine.filter((t) => Object.keys(t.checks).length > 0);
+  // A trial whose check could not run was not graded: it is not a check miss.
+  const checked = mine.filter(
+    (t) => Object.keys(t.checks).length > 0 && Object.values(t.checks).every((c) => c.state === "pass" || c.state === "fail"),
+  );
   const scores = mine.map((t) => t.judge.absolute_overall).filter((n): n is number => n !== null);
   const duels = mine.flatMap((t) => t.judge.pairwise ?? []);
   return {
     candidate,
     trials: mine.length,
     success: mine.filter((t) => t.task_outcome === "success").length,
+    undetermined: mine.filter((t) => t.task_outcome === "undetermined").length,
     checkPass: checked.filter((t) => Object.values(t.checks).every((c) => c.state === "pass")).length,
     checkTotal: checked.length,
     wins: duels.filter((d) => d.resolved === "win").length,
@@ -62,6 +68,12 @@ function rowFor(candidate: string, trials: readonly TrialRow[]): Row {
     costObserved: mine.every((t) => t.cost.source !== "none"),
     medianMs: median(mine.map((t) => t.ms)),
   };
+}
+
+/** "1/2" over attributable trials; ", N undetermined" when some were not. */
+function successCell(r: Row): string {
+  const cell = `${r.success}/${r.trials - r.undetermined}`;
+  return r.undetermined > 0 ? `${cell}, ${r.undetermined} undetermined` : cell;
 }
 
 /** "$0.0700"; "unobserved" when nothing was reported; "≥$0.0700" when only some of it was. */
@@ -97,7 +109,7 @@ export function summaryLines(input: SummaryInput): string[] {
   ];
   const body = rows.map((r) => [
     r.candidate,
-    `${r.success}/${r.trials}`,
+    successCell(r),
     ...(showCheck ? [r.checkTotal === 0 ? "—" : `${r.checkPass}/${r.checkTotal}`] : []),
     ...(showDuels ? [r.duels === 0 ? "—" : `${r.wins}/${r.duels}`] : []),
     ...(showScore ? [r.absolute === null ? "—" : r.absolute.toFixed(1)] : []),

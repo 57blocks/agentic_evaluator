@@ -17,6 +17,7 @@ import type { RunManifest } from "./manifest.js";
 import type { CandidateRates, Directionality } from "./rates.js";
 import type { EvaluationRow, TrialRow } from "./rows.js";
 import { recommendFromCanon, type Recommendation } from "./select.js";
+import { INFRA_COMPLETION_STATES } from "./states.js";
 import { budgetGap, type BudgetState } from "./budget.js";
 import { judgeDiscrimination, saturationGap, type JudgeDiscrimination } from "./discrimination.js";
 import type { TraceIntegrity } from "./trace.js";
@@ -69,6 +70,17 @@ function unobservedCostGap(trials: readonly TrialRow[]): string | null {
   return `- generation cost: **not observed** for ${unobserved.length} trial(s) (${candidates}). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger \`generation\` and \`total\` are lower bounds, and \`cost_per_success\` / \`cost_per_attempt\` are null.`;
 }
 
+/** Trials the provider, transport or harness lost: undetermined, never the candidate's failure. */
+function infraGap(trials: readonly TrialRow[]): string | null {
+  const lost = trials.filter((t) => INFRA_COMPLETION_STATES.has(t.completion_state));
+  if (lost.length === 0) return null;
+  const byCandidate = [...new Set(lost.map((t) => t.candidate))]
+    .sort()
+    .map((c) => `${c} ${lost.filter((t) => t.candidate === c).length}`)
+    .join(", ");
+  return `- infra failures: ${lost.length} trial(s) ended in provider_error or cancelled (${byCandidate}). They are undetermined: out of task-success and reliability denominators, and shown as lost evaluation coverage.`;
+}
+
 /** Spend a candidate's own command reported: recorded, but nothing the harness saw. */
 function selfReportedCostGap(trials: readonly TrialRow[], selfReporting: readonly string[]): string | null {
   const reported = [...new Set(
@@ -102,7 +114,6 @@ export function buildGaps(
   }
   const sawCache = trials.some((t) => t.tokens.cached !== null && t.tokens.cached > 0);
   const sawProvider = trials.some((t) => t.deployment_ref !== null);
-  const providerErrors = trials.filter((t) => t.completion_state === "provider_error").length;
   const evaluatorErrors = evaluations.filter((e) => e.state === "evaluator_error").length;
 
   const unpriced = unobservedCostGap(trials);
@@ -124,10 +135,10 @@ export function buildGaps(
   lines.push("- `tool_calls`: producers make no tool calls this milestone.");
   lines.push("- `checkpoint`: not applicable to single-call trials.");
   lines.push(
-    providerErrors > 0
-      ? `- transport retry: ${providerErrors} provider_error attempt(s) were recorded as candidate results; automatic transport retry is not implemented yet, so they may over-count candidate failures.`
-      : "- transport retry: not implemented; no provider_error occurred in this run.",
+    "- transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.",
   );
+  const infra = infraGap(trials);
+  if (infra !== null) lines.push(infra);
   lines.push(
     evaluatorErrors > 0
       ? `- evaluator errors: ${evaluatorErrors} evaluator invocation(s) failed and are recorded as evaluator_error rows (excluded from candidate rates).`
