@@ -11,6 +11,7 @@ import {
   humanRecord,
   judgeAgreement,
   latestVerdicts,
+  matchesShow,
   pairId,
   reviewQueue,
   verdictRow,
@@ -130,4 +131,14 @@ test("agreement with the judge reads pairs in either orientation, per dimension"
   assert.deepEqual(agreement.overall, { agree: 1, total: 2 });
   assert.deepEqual(agreement.dimensions.coverage, { agree: 2, total: 2 });
   assert.deepEqual(agreement.dimensions.size, { agree: 0, total: 1 });
+});
+
+test("show globs: * and ? stay in a segment, ** crosses them", () => {
+  const cases: Array<[string, string, boolean]> = [
+    [".ab/tasks.json", ".ab/tasks.json", true], ["UI_CONTRACT.md", "*.md", true], ["docs/PRD.md", "*.md", false],
+    ["docs/PRD.md", "**/*.md", true], ["PRD.md", "**/*.md", true], ["a/b/c.ts", "a/**", true],
+    ["x.json", "?.json", true], ["xy.json", "?.json", false], ["ab", "a.b", false],
+  ];
+
+  for (const [file, glob, want] of cases) assert.equal(matchesShow(file, [glob]), want, `${file} ~ ${glob}`);
 });

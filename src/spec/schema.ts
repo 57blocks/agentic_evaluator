@@ -143,6 +143,17 @@ export const SPEC_SCHEMA = {
             },
           },
         },
+        human: {
+          type: "object",
+          additionalProperties: false,
+          required: ["rubric_file"],
+          properties: {
+            rubric_file: { type: "string", minLength: 1 },
+            method: { type: "string", enum: ["pairwise"] },
+            show: { type: "array", items: { type: "string", minLength: 1 } },
+            dimensions: { type: "array", items: { type: "string", minLength: 1 } },
+          },
+        },
         judge: {
           type: "object",
           additionalProperties: false,
