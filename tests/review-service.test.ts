@@ -206,3 +206,17 @@ test("DNS rebinding: a request for a non-loopback host name is refused, GET and 
     server.close();
   }
 });
+
+test("a file under the cap is whole, even when it is mostly multi-byte text", async () => {
+  const { capText } = await import("../src/core/review-service.js");
+  const cjk = Buffer.from("新增一个 platform 基座域 → foundation\n".repeat(200), "utf-8");
+
+  const whole = capText(cjk, 512 * 1024);
+  const cut = capText(cjk, 100);
+
+  assert.equal(whole.truncated, false);
+  assert.equal(whole.content, cjk.toString("utf-8"));
+  assert.equal(cut.truncated, true);
+  assert.ok(Buffer.byteLength(cut.content, "utf-8") <= 100);
+  assert.doesNotMatch(cut.content, /�/);
+});

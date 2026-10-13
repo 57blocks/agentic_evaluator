@@ -9,7 +9,7 @@
  * and the rubric's hash versions every verdict.
  */
 
-import { appendFile, mkdir, readdir, readFile, stat } from "node:fs/promises";
+import { appendFile, mkdir, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { sha256, short } from "../canon/hash.js";
 import type { RunManifest } from "../canon/manifest.js";
@@ -159,13 +159,25 @@ async function shownFiles(ctx: RunContext, candidate: string, input: string, tri
   let budget = MAX_ANSWER_BYTES;
   for (const rel of paths) {
     const abs = path.join(workDir, rel);
-    const size = (await stat(abs)).size;
-    const cap = Math.min(MAX_FILE_BYTES, budget);
-    const content = cap > 0 ? (await readFile(abs, "utf-8")).slice(0, cap) : "";
-    budget -= content.length;
-    out.push({ path: rel, content, truncated: size > content.length });
+    const capped = capText(await readFile(abs), Math.min(MAX_FILE_BYTES, budget));
+    budget -= Buffer.byteLength(capped.content, "utf-8");
+    out.push({ path: rel, content: capped.content, truncated: capped.truncated });
   }
   return out;
+}
+
+/**
+ * A file's text, cut to at most `cap` bytes. Sizes are bytes on both sides:
+ * comparing a byte size with a string's length flagged every file with
+ * multi-byte text (Chinese, arrows) as truncated when it was whole. A cut
+ * lands on a character boundary, never inside one.
+ */
+export function capText(buf: Buffer, cap: number): { content: string; truncated: boolean } {
+  if (buf.length <= cap) return { content: buf.toString("utf-8"), truncated: false };
+  let end = Math.max(0, cap);
+  // Step back over UTF-8 continuation bytes (10xxxxxx) to a character start.
+  while (end > 0 && (buf[end] & 0xc0) === 0x80) end -= 1;
+  return { content: buf.subarray(0, end).toString("utf-8"), truncated: true };
 }
 
 function toScreen(v: HumanVerdict, layout: BlindLayout): ScreenVerdict {
