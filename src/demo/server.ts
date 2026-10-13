@@ -25,6 +25,7 @@ import { buildOverview } from "../server/overview.js";
 import { hasReport, loadReportModel } from "../report-model.js";
 import { NoSuchSpecError } from "../core/workspace.js";
 import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun, safeId } from "./catalog.js";
+import { loadReviewSession, recordVerdict, reveal, ReviewError, type VerdictInput } from "../core/review-service.js";
 import { demoPage, DIST_DIR } from "./ui.js";
 
 const HOST = "127.0.0.1";
@@ -263,6 +264,45 @@ async function handleRuns(
   return false;
 }
 
+/**
+ * Blind human review of one run (docs/design/human-review.md).
+ *
+ *   GET  /api/review/<run>?reviewer=…[&failed=1]  the blinded queue, files embedded
+ *   POST /api/review/<run>                        one verdict {reviewer, pairId, overall, dimensions?, note?}
+ *   POST /api/review/<run>/reveal                 unblind for {reviewer}
+ *
+ * The run id must be in the live index, the same gate /artifact/ uses.
+ */
+async function handleReview(ws: Workspace, req: http.IncomingMessage, res: http.ServerResponse, url: URL): Promise<boolean> {
+  const m = url.pathname.match(/^\/api\/review\/([^/]+)(\/reveal)?$/);
+  if (!m) return false;
+  const runDir = (await liveRunIndex({ ws })).get(decodeURIComponent(m[1]));
+  if (!runDir) {
+    sendJson(res, 404, { error: "run not found" });
+    return true;
+  }
+  try {
+    if (req.method === "GET" && !m[2]) {
+      const session = await loadReviewSession(runDir, url.searchParams.get("reviewer") ?? "", {
+        includeFailed: url.searchParams.get("failed") === "1",
+      });
+      sendJson(res, 200, session);
+    } else if (req.method === "POST" && m[2]) {
+      const body = (await readJsonBody(req)) as { reviewer?: string };
+      await reveal(runDir, body.reviewer ?? "");
+      sendJson(res, 200, { ok: true });
+    } else if (req.method === "POST") {
+      await recordVerdict(runDir, (await readJsonBody(req)) as VerdictInput);
+      sendJson(res, 200, { ok: true });
+    } else {
+      sendJson(res, 405, { error: "method not allowed" });
+    }
+  } catch (err) {
+    sendJson(res, err instanceof ReviewError ? 400 : 500, { error: err instanceof Error ? err.message : String(err) });
+  }
+  return true;
+}
+
 async function handle(
   ws: Workspace,
   runs: RunRegistry,
@@ -271,6 +311,7 @@ async function handle(
 ): Promise<void> {
   const url = new URL(req.url ?? "/", `http://${HOST}`);
   if (await handleRuns(runs, req, res, url)) return;
+  if (await handleReview(ws, req, res, url)) return;
   if (req.method !== "GET") {
     send(res, 405, "method not allowed");
     return;
