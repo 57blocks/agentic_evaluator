@@ -17,7 +17,8 @@
  * Pass: .ab/tasks.json parses with at least one task, no hard finding from
  * any of them, and no partial finding from a REQUIRED gate.
  *
- * ab-gate runs from the agb checkout in AGB_HOME (default ~/workspace/57b/agb).
+ * ab-gate runs from the agb checkout in AGB_HOME (default ~/workspace/57b/agb),
+ * at packages/agb/src/gate/cli.ts (packages/ab-gate/src/cli.ts before agb #77).
  */
 
 import { spawnSync } from "node:child_process";
@@ -30,7 +31,9 @@ const RECORDED = ["ac-task-coverage", "task-granularity", "task-files-vague"];
 const GATES = [...REQUIRED, ...RECORDED];
 const home = process.env.AGB_HOME ?? path.join(os.homedir(), "workspace", "57b", "agb");
 const tsx = path.join(home, "node_modules", ".bin", "tsx");
-const cli = path.join(home, "packages", "ab-gate", "src", "cli.ts");
+// agb #77 folded ab-gate into the agb package; keep the old path for older checkouts.
+const cli = [path.join(home, "packages", "agb", "src", "gate", "cli.ts"), path.join(home, "packages", "ab-gate", "src", "cli.ts")].find((p) => existsSync(p))
+  ?? path.join(home, "packages", "agb", "src", "gate", "cli.ts");
 const cwd = process.cwd();
 
 function finish(code, evidence, reason) {
@@ -52,10 +55,21 @@ if (!existsSync(cli)) finish(2, `ab-gate not found: ${cli} (set AGB_HOME)`, "ab-
 
 const events = path.join(cwd, ".ab", "events.jsonl");
 rmSync(events, { force: true });
+// Newer agb redacts finding text from events.jsonl; the gate's own report on
+// stdout still says what is wrong, so the first line under each finding
+// header is kept as evidence.
+const ANSI = /\x1b\[[0-9;]*m/g;
+const headlines = [];
 for (const gate of GATES) {
-  const r = spawnSync(tsx, [cli, "check", "--all", `--gate=${gate}`, "--quiet"], { cwd, encoding: "utf-8" });
+  const r = spawnSync(tsx, [cli, "check", "--all", `--gate=${gate}`, "--stage=detail"], { cwd, encoding: "utf-8" });
   if (r.status !== 0 && r.status !== 1) finish(2, `ab-gate ${gate} exited with ${r.status}: ${(r.stderr || r.stdout).slice(-400)}`, "ab-gate did not run");
+  const report = (r.stdout ?? "").replace(ANSI, "").split("\n");
+  report.forEach((line, i) => {
+    const head = /^\[(hard|partial)\]\s+(\S+)/.exec(line);
+    if (head) headlines.push({ gate: head[2], severity: head[1], text: (report[i + 1] ?? "").trim() });
+  });
 }
+const headlineFor = (f) => headlines.find((h) => h.gate === f.gate && h.severity === f.severity && !h.used);
 
 const findings = existsSync(events)
   ? readFileSync(events, "utf-8").split("\n").filter(Boolean).map((l) => JSON.parse(l)).filter((e) => e.type === "gate.finding")
@@ -65,7 +79,11 @@ const noted = findings.filter((f) => f.severity === "partial" && RECORDED.includ
 const byGate = RECORDED.map((g) => `${g} ${noted.filter((f) => f.gate === g).length}`).join(", ");
 const lines = [
   `${tasks} tasks; ${blocking.length} coverage or structure findings`,
-  ...blocking.slice(0, 6).map((f) => `· [${f.gate}] ${String(f.message).slice(0, 160)}`),
+  ...blocking.slice(0, 6).map((f) => {
+    const h = headlineFor(f);
+    if (h) h.used = true;
+    return `· [${f.gate}] ${String(f.message ?? h?.text ?? `${f.severity} finding`).slice(0, 200)}`;
+  }),
   `heuristics (recorded, not gating): ${byGate}`,
 ];
 finish(blocking.length === 0 ? 0 : 1, lines.join("\n"), blocking.length ? "plan has coverage or structure findings" : undefined);

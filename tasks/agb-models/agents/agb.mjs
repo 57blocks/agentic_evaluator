@@ -23,7 +23,8 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { cpSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -76,6 +77,16 @@ run("git", ["init", "-q"]);
 run("git", ["add", "-A"]);
 run("git", ["-c", "user.name=agentic-evaluator", "-c", "user.email=eval@localhost", "commit", "-q", "-m", `fixture: ${header.fixture}`]);
 
+const AGB_HOME = process.env.AGB_HOME ?? path.join(os.homedir(), "workspace", "57b", "agb");
+const AGB_PLUGIN = path.join(AGB_HOME, "skills", "dist", "packages", "claude-code");
+if (header.stage === "detail" && !existsSync(path.join(AGB_PLUGIN, "skills", "stage-detail"))) {
+  // Without the skill the trial would measure the model freelancing, not agb:
+  // refuse before any model is called. Every candidate fails the same way, so
+  // the run ends needs-review with this message in raw/ rather than a ranking.
+  console.error(`agb's Claude Code plugin is not built at ${AGB_PLUGIN} (run pnpm install in AGB_HOME)`);
+  process.exit(2);
+}
+
 const DETAIL_PROMPT =
   "用 stage-detail skill 完成这个项目的详设与任务拆解阶段。输入在 docs/PRD.md、docs/DESIGN.md 与 _contracts/；" +
   "按 skill 的要求产出 .ab/tasks.json 与 UI_CONTRACT.md。只做这一个阶段，不要写代码，不要写测试。" +
@@ -92,6 +103,11 @@ try {
       "-p", DETAIL_PROMPT,
       "--model", model,
       "--max-budget-usd", String(MAX_COST.detail),
+      // The stage-detail skill comes from agb's own build in AGB_HOME, loaded
+      // for this session only: the user-level agb-skills plugin may be
+      // disabled or another version, and either way the candidate would run
+      // without the skill the step is meant to measure.
+      "--plugin-dir", AGB_PLUGIN,
       "--permission-mode", "acceptEdits",
       "--allowedTools", "Read", "Edit", "Write", "Glob", "Grep", "Skill", "Bash(ls:*)",
     ]);
