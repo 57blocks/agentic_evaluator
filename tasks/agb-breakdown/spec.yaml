@@ -1,0 +1,96 @@
+# Which model agb should use for task breakdown (the detail stage).
+#
+# Every candidate is "agb + one model": agents/agb.mjs sets .abrc.json's model
+# slots to it and runs the stage-detail skill with `claude -p`; only the model
+# changes. Inputs are real agb projects at the moment before their task plan
+# was written, harvested with scripts/harvest.mjs --only=detail --reference:
+#
+#   demo-todo  Team Tasks              PRD 246 lines   adopted plan: 3 domains, 8 tasks
+#   chessicle  AI chess analysis       PRD 617 lines   adopted plan: 7 domains, 37 tasks
+#   invoice    Cobo invoice (Chinese)  PRD 1184 lines  adopted plan: 10 domains, 35 tasks
+#
+# invoice wrote design, contracts and plan in one commit (0857da9); its input
+# is that commit with the plan's outputs removed, and its reference is the
+# corrected plan (2c2281d), which split out a domain to break two dependency
+# cycles. references/<input>/ holds each project's adopted plan; check-task
+# confirms the check passes them.
+#
+# Success: .ab/tasks.json parses with at least one task and agb's coverage and
+# structure gates find nothing (checks/plan-gates.mjs). Heuristic gates are
+# counted in the evidence, never gated on.
+#
+# Three inputs: every result is directional. Add agb projects with
+# scripts/harvest.mjs as they appear.
+#
+# agents/agb.mjs reports claude's own total_cost_usd (.eval-usage.json,
+# reports_usage), recorded as an estimate. The mode stays highest-assurance;
+# cost is shown beside it. A run bills the models through claude; agb.mjs caps
+# each trial at $15 (--max-budget-usd). Start with `agenteval check-task agb-breakdown`.
+protocol_version: "0.3"
+run_name: agb-breakdown
+
+workflow:
+  control_candidate: agb-sonnet-5
+  steps:
+    - id: detail
+      version: "1"
+      test_set:
+        id: breakdown-v1
+        inputs: [demo-todo-detail, chessicle-detail, invoice-detail]
+      candidate_ids: [agb-opus-5, agb-opus-5-5, agb-sonnet-5]
+      required_checks: [plan-gates]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: highest-assurance
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 3000
+
+candidates:
+  - id: agb-opus-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, claude-opus-5]
+      reports_usage: true   # agents/agb.mjs writes claude's total_cost_usd
+  - id: agb-opus-5-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, claude-opus-5-5]
+      reports_usage: true   # agents/agb.mjs writes claude's total_cost_usd
+  - id: agb-sonnet-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, claude-sonnet-5]
+      reports_usage: true   # agents/agb.mjs writes claude's total_cost_usd
+
+evaluators:
+  required_checks:
+    plan-gates:
+      kind: command
+      argv: ["node", "checks/plan-gates.mjs"]
+      version_files: [checks/plan-gates.mjs]
+      timeout_seconds: 300
+  human:
+    # agenteval review <run>: compare two candidates' plans blind. The gates
+    # above already decide right from wrong; this is which right plan is better.
+    rubric_file: rubrics/breakdown.md
+    show: [".ab/tasks.json", "UI_CONTRACT.md"]
+    dimensions: [granularity, ordering, clarity, domains]
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/none.md
+    # No judge: a candidate's "output" is the executor's terminal log.
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 1
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0
