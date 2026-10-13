@@ -46,7 +46,39 @@ const MIME: Record<string, string> = {
 /** A request body, capped: this server is local, but a cap costs nothing. */
 const MAX_BODY_BYTES = 64 * 1024;
 
+/** A POST refused before its body is read: the status says why (415, 403). */
+class RefusedRequest extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message);
+    this.name = "RefusedRequest";
+  }
+}
+
+/**
+ * Cross-site request forgery guard for every POST.
+ *
+ * Any page the user visits while the dashboard runs can send a "simple"
+ * cross-origin request (text/plain, no preflight) to 127.0.0.1, and that
+ * could start a billed run or post review verdicts. Requiring a JSON content
+ * type forces a CORS preflight, which this server never grants; a browser
+ * Origin that is not this host is refused outright.
+ */
+function assertSameSiteJson(req: http.IncomingMessage): void {
+  const type = String(req.headers["content-type"] ?? "").split(";")[0].trim().toLowerCase();
+  if (type !== "application/json") throw new RefusedRequest(415, "content-type must be application/json");
+  const origin = req.headers.origin;
+  if (origin === undefined) return;
+  let host: string;
+  try {
+    host = new URL(origin).host;
+  } catch {
+    throw new RefusedRequest(403, "cross-origin request refused");
+  }
+  if (host !== req.headers.host) throw new RefusedRequest(403, "cross-origin request refused");
+}
+
 async function readJsonBody(req: http.IncomingMessage): Promise<unknown> {
+  assertSameSiteJson(req);
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const chunk of req) {
@@ -241,6 +273,8 @@ async function handleRuns(
         sendJson(res, 409, { error: err.message, runId: err.runId });
       } else if (err instanceof NoSuchSpecError) {
         sendJson(res, 404, { error: err.message });
+      } else if (err instanceof RefusedRequest) {
+        sendJson(res, err.status, { error: err.message });
       } else {
         sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
       }
@@ -298,7 +332,8 @@ async function handleReview(ws: Workspace, req: http.IncomingMessage, res: http.
       sendJson(res, 405, { error: "method not allowed" });
     }
   } catch (err) {
-    sendJson(res, err instanceof ReviewError ? 400 : 500, { error: err instanceof Error ? err.message : String(err) });
+    const status = err instanceof RefusedRequest ? err.status : err instanceof ReviewError ? 400 : 500;
+    sendJson(res, status, { error: err instanceof Error ? err.message : String(err) });
   }
   return true;
 }

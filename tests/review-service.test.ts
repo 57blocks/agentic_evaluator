@@ -140,3 +140,29 @@ test("the dashboard serves the queue, takes verdicts and reveals, and 404s an un
     server.close();
   }
 });
+
+test("a cross-site page cannot post to the dashboard: wrong content type or foreign origin is refused", async () => {
+  const run = await reviewedTaskRun();
+  const ws = path.resolve(run, "..", "..", "..", "..");
+  const server = createDemoServer(workspaceAt(ws));
+  const base = await listenDemo(server, 0);
+  const runId = path.basename(run);
+  try {
+    const { pairs } = (await (await fetch(`${base}/api/review/${runId}?reviewer=xing&failed=1`)).json()) as { pairs: Array<{ id: string }> };
+    const body = JSON.stringify({ reviewer: "xing", pairId: pairs[0].id, overall: "left" });
+
+    // The two shapes a cross-site form or fetch can send without a CORS preflight.
+    const textPlain = await fetch(`${base}/api/review/${runId}`, { method: "POST", headers: { "content-type": "text/plain" }, body });
+    const foreign = await fetch(`${base}/api/review/${runId}`, { method: "POST", headers: { "content-type": "application/json", origin: "https://evil.example" }, body });
+    const startRun = await fetch(`${base}/api/runs`, { method: "POST", headers: { "content-type": "text/plain" }, body: "{}" });
+    const sameOrigin = await fetch(`${base}/api/review/${runId}`, { method: "POST", headers: { "content-type": "application/json", origin: base }, body });
+
+    assert.equal(textPlain.status, 415);
+    assert.equal(foreign.status, 403);
+    assert.equal(startRun.status, 415);
+    assert.equal(sameOrigin.status, 200);
+    assert.equal(await fs.readdir(path.join(run, "reviews")).then((f) => f.length), 1);
+  } finally {
+    server.close();
+  }
+});
