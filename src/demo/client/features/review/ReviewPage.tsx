@@ -115,7 +115,10 @@ export function ReviewPage({ runId, reviewer }: { runId: string; reviewer: strin
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
+      // Typing a note or a name is not a shortcut; a focused checkbox is (it
+      // keeps focus after the failed-pairs toggle). Cmd/Ctrl+A is select-all.
+      const typing = e.target instanceof HTMLTextAreaElement || (e.target instanceof HTMLInputElement && e.target.type !== "checkbox");
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
       const choice = CHOICES.find((c) => c.key === e.key);
       if (choice) setOverall(choice.value);
       else if (e.key === "Enter") void save();
