@@ -168,7 +168,12 @@ about reviews are derived at render time; GAPS.md on disk is not rewritten.
 2. **Failed-check pairs.** Is hiding them by default right, or should a
    reviewer be able to say "B is the better failure"?
 3. **Where `--reviewer` comes from** when there is no git identity (e.g. in a
-   shared dashboard).
+   shared dashboard). Decided: `--reviewer`, then git `user.name`, then the OS
+   user.
+4. **One person, two spellings.** Reviewers are keyed by the name as given,
+   so "Xing Liu" and "Xing-Liu" are two reviewers, each with their own file
+   and layout. That is fine while names come from git. A shared dashboard
+   would want an identity, not a typed name.
 
 ## Work, in order
 
