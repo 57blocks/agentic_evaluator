@@ -67,6 +67,7 @@ export interface EvalSpec {
       }
     >;
     judge: { model: string; provider_route?: string; rubric_file: string; methods?: string[] };
+    human?: { rubric_file: string; method?: "pairwise"; show?: string[]; dimensions?: string[] };
   };
   execution: {
     trials_per_case: number;
@@ -315,6 +316,14 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
       : DEFAULT_TIMEOUT_MS,
     check,
     dimensions: step.judged_dimensions ?? [],
+    human: spec.evaluators.human
+      ? {
+          rubricFile: spec.evaluators.human.rubric_file,
+          method: spec.evaluators.human.method ?? "pairwise",
+          show: spec.evaluators.human.show ?? [],
+          dimensions: spec.evaluators.human.dimensions ?? step.judged_dimensions ?? [],
+        }
+      : undefined,
 
     candidateDefs,
     protocolVersion: spec.protocol_version,

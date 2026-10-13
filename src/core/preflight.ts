@@ -22,6 +22,7 @@ import path from "node:path";
 import { adapterIdOf } from "../adapters/types.js";
 import { sha256 } from "../canon/hash.js";
 import { directionality } from "../canon/rates.js";
+import { matchesShow } from "../canon/review.js";
 import { taskInputPath } from "../paths.js";
 import { looksLikePath } from "../script-path.js";
 import { loadWorkflow } from "../spec/load-spec.js";
@@ -122,8 +123,34 @@ function stepFindings(suite: Suite): Finding[] {
   return [];
 }
 
+async function referenceFiles(taskRoot: string): Promise<string[]> {
+  const root = path.join(taskRoot, "references");
+  const entries = await fs.readdir(root, { withFileTypes: true, recursive: true }).catch(() => []);
+  return entries
+    .filter((e) => e.isFile())
+    .map((e) => path.relative(root, path.join(e.parentPath, e.name)).split(path.sep).slice(1).join("/"))
+    .filter((rel) => rel !== "");
+}
+
+/** evaluators.human: the rubric exists, and `show` picks something out of a correct answer. */
+async function reviewFindings(suite: Suite): Promise<Finding[]> {
+  const human = suite.human;
+  if (!human) return [];
+  const out: Finding[] = [];
+  if (!existsSync(path.resolve(suite.taskRoot, human.rubricFile))) {
+    out.push({ severity: "blocking", code: "review.rubric-missing", message: `human review rubric ${human.rubricFile} not found in ${suite.taskRoot}` });
+  }
+  if (human.show.length > 0) {
+    const files = await referenceFiles(suite.taskRoot);
+    if (files.length > 0 && !files.some((f) => matchesShow(f, human.show))) {
+      out.push({ severity: "warning", code: "review.show-empty", message: `human review show [${human.show.join(", ")}] matches no file in references/: a reviewer would see nothing to compare` });
+    }
+  }
+  return out;
+}
+
 async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Finding[]> {
-  const findings: Finding[] = [...stepFindings(suite), ...candidateFindings(suite)];
+  const findings: Finding[] = [...stepFindings(suite), ...candidateFindings(suite), ...(await reviewFindings(suite))];
   if (suite.inputFrom) {
     findings.push({ severity: "ok", code: "inputs.from-step", message: `inputs come from step ${suite.inputFrom} at run time; input checks skipped, the check is probed with an empty input` });
     if (suite.check) findings.push(...(await probeCheck(suite, [{ slug: "from-previous-step", text: "" }], opts)).filter((f) => f.code === "check.null"));

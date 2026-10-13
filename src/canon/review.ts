@@ -13,6 +13,28 @@ import type { EvaluationRow, TrialRow } from "./rows.js";
 
 export const HUMAN_PAIRWISE = "human-pairwise";
 
+/** One glob segment as a regex fragment: `*` and `?` stay within the segment. */
+function segmentRegex(seg: string): string {
+  const escaped = seg.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+  return escaped.replace(/\*/g, "[^/]*").replace(/\?/g, "[^/]");
+}
+
+function globRegex(pattern: string): RegExp {
+  const parts = pattern.split("/");
+  let re = "";
+  parts.forEach((seg, i) => {
+    const last = i === parts.length - 1;
+    if (seg === "**") re += last ? ".*" : "(?:.*/)?"; // any depth, including none
+    else re += segmentRegex(seg) + (last ? "" : "/");
+  });
+  return new RegExp(`^${re}$`);
+}
+
+/** `show` globs, relative to a trial's work dir: `*` and `?` within a segment, `**` across. */
+export function matchesShow(relPath: string, patterns: readonly string[]): boolean {
+  return patterns.some((p) => globRegex(p).test(relPath));
+}
+
 /** What a reviewer can say about a pair, in canonical (a, b) orientation. */
 export type HumanVerdict = "a" | "b" | "tie" | "both_bad";
 /** What a reviewer says on screen: which side, not which candidate. */
