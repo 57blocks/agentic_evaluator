@@ -22,6 +22,7 @@ import type { Recommendation } from "./canon/select.js";
 import type { E2eValidation } from "./canon/e2e.js";
 import { judgeStandings } from "./canon/judge-standings.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
+import { humanRecord, judgeAgreement, reviewQueue, type Agreement, type HumanRecord } from "./canon/review.js";
 import { dimensionKeys, profiles, type CandidateProfile } from "./report-charts.js";
 import type { RawOutput } from "./report-evidence.js";
 import type { RunBundle } from "./report-v2.js";
@@ -57,6 +58,8 @@ export interface CandidateView {
   record: { wins: number; losses: number; ties: number };
   /** Attempts that completed normally, of all attempts. */
   completed: { ok: number; total: number };
+  /** Blind human review record; null when nobody reviewed this run. */
+  human: HumanRecord | null;
 }
 
 /**
@@ -109,6 +112,7 @@ export function candidateViews(b: RunBundle): CandidateView[] {
       outcomes: c.outcomes,
       record: { wins: duel.wins, losses: duel.losses, ties: duel.ties },
       completed: { ok: c.completion_states.success ?? 0, total: attempts },
+      human: b.reviews && b.reviews.length > 0 ? humanRecord(c.candidate, b.reviews) : null,
     };
   });
 }
@@ -258,6 +262,49 @@ export interface GapLine {
 }
 
 /** Bullet items, and — for the workflow page — `##` section headings. */
+/** Below this share of agreeing pairs, a judge's verdicts are not yet trusted for this rubric. */
+const JUDGE_AGREEMENT_FLOOR = 0.9;
+
+export interface ReviewSummary {
+  reviewers: string[];
+  /** Pairs with a human verdict, of the pairs the queue offers. */
+  reviewed: number;
+  pairs: number;
+  /** Judge vs human, when a judge also compared these pairs. */
+  agreement: Agreement | null;
+}
+
+export function reviewSummary(b: RunBundle): ReviewSummary | null {
+  const reviews = b.reviews ?? [];
+  if (reviews.length === 0) return null;
+  const agreement = judgeAgreement(reviews, b.evaluations);
+  return {
+    reviewers: [...new Set(reviews.map((r) => r.reviewer))].sort(),
+    reviewed: new Set(reviews.map((r) => (r.subject.kind === "pair" ? `${r.subject.input}|${r.subject.a}|${r.subject.b}` : ""))).size,
+    pairs: reviewQueue(b.trials, { includeFailed: true }).length,
+    agreement: agreement.overall.total > 0 ? agreement : null,
+  };
+}
+
+/** GAPS lines about human review, derived at render time; GAPS.md on disk is never rewritten. */
+export function reviewGapLines(review: ReviewSummary | null): GapLine[] {
+  if (!review) return [];
+  const lines: GapLine[] = [
+    {
+      kind: "item",
+      text: `human review: ${review.reviewed} of ${review.pairs} pairs reviewed (${review.reviewers.join(", ")}); human verdicts inform the report and do not enter the recommendation.`,
+    },
+  ];
+  const a = review.agreement?.overall;
+  if (a && a.agree / a.total < JUDGE_AGREEMENT_FLOOR) {
+    lines.push({
+      kind: "item",
+      text: `judge calibration: the judge agrees with the human on ${a.agree} of ${a.total} pairs, below ${JUDGE_AGREEMENT_FLOOR * 100}%; treat its verdicts on this rubric as uncalibrated.`,
+    });
+  }
+  return lines;
+}
+
 export function gapLines(gaps: string, withHeadings: boolean): GapLine[] {
   return gaps.split("\n").flatMap((l): GapLine[] => {
     if (l.startsWith("- ")) return [{ kind: "item", text: l.slice(2) }];
@@ -328,6 +375,8 @@ export interface StepReport {
   trials: TrialRow[];
   outputs: RawOutput[];
   gaps: GapLine[];
+  /** Blind human review of this run; null when nobody reviewed it. */
+  review: ReviewSummary | null;
   sampleTrial: string;
   manifest: string;
 }
@@ -405,7 +454,8 @@ export function buildStepReport(b: RunBundle): StepReport {
     duels: b.evaluations.filter((r) => r.subject.kind === "pair"),
     trials: b.trials,
     outputs: b.outputs,
-    gaps: gapLines(b.gaps, false),
+    gaps: [...gapLines(b.gaps, false), ...reviewGapLines(reviewSummary(b))],
+    review: reviewSummary(b),
     sampleTrial: b.trials[0] ? JSON.stringify(b.trials[0], null, 1) : "{}",
     manifest: JSON.stringify(m, null, 1),
   };
