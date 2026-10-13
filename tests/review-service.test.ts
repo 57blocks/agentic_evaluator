@@ -5,6 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { main } from "../src/cli/index.js";
@@ -162,6 +163,45 @@ test("a cross-site page cannot post to the dashboard: wrong content type or fore
     assert.equal(startRun.status, 415);
     assert.equal(sameOrigin.status, 200);
     assert.equal(await fs.readdir(path.join(run, "reviews")).then((f) => f.length), 1);
+  } finally {
+    server.close();
+  }
+});
+
+// ── `agenteval review` ───────────────────────────────────────────────────
+
+test("agenteval review names the reviewer, links straight to the review page, and refuses a task with no human block", async () => {
+  const { resolveReviewer, reviewPageUrl } = await import("../src/cli/commands/review.js");
+  const run = await reviewedTaskRun(null);
+  const ws = path.resolve(run, "..", "..", "..", "..");
+
+  assert.equal(await resolveReviewer("Kevin"), "Kevin");
+  assert.ok((await resolveReviewer(undefined)).length > 0);
+  assert.equal(reviewPageUrl("http://127.0.0.1:4173", "run-1", "Xing Liu"), "http://127.0.0.1:4173/#run=run-1&review=Xing%20Liu");
+  await assert.rejects(main(["review", path.basename(run), "--workspace", ws, "--no-open"], bufferIo()), /evaluators\.human/);
+});
+
+test("DNS rebinding: a request for a non-loopback host name is refused, GET and POST alike", async () => {
+  const run = await reviewedTaskRun();
+  const ws = path.resolve(run, "..", "..", "..", "..");
+  const server = createDemoServer(workspaceAt(ws));
+  const base = await listenDemo(server, 0);
+  const port = new URL(base).port;
+  const raw = (method: string, host: string, extra: Record<string, string> = {}) =>
+    new Promise<number>((resolve, reject) => {
+      const req = http.request({ host: "127.0.0.1", port, path: `/api/review/${path.basename(run)}?reviewer=x`, method, headers: { host, ...extra } }, (res) => {
+        res.resume();
+        resolve(res.statusCode ?? 0);
+      });
+      req.on("error", reject);
+      req.end(method === "POST" ? "{}" : undefined);
+    });
+  try {
+    // The attacker's page and Host both say evil.example; it resolves to 127.0.0.1.
+    assert.equal(await raw("GET", `evil.example:${port}`), 403);
+    assert.equal(await raw("POST", `evil.example:${port}`, { "content-type": "application/json", origin: `http://evil.example:${port}` }), 403);
+    assert.equal(await raw("GET", `localhost:${port}`), 200);
+    assert.equal(await raw("GET", `127.0.0.1:${port}`), 200);
   } finally {
     server.close();
   }
