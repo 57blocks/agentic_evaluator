@@ -7,6 +7,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { parseTaskPlan } from "./taskPlan";
+import { TaskPlanView } from "./TaskPlanView";
 
 export interface ShownFile {
   path: string;
@@ -25,7 +27,9 @@ function readable(file: ShownFile): string {
 
 export function AnswerPane({ label, files, revealedAs }: { label: string; files: ShownFile[]; revealedAs?: string }) {
   const [active, setActive] = useState(0);
+  const [raw, setRaw] = useState(false);
   const file = files[Math.min(active, files.length - 1)];
+  const plan = file && !file.truncated ? parseTaskPlan(file.content) : null;
   return (
     <div className="flex min-w-0 flex-col rounded-lg border bg-card">
       <div className="flex items-center justify-between gap-2 border-b px-3 py-2">
@@ -51,7 +55,18 @@ export function AnswerPane({ label, files, revealedAs }: { label: string; files:
             </div>
           )}
           {files.length === 1 && <div className="border-b px-3 py-1 font-mono text-xs text-muted-foreground">{file.path}</div>}
-          <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap break-words p-3 font-mono text-xs leading-relaxed">{readable(file)}</pre>
+          {plan && (
+            <div className="flex justify-end border-b px-2 py-1">
+              <button type="button" onClick={() => setRaw((r) => !r)} className="text-xs text-muted-foreground underline-offset-2 hover:underline">
+                {raw ? "Show as plan" : "Show raw JSON"}
+              </button>
+            </div>
+          )}
+          {plan && !raw ? (
+            <div className="max-h-[70vh] overflow-auto"><TaskPlanView plan={plan} /></div>
+          ) : (
+            <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap break-words p-3 font-mono text-xs leading-relaxed">{readable(file)}</pre>
+          )}
           {file.truncated && <p className="border-t px-3 py-1.5 text-xs text-warn">Truncated for review: the file is larger than shown.</p>}
         </>
       )}
