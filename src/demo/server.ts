@@ -338,12 +338,30 @@ async function handleReview(ws: Workspace, req: http.IncomingMessage, res: http.
   return true;
 }
 
+const LOOPBACK_NAMES: ReadonlySet<string> = new Set(["127.0.0.1", "localhost", "[::1]"]);
+
+/**
+ * DNS-rebinding guard for every request. A hostile name can resolve to
+ * 127.0.0.1, making the attacker's page same-origin with this server (its
+ * Origin and Host then agree), able to read every run and to POST. Only a
+ * loopback host name is served; anything else is refused before routing.
+ */
+function isLoopbackHost(host: string | undefined): boolean {
+  if (!host) return false;
+  const name = host.startsWith("[") ? host.slice(0, host.indexOf("]") + 1) : host.split(":")[0];
+  return LOOPBACK_NAMES.has(name.toLowerCase());
+}
+
 async function handle(
   ws: Workspace,
   runs: RunRegistry,
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ): Promise<void> {
+  if (!isLoopbackHost(req.headers.host)) {
+    sendJson(res, 403, { error: "this dashboard only answers on 127.0.0.1 / localhost" });
+    return;
+  }
   const url = new URL(req.url ?? "/", `http://${HOST}`);
   if (await handleRuns(runs, req, res, url)) return;
   if (await handleReview(ws, req, res, url)) return;
