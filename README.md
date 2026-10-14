@@ -366,7 +366,8 @@ It exits 1 when anything blocks, and `--json` prints the findings for
 scripts.
 
 **Building a task with Claude Code.** `agenteval install-skill` adds a
-`/agenteval-new-task` skill to the workspace, in `.claude/skills/`. In Claude
+`/agenteval-new-task` skill to the workspace, in `.claude/skills/`, with this
+README beside it as `reference.md` for the skill to read. In Claude
 Code it walks you through one task:
 
 1. The decision the task informs.
