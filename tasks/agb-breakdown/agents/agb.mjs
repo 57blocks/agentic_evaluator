@@ -4,6 +4,10 @@
  *
  *   node agents/agb.mjs <model>
  *
+ * <model> is a Claude model, or provider:model for another provider through
+ * claude's Anthropic-compatible endpoint (deepseek:deepseek-v4-pro,
+ * openrouter:moonshotai/kimi-k2; see providers.mjs).
+ *
  * The input's header says what to do (written by scripts/harvest.mjs):
  *
  *   stage: detail | code
@@ -27,24 +31,32 @@ import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { claudeBudgetFor, costOf, resolveModel } from "./providers.mjs";
 
 // chessicle (617-line PRD) ran past $10 twice on the detail step; invoice is larger.
 const MAX_COST = { detail: 15, code: 10 };
 const here = path.dirname(fileURLToPath(import.meta.url));
 const cwd = process.cwd();
-const model = process.argv[2];
+const modelSpec = process.argv[2];
 const dry = process.env.AGB_EVAL_DRY === "1";
 
 const header = Object.fromEntries(
   [...readFileSync(path.join(cwd, ".eval-input.txt"), "utf-8").matchAll(/^(stage|fixture|task):\s*(\S+)/gm)].map((m) => [m[1], m[2]]),
 );
-if (!model || !(header.stage in MAX_COST) || !header.fixture || (header.stage === "code" && !header.task)) {
+if (!modelSpec || !(header.stage in MAX_COST) || !header.fixture || (header.stage === "code" && !header.task)) {
   console.error("usage: agb.mjs <model>; the input needs stage: detail|code, fixture: <dir>, and task: T-NNN for code");
   process.exit(2);
 }
+// A missing key or an unknown model is the setup's fault: exit 2, before any call.
+const provider = await resolveModel(modelSpec).catch((e) => {
+  console.error(e.message);
+  process.exit(2);
+});
+const model = provider.model;
+const env = { ...process.env, ...provider.env };
 
 function run(cmd, args) {
-  const r = spawnSync(cmd, args, { cwd, stdio: "inherit" });
+  const r = spawnSync(cmd, args, { cwd, stdio: "inherit", env });
   if (r.error) throw r.error;
   return r.status ?? 1;
 }
@@ -58,7 +70,7 @@ function run(cmd, args) {
  *   AGB_EVAL_RESULT.json the outcome, read by checks/plan-gates.mjs as evidence
  */
 function runClaude(args) {
-  const r = spawnSync("claude", args, { cwd, encoding: "utf-8", stdio: ["ignore", "pipe", "inherit"], maxBuffer: 16 * 1024 * 1024 });
+  const r = spawnSync("claude", args, { cwd, env, encoding: "utf-8", stdio: ["ignore", "pipe", "inherit"], maxBuffer: 16 * 1024 * 1024 });
   if (r.error) throw r.error;
   let out = null;
   try {
@@ -68,12 +80,15 @@ function runClaude(args) {
   }
   const u = out.usage ?? {};
   const prompt = (u.input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0);
-  if (typeof out.total_cost_usd === "number") {
-    writeFileSync(path.join(cwd, ".eval-usage.json"), JSON.stringify({ cost_usd: out.total_cost_usd, prompt_tokens: prompt, completion_tokens: u.output_tokens ?? 0 }));
+  // claude prices at Anthropic's rates; another provider's cost comes from its own price list.
+  const cost = provider.price ? (out.usage ? costOf(u, provider.price) : null) : out.total_cost_usd;
+  if (typeof cost === "number") {
+    writeFileSync(path.join(cwd, ".eval-usage.json"), JSON.stringify({ cost_usd: cost, prompt_tokens: prompt, completion_tokens: u.output_tokens ?? 0 }));
   }
   writeFileSync(path.join(cwd, "AGB_EVAL_RESULT.json"), JSON.stringify({
     exit: r.status, is_error: out.is_error ?? null, subtype: out.subtype ?? null,
-    num_turns: out.num_turns ?? null, cost_usd: out.total_cost_usd ?? null,
+    provider: provider.provider, model, models_used: Object.keys(out.modelUsage ?? {}),
+    num_turns: out.num_turns ?? null, cost_usd: cost ?? null,
     result: String(out.result ?? "").slice(0, 2000),
   }, null, 2));
   return r.status ?? 1;
@@ -128,13 +143,13 @@ try {
   if (dry) {
     status = header.stage === "code" ? run("agb", ["run", "--dry-run"]) : 0;
   } else if (header.stage === "code") {
-    status = run("agb", ["run", `--max-cost=${MAX_COST.code}`]);
+    status = run("agb", ["run", `--max-cost=${claudeBudgetFor(MAX_COST.code, provider.price)}`]);
   } else {
     status = runClaude([
       "-p", DETAIL_PROMPT,
       "--output-format", "json",
       "--model", model,
-      "--max-budget-usd", String(MAX_COST.detail),
+      "--max-budget-usd", String(claudeBudgetFor(MAX_COST.detail, provider.price)),
       // The stage-detail skill comes from agb's own build in AGB_HOME, loaded
       // for this session only: the user-level agb-skills plugin may be
       // disabled or another version, and either way the candidate would run

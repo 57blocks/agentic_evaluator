@@ -1,0 +1,195 @@
+# agb's whole flow, in one spec: which model should run each step, and does
+# the per-step best combination beat one model end to end?
+#
+#   detail  task breakdown   .ab/tasks.json, UI_CONTRACT.md      (stage-detail)
+#   qa      test design      .ab/test-plan.json                  (stage-qa)
+#   code    implementation   every task, via `agb run`           (stage-code)
+#
+# Each step is evaluated on its own inputs: real agb projects at the moment
+# that step started (fixture/), so a step's result does not depend on which
+# model ran the step before. Then the chain runs end to end twice — the
+# control (one model throughout) and the combination of each step's pick —
+# each step starting from the previous step's work dir.
+#
+# THIS IS THE TARGET SHAPE. Fields marked "NEW" are not in agenteval yet; see
+# docs/design/agb-flow-gaps.md. `agenteval plan agb-flow` rejects this spec
+# until they are built.
+
+protocol_version: "0.3"
+run_name: agb-flow
+# NEW (meaning): counts what candidates report spending, not only the judge's
+# OpenRouter calls, and stops scheduling trials once it is reached.
+budget_usd: 600
+
+workflow:
+  control_candidate: opus-5-5
+  # NEW: the chain is validated on these root inputs only. A full chain on
+  # invoice (35 tasks) is a day and $150+ per arm; demo-todo is 8 tasks.
+  e2e:
+    inputs: [demo-todo]
+    # NEW: what decides whether a chain delivered. The code step's own check
+    # grades one task's tests; a chain's end product is the whole app.
+    final_checks: [app-gates]
+    judge:
+      rubric_file: rubrics/delivery.md
+      methods: [absolute-1-5, pairwise-swap]
+      show: [".ab/tasks.json", ".ab/test-plan.json", UI_CONTRACT.md, README.md, "client/src/**", "server/src/**", "server/test/**"]
+
+  steps:
+    - id: detail
+      version: "1"
+      test_set:
+        id: detail-v1
+        inputs: [demo-todo, chessicle, invoice]
+        # NEW: each input is a directory as well as a text: fixture/<input>/
+        # is laid into the work dir before the candidate starts.
+        fixture_dir: fixture/detail
+      candidate_ids: &all [opus-5-5, fable-5-1, gpt-5-6-sol, deepseek-v4-pro, deepseek-flash, kimi-k3, glm-5-3, glm-5-3-prime, qwen-3-8-max]
+      required_checks: [plan-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      # NEW: a spend cap per trial, handed to the command as {{max_cost_usd}}.
+      max_cost_per_trial_usd: 15
+      # NEW: per-step judge (today one judge block serves every step).
+      judge:
+        rubric_file: rubrics/breakdown.md
+        methods: [pairwise-swap]
+        show: [".ab/tasks.json", UI_CONTRACT.md]
+        dimensions: [granularity, ordering, clarity, domains]
+
+    - id: qa
+      version: "1"
+      input_from: detail
+      # NEW: the next step starts from the previous step's work dir (files),
+      # not from its output rendered as text.
+      handoff: workdir
+      test_set:
+        id: qa-v1
+        inputs: [demo-todo, chessicle, invoice]
+        fixture_dir: fixture/qa
+      candidate_ids: *all
+      required_checks: [test-plan-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 1800
+      max_cost_per_trial_usd: 10
+
+    - id: code
+      version: "1"
+      input_from: qa
+      handoff: workdir
+      test_set:
+        id: code-v1
+        # One input per task of demo-todo: the project as it stood just before
+        # that task, plus the task id. In the chain the step builds every task.
+        inputs: [demo-todo-T-001, demo-todo-T-002, demo-todo-T-003, demo-todo-T-004,
+                 demo-todo-T-005, demo-todo-T-006, demo-todo-T-007, demo-todo-T-008]
+        fixture_dir: fixture/code
+      candidate_ids: *all
+      required_checks: [task-tests]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3600
+      max_cost_per_trial_usd: 10
+      # NEW: per-step concurrency. agb run is heavy (installs, builds, a dev
+      # server); three at once is what this machine takes.
+      concurrency: 3
+
+# One command for every step: agents/agb-step.mjs reads which step it is from
+# the input and runs the matching stage. The provider is plain env (cli.env
+# exists today); the anchors keep each provider in one place.
+x-providers:
+  deepseek: &deepseek
+    ANTHROPIC_BASE_URL: https://api.deepseek.com/anthropic
+    ANTHROPIC_API_KEY: ${DEEPSEEK_API_KEY}     # NEW: ${VAR} from the environment / .env.local
+    ANTHROPIC_AUTH_TOKEN: ""
+  openrouter: &openrouter
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
+    ANTHROPIC_AUTH_TOKEN: ${OPENROUTER_API_KEY}
+    ANTHROPIC_API_KEY: ""
+
+candidates:
+  - id: opus-5-5
+    adapter: agent-cli
+    # NEW (for agent-cli): the model this candidate runs. agenteval prices the
+    # tokens the command reports with it, and substitutes {{model}}.
+    model: anthropic/claude-opus-5-5
+    cli: &agb
+      argv: [node, agents/agb-step.mjs, "{{model}}", "{{max_cost_usd}}"]
+      # NEW value: the command reports tokens only; agenteval does the pricing.
+      reports_usage: tokens
+  - id: fable-5-1
+    adapter: agent-cli
+    model: anthropic/claude-fable-5-1
+    cli: *agb
+  - id: gpt-5-6-sol
+    adapter: agent-cli
+    model: openai/gpt-5.6-sol
+    cli: { <<: *agb, env: *openrouter }
+  - id: deepseek-v4-pro
+    adapter: agent-cli
+    model: deepseek/deepseek-v4-pro
+    cli: { <<: *agb, env: *deepseek }
+  - id: deepseek-flash
+    adapter: agent-cli
+    model: deepseek/deepseek-flash
+    cli: { <<: *agb, env: *deepseek }
+  - id: kimi-k3
+    adapter: agent-cli
+    model: moonshotai/kimi-k3
+    cli: { <<: *agb, env: *openrouter }
+  - id: glm-5-3
+    adapter: agent-cli
+    model: z-ai/glm-5.3
+    cli: { <<: *agb, env: *openrouter }
+  - id: glm-5-3-prime
+    adapter: agent-cli
+    model: z-ai/glm-5.3-prime
+    cli: { <<: *agb, env: *openrouter }
+  - id: qwen-3-8-max
+    adapter: agent-cli
+    model: qwen/qwen3.8-max-0902
+    cli: { <<: *agb, env: *openrouter }
+
+evaluators:
+  required_checks:
+    plan-gates:
+      kind: command
+      argv: [node, checks/plan-gates.mjs]
+      version_files: [checks/plan-gates.mjs]
+      timeout_seconds: 300
+    test-plan-gates:
+      kind: command
+      argv: [node, checks/test-plan-gates.mjs]
+      version_files: [checks/test-plan-gates.mjs]
+      timeout_seconds: 300
+    task-tests:
+      kind: command
+      argv: [node, checks/task-tests.mjs]
+      version_files: [checks/task-tests.mjs]
+      timeout_seconds: 900
+    app-gates:
+      kind: command
+      argv: [node, checks/app-gates.mjs]
+      version_files: [checks/app-gates.mjs]
+      timeout_seconds: 2400
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/breakdown.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 3
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0
