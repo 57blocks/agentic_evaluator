@@ -39,6 +39,7 @@ export async function cmdInstallSkill(args: ParsedArgs, io: Io): Promise<ExitCod
     throw new UsageError(`${displayPath(target)} already exists; --force replaces it`);
   }
 
+  await refuseLinkedOut(ws.root, targetDir);
   await fs.mkdir(targetDir, { recursive: true });
   await replaceWith(source, target);
   await replaceWith(path.join(INSTALL_ROOT, "README.md"), path.join(targetDir, "reference.md"));
@@ -51,4 +52,18 @@ export async function cmdInstallSkill(args: ParsedArgs, io: Io): Promise<ExitCod
 async function replaceWith(source: string, dest: string): Promise<void> {
   await fs.rm(dest, { force: true });
   await fs.copyFile(source, dest, fs.constants.COPYFILE_EXCL);
+}
+
+/** A cloned workspace can make `.claude` (or a directory under it) a symlink
+ * to somewhere else; mkdir and the copies would follow it. Refuse instead. */
+async function refuseLinkedOut(root: string, dir: string): Promise<void> {
+  let at = root;
+  for (const part of path.relative(root, dir).split(path.sep)) {
+    at = path.join(at, part);
+    const stat = await fs.lstat(at).catch(() => null);
+    if (!stat) return;
+    if (stat.isSymbolicLink() || !stat.isDirectory()) {
+      throw new UsageError(`${displayPath(at)} is a symlink or not a directory; installing through it could write outside the workspace`);
+    }
+  }
 }
