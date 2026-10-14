@@ -18,10 +18,15 @@ const DEFAULT_CONCURRENCY = 5;
 const MIN_INPUTS_FOR_MAGNITUDE = 10;
 
 /** The spec wins over the environment: a step that declares a limit means it. */
+/**
+ * Trials in flight: `--concurrency` (EVAL_CONCURRENCY) wins, as its help says,
+ * then the step's own `concurrency`, then `execution.concurrency`.
+ */
 export function resolveConcurrency(suite: Suite): number {
-  if (suite.concurrency && suite.concurrency > 0) return suite.concurrency;
   const parsed = parseInt(process.env.EVAL_CONCURRENCY ?? "", 10);
-  return Number.isNaN(parsed) ? DEFAULT_CONCURRENCY : Math.max(1, parsed);
+  if (!Number.isNaN(parsed)) return Math.max(1, parsed);
+  if (suite.concurrency && suite.concurrency > 0) return suite.concurrency;
+  return DEFAULT_CONCURRENCY;
 }
 
 /**
@@ -97,6 +102,8 @@ export function planE2e(suites: readonly Suite[]): E2ePlan | null {
     controlCandidate: root.controlCandidate ?? null,
     chain: chain.map((s) => s.step),
     perArm: e2eRootInputs(root).length * trials * chain.length,
+    inputs: e2eRootInputs(root).length,
+    ...(root.e2eJudge ? { judgedCases: e2eRootInputs(root).length * trials } : {}),
   };
 }
 

@@ -239,3 +239,20 @@ test("a spec can share blocks with YAML merge keys, and keep them under any x- k
 
   assert.deepEqual(suite!.candidateDefs?.["fake-fail"]?.cli?.env, { SHARED: "1", OWN: "2" });
 });
+
+test("check-task blocks on a missing env var and a cap the step never sets, and warns on unpriced tokens", async () => {
+  const spec = await chainTask("");
+  let yaml = await fs.readFile(spec, "utf-8");
+  yaml = yaml.replace(
+    "      argv: [node, agents/fake-codegen-agent.mjs, --mode, fail]\n      reports_usage: true\n",
+    "      argv: [node, agents/fake-codegen-agent.mjs, --mode, fail, \"{{max_cost_usd}}\"]\n      reports_usage: tokens\n      env: { KEY: \"${NOT_SET_ANYWHERE_XYZ}\" }\n",
+  );
+  await fs.writeFile(spec, yaml);
+
+  const report = await preflightTask(spec);
+  const codes = report.steps[0]!.findings.map((f) => `${f.severity}:${f.code}`);
+
+  assert.ok(codes.includes("blocking:candidate.env-missing"), codes.join(" "));
+  assert.ok(codes.includes("blocking:candidate.no-cost-cap"), codes.join(" "));
+  assert.ok(codes.includes("warning:candidate.unpriced"), codes.join(" "));
+});

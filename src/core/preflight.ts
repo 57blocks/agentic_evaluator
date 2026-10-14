@@ -25,6 +25,8 @@ import { directionality } from "../canon/rates.js";
 import { matchesShow } from "../canon/review.js";
 import { fixturePath, isDir } from "./fixture.js";
 import { restoreAnswerKey } from "./answer-key.js";
+import { envRefs } from "../adapters/agent-cli.js";
+import type { CandidateDef } from "../canon/types.js";
 import { taskInputPath } from "../paths.js";
 import { looksLikePath } from "../script-path.js";
 import { loadWorkflow } from "../spec/load-spec.js";
@@ -89,6 +91,26 @@ function inputFindings(suite: Suite, inputs: readonly LoadedInput[]): Finding[] 
   return out;
 }
 
+/** `${NAME}` in cli.env that this environment (with .env.local) does not set. */
+function cliEnvFindings(id: string, env: Record<string, string>): Finding[] {
+  const missing = [...new Set(Object.values(env).flatMap(envRefs))].filter((n) => process.env[n] === undefined);
+  return missing.length === 0
+    ? []
+    : [{ severity: "blocking", code: "candidate.env-missing", message: `${id}: cli.env needs ${missing.join(", ")}, which is not set (export it, or put it in .env.local)` }];
+}
+
+/** Spend reporting and the per-trial cap a command is handed. */
+function usageFindings(suite: Suite, id: string, def: CandidateDef): Finding[] {
+  const out: Finding[] = [];
+  if (def.cli?.reports_usage === "tokens" && !def.model && !def.price) {
+    out.push({ severity: "warning", code: "candidate.unpriced", message: `${id}: reports tokens but has no model or price, so its cost stays unobserved` });
+  }
+  if (def.cli?.argv.some((a) => a.includes("{{max_cost_usd}}")) && suite.maxCostPerTrialUsd === undefined) {
+    out.push({ severity: "blocking", code: "candidate.no-cost-cap", message: `${id}: argv uses {{max_cost_usd}} but step ${suite.step} declares no max_cost_per_trial_usd` });
+  }
+  return out;
+}
+
 function candidateFindings(suite: Suite): Finding[] {
   const out: Finding[] = [];
   const onHost: string[] = [];
@@ -102,12 +124,13 @@ function candidateFindings(suite: Suite): Finding[] {
       out.push({ severity: "blocking", code: "candidate.script-missing", message: `${id}: declared script ${arg} not found in ${suite.taskRoot}` });
     }
     if (!def.cli.image) onHost.push(id);
+    out.push(...cliEnvFindings(id, def.cli.env ?? {}), ...usageFindings(suite, id, def));
   }
   if (onHost.length > 0 && suite.check) {
     out.push({
       severity: "warning",
       code: "candidate.host-reads-answers",
-      message: `${onHost.join(", ")} run on this machine without an image: they can read the task's checks/, rubrics/ and references/ (the answer key). Give them cli.image to keep those out of reach.`,
+      message: `${onHost.join(", ")} run on this machine without an image: they can read the task's checks/ and rubrics/ (references/ is unreadable while a run is in flight, which stops an agent that looks, not one that breaks out). Give them cli.image to keep all of it out of reach.`,
     });
   }
   return out;

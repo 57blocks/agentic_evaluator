@@ -18,6 +18,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { CostSource } from "../canon/types.js";
+import type { TokenUsage } from "../pricing.js";
 
 export const USAGE_FILE = ".eval-usage.json";
 
@@ -62,5 +63,35 @@ export async function readReportedUsage(workDir: string): Promise<ReportedUsage>
     return parseReportedUsage(JSON.parse(text)) ?? UNOBSERVED;
   } catch {
     return UNOBSERVED;
+  }
+}
+
+/**
+ * `reports_usage: tokens`: the file carries tokens only, and agenteval prices
+ * them (src/pricing.ts). `prompt_tokens` is input not served from or written
+ * to a cache; cache reads and writes are counted apart, since they cost
+ * differently:
+ *
+ *   { "prompt_tokens": 1200, "completion_tokens": 3400,
+ *     "cache_read_tokens": 81000, "cache_write_tokens": 9000 }
+ */
+export function parseReportedTokens(raw: unknown): TokenUsage | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const f = raw as Record<string, unknown>;
+  if (f.prompt_tokens === undefined || f.completion_tokens === undefined) return null;
+  const input = tokenCount(f.prompt_tokens);
+  const output = tokenCount(f.completion_tokens);
+  const cacheRead = tokenCount(f.cache_read_tokens);
+  const cacheWrite = tokenCount(f.cache_write_tokens);
+  if (input === null || output === null || cacheRead === null || cacheWrite === null) return null;
+  return { input, output, cacheRead, cacheWrite };
+}
+
+/** The tokens a candidate reported, or null when absent or malformed. */
+export async function readReportedTokens(workDir: string): Promise<TokenUsage | null> {
+  try {
+    return parseReportedTokens(JSON.parse(await fs.readFile(path.join(workDir, USAGE_FILE), "utf-8")));
+  } catch {
+    return null;
   }
 }

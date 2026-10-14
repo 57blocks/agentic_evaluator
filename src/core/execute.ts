@@ -321,7 +321,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
 
     if (nested) {
       const chosenByStep = Object.fromEntries(steps.map((s) => [s.id, s.chosen]));
-      const e2e = await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit });
+      const e2e = await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit, budget });
       const control = e2e?.control ?? null;
       const record = buildWorkflowRecord({
         protocolVersion: suites[0].protocolVersion ?? "0.3",

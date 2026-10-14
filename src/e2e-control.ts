@@ -18,6 +18,7 @@ import {
 } from "./canon/e2e.js";
 import { sha256 } from "./canon/hash.js";
 import { decideTaskOutcome } from "./canon/success.js";
+import { INFRA_COMPLETION_STATES } from "./canon/states.js";
 import type { CompletionState, EvaluationResult } from "./canon/types.js";
 import type { Suite } from "./types.js";
 
@@ -158,7 +159,9 @@ export async function runChainArm(params: {
           output_sha: sha256(payload),
           checks: gen.checks,
         });
-        if (decided.outcome === "failure") {
+        // A failed step ends the case; so does one that never got to finish
+        // (an outage, the budget), since the next would start from nothing.
+        if (decided.outcome === "failure" || INFRA_COMPLETION_STATES.has(gen.completion_state)) {
           aborted = true;
           break;
         }
