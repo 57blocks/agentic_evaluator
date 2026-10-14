@@ -9,9 +9,11 @@
  */
 
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { runCheck, runCommandCheck, type CheckFile, type CheckResult } from "../check.js";
 import { resolveTaskAsset } from "../paths.js";
+import { fixturePath, isDir } from "./fixture.js";
 import type { Suite } from "../types.js";
 import type { Finding } from "./preflight.js";
 
@@ -36,7 +38,14 @@ async function runStepCheck(suite: Suite, input: { slug: string; text: string },
     files: answer.files,
     output: answer.output,
     input: input.text,
-    meta: { step: suite.step, candidate: "check-task", input: input.slug, trial: 0 },
+    meta: {
+      step: suite.step,
+      candidate: "check-task",
+      input: input.slug,
+      trial: 0,
+      ...(fixturePath(suite, input.slug) ? { fixture: fixturePath(suite, input.slug)! } : {}),
+      chained: false,
+    },
     workDir,
   });
 }
@@ -56,24 +65,40 @@ async function filesUnder(root: string): Promise<CheckFile[]> {
  * `output.txt` among them is the deliverable text); `references/<slug>.txt`
  * is the deliverable text alone. Null when the input has no reference.
  */
-async function referenceFor(taskRoot: string, slug: string): Promise<Answer | null> {
-  const dir = path.join(taskRoot, "references", slug);
+async function referenceFor(taskRoot: string, slug: string, step?: string): Promise<Answer | null> {
+  // Several steps may name an input alike (each project, at each step's
+  // start): references/<step>/<input> wins over references/<input>.
+  if (step !== undefined) {
+    const own = await referenceIn(path.join(taskRoot, "references", step), slug);
+    if (own !== null) return own;
+  }
+  return referenceIn(path.join(taskRoot, "references"), slug);
+}
+
+async function referenceIn(root: string, slug: string): Promise<Answer | null> {
+  const dir = path.join(root, slug);
   if (await fs.stat(dir).then((s) => s.isDirectory(), () => false)) {
     const files = await filesUnder(dir);
     return { files, output: files.find((f) => f.path === "output.txt")?.content ?? "" };
   }
-  const text = await fs.readFile(path.join(taskRoot, "references", `${slug}.txt`), "utf-8").catch(() => null);
+  const text = await fs.readFile(path.join(root, `${slug}.txt`), "utf-8").catch(() => null);
   return text === null ? null : { files: [], output: text };
 }
 
 const describe = (r: CheckResult): string => `${r.state}${r.reason ? ` (${r.reason})` : ""}`;
 
-/** The null probe: an empty answer must fail (or be not_evaluated); passing or crashing blocks. */
+/**
+ * The null probe: an empty answer must fail (or be not_evaluated); passing or
+ * crashing blocks. With `fixture_dir`, "empty" is the untouched fixture.
+ */
 async function nullProbe(suite: Suite, inputs: readonly { slug: string; text: string }[], scratch: string): Promise<Finding> {
   const passed: string[] = [];
   const crashed: string[] = [];
   for (const input of inputs) {
-    const r = await runStepCheck(suite, input, EMPTY, path.join(scratch, `null__${input.slug}`));
+    // With a fixture, a candidate that did nothing leaves the fixture as it was.
+    const fixture = fixturePath(suite, input.slug);
+    const nothing = fixture && (await isDir(fixture)) ? { files: await filesUnder(fixture), output: "" } : EMPTY;
+    const r = await runStepCheck(suite, input, nothing, path.join(scratch, `null__${input.slug}`));
     if (r.state === "pass") passed.push(input.slug);
     if (r.state === "evaluator_error") crashed.push(`${input.slug}: ${describe(r)}`);
   }
@@ -94,7 +119,7 @@ async function oracleProbe(suite: Suite, inputs: readonly { slug: string; text: 
   const rejected: string[] = [];
   let passed = 0;
   for (const input of inputs) {
-    const reference = await referenceFor(suite.taskRoot, input.slug);
+    const reference = await referenceFor(suite.taskRoot, input.slug, suite.step);
     if (reference === null) {
       missing.push(input.slug);
       continue;
@@ -115,15 +140,18 @@ async function oracleProbe(suite: Suite, inputs: readonly { slug: string; text: 
   return out;
 }
 
-/** Both probes for one step, in a scratch dir under the task's runs/ that is removed afterwards. */
+/** Both probes for one step, in a temp dir that is removed afterwards. */
 export async function probeCheck(
   suite: Suite,
   inputs: readonly { slug: string; text: string }[],
   opts: { keep?: boolean } = {},
 ): Promise<Finding[]> {
-  const scratch = path.join(suite.taskRoot, "runs", `check-task-${Date.now()}-${process.pid}`);
+  // Outside the repo, like a run's trials: a reference with no config of its
+  // own must not pick up the repo's.
+  const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "agenteval-check-task-"));
   try {
-    return [await nullProbe(suite, inputs, scratch), ...(await oracleProbe(suite, inputs, scratch))];
+    const found = [await nullProbe(suite, inputs, scratch), ...(await oracleProbe(suite, inputs, scratch))];
+    return opts.keep ? [...found, { severity: "ok", code: "check.kept", message: `probe work dirs kept in ${scratch}` }] : found;
   } finally {
     if (!opts.keep) await fs.rm(scratch, { recursive: true, force: true });
   }

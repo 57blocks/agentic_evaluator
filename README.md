@@ -487,7 +487,10 @@ It runs in a fresh, empty work dir. `{{input}}` is replaced by the test case
 The files it leaves behind are its deliverable; if it leaves none, its stdout
 is. It must exit 0: a non-zero exit is recorded as a failed attempt (with the
 exit code as the reason), even if it left files behind. Relative paths resolve
-against the task directory. Use `x-harness: { producer: codegen }`. Add
+against the task directory. The judge reads every file it left; when that is
+a whole project, `evaluators.judge.show` (globs such as `[README.md, "src/**"]`)
+narrows what the judge reads, and what the report shows, to those files. The
+check still gets every file. Use `x-harness: { producer: codegen }`. Add
 `image:` to run it in Docker (see [Safety](#safety)); `agenteval init` and the
 `custom-check` sample are working examples.
 
@@ -530,6 +533,35 @@ A task can have several steps, each evaluated on its own inputs. Add
 whole chain twice — once with `control_candidate` on every step, once with each
 step's recommended candidate — and reports whether the combination beats the
 single model. The `chain-offline` sample shows this.
+
+In the chain, a step's input is the previous step's output, rendered as text.
+For agents whose next stage needs the project itself, add `handoff: workdir`
+to the chained step: its work dir then starts with the files the previous step
+left, and its input text stays the root input's.
+
+An input can also be a starting state: with `fixture_dir: fixture` under
+`test_set`, `fixture/<input>/` is copied into a command candidate's work dir
+before it starts (its contents are part of the trial's identity, so editing a
+fixture is a new trial). Several steps can then share input names, one
+fixture each; `references/<step>/<input>` takes precedence over
+`references/<input>`. A command candidate is told where it is through
+`EVAL_STEP`, `EVAL_INPUT` and `EVAL_CHAINED` (`1` when its work dir was handed
+over), so one command can serve every step; a check finds the fixture's path
+as `fixture` in `meta.json`.
+
+A whole chain can be far costlier than any one step. `workflow.e2e` bounds it:
+
+```yaml
+workflow:
+  control_candidate: opus
+  e2e:
+    inputs: [demo-todo]        # run the chain on these root inputs only
+    final_checks: [app-gates]  # grade the chain's end product with this check
+```
+
+`final_checks` replaces the last step's own check in the chain only: a step
+evaluated on its own inputs (one task, say) and a chain's delivery (every
+task) usually need different checks.
 
 ### How much to trust a result
 
@@ -630,6 +662,19 @@ you confirm those numbers. Stop the dashboard with Ctrl+C.
   network is off unless you set `network:`, and only the variables you list in
   `env:` are passed in. Every trial records whether it was isolated. The
   `docker-sandbox` sample shows both ways side by side.
+- Every trial, and its check, runs in a temp dir outside the workspace, so a
+  project with no config of its own never picks up the workspace's (a
+  `vite.config.ts`, a `tsconfig.json`). What it left is copied under the run
+  as evidence, without `node_modules` or `.git`.
+- While a run is in flight the task's `references/` is unreadable, so a
+  command candidate cannot read the answers; a check that grades against them
+  finds a private copy at `$EVAL_REFERENCES_DIR`. This stops an agent that
+  goes looking, not one set on breaking out: `image:` is the real boundary.
+- A command runs as its own process group. A timeout stops the whole tree
+  (the agent and whatever it started), as does Ctrl+C on agenteval. A
+  command that prints a lot is not stopped: the last 2 MB of its output are
+  kept. Files over 2 MB, or binary, are not read back as its answer; the
+  trace names them.
 - Check scripts and `tsc` always run on your machine. Declare only checks you
   would run yourself.
 - An agent's own spending is invisible to agenteval: it shows as unobserved,

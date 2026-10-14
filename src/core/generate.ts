@@ -8,10 +8,12 @@
  */
 
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { LlmError, type LlmTrace } from "../llm.js";
 import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "../adapters/resolve.js";
 import type { ArtifactFile } from "../adapters/types.js";
+import { fixturePath, inputIdentity } from "./fixture.js";
 import { deliverableText, parsedUnitsFor } from "../adapters/deliverable.js";
 import { displayPath, taskInputPath, resolveTaskAsset } from "../paths.js";
 import { listRunDirs, type Workspace } from "./workspace.js";
@@ -119,7 +121,32 @@ export async function generateOne(params: {
   checkWorkDir: string;
   trace: LlmTrace;
   traceContext: Record<string, unknown>;
+  /** The input's fixture (`fixture_dir`), laid in before an agent starts. */
+  fixtureDir?: string | null;
+  /** A chained step's handoff: the previous step's files (`handoff: workdir`). */
+  seedFiles?: readonly ArtifactFile[];
 }): Promise<GenOutput> {
+  // The trial runs outside the repo (a project with no config of its own
+  // would otherwise pick up this repo's: vite.config.ts, tsconfig, .git).
+  // What it left is kept under the run as evidence; installs are not.
+  const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "agenteval-trial-"));
+  try {
+    return await generateIn(scratch, params);
+  } finally {
+    await keepEvidence(scratch, params.checkWorkDir);
+    await fs.rm(scratch, { recursive: true, force: true });
+  }
+}
+
+/** Not kept as evidence: reinstallable, and large. */
+const NOT_EVIDENCE = new Set(["node_modules", ".git"]);
+
+async function keepEvidence(from: string, to: string): Promise<void> {
+  await fs.mkdir(to, { recursive: true });
+  await fs.cp(from, to, { recursive: true, force: true, filter: (src) => !NOT_EVIDENCE.has(path.basename(src)) });
+}
+
+async function generateIn(workDir: string, params: Parameters<typeof generateOne>[0]): Promise<GenOutput> {
   const { suite, producer, promptTpl, inputSlug, inputText, def, temperature, timeoutMs, trace, traceContext } = params;
   const adapter = adapterFor(def, producer);
   const result = await adapter.execute(
@@ -134,12 +161,14 @@ export async function generateOne(params: {
       model: def.model,
       maxTokens: def.generation_settings?.max_tokens,
       cli: def.cli,
+      ...(params.fixtureDir ? { fixtureDir: params.fixtureDir } : {}),
+      ...(params.seedFiles ? { seedFiles: params.seedFiles } : {}),
     },
-    { workDir: params.checkWorkDir, taskRoot: suite.taskRoot, emit: trace, traceContext },
+    { workDir, taskRoot: suite.taskRoot, emit: trace, traceContext },
   );
   const out: GenOutput = {
     ...result,
-    text: deliverableText(adapter.id, result.text, result.artifacts),
+    text: deliverableText(adapter.id, result.text, result.artifacts, suite.judgeShow),
     parsedUnits: parsedUnitsFor(adapter.id, result.artifacts, suite.check !== undefined),
   };
   if (!suite.check) return out;
@@ -149,7 +178,7 @@ export async function generateOne(params: {
       ? await runCheck({
           files: result.artifacts,
           scaffoldDir: await resolveTaskAsset(suite.taskRoot, suite.check.scaffoldDir),
-          workDir: params.checkWorkDir,
+          workDir,
         })
       : await runCommandCheck({
           argv: suite.check.argv,
@@ -164,8 +193,12 @@ export async function generateOne(params: {
             candidate: params.def.id,
             input: params.inputSlug,
             trial: Number(params.traceContext.trial ?? 0),
+            // Where this input's fixture is, so a check can compare against
+            // the starting state; and whether the work dir was handed over.
+            ...(params.fixtureDir ? { fixture: params.fixtureDir } : {}),
+            chained: params.seedFiles !== undefined,
           },
-          workDir: params.checkWorkDir,
+          workDir,
         });
   return {
     ...out,
@@ -372,6 +405,8 @@ export async function runAll(params: {
   const tasks: GenTask[] = [];
   for (const inputSlug of suite.inputs) {
     const inputText = inputTextBySlug.get(inputSlug) ?? "";
+    const fixture = fixturePath(suite, inputSlug);
+    const identity = await inputIdentity(inputText, fixture);
     for (const candidate of suite.candidates) {
       const def = defOf(suite, candidate);
       const temperature = def.generation_settings?.temperature ?? baseTemperature;
@@ -386,7 +421,7 @@ export async function runAll(params: {
             producer,
             producerVersion: producer === "codegen" ? CODEGEN_PRODUCER_VERSION : "1",
             promptTemplateSha,
-            inputSha: sha256(inputText),
+            inputSha: sha256(identity),
             model: modelRefOf(def),
             temperature,
             maxTokens: def.generation_settings?.max_tokens,
@@ -438,6 +473,7 @@ export async function runAll(params: {
         checkWorkDir,
         trace,
         traceContext: { phase: "generation", candidate, model: modelRefOf(def), input: inputSlug, trial },
+        fixtureDir: fixturePath(suite, inputSlug),
       });
       budget.add(g.costUsd + (g.retryCostUsd ?? 0));
       const verdict = classifyCompletion({ finishReason: g.finishReason, refusal: g.refusal, parsedUnits: g.parsedUnits });

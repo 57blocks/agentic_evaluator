@@ -34,7 +34,8 @@ import { openTrace } from "../canon/trace.js";
 import { classifyCompletion } from "../canon/states.js";
 import { defOf, errorRecord, generateOne, readInput, safeName } from "./generate.js";
 import { loadPromptTemplate } from "./execute.js";
-import { e2eChain } from "./plan.js";
+import { fixturePath } from "./fixture.js";
+import { e2eArmChain, e2eChain, e2eRootInputs } from "./plan.js";
 import type { RunEventSink } from "./events.js";
 import { resolveEligibility } from "../canon/select.js";
 import type { EligibilityThresholds } from "../canon/types.js";
@@ -88,7 +89,7 @@ async function openArmRunner(params: {
     promptByStep.set(step.step, (await loadPromptTemplate(step, step.producer ?? "prompt")).promptTpl);
   }
 
-  const generate: E2eArmGenerate = async function (step, candidate, inputSlug, inputText, trial) {
+  const generate: E2eArmGenerate = async function (step, candidate, inputSlug, inputText, trial, seed) {
     const def = defOf(step, candidate);
     const checkWorkDir = path.join(outDir, "checks", `${safeName(step.step)}__${inputSlug}__t${trial}`);
     try {
@@ -104,6 +105,8 @@ async function openArmRunner(params: {
         checkWorkDir,
         trace: trace.emit,
         traceContext: { phase: armId, candidate, step: step.step, input: inputSlug, trial },
+        // A handed-over step starts from the previous step's files, never its own fixture.
+        ...(seed ? { seedFiles: seed } : { fixtureDir: fixturePath(step, inputSlug) }),
       });
       const verdict = classifyCompletion({
         finishReason: g.finishReason,
@@ -166,13 +169,14 @@ export async function maybeRunE2eValidation(params: {
   chosenByStep: Record<string, string | null>;
 }): Promise<E2eArms | null> {
   const { suites, root, runId, chosenByStep, emit } = params;
-  const chain = e2eChain(suites);
-  if (!chain) return null;
+  const declared = e2eChain(suites);
+  if (!declared) return null;
+  const chain = e2eArmChain(declared);
   const controlCandidate = chain[0].controlCandidate;
   if (!controlCandidate) return null;
 
   const rootInputs = await Promise.all(
-    chain[0].inputs.map(async (slug) => ({ slug, text: await readInput(slug, chain[0].taskRoot) })),
+    e2eRootInputs(chain[0]).map(async (slug) => ({ slug, text: await readInput(slug, chain[0].taskRoot) })),
   );
   const trials = chain[0].trials ?? 2;
 

@@ -29,7 +29,7 @@ const DEFAULT_TIMEOUT_MS = 120_000;
 export interface EvalStep {
   id: string;
   version: string;
-  test_set: { id: string; inputs: string[] };
+  test_set: { id: string; inputs: string[]; fixture_dir?: string };
   candidate_ids: string[];
   required_checks?: string[];
   judged_dimensions?: string[];
@@ -43,6 +43,8 @@ export interface EvalStep {
   rubric_file?: string;
   /** Prior step id whose output is this step's input during e2e control. Independent eval still uses test_set. */
   input_from?: string;
+  /** What a chained step starts from: the previous output as text (default), or its files. */
+  handoff?: "text" | "workdir";
 }
 
 /** Static shape of a validated spec (mirrors SPEC_SCHEMA; kept loose on purpose). */
@@ -52,6 +54,8 @@ export interface EvalSpec {
   budget_usd?: number;
   workflow: {
     control_candidate?: string;
+    /** End-to-end validation: which root inputs the chain runs on, and what grades its end product. */
+    e2e?: { inputs?: string[]; final_checks?: string[] };
     steps: EvalStep[];
   };
   candidates: CandidateDef[];
@@ -66,7 +70,7 @@ export interface EvalSpec {
         timeout_seconds?: number;
       }
     >;
-    judge: { model: string; provider_route?: string; rubric_file: string; methods?: string[] };
+    judge: { model: string; provider_route?: string; rubric_file: string; methods?: string[]; show?: string[] };
     human?: { rubric_file: string; method?: "pairwise"; show?: string[]; dimensions?: string[] };
   };
   execution: {
@@ -103,7 +107,9 @@ function vendorOf(modelId: string): string {
 }
 
 export function parseSpec(text: string, specPath: string): EvalSpec {
-  const data: unknown = parseYaml(text);
+  // `merge`: `<<: *anchor` folds shared blocks (one candidate's cli, a
+  // provider's env) into many, so a spec states them once.
+  const data: unknown = parseYaml(text, { merge: true });
   if (!validateSpec(data)) {
     const issues = (validateSpec.errors ?? [])
       .map((e) => `${e.instancePath || "/"} ${e.message ?? ""}`.trim())
@@ -218,6 +224,9 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
     if (steps.some((s) => s.input_from)) {
       throw specError(specPath, "input_from must form a single linear chain (no forks or cycles)");
     }
+    if (spec.workflow.e2e) {
+      throw specError(specPath, "workflow.e2e needs a chain: no step declares input_from");
+    }
     return;
   }
 
@@ -229,6 +238,21 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
     if (!steps[indexOf.get(id)!].candidate_ids.includes(control)) {
       throw specError(specPath, `control_candidate "${control}" is not in step "${id}" candidate_ids`);
     }
+  }
+  checkE2eBlock(spec, specPath, steps[indexOf.get(chain[0])!]);
+}
+
+/** workflow.e2e: its inputs are the chain's first step's, and its final check is declared. */
+function checkE2eBlock(spec: EvalSpec, specPath: string, root: EvalStep): void {
+  const e2e = spec.workflow.e2e;
+  if (!e2e) return;
+  const unknown = (e2e.inputs ?? []).filter((i) => !root.test_set.inputs.includes(i));
+  if (unknown.length > 0) {
+    throw specError(specPath, `workflow.e2e.inputs ${unknown.join(", ")} are not inputs of "${root.id}", where the chain starts`);
+  }
+  const undeclared = (e2e.final_checks ?? []).filter((c) => !spec.evaluators.required_checks?.[c]);
+  if (undeclared.length > 0) {
+    throw specError(specPath, `workflow.e2e.final_checks ${undeclared.join(", ")} have no evaluator definition`);
   }
 }
 
@@ -288,6 +312,17 @@ function compileCheck(
   };
 }
 
+/** workflow.e2e, compiled: the same on every step (the chain reads it off its first and last). */
+function e2eOf(spec: EvalSpec, specPath: string): Pick<Suite, "e2eInputs" | "e2eFinalCheck"> {
+  const e2e = spec.workflow.e2e;
+  if (!e2e) return {};
+  const finalCheck = e2e.final_checks ? compileCheck(spec, specPath, "workflow.e2e", e2e.final_checks) : undefined;
+  return {
+    ...(e2e.inputs ? { e2eInputs: [...e2e.inputs] } : {}),
+    ...(finalCheck ? { e2eFinalCheck: finalCheck } : {}),
+  };
+}
+
 function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskRoot: string, step: EvalStep): Suite {
   const harness = spec["x-harness"]!;
   const { producer, promptFile, rubricFile } = stepOverrides(step, spec);
@@ -308,6 +343,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     candidates: [...step.candidate_ids],
     judge: spec.evaluators.judge.model,
     judgeMethods: judgeMethodsOf(spec),
+    ...(spec.evaluators.judge.show?.length ? { judgeShow: spec.evaluators.judge.show } : {}),
     inputs: [...step.test_set.inputs],
     trials: spec.execution.trials_per_case,
     temperature: harness.default_temperature ?? DEFAULT_TEMPERATURE,
@@ -345,6 +381,9 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     specPath,
     taskRoot,
     inputFrom: step.input_from,
+    ...(step.handoff ? { handoff: step.handoff } : {}),
+    ...e2eOf(spec, specPath),
+    ...(step.test_set.fixture_dir ? { fixtureDir: step.test_set.fixture_dir } : {}),
   };
 }
 

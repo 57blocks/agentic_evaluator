@@ -27,6 +27,10 @@ export interface CandidateRequest {
   maxTokens?: number;
   /** Required when the adapter is agent-cli. */
   cli?: AgentCliConfig;
+  /** agent-cli: a directory copied into the work dir before the command starts (`fixture_dir`). */
+  fixtureDir?: string;
+  /** agent-cli: files written into the work dir before it starts — a chained step's handoff. */
+  seedFiles?: readonly ArtifactFile[];
 }
 
 export interface ExecutionContext {

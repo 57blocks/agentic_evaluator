@@ -105,6 +105,11 @@ export interface Suite {
    * per-dimension thresholds and returns a wall of 5s.
    */
   judgeMethods?: JudgeMethod[];
+  /**
+   * `evaluators.judge.show`: for command candidates, the files the judge reads
+   * (globs relative to the work dir). Every file when omitted.
+   */
+  judgeShow?: string[];
   /** Input case slugs; each maps to `eval/inputs/<slug>.txt`. */
   inputs: string[];
   /** Repeats per (candidate, input) to average cost/latency. Default 2. */
@@ -150,6 +155,30 @@ export interface Suite {
   concurrency?: number;
   /** Prior step id for the single-model e2e control handoff. Independent eval ignores this. */
   inputFrom?: string;
+  /**
+   * What a chained step starts from in the e2e arms: the previous step's
+   * output rendered as text (default), or its files laid into the work dir
+   * (`workdir`), for agents whose next stage needs the project itself.
+   */
+  handoff?: "text" | "workdir";
+  /**
+   * `test_set.fixture_dir`, relative to the task: `<fixtureDir>/<input>/` is
+   * laid into an agent-cli candidate's work dir before it starts, so an input
+   * can be a project at a moment in time rather than only a text.
+   */
+  fixtureDir?: string;
+  /**
+   * `workflow.e2e.inputs`: the root inputs the end-to-end arms run on, when
+   * not every input of the chain's first step (a whole chain can cost a day).
+   */
+  e2eInputs?: string[];
+  /**
+   * `workflow.e2e.final_checks`: what grades the chain's end product. It
+   * replaces the last step's own check in the arms only — a step evaluated on
+   * its own inputs (one task) and a chain's delivery (every task) are graded
+   * differently.
+   */
+  e2eFinalCheck?: CheckConfig;
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;
