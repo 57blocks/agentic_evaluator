@@ -56,19 +56,34 @@ function Checks({ c }: { c: CandidateRow }) {
 }
 
 function WinRate({ c }: { c: CandidateRow }) {
-  if (c.winRate === null) return <span className="text-muted-foreground">—</span>;
-  const width = Math.max(0, Math.min(100, c.winRate));
+  return <RateBar rate={c.winRate} />;
+}
+
+/** Blind human review: win rate over the pairs this candidate was reviewed in. */
+function HumanRate({ c }: { c: CandidateRow }) {
+  return (
+    <div className="flex flex-col items-end">
+      <RateBar rate={c.human?.rate ?? null} />
+      <span className="text-xs text-muted-foreground">{c.human?.comparisons ?? 0} reviewed</span>
+    </div>
+  );
+}
+
+function RateBar({ rate }: { rate: number | null }) {
+  if (rate === null) return <span className="text-muted-foreground">—</span>;
+  const width = Math.max(0, Math.min(100, rate));
   return (
     <div className="flex items-center justify-end gap-2">
       <span className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-muted sm:inline-block">
         <span className="block h-full rounded-full bg-brand-2" style={{ width: `${width.toFixed(0)}%` }} />
       </span>
-      <span className="font-mono">{fmtPct(c.winRate)}</span>
+      <span className="font-mono">{fmtPct(rate)}</span>
     </div>
   );
 }
 
 export function Candidates({ candidates, control }: Pick<StepReport, "candidates" | "control">) {
+  const reviewed = candidates.some((c) => c.human !== null);
   return (
     <Section title="Candidates" hint="Results on the same inputs. Gated-out candidates stay in the table for comparison.">
       <Table>
@@ -78,6 +93,7 @@ export function Candidates({ candidates, control }: Pick<StepReport, "candidates
             <TableHead>Task success</TableHead>
             <TableHead className="text-right">Required check</TableHead>
             <TableHead className="text-right">Judge win rate</TableHead>
+            {reviewed && <TableHead className="text-right">Human win rate</TableHead>}
             <TableHead className="text-right">Absolute score</TableHead>
             <TableHead className="text-right">Cost per success</TableHead>
             <TableHead className="text-right">Median duration</TableHead>
@@ -93,6 +109,7 @@ export function Candidates({ candidates, control }: Pick<StepReport, "candidates
               <TableCell className="align-top"><Success c={c} /></TableCell>
               <TableCell className="text-right align-top"><Checks c={c} /></TableCell>
               <TableCell className="text-right align-top"><WinRate c={c} /></TableCell>
+              {reviewed && <TableCell className="text-right align-top"><HumanRate c={c} /></TableCell>}
               <TableCell className="text-right align-top font-mono">{fmtScore(c.absolute)}</TableCell>
               <TableCell className="text-right align-top font-mono">{fmtCost(c.costPerSuccess, c.costObserved)}</TableCell>
               <TableCell className="text-right align-top font-mono">{fmtSec(c.p50)}</TableCell>

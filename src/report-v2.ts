@@ -23,10 +23,11 @@ import { FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel } from "./
 import { NO_PICK, plural } from "./report-format.js";
 import {
   candidateViews, evaluatorErrorSubject, fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, judgeFavourite,
-  ledgerNote, sha8, stateTone, subtitleReasons, verdictFacts, verdictText,
+  ledgerNote, reviewGapLines, reviewSummary, sha8, stateTone, subtitleReasons, verdictFacts, verdictText,
   type CandidateView,
 } from "./report-model.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
+import { latestVerdicts, type ReviewEntry, type ReviewRow } from "./canon/review.js";
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
 import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
@@ -51,6 +52,18 @@ export interface RunBundle {
   recommendation: Recommendation;
   gaps: string;
   outputs: RawOutput[];
+  /**
+   * Human verdicts from reviews/*.jsonl, latest per (reviewer, pair). Kept apart
+   * from `evaluations` so nothing that selects a candidate can read them.
+   */
+  reviews?: ReviewRow[];
+}
+
+async function loadReviews(dir: string): Promise<ReviewRow[]> {
+  const root = path.join(dir, "reviews");
+  const files = (await fs.readdir(root).catch(() => [] as string[])).filter((f) => f.endsWith(".jsonl")).sort();
+  const entries = (await Promise.all(files.map((f) => readJsonl<ReviewEntry>(path.join(root, f))))).flat();
+  return latestVerdicts(entries);
 }
 
 async function readJsonl<T>(file: string): Promise<T[]> {
@@ -74,6 +87,7 @@ export async function loadBundle(dir: string): Promise<RunBundle> {
     summary,
     recommendation,
     gaps: await fs.readFile(path.join(dir, "GAPS.md"), "utf-8").catch(() => ""),
+    reviews: await loadReviews(dir),
   };
 }
 
@@ -155,10 +169,12 @@ export function renderRunReport(b: RunBundle): string {
   const inputs = m.test_set.inputs;
   const trialsPer = m.execution.trials_per_case;
   const evaluatorErrors = b.evaluations.filter((e) => e.state === "evaluator_error");
-  const gapsHtml = b.gaps
-    .split("\n")
-    .filter((l) => l.startsWith("- "))
-    .map((l) => `<li>${escapeHtml(l.slice(2)).replace(/`([^`]+)`/g, "<code>$1</code>")}</li>`)
+  const review = reviewSummary(b);
+  const gapsHtml = [
+    ...b.gaps.split("\n").filter((l) => l.startsWith("- ")).map((l) => l.slice(2)),
+    ...reviewGapLines(review).map((g) => g.text),
+  ]
+    .map((t) => `<li>${escapeHtml(t).replace(/`([^`]+)`/g, "<code>$1</code>")}</li>`)
     .join("");
 
   const colorOf = new Map(views.map((v, i) => [v.id, i % 4]));
@@ -179,6 +195,7 @@ export function renderRunReport(b: RunBundle): string {
         <td><div class="state-list">${outcomes}</div></td>
         <td class="num">${checkPill(v)}</td>
         <td class="num">${winBar(v.winRate)}${fmtPct(v.winRate)}<span class="sub">${v.comparisons} matches</span></td>
+        ${review ? `<td class="num">${winBar(v.human?.rate ?? null)}${fmtPct(v.human?.rate ?? null)}<span class="sub">${v.human?.comparisons ?? 0} reviewed</span></td>` : ""}
         <td class="num">${fmtScore(v.absolute)}</td>
         <td class="num">${fmtCost(v.costPerSuccess, v.costObserved)}</td>
         <td class="num">${fmtSec(v.p50)}</td>
@@ -231,13 +248,14 @@ export function renderRunReport(b: RunBundle): string {
   <section class="card">
     <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule ${escapeHtml(rec.rule_version)}</span></h2>
     <ol class="trace">${filterList(rec)}</ol>
+    ${review ? `<p class="note"><b>Blind human review</b> by ${escapeHtml(review.reviewers.join(", "))}: ${review.reviewed} of ${review.pairs} pairs.${review.agreement ? ` The judge agrees with the human on ${review.agreement.overall.agree} of ${review.agreement.overall.total} pair${review.agreement.overall.total === 1 ? "" : "s"}.` : ""} Human verdicts inform this report and do not enter the recommendation.</p>` : ""}
     <p class="note">Passed every gate: ${rec.eligible.length ? rec.eligible.map(escapeHtml).join(", ") : "none"}. The judge's win rate is for reference only and takes no part in selection.</p>
   </section>
 
   <section class="card">
     <h2>Candidates <span class="hint">the same inputs, paired by candidate; ${trialsPer} trial(s) per cell</span></h2>
     <div class="table-wrap"><table>
-      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th><th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
+      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th>${review ? '<th class="num">Human win rate</th>' : ""}<th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
       <tbody>${candidateRows}</tbody>
     </table></div>
     <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.${m.control_candidate ? ` Control candidate: ${escapeHtml(m.control_candidate)}.` : ""}</p>

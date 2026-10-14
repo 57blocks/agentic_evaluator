@@ -24,6 +24,7 @@ import { cmdReport, REPORT_HELP } from "./commands/report.js";
 import { cmdDash, DASH_HELP } from "./commands/dash.js";
 import { cmdCheckTask, CHECK_TASK_HELP } from "./commands/check-task.js";
 import { cmdInstallSkill, INSTALL_SKILL_HELP } from "./commands/install-skill.js";
+import { cmdReview, REVIEW_HELP } from "./commands/review.js";
 
 interface Command {
   summary: string;
@@ -43,6 +44,7 @@ export const COMMANDS: Record<string, Command> = {
   init: { summary: "create a runnable task to edit", help: INIT_HELP, valued: VALUED, run: cmdInit },
   models: { summary: "are this task's models reachable from here, and at what price", help: MODELS_HELP, valued: VALUED, run: cmdModels },
   report: { summary: "re-render a run's report.html", help: REPORT_HELP, valued: VALUED, run: cmdReport },
+  review: { summary: "review a run blind, in the dashboard", help: REVIEW_HELP, valued: [...VALUED, "reviewer"], run: cmdReview },
   dash: { summary: "serve the dashboard", help: DASH_HELP, valued: VALUED, run: cmdDash },
   "install-skill": { summary: "add the /agenteval-new-task skill for Claude Code", help: INSTALL_SKILL_HELP, valued: VALUED, run: cmdInstallSkill },
 };

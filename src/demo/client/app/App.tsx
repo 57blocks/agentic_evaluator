@@ -7,6 +7,7 @@
  * what keeps this file from growing a little of every page.
  */
 
+import { ReviewPage } from "@/features/review/ReviewPage";
 import { AppFooter } from "./AppFooter";
 import type { RunView, TaskView } from "../../catalog.js";
 import { allRuns, useWorkspace, type Catalog } from "./useWorkspace";
@@ -53,13 +54,14 @@ function reportLabel(run: RunView, dir: string): string {
 /** The trail back, built from whatever the route resolved to. */
 function crumbsFor(route: Route, task: TaskView | undefined, run: RunView | undefined, catalog: Catalog): Crumb[] {
   if (route.view === "task") return [{ label: task?.name ?? route.specPath }];
-  if (route.view !== "run" && route.view !== "report") return [];
+  if (route.view !== "run" && route.view !== "report" && route.view !== "review") return [];
   if (!run) return [{ label: route.runId }];
   const owner = run.task ? catalog.tasks.find((t) => t.name === run.task) : undefined;
   const trail: Crumb[] = owner
     ? [{ label: owner.name, route: { view: "task", specPath: owner.specPath } }]
     : [];
   const stamp: Crumb = { label: runStamp(run), route: { view: "run", runId: run.id } };
+  if (route.view === "review") return [...trail, stamp, { label: "Blind review" }];
   return route.view === "report"
     ? [...trail, stamp, { label: reportLabel(run, route.dir) }]
     : [...trail, stamp];
@@ -75,7 +77,7 @@ export function App() {
   const task =
     route.view === "task" ? catalog.tasks.find((t) => t.specPath === route.specPath) : undefined;
   const run =
-    route.view === "run" || route.view === "report"
+    route.view === "run" || route.view === "report" || route.view === "review"
       ? allRuns(catalog).find((r) => r.id === route.runId)
       : undefined;
 
@@ -91,6 +93,8 @@ export function App() {
         <TaskPage task={task} onRunFinished={reload} />
       ) : run && route.view === "report" ? (
         <ReportPage run={run} dir={route.dir} />
+      ) : run && route.view === "review" ? (
+        <ReviewPage runId={run.id} reviewer={route.reviewer} />
       ) : run ? (
         <RunPage run={run} />
       ) : (

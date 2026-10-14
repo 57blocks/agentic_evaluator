@@ -25,6 +25,7 @@ import { buildOverview } from "../server/overview.js";
 import { hasReport, loadReportModel } from "../report-model.js";
 import { NoSuchSpecError } from "../core/workspace.js";
 import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun, safeId } from "./catalog.js";
+import { loadReviewSession, recordVerdict, reveal, ReviewError, type VerdictInput } from "../core/review-service.js";
 import { demoPage, DIST_DIR } from "./ui.js";
 
 const HOST = "127.0.0.1";
@@ -45,7 +46,39 @@ const MIME: Record<string, string> = {
 /** A request body, capped: this server is local, but a cap costs nothing. */
 const MAX_BODY_BYTES = 64 * 1024;
 
+/** A POST refused before its body is read: the status says why (415, 403). */
+class RefusedRequest extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message);
+    this.name = "RefusedRequest";
+  }
+}
+
+/**
+ * Cross-site request forgery guard for every POST.
+ *
+ * Any page the user visits while the dashboard runs can send a "simple"
+ * cross-origin request (text/plain, no preflight) to 127.0.0.1, and that
+ * could start a billed run or post review verdicts. Requiring a JSON content
+ * type forces a CORS preflight, which this server never grants; a browser
+ * Origin that is not this host is refused outright.
+ */
+function assertSameSiteJson(req: http.IncomingMessage): void {
+  const type = String(req.headers["content-type"] ?? "").split(";")[0].trim().toLowerCase();
+  if (type !== "application/json") throw new RefusedRequest(415, "content-type must be application/json");
+  const origin = req.headers.origin;
+  if (origin === undefined) return;
+  let host: string;
+  try {
+    host = new URL(origin).host;
+  } catch {
+    throw new RefusedRequest(403, "cross-origin request refused");
+  }
+  if (host !== req.headers.host) throw new RefusedRequest(403, "cross-origin request refused");
+}
+
 async function readJsonBody(req: http.IncomingMessage): Promise<unknown> {
+  assertSameSiteJson(req);
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const chunk of req) {
@@ -240,6 +273,8 @@ async function handleRuns(
         sendJson(res, 409, { error: err.message, runId: err.runId });
       } else if (err instanceof NoSuchSpecError) {
         sendJson(res, 404, { error: err.message });
+      } else if (err instanceof RefusedRequest) {
+        sendJson(res, err.status, { error: err.message });
       } else {
         sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
       }
@@ -263,14 +298,73 @@ async function handleRuns(
   return false;
 }
 
+/**
+ * Blind human review of one run (docs/design/human-review.md).
+ *
+ *   GET  /api/review/<run>?reviewer=…[&failed=1]  the blinded queue, files embedded
+ *   POST /api/review/<run>                        one verdict {reviewer, pairId, overall, dimensions?, note?}
+ *   POST /api/review/<run>/reveal                 unblind for {reviewer}
+ *
+ * The run id must be in the live index, the same gate /artifact/ uses.
+ */
+async function handleReview(ws: Workspace, req: http.IncomingMessage, res: http.ServerResponse, url: URL): Promise<boolean> {
+  const m = url.pathname.match(/^\/api\/review\/([^/]+)(\/reveal)?$/);
+  if (!m) return false;
+  const runDir = (await liveRunIndex({ ws })).get(decodeURIComponent(m[1]));
+  if (!runDir) {
+    sendJson(res, 404, { error: "run not found" });
+    return true;
+  }
+  try {
+    if (req.method === "GET" && !m[2]) {
+      const session = await loadReviewSession(runDir, url.searchParams.get("reviewer") ?? "", {
+        includeFailed: url.searchParams.get("failed") === "1",
+      });
+      sendJson(res, 200, session);
+    } else if (req.method === "POST" && m[2]) {
+      const body = (await readJsonBody(req)) as { reviewer?: string };
+      await reveal(runDir, body.reviewer ?? "");
+      sendJson(res, 200, { ok: true });
+    } else if (req.method === "POST") {
+      await recordVerdict(runDir, (await readJsonBody(req)) as VerdictInput);
+      sendJson(res, 200, { ok: true });
+    } else {
+      sendJson(res, 405, { error: "method not allowed" });
+    }
+  } catch (err) {
+    const status = err instanceof RefusedRequest ? err.status : err instanceof ReviewError ? 400 : 500;
+    sendJson(res, status, { error: err instanceof Error ? err.message : String(err) });
+  }
+  return true;
+}
+
+const LOOPBACK_NAMES: ReadonlySet<string> = new Set(["127.0.0.1", "localhost", "[::1]"]);
+
+/**
+ * DNS-rebinding guard for every request. A hostile name can resolve to
+ * 127.0.0.1, making the attacker's page same-origin with this server (its
+ * Origin and Host then agree), able to read every run and to POST. Only a
+ * loopback host name is served; anything else is refused before routing.
+ */
+function isLoopbackHost(host: string | undefined): boolean {
+  if (!host) return false;
+  const name = host.startsWith("[") ? host.slice(0, host.indexOf("]") + 1) : host.split(":")[0];
+  return LOOPBACK_NAMES.has(name.toLowerCase());
+}
+
 async function handle(
   ws: Workspace,
   runs: RunRegistry,
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ): Promise<void> {
+  if (!isLoopbackHost(req.headers.host)) {
+    sendJson(res, 403, { error: "this dashboard only answers on 127.0.0.1 / localhost" });
+    return;
+  }
   const url = new URL(req.url ?? "/", `http://${HOST}`);
   if (await handleRuns(runs, req, res, url)) return;
+  if (await handleReview(ws, req, res, url)) return;
   if (req.method !== "GET") {
     send(res, 405, "method not allowed");
     return;

@@ -62,6 +62,17 @@ export type CheckConfig =
     };
 
 /** One eval suite = one pipeline step, several candidates, a few fixed inputs. */
+/** `evaluators.human`, resolved for one step (docs/design/human-review.md). */
+export interface HumanReviewConfig {
+  /** Task-relative rubric the reviewer reads; its hash versions every verdict. */
+  rubricFile: string;
+  method: "pairwise";
+  /** Globs, relative to a trial's work dir, of the files to review; empty → output.txt. */
+  show: string[];
+  /** Dimensions to give a verdict on; defaults to the step's judged_dimensions. */
+  dimensions: string[];
+}
+
 export interface Suite {
   suiteId: string;
   /** Step name, free text (e.g. "prd"). Purely a label. */
@@ -110,6 +121,8 @@ export interface Suite {
    * or empty the judge only produces the overall verdict.
    */
   dimensions?: string[];
+  /** Blind human review of the deliverables (evaluators.human); informs, never decides. */
+  human?: HumanReviewConfig;
 
   // ── Canonical (protocol v0.4) fields, populated by the YAML spec loader. ──
   // Optional so a test can build a minimal Suite; `defOf` fills in a
