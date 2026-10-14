@@ -511,6 +511,36 @@ price itself. A wrapper that copies the figure from a harness it ran, as
 recorded as `estimated`, and `GAPS.md` names the candidates that reported
 their own cost.
 
+An agent tool's own cost figure assumes its own vendor's prices (claude
+prices any model it does not know at Opus rates). To have agenteval do the
+pricing, declare `reports_usage: tokens`, have the command report tokens only,
+and give the candidate the `model` it runs (an OpenRouter id, priced from the
+OpenRouter catalog) or a `price` (USD per million tokens) for a direct
+provider:
+
+```yaml
+  - id: deepseek-v4-pro
+    adapter: agent-cli
+    price: { input: 1.32, output: 3.96, cache_read: 0.044 }   # or: model: deepseek/deepseek-v4-pro-0813
+    cli:
+      argv: [node, agents/run.mjs, deepseek-v4-pro, "{{max_cost_usd}}"]
+      reports_usage: tokens
+      env: { ANTHROPIC_API_KEY: "${DEEPSEEK_API_KEY}" }
+```
+
+```json
+{ "prompt_tokens": 1200, "completion_tokens": 3400, "cache_read_tokens": 81000, "cache_write_tokens": 9000 }
+```
+
+`prompt_tokens` is input not read from or written to a cache. A step's
+`max_cost_per_trial_usd` is handed to the command as `{{max_cost_usd}}` and
+`EVAL_MAX_COST_USD`, with the model's price as `EVAL_MODEL_PRICE` (JSON, per
+million tokens) so a wrapper can convert the cap into its tool's units;
+agenteval cannot stop an agent mid-run, so the command enforces it. `${NAME}`
+in `env` is read from the environment (or `.env.local`) when the command
+starts, so the spec and the run's records never hold the secret;
+`check-task` blocks when one is not set.
+
 ### Check scripts
 
 A `kind: command` check runs in the trial's work dir: the candidate's files,
@@ -561,7 +591,19 @@ workflow:
 
 `final_checks` replaces the last step's own check in the chain only: a step
 evaluated on its own inputs (one task, say) and a chain's delivery (every
-task) usually need different checks.
+task) usually need different checks. `e2e.judge` (`rubric_file`, and
+optionally `show` and `dimensions`) compares the two arms' deliveries case by
+case, pairwise; like a step's judge it informs, and the gates decide.
+
+Steps differ in what to judge and how hard they are to run. A step can carry
+its own `judge` block (`rubric_file`, `methods`, `show`, `dimensions`; the
+judge model stays `evaluators.judge.model`) and its own `concurrency`.
+`--concurrency` on the command line overrides both.
+
+A long run that dies part way is resumed with `agenteval run <task> --yes
+--reuse`: every trial is journaled the moment it finishes
+(`trials.partial.jsonl`), and `--reuse` takes finished trials from there as
+well as from completed runs, so only the unfinished ones run again.
 
 ### How much to trust a result
 
@@ -677,9 +719,11 @@ you confirm those numbers. Stop the dashboard with Ctrl+C.
   trace names them.
 - Check scripts and `tsc` always run on your machine. Declare only checks you
   would run yourself.
-- An agent's own spending is invisible to agenteval: it shows as unobserved,
-  and `budget_usd` cannot stop it. Only model candidates and the judge count
-  against the budget.
+- An agent's own spending is invisible to agenteval unless its command
+  reports it (`reports_usage`); unreported, it shows as unobserved. What is
+  reported counts against `budget_usd`, end-to-end arms included: past the
+  budget no new trial starts. One already running finishes, so cap each
+  trial too (`max_cost_per_trial_usd`).
 - The dashboard listens on 127.0.0.1 only and has no authentication.
 
 ## Troubleshooting
@@ -694,7 +738,7 @@ you confirm those numbers. Stop the dashboard with Ctrl+C.
 | every candidate gated: `required-check pass rate undefined (0/0)` | the step has no required check; add one, or use [judge-only grading](#judge-only-grading) |
 | every trial `skip ... budget limit reached` | `budget_usd` is too low — it must be above 0, even for a free task |
 | a candidate shows `evaluator_error` | your check crashed or exited with something other than 0/1 — the check's fault, not the candidate's |
-| a candidate `malformed` with `exited with code N` | the command candidate exited non-zero; its files were not graded |
+| a candidate `malformed` with `exited with code N` | the command candidate exited non-zero, so the trial failed; its check still ran on what it left, and the evidence is in the report |
 | exit code `3` | the run finished but is partial: read its `GAPS.md` |
 | a model fails mid-run | run `agenteval models <task>` after editing candidate ids |
 

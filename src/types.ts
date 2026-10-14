@@ -168,6 +168,12 @@ export interface Suite {
    */
   fixtureDir?: string;
   /**
+   * `max_cost_per_trial_usd`: the spend cap a command candidate is handed
+   * (`{{max_cost_usd}}`, EVAL_MAX_COST_USD) and enforces itself — agenteval
+   * cannot stop an agent's spending mid-run, only hand it the limit.
+   */
+  maxCostPerTrialUsd?: number;
+  /**
    * `workflow.e2e.inputs`: the root inputs the end-to-end arms run on, when
    * not every input of the chain's first step (a whole chain can cost a day).
    */
@@ -179,6 +185,8 @@ export interface Suite {
    * differently.
    */
   e2eFinalCheck?: CheckConfig;
+  /** `workflow.e2e.judge`: compare the two arms' deliveries (informs, never decides). */
+  e2eJudge?: E2eJudgeConfig;
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;
@@ -243,6 +251,14 @@ export type Winner = "a" | "b" | "tie";
  * `forward` and `reverse` are the two order-swapped rounds already mapped into
  * a/b space; `resolved` is a win only when both rounds agree, else "tie".
  */
+/** The judge on a workflow's end product; the model is evaluators.judge.model. */
+export interface E2eJudgeConfig {
+  rubricFile: string;
+  /** Files of the last step the judge reads; all when absent. */
+  show?: string[];
+  dimensions: string[];
+}
+
 export interface DimensionVerdict {
   forward: Winner;
   reverse: Winner;

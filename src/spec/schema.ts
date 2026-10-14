@@ -35,6 +35,16 @@ export const SPEC_SCHEMA = {
           properties: {
             inputs: { type: "array", minItems: 1, items: { type: "string" } },
             final_checks: { type: "array", minItems: 1, items: { type: "string" } },
+            judge: {
+              type: "object",
+              additionalProperties: false,
+              required: ["rubric_file"],
+              properties: {
+                rubric_file: { type: "string", minLength: 1 },
+                show: { type: "array", items: { type: "string", minLength: 1 } },
+                dimensions: { type: "array", items: { type: "string" } },
+              },
+            },
           },
         },
         steps: {
@@ -86,6 +96,19 @@ export const SPEC_SCHEMA = {
                 },
               },
               maximum_completion_time_seconds: { type: "number", exclusiveMinimum: 0 },
+              max_cost_per_trial_usd: { type: "number", exclusiveMinimum: 0 },
+              concurrency: { type: "integer", minimum: 1 },
+              // This step's judging; the judge model stays evaluators.judge.model.
+              judge: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  rubric_file: { type: "string", minLength: 1 },
+                  methods: { type: "array", items: { type: "string", enum: ["pairwise-swap", "absolute-1-5"] } },
+                  show: { type: "array", items: { type: "string", minLength: 1 } },
+                  dimensions: { type: "array", items: { type: "string" } },
+                },
+              },
               producer: { type: "string", enum: ["prompt", "codegen"] },
               prompt_file: { type: "string" },
               rubric_file: { type: "string" },
@@ -108,6 +131,17 @@ export const SPEC_SCHEMA = {
           adapter: { type: "string", enum: ["model-api", "codegen", "agent-cli"] },
           model: { type: "string" },
           provider_route: { type: "string" },
+          price: {
+            type: "object",
+            additionalProperties: false,
+            required: ["input", "output"],
+            properties: {
+              input: { type: "number", minimum: 0 },
+              output: { type: "number", minimum: 0 },
+              cache_read: { type: "number", minimum: 0 },
+              cache_write: { type: "number", minimum: 0 },
+            },
+          },
           generation_settings: {
             type: "object",
             additionalProperties: false,
@@ -127,7 +161,7 @@ export const SPEC_SCHEMA = {
               network: { type: "string", enum: ["none", "bridge"] },
               memory: { type: "string", minLength: 1 },
               cpus: { type: "string", minLength: 1 },
-              reports_usage: { type: "boolean" },
+              reports_usage: { oneOf: [{ type: "boolean" }, { type: "string", enum: ["tokens"] }] },
             },
           },
         },

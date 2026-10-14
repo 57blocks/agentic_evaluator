@@ -32,9 +32,10 @@ export function formatEvent(e: RunEvent): string[] {
     case "step.planned":
       return planLines(e.plan);
     case "workflow.planned": {
-      const { chain, controlCandidate, perArm } = e.e2e;
+      const { chain, controlCandidate, perArm, judgedCases } = e.e2e;
+      const judging = judgedCases ? `; the e2e judge compares the arms' deliveries, up to ${judgedCases} pair(s)` : " (no judge)";
       return [
-        `\n  e2e control ${controlCandidate ?? "none"}: ${chain.join(" → ")} · ${perArm} generations (no judge)`,
+        `\n  e2e control ${controlCandidate ?? "none"}: ${chain.join(" → ")} · ${perArm} generations${judging}`,
         `  e2e validation: one more arm of ${perArm} generations if the step recommendations propose a combination other than the control — up to ${perArm * 2} in total\n`,
       ];
     }

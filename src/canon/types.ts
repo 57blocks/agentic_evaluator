@@ -62,8 +62,12 @@ export interface AgentCliConfig {
    * Off by default: the file sits where the evaluated agent can write, so
    * only a spec author vouching for the command (a wrapper that copies a
    * figure from a harness it runs) turns it on. Recorded as "estimated".
+   *
+   * `"tokens"`: the file reports tokens only, and agenteval prices them with
+   * the candidate's `price` or its `model`'s catalog price (src/pricing.ts) —
+   * an agent tool's own figure assumes its own vendor's prices.
    */
-  reports_usage?: boolean;
+  reports_usage?: boolean | "tokens";
 }
 
 /** How a candidate's command was executed — recorded, never inferred. */
@@ -75,6 +79,8 @@ export interface CandidateDef {
   adapter?: CandidateAdapterId;
   model?: string;
   provider_route?: string;
+  /** USD per million tokens, when the catalog does not list `model` (a direct provider). */
+  price?: { input: number; output: number; cache_read?: number; cache_write?: number };
   generation_settings?: GenerationSettings;
   cli?: AgentCliConfig;
 }

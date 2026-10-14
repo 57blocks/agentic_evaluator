@@ -16,7 +16,9 @@ import { sha256 } from "../canon/hash.js";
 import { runProcess, type SpawnError } from "../proc.js";
 import { looksLikePath } from "../script-path.js";
 import { CONTAINER_WORKDIR, runInDocker, TASK_MOUNT, type Mount } from "./docker.js";
-import { readReportedUsage, UNOBSERVED, USAGE_FILE } from "./reported-usage.js";
+import { readReportedTokens, readReportedUsage, UNOBSERVED, USAGE_FILE, type ReportedUsage } from "./reported-usage.js";
+import { catalogPrice, costOf } from "../pricing.js";
+import type { AgentCliConfig } from "../canon/types.js";
 import {
   AdapterError,
   type ArtifactFile,
@@ -28,6 +30,35 @@ import {
 
 const INPUT_FILE = ".eval-input.txt";
 const SKIP_NAMES = new Set(["node_modules", INPUT_FILE, USAGE_FILE]);
+
+const ENV_REF = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
+
+/** The `${NAME}`s a value refers to. */
+export function envRefs(value: string): string[] {
+  return [...value.matchAll(ENV_REF)].map((m) => m[1]!);
+}
+
+/**
+ * `${NAME}` in `cli.env` from this process's environment (`.env.local`
+ * included), at the moment the command starts: a spec names its secrets, and
+ * neither it nor the run's records ever hold them. A missing variable is the
+ * setup's fault, raised before the command runs.
+ */
+export function expandEnv(env: Record<string, string>): Record<string, string> {
+  const missing = new Set<string>();
+  const out = Object.fromEntries(
+    Object.entries(env).map(([k, v]) => [
+      k,
+      v.replace(ENV_REF, (_, name: string) => {
+        const value = process.env[name];
+        if (value === undefined) missing.add(name);
+        return value ?? "";
+      }),
+    ]),
+  );
+  if (missing.size > 0) throw new AdapterError(`cli.env needs ${[...missing].join(", ")}, which is not set`, { kind: "spawn", ms: 0 });
+  return out;
+}
 
 function subst(value: string, vars: Record<string, string>): string {
   return value.replace(/\{\{(\w+)\}\}/g, (_, key: string) => vars[key] ?? "");
@@ -112,6 +143,31 @@ const BINARY_SNIFF_BYTES = 8192;
  * binary (which would be mangled as UTF-8, and handed on mangled), is left
  * out and named in `skipped`, never silently.
  */
+/**
+ * What the run cost, by what the spec says the command reports: nothing
+ * (unobserved), its own dollar figure, or its tokens, which agenteval prices
+ * with the candidate's price or its model's catalog price.
+ */
+async function usageOf(
+  cli: AgentCliConfig,
+  request: CandidateRequest,
+  workDir: string,
+): Promise<ReportedUsage & { cachedTokens?: number }> {
+  if (cli.reports_usage === true) return readReportedUsage(workDir);
+  if (cli.reports_usage !== "tokens") return UNOBSERVED;
+  const tokens = await readReportedTokens(workDir);
+  if (!tokens) return UNOBSERVED;
+  const counted = {
+    promptTokens: tokens.input + tokens.cacheRead + tokens.cacheWrite,
+    completionTokens: tokens.output,
+    cachedTokens: tokens.cacheRead,
+  };
+  const price = request.price ?? (request.model ? await catalogPrice(request.model) : null);
+  // Tokens without a price are still worth keeping; the cost stays unobserved.
+  if (!price) return { ...counted, costUsd: 0, costSource: "none" };
+  return { ...counted, costUsd: costOf(tokens, price), costSource: "estimated" };
+}
+
 async function collectFiles(root: string): Promise<{ files: ArtifactFile[]; skipped: string[] }> {
   const files: ArtifactFile[] = [];
   const skipped: string[] = [];
@@ -184,6 +240,7 @@ export const agentCliAdapter: CandidateAdapter = {
     const vars = {
       input: request.inputText,
       workdir: inDocker ? CONTAINER_WORKDIR : context.workDir,
+      max_cost_usd: request.maxCostUsd !== undefined ? String(request.maxCostUsd) : "",
     };
     const raw = cli.argv.map((a) => subst(a, vars));
     const contained = inDocker ? await containerArgv(raw, context.taskRoot) : null;
@@ -196,11 +253,17 @@ export const agentCliAdapter: CandidateAdapter = {
     await fs.writeFile(path.join(context.workDir, INPUT_FILE), request.inputText, "utf-8");
     // Which step and input this is, and whether the work dir came from the
     // step before: one command can then serve every step of a workflow.
+    // The spend cap and the model's price: an agent tool enforces a cap in
+    // its own units (claude's assume its vendor's prices), so a wrapper may
+    // need the price to convert. Absent when unknown.
+    const price = request.price ?? (request.model ? await catalogPrice(request.model) : null);
     const env = {
-      ...cli.env,
+      ...expandEnv(cli.env ?? {}),
       EVAL_STEP: request.stepId,
       EVAL_INPUT: request.inputId,
       EVAL_CHAINED: request.seedFiles ? "1" : "0",
+      ...(request.maxCostUsd !== undefined ? { EVAL_MAX_COST_USD: String(request.maxCostUsd) } : {}),
+      ...(price ? { EVAL_MODEL_PRICE: JSON.stringify(price) } : {}),
     };
 
     const model = request.model ?? cmd;
@@ -227,7 +290,7 @@ export const agentCliAdapter: CandidateAdapter = {
           });
       const [{ files: artifacts, skipped }, usage] = await Promise.all([
         collectFiles(context.workDir),
-        cli.reports_usage === true ? readReportedUsage(context.workDir) : UNOBSERVED,
+        usageOf(cli, request, context.workDir),
       ]);
       const ms = Date.now() - t0;
       context.emit?.({ type: "model.response", ...base, ms, ...(skipped.length > 0 ? { skippedFiles: skipped } : {}) });
@@ -236,6 +299,7 @@ export const agentCliAdapter: CandidateAdapter = {
         artifacts,
         promptTokens: usage.promptTokens,
         completionTokens: usage.completionTokens,
+        ...(usage.cachedTokens !== undefined ? { cachedTokens: usage.cachedTokens } : {}),
         costUsd: usage.costUsd,
         costSource: usage.costSource,
         ms,

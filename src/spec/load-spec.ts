@@ -37,6 +37,12 @@ export interface EvalStep {
   operating_mode?: string;
   eligibility?: EligibilityDecl;
   maximum_completion_time_seconds?: number;
+  /** A spend cap per trial, handed to command candidates (they enforce it). */
+  max_cost_per_trial_usd?: number;
+  /** Trials in flight for this step; execution.concurrency otherwise. */
+  concurrency?: number;
+  /** This step's judging, over evaluators.judge (whose model it keeps). */
+  judge?: StepJudge;
   /** Overrides x-harness.producer for this step. */
   producer?: "prompt" | "codegen";
   prompt_file?: string;
@@ -47,6 +53,14 @@ export interface EvalStep {
   handoff?: "text" | "workdir";
 }
 
+/** Judging for one step (or the e2e arms): any field left out comes from evaluators.judge. */
+export interface StepJudge {
+  rubric_file?: string;
+  methods?: string[];
+  show?: string[];
+  dimensions?: string[];
+}
+
 /** Static shape of a validated spec (mirrors SPEC_SCHEMA; kept loose on purpose). */
 export interface EvalSpec {
   protocol_version: string;
@@ -55,7 +69,7 @@ export interface EvalSpec {
   workflow: {
     control_candidate?: string;
     /** End-to-end validation: which root inputs the chain runs on, and what grades its end product. */
-    e2e?: { inputs?: string[]; final_checks?: string[] };
+    e2e?: { inputs?: string[]; final_checks?: string[]; judge?: { rubric_file: string; show?: string[]; dimensions?: string[] } };
     steps: EvalStep[];
   };
   candidates: CandidateDef[];
@@ -137,7 +151,7 @@ function stepOverrides(step: EvalStep, spec: EvalSpec): {
   return {
     producer: step.producer ?? harness.producer,
     promptFile: step.prompt_file ?? harness.prompt_file,
-    rubricFile: step.rubric_file ?? spec.evaluators.judge.rubric_file,
+    rubricFile: step.judge?.rubric_file ?? step.rubric_file ?? spec.evaluators.judge.rubric_file,
   };
 }
 
@@ -268,8 +282,8 @@ const ALL_JUDGE_METHODS: JudgeMethod[] = ["pairwise-swap", "absolute-1-5"];
  * billed a full judging pass on a step that had asked for none, and left no
  * way to declare a check-only step.
  */
-function judgeMethodsOf(spec: EvalSpec): JudgeMethod[] {
-  const declared = spec.evaluators.judge.methods;
+function judgeMethodsOf(spec: EvalSpec, own?: StepJudge): JudgeMethod[] {
+  const declared = own?.methods ?? spec.evaluators.judge.methods;
   if (!declared) return [...ALL_JUDGE_METHODS];
   return ALL_JUDGE_METHODS.filter((m) => declared.includes(m));
 }
@@ -313,13 +327,22 @@ function compileCheck(
 }
 
 /** workflow.e2e, compiled: the same on every step (the chain reads it off its first and last). */
-function e2eOf(spec: EvalSpec, specPath: string): Pick<Suite, "e2eInputs" | "e2eFinalCheck"> {
+function e2eOf(spec: EvalSpec, specPath: string): Pick<Suite, "e2eInputs" | "e2eFinalCheck" | "e2eJudge"> {
   const e2e = spec.workflow.e2e;
   if (!e2e) return {};
   const finalCheck = e2e.final_checks ? compileCheck(spec, specPath, "workflow.e2e", e2e.final_checks) : undefined;
   return {
     ...(e2e.inputs ? { e2eInputs: [...e2e.inputs] } : {}),
     ...(finalCheck ? { e2eFinalCheck: finalCheck } : {}),
+    ...(e2e.judge
+      ? {
+          e2eJudge: {
+            rubricFile: e2e.judge.rubric_file,
+            ...(e2e.judge.show?.length ? { show: [...e2e.judge.show] } : {}),
+            dimensions: [...(e2e.judge.dimensions ?? [])],
+          },
+        }
+      : {}),
   };
 }
 
@@ -342,8 +365,8 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     rubricFile,
     candidates: [...step.candidate_ids],
     judge: spec.evaluators.judge.model,
-    judgeMethods: judgeMethodsOf(spec),
-    ...(spec.evaluators.judge.show?.length ? { judgeShow: spec.evaluators.judge.show } : {}),
+    judgeMethods: judgeMethodsOf(spec, step.judge),
+    ...((step.judge?.show ?? spec.evaluators.judge.show)?.length ? { judgeShow: step.judge?.show ?? spec.evaluators.judge.show } : {}),
     inputs: [...step.test_set.inputs],
     trials: spec.execution.trials_per_case,
     temperature: harness.default_temperature ?? DEFAULT_TEMPERATURE,
@@ -351,7 +374,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
       ? step.maximum_completion_time_seconds * 1000
       : DEFAULT_TIMEOUT_MS,
     check,
-    dimensions: step.judged_dimensions ?? [],
+    dimensions: step.judge?.dimensions ?? step.judged_dimensions ?? [],
     human: spec.evaluators.human
       ? {
           rubricFile: spec.evaluators.human.rubric_file,
@@ -376,12 +399,13 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     controlCandidate: spec.workflow.control_candidate,
     benchmarkMode: spec.execution.benchmark_mode ?? "capability-neutral",
     cacheMode: spec.execution.cache_mode ?? "cold",
-    concurrency: spec.execution.concurrency,
+    concurrency: step.concurrency ?? spec.execution.concurrency,
     specSha,
     specPath,
     taskRoot,
     inputFrom: step.input_from,
     ...(step.handoff ? { handoff: step.handoff } : {}),
+    ...(step.max_cost_per_trial_usd !== undefined ? { maxCostPerTrialUsd: step.max_cost_per_trial_usd } : {}),
     ...e2eOf(spec, specPath),
     ...(step.test_set.fixture_dir ? { fixtureDir: step.test_set.fixture_dir } : {}),
   };

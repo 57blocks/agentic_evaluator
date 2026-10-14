@@ -35,9 +35,11 @@ import { classifyCompletion } from "../canon/states.js";
 import { defOf, errorRecord, generateOne, readInput, safeName } from "./generate.js";
 import { loadPromptTemplate } from "./execute.js";
 import { fixturePath } from "./fixture.js";
+import { caseKey, judgeDeliveries, type Deliveries, type E2eJudgement } from "./e2e-judge.js";
 import { e2eArmChain, e2eChain, e2eRootInputs } from "./plan.js";
 import type { RunEventSink } from "./events.js";
 import { resolveEligibility } from "../canon/select.js";
+import type { BudgetGuard } from "../canon/budget.js";
 import type { EligibilityThresholds } from "../canon/types.js";
 import type { Suite } from "../types.js";
 
@@ -45,6 +47,8 @@ export interface E2eArms {
   control: E2eControlReport | null;
   proposed: E2eArmReport | null;
   validation: E2eValidation | null;
+  /** workflow.e2e.judge on the two arms' deliveries, when declared and both ran. */
+  judge?: E2eJudgement | null;
 }
 
 /** The workflow must clear the strictest gate any chained step declares. */
@@ -79,8 +83,9 @@ async function openArmRunner(params: {
   root: string;
   runId: string;
   emit: RunEventSink;
+  budget?: BudgetGuard;
 }): Promise<{ outDir: string; generate: E2eArmGenerate; close: () => Promise<unknown> }> {
-  const { armId, chain, root, runId, emit } = params;
+  const { armId, chain, root, runId, emit, budget } = params;
   const outDir = path.join(root, armId);
   await fs.mkdir(outDir, { recursive: true });
   const trace = await openTrace(outDir, `${runId}/${armId}`);
@@ -92,6 +97,12 @@ async function openArmRunner(params: {
   const generate: E2eArmGenerate = async function (step, candidate, inputSlug, inputText, trial, seed) {
     const def = defOf(step, candidate);
     const checkWorkDir = path.join(outDir, "checks", `${safeName(step.step)}__${inputSlug}__t${trial}`);
+    // The run's budget covers the arms too: past it, a step is not started,
+    // and the case is undetermined rather than failed.
+    if (budget && !budget.allows("generation")) {
+      emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: "skipped" });
+      return { completion_state: "cancelled", text: "", artifacts: [], cost_usd: 0, ms: 0, checks: [] };
+    }
     try {
       const g = await generateOne({
         suite: step,
@@ -117,6 +128,7 @@ async function openArmRunner(params: {
         g.checkState === undefined
           ? []
           : [{ evaluator: step.check?.id ?? TSC_CHECK_ID, version: g.checkVersion ?? "unknown", state: g.checkState }];
+      budget?.add(g.costUsd + (g.retryCostUsd ?? 0));
       emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: verdict.state, ms: g.ms, costUsd: g.costUsd });
       return {
         completion_state: verdict.state,
@@ -167,8 +179,9 @@ export async function maybeRunE2eValidation(params: {
   root: string;
   runId: string;
   chosenByStep: Record<string, string | null>;
+  budget?: BudgetGuard;
 }): Promise<E2eArms | null> {
-  const { suites, root, runId, chosenByStep, emit } = params;
+  const { suites, root, runId, chosenByStep, emit, budget } = params;
   const declared = e2eChain(suites);
   if (!declared) return null;
   const chain = e2eArmChain(declared);
@@ -180,12 +193,25 @@ export async function maybeRunE2eValidation(params: {
   );
   const trials = chain[0].trials ?? 2;
 
+  // What each arm's last step delivered, per case, for the e2e judge.
+  const deliveries: Record<string, Deliveries> = {};
+  const lastStep = chain[chain.length - 1]!.step;
   const runArm = async (
     armId: string,
     armKind: "proposed" | "control",
     assignment: StepAssignment,
   ): Promise<E2eArmReport> => {
-    const runner = await openArmRunner({ armId, chain, root, runId, emit });
+    const opened = await openArmRunner({ armId, chain, root, runId, emit, budget });
+    const delivered: Deliveries = new Map();
+    deliveries[armId] = delivered;
+    const runner = {
+      ...opened,
+      generate: (async (step, candidate, inputSlug, inputText, trial, seed) => {
+        const g = await opened.generate(step, candidate, inputSlug, inputText, trial, seed);
+        if (step.step === lastStep && g.completion_state === "success") delivered.set(caseKey(inputSlug, trial), g.artifacts);
+        return g;
+      }) as E2eArmGenerate,
+    };
     emit({ type: "e2e.arm.start", armId, assignment: { ...assignment } });
     try {
       return await runChainArm({
@@ -268,13 +294,25 @@ export async function maybeRunE2eValidation(params: {
     });
   }
 
+  const judgeConfig = chain[0].e2eJudge;
+  const judge =
+    judgeConfig && proposed
+      ? await judgeDeliveries({
+          root: chain[0],
+          config: judgeConfig,
+          control: deliveries["e2e-control"] ?? new Map(),
+          proposed: deliveries["e2e-proposed"] ?? new Map(),
+          ...(budget ? { budget } : {}),
+        })
+      : null;
+
   await fs.writeFile(
     path.join(root, "e2e-validation.json"),
-    JSON.stringify(validation, null, 2),
+    JSON.stringify(judge ? { ...validation, judge } : validation, null, 2),
     "utf-8",
   );
   emit({ type: "e2e.validated", verdict: validation.verdict, firmness: validation.firmness, reason: validation.reasons[0] ?? "" });
-  return { control, proposed, validation };
+  return { control, proposed, validation, judge };
 }
 
 /**

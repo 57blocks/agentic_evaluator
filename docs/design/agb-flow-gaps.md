@@ -73,7 +73,7 @@ silently ignored (the parser's merge option was off), and a top-level
 
 ## B. Needed for a fair comparison across providers
 
-**B1. Price tokens in agenteval** (`model` on agent-cli candidates,
+**B1. Price tokens in agenteval** **Done.** (`model` on agent-cli candidates,
 `reports_usage: tokens`). claude prices every model it does not know at Opus
 rates (measured: kimi-k3 reported $0.41, really $0.07). The command should
 report tokens (input, cache read, cache write, output); agenteval prices them
@@ -81,39 +81,40 @@ with the candidate's `model`, from the OpenRouter catalog it already reads,
 plus a local table for direct providers (DeepSeek).
 *Worked around by:* `providers.mjs` with its own price table.
 
-**B2. A per-trial spend cap handed to the command**
-(`max_cost_per_trial_usd` → `{{max_cost_usd}}`, and `{{model}}`). Each
+**B2. A per-trial spend cap handed to the command** **Done.**
+(`max_cost_per_trial_usd` → `{{max_cost_usd}}`; `{{model}}` dropped: the
+tool's model name and the catalog id differ, so argv names the former). Each
 wrapper hard-codes its caps today. Once agenteval prices tokens (B1), it
 should also hand the command the cap in the units the command's own budget
 flag uses (for claude, its Opus-rate figure), since claude enforces against
 its own estimate.
 *Worked around by:* `claudeBudgetFor` in providers.mjs.
 
-**B3. `${VAR}` in `cli.env`.** Provider keys come from the environment or
+**B3. `${VAR}` in `cli.env`.** **Done.** Provider keys come from the environment or
 `.env.local`; the spec should reference them, never contain them.
 
-**B4. The budget covers candidates.** `budget_usd` only bounds the judge's
+**B4. The budget covers candidates.** **Done.** `budget_usd` only bounds the judge's
 OpenRouter calls. With B1 agenteval knows each trial's cost: it should count
 it, and stop scheduling new trials once the budget is spent.
 
 ## C. Make the flow practical
 
-**C1. Per-step judge** (`steps[].judge`, `workflow.e2e.judge`). One judge
+**C1. Per-step judge** (`steps[].judge`, `workflow.e2e.judge`). **Done** (the e2e judge compares the arms' deliveries pairwise). One judge
 block serves every step; only `rubric_file` can vary. A plan, a test plan and
 a delivered app need different rubrics, files (`show`) and methods.
 *Partly done:* `evaluators.judge.show` (on this branch).
 
-**C2. Per-step concurrency** (`steps[].concurrency`). Planning steps run
+**C2. Per-step concurrency** (`steps[].concurrency`). **Done.** Planning steps run
 nine at a time; the code step builds and serves an app, three at most.
 
-**C3. `--concurrency` on the command line overrides the spec.** Known bug.
+**C3. `--concurrency` on the command line overrides the spec.** **Done** (it was the other way round). Known bug.
 
-**C4. Grade what a failed agent left.** A non-zero exit marks the trial
+**C4. Grade what a failed agent left.** **Already so:** the check runs and its evidence is kept; the trial fails because the agent did not finish. Only the README said otherwise; fixed. A non-zero exit marks the trial
 malformed and skips the check. For an agent that stopped half way (budget,
 timeout), what it left is the evidence: run the check anyway and record both.
 *Worked around by:* agb-e2e's wrapper always exiting 0.
 
-**C5. Resume a long run.** A multi-hour run that dies at trial 50 of 81
+**C5. Resume a long run.** **Done:** each trial is journaled as it finishes, and `--reuse` reads journals (it also never looked inside a multi-step run's step dirs; fixed). A multi-hour run that dies at trial 50 of 81
 starts over today. Skip trials that already have rows (`--reuse` exists for
 generation reuse; check whether it covers this).
 

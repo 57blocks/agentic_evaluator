@@ -14,6 +14,7 @@ import { LlmError, type LlmTrace } from "../llm.js";
 import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "../adapters/resolve.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import { fixturePath, inputIdentity } from "./fixture.js";
+import { priceFromSpec } from "../pricing.js";
 import { deliverableText, parsedUnitsFor } from "../adapters/deliverable.js";
 import { displayPath, taskInputPath, resolveTaskAsset } from "../paths.js";
 import { listRunDirs, type Workspace } from "./workspace.js";
@@ -161,6 +162,8 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
       model: def.model,
       maxTokens: def.generation_settings?.max_tokens,
       cli: def.cli,
+      ...(def.price ? { price: priceFromSpec(def.price) } : {}),
+      ...(suite.maxCostPerTrialUsd !== undefined ? { maxCostUsd: suite.maxCostPerTrialUsd } : {}),
       ...(params.fixtureDir ? { fixtureDir: params.fixtureDir } : {}),
       ...(params.seedFiles ? { seedFiles: params.seedFiles } : {}),
     },
@@ -251,9 +254,17 @@ async function loadReusable(
     .filter((e) => e.name !== currentRunId)
     .sort((a, b) => b.name.localeCompare(a.name));
 
-  for (const { dir } of candidates) {
+  // A multi-step run keeps each step under runs/<run>/<step>/.
+  const dirs = candidates.flatMap(({ dir }) => [dir, path.join(dir, step)]);
+  for (const dir of dirs) {
     const hit = await findTrialRow(dir, step, hash);
-    if (!hit) continue;
+    if (!hit) {
+      // The hash covers the step's producer, input and candidate, so a
+      // journal line with it is this trial; the step is implied.
+      const journaled = await findJournaled(dir, hash);
+      if (journaled) return { record: journaled, from: displayPath(dir) };
+      continue;
+    }
     const text = await fs
       .readFile(path.join(dir, "raw", `${safeName(hit.candidate)}__${hit.input}__t${hit.trial}.txt`), "utf-8")
       .catch(() => null);
@@ -261,6 +272,38 @@ async function loadReusable(
     // the call, and there is nothing here to skip it with.
     if (text === null) continue;
     return { record: recordFromRow(hit, text), from: displayPath(dir) };
+  }
+  return null;
+}
+
+/**
+ * Each finished trial, appended the moment it finishes. A run's rows are
+ * written once every trial is done, so a run that dies at trial 50 of 81 used
+ * to leave nothing `--reuse` could find, and the 50 were bought again.
+ */
+export const JOURNAL_FILE = "trials.partial.jsonl";
+
+async function journal(outDir: string, record: RunRecord): Promise<void> {
+  await fs.mkdir(outDir, { recursive: true });
+  await fs.appendFile(path.join(outDir, JOURNAL_FILE), JSON.stringify(record) + "\n", "utf-8");
+}
+
+/** A finished trial with that hash from a run's journal (a run that did not finish), or null. */
+async function findJournaled(dir: string, hash: string): Promise<RunRecord | null> {
+  let raw: string;
+  try {
+    raw = await fs.readFile(path.join(dir, JOURNAL_FILE), "utf-8");
+  } catch {
+    return null;
+  }
+  for (const line of raw.split("\n")) {
+    if (line.trim() === "") continue;
+    try {
+      const r = JSON.parse(line) as RunRecord;
+      if (r.trialHash === hash && r.status === "ok") return r;
+    } catch {
+      // A line cut short by the crash itself.
+    }
   }
   return null;
 }
@@ -489,7 +532,7 @@ export async function runAll(params: {
         costSource: g.costSource,
         check: g.checkState,
       });
-      return {
+      const record: RunRecord = {
         candidate,
         inputSlug,
         trial,
@@ -520,6 +563,8 @@ export async function runAll(params: {
         // observed" for the one thing the sandbox exists to make visible.
         isolation: g.isolation,
       };
+      await journal(outDir, record);
+      return record;
     } catch (err) {
       const rec = errorRecord(task, err);
       budget.add(rec.costUsd + (rec.retryCostUsd ?? 0));

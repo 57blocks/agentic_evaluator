@@ -5,6 +5,7 @@
 
 import type { AgentCliConfig, CandidateAdapterId, CandidateDef, CostSource, Isolation } from "../canon/types.js";
 import type { LlmTrace } from "../llm.js";
+import type { ModelPrice } from "../pricing.js";
 import type { ProducerKind } from "../types.js";
 
 export type { CandidateAdapterId };
@@ -31,6 +32,10 @@ export interface CandidateRequest {
   fixtureDir?: string;
   /** agent-cli: files written into the work dir before it starts — a chained step's handoff. */
   seedFiles?: readonly ArtifactFile[];
+  /** agent-cli with `reports_usage: tokens`: the price to use instead of `model`'s catalog price. */
+  price?: ModelPrice;
+  /** agent-cli: the step's spend cap per trial (`max_cost_per_trial_usd`). */
+  maxCostUsd?: number;
 }
 
 export interface ExecutionContext {

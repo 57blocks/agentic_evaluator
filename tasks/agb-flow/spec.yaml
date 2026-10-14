@@ -11,28 +11,28 @@
 # control (one model throughout) and the combination of each step's pick —
 # each step starting from the previous step's work dir.
 #
-# THIS IS THE TARGET SHAPE. Fields marked "NEW" are not in agenteval yet; see
-# docs/design/agb-flow-gaps.md. `agenteval plan agb-flow` rejects this spec
-# until they are built.
+# Every field here is supported (docs/design/agb-flow-gaps.md tracks how).
+# Not built yet: the task's files — agents/agb-step.mjs, the fixtures under
+# fixture/<step>/, the checks and the rubrics.
 
 protocol_version: "0.3"
 run_name: agb-flow
-# NEW (meaning): counts what candidates report spending, not only the judge's
-# OpenRouter calls, and stops scheduling trials once it is reached.
+# Counts what candidates report spending, the e2e arms included; past it no
+# new trial starts.
 budget_usd: 600
 
 workflow:
   control_candidate: opus-5-5
-  # NEW: the chain is validated on these root inputs only. A full chain on
+  # the chain is validated on these root inputs only. A full chain on
   # invoice (35 tasks) is a day and $150+ per arm; demo-todo is 8 tasks.
   e2e:
     inputs: [demo-todo]
-    # NEW: what decides whether a chain delivered. The code step's own check
+    # what decides whether a chain delivered. The code step's own check
     # grades one task's tests; a chain's end product is the whole app.
     final_checks: [app-gates]
+    # Compares the two arms' deliveries, pairwise (informs; the gates decide).
     judge:
       rubric_file: rubrics/delivery.md
-      methods: [absolute-1-5, pairwise-swap]
       show: [".ab/tasks.json", ".ab/test-plan.json", UI_CONTRACT.md, README.md, "client/src/**", "server/src/**", "server/test/**"]
 
   steps:
@@ -41,7 +41,7 @@ workflow:
       test_set:
         id: detail-v1
         inputs: [demo-todo, chessicle, invoice]
-        # NEW: each input is a directory as well as a text: fixture/<input>/
+        # each input is a directory as well as a text: fixture/<input>/
         # is laid into the work dir before the candidate starts.
         fixture_dir: fixture/detail
       candidate_ids: &all [opus-5-5, fable-5-1, gpt-5-6-sol, deepseek-v4-pro, deepseek-flash, kimi-k3, glm-5-3, glm-5-3-prime, qwen-3-8-max]
@@ -50,9 +50,9 @@ workflow:
       operating_mode: highest-assurance
       eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
       maximum_completion_time_seconds: 3000
-      # NEW: a spend cap per trial, handed to the command as {{max_cost_usd}}.
+      # a spend cap per trial, handed to the command as {{max_cost_usd}}.
       max_cost_per_trial_usd: 15
-      # NEW: per-step judge (today one judge block serves every step).
+      # per-step judge.
       judge:
         rubric_file: rubrics/breakdown.md
         methods: [pairwise-swap]
@@ -62,7 +62,7 @@ workflow:
     - id: qa
       version: "1"
       input_from: detail
-      # NEW: the next step starts from the previous step's work dir (files),
+      # the next step starts from the previous step's work dir (files),
       # not from its output rendered as text.
       handoff: workdir
       test_set:
@@ -95,17 +95,18 @@ workflow:
       eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
       maximum_completion_time_seconds: 3600
       max_cost_per_trial_usd: 10
-      # NEW: per-step concurrency. agb run is heavy (installs, builds, a dev
+      # per-step concurrency. agb run is heavy (installs, builds, a dev
       # server); three at once is what this machine takes.
       concurrency: 3
 
-# One command for every step: agents/agb-step.mjs reads which step it is from
-# the input and runs the matching stage. The provider is plain env (cli.env
-# exists today); the anchors keep each provider in one place.
+# One command for every step: agents/agb-step.mjs reads EVAL_STEP and runs the
+# matching stage with the model it is given. argv names the model as the tool
+# knows it; `model` is the OpenRouter id agenteval prices its tokens with
+# (reports_usage: tokens). Providers are plain env, keys read at run time.
 x-providers:
   deepseek: &deepseek
     ANTHROPIC_BASE_URL: https://api.deepseek.com/anthropic
-    ANTHROPIC_API_KEY: ${DEEPSEEK_API_KEY}     # NEW: ${VAR} from the environment / .env.local
+    ANTHROPIC_API_KEY: ${DEEPSEEK_API_KEY}
     ANTHROPIC_AUTH_TOKEN: ""
   openrouter: &openrouter
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
@@ -115,45 +116,40 @@ x-providers:
 candidates:
   - id: opus-5-5
     adapter: agent-cli
-    # NEW (for agent-cli): the model this candidate runs. agenteval prices the
-    # tokens the command reports with it, and substitutes {{model}}.
-    model: anthropic/claude-opus-5-5
-    cli: &agb
-      argv: [node, agents/agb-step.mjs, "{{model}}", "{{max_cost_usd}}"]
-      # NEW value: the command reports tokens only; agenteval does the pricing.
-      reports_usage: tokens
+    model: anthropic/claude-opus-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-opus-5-5, "{{max_cost_usd}}"], reports_usage: tokens }
   - id: fable-5-1
     adapter: agent-cli
-    model: anthropic/claude-fable-5-1
-    cli: *agb
+    model: anthropic/claude-fable-5.1
+    cli: { argv: [node, agents/agb-step.mjs, claude-fable-5-1, "{{max_cost_usd}}"], reports_usage: tokens }
   - id: gpt-5-6-sol
     adapter: agent-cli
     model: openai/gpt-5.6-sol
-    cli: { <<: *agb, env: *openrouter }
+    cli: { argv: [node, agents/agb-step.mjs, openai/gpt-5.6-sol, "{{max_cost_usd}}"], reports_usage: tokens, env: *openrouter }
   - id: deepseek-v4-pro
     adapter: agent-cli
-    model: deepseek/deepseek-v4-pro
-    cli: { <<: *agb, env: *deepseek }
+    model: deepseek/deepseek-v4-pro-0813
+    cli: { argv: [node, agents/agb-step.mjs, deepseek-v4-pro, "{{max_cost_usd}}"], reports_usage: tokens, env: *deepseek }
   - id: deepseek-flash
     adapter: agent-cli
-    model: deepseek/deepseek-flash
-    cli: { <<: *agb, env: *deepseek }
+    model: deepseek/deepseek-v4.1-flash
+    cli: { argv: [node, agents/agb-step.mjs, deepseek-flash, "{{max_cost_usd}}"], reports_usage: tokens, env: *deepseek }
   - id: kimi-k3
     adapter: agent-cli
     model: moonshotai/kimi-k3
-    cli: { <<: *agb, env: *openrouter }
+    cli: { argv: [node, agents/agb-step.mjs, moonshotai/kimi-k3, "{{max_cost_usd}}"], reports_usage: tokens, env: *openrouter }
   - id: glm-5-3
     adapter: agent-cli
     model: z-ai/glm-5.3
-    cli: { <<: *agb, env: *openrouter }
+    cli: { argv: [node, agents/agb-step.mjs, z-ai/glm-5.3, "{{max_cost_usd}}"], reports_usage: tokens, env: *openrouter }
   - id: glm-5-3-prime
     adapter: agent-cli
     model: z-ai/glm-5.3-prime
-    cli: { <<: *agb, env: *openrouter }
+    cli: { argv: [node, agents/agb-step.mjs, z-ai/glm-5.3-prime, "{{max_cost_usd}}"], reports_usage: tokens, env: *openrouter }
   - id: qwen-3-8-max
     adapter: agent-cli
     model: qwen/qwen3.8-max-0902
-    cli: { <<: *agb, env: *openrouter }
+    cli: { argv: [node, agents/agb-step.mjs, qwen/qwen3.8-max-0902, "{{max_cost_usd}}"], reports_usage: tokens, env: *openrouter }
 
 evaluators:
   required_checks:
