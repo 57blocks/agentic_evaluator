@@ -18,7 +18,8 @@ const SKILL_NAME = "agenteval-new-task";
 export const INSTALL_SKILL_HELP = `agenteval install-skill [options]
 
   Install the /${SKILL_NAME} skill for Claude Code into this workspace
-  (.claude/skills/${SKILL_NAME}/). In Claude Code, run /${SKILL_NAME} to
+  (.claude/skills/${SKILL_NAME}/, with this version's README as
+  reference.md). In Claude Code, run /${SKILL_NAME} to
   build a task with an interview: inputs, a check, reference answers,
   candidates, then \`agenteval check-task\` before anything is paid.
 
@@ -31,14 +32,16 @@ export async function cmdInstallSkill(args: ParsedArgs, io: Io): Promise<ExitCod
   const ws = dir ? workspaceAt(dir) : await findWorkspace();
 
   const source = path.join(INSTALL_ROOT, "skills", SKILL_NAME, "SKILL.md");
-  const target = path.join(ws.root, ".claude", "skills", SKILL_NAME, "SKILL.md");
+  const targetDir = path.join(ws.root, ".claude", "skills", SKILL_NAME);
+  const target = path.join(targetDir, "SKILL.md");
   const exists = await fs.stat(target).then(() => true, () => false);
   if (exists && args.flags.force !== true) {
     throw new UsageError(`${displayPath(target)} already exists; --force replaces it`);
   }
 
-  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.mkdir(targetDir, { recursive: true });
   await fs.copyFile(source, target);
+  await fs.copyFile(path.join(INSTALL_ROOT, "README.md"), path.join(targetDir, "reference.md"));
   io.out(`installed ${displayPath(target)}\nIn Claude Code, from ${displayPath(ws.root) || "."}: /${SKILL_NAME}\n`);
   return EXIT.ok;
 }

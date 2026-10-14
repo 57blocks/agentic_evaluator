@@ -13,7 +13,7 @@ Ask decisions with `AskUserQuestion`, your recommendation first and labelled "(R
 
 **Never run `agenteval run … --yes` without an explicit yes in this conversation** — it is the only command that bills. `init`, `check-task`, `plan` and `models --catalog-only` are free and need no key.
 
-The spec reference is the agenteval README: "Tutorial" (a complete spec with a prompt, inputs, a check script and a judge rubric) and "Writing a task" (rules `plan` enforces, producers, operating modes, gates, command candidates, check scripts). Read those sections before writing `spec.yaml`; do not guess fields.
+The spec reference is the agenteval README, installed beside this file as `reference.md`: "Tutorial" (a complete spec with a prompt, inputs, a check script and a judge rubric) and "Writing a task" (rules `plan` enforces, producers, operating modes, gates, command candidates, check scripts). Read those sections before writing `spec.yaml`; do not guess fields.
 
 ---
 
@@ -31,7 +31,7 @@ Scaffold with `agenteval init <name>` (offline, command candidates) or `agenteva
 
 ## Multi-step workflows
 
-Use this when the candidates run a pipeline — stages whose output the next stage consumes. Read the README's "Workflows" section and the shipped `chain-offline` sample before writing the spec.
+Use this when the candidates run a pipeline — stages whose output the next stage consumes. Read the "Workflows" section of `reference.md` and the shipped `chain-offline` sample ("Samples" there says how to copy it in) before writing the spec.
 
 **Two questions, ask which they need** (often both):
 
@@ -114,7 +114,7 @@ If yes for even one case, the check isn't ready: fix it, re-run `check-task`, sh
 
 ## Step 3 — Candidates, gates, mode
 
-- **Candidates**: model ids (`agenteval models <name> --catalog-only` checks they exist, free), or commands. Recommend `cli.image` for any command candidate — on the host it can read `checks/`, `rubrics/` and `references/`, which `check-task` warns about. A command that knows its spend can report it via `.eval-usage.json` with `cli.reports_usage: true` (README, "Command candidates"); otherwise its cost is *unobserved* and `lowest-cost` cannot rank it.
+- **Candidates**: model ids (`agenteval models <name> --catalog-only` checks they exist, free), or commands. Recommend `cli.image` for any command candidate — on the host it can read `checks/`, `rubrics/` and `references/`, which `check-task` warns about. A command that knows its spend can report it via `.eval-usage.json` with `cli.reports_usage: true` (`reference.md`, "Command candidates"); otherwise its cost is *unobserved* and `lowest-cost` cannot rank it.
 - **Control** (`control_candidate`): what they use today, or the obvious default.
 - **Operating mode**: `lowest-cost`, `fastest-within-cost-ceiling` (needs `eligibility.cost_ceiling_per_success_usd`), `highest-assurance`, or `judge-preference`. Ask which tradeoff they actually care about.
 - **Gates**: `minimum_reliability` and `minimum_required_check_pass_rate` default to 1.0 when a check exists — say so; lower them only if the user accepts candidates that sometimes fail.
