@@ -1,0 +1,504 @@
+// Chessicle 数据层 —— 表结构的唯一真相。
+//
+// 表名与 .ab/arch.json 的 owns.tables、.ab/design.json 的 DEC.tables 一致。
+// 演进只走 migration（`prisma migrate dev`），禁止 `prisma db push`。
+//
+// TRD §5 的 "Deliberately not stored" 原样采纳：分析完成后的记谱照片、
+// 明文验证码、任何用于训练的照片衍生数据 —— 见 CON-004 / CON-005。
+//
+// 标 `@db.Text /// PII` 的三列按 DEC-016 列级加密（应用层加密，密钥不入库）。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── auth（CMP-001） ────────────────────────────────────────────
+
+enum UserStatus {
+  pending_consent
+  active
+  deleted
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  status    UserStatus @default(pending_consent)
+  /// PII（DEC-016 列级加密）—— 可能是孩子的真实姓名
+  childName String?
+  /// PII（DEC-016 列级加密）—— 只存年份，不存完整生日（DEC-003）
+  birthYear Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  consent            ParentConsent?
+  loginCodes         LoginCode[]
+  sessions           Session[]
+  games              Game[]
+  opponentReports    OpponentReport[]
+  metricEvents       MetricEvent[]
+  tournamentCheckins TournamentCheckin[]
+  reviews            Review[]
+
+  @@map("users")
+}
+
+// 一次性登录码（DEC-002）。只存哈希，明文永不落库。
+model LoginCode {
+  id        String    @id @default(uuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("login_codes")
+}
+
+// 服务端会话（DEC-001）。撤销即删行 —— EH006 / Q-011 要的就是这个即时性。
+model Session {
+  id             String   @id @default(uuid())
+  userId         String
+  tokenHash      String   @unique
+  lastSeenAt     DateTime @default(now())
+  slidingExpires DateTime
+  createdAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// ─── consent（CMP-002） ────────────────────────────────────────
+
+enum ConsentStatus {
+  pending
+  code_sent
+  expired
+  suspended_awaiting_consent
+  confirmed
+  declined
+}
+
+model ParentConsent {
+  id            String        @id @default(uuid())
+  userId        String        @unique
+  /// PII（DEC-016 列级加密）
+  parentEmail   String
+  status        ConsentStatus @default(pending)
+  codeHash      String?
+  codeExpiresAt DateTime?
+  // 撤回链接的签名令牌哈希（DEC-004）。长期有效，只认这一个。
+  revokeTokenHash String?
+  confirmedAt   DateTime?
+  declinedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("parent_consents")
+}
+
+// 家长拒绝/撤回后留下的唯一痕迹（Q-009）。只有邮箱哈希与时间戳，不含儿童数据。
+model ConsentDenial {
+  id              String   @id @default(uuid())
+  parentEmailHash String
+  createdAt       DateTime @default(now())
+
+  @@index([parentEmailHash])
+  @@map("consent_denials")
+}
+
+enum AuditEventName {
+  consent_code_sent
+  consent_confirmed
+  consent_declined
+  consent_revoked
+  account_deleted
+  photo_deleted
+}
+
+// DEC-016：只记这几类合规上要举证的动作，且不含任何儿童数据。
+model AuditEvent {
+  id        String         @id @default(uuid())
+  name      AuditEventName
+  subjectId String
+  createdAt DateTime       @default(now())
+
+  @@index([name, createdAt])
+  @@map("audit_events")
+}
+
+// ─── game（CMP-003） ───────────────────────────────────────────
+
+enum GameSource {
+  photo
+  manual
+}
+
+model Game {
+  id                String     @id @default(uuid())
+  userId            String
+  pgn               String     @db.Text
+  source            GameSource
+  ocrConfirmations  Json?
+  playedAt          DateTime?
+  createdAt         DateTime   @default(now())
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job      OcrJob?
+  reports  AnalysisReport[]
+  reviews  Review[]
+
+  // DEC-007：cursor 分页按 (createdAt, id) 倒序走这条索引
+  @@index([userId, createdAt, id])
+  @@map("games")
+}
+
+enum OcrJobStatus {
+  uploading
+  prescanning
+  reconstructing
+  awaiting_confirmation
+  done
+  failed
+  abandoned
+}
+
+enum OcrFailureCode {
+  prescan_failed
+  not_a_scoresheet
+  abandoned
+  timeout
+}
+
+model OcrJob {
+  id              String          @id @default(uuid())
+  userId          String
+  gameId          String?         @unique
+  status          OcrJobStatus    @default(uploading)
+  // 预扫可读率（VAR-01 阈值 80%）。低于阈值 → prescan_failed（EH001）
+  readablePercent Float?
+  paperFormat     String?
+  failureCode     OcrFailureCode?
+  startedAt       DateTime        @default(now())
+  finishedAt      DateTime?
+
+  game        Game?           @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  ambiguities OcrAmbiguity[]
+  photo       PhotoObject?
+
+  @@index([userId, startedAt])
+  @@map("ocr_jobs")
+}
+
+model OcrAmbiguity {
+  id         String  @id @default(uuid())
+  jobId      String
+  slotIndex  Int
+  ply        Int
+  side       String
+  candidates Json
+  repair     String?
+  resolvedSan String?
+
+  job OcrJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, slotIndex])
+  @@map("ocr_ambiguities")
+}
+
+// DEC-006：键是契约，兑现在这张表。同键不同请求体 → 409。
+model IdempotencyKey {
+  id            String   @id @default(uuid())
+  userId        String
+  scope         String
+  key           String
+  requestHash   String
+  resultId      String?
+  inFlight      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, scope, key])
+  @@map("idempotency_keys")
+}
+
+// ─── analysis（CMP-004） ───────────────────────────────────────
+
+enum AnalysisStatus {
+  analyzing
+  complete
+  partial
+}
+
+model AnalysisReport {
+  id                 String         @id @default(uuid())
+  gameId             String
+  status             AnalysisStatus @default(analyzing)
+  // CON-008：钉死版本与深度，旧报告可复现
+  engineVersion      String
+  depth              Int
+  // EH003 局部报告：分析到第几个半步为止（Q-007 的横幅要报这个数）
+  analysedThroughPly Int?
+  accuracy           Float?
+  summary            Json?
+  retryCount         Int            @default(0)
+  createdAt          DateTime       @default(now())
+
+  game            Game                  @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  moves           AnalysisMove[]
+  recommendations StudyRecommendation[]
+
+  @@index([gameId, createdAt])
+  @@map("analysis_reports")
+}
+
+enum MoveClassification {
+  brilliant
+  great
+  best
+  excellent
+  good
+  inaccuracy
+  mistake
+  miss
+  blunder
+}
+
+model AnalysisMove {
+  id             String             @id @default(uuid())
+  reportId       String
+  ply            Int
+  san            String
+  classification MoveClassification
+  evalCp         Int
+  explanation    String?            @db.Text
+  conceptTags    String[]
+
+  report AnalysisReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@unique([reportId, ply])
+  @@map("analysis_moves")
+}
+
+// DEC-010：url 写入前必须过白名单三道校验。source 是白名单里的那一档。
+model StudyRecommendation {
+  id         String   @id @default(uuid())
+  reportId   String
+  ply        Int
+  conceptTag String
+  title      String
+  url        String
+  source     String
+  createdAt  DateTime @default(now())
+
+  report AnalysisReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId, ply])
+  @@map("study_recommendations")
+}
+
+// ─── prep（CMP-005） ───────────────────────────────────────────
+
+model OpponentReport {
+  id             String   @id @default(uuid())
+  userId         String
+  opponentQuery  Json
+  matchedProfile Json?
+  summary        Json?
+  sourcesQueried Json
+  createdAt      DateTime @default(now())
+  // CON-009：缓存 7 天
+  expiresAt      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("opponent_reports")
+}
+
+// DEC-012：命中条件是等于当前评分**或历史里任一个** —— 所以要存整段历史。
+model RatingLookupCache {
+  id             String   @id @default(uuid())
+  source         String
+  playerId       String
+  name           String
+  federation     String?
+  currentRating  Int?
+  ratingHistory  Json
+  sourceUrl      String
+  fetchedAt      DateTime @default(now())
+  expiresAt      DateTime
+
+  @@unique([source, playerId])
+  @@index([name])
+  @@map("rating_lookup_cache")
+}
+
+// ─── metrics（CMP-006） ────────────────────────────────────────
+
+enum MetricEventName {
+  photo_uploaded
+  prescan_failed
+  moves_confirmed
+  analysis_completed
+  report_viewed
+  tournament_count_submitted
+}
+
+// Q-022：六个事件的最小集，自建表，不接第三方分析工具。
+model MetricEvent {
+  id         String          @id @default(uuid())
+  userId     String
+  name       MetricEventName
+  properties Json?
+  occurredAt DateTime
+  createdAt  DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([name, occurredAt])
+  @@index([userId, name])
+  @@map("metric_events")
+}
+
+// 主成功指标的分母：「这个比赛/周末你下了几盘？」
+model TournamentCheckin {
+  id                  String   @id @default(uuid())
+  userId              String
+  gamesPlayedReported Int
+  periodStart         DateTime
+  periodEnd           DateTime
+  createdAt           DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, periodStart])
+  @@map("tournament_checkins")
+}
+
+// ─── review（CMP-007） ─────────────────────────────────────────
+
+// Q-002：站内评分。AC-009 的 30 天冷却按 createdAt 算。
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  gameId    String?
+  stars     Int
+  text      String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game? @relation(fields: [gameId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@map("reviews")
+}
+
+// ─── 基础设施块拥有的表（CMP-008 … CMP-014） ───────────────────
+
+model EmailDelivery {
+  id         String    @id @default(uuid())
+  toHash     String
+  template   String
+  providerId String?
+  sentAt     DateTime?
+  failedAt   DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([toHash, createdAt])
+  @@map("email_deliveries")
+}
+
+// CON-004：分析完成后立即删除，S3 lifecycle 24h 兜底。deletedAt 是举证点。
+model PhotoObject {
+  id        String    @id @default(uuid())
+  jobId     String    @unique
+  bucket    String
+  objectKey String
+  bytes     Int
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  job OcrJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@map("photo_objects")
+}
+
+model ExternalFetchLog {
+  id         String   @id @default(uuid())
+  source     String
+  url        String
+  statusCode Int?
+  ok         Boolean
+  attempt    Int
+  durationMs Int?
+  createdAt  DateTime @default(now())
+
+  @@index([source, createdAt])
+  @@map("external_fetch_log")
+}
+
+model OcrProviderCall {
+  id         String   @id @default(uuid())
+  jobId      String
+  provider   String
+  stage      String
+  durationMs Int?
+  ok         Boolean
+  createdAt  DateTime @default(now())
+
+  @@index([jobId])
+  @@map("ocr_provider_calls")
+}
+
+model EngineJob {
+  id         String   @id @default(uuid())
+  reportId   String
+  pass       String
+  depth      Int
+  durationMs Int?
+  ok         Boolean
+  createdAt  DateTime @default(now())
+
+  @@index([reportId])
+  @@map("engine_jobs")
+}
+
+model LlmCall {
+  id           String   @id @default(uuid())
+  reportId     String?
+  purpose      String
+  model        String
+  inputTokens  Int?
+  outputTokens Int?
+  durationMs   Int?
+  ok           Boolean
+  createdAt    DateTime @default(now())
+
+  @@index([reportId])
+  @@map("llm_calls")
+}
+
+// DEC-010：白名单存成配置表，加一家不用发版。
+model SourceAllowlistEntry {
+  id        String   @id @default(uuid())
+  kind      String
+  value     String
+  note      String?
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([kind, value])
+  @@map("source_allowlist")
+}

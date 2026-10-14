@@ -83,3 +83,49 @@ export async function postJson<T>(url: string, payload: unknown): Promise<JsonRe
 export async function del(url: string): Promise<void> {
   await fetch(url, { method: "DELETE" });
 }
+
+// ── blind human review ───────────────────────────────────────────────────────
+
+/** Mirrors core/review-service.ts's ReviewSession; the browser never sees candidate ids before reveal. */
+export type ScreenVerdict = "left" | "right" | "tie" | "both_bad";
+
+export interface ReviewSession {
+  run: string;
+  step: string;
+  reviewer: string;
+  rubric: { file: string; text: string; sha: string };
+  dimensions: string[];
+  pairs: Array<{
+    id: string;
+    input: { slug: string; text: string };
+    left: { files: Array<{ path: string; content: string; truncated: boolean }> };
+    right: { files: Array<{ path: string; content: string; truncated: boolean }> };
+    verdict: { overall: ScreenVerdict; dimensions: Record<string, ScreenVerdict>; note: string } | null;
+    revealed?: { left: string; right: string };
+  }>;
+  done: number;
+  hiddenFailed: number;
+  revealed: boolean;
+}
+
+export function reviewUrl(runId: string, reviewer: string, includeFailed: boolean): string {
+  const q = new URLSearchParams({ reviewer, ...(includeFailed ? { failed: "1" } : {}) });
+  return `/api/review/${encodeURIComponent(runId)}?${q}`;
+}
+
+/** A review POST: 400 carries the server's reason, which the page shows as is. */
+async function postReview(url: string, body: unknown): Promise<void> {
+  const res = await postJson<unknown>(url, body);
+  if (!res.ok) throw new Error(res.body.error ?? `HTTP ${res.status}`);
+}
+
+export function postVerdict(
+  runId: string,
+  verdict: { reviewer: string; pairId: string; overall: ScreenVerdict; dimensions: Record<string, ScreenVerdict>; note: string },
+): Promise<void> {
+  return postReview(`/api/review/${encodeURIComponent(runId)}`, verdict);
+}
+
+export function postReveal(runId: string, reviewer: string): Promise<void> {
+  return postReview(`/api/review/${encodeURIComponent(runId)}/reveal`, { reviewer });
+}

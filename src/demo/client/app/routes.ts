@@ -11,7 +11,9 @@ export type Route =
   | { view: "task"; specPath: string }
   | { view: "run"; runId: string }
   /** `dir` is artifact-relative: a workflow root, or one step inside a run. */
-  | { view: "report"; runId: string; dir: string };
+  | { view: "report"; runId: string; dir: string }
+  /** Blind human review of one run; `reviewer` empty until the page asks for a name. */
+  | { view: "review"; runId: string; reviewer: string };
 
 const HOME: Route = { view: "home" };
 
@@ -21,6 +23,8 @@ export function parseRoute(hash: string): Route {
   if (specPath) return { view: "task", specPath };
   const runId = params.get("run");
   const dir = params.get("report");
+  const reviewer = params.get("review");
+  if (runId && reviewer !== null) return { view: "review", runId, reviewer };
   if (runId && dir) return { view: "report", runId, dir };
   if (runId) return { view: "run", runId };
   return HOME;
@@ -34,6 +38,8 @@ export function hashFor(route: Route): string {
       return `#run=${encodeURIComponent(route.runId)}`;
     case "report":
       return `#run=${encodeURIComponent(route.runId)}&report=${encodeURIComponent(route.dir)}`;
+    case "review":
+      return `#run=${encodeURIComponent(route.runId)}&review=${encodeURIComponent(route.reviewer)}`;
     case "home":
       return "#";
   }

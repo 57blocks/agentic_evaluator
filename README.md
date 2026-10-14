@@ -311,6 +311,7 @@ Every command takes `--help`.
 | `agenteval plan <task>` | count what a run would do: generations, judge calls, budget | no |
 | `agenteval models <task>` | check each model id is listed and reachable, and its price | yes (`--catalog-only`: no) |
 | `agenteval run <task> --yes` | execute (without `--yes` it only prints the plan) | if the task calls models |
+| `agenteval review <run>` | review a run blind in the dashboard; verdicts go to `runs/<run>/reviews/` | no |
 | `agenteval report <run>` | re-render a run's `report.html` (run id or path) | no |
 | `agenteval install-skill` | add the `/agenteval-new-task` skill for Claude Code to this workspace | no |
 | `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
@@ -433,6 +434,42 @@ evaluators:
 The judge's favourite is recommended, and the `success` column reads `0/2`:
 without a check nothing was measured as right or wrong. Such a verdict is at
 most *directional*.
+
+### Human review
+
+A required check says whether an answer is right. It cannot say which of two
+right answers is better. For that, review a run blind, in the dashboard:
+
+```yaml
+evaluators:
+  human:
+    rubric_file: rubrics/review.md          # what the reviewer reads
+    show: [".ab/tasks.json", "*.md"]        # files to compare, in each trial's work dir
+    dimensions: [coverage, granularity]     # optional; defaults to judged_dimensions
+```
+
+```bash
+agenteval review <run>                      # opens the dashboard on the review page
+```
+
+The page shows one pair per screen: the input, then two candidates' answers
+as **Left** and **Right**. Model names, cost, time and check results are not
+shown, and the server does not send them until you reveal. For each pair you
+give an overall verdict (left, right, tie or both bad), optional verdicts per
+dimension, and a note. Shortcuts: `a`/`b`/`t`/`x`, Enter to save, `j`/`k`
+to move between pairs.
+
+Each verdict is saved as you give it, to `runs/<run>/reviews/<you>.jsonl`. A
+reload resumes where you stopped. Pairs where one side failed its check are
+hidden unless you tick the box. **Reveal** shows which candidate was which,
+and makes your verdicts read-only.
+
+`report.html` and the dashboard then show a **Human win rate** column. If a
+judge also ran, they also show how often the judge agreed with you. Below 90%
+agreement, `GAPS.md` in the report calls the judge uncalibrated. Human
+verdicts inform the report and do not change the recommendation. Review works
+on runs made before the `human` block was added: it reads the task's current
+spec, and stamps the rubric's hash on every verdict.
 
 ### Command candidates
 

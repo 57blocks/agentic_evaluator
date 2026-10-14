@@ -1,0 +1,290 @@
+{
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "title": "会话用服务端 session cookie，不用 JWT",
+      "domains": [
+        "auth"
+      ],
+      "endpoints": [
+        "POST /api/auth/verify-code",
+        "GET /api/auth/me",
+        "POST /api/auth/logout"
+      ],
+      "tables": [
+        "users",
+        "sessions",
+        "login_codes"
+      ]
+    },
+    {
+      "id": "DEC-002",
+      "title": "登录凭证是一次性邮箱验证码，不设密码",
+      "domains": [
+        "auth",
+        "consent"
+      ],
+      "endpoints": [
+        "POST /api/auth/request-code",
+        "POST /api/auth/verify-code",
+        "POST /api/consent/request"
+      ],
+      "tables": [
+        "users",
+        "login_codes",
+        "parent_consents"
+      ]
+    },
+    {
+      "id": "DEC-003",
+      "title": "年龄门按出生年判定，<13 才走家长同意",
+      "domains": [
+        "auth",
+        "consent"
+      ],
+      "endpoints": [
+        "POST /api/auth/request-code",
+        "POST /api/consent/request"
+      ],
+      "tables": [
+        "users",
+        "parent_consents"
+      ]
+    },
+    {
+      "id": "DEC-004",
+      "title": "家长撤回同意走邮件签名链接，不建家长账号",
+      "domains": [
+        "consent"
+      ],
+      "endpoints": [
+        "POST /api/consent/revoke"
+      ],
+      "tables": [
+        "parent_consents",
+        "consent_denials",
+        "audit_events"
+      ]
+    },
+    {
+      "id": "DEC-005",
+      "title": "错误全站一种形状：HTTP 状态 + { code, message }",
+      "domains": [
+        "auth",
+        "consent",
+        "game",
+        "analysis",
+        "prep",
+        "metrics",
+        "review"
+      ],
+      "endpoints": [
+        "POST /api/games/photo",
+        "POST /api/opponents/search",
+        "POST /api/consent/confirm"
+      ],
+      "tables": [
+        "ocr_jobs"
+      ]
+    },
+    {
+      "id": "DEC-006",
+      "title": "创建类 POST 用客户端生成的幂等键，不用自然键",
+      "domains": [
+        "game",
+        "analysis"
+      ],
+      "endpoints": [
+        "POST /api/games/photo",
+        "POST /api/games/{gameId}/analysis",
+        "POST /api/analysis/{analysisId}/retry"
+      ],
+      "tables": [
+        "idempotency_keys",
+        "ocr_jobs",
+        "analysis_reports"
+      ]
+    },
+    {
+      "id": "DEC-007",
+      "title": "列表分页用 cursor，不用 offset",
+      "domains": [
+        "game"
+      ],
+      "endpoints": [
+        "GET /api/games"
+      ],
+      "tables": [
+        "games"
+      ]
+    },
+    {
+      "id": "DEC-008",
+      "title": "进度用 SSE 单向流，不用 WebSocket；断线不续跑",
+      "domains": [
+        "game",
+        "analysis"
+      ],
+      "endpoints": [
+        "GET /api/games/jobs/{jobId}/events",
+        "GET /api/analysis/{analysisId}/events",
+        "GET /api/games/jobs/{jobId}"
+      ],
+      "tables": [
+        "ocr_jobs",
+        "analysis_reports"
+      ]
+    },
+    {
+      "id": "DEC-009",
+      "title": "Stockfish 跑服务端，不跑浏览器 WASM",
+      "domains": [
+        "analysis"
+      ],
+      "endpoints": [
+        "POST /api/games/{gameId}/analysis"
+      ],
+      "tables": [
+        "analysis_reports",
+        "engine_jobs"
+      ]
+    },
+    {
+      "id": "DEC-010",
+      "title": "外链只走白名单，宁可空推荐也不回退开放网络结果",
+      "domains": [
+        "analysis"
+      ],
+      "endpoints": [
+        "GET /api/analysis/{analysisId}"
+      ],
+      "tables": [
+        "study_recommendations",
+        "source_allowlist"
+      ]
+    },
+    {
+      "id": "DEC-011",
+      "title": "外部源统一退避重试 + 单源失败降级为部分结果",
+      "domains": [
+        "prep",
+        "analysis"
+      ],
+      "endpoints": [
+        "POST /api/opponents/search",
+        "GET /api/opponents/reports/{reportId}"
+      ],
+      "tables": [
+        "opponent_reports",
+        "rating_lookup_cache",
+        "external_fetch_log"
+      ]
+    },
+    {
+      "id": "DEC-012",
+      "title": "对手身份先解析再找棋局，评分匹配含历史评分",
+      "domains": [
+        "prep"
+      ],
+      "endpoints": [
+        "POST /api/opponents/search"
+      ],
+      "tables": [
+        "rating_lookup_cache",
+        "opponent_reports"
+      ]
+    },
+    {
+      "id": "DEC-013",
+      "title": "浏览器直连契约，不建 BFF",
+      "domains": [
+        "auth",
+        "consent",
+        "game",
+        "analysis",
+        "prep",
+        "metrics",
+        "review"
+      ],
+      "endpoints": [
+        "GET /api/games",
+        "GET /api/analysis/{analysisId}"
+      ],
+      "tables": [
+        "games",
+        "analysis_reports"
+      ]
+    },
+    {
+      "id": "DEC-014",
+      "title": "服务端状态用共享 query cache，不用全局 store",
+      "domains": [
+        "game",
+        "analysis",
+        "prep"
+      ],
+      "endpoints": [
+        "GET /api/games",
+        "GET /api/analysis/{analysisId}",
+        "GET /api/opponents/reports/{reportId}"
+      ],
+      "tables": [
+        "games",
+        "analysis_reports",
+        "opponent_reports"
+      ]
+    },
+    {
+      "id": "DEC-015",
+      "title": "写操作等响应再改 UI，不做乐观更新",
+      "domains": [
+        "game",
+        "review"
+      ],
+      "endpoints": [
+        "POST /api/games/jobs/{jobId}/confirmations",
+        "POST /api/reviews"
+      ],
+      "tables": [
+        "games",
+        "reviews"
+      ]
+    },
+    {
+      "id": "DEC-016",
+      "title": "儿童 PII 列级加密，审计日志只记同意与删除事件",
+      "domains": [
+        "auth",
+        "consent"
+      ],
+      "endpoints": [
+        "GET /api/auth/me",
+        "POST /api/consent/confirm",
+        "POST /api/consent/decline"
+      ],
+      "tables": [
+        "users",
+        "parent_consents",
+        "audit_events"
+      ]
+    },
+    {
+      "id": "DEC-017",
+      "title": "匿名写端点按邮箱与 IP 双维度限流",
+      "domains": [
+        "auth",
+        "consent"
+      ],
+      "endpoints": [
+        "POST /api/auth/request-code",
+        "POST /api/auth/verify-code",
+        "POST /api/consent/request",
+        "POST /api/consent/resend"
+      ],
+      "tables": [
+        "login_codes",
+        "parent_consents"
+      ]
+    }
+  ]
+}
