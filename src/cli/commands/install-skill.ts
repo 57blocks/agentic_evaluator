@@ -40,8 +40,15 @@ export async function cmdInstallSkill(args: ParsedArgs, io: Io): Promise<ExitCod
   }
 
   await fs.mkdir(targetDir, { recursive: true });
-  await fs.copyFile(source, target);
-  await fs.copyFile(path.join(INSTALL_ROOT, "README.md"), path.join(targetDir, "reference.md"));
+  await replaceWith(source, target);
+  await replaceWith(path.join(INSTALL_ROOT, "README.md"), path.join(targetDir, "reference.md"));
   io.out(`installed ${displayPath(target)}\nIn Claude Code, from ${displayPath(ws.root) || "."}: /${SKILL_NAME}\n`);
   return EXIT.ok;
+}
+
+/** Copy, first removing whatever is at `dest`: a symlink there (a cloned repo
+ * can carry one) is replaced, never written through. */
+async function replaceWith(source: string, dest: string): Promise<void> {
+  await fs.rm(dest, { force: true });
+  await fs.copyFile(source, dest, fs.constants.COPYFILE_EXCL);
 }
