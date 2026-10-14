@@ -108,6 +108,8 @@ export interface LlmCallEvent {
   provider?: string;
   finishReason?: string;
   error?: { kind: LlmErrorKind; httpStatus?: number; message: string };
+  /** agent-cli: files left in the work dir but not read back (too large, or binary), with why. */
+  skippedFiles?: string[];
   /** Caller-supplied labels (phase, candidate, input, trial, pair, attempt). */
   context?: Record<string, unknown>;
 }

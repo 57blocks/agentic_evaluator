@@ -9,6 +9,7 @@
  * carries them.
  */
 
+import { matchesShow } from "../canon/show.js";
 import type { ArtifactFile, CandidateAdapterId } from "./types.js";
 
 /** Renders artifacts the way the chained-workflow handoff does. */
@@ -16,13 +17,22 @@ export function renderArtifacts(artifacts: readonly ArtifactFile[]): string {
   return artifacts.map((f) => "```file:" + f.path + "\n" + f.content + "\n```").join("\n\n");
 }
 
+/**
+ * `show` (`evaluators.judge.show`) narrows an agent's files to the ones worth
+ * reading: a whole project carries lockfiles and logs that would crowd the
+ * judge's context and say nothing about the work. The check still gets every
+ * file; only this text, which the judge reads and the report shows, narrows.
+ */
 export function deliverableText(
   adapter: CandidateAdapterId,
   text: string,
   artifacts: readonly ArtifactFile[],
+  show?: readonly string[],
 ): string {
   if (adapter !== "agent-cli" || artifacts.length === 0) return text;
-  return renderArtifacts(artifacts);
+  if (!show || show.length === 0) return renderArtifacts(artifacts);
+  const shown = artifacts.filter((f) => matchesShow(f.path, show));
+  return shown.length > 0 ? renderArtifacts(shown) : `(none of the ${artifacts.length} files left match judge.show: ${show.join(", ")})`;
 }
 
 /**

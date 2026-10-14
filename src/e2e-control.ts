@@ -66,6 +66,8 @@ export type E2eArmGenerate = (
   inputSlug: string,
   inputText: string,
   trial: number,
+  /** `handoff: workdir`: the previous step's files, to start the work dir from. */
+  seed?: readonly ArtifactFile[],
 ) => Promise<E2eGeneration>;
 
 export type E2eGenerate = (
@@ -126,11 +128,17 @@ export async function runChainArm(params: {
     for (let trial = 0; trial < trials; trial++) {
       const steps: E2eStepResult[] = [];
       let nextText = root.text;
+      let previous: E2eGeneration | null = null;
       let aborted = false;
       for (const step of chain) {
         const candidate = assignment[step.step];
-        const inputSha = sha256(nextText);
-        const gen = await generate(step, candidate, root.slug, nextText, trial);
+        // `handoff: workdir`: the step starts from the previous step's files
+        // and keeps the root input as its instruction. Otherwise the previous
+        // output, rendered as text, is the input (the default).
+        const seed = previous && step.handoff === "workdir" ? previous.artifacts : undefined;
+        const text = seed ? root.text : nextText;
+        const inputSha = sha256(seed ? `${text}\0handoff:${handoffPayload({ text: "", artifacts: [...seed] })}` : text);
+        const gen = await generate(step, candidate, root.slug, text, trial, seed);
         const decided = decideTaskOutcome({
           criteria: step.successCriteria,
           requiredChecks: step.requiredChecks ?? [],
@@ -155,6 +163,7 @@ export async function runChainArm(params: {
           break;
         }
         nextText = payload;
+        previous = gen;
       }
       cases.push({
         input: root.slug,

@@ -16,6 +16,9 @@ export const SPEC_SCHEMA = {
   type: "object",
   additionalProperties: false,
   required: ["protocol_version", "run_name", "workflow", "candidates", "evaluators", "execution"],
+  // Any other `x-` key is the spec author's (YAML anchors to share, notes):
+  // never read by agenteval, so never rejected.
+  patternProperties: { "^x-": {} },
   properties: {
     protocol_version: { type: "string", enum: [PROTOCOL_VERSION] },
     run_name: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{1,63}$" },
@@ -26,6 +29,14 @@ export const SPEC_SCHEMA = {
       required: ["steps"],
       properties: {
         control_candidate: { type: "string" },
+        e2e: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            inputs: { type: "array", minItems: 1, items: { type: "string" } },
+            final_checks: { type: "array", minItems: 1, items: { type: "string" } },
+          },
+        },
         steps: {
           type: "array",
           minItems: 1,
@@ -43,6 +54,7 @@ export const SPEC_SCHEMA = {
                 properties: {
                   id: { type: "string" },
                   inputs: { type: "array", minItems: 1, items: { type: "string" } },
+                  fixture_dir: { type: "string", minLength: 1 },
                 },
               },
               candidate_ids: { type: "array", minItems: 1, items: { type: "string" } },
@@ -78,6 +90,7 @@ export const SPEC_SCHEMA = {
               prompt_file: { type: "string" },
               rubric_file: { type: "string" },
               input_from: { type: "string" },
+              handoff: { type: "string", enum: ["text", "workdir"] },
             },
           },
         },
@@ -166,6 +179,7 @@ export const SPEC_SCHEMA = {
               type: "array",
               items: { type: "string", enum: ["pairwise-swap", "absolute-1-5"] },
             },
+            show: { type: "array", items: { type: "string", minLength: 1 } },
           },
         },
       },

@@ -61,3 +61,32 @@ test("check-task blocks on a missing review rubric and warns when show matches n
   assert.ok(codes.includes("blocking:review.rubric-missing"), codes.join(" "));
   assert.ok(codes.includes("warning:review.show-empty"), codes.join(" "));
 });
+
+test("judge.show is loaded into the step; without it the judge reads every file", async () => {
+  const dir = path.dirname(await sampleWith(null));
+  const spec = path.join(dir, "spec.yaml");
+  const yaml = await fs.readFile(spec, "utf-8");
+  await fs.writeFile(spec, yaml.replace(/(  judge:\n(?:    .*\n)*?    rubric_file: .*\n)/, "$1    show: [README.md, \"src/**\"]\n"));
+
+  const [suite] = await loadWorkflow(spec);
+  const [plain] = await loadWorkflow(await sampleWith(null));
+
+  assert.deepEqual(suite.judgeShow, ["README.md", "src/**"]);
+  assert.equal(plain.judgeShow, undefined);
+});
+
+test("check-task says how much of each reference the judge reads, and warns when judge.show matches nothing", async () => {
+  async function withJudgeShow(show: string): Promise<string[]> {
+    const spec = await sampleWith(null);
+    const yaml = await fs.readFile(spec, "utf-8");
+    await fs.writeFile(spec, yaml.replace("    methods: []\n", `    methods: [pairwise-swap]\n    show: ${show}\n`));
+    const ref = path.join(path.dirname(spec), "references", "changelog");
+    await fs.mkdir(ref, { recursive: true });
+    await fs.writeFile(path.join(ref, "RELEASE_NOTES.md"), "x".repeat(2048));
+    const report = await preflightTask(spec);
+    return report.steps.flatMap((s) => s.findings).filter((f) => f.code.startsWith("judge.show")).map((f) => `${f.severity}:${f.message}`);
+  }
+
+  assert.deepEqual(await withJudgeShow("[RELEASE_NOTES.md]"), ["ok:judge reads per answer: changelog 2 KB (about 1 token per 4 bytes)"]);
+  assert.match((await withJudgeShow("[nothing.md]"))[0] ?? "", /^warning:judge show \[nothing\.md\] matches no file/);
+});

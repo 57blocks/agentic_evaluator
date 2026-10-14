@@ -10,10 +10,10 @@
  * rather than an assumption a reader has to make.
  */
 
-import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { sha256 } from "../canon/hash.js";
+import { runProcess, type SpawnError } from "../proc.js";
 import { looksLikePath } from "../script-path.js";
 import { CONTAINER_WORKDIR, runInDocker, TASK_MOUNT, type Mount } from "./docker.js";
 import { readReportedUsage, UNOBSERVED, USAGE_FILE } from "./reported-usage.js";
@@ -27,7 +27,6 @@ import {
 } from "./types.js";
 
 const INPUT_FILE = ".eval-input.txt";
-const MAX_BUFFER = 2 * 1024 * 1024;
 const SKIP_NAMES = new Set(["node_modules", INPUT_FILE, USAGE_FILE]);
 
 function subst(value: string, vars: Record<string, string>): string {
@@ -85,8 +84,37 @@ async function containerArgv(raw: readonly string[], taskRoot: string): Promise<
   return { argv, mounts: [...mounts.values()] };
 }
 
-async function collectFiles(root: string): Promise<ArtifactFile[]> {
-  const out: ArtifactFile[] = [];
+/**
+ * What the work dir holds before the command starts: a chained step's handoff
+ * (the previous step's files) when there is one, else the input's fixture.
+ * Never both — a handed-over project already started from its fixture.
+ */
+async function layStartingState(workDir: string, request: CandidateRequest): Promise<void> {
+  if (request.seedFiles) {
+    for (const f of request.seedFiles) {
+      const dest = path.join(workDir, f.path.replace(/^[/\\]+/, ""));
+      if (!dest.startsWith(workDir + path.sep)) throw new Error(`handoff file escapes the work dir: ${f.path}`);
+      await fs.mkdir(path.dirname(dest), { recursive: true });
+      await fs.writeFile(dest, f.content, "utf-8");
+    }
+    return;
+  }
+  if (request.fixtureDir) await fs.cp(request.fixtureDir, workDir, { recursive: true });
+}
+
+/** Past this a file is not read back: a deliverable is source and docs, not logs or dumps. */
+const MAX_ARTIFACT_BYTES = 2 * 1024 * 1024;
+/** How much of a file is sniffed for a NUL byte, which text never has. */
+const BINARY_SNIFF_BYTES = 8192;
+
+/**
+ * The files an agent left, as text. A file too large to be a deliverable, or
+ * binary (which would be mangled as UTF-8, and handed on mangled), is left
+ * out and named in `skipped`, never silently.
+ */
+async function collectFiles(root: string): Promise<{ files: ArtifactFile[]; skipped: string[] }> {
+  const files: ArtifactFile[] = [];
+  const skipped: string[] = [];
   async function walk(dir: string): Promise<void> {
     let entries;
     try {
@@ -103,44 +131,42 @@ async function collectFiles(root: string): Promise<ArtifactFile[]> {
       }
       if (!e.isFile()) continue;
       const rel = path.relative(root, abs).split(path.sep).join("/");
-      out.push({ path: rel, content: await fs.readFile(abs, "utf-8") });
+      const { size } = await fs.stat(abs);
+      if (size > MAX_ARTIFACT_BYTES) {
+        skipped.push(`${rel} (${size} bytes, over ${MAX_ARTIFACT_BYTES})`);
+        continue;
+      }
+      const bytes = await fs.readFile(abs);
+      if (bytes.subarray(0, BINARY_SNIFF_BYTES).includes(0)) {
+        skipped.push(`${rel} (binary)`);
+        continue;
+      }
+      files.push({ path: rel, content: bytes.toString("utf-8") });
     }
   }
   await walk(root);
-  return out;
+  return { files, skipped };
 }
 
-function runCommand(
+async function runCommand(
   cmd: string,
   args: string[],
   opts: { cwd: string; timeoutMs: number; env?: Record<string, string> },
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   const env = opts.env ? { ...process.env, ...opts.env } : process.env;
-  return new Promise((resolve, reject) => {
-    const t0 = Date.now();
-    execFile(cmd, args, { cwd: opts.cwd, timeout: opts.timeoutMs, maxBuffer: MAX_BUFFER, env }, (error, stdout, stderr) => {
-      const ms = Date.now() - t0;
-      const out = { stdout: stdout ?? "", stderr: stderr ?? "" };
-      if (!error) {
-        resolve({ ...out, exitCode: 0 });
-        return;
-      }
-      const e = error as NodeJS.ErrnoException & { killed?: boolean; code?: unknown };
-      if (e.killed) {
-        reject(new AdapterError("candidate CLI timed out", { kind: "timeout", ms }));
-        return;
-      }
-      if (typeof e.code === "number") {
-        resolve({ ...out, exitCode: e.code });
-        return;
-      }
-      if (e.code === "ENOENT") {
-        reject(new AdapterError(`command not found: ${cmd}`, { kind: "spawn", ms }));
-        return;
-      }
-      reject(new AdapterError(e.message, { kind: "unknown", ms }));
-    });
-  });
+  const t0 = Date.now();
+  let ran;
+  try {
+    ran = await runProcess(cmd, args, { cwd: opts.cwd, env, timeoutMs: opts.timeoutMs });
+  } catch (err) {
+    const e = err as SpawnError;
+    if (e.code === "ENOENT") throw new AdapterError(`command not found: ${cmd}`, { kind: "spawn", ms: e.ms });
+    throw new AdapterError(e.message, { kind: "unknown", ms: Date.now() - t0 });
+  }
+  if (ran.timedOut) throw new AdapterError("candidate CLI timed out", { kind: "timeout", ms: ran.ms });
+  const note = ran.droppedBytes > 0 ? `[agenteval: the first ${ran.droppedBytes} bytes of output were dropped; the tail is kept]\n` : "";
+  // A signal (not ours: we only signal on timeout) ends it without a code.
+  return { stdout: ran.stdout, stderr: note + ran.stderr, exitCode: ran.exitCode ?? 128 };
 }
 
 export const agentCliAdapter: CandidateAdapter = {
@@ -166,7 +192,16 @@ export const agentCliAdapter: CandidateAdapter = {
       : await Promise.all(raw.map((a) => resolveArg(a, context.taskRoot)));
 
     await fs.mkdir(context.workDir, { recursive: true });
+    await layStartingState(context.workDir, request);
     await fs.writeFile(path.join(context.workDir, INPUT_FILE), request.inputText, "utf-8");
+    // Which step and input this is, and whether the work dir came from the
+    // step before: one command can then serve every step of a workflow.
+    const env = {
+      ...cli.env,
+      EVAL_STEP: request.stepId,
+      EVAL_INPUT: request.inputId,
+      EVAL_CHAINED: request.seedFiles ? "1" : "0",
+    };
 
     const model = request.model ?? cmd;
     const base = {
@@ -180,7 +215,7 @@ export const agentCliAdapter: CandidateAdapter = {
     const t0 = Date.now();
     try {
       const ran = inDocker
-        ? await runInDocker(cli, [cmd, ...args], {
+        ? await runInDocker({ ...cli, env }, [cmd, ...args], {
             workDir: context.workDir,
             timeoutMs: request.timeoutMs,
             mounts: contained?.mounts,
@@ -188,14 +223,14 @@ export const agentCliAdapter: CandidateAdapter = {
         : await runCommand(cmd, args, {
             cwd: context.workDir,
             timeoutMs: request.timeoutMs,
-            env: cli.env,
+            env,
           });
-      const [artifacts, usage] = await Promise.all([
+      const [{ files: artifacts, skipped }, usage] = await Promise.all([
         collectFiles(context.workDir),
         cli.reports_usage === true ? readReportedUsage(context.workDir) : UNOBSERVED,
       ]);
       const ms = Date.now() - t0;
-      context.emit?.({ type: "model.response", ...base, ms });
+      context.emit?.({ type: "model.response", ...base, ms, ...(skipped.length > 0 ? { skippedFiles: skipped } : {}) });
       return {
         text: ran.stdout.trim() !== "" ? ran.stdout : ran.stderr,
         artifacts,

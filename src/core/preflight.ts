@@ -23,6 +23,8 @@ import { adapterIdOf } from "../adapters/types.js";
 import { sha256 } from "../canon/hash.js";
 import { directionality } from "../canon/rates.js";
 import { matchesShow } from "../canon/review.js";
+import { fixturePath, isDir } from "./fixture.js";
+import { restoreAnswerKey } from "./answer-key.js";
 import { taskInputPath } from "../paths.js";
 import { looksLikePath } from "../script-path.js";
 import { loadWorkflow } from "../spec/load-spec.js";
@@ -149,8 +151,57 @@ async function reviewFindings(suite: Suite): Promise<Finding[]> {
   return out;
 }
 
+/**
+ * evaluators.judge.show: it picks something out of a correct answer, and how
+ * much of it the judge would read (a whole project can overrun its context).
+ */
+async function judgeShowFindings(suite: Suite): Promise<Finding[]> {
+  const show = suite.judgeShow;
+  if (!show || show.length === 0 || (suite.judgeMethods ?? []).length === 0) return [];
+  const root = path.join(suite.taskRoot, "references");
+  const entries = await fs.readdir(root, { withFileTypes: true, recursive: true }).catch(() => []);
+  const bytesByInput = new Map<string, number>();
+  for (const e of entries.filter((x) => x.isFile())) {
+    const [input, ...rest] = path.relative(root, path.join(e.parentPath, e.name)).split(path.sep);
+    if (input === undefined || rest.length === 0 || !matchesShow(rest.join("/"), show)) continue;
+    const { size } = await fs.stat(path.join(e.parentPath, e.name));
+    bytesByInput.set(input, (bytesByInput.get(input) ?? 0) + size);
+  }
+  if (entries.length === 0) return [];
+  if (bytesByInput.size === 0) {
+    return [{ severity: "warning", code: "judge.show-empty", message: `judge show [${show.join(", ")}] matches no file in references/: the judge would read nothing` }];
+  }
+  const sizes = [...bytesByInput].map(([input, bytes]) => `${input} ${Math.round(bytes / 1024)} KB`).join(", ");
+  return [{ severity: "ok", code: "judge.show", message: `judge reads per answer: ${sizes} (about 1 token per 4 bytes)` }];
+}
+
+/** fixture_dir: every input has its directory, and an agent is there to start from it. */
+async function fixtureFindings(suite: Suite): Promise<Finding[]> {
+  if (!suite.fixtureDir) return [];
+  const missing: string[] = [];
+  for (const slug of suite.inputs) {
+    const dir = fixturePath(suite, slug);
+    if (dir && !(await isDir(dir))) missing.push(slug);
+  }
+  const out: Finding[] = [];
+  if (missing.length > 0) {
+    out.push({ severity: "blocking", code: "inputs.fixture-missing", message: `no fixture under ${suite.fixtureDir}/ for ${missing.join(", ")}: those candidates would start from an empty work dir` });
+  }
+  const notAgents = suite.candidates.filter((c) => (suite.candidateDefs?.[c]?.adapter ?? "") !== "agent-cli");
+  if (notAgents.length > 0) {
+    out.push({ severity: "warning", code: "inputs.fixture-unused", message: `${notAgents.join(", ")} ${notAgents.length === 1 ? "is not a command" : "are not commands"}: only agent-cli candidates start from the fixture` });
+  }
+  return out;
+}
+
 async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Finding[]> {
-  const findings: Finding[] = [...stepFindings(suite), ...candidateFindings(suite), ...(await reviewFindings(suite))];
+  const findings: Finding[] = [
+    ...stepFindings(suite),
+    ...candidateFindings(suite),
+    ...(await reviewFindings(suite)),
+    ...(await judgeShowFindings(suite)),
+    ...(await fixtureFindings(suite)),
+  ];
   if (suite.inputFrom) {
     findings.push({ severity: "ok", code: "inputs.from-step", message: `inputs come from step ${suite.inputFrom} at run time; input checks skipped, the check is probed with an empty input` });
     if (suite.check) findings.push(...(await probeCheck(suite, [{ slug: "from-previous-step", text: "" }], opts)).filter((f) => f.code === "check.null"));
@@ -165,7 +216,12 @@ async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Fi
 export async function preflightTask(specPath: string, opts: { keep?: boolean } = {}): Promise<PreflightReport> {
   const suites = await loadWorkflow(specPath);
   const steps: PreflightReport["steps"] = [];
+  // A run that was killed outright leaves references/ unreadable (answer-key.ts).
+  const recovered = suites.length > 0 && restoreAnswerKey(suites[0]!.taskRoot);
   for (const suite of suites) steps.push({ step: suite.stepId ?? suite.step, findings: await preflightStep(suite, opts) });
+  if (recovered) {
+    steps[0]!.findings.unshift({ severity: "warning", code: "references.restored", message: "references/ was left unreadable by an interrupted run; made readable again" });
+  }
   const all = steps.flatMap((s) => s.findings);
   return {
     spec: specPath,

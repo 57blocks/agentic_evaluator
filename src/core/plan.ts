@@ -75,6 +75,19 @@ export function e2eChain(suites: readonly Suite[]): Suite[] | null {
   return ids.map((id) => byId.get(id)!);
 }
 
+/** The root inputs the end-to-end arms run on. */
+export function e2eRootInputs(root: Suite): string[] {
+  return root.e2eInputs ?? root.inputs;
+}
+
+/** The chain as the arms run it: the last step graded by `e2e.final_checks` when declared. */
+export function e2eArmChain(chain: readonly Suite[]): Suite[] {
+  const last = chain.length - 1;
+  return chain.map((s, i) =>
+    i === last && s.e2eFinalCheck ? { ...s, check: s.e2eFinalCheck, requiredChecks: [s.e2eFinalCheck.id] } : s,
+  );
+}
+
 export function planE2e(suites: readonly Suite[]): E2ePlan | null {
   const chain = e2eChain(suites);
   if (!chain) return null;
@@ -83,7 +96,7 @@ export function planE2e(suites: readonly Suite[]): E2ePlan | null {
   return {
     controlCandidate: root.controlCandidate ?? null,
     chain: chain.map((s) => s.step),
-    perArm: root.inputs.length * trials * chain.length,
+    perArm: e2eRootInputs(root).length * trials * chain.length,
   };
 }
 
