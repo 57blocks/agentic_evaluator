@@ -19,7 +19,7 @@ The spec reference is the agenteval README: "Tutorial" (a complete spec with a p
 
 ## Step 0 — The decision
 
-Ask what choice this task informs, in one sentence: *"which model should draft our PRDs"*, *"is opencode as good as Claude Code on our refactors"*. One step, one decision. If they describe several, build the one they need first.
+Ask what choice this task informs, in one sentence: *"which model should draft our PRDs"*, *"is opencode as good as Claude Code on our refactors"*. One task, one decision. If they describe several unrelated decisions, build the one they need first. If the decision is about a pipeline — *"which model should run each stage of our flow"* — that is one decision over several steps: see **Multi-step workflows** below.
 
 Then pin down:
 
@@ -28,6 +28,44 @@ Then pin down:
 - **What the deliverable is.** Text (`output.txt` in the check's dir) or files the candidate leaves behind (the end state). For agents, the end state is the answer — grade files, not narration.
 
 Scaffold with `agenteval init <name>` (offline, command candidates) or `agenteval init <name> --models` (two models and a judge), then edit. Run `agenteval plan <name>` after every spec edit; it names the field it rejects.
+
+## Multi-step workflows
+
+Use this when the candidates run a pipeline — stages whose output the next stage consumes. Read the README's "Workflows" section and the shipped `chain-offline` sample before writing the spec.
+
+**Two questions, ask which they need** (often both):
+
+1. *Which candidate is best at each step?* — every step is evaluated on its own inputs.
+2. *Does the per-step best combination beat one candidate end to end?* — chain the steps (`input_from`), set `workflow.control_candidate`, and the run also executes the whole chain twice: control on every step, then each step's pick.
+
+**Break the pipeline into steps first.** List the stages with the user — per stage: what it starts from, what it leaves behind, what "right" means. Show this as a short table and get a yes before writing inputs. Fewer steps is better: only make a stage its own step if they'd plausibly pick a different candidate for it.
+
+**Then run Steps 1–3 below once per step.** Each step has its own inputs, its own required check, its own references, and **its own two sign-offs**. Do not batch the sign-offs across steps; a user who approves three steps' inputs at once has read none of them.
+
+Per step, decide:
+
+- **Starting state.** A step evaluated alone should start from a fixed state, not from whatever an upstream candidate produced — otherwise its result depends on who ran the step before. For agents that's `test_set.fixture_dir: fixture/<step>` with `fixture/<step>/<input>/` holding the project as it stood when that stage began (real snapshots beat hand-built ones). Steps may share input names, one fixture each.
+- **Check.** Grade the step's own deliverable. Anything the check trusts (acceptance tests, the plan it grades against) comes from the fixture (`fixture` in `meta.json`), never from the candidate's work dir — a candidate must not grade itself.
+- **References.** `references/<step>/<input>/` (wins over `references/<input>/`): the adopted state after that step.
+- **Limits.** Stages differ: `maximum_completion_time_seconds`, `max_cost_per_trial_usd`, a step-level `judge` (rubric, `show`, `dimensions`) and `concurrency` are all per step.
+- **One command for every step** is fine: a command candidate reads `EVAL_STEP`, `EVAL_INPUT` and `EVAL_CHAINED`.
+
+**For the chain** (question 2), after every step is signed off:
+
+- Hand-off: by default a chained step's input is the previous step's output as text. For agents whose next stage needs the project itself, add `handoff: workdir`: the work dir starts with the previous step's files.
+- `workflow.e2e`: `inputs` (run the chain only on these root inputs — a chain costs far more than a step), `final_checks` (grades the end product; usually not the last step's own check), `steps.<step>` (raise a step's limits in the chain only), and optionally `judge` (compares the two arms' deliveries).
+- `references/e2e/<input>/`: a delivered end product the final check must pass. This is a third sign-off: show the user the final check's evidence on it.
+- Tell the user the chain's cost separately from the per-step cost before Step 4.
+
+**Worked example — agb's flow** (one spec, three steps, ten models; *which model runs each stage, and does the combination beat opus throughout?*):
+
+| step | starts from (`fixture/<step>/<input>/`) | candidate leaves | required check |
+|---|---|---|---|
+| `detail` | a real project with PRD, design and contracts in place (3 projects) | `.ab/tasks.json`, `UI_CONTRACT.md` | `plan-gates`: every page and endpoint claimed, no domain cycle |
+| `qa` | the adopted task plan in place (same 3 projects) | `.ab/test-plan.json` | `test-plan-gates`: every acceptance criterion covered |
+| `code` | the project just before one task (inputs `demo-todo-T-001`, `demo-todo-T-006`: a from-scratch task and a feature on a working codebase) | the implemented task | `task-tests`: the task's acceptance tests — restored from the fixture, not the candidate's copy — all pass |
+
+What it shows: each step starts from a real snapshot, so `qa`'s result doesn't depend on who ran `detail`; one command (`agents/agb-step.mjs`) serves every step via `EVAL_STEP`; caps differ per step (detail $15/50 min, qa $10/30 min, code $10/60 min, code at `concurrency: 3` because each trial builds an app); `detail` adds a step judge (`rubrics/breakdown.md`, `show: [".ab/tasks.json", UI_CONTRACT.md]`) for granularity and ordering a script can't see. The chain adds `input_from` + `handoff: workdir` on `qa` and `code`, and `workflow.e2e` with `inputs: [demo-todo]` (the chain's code step builds every task) and `final_checks: [app-gates]` (installs, builds, the whole test suite passes) — a different check from `task-tests`, because one task passing and a delivered app working are different claims. `references/e2e/demo-todo/` is the delivered app.
 
 ## Step 1 — Inputs
 
@@ -86,7 +124,7 @@ If yes for even one case, the check isn't ready: fix it, re-run `check-task`, sh
 
 1. `agenteval check-task <name>` reports **0 blocking**. Read the remaining warnings out to the user in one line each and let them decide.
 2. `agenteval plan <name>` — show the counts (generations, judge calls, budget).
-3. Ask for consent in one line: *"N candidates × M inputs × T trials, judge on/off, budget $B — run it?"* Only on a yes: `agenteval run <name> --yes --html`, then point them at `runs/<run>/report.html` and `GAPS.md`.
+3. Ask for consent in one line: *"N candidates × M inputs × T trials, judge on/off, budget $B — run it?"* For a workflow, give it per step plus the chain: *"detail 10×3, qa 10×3, code 10×2, chain 2 arms on demo-todo, budget $600 — run it?"* Only on a yes: `agenteval run <name> --yes --html`, then point them at `runs/<run>/report.html` and `GAPS.md`.
 
 Hand over: where the task lives, what `check-task` said, and that every edit to inputs or the check should be followed by `check-task` again. Suggest committing `tasks/<name>/` (runs are gitignored).
 
@@ -96,4 +134,6 @@ Hand over: where the task lives, what `check-task` said, and that every edit to 
 - **Running before a yes**, including "just one" paid trial.
 - **References from a candidate model**, or a check that passes an empty answer (`check-task` blocks it — don't work around it).
 - **A check that exits 2 on a missing deliverable** — that turns "did nothing" into undetermined.
-- **A grand unified task.** One decision per task.
+- **A grand unified task.** One decision per task. A pipeline is one decision over several steps; unrelated decisions are separate tasks.
+- **Steps that start from upstream output when evaluated alone.** Give each step a fixed starting state (`fixture_dir`); chaining is for the e2e arms.
+- **Reusing a step's check as the chain's final check** without asking whether "this step's deliverable is right" and "the end product works" are the same claim.
