@@ -75,3 +75,12 @@ test("install-skill replaces a symlink in its way instead of writing through it"
   assert.ok(!(await fs.lstat(path.join(dir, "reference.md"))).isSymbolicLink());
   assert.ok(!(await fs.lstat(path.join(dir, "SKILL.md"))).isSymbolicLink());
 });
+
+test("install-skill refuses a skill directory that leads out of the workspace", async () => {
+  const ws = await workspace();
+  const elsewhere = await fs.mkdtemp(path.join(os.tmpdir(), "eval-elsewhere-"));
+  await fs.symlink(elsewhere, path.join(ws, ".claude"));
+
+  await assert.rejects(main(["install-skill", "--workspace", ws], bufferIo()), (e: unknown) => e instanceof UsageError && /outside/.test(e.message));
+  assert.deepEqual(await fs.readdir(elsewhere), []);
+});
