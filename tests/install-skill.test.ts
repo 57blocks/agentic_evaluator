@@ -59,3 +59,19 @@ test("the skill ships with the package", async () => {
   assert.ok(pkg.files.includes("skills"));
   assert.match(await fs.readFile(path.join(INSTALL_ROOT, SKILL), "utf-8"), /^---\nname: agenteval-new-task\n/);
 });
+
+test("install-skill replaces a symlink in its way instead of writing through it", async () => {
+  const ws = await workspace();
+  const outside = path.join(ws, "outside.txt");
+  await fs.writeFile(outside, "keep me");
+  const dir = path.join(ws, ".claude", "skills", "agenteval-new-task");
+  await fs.mkdir(dir, { recursive: true });
+  await fs.symlink(outside, path.join(dir, "reference.md"));
+  await fs.symlink(outside, path.join(dir, "SKILL.md"));
+
+  await main(["install-skill", "--workspace", ws, "--force"], bufferIo());
+
+  assert.equal(await fs.readFile(outside, "utf-8"), "keep me");
+  assert.ok(!(await fs.lstat(path.join(dir, "reference.md"))).isSymbolicLink());
+  assert.ok(!(await fs.lstat(path.join(dir, "SKILL.md"))).isSymbolicLink());
+});
