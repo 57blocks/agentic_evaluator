@@ -29,6 +29,16 @@ test("install-skill puts the authoring skill where Claude Code finds it, in the 
   assert.match(io.stdout, /\/agenteval-new-task/);
 });
 
+test("install-skill puts the README beside the skill, so the spec reference it cites is there to read", async () => {
+  const ws = await workspace();
+
+  await main(["install-skill", "--workspace", ws], bufferIo());
+
+  const reference = await fs.readFile(path.join(ws, ".claude", "skills", "agenteval-new-task", "reference.md"), "utf-8");
+  assert.equal(reference, await fs.readFile(path.join(INSTALL_ROOT, "README.md"), "utf-8"));
+  assert.match(await fs.readFile(path.join(INSTALL_ROOT, SKILL), "utf-8"), /reference\.md/);
+});
+
 test("install-skill will not overwrite an edited copy unless asked", async () => {
   const ws = await workspace();
   const target = path.join(ws, ".claude", "skills", "agenteval-new-task", "SKILL.md");
