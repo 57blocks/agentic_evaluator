@@ -55,6 +55,20 @@ export interface CandidateTradeoff {
 
 export type RecommendationFirmness = "firm" | "directional" | "needs-review";
 
+/**
+ * Who came nearest when every candidate was gated out. Never adopted: `chosen`
+ * stays null and the step still needs review. It tells the reader where to
+ * start looking, ranked by required-check pass rate, then reliability, then
+ * cost per success. A candidate removed only by the p95 or cost ceiling ranks
+ * on those rates too, however far it is from the ceiling.
+ */
+export interface ClosestCandidate {
+  candidate: string;
+  reason: string;
+  /** Why the gate that removed it did so (later gates skip a removed candidate). */
+  gated_by: string[];
+}
+
 export interface Recommendation {
   rule_version: typeof SELECT_RULE_VERSION;
   operating_mode: string | null;
@@ -67,6 +81,8 @@ export interface Recommendation {
   compared_to_control: { beats_control: boolean | null; reason: string } | null;
   firmness: RecommendationFirmness;
   reasons: string[];
+  /** Set only when the gates removed every candidate; null otherwise. */
+  closest: ClosestCandidate | null;
 }
 
 export interface RecommendInput {
@@ -579,6 +595,26 @@ export function recommend(input: RecommendInput): Recommendation {
     compared_to_control: compareToControl(chosen, input.controlCandidate, mode, candidates),
     firmness,
     reasons,
+    closest: mode && eligibleRates.length === 0 ? closestOf(candidates, filters) : null,
+  };
+}
+
+const costSortValue = (c: CandidateRates): number => c.generation_cost_per_success ?? Number.POSITIVE_INFINITY;
+
+/** The gated-out candidate nearest to qualifying: see ClosestCandidate. Null when there is nobody to rank. */
+function closestOf(candidates: readonly CandidateRates[], filters: readonly RecommendFilter[]): ClosestCandidate | null {
+  const ranked = [...candidates].sort(
+    (a, b) =>
+      rateSortValue(b.required_check_pass_rate) - rateSortValue(a.required_check_pass_rate) ||
+      rateSortValue(b.reliability) - rateSortValue(a.reliability) ||
+      costSortValue(a) - costSortValue(b),
+  );
+  const best = ranked[0];
+  if (best === undefined) return null;
+  return {
+    candidate: best.candidate,
+    reason: `no candidate passed the gates; the closest is ${best.candidate}, with required-check pass rate ${fmtRate(best.required_check_pass_rate)} and reliability ${fmtRate(best.reliability)}`,
+    gated_by: filters.flatMap((f) => f.removed.filter((r) => r.candidate === best.candidate).map((r) => r.reason)),
   };
 }
 

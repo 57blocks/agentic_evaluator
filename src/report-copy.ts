@@ -196,7 +196,14 @@ function controlClause(rec: Recommendation): string {
 export function recommendationSentence(rec: Recommendation): string {
   if (rec.chosen) return (pickClause(rec) + controlClause(rec)).trim();
   if (!rec.operating_mode) return "The spec declares no operating mode, so no choice can be made among eligible candidates.";
-  if (rec.eligible.length === 0) return "No candidate passes every gate, so this step makes no recommendation.";
+  if (rec.eligible.length === 0) {
+    const near = rec.closest;
+    if (!near) return "No candidate passes every gate, so this step makes no recommendation.";
+    // Both rates, not only the gate that removed it: a later gate (e.g. reliability) never runs on a removed candidate.
+    const t = rec.tradeoffs.find((x) => x.candidate === near.candidate);
+    const rates = t ? ` (required check ${rateText(t.required_check_pass_rate)}, reliability ${rateText(t.reliability)})` : "";
+    return `No candidate passes every gate. The closest is ${near.candidate}${rates}; it is named for review, not adopted.`;
+  }
   return `${rec.eligible.length} candidates are eligible, but "${modeLabel(rec.operating_mode)}" cannot separate them.`;
 }
 
