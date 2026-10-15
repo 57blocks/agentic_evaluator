@@ -215,6 +215,7 @@ async function executeSuite(params: {
     ledgerTotal: ledger.total,
     ledgerSource: ledger.source,
     chosen: recommendation.chosen,
+    closest: recommendation.closest?.candidate ?? null,
     firmness: recommendation.firmness,
     html,
     gated: recommendation.filters.flatMap((f) => f.removed),

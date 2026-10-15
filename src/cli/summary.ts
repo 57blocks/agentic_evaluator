@@ -16,6 +16,8 @@ export interface SummaryInput {
   candidates: readonly string[];
   trials: readonly TrialRow[];
   chosen: string | null;
+  /** Named when nobody qualified (Recommendation.closest); never adopted. */
+  closest?: string | null;
   firmness: string;
   /** Candidates the eligibility gate removed, and why. */
   gated: ReadonlyArray<{ candidate: string; reason: string }>;
@@ -131,7 +133,7 @@ export function summaryLines(input: SummaryInput): string[] {
     ...body.map((b) => `  ${line(b)}`),
     "",
     ...gated,
-    `  → ${input.chosen ?? "no candidate qualified"} (${input.firmness}) · total $${input.ledgerTotal.toFixed(4)} (${input.ledgerSource}${lowerBound})`,
+    `  → ${input.chosen ?? `no candidate qualified${input.closest ? ` · closest ${input.closest}` : ""}`} (${input.firmness}) · total $${input.ledgerTotal.toFixed(4)} (${input.ledgerSource}${lowerBound})`,
     "",
   ];
 }

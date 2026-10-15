@@ -82,12 +82,13 @@ export function formatEvent(e: RunEvent): string[] {
           candidates: e.candidates,
           trials: e.rows,
           chosen: e.chosen,
+          closest: e.closest,
           firmness: e.firmness,
           gated: e.gated,
           ledgerTotal: e.ledgerTotal,
           ledgerSource: e.ledgerSource,
         }),
-        `✔ ${e.dir}/ — ${e.trials} trials, ${e.evaluations} evaluator rows, ${e.traceEvents} trace events, ledger total ${usd(e.ledgerTotal)} (${e.ledgerSource}), recommend ${e.chosen ?? "none"} (${e.firmness})${e.html ? ", report.html" : ""}`,
+        `✔ ${e.dir}/ — ${e.trials} trials, ${e.evaluations} evaluator rows, ${e.traceEvents} trace events, ledger total ${usd(e.ledgerTotal)} (${e.ledgerSource}), recommend ${e.chosen ?? (e.closest ? `none, closest ${e.closest}` : "none")} (${e.firmness})${e.html ? ", report.html" : ""}`,
       ];
     case "e2e.arm.start":
       return [`\n▶ ${e.armId} — ${Object.entries(e.assignment).map(([s, c]) => `${s}:${c}`).join(" → ")}`];

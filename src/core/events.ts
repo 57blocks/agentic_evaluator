@@ -109,6 +109,8 @@ export type RunEvent =
       ledgerTotal: number;
       ledgerSource: string;
       chosen: string | null;
+      /** Nearest gated-out candidate when nobody qualified; never adopted. */
+      closest?: string | null;
       firmness: string;
       html: boolean;
       /** Candidates the eligibility gate removed, and why. */

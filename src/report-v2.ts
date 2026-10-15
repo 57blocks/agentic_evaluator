@@ -238,7 +238,7 @@ export function renderRunReport(b: RunBundle): string {
       <div><dt>Judge</dt><dd>${escapeHtml(m.judge.model)} · rubric ${sha8(m.evaluators.rubric_sha256)}</dd></div>
       <div><dt>Mode</dt><dd>${escapeHtml(m.execution.benchmark_mode)} · ${escapeHtml(m.execution.cache_mode)} cache</dd></div>
       <div><dt>Run time</dt><dd>${escapeHtml(m.started_at.slice(0, 16).replace("T", " "))} → ${escapeHtml((m.finished_at ?? "").slice(11, 16))}</dd></div>
-      <div><dt>Operating mode</dt><dd>${escapeHtml(modeLabel(m.operating_mode))} · ${escapeHtml(FIRMNESS_LABEL[rec.firmness])}${rec.chosen ? ` · recommend ${escapeHtml(rec.chosen)}` : ` · ${NO_PICK}`}</dd></div>
+      <div><dt>Operating mode</dt><dd>${escapeHtml(modeLabel(m.operating_mode))} · ${escapeHtml(FIRMNESS_LABEL[rec.firmness])}${rec.chosen ? ` · recommend ${escapeHtml(rec.chosen)}` : ` · ${NO_PICK}${rec.closest ? ` · closest ${escapeHtml(rec.closest.candidate)}` : ""}`}</dd></div>
       <div><dt>harness</dt><dd>${escapeHtml(m.harness.version)} · ${escapeHtml(m.harness.git_sha ?? "—")}</dd></div>
     </dl>
   </header>
