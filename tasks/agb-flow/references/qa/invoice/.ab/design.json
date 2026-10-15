@@ -1,0 +1,272 @@
+{
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "title": "租户隔离用共享库加 org_id 列",
+      "domains": [
+        "auth",
+        "client",
+        "invoice",
+        "recurring",
+        "settlement",
+        "dashboard",
+        "webhook"
+      ],
+      "tables": [
+        "organizations",
+        "clients",
+        "invoices",
+        "recurring_series",
+        "settlement_requests"
+      ]
+    },
+    {
+      "id": "DEC-002",
+      "title": "商户会话用我方签发的 JWT，前端只放内存",
+      "domains": [
+        "auth",
+        "org"
+      ],
+      "endpoints": [
+        "POST /api/auth/session",
+        "GET /api/org/profile"
+      ]
+    },
+    {
+      "id": "DEC-003",
+      "title": "Payer 链接用不可枚举 token，不设过期",
+      "domains": [
+        "payer"
+      ],
+      "endpoints": [
+        "GET /api/pay/:token"
+      ],
+      "tables": [
+        "invoices"
+      ]
+    },
+    {
+      "id": "DEC-004",
+      "title": "错误全站一种形状：HTTP 状态加 code/message",
+      "domains": [
+        "auth",
+        "org",
+        "client",
+        "invoice",
+        "recurring",
+        "settlement",
+        "dashboard",
+        "payer",
+        "webhook"
+      ]
+    },
+    {
+      "id": "DEC-005",
+      "title": "三条写端点用客户端生成的幂等键",
+      "domains": [
+        "invoice",
+        "settlement"
+      ],
+      "endpoints": [
+        "POST /api/invoices/:invoiceId/send",
+        "POST /api/invoices/:invoiceId/void",
+        "POST /api/settlements"
+      ],
+      "tables": [
+        "idempotency_keys"
+      ]
+    },
+    {
+      "id": "DEC-006",
+      "title": "列表用 offset 翻页式分页，每页 20",
+      "domains": [
+        "client",
+        "invoice",
+        "settlement"
+      ],
+      "endpoints": [
+        "GET /api/clients",
+        "GET /api/invoices",
+        "GET /api/settlements",
+        "GET /api/settlements/settleable-invoices",
+        "GET /api/settlements/:requestId"
+      ]
+    },
+    {
+      "id": "DEC-007",
+      "title": "金额收敛为标量 USD，用 decimal 字符串传输",
+      "domains": [
+        "invoice",
+        "settlement",
+        "dashboard",
+        "payer"
+      ],
+      "tables": [
+        "invoices",
+        "invoice_items",
+        "settlement_requests"
+      ]
+    },
+    {
+      "id": "DEC-008",
+      "title": "payout 提全额，手续费从余额另扣",
+      "domains": [
+        "settlement"
+      ],
+      "endpoints": [
+        "POST /api/settlements",
+        "GET /api/settlements/:requestId"
+      ],
+      "tables": [
+        "settlement_requests"
+      ]
+    },
+    {
+      "id": "DEC-009",
+      "title": "Cobo 的 org access token 不落库，按需换取并进程内缓存",
+      "domains": [
+        "org",
+        "auth"
+      ],
+      "tables": [
+        "organizations"
+      ]
+    },
+    {
+      "id": "DEC-010",
+      "title": "回调按原始字节验签，事件 id 落库去重",
+      "domains": [
+        "webhook"
+      ],
+      "endpoints": [
+        "POST /api/webhooks/cobo"
+      ],
+      "tables": [
+        "webhook_events"
+      ]
+    },
+    {
+      "id": "DEC-011",
+      "title": "定时任务用同进程 cron，靠幂等键而不是单实例保证不重复",
+      "domains": [
+        "recurring",
+        "invoice"
+      ],
+      "tables": [
+        "recurring_series",
+        "invoices"
+      ]
+    },
+    {
+      "id": "DEC-012",
+      "title": "技术栈与目录布局",
+      "domains": [
+        "auth",
+        "org",
+        "client",
+        "invoice",
+        "recurring",
+        "settlement",
+        "dashboard",
+        "payer",
+        "webhook"
+      ]
+    },
+    {
+      "id": "DEC-013",
+      "title": "浏览器直连 api-routes，不做 BFF",
+      "domains": [
+        "client",
+        "invoice",
+        "settlement",
+        "dashboard",
+        "payer"
+      ]
+    },
+    {
+      "id": "DEC-014",
+      "title": "服务端状态用共享 query cache，不用全局 store",
+      "domains": [
+        "client",
+        "invoice",
+        "settlement",
+        "dashboard"
+      ]
+    },
+    {
+      "id": "DEC-015",
+      "title": "列表的筛选与分页写进 URL",
+      "domains": [
+        "client",
+        "invoice",
+        "settlement"
+      ],
+      "endpoints": [
+        "GET /api/clients",
+        "GET /api/invoices",
+        "GET /api/settlements"
+      ]
+    },
+    {
+      "id": "DEC-016",
+      "title": "写操作等响应再改 UI，不做乐观更新",
+      "domains": [
+        "client",
+        "invoice",
+        "settlement"
+      ]
+    },
+    {
+      "id": "DEC-017",
+      "title": "外部调用 120 秒超时且不自动重试",
+      "domains": [
+        "invoice",
+        "settlement"
+      ],
+      "endpoints": [
+        "POST /api/invoices/:invoiceId/send",
+        "POST /api/invoices/:invoiceId/void",
+        "POST /api/settlements"
+      ]
+    },
+    {
+      "id": "DEC-018",
+      "title": "结算提交用乐观锁剔除被占用的发票，不整单失败",
+      "domains": [
+        "settlement"
+      ],
+      "endpoints": [
+        "POST /api/settlements"
+      ],
+      "tables": [
+        "invoices",
+        "settlement_request_invoices"
+      ]
+    },
+    {
+      "id": "DEC-019",
+      "title": "发票邮件由 Cobo 发，我方不接第三方邮件服务商",
+      "domains": [
+        "invoice"
+      ],
+      "endpoints": [
+        "POST /api/invoices/:invoiceId/send"
+      ]
+    },
+    {
+      "id": "DEC-020",
+      "title": "同一份契约只活一个版本，新字段只加 optional",
+      "domains": [
+        "auth",
+        "org",
+        "client",
+        "invoice",
+        "recurring",
+        "settlement",
+        "dashboard",
+        "payer",
+        "webhook"
+      ]
+    }
+  ]
+}

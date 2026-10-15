@@ -1,0 +1,66 @@
+{
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "title": "不做登录与鉴权，全部端点公开；「当前成员」只是本地会话的显示状态",
+      "domains": ["task", "member"],
+      "endpoints": [
+        "GET /api/members",
+        "POST /api/members",
+        "DELETE /api/members/:memberId",
+        "GET /api/tasks",
+        "POST /api/tasks",
+        "GET /api/tasks/:taskId",
+        "PATCH /api/tasks/:taskId",
+        "POST /api/tasks/:taskId/transitions"
+      ],
+      "tables": ["tasks", "members"]
+    },
+    {
+      "id": "DEC-002",
+      "title": "任务状态转移走独立端点，服务端按 WF-01 校验合法转移，不接受客户端直接写任意 status",
+      "domains": ["task"],
+      "endpoints": ["POST /api/tasks/:taskId/transitions"],
+      "tables": ["tasks"]
+    },
+    {
+      "id": "DEC-003",
+      "title": "共享数据落在服务端持久化存储，而不是仅存于客户端本地",
+      "domains": ["task", "member"],
+      "endpoints": [
+        "GET /api/members",
+        "POST /api/members",
+        "DELETE /api/members/:memberId",
+        "GET /api/tasks",
+        "POST /api/tasks",
+        "GET /api/tasks/:taskId",
+        "PATCH /api/tasks/:taskId",
+        "POST /api/tasks/:taskId/transitions"
+      ],
+      "tables": ["tasks", "members"]
+    },
+    {
+      "id": "DEC-004",
+      "title": "移除成员时，其名下任务在同一次请求内改为「未分配」，不做前置阻断",
+      "domains": ["task", "member"],
+      "endpoints": ["DELETE /api/members/:memberId"],
+      "tables": ["tasks", "members"]
+    },
+    {
+      "id": "DEC-005",
+      "title": "技术栈：React+Vite+TypeScript 前端，Node.js+Express+TypeScript 后端，SQLite 持久化，Vitest+Supertest 测试",
+      "domains": ["task", "member"],
+      "endpoints": [
+        "GET /api/members",
+        "POST /api/members",
+        "DELETE /api/members/:memberId",
+        "GET /api/tasks",
+        "POST /api/tasks",
+        "GET /api/tasks/:taskId",
+        "PATCH /api/tasks/:taskId",
+        "POST /api/tasks/:taskId/transitions"
+      ],
+      "tables": ["tasks", "members"]
+    }
+  ]
+}

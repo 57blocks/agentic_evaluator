@@ -1,0 +1,1450 @@
+{
+  "domains": [
+    {
+      "id": "platform",
+      "name": "平台底座",
+      "tasks": [
+        {
+          "id": "T-001",
+          "title": "后端服务能被启动并自报存活",
+          "role": "backend",
+          "description": "把后端做成一个真的能 listen 起来的进程，而不是只导出一个 app 工厂。这一片不是用户能力，但后面每一片能被真的验一次都靠它。",
+          "dependsOn": [],
+          "coversRequirementIds": [
+            "PAGE-001"
+          ],
+          "acceptanceCriteria": [
+            "`pnpm --filter api dev` 与 `pnpm --filter api start` 都能把进程起在一个端口上并保持运行",
+            "启动脚本的命令文本里出现后端入口文件或 services/api 目录，不依赖脚本名被猜对",
+            "GET /api/health 返回 200 与 { status: \"ok\", version }，且不经过任何鉴权中间件",
+            "GET /api/health 不读数据库、不返回环境变量或版本以外的任何内部信息",
+            ".env.example 列出代码里每一个没有兜底的环境变量，值一律为占位符",
+            "数据库连接模块在 NODE_ENV=test 或 VITEST 非空时退到进程内库，不在 import 阶段抛错"
+          ],
+          "subSteps": [
+            {
+              "action": "搭骨架",
+              "detail": "pnpm workspace + services/api 的 Koa 应用与 listen 入口"
+            },
+            {
+              "action": "健康检查",
+              "detail": "按契约实现 GET /api/health，挂在鉴权中间件之前"
+            },
+            {
+              "action": "环境契约",
+              "detail": "写 .env.example，含 Cobo、数据库、签名密钥四类变量名"
+            },
+            {
+              "action": "测试兜底",
+              "detail": "连接模块按 db-test-fallback 的要求分支"
+            }
+          ],
+          "files": {
+            "creates": [
+              "package.json",
+              "pnpm-workspace.yaml",
+              ".env.example",
+              "services/api/src/index.ts",
+              "services/api/src/db/client.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-034",
+          "title": "数据层接上 drizzle 并产出初始 migration",
+          "role": "backend",
+          "description": "schema 已由 agb-arch 写在 _contracts/schema.ts，本任务不重新设计表，只把它接上 drizzle-kit 并生成第一个 migration。在此之前 schema-migration 门禁会正确地拦住提交。",
+          "dependsOn": [
+            "T-001"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001"
+          ],
+          "acceptanceCriteria": [
+            "drizzle.config.ts 指向 _contracts/schema.ts，迁移目录与之配套",
+            "drizzle-kit generate 产出初始 migration，覆盖 12 张表与全部枚举、外键、唯一约束与索引",
+            "migration 与 schema 文件在同一次提交里，schema-migration 门禁不再报红",
+            "drizzle-kit migrate 能在空库上跑通并建出全部表",
+            "仓库里不存在 drizzle-kit push 的调用或脚本，package.json 的脚本里也没有"
+          ],
+          "subSteps": [
+            {
+              "action": "接适配器",
+              "detail": "drizzle.config.ts 指向 _contracts/schema.ts"
+            },
+            {
+              "action": "生成迁移",
+              "detail": "drizzle-kit generate，并与 schema 一起提交"
+            }
+          ],
+          "files": {
+            "creates": [
+              "drizzle.config.ts",
+              "drizzle/"
+            ],
+            "modifies": [
+              "package.json"
+            ]
+          }
+        },
+        {
+          "id": "T-035",
+          "title": "测试脚手架能跑起来并看得见红",
+          "role": "test",
+          "description": "这个仓库现在没有任何测试命令。RED 的判据是「亲眼看见它因为目标行为未实现而失败」，没有聚焦命令就看不见——后面每一条 AT-* 都建立在这一片上。只搭跑道，不写任何业务用例。",
+          "dependsOn": [
+            "T-001"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001"
+          ],
+          "acceptanceCriteria": [
+            "存在聚焦测试命令（跑单文件或单用例）与全量测试命令两套脚本，命令文本里指明目标目录而不是靠脚本名被猜",
+            "vitest 承担 unit 与 integration：API 用 supertest、组件用 jsdom 加 testing-library，两种都能跑通一条示例断言",
+            "playwright 承担 e2e，能对着本地起好的服务跑通一条示例断言",
+            "在没有任何业务代码时，两套命令都能跑起来并报告 0 个业务用例，而不是以配置错误退出",
+            "故意写一条必失败的断言时，聚焦命令以非零退出码结束并指出是哪一条——红看得见"
+          ],
+          "subSteps": [
+            {
+              "action": "跑道",
+              "detail": "vitest.config.ts 与 playwright.config.ts，聚焦与全量脚本分开"
+            },
+            {
+              "action": "自证",
+              "detail": "用一条示例红断言确认失败真的可见，确认后删掉，不留业务用例"
+            }
+          ],
+          "files": {
+            "creates": [
+              "vitest.config.ts",
+              "playwright.config.ts"
+            ],
+            "modifies": [
+              "package.json"
+            ]
+          }
+        },
+        {
+          "id": "T-002",
+          "title": "前端样式地基与应用骨架真的用上 token 表",
+          "role": "frontend",
+          "description": "把 .ab/design-tokens.json 接进一处，并让一个页面骨架真的用它渲染。这一片同样不是用户能力，缺了它交付出来的会是一份没有样式的裸 HTML。 路由表按 .ab/prd.json 的 13 个 PAGE 一次建全，指向按需加载的页面模块，后续任务只创建自己的页面组件、不再回来改路由表。",
+          "dependsOn": [
+            "T-001"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001",
+            "PAGE-012"
+          ],
+          "acceptanceCriteria": [
+            "tailwind 配置从 .ab/design-tokens.json 取色板、间距、字号、圆角，token 表是唯一来源",
+            "侧栏骨架渲染出 app-shell 与 app-sidebar 两个锚点，宽度 248px 且 sticky",
+            "四个导航锚点 nav-dashboard / nav-clients / nav-invoices / nav-settlements 都渲染且可跳转",
+            "骨架页面用到的颜色全部来自 token 表，代码里不出现字面十六进制色值",
+            "global-toast 容器在骨架里渲染，供后续所有成功与失败反馈复用",
+            "路由表一次覆盖 .ab/prd.json 的全部 13 个页面，后续任务只需补上页面模块，不需要再改路由表"
+          ],
+          "subSteps": [
+            {
+              "action": "接表",
+              "detail": "tailwind.config 读 .ab/design-tokens.json，不另抄一份色值"
+            },
+            {
+              "action": "骨架",
+              "detail": "侧栏 + 内容区布局，按 UI_CONTRACT 渲染锚点"
+            },
+            {
+              "action": "路由",
+              "detail": "react-router 挂在 /apps/invoice/* 前缀下"
+            }
+          ],
+          "files": {
+            "creates": [
+              "apps/web/tailwind.config.ts",
+              "apps/web/src/app/AppShell.tsx",
+              "apps/web/src/app/routes.tsx",
+              "apps/web/src/app/Toast.tsx"
+            ],
+            "modifies": [
+              "package.json"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "auth",
+      "name": "会话",
+      "tasks": [
+        {
+          "id": "T-003",
+          "title": "商户可从 Cobo Portal 进入并建立会话",
+          "role": "fullstack",
+          "description": "用门户交付的 Cobo JWT 换我方 JWT，前端只放内存；无会话时访问商户端路由渲染无权限页。",
+          "dependsOn": [
+            "T-002",
+            "T-004"
+          ],
+          "coversRequirementIds": [
+            "PAGE-012"
+          ],
+          "acceptanceCriteria": [
+            "POST /api/auth/session 用 Cobo 的 JWKS 验签门户 token，取出 email / org_id / iss",
+            "验签失败返回 403 且响应体不含任何来自 Cobo 的原始错误或堆栈",
+            "签发的我方 JWT 载荷含 org_id；服务端后续一律从 JWT 取 org_id，不信任任何请求参数里的组织标识",
+            "前端把 token 保存在内存中，localStorage 与 sessionStorage 里查不到它",
+            "无会话或会话过期时访问任一商户端路由渲染 no-permission-page，且不发起任何业务请求",
+            "POST /api/auth/session 是公开写端点，已按契约接上限流"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/auth/session 的请求、响应、错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "JWKS 验签、签发、typed client、内存存放、路由守卫、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/auth/session.ts",
+              "services/api/src/auth/jwks.ts",
+              "apps/web/src/auth/session.ts",
+              "apps/web/src/app/RequireSession.tsx",
+              "apps/web/src/pages/NoPermission.tsx"
+            ],
+            "modifies": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "org",
+      "name": "组织档案与结算目标地址",
+      "tasks": [
+        {
+          "id": "T-004",
+          "title": "组织档案落库并在建立会话时刷新",
+          "role": "backend",
+          "description": "GET /api/org/profile。organizations 表由 T-034 的迁移建出，本任务只写读写逻辑。名称与 Logo 是快照，Cobo 的 org access token 按 DEC-009 不落库。",
+          "dependsOn": [
+            "T-001",
+            "T-034"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001"
+          ],
+          "acceptanceCriteria": [
+            "organizations 表只有 org_id / name / logo_url 与时间戳，表里没有任何 Cobo 凭据列",
+            "org access token 按需换取并在进程内带 TTL 缓存，进程重启后重新换取",
+            "建立会话时刷新组织名称与 Logo；Logo 为空时回落到默认值",
+            "GET /api/org/profile 只返回当前会话所属组织，换一个 org_id 的 JWT 拿到的是另一份数据"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET /api/org/profile 的响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "organizations 表、Cobo 组织信息读取、TTL 缓存、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/org/profile.ts",
+              "services/api/src/cobo/orgToken.ts",
+              "services/api/src/cobo/orgInfo.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-005",
+          "title": "结算目标地址只读接入 Cobo destination 注册表",
+          "role": "backend",
+          "description": "两条只读端点，数据源是 destination 注册表而不是 Wallet API；本应用只读不写，不接 create-destination。",
+          "dependsOn": [
+            "T-004"
+          ],
+          "coversRequirementIds": [
+            "PAGE-009"
+          ],
+          "acceptanceCriteria": [
+            "GET /api/org/destinations 的数据来自 list-all-destinations，响应里不含任何 Cobo 原始字段",
+            "GET /api/org/destinations/:destinationId/entries 的数据来自 list-destination-entries 并带回 chainId",
+            "传入 token 参数时只返回 chainId 与该 token 所在链一致的条目",
+            "代码里不存在对 create-destination 或 create-destination-entry 的调用",
+            "Cobo 返回空列表时端点返回空数组而不是错误，由前端渲染无可用地址提示"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "两条端点的请求、响应、错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "Cobo 客户端、链一致性校验、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/org/destinations.ts",
+              "services/api/src/cobo/destinations.ts"
+            ],
+            "modifies": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "client",
+      "name": "客户管理",
+      "tasks": [
+        {
+          "id": "T-006",
+          "title": "商户可查看、搜索与筛选客户列表",
+          "role": "fullstack",
+          "description": "GET /api/clients + PAGE-002 列表页，含分页与空态。租户隔离的写法在这一片定下来，后面各域照抄。（表由 T-034 的迁移建出，本任务不改 schema。）",
+          "dependsOn": [
+            "T-003"
+          ],
+          "coversRequirementIds": [
+            "PAGE-002",
+            "AC-003",
+            "AC-004"
+          ],
+          "acceptanceCriteria": [
+            "列表默认按创建时间倒序、每页 20 条，分页器可翻页且总数正确",
+            "按邮箱或名称搜索、按类型与状态过滤都生效，条件写进 URL，刷新与后退后仍然保留",
+            "查询强制带 org_id 谓词；用另一个组织的会话请求时拿不到本组织的任何一行",
+            "无客户时渲染 client-empty 与新增入口，且不渲染空表格",
+            "付款方或无会话直接访问该路由时渲染 no-permission-page 且不加载数据"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET /api/clients 的分页、搜索、过滤入参与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "clients 表、端点、typed client、列表页、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/client/list.ts",
+              "apps/web/src/pages/ClientList.tsx",
+              "apps/web/src/api/clients.ts",
+              "services/api/src/client/list.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-007",
+          "title": "商户可新增客户",
+          "role": "fullstack",
+          "description": "POST /api/clients + Add Client 弹窗。类型是 radio 组不是下拉——原型 prototype.html:765 的写法为准。",
+          "dependsOn": [
+            "T-006"
+          ],
+          "coversRequirementIds": [
+            "PAGE-002",
+            "AC-001",
+            "AC-002",
+            "AC-005"
+          ],
+          "acceptanceCriteria": [
+            "填入合法且不重复的邮箱、类型、名称后提交，客户以 Active 创建并显示成功提示",
+            "邮箱为空时在字段旁显示必填提示且不创建客户",
+            "名称为 2 个字符时阻止提交并提示 3 到 100 字符",
+            "同一组织内邮箱重复时提示已存在；不同组织可以有同一邮箱",
+            "类型用两个 radio 渲染，不是 select",
+            "提交中按钮禁用，重复点击不产生第二个客户"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/clients 的请求、响应、字段级错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、校验、弹窗、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/client/create.ts",
+              "apps/web/src/components/ClientModal.tsx",
+              "services/api/src/client/create.test.ts"
+            ],
+            "modifies": [
+              "apps/web/src/pages/ClientList.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-008",
+          "title": "商户可编辑客户资料",
+          "role": "fullstack",
+          "description": "PATCH /api/clients/:clientId，只允许改类型与名称，邮箱只读。",
+          "dependsOn": [
+            "T-007"
+          ],
+          "coversRequirementIds": [
+            "PAGE-002"
+          ],
+          "acceptanceCriteria": [
+            "编辑弹窗里邮箱只读，类型与名称可改并保存成功后刷新列表",
+            "名称长度校验与新增页一致",
+            "改到另一个组织的客户 id 时返回 404，不泄露该客户是否存在"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "PATCH 的部分更新语义与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、弹窗编辑态、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/client/update.ts",
+              "services/api/src/client/update.test.ts"
+            ],
+            "modifies": [
+              "apps/web/src/components/ClientModal.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-009",
+          "title": "商户可冻结与解冻客户",
+          "role": "fullstack",
+          "description": "PUT /api/clients/:clientId/status，冻结前校验 7 个进行中状态。该校验直接查 invoices 表（由 T-034 的迁移建出），不依赖发票域的任何端点或页面。",
+          "dependsOn": [
+            "T-008",
+            "T-034"
+          ],
+          "coversRequirementIds": [
+            "PAGE-002"
+          ],
+          "acceptanceCriteria": [
+            "客户没有任何进行中发票时可冻结，状态变为 Frozen 并显示成功提示",
+            "存在 Sending / Pending / Received / Voiding / Settling / Settlement Failed / Overdue 任一状态的发票时冻结被拒，渲染 client-freeze-blocked-error",
+            "只有 Draft 发票不阻止冻结",
+            "Frozen 客户可解冻回 Active",
+            "校验在服务端做，绕过前端直接调端点同样被拒"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "PUT status 的请求、响应与被拒时的错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、前置条件查询、确认弹窗、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/client/status.ts",
+              "apps/web/src/components/ClientFreezeModal.tsx",
+              "services/api/src/client/status.test.ts"
+            ],
+            "modifies": [
+              "apps/web/src/pages/ClientList.tsx"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "invoice",
+      "name": "发票",
+      "tasks": [
+        {
+          "id": "T-010",
+          "title": "商户可查看、搜索与筛选发票列表",
+          "role": "fullstack",
+          "description": "GET /api/invoices + GET /api/invoices/status-counts + PAGE-003。状态计数覆盖全量而非当前页。（表由 T-034 的迁移建出，本任务不改 schema。）",
+          "dependsOn": [
+            "T-006"
+          ],
+          "coversRequirementIds": [
+            "PAGE-003"
+          ],
+          "acceptanceCriteria": [
+            "列表默认按创建时间倒序、每页 20 条，分页器可翻页且总数正确",
+            "按客户名或分类搜索、按类型、Token、状态、创建时间过滤都生效，条件写进 URL 并在返回时保留",
+            "状态计数统计的是全量而不是当前页，切换页码时计数不变",
+            "查询强制带 org_id 谓词，跨组织取不到任何一行",
+            "无发票时渲染 invoice-empty",
+            "金额以 2 位小数渲染，响应里金额是字符串而不是 JSON number"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "两条端点的入参、响应与分页形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "五张表、两条端点、typed client、列表页、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/invoice/list.ts",
+              "services/api/src/invoice/statusCounts.ts",
+              "apps/web/src/pages/InvoiceList.tsx",
+              "apps/web/src/api/invoices.ts",
+              "services/api/src/invoice/list.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-011",
+          "title": "商户可填写并保存发票草稿",
+          "role": "fullstack",
+          "description": "POST /api/invoices + PAGE-004 表单页。客户选择器按 Q-071 是可搜索 combobox；金额按 DEC-007 是标量 USD。",
+          "dependsOn": [
+            "T-010",
+            "T-007"
+          ],
+          "coversRequirementIds": [
+            "PAGE-004",
+            "AC-011",
+            "Q-071"
+          ],
+          "acceptanceCriteria": [
+            "填齐必填项后保存，发票以 Draft 创建并回到列表",
+            "客户选择器是可搜索 combobox，输入即向服务端筛选，只出 Active 客户，第 21 个之后的客户也选得到",
+            "单价是单个输入框，不是按币种渲染多个输入框；页面上不存在主币的概念",
+            "应付总额低于 1 时阻止保存并提示，等于 1 时可保存",
+            "折扣、税率、整单折扣允许填 0，填 100 被拒",
+            "添加到第 50 行 item 时新增按钮置灰；服务端在收到第 51 行时同样拒绝",
+            "抄送人达到 3 个时新增按钮置灰；服务端在收到第 4 个时同样拒绝",
+            "分类 0 到 100 字符、备注 0 到 500 字符，都允许为空"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/invoices 的请求、响应与字段级错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、校验、表单页、combobox、CC 弹窗、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/invoice/create.ts",
+              "apps/web/src/pages/InvoiceForm.tsx",
+              "apps/web/src/components/ClientCombobox.tsx",
+              "apps/web/src/components/CcModal.tsx",
+              "services/api/src/invoice/create.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-012",
+          "title": "商户可编辑与删除草稿发票",
+          "role": "fullstack",
+          "description": "PATCH 与 DELETE /api/invoices/:invoiceId + PAGE-005。删除是硬删除、不可恢复。",
+          "dependsOn": [
+            "T-011"
+          ],
+          "coversRequirementIds": [
+            "PAGE-005",
+            "AC-012",
+            "AC-013",
+            "AC-014",
+            "AC-015"
+          ],
+          "acceptanceCriteria": [
+            "草稿保存有效修改后 update_time 刷新并显示成功提示",
+            "发票为 Pending 时列表里的编辑入口置灰不可点，直接调用 PATCH 同样被拒",
+            "删除草稿并确认后从列表移除且详情页打不开",
+            "删除请求失败时草稿仍在列表，并显示删除失败提示",
+            "离开已修改的表单时弹出未保存变更确认，未修改时直接返回"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "PATCH 的部分更新语义、DELETE 的响应与失败形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "两条端点、状态前置校验、编辑页、离开确认、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/invoice/update.ts",
+              "services/api/src/invoice/delete.ts",
+              "apps/web/src/components/UnsavedChangesModal.tsx",
+              "services/api/src/invoice/update.test.ts"
+            ],
+            "modifies": [
+              "apps/web/src/pages/InvoiceForm.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-013",
+          "title": "商户可创建并发送发票",
+          "role": "fullstack",
+          "description": "POST /api/invoices/:invoiceId/send。进 Sending 后由后台流程调 Cobo Create order link 与发信，成功才进 Pending；失败先撤销链接再回 Draft。",
+          "dependsOn": [
+            "T-011",
+            "T-005"
+          ],
+          "coversRequirementIds": [
+            "PAGE-004",
+            "AC-006",
+            "AC-007",
+            "AC-008",
+            "AC-009",
+            "AC-010"
+          ],
+          "acceptanceCriteria": [
+            "校验通过且客户 Active 时点击创建并发送，发票进入 Sending，按钮在处理中禁用",
+            "链接生成与邮件都成功后发票进入 Pending 并显示成功提示",
+            "未选付款币种时阻止提交并在币种区显示提示",
+            "选中 Frozen 客户时阻止提交并显示对应提示",
+            "Cobo 链接接口超时（120 秒）时发票回到 Draft、输入保留并显示失败提示",
+            "链接已生成而邮件失败时，先撤销该支付链接并清空 payment_link，再回到 Draft",
+            "重复点击携带同一幂等键时只产生一次发送尝试；同键不同体返回 409",
+            "外部调用不做自动重试，重试由用户再次点击发起"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST send 的幂等键、响应与三种失败路径"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、幂等占位、Cobo 下单、发信、回滚、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/invoice/send.ts",
+              "services/api/src/invoice/idempotency.ts",
+              "services/api/src/cobo/orderLink.ts",
+              "services/api/src/cobo/email.ts",
+              "services/api/src/invoice/send.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-014",
+          "title": "商户可基于已有发票复制出新草稿",
+          "role": "frontend",
+          "description": "PAGE-006。复用 GET 详情预填 + POST 创建，不新增端点。",
+          "dependsOn": [
+            "T-013"
+          ],
+          "coversRequirementIds": [
+            "PAGE-006"
+          ],
+          "acceptanceCriteria": [
+            "从列表或详情点复制，打开预填了原发票内容的新表单",
+            "新发票保存后拿到新的发票号，原发票不受影响",
+            "开票日期默认为当前日期、到期日期默认为当前日期加 30 天",
+            "Settling 状态的发票没有复制入口，其余 10 个状态都有"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "复制路由、预填映射、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "apps/web/src/pages/InvoiceDuplicate.tsx",
+              "apps/web/src/invoice/prefill.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-015",
+          "title": "商户可查看发票详情",
+          "role": "fullstack",
+          "description": "GET /api/invoices/:invoiceId + PAGE-007，含周期区域与异常提示。 详情页为周期区域留一个插槽并按需渲染 recurring 域交付的面板组件，recurring 域不回来改这个文件。",
+          "dependsOn": [
+            "T-010"
+          ],
+          "coversRequirementIds": [
+            "PAGE-007"
+          ],
+          "acceptanceCriteria": [
+            "详情页渲染状态、基本信息、商品明细与四个汇总值",
+            "作废原因只在 Voided 时渲染，支付异常横幅只在 Error 时渲染",
+            "空的抄送人、备注、分类、周期区域整块不渲染，不显示占位行",
+            "发送时间对商户可见；update_time 与 series_id 不出现在页面上",
+            "跨组织请求他人发票时返回 404",
+            "加载态用骨架屏，与列表页一致"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET 详情的响应形状与空字段语义"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、详情页、骨架屏、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/invoice/detail.ts",
+              "apps/web/src/pages/InvoiceDetail.tsx",
+              "services/api/src/invoice/detail.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-016",
+          "title": "商户可作废 Pending 或 Overdue 发票",
+          "role": "fullstack",
+          "description": "POST /api/invoices/:invoiceId/void + 作废弹窗，幂等。",
+          "dependsOn": [
+            "T-015"
+          ],
+          "coversRequirementIds": [
+            "PAGE-003",
+            "AC-016",
+            "AC-017",
+            "AC-018",
+            "AC-019"
+          ],
+          "acceptanceCriteria": [
+            "Pending 发票填写 3 到 500 字符原因后作废，进入 Voiding，取消链接回调成功后变 Voided",
+            "Overdue 发票同样可作废，走同一套原因校验与失败回退",
+            "原因为空时阻止提交且状态不变",
+            "取消链接接口失败时发票回到 Pending、原因保留并显示失败提示",
+            "重复点击携带同一幂等键时只处理一次作废",
+            "Draft 与其余状态没有作废入口，直接调端点同样被拒"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST void 的请求、幂等键与失败回退"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、幂等、Cobo 取消链接、弹窗、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/invoice/void.ts",
+              "apps/web/src/components/VoidModal.tsx",
+              "services/api/src/invoice/void.test.ts"
+            ],
+            "modifies": [
+              "apps/web/src/pages/InvoiceList.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-017",
+          "title": "发票状态流水与中间态卡住的检出",
+          "role": "backend",
+          "description": "invoice_status_logs 贯穿所有状态转移；Pending 到期推进 Overdue；Sending 与 Voiding 超 24 小时可检出。定时任务靠幂等键而不是单实例。",
+          "dependsOn": [
+            "T-013",
+            "T-016"
+          ],
+          "coversRequirementIds": [
+            "PAGE-003"
+          ],
+          "acceptanceCriteria": [
+            "每一次状态转移都写一条流水，含旧状态、新状态、触发方与外部回调参考",
+            "Pending 且到期未付款的发票被定时推进为 Overdue，按 UTC 判定日期",
+            "推进是幂等的条件更新，同一张发票被扫描两次不会产生两条流水",
+            "Sending 或 Voiding 停留超过 24 小时的发票可被查出，列表上渲染 invoice-stuck-tooltip",
+            "两个实例同时跑定时任务时不产生重复推进"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "流水写入点、定时推进、卡住检出、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/invoice/statusLog.ts",
+              "services/api/src/schedule/overdue.ts",
+              "services/api/src/schedule/stuck.ts",
+              "services/api/src/schedule/overdue.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-018",
+          "title": "商户可对 Pending 或 Overdue 发票催缴",
+          "role": "frontend",
+          "description": "走 mailto，不改为系统发信；打不开时降级为可复制面板。点击时先拉一次详情取付款链接与客户邮箱，不把链接放进列表响应。",
+          "dependsOn": [
+            "T-015"
+          ],
+          "coversRequirementIds": [
+            "PAGE-007"
+          ],
+          "acceptanceCriteria": [
+            "催缴入口只在 Pending 与 Overdue 出现，其余状态置灰",
+            "点击后打开本地邮件客户端，收件人、主题、正文与付款链接都已填好",
+            "本地邮件客户端打不开时渲染 reminder-fallback-panel 并提供复制按钮",
+            "付款链接通过详情请求获取，列表响应里不包含它"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "mailto 拼装、降级面板、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "apps/web/src/components/ReminderFallback.tsx",
+              "apps/web/src/invoice/reminder.ts"
+            ],
+            "modifies": [
+              "apps/web/src/pages/InvoiceDetail.tsx"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "recurring",
+      "name": "周期发票",
+      "tasks": [
+        {
+          "id": "T-019",
+          "title": "周期发票按频率自动生成并发送",
+          "role": "backend",
+          "description": "同进程 cron。recurring_series 表由 T-034 的迁移建出。幂等键是 series_id 加应发送日期，失败重试 3 次后跳过本期。",
+          "dependsOn": [
+            "T-013"
+          ],
+          "coversRequirementIds": [
+            "AC-035",
+            "AC-036",
+            "AC-038"
+          ],
+          "acceptanceCriteria": [
+            "打开周期开关并选好频率与结束条件保存发票后，创建出一条 Active 的 Series 并与生成的发票关联",
+            "到达下次发送日期时生成一张新发票并走正常的创建并发送流程",
+            "同一期被扫描两次只生成一张发票，幂等键冲突即跳过",
+            "生成失败时在当次任务内重试 3 次，仍失败则跳过本期、邮件通知商户，下次发送日期正常往后走",
+            "结束类型只有两个取值，选 End Date 时结束日期必填",
+            "到达结束日期后 Series 变为 Completed 且不再生成",
+            "两个实例同时跑调度时不产生重复发票"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "Series 表、cron、幂等占位、重试与跳过、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/recurring/series.ts",
+              "services/api/src/schedule/recurring.ts",
+              "services/api/src/schedule/recurring.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-020",
+          "title": "商户可停止周期发票",
+          "role": "fullstack",
+          "description": "PUT /api/recurring-series/:seriesId/status + 详情页周期区域。Series 除停止外不开放写接口。 只交付周期面板组件与端点，详情页的插槽由 T-015 留好。",
+          "dependsOn": [
+            "T-019",
+            "T-015"
+          ],
+          "coversRequirementIds": [
+            "PAGE-007",
+            "AC-037"
+          ],
+          "acceptanceCriteria": [
+            "Active 的 Series 在发票详情的周期区域显示频率与下次发送日期，并提供停止入口",
+            "确认停止后 Series 变为 Discontinued，不再生成新发票",
+            "已生成的历史发票保持各自的状态不受影响",
+            "Discontinued 与 Completed 的 Series 没有停止入口，直接调端点同样被拒",
+            "端点不接受除停止以外的任何字段修改"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "PUT status 的请求与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、周期区域、确认弹窗、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/recurring/discontinue.ts",
+              "apps/web/src/components/RecurringPanel.tsx",
+              "services/api/src/recurring/discontinue.test.ts"
+            ],
+            "modifies": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "settlement",
+      "name": "结算",
+      "tasks": [
+        {
+          "id": "T-021",
+          "title": "商户可查看结算列表与两个汇总指标",
+          "role": "fullstack",
+          "description": "GET /api/settlements + GET /api/settlements/summary + PAGE-008。状态只有三个，没有 Partial Success。（表由 T-034 的迁移建出，本任务不改 schema。）",
+          "dependsOn": [
+            "T-010"
+          ],
+          "coversRequirementIds": [
+            "PAGE-008"
+          ],
+          "acceptanceCriteria": [
+            "列表默认按创建时间倒序、每页 20 条，分页器可翻页且总数正确",
+            "按结算单号搜索、按 Token、状态、创建时间过滤都生效，条件写进 URL",
+            "状态过滤只有 In Progress / Success / Failed 三个取值，界面上不存在 Partial Success",
+            "上次结算金额卡片可点击进入对应结算详情",
+            "结算中金额按 Token 分组展示",
+            "无结算记录时渲染空态与发起结算入口",
+            "查询强制带 org_id 谓词，跨组织取不到任何一行"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "两条端点的入参与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "两张表、两条端点、typed client、列表页、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/settlement/list.ts",
+              "services/api/src/settlement/summary.ts",
+              "apps/web/src/pages/SettlementList.tsx",
+              "apps/web/src/api/settlements.ts",
+              "services/api/src/settlement/list.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-022",
+          "title": "商户可选择结算币种、收款地址与可结算发票",
+          "role": "fullstack",
+          "description": "GET /api/settlements/settleable-invoices + PAGE-009。一次只结算一个 Token，列表只出 paidToken 匹配的发票。",
+          "dependsOn": [
+            "T-021",
+            "T-005"
+          ],
+          "coversRequirementIds": [
+            "PAGE-009",
+            "AC-030"
+          ],
+          "acceptanceCriteria": [
+            "选定结算币种后，可结算发票列表只显示 paidToken 与之匹配的 Received 或 Settlement Failed 发票",
+            "切换币种时已选发票清空并重新拉取列表",
+            "钱包下拉来自 destination 注册表，地址下拉来自所选 destination 的条目",
+            "所选地址的链与所选币种不一致时阻止进入下一步",
+            "所选币种没有可用地址时渲染 settlement-address-empty 且下一步不可用",
+            "没有可结算发票时渲染 settlement-invoice-empty 与返回入口",
+            "未选任何发票时下一步按钮禁用",
+            "已选数量与已选金额随勾选实时更新，金额是所选发票 paid_amount 的全额之和"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "可结算发票端点的入参、分页与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、三级联动、勾选表格、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/settlement/settleable.ts",
+              "apps/web/src/pages/SettlementRequest.tsx",
+              "services/api/src/settlement/settleable.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-023",
+          "title": "商户在提交前能看到预估费用",
+          "role": "fullstack",
+          "description": "POST /api/settlements/estimate + PAGE-010 的展示部分。该端点无副作用、不创建记录、不带幂等键。",
+          "dependsOn": [
+            "T-022"
+          ],
+          "coversRequirementIds": [
+            "PAGE-010",
+            "AC-031",
+            "Q-070"
+          ],
+          "acceptanceCriteria": [
+            "进入确认页时调用预估端点，渲染发票数量、总金额、预估费用与费用说明",
+            "预估费用取自端点响应，前端不做任何费率计算",
+            "结算总金额是所选发票的全额之和、2 位小数，不减手续费",
+            "Invoice 服务费恒为 0，总预估费只等于 Cobo 返回的费用",
+            "重复调用预估端点不创建任何记录、不改变任何发票状态",
+            "未选钱包地址时确认按钮禁用"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST estimate 的请求、响应形状与无副作用语义"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、转调 Cobo 费用预估、确认页展示、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/settlement/estimate.ts",
+              "apps/web/src/pages/SettlementConfirm.tsx",
+              "services/api/src/cobo/fees.ts",
+              "services/api/src/settlement/estimate.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-024",
+          "title": "商户可提交结算申请",
+          "role": "fullstack",
+          "description": "POST /api/settlements + payout 提交。幂等键 + 乐观锁剔除被占用的发票，不整单失败。",
+          "dependsOn": [
+            "T-023"
+          ],
+          "coversRequirementIds": [
+            "PAGE-010",
+            "AC-029",
+            "AC-032",
+            "AC-034"
+          ],
+          "acceptanceCriteria": [
+            "选好币种、地址与至少一张发票后确认，创建 In Progress 的结算请求，所选发票进入 Settling 并显示成功提示",
+            "提交时对每张发票做条件更新，只有处于 Received 或 Settlement Failed 才可进 Settling",
+            "已被其他请求占用的发票被剔除，剩余发票照常提交，被剔除的发票在页面上渲染出来告知商户",
+            "提交给 Cobo 的 payout 金额是全额、2 位小数，不减手续费",
+            "结算接口超时（120 秒）时不创建重复请求、保留选择并显示失败提示",
+            "重复点击携带同一幂等键时不产生第二个结算请求；同键不同体返回 409",
+            "外部调用不做自动重试"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST settlements 的幂等键、剔除字段与失败形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、幂等占位、乐观锁、payout 提交、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/settlement/create.ts",
+              "services/api/src/cobo/payout.ts",
+              "services/api/src/settlement/create.test.ts"
+            ],
+            "modifies": [
+              "apps/web/src/pages/SettlementConfirm.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-025",
+          "title": "商户可查看结算详情与关联发票结果",
+          "role": "fullstack",
+          "description": "GET /api/settlements/:requestId + PAGE-011。Cobo 结算单号在本页展示，回调写入前显示占位。",
+          "dependsOn": [
+            "T-024"
+          ],
+          "coversRequirementIds": [
+            "PAGE-011"
+          ],
+          "acceptanceCriteria": [
+            "详情页渲染结算单号、创建时间、金额、地址与状态",
+            "Cobo 结算单号可复制；回调写入前显示占位而不是空白",
+            "关联发票分页展示，可按单号搜索与按结算结果过滤",
+            "成功与失败的发票都列出，失败的可在下一次结算中重新选中",
+            "跨组织请求他人结算单时返回 404"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET 详情的响应与关联发票分页形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、详情页、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/settlement/detail.ts",
+              "apps/web/src/pages/SettlementDetail.tsx",
+              "services/api/src/settlement/detail.test.ts"
+            ],
+            "modifies": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "dashboard",
+      "name": "Dashboard 指标",
+      "tasks": [
+        {
+          "id": "T-026",
+          "title": "商户可查看已发送发票的每日堆叠金额",
+          "role": "fullstack",
+          "description": "GET /api/dashboard/invoice-sent + 图表。日期范围最多 15 天，上限在服务端强制；图表旁配数字表作为文本替代。",
+          "dependsOn": [
+            "T-010"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001",
+            "AC-025",
+            "AC-026"
+          ],
+          "acceptanceCriteria": [
+            "选择 15 天以内的日期范围时，柱图按日展示已发送金额并按 Pending / Received / Settled / Error / Other 堆叠",
+            "选择超过 15 天时渲染提示且不请求数据；绕过前端直接调端点同样被拒",
+            "计入的是除 Draft 与 Sending 之外的全部状态，按发送时间所在的 UTC 日期归日",
+            "历史柱子不因发票后续状态变化而回退",
+            "金额按 USD 展示，页面上不存在任何汇率或法币折算",
+            "图表旁渲染 chart-invoice-sent-table 作为文本替代"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET invoice-sent 的入参、上限与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、15 天上限、图表、数字表、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/dashboard/invoiceSent.ts",
+              "apps/web/src/pages/Dashboard.tsx",
+              "apps/web/src/components/InvoiceSentChart.tsx",
+              "services/api/src/dashboard/invoiceSent.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-027",
+          "title": "商户可查看未收、按币已收与最近一次收款",
+          "role": "fullstack",
+          "description": "实现 GET /api/dashboard/unreceived、GET /api/dashboard/received-by-token、GET /api/dashboard/last-received 三条端点与对应的三个面板，含整页空态。",
+          "dependsOn": [
+            "T-026"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001",
+            "AC-027",
+            "AC-028"
+          ],
+          "acceptanceCriteria": [
+            "未收面板按 Not Due 与 Overdue 拆分，范围可切换 30 / 90 / 120 天与全部，默认 30 天",
+            "按币已收面板按所选年月统计，金额来自 paid_token 与 paid_amount 而不是报价",
+            "最近一次收款面板展示金额、付款方与日期",
+            "四个指标都没有数据时渲染整页空态与创建发票引导，而不是四个空框",
+            "四个指标各自独立请求、各自独立的加载态，一个失败不影响其余三个",
+            "付款方或无会话直接访问该路由时渲染 no-permission-page 且不加载数据"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET /api/dashboard/unreceived、GET /api/dashboard/received-by-token、GET /api/dashboard/last-received 的入参与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "三条端点、三个面板、空态、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/dashboard/unreceived.ts",
+              "services/api/src/dashboard/receivedByToken.ts",
+              "services/api/src/dashboard/lastReceived.ts",
+              "services/api/src/dashboard/unreceived.test.ts"
+            ],
+            "modifies": [
+              "apps/web/src/pages/Dashboard.tsx"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "payer",
+      "name": "付款方发票页",
+      "tasks": [
+        {
+          "id": "T-028",
+          "title": "付款方可通过邮件链接查看发票",
+          "role": "fullstack",
+          "description": "GET /api/pay/:token + PAGE-013。token 不可枚举且不设过期；页面没有币种选择器。",
+          "dependsOn": [
+            "T-015"
+          ],
+          "coversRequirementIds": [
+            "PAGE-013",
+            "AC-021",
+            "AC-022"
+          ],
+          "acceptanceCriteria": [
+            "通过链接打开 Pending 且未逾期的发票，页面渲染商户信息、明细与四个汇总值",
+            "发票逾期时页面只读、隐藏付款按钮并说明已逾期且提示联系商户",
+            "发票为 Received 或 Settled 时页面只读、隐藏付款按钮并说明已付款",
+            "其余非可付款状态各自给出对应说明",
+            "页面不渲染任何商户端导航，也不渲染币种选择器",
+            "token 至少 128 bit 熵且不可由发票号推导；该端点已按契约接上限流",
+            "用不存在或被篡改的 token 访问时返回 404，不泄露该发票是否存在"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET /api/pay/:token 的响应形状与只读语义"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "token 生成、端点、限流、付款方页、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/payer/detail.ts",
+              "services/api/src/payer/token.ts",
+              "apps/web/src/pages/PayerInvoice.tsx",
+              "services/api/src/payer/detail.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-029",
+          "title": "付款方可发起支付并在回跳后看到结果",
+          "role": "fullstack",
+          "description": "Pay Now 跳转 Cobo 托管页，完成后回跳本页重新拉状态。不自建支付结果页。",
+          "dependsOn": [
+            "T-028",
+            "T-013"
+          ],
+          "coversRequirementIds": [
+            "PAGE-013",
+            "AC-020",
+            "AC-023",
+            "AC-024"
+          ],
+          "acceptanceCriteria": [
+            "发票 Pending 且未逾期时渲染付款按钮，点击后跳转 Cobo 托管支付页",
+            "支付成功回跳后页面重新拉取发票，状态显示为 Received 且付款按钮消失",
+            "支付失败、取消、超时三种情形回跳后各自渲染一条横幅，发票仍为 Pending 且可原地重试",
+            "Cobo 不可用时渲染失败或超时状态并提供重试与联系商户的出路",
+            "付款回调已处理后再次刷新页面，发票仍为 Received，付款按钮仍然隐藏"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "跳转、回跳参数解析、结果横幅、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "apps/web/src/components/PayerResultBanner.tsx",
+              "apps/web/src/payer/redirect.ts"
+            ],
+            "modifies": [
+              "apps/web/src/pages/PayerInvoice.tsx"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "webhook",
+      "name": "外部回调入口",
+      "tasks": [
+        {
+          "id": "T-030",
+          "title": "Cobo Portal 安装回调建立组织记录",
+          "role": "backend",
+          "description": "POST /api/webhooks/portal-install。首次安装与更新设置两种结果都要处理。",
+          "dependsOn": [
+            "T-004"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001"
+          ],
+          "acceptanceCriteria": [
+            "收到安装回调后换取 org access token 并落一条 organization 记录，含名称与 Logo",
+            "更新设置的回调不重复创建记录，只刷新名称与 Logo",
+            "重复投递同一个组织的安装回调不产生第二条记录",
+            "端点是公开写端点，已按契约接上限流",
+            "响应体不含任何凭据或内部错误信息"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST portal-install 的请求与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点、换取 token、组织落库、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/webhook/portalInstall.ts",
+              "services/api/src/webhook/portalInstall.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-031",
+          "title": "Cobo 回调验签与事件去重",
+          "role": "backend",
+          "description": "POST /api/webhooks/cobo 的公共入口：先按原始字节验签，再按事件 id 去重。处理逻辑必须与事件顺序无关。",
+          "dependsOn": [
+            "T-001"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001"
+          ],
+          "acceptanceCriteria": [
+            "验签取的是原始请求体字节，不经过反序列化再序列化",
+            "下划线与连字符两种拼法的签名头与时间戳头都能读到",
+            "按环境使用对应的 Cobo 公钥验签，验签失败返回错误且不进入任何业务处理",
+            "事件 id 落库唯一索引；重复投递的同一事件只生效一次并直接返回成功",
+            "端点是公开写端点，已按契约接上限流，且限流阈值不低于 Cobo 的重试突发量",
+            "响应体不回显任何来自 Cobo 的原始内容"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "原始字节读取、Ed25519 验签、事件表去重、分发骨架、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/webhook/verify.ts",
+              "services/api/src/webhook/cobo.ts",
+              "services/api/src/webhook/events.ts",
+              "services/api/src/webhook/verify.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-032",
+          "title": "付款回调推进发票状态并识别多付",
+          "role": "backend",
+          "description": "收到订单状态事件后拉单比对实收与应付：相等置 Received，大于置 Error。多付在 Cobo 侧同样落 Completed，无法由状态识别。",
+          "dependsOn": [
+            "T-031",
+            "T-013"
+          ],
+          "coversRequirementIds": [
+            "PAGE-003"
+          ],
+          "acceptanceCriteria": [
+            "收到订单状态事件后拉取订单信息，比对实收金额与应付金额",
+            "两者相等时发票置 Received 并写入 paid_token 与 paid_amount",
+            "实收大于应付时发票置 Error 并记录原因，不置 Received",
+            "Cobo 判定少付时发票置 Error",
+            "首个订单状态事件带回的 order_id 补写进发票；此前靠发票号反查",
+            "迟付事件只记录流水并通知商户，不改变发票状态",
+            "同一事件重复投递或乱序到达时，发票不会被推进两次或回退"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "事件处理、拉单比对、状态推进、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/webhook/payment.ts",
+              "services/api/src/cobo/payinOrder.ts",
+              "services/api/src/webhook/payment.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-033",
+          "title": "结算回调推进结算请求与关联发票",
+          "role": "backend",
+          "description": "payout 回调的终局只有两种：全部成功或全部失败。没有部分成功。",
+          "dependsOn": [
+            "T-031",
+            "T-024"
+          ],
+          "coversRequirementIds": [
+            "AC-033"
+          ],
+          "acceptanceCriteria": [
+            "payout 回调为完成时，结算请求置 Success 且所有关联发票置 Settled",
+            "payout 回调为失败时，结算请求置 Failed 且所有关联发票置 Settlement Failed",
+            "没有任何代码路径能产生 Partial Success，该状态在枚举里不存在",
+            "回调靠我方 request_id 关联到结算请求，Cobo 不参与这层关联",
+            "Cobo 的结算单号在回调时补写进结算请求",
+            "同一回调重复投递或乱序到达时，结算与发票状态不会被推进两次",
+            "商户收到结算结果邮件通知"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "事件处理、结算与发票状态广播、邮件通知、聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "services/api/src/webhook/settlement.ts",
+              "services/api/src/webhook/settlement.test.ts"
+            ],
+            "modifies": []
+          }
+        }
+      ]
+    }
+  ]
+}

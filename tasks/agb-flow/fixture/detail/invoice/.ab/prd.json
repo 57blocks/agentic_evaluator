@@ -1,0 +1,1098 @@
+{
+  "meta": {
+    "title": "Cobo Invoice 发票收款与结算平台",
+    "tier": "L",
+    "mode": "normalized",
+    "sourceDoc": "docs/PRD.md",
+    "note": "归一化产物。页面与状态机按 docs/PRD.md 原文抽取，未发明需求；routes 由 Q-014 裁定的挂载前缀 /apps/invoice/* 与 docs/prototype.html 的 data-bp-view 视图名机械推导。未决项见 .ab/questions.json（Q-001–Q-056）。 2026-09-09 二次同步：已并入 Q-053–Q-059 六条裁决（结算改按 payout、金额精度改 2 位、删除 Partial Success、收款改用 Create order link、地址源改 destination、merchant_id 带外配置）。",
+    "coboConfig": {
+      "merchant_id": "5",
+      "app_id": "invoice",
+      "apiBase": {
+        "dev": "https://api.dev.cobo.com/v2",
+        "prod": "https://api.cobo.com/v2"
+      },
+      "source": "Q-058 / Q-048"
+    }
+  },
+  "pages": [
+    {
+      "id": "PAGE-001",
+      "name": "Dashboard",
+      "route": "/apps/invoice/dashboard",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Sidebar: 248px 固定左侧栏，Dashboard / Client / Invoice / Settlement 四项（Q-036）",
+        "Header: 页面标题 + 日期范围筛选",
+        "Body: Invoice Sent 堆叠柱状图、Unreceived、Received Invoice、Last Received 四块指标"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-001",
+          "name": "日期范围选择器",
+          "interaction": "选择起止日期",
+          "effect": "刷新 Invoice Sent 图表；超过 15 天时提示 `You cannot select a date range longer than 15 days.`"
+        },
+        {
+          "id": "IC-002",
+          "name": "未收范围切换",
+          "interaction": "选择 Last 30 / 90 / 120 days / All",
+          "effect": "刷新 Unreceived 指标"
+        },
+        {
+          "id": "IC-003",
+          "name": "月份选择器",
+          "interaction": "选择年月",
+          "effect": "刷新 Received Invoice by Token"
+        },
+        {
+          "id": "IC-004",
+          "name": "侧栏导航 Invoice",
+          "interaction": "点击",
+          "effect": "进入 Invoice List（/apps/invoice/invoices）"
+        },
+        {
+          "id": "IC-005",
+          "name": "侧栏导航 Client",
+          "interaction": "点击",
+          "effect": "进入 Client List（/apps/invoice/clients）"
+        },
+        {
+          "id": "IC-006",
+          "name": "侧栏导航 Settlement",
+          "interaction": "点击",
+          "effect": "进入 Settlement List（/apps/invoice/settlements）"
+        }
+      ],
+      "staticElements": [
+        "Invoice Sent 每日金额（按 Pending / Received / Settled / Error / Other 堆叠，Other = Overdue + Settling + Settlement Failed + Voiding + Voided，Q-046）",
+        "Unreceived 金额（Overdue 与 Not Due 拆分）",
+        "Received Invoice by Token 金额",
+        "Last Received 的金额、付款方与日期",
+        "图表旁的数字表（无障碍文本替代，Q-036）"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "populated"
+      ],
+      "isEntry": true,
+      "notes": "登录后默认落地页。稳定币按 1:1 计价，无法币折算；日期切分按 UTC（Q-016）。P0 不支持指标钻取（Q-038）。"
+    },
+    {
+      "id": "PAGE-002",
+      "name": "Client List",
+      "route": "/apps/invoice/clients",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 标题 + Add Client",
+        "Toolbar: 搜索与过滤",
+        "Body: 客户表格 + 分页器"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-007",
+          "name": "Add Client",
+          "interaction": "点击",
+          "effect": "打开 Add/Edit Client 弹窗（本页内，无独立路由）"
+        },
+        {
+          "id": "IC-008",
+          "name": "Edit",
+          "interaction": "点击行内 Action",
+          "effect": "打开 Add/Edit Client 弹窗并填充该客户"
+        },
+        {
+          "id": "IC-009",
+          "name": "Freeze / Unfreeze",
+          "interaction": "点击行内 Action 并确认",
+          "effect": "切换客户 Active / Frozen 状态"
+        },
+        {
+          "id": "IC-010",
+          "name": "搜索与过滤",
+          "interaction": "输入 Email 或 Name；选择 Type / Status",
+          "effect": "过滤表格"
+        },
+        {
+          "id": "IC-011",
+          "name": "分页器",
+          "interaction": "翻页",
+          "effect": "加载下一页，每页 20 条（Q-028）"
+        }
+      ],
+      "staticElements": [
+        "Create Time",
+        "Client Name",
+        "Client Type",
+        "Email Address",
+        "Status",
+        "Action"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "populated"
+      ],
+      "notes": "整行不可点，只有 Action 列可点（Q-030）。无 Client 详情页（Q-012）。空态文案 `There are no client records yet. Add a client to create invoices faster.`（Q-031）。"
+    },
+    {
+      "id": "PAGE-003",
+      "name": "Invoice List",
+      "route": "/apps/invoice/invoices",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 标题 + Create New Invoice",
+        "Toolbar: 状态计数、搜索、过滤",
+        "Body: 发票表格 + 分页器"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-012",
+          "name": "Create New Invoice",
+          "interaction": "点击",
+          "effect": "进入 Create Invoice Page（/apps/invoice/invoices/new）"
+        },
+        {
+          "id": "IC-013",
+          "name": "View Detail",
+          "interaction": "点击行内 Action",
+          "effect": "进入 Invoice Detail Page（/apps/invoice/invoices/:invoiceId）"
+        },
+        {
+          "id": "IC-014",
+          "name": "Edit",
+          "interaction": "点击行内 Action（仅 Draft 可用）",
+          "effect": "进入 Edit Draft Invoice Page（/apps/invoice/invoices/:invoiceId/edit）"
+        },
+        {
+          "id": "IC-015",
+          "name": "Duplicate",
+          "interaction": "点击行内 Action",
+          "effect": "进入 Duplicate Invoice Page（/apps/invoice/invoices/:invoiceId/duplicate）；除 Settling 外均可用（Q-034）"
+        },
+        {
+          "id": "IC-016",
+          "name": "Void",
+          "interaction": "点击行内 Action（Pending 与 Overdue 可用）并填写 3–500 字原因",
+          "effect": "打开作废弹窗，提交后发票进入 Voiding"
+        },
+        {
+          "id": "IC-017",
+          "name": "Send Reminder",
+          "interaction": "点击行内 Action（仅 Pending / Overdue 可用，Q-033）",
+          "effect": "以 mailto 打开本机邮件客户端；打不开时弹出可复制的内容面板"
+        },
+        {
+          "id": "IC-018",
+          "name": "搜索与过滤",
+          "interaction": "输入 Client Name 或 Category；选择 Invoice Type / Token / Creation Time / Status",
+          "effect": "过滤表格"
+        },
+        {
+          "id": "IC-019",
+          "name": "分页器",
+          "interaction": "翻页",
+          "effect": "加载下一页，每页 20 条"
+        }
+      ],
+      "staticElements": [
+        "Creation Time",
+        "Invoice ID",
+        "Client Name",
+        "Invoice Type",
+        "Amount",
+        "Status",
+        "Action",
+        "各状态数量计数"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "populated"
+      ],
+      "notes": "空态文案 `There are no invoice records yet.`（原文已确定）。Invoice Type = Recurring 的过滤是找到 Recurring Series 的唯一入口（Q-013）。"
+    },
+    {
+      "id": "PAGE-004",
+      "name": "Create Invoice Page",
+      "route": "/apps/invoice/invoices/new",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 标题 + Save Draft / Create&Send",
+        "Body: 基本信息、Client、CC、Token、Item 表格、统计、Category、Memo、Recurring"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-051",
+          "name": "Client 选择器",
+          "interaction": "输入关键字筛选并从候选中选择",
+          "effect": "向服务端按 status=Active + 关键字搜索（每页 20），选中后回填客户。是可搜索 combobox 而不是下拉，客户超过 20 个时仍选得到（Q-071）"
+        },
+        {
+          "id": "IC-020",
+          "name": "Save Draft",
+          "interaction": "点击",
+          "effect": "保存为 Draft 并返回 Invoice List（/apps/invoice/invoices）"
+        },
+        {
+          "id": "IC-021",
+          "name": "Create&Send",
+          "interaction": "点击",
+          "effect": "发票进入 Sending，生成支付链接并发信；成功后为 Pending，返回 Invoice List"
+        },
+        {
+          "id": "IC-022",
+          "name": "Add Item",
+          "interaction": "点击",
+          "effect": "新增一行 item；达到 50 行上限时置灰（Q-035）"
+        },
+        {
+          "id": "IC-023",
+          "name": "Add Client",
+          "interaction": "点击",
+          "effect": "打开 Add/Edit Client 弹窗，保存后回填到本表单"
+        },
+        {
+          "id": "IC-024",
+          "name": "Add CC",
+          "interaction": "点击",
+          "effect": "打开 CC 弹窗；最多 3 个，达上限置灰"
+        },
+        {
+          "id": "IC-025",
+          "name": "Recurring 开关",
+          "interaction": "打开并选择频率与结束条件",
+          "effect": "保存时一并创建 Recurring Series"
+        },
+        {
+          "id": "IC-026",
+          "name": "离开确认",
+          "interaction": "表单已修改时点返回或离开",
+          "effect": "弹「未保存变更」确认，提供离开 / 继续编辑（Q-029）"
+        }
+      ],
+      "staticElements": [
+        "Invoice ID",
+        "From",
+        "Issue Date",
+        "Due Date",
+        "统计区（Amount without tax / Total Tax / Discount / Total amount）"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "populated"
+      ],
+      "notes": "新发票默认 Draft，Issue Date 为当前日期，Due Date 为 30 天后。金额一律 2 位小数（Q-057 修正 Q-020），且为标量 USD、无按币定价（Q-063）。Due ≡ total_amount 且须 >= 1（Q-009）。"
+    },
+    {
+      "id": "PAGE-005",
+      "name": "Edit Draft Invoice Page",
+      "route": "/apps/invoice/invoices/:invoiceId/edit",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 标题 + Draft 状态标签 + 操作区",
+        "Body: 同创建页字段，填充当前 Draft 数据"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-027",
+          "name": "Save Draft",
+          "interaction": "点击",
+          "effect": "保存修改并返回 Invoice List（/apps/invoice/invoices）"
+        },
+        {
+          "id": "IC-028",
+          "name": "Create&Send",
+          "interaction": "点击",
+          "effect": "发票进入 Sending，成功后为 Pending"
+        },
+        {
+          "id": "IC-029",
+          "name": "Delete",
+          "interaction": "点击并确认 `Are you sure you want to delete this draft invoice?`",
+          "effect": "硬删除该 Draft，不可恢复，返回 Invoice List（Q-024）"
+        }
+      ],
+      "staticElements": [
+        "Draft 状态标签",
+        "Invoice ID",
+        "当前字段值"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "populated"
+      ],
+      "notes": "仅 Draft 可进入；非 Draft 的 Edit 图标置灰。"
+    },
+    {
+      "id": "PAGE-006",
+      "name": "Duplicate Invoice Page",
+      "route": "/apps/invoice/invoices/:invoiceId/duplicate",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 标题 + Save Draft / Create&Send",
+        "Body: 同创建页，复制原发票内容"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-030",
+          "name": "Save Draft",
+          "interaction": "点击",
+          "effect": "以新 Invoice ID 保存为 Draft 并返回 Invoice List（/apps/invoice/invoices）"
+        },
+        {
+          "id": "IC-031",
+          "name": "Create&Send",
+          "interaction": "点击",
+          "effect": "新发票进入 Sending"
+        }
+      ],
+      "staticElements": [
+        "新 Invoice ID",
+        "复制自原发票的字段值"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "populated"
+      ],
+      "notes": "新 Invoice ID，Issue Date 为当前日期，Due Date 为 30 天后。来源发票除 Settling 外均可复制（Q-034）。"
+    },
+    {
+      "id": "PAGE-007",
+      "name": "Invoice Detail Page",
+      "route": "/apps/invoice/invoices/:invoiceId",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 发票号 + 状态标签 + 操作区",
+        "Body: 基本信息、Token、Item、统计、备注",
+        "Aside: 周期信息（仅 Recurring）"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-032",
+          "name": "Send Reminder",
+          "interaction": "点击（仅 Pending / Overdue）",
+          "effect": "以 mailto 打开本机邮件客户端"
+        },
+        {
+          "id": "IC-033",
+          "name": "Duplicate",
+          "interaction": "点击",
+          "effect": "进入 Duplicate Invoice Page（/apps/invoice/invoices/:invoiceId/duplicate）"
+        },
+        {
+          "id": "IC-034",
+          "name": "Discontinue recurring",
+          "interaction": "点击并确认 `Yes,I want to stop it.`",
+          "effect": "Recurring Series 转为 Discontinued，停止后续生成"
+        },
+        {
+          "id": "IC-035",
+          "name": "返回",
+          "interaction": "点击",
+          "effect": "回到 Invoice List（/apps/invoice/invoices）并保留筛选条件"
+        }
+      ],
+      "staticElements": [
+        "Invoice ID",
+        "Status",
+        "From",
+        "Issue Date",
+        "Due Date",
+        "Send Time",
+        "Client",
+        "CC Recipient",
+        "Payment Token",
+        "Items",
+        "Overall Discount",
+        "Amount without tax",
+        "Total Tax amount",
+        "Discount",
+        "Total amount",
+        "Category",
+        "Memo",
+        "周期信息（频率、下次发送日期）"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "populated"
+      ],
+      "notes": "send_time 展示，update_time 与 series_id 不展示（Q-039）。空字段整块隐藏、加载用骨架屏（Q-044）。不展示结算信息（Q-027）。"
+    },
+    {
+      "id": "PAGE-008",
+      "name": "Settlement List",
+      "route": "/apps/invoice/settlements",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 标题 + Request Settlement",
+        "Summary: Last Settled Amount、Total Settlement Pending",
+        "Body: 结算表格 + 分页器"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-036",
+          "name": "Request Settlement",
+          "interaction": "点击",
+          "effect": "进入 Settlement Request Page（/apps/invoice/settlements/new）"
+        },
+        {
+          "id": "IC-037",
+          "name": "View Detail",
+          "interaction": "点击行内 Action",
+          "effect": "进入 Settlement Detail Page（/apps/invoice/settlements/:requestId）"
+        },
+        {
+          "id": "IC-038",
+          "name": "搜索与过滤",
+          "interaction": "输入 Settlement Request ID；选择 Token / Status / Create Time",
+          "effect": "过滤表格"
+        },
+        {
+          "id": "IC-039",
+          "name": "分页器",
+          "interaction": "翻页",
+          "effect": "加载下一页，每页 20 条"
+        }
+      ],
+      "staticElements": [
+        "Create Time",
+        "Settlement Request ID",
+        "Amount",
+        "Status",
+        "Action",
+        "Last Settled Amount",
+        "Total Settlement Pending"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "populated"
+      ],
+      "notes": "空态文案 `There are no settlement records yet.`（Q-031）。默认按 Create Time 倒序（Q-028）。整个结算模型待 Q-053 裁决（Cobo 的 settlement 接口已废弃，指向 payout）。"
+    },
+    {
+      "id": "PAGE-009",
+      "name": "Settlement Request Page",
+      "route": "/apps/invoice/settlements/new",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 标题",
+        "Form: Token、Wallet、Wallet Address",
+        "Body: 可结算发票选择表格"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-040",
+          "name": "Token 选择",
+          "interaction": "选择结算币种",
+          "effect": "过滤发票表格，只显示 paid_token 匹配的发票（Q-021）"
+        },
+        {
+          "id": "IC-041",
+          "name": "Destination / Address 选择",
+          "interaction": "选择钱包与地址",
+          "effect": "Wallet 下拉读 list-all-destinations，Address 下拉读 list-destination-entries（Q-059）；需校对 entry 的 chain_id 与所选 token 的链一致；无可用项时提示 `No wallet address available for the selected token.`"
+        },
+        {
+          "id": "IC-042",
+          "name": "发票勾选",
+          "interaction": "勾选一张或多张 Received / Settlement Failed 发票",
+          "effect": "累计选中数量与金额；未选时 Settlement 按钮置灰"
+        },
+        {
+          "id": "IC-043",
+          "name": "Settlement",
+          "interaction": "点击",
+          "effect": "进入 Settlement Confirmation Page（/apps/invoice/settlements/new/confirm）"
+        }
+      ],
+      "staticElements": [
+        "可结算发票列表",
+        "已选数量与合计金额"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "populated"
+      ],
+      "notes": "空态文案 `There are no invoices available for settlement.`（Q-031）。不做高级过滤（Q-045）。 地址只读，注册与审批在 Cobo Portal 带外完成，本应用不接 create-destination（Q-059）。"
+    },
+    {
+      "id": "PAGE-010",
+      "name": "Settlement Confirmation Page",
+      "route": "/apps/invoice/settlements/new/confirm",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: 标题",
+        "Body: 发票数量、总金额、预估费用、费用说明",
+        "Footer: Confirm"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-052",
+          "name": "进入确认页",
+          "interaction": "从 Settlement Request Page 进入",
+          "effect": "调用提交前预估端点，渲染发票数量、总金额、预估费用与费用说明；费用取自后端返回值，前端不自算（Q-070 / Q-026）"
+        },
+        {
+          "id": "IC-044",
+          "name": "Confirm",
+          "interaction": "点击（已选 Token、Wallet Address 与至少 1 张发票时可用）",
+          "effect": "创建 Settlement Request 进入 In Progress，选中发票转 Settling，返回 Settlement List（/apps/invoice/settlements）"
+        },
+        {
+          "id": "IC-045",
+          "name": "返回",
+          "interaction": "点击",
+          "effect": "回到 Settlement Request Page（/apps/invoice/settlements/new）并保留选择"
+        }
+      ],
+      "staticElements": [
+        "发票数量",
+        "总金额",
+        "Cobo Pay 预估费用",
+        "Invoice 服务费（MVP 恒为 0，Q-026）",
+        "总预估费用",
+        "费用说明"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "populated"
+      ],
+      "notes": "提交带幂等键，重复点击不重复创建；服务端按状态前置条件剔除已被占用的发票并告知（Q-050）。不做明细展开（Q-045）。 【Q-053】提交后发一笔 payout 覆盖全部所选发票，request_id = 本 Settlement Request ID；结果只有整笔成功或失败，无部分成功。 【Q-070】预估费用由 POST /api/settlements/estimate 在提交前给出，该端点无副作用、不创建记录。结算金额是所选发票 paid_amount 的全额，不减手续费（Q-064）。"
+    },
+    {
+      "id": "PAGE-011",
+      "name": "Settlement Detail Page",
+      "route": "/apps/invoice/settlements/:requestId",
+      "roles": [
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Header: Request ID + 状态",
+        "Body: 结算基本信息",
+        "Section: 关联发票列表 + 搜索过滤"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-046",
+          "name": "搜索与过滤",
+          "interaction": "输入关键字或选择状态",
+          "effect": "过滤关联发票列表"
+        },
+        {
+          "id": "IC-047",
+          "name": "返回",
+          "interaction": "点击",
+          "effect": "回到 Settlement List（/apps/invoice/settlements）并保留筛选条件"
+        }
+      ],
+      "staticElements": [
+        "Settlement Request ID",
+        "Cobo payout_id（可复制；Q-027 定了展示凭据，Q-053 定了该凭据实为 payout_id）",
+        "Creation Time",
+        "Amount",
+        "Wallet Address",
+        "Status",
+        "关联发票及各自结果"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "populated"
+      ],
+      "notes": "P0 不支持导出（Q-038）。【Q-053】Partial Success 已删除，结算结果只有 Success 或 Failed。"
+    },
+    {
+      "id": "PAGE-012",
+      "name": "No Permission",
+      "route": "/apps/invoice/no-permission",
+      "roles": [
+        "Payer",
+        "Merchant"
+      ],
+      "layoutRegions": [
+        "Body: 无权限提示与返回入口"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-048",
+          "name": "返回",
+          "interaction": "点击",
+          "effect": "Merchant 回到 Dashboard（/apps/invoice/dashboard）；Payer 回到自己的发票链接"
+        }
+      ],
+      "staticElements": [
+        "`You do not have permission to access this page.`（Q-031）"
+      ],
+      "states": [
+        "populated"
+      ],
+      "notes": "直接访问无权页面时展示；商户端导航同时隐藏。未确认的字段与操作对 Payer 一律默认关闭（Q-051）。",
+      "entryMechanism": "非应用内导航：Payer 或无权限用户直接访问商户端任一路由时由路由守卫重定向至此；商户端导航同时隐藏该入口（Q-051）。"
+    },
+    {
+      "id": "PAGE-013",
+      "name": "Payer Invoice Detail",
+      "route": "/apps/invoice/pay/:token",
+      "roles": [
+        "Payer"
+      ],
+      "layoutRegions": [
+        "Header: 商户名与 Logo",
+        "Body: 状态、日期、From、Billed To、Token、Item、统计、Category、Memo",
+        "Footer: Pay Now"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-050",
+          "name": "Pay Now",
+          "interaction": "点击（仅 Pending 且未过期）",
+          "effect": "跳转 Cobo 托管支付页；付款方在该页选择币种与链（Q-056），完成或失败后回跳本页并重新拉取发票状态"
+        }
+      ],
+      "staticElements": [
+        "发票状态说明",
+        "应付金额",
+        "商品明细",
+        "统计",
+        "商户 Logo",
+        "可接受的 Token 清单（仅展示，选择在 Cobo 托管页完成）"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "populated"
+      ],
+      "notes": "匿名访问，链接携带不可枚举的签名 token 且【不设过期】（Q-067 修正 Q-015 的后半）；链接可被转发，Q-043 确认 share URL 是正式入口，因此发票内容对持有链接者永久可读，这一风险已被明确接受。非 Pending 或已过期时只读并隐藏 Pay Now。不展示商户后台导航与结算信息。【Q-056】本页不再提供 Select payment method——币种由付款方在 Cobo 托管页选择，两处都能选会不一致且没人定义以哪个为准。",
+      "openQuestions": [
+        "Q-015"
+      ],
+      "entryMechanism": "非应用内导航：付款方通过发票邮件的 View Details 或商户转发的 share URL 直达，链接携带签名 token（Q-015 / Q-043）。商户端不存在通向本页的导航。"
+    }
+  ],
+  "domain": {
+    "entities": [
+      {
+        "type": "Client",
+        "notes": "client_id、create_time、client_email（唯一）、client_type、client_name（3–100）、status、update_time"
+      },
+      {
+        "type": "Invoice",
+        "notes": "含 Q-008 新增的 paid_token 与 paid_amount（付款回调写入）；Q-056 新增 cobo_order_id（回调后补写，创建时为空）与 psp_order_code = invoice_id；Due ≡ total_amount（Q-009）；invoice_id 用商户号前缀（Q-010）；金额 2 位小数（Q-057）"
+      },
+      {
+        "type": "InvoiceItem",
+        "notes": "每张发票最多 50 行（Q-035）；discount / tax 区间 0 ≤ v < 100（Q-001）；金额 2 位小数（Q-057）。注：Q-016 的稳定币 1:1 使 unit_price_by_token 与 amount_by_token 的各 Token 取值必然相同，两字段实际已退化为标量——是否收敛属数据层化简，留给 arch"
+      },
+      {
+        "type": "CCRecipient",
+        "notes": "每张发票最多 3 个"
+      },
+      {
+        "type": "RecurringSeries",
+        "notes": "end_type 仅 End Date / No End Date 两个值（Q-011）；创建后不可编辑（Q-022）"
+      },
+      {
+        "type": "SettlementRequest",
+        "notes": "Q-053：改按 Cobo payout 实现，一笔 payout 覆盖全部所选发票；新增 payout_id 与 request_id（= 本 ID）；原 settlement_id 语义即 payout_id。一次只结算一个 Token（Q-021）；invoice_service_fee 恒为 0（Q-026）；【Partial Success 状态已删除】"
+      },
+      {
+        "type": "InvoiceStatusLog",
+        "notes": "Q-023 新增：发票、旧状态、新状态、触发方、时间、外部回调参考。P0 不做展示界面"
+      }
+    ],
+    "variables": [
+      {
+        "id": "VAR-01",
+        "name": "发票应付金额下限",
+        "value": "1",
+        "source": "docs/PRD.md §Invoice Validation Error Copy"
+      },
+      {
+        "id": "VAR-02",
+        "name": "单张发票 item 行数上限",
+        "value": "50",
+        "source": "Q-035"
+      },
+      {
+        "id": "VAR-03",
+        "name": "CC 收件人数量上限",
+        "value": "3",
+        "source": "docs/PRD.md §File and External Integration Spec"
+      },
+      {
+        "id": "VAR-04",
+        "name": "折扣与税率区间",
+        "value": "0 ≤ value < 100",
+        "source": "Q-001"
+      },
+      {
+        "id": "VAR-05",
+        "name": "中间态卡住告警阈值",
+        "value": "24 小时",
+        "source": "Q-017"
+      },
+      {
+        "id": "VAR-06",
+        "name": "外部调用超时",
+        "value": "120 秒，不自动重试",
+        "source": "Q-017"
+      },
+      {
+        "id": "VAR-07",
+        "name": "列表每页条数",
+        "value": "20",
+        "source": "Q-028"
+      },
+      {
+        "id": "VAR-08",
+        "name": "金额小数位",
+        "value": "2",
+        "source": "Q-057（修正 Q-020 的 6 位）"
+      },
+      {
+        "id": "VAR-09",
+        "name": "定时生成失败重试次数",
+        "value": "3",
+        "source": "Q-022"
+      },
+      {
+        "id": "VAR-10",
+        "name": "Payer 链接有效期",
+        "value": "不过期（链接只靠不可枚举的签名 token 做访问控制）",
+        "source": "Q-067（修正 Q-015 的后半）"
+      }
+    ],
+    "rules": [
+      {
+        "id": "RULE-01",
+        "name": "应付金额下限校验",
+        "inputVariableId": "VAR-01",
+        "description": "Save Draft 与 Create&Send 两处都校验 Due >= 1，否则提示 `The invoice amount due must be greater than or equal to 1.`"
+      },
+      {
+        "id": "RULE-02",
+        "name": "item 行数上限",
+        "inputVariableId": "VAR-02",
+        "description": "达到上限时 Add Item 按钮置灰"
+      },
+      {
+        "id": "RULE-03",
+        "name": "CC 数量上限",
+        "inputVariableId": "VAR-03",
+        "description": "达到上限时 Add a recipient 按钮置灰"
+      },
+      {
+        "id": "RULE-04",
+        "name": "折扣税率区间校验",
+        "inputVariableId": "VAR-04",
+        "description": "discount / tax / overall_discount 三处一致；错误文案需改为 `must be 0 or larger and less than 100`"
+      },
+      {
+        "id": "RULE-05",
+        "name": "中间态卡住提示",
+        "inputVariableId": "VAR-05",
+        "description": "Sending / Voiding 超过阈值时展示 tooltip 提示联系 super admin；恢复走内部对账接口（Q-049）"
+      },
+      {
+        "id": "RULE-06",
+        "name": "外部调用超时回滚",
+        "inputVariableId": "VAR-06",
+        "description": "超时即按既定路径回滚，不自动重试，由用户再次点击发起"
+      },
+      {
+        "id": "RULE-07",
+        "name": "列表分页",
+        "inputVariableId": "VAR-07",
+        "description": "三个列表统一翻页式分页，后端按 offset"
+      },
+      {
+        "id": "RULE-08",
+        "name": "金额精度",
+        "inputVariableId": "VAR-08",
+        "description": "存储与展示统一 2 位小数；中间计算用高精度，仅最终金额舍入。上限来自 Cobo payout 的 amount 最多两位非零小数且超出即报错（Q-057）。"
+      },
+      {
+        "id": "RULE-09",
+        "name": "周期生成幂等与重试",
+        "inputVariableId": "VAR-09",
+        "description": "以 (series_id, 应发送日期) 为幂等键，同期只生成一张；失败重试 3 次后跳过本期并通知商户"
+      },
+      {
+        "id": "RULE-10",
+        "name": "Payer 链接鉴权",
+        "inputVariableId": "VAR-10",
+        "description": "链接携带不可枚举的签名 token，不设过期时间（Q-067 修正 Q-015 的后半）。撤销路径靠业务状态：发票 Void 之后页面只读。非 Pending 或已逾期时页面只读并隐藏 Pay Now（EH007）。"
+      }
+    ],
+    "workflows": [
+      {
+        "id": "WF-01",
+        "entity": "Invoice",
+        "initial": "Draft",
+        "states": [
+          "Draft",
+          "Sending",
+          "Pending",
+          "Received",
+          "Voiding",
+          "Voided",
+          "Settling",
+          "Settled",
+          "Settlement Failed",
+          "Overdue",
+          "Error"
+        ],
+        "terminalStates": [
+          "Voided",
+          "Error"
+        ],
+        "transitions": [
+          {
+            "from": "Draft",
+            "to": "Draft",
+            "action": "Save Draft（校验通过且 Client Active）",
+            "actor": "Merchant"
+          },
+          {
+            "from": "Draft",
+            "to": "Sending",
+            "action": "Create&Send（校验通过、Client Active、幂等）",
+            "actor": "Merchant"
+          },
+          {
+            "from": "Sending",
+            "to": "Pending",
+            "action": "支付链接生成且邮件发送成功",
+            "actor": "System"
+          },
+          {
+            "from": "Sending",
+            "to": "Draft",
+            "action": "链接或邮件失败/超时回滚（先撤销已生成的支付链接，Q-006）",
+            "actor": "System"
+          },
+          {
+            "from": "Pending",
+            "to": "Received",
+            "action": "Cobo Pay 付款成功回调（写入 paid_token / paid_amount）",
+            "actor": "System"
+          },
+          {
+            "from": "Pending",
+            "to": "Overdue",
+            "action": "Due Date 到期未付款（按 UTC 判定）",
+            "actor": "System"
+          },
+          {
+            "from": "Pending",
+            "to": "Voiding",
+            "action": "Void invoice（填写 3–500 字原因）",
+            "actor": "Merchant"
+          },
+          {
+            "from": "Overdue",
+            "to": "Voiding",
+            "action": "Void invoice（Q-005 新增）",
+            "actor": "Merchant"
+          },
+          {
+            "from": "Voiding",
+            "to": "Voided",
+            "action": "取消支付链接回调成功",
+            "actor": "System"
+          },
+          {
+            "from": "Voiding",
+            "to": "Pending",
+            "action": "取消失败回滚，保留原因并可重试",
+            "actor": "System"
+          },
+          {
+            "from": "Received",
+            "to": "Settling",
+            "action": "提交结算申请",
+            "actor": "Merchant"
+          },
+          {
+            "from": "Settlement Failed",
+            "to": "Settling",
+            "action": "重新提交结算",
+            "actor": "Merchant"
+          },
+          {
+            "from": "Settling",
+            "to": "Settled",
+            "action": "结算成功回调",
+            "actor": "System"
+          },
+          {
+            "from": "Settling",
+            "to": "Settlement Failed",
+            "action": "结算失败回调",
+            "actor": "System"
+          },
+          {
+            "from": "Pending",
+            "to": "Error",
+            "action": "支付异常回调（多付/少付/误付）",
+            "actor": "System"
+          },
+          {
+            "from": "Received",
+            "to": "Error",
+            "action": "支付异常回调",
+            "actor": "System"
+          },
+          {
+            "from": "Settling",
+            "to": "Error",
+            "action": "支付异常回调",
+            "actor": "System"
+          },
+          {
+            "from": "Settled",
+            "to": "Error",
+            "action": "支付异常回调（Q-003：保留此转移，Settled 因此为非终态）",
+            "actor": "System"
+          },
+          {
+            "from": "Overdue",
+            "to": "Error",
+            "action": "支付异常回调",
+            "actor": "System"
+          }
+        ],
+        "notes": "Q-004 裁定 Error 为终态；Q-003 裁定 Settled 为非终态并保留 Settled → Error。Sending / Voiding 的 24h 自环告警不是状态转移，见 RULE-05。多付在 Cobo 侧落 Completed、迟付另有 payment.transaction.late 事件，两者与本状态机的接法待 Q-054 / Q-055。 【Q-054】多付在 Cobo 侧同样落 Completed，无法由状态识别：收到 payment.order.status.updated 后须拉 Get pay-in order information，比对 received_token_amount 与 payable_amount，相等置 Received、大于置 Error。amount_tolerance = 0。【Q-055】过期后到账不入商户账户，payment.transaction.late 仅记流水并通知商户，不改发票状态。"
+      },
+      {
+        "id": "WF-02",
+        "entity": "Client",
+        "initial": "Active",
+        "states": [
+          "Active",
+          "Frozen"
+        ],
+        "terminalStates": [],
+        "transitions": [
+          {
+            "from": "Active",
+            "to": "Frozen",
+            "action": "Freeze（无 Sending / Pending / Received / Voiding / Settling / Settlement Failed / Overdue 发票，Q-007）",
+            "actor": "Merchant"
+          },
+          {
+            "from": "Frozen",
+            "to": "Active",
+            "action": "Unfreeze",
+            "actor": "Merchant"
+          }
+        ],
+        "notes": "【已知会触发「至少一个终态」检查报红】：P0 不提供删除客户功能，Active 与 Frozen 之间可无限往复，本实体在业务上确实没有终态。按 asking 的要求不编造终态来消红——这条红指向的是一个真实的领域属性，不是缺陷。"
+      },
+      {
+        "id": "WF-03",
+        "entity": "RecurringSeries",
+        "initial": "Active",
+        "states": [
+          "Active",
+          "Discontinued",
+          "Completed"
+        ],
+        "terminalStates": [
+          "Discontinued",
+          "Completed"
+        ],
+        "transitions": [
+          {
+            "from": "Active",
+            "to": "Active",
+            "action": "到达 next_send_date 自动生成并发送单张 Invoice（幂等键 series_id + 应发送日期）",
+            "actor": "System"
+          },
+          {
+            "from": "Active",
+            "to": "Discontinued",
+            "action": "商户确认 `Yes,I want to stop it.`",
+            "actor": "Merchant"
+          },
+          {
+            "from": "Active",
+            "to": "Completed",
+            "action": "end_type 为 End Date 且到达结束日期",
+            "actor": "System"
+          }
+        ],
+        "notes": "Series 创建后不可编辑（Q-022）。无独立页面，只在 Invoice Detail 的周期区域呈现（Q-013）。"
+      },
+      {
+        "id": "WF-04",
+        "entity": "SettlementRequest",
+        "initial": "In Progress",
+        "states": [
+          "In Progress",
+          "Success",
+          "Failed"
+        ],
+        "terminalStates": [
+          "Success",
+          "Failed"
+        ],
+        "transitions": [
+          {
+            "from": "In Progress",
+            "to": "In Progress",
+            "action": "对账通过并已向 Cobo 提交结算",
+            "actor": "System"
+          },
+          {
+            "from": "In Progress",
+            "to": "Success",
+            "action": "payout 回调 Completed → 所选发票全部 Settled",
+            "actor": "System"
+          },
+          {
+            "from": "In Progress",
+            "to": "Failed",
+            "action": "payout 回调 Failed → 所选发票全部 Settlement Failed",
+            "actor": "System"
+          }
+        ],
+        "notes": "Q-053 裁定：改按 Cobo payout 实现。因 Q-021 一次只结算一个 Token，payout_params 仅一项，Cobo 的 PartiallyCompleted（多币种分腿部分成功）不会出现，故【Partial Success 状态删除】。发票与结算的关联为纯我方账本，靠 request_id 串联。"
+      }
+    ]
+  }
+}
