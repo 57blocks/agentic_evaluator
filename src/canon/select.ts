@@ -12,7 +12,7 @@ import type { TrialRow } from "./rows.js";
 import type { CandidateRates, Directionality, Rate } from "./rates.js";
 import type { EligibilityDecl, EligibilityThresholds, OperatingMode } from "./types.js";
 
-export const SELECT_RULE_VERSION = "select-v1" as const;
+export const SELECT_RULE_VERSION = "select-v2" as const;
 
 const MODES: readonly OperatingMode[] = [
   "lowest-cost",
@@ -252,27 +252,59 @@ function pickFastest(
   };
 }
 
+/** The judge's pairwise score as the report shows it: (wins + ties/2) / comparisons. Null when never compared. */
+function pairwiseScore(s: JudgeStanding | undefined): number | null {
+  return s && s.comparisons > 0 ? (s.wins + s.ties / 2) / s.comparisons : null;
+}
+
+const pct = (x: number): string => `${Math.round(x * 100)}%`;
+
+/**
+ * Highest reliability, then required-check pass rate. Among candidates still
+ * tied on both — common: every eligible one passed everything — the judge's
+ * pairwise score decides when a judge ran (the better answer among equally
+ * correct ones), then cost. The reason says it was a tie and what broke it,
+ * since "highest reliability" alone would hide that six were at 100%.
+ */
 function pickHighestAssurance(
   eligible: readonly CandidateRates[],
   control: string | null,
+  standings: readonly JudgeStanding[],
 ): { chosen: string | null; reason: string } {
   if (eligible.length === 0) {
     return { chosen: null, reason: "no eligible candidates" };
   }
+  const judged = new Map(standings.map((s) => [s.candidate, pairwiseScore(s)]));
+  const assurance = (a: CandidateRates, b: CandidateRates): number =>
+    rateSortValue(b.reliability) - rateSortValue(a.reliability) ||
+    rateSortValue(b.required_check_pass_rate) - rateSortValue(a.required_check_pass_rate);
   const ranked = [...eligible].sort((a, b) => {
-    const rel = rateSortValue(b.reliability) - rateSortValue(a.reliability);
-    if (rel !== 0) return rel;
-    const chk = rateSortValue(b.required_check_pass_rate) - rateSortValue(a.required_check_pass_rate);
-    if (chk !== 0) return chk;
+    const first = assurance(a, b);
+    if (first !== 0) return first;
+    const ja = judged.get(a.candidate) ?? null;
+    const jb = judged.get(b.candidate) ?? null;
+    if (ja !== null && jb !== null && ja !== jb) return jb - ja;
     const costA = a.generation_cost_per_success;
     const costB = b.generation_cost_per_success;
     if (costA !== null && costB !== null && costA !== costB) return costA - costB;
     return compareIds(a.candidate, b.candidate, control);
   });
   const best = ranked[0];
+  const tied = ranked.filter((c) => assurance(best, c) === 0);
+  const level = `${fmtRate(best.reliability)} reliability and ${fmtRate(best.required_check_pass_rate)} required-check pass rate`;
+  if (tied.length === 1) {
+    return { chosen: best.candidate, reason: `highest assurance: ${best.candidate} alone has ${level}` };
+  }
+  const runnerUp = tied[1];
+  const jBest = judged.get(best.candidate) ?? null;
+  const jNext = judged.get(runnerUp.candidate) ?? null;
+  const byJudge = jBest !== null && jNext !== null && jBest !== jNext;
+  const breaker = byJudge
+    ? `the judge's pairwise score (${best.candidate} ${pct(jBest)}, next ${runnerUp.candidate} ${pct(jNext)})`
+    : `generation cost per success, the judge not separating them${jBest === null ? " (no pairwise judging)" : ""}`;
   return {
     chosen: best.candidate,
-    reason: `highest reliability among eligible (${fmtRate(best.reliability)}), then required-check pass rate, then cost`,
+    reason: `${tied.length} eligible candidates tie at ${level}; ${best.candidate} is picked by ${breaker}`,
   };
 }
 
@@ -359,7 +391,7 @@ function pickForMode(
     case "fastest-within-cost-ceiling":
       return pickFastest(eligible, control, mmd);
     case "highest-assurance":
-      return pickHighestAssurance(eligible, control);
+      return pickHighestAssurance(eligible, control, standings);
     case "judge-preference":
       return pickJudgePreference(eligible, standings, control, absoluteDiscriminates);
   }

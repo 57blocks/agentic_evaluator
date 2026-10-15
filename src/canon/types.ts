@@ -68,6 +68,19 @@ export interface AgentCliConfig {
    * an agent tool's own figure assumes its own vendor's prices.
    */
   reports_usage?: boolean | "tokens";
+  /**
+   * Files whose content is part of the trial's identity (the wrapper script
+   * the command runs), relative to the task. Edit one and the next `--reuse`
+   * generates again instead of serving a run made by the old script.
+   */
+  version_files?: string[];
+  /**
+   * `fail` (default): a non-zero exit fails the trial whatever the check says.
+   * `ignore`: it is kept as evidence and the check decides (src/core/exit-policy.ts).
+   */
+  exit_code?: "fail" | "ignore";
+  /** Set by the loader: a hash of `version_files`' content. */
+  version_sha?: string;
 }
 
 /** How a candidate's command was executed — recorded, never inferred. */

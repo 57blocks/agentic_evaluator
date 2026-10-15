@@ -35,6 +35,7 @@ import { classifyCompletion } from "../canon/states.js";
 import { defOf, errorRecord, generateOne, readInput, safeName } from "./generate.js";
 import { loadPromptTemplate } from "./execute.js";
 import { fixturePath } from "./fixture.js";
+import { finishForCompletion } from "./exit-policy.js";
 import { caseKey, judgeDeliveries, type Deliveries, type E2eJudgement } from "./e2e-judge.js";
 import { e2eArmChain, e2eChain, e2eRootInputs } from "./plan.js";
 import type { RunEventSink } from "./events.js";
@@ -120,7 +121,7 @@ async function openArmRunner(params: {
         ...(seed ? { seedFiles: seed } : { fixtureDir: fixturePath(step, inputSlug) }),
       });
       const verdict = classifyCompletion({
-        finishReason: g.finishReason,
+        finishReason: finishForCompletion(def, g.finishReason, step),
         refusal: g.refusal,
         parsedUnits: g.parsedUnits,
       });

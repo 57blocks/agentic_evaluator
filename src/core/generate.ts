@@ -14,6 +14,8 @@ import { LlmError, type LlmTrace } from "../llm.js";
 import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "../adapters/resolve.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import { fixturePath, inputIdentity } from "./fixture.js";
+import { killProcessesUnder } from "../proc.js";
+import { finishForCompletion } from "./exit-policy.js";
 import { priceFromSpec } from "../pricing.js";
 import { deliverableText, parsedUnitsFor } from "../adapters/deliverable.js";
 import { displayPath, taskInputPath, resolveTaskAsset } from "../paths.js";
@@ -87,6 +89,8 @@ function deploymentRef(def: CandidateDef, provider: string | undefined): string 
 /** Output of a single generation (before it becomes a RunRecord). */
 export interface GenOutput {
   text: string;
+  /** agent-cli: what the command printed (see CandidateResult.log). */
+  log?: string;
   promptTokens: number;
   completionTokens: number;
   cachedTokens?: number;
@@ -131,20 +135,85 @@ export async function generateOne(params: {
   // would otherwise pick up this repo's: vite.config.ts, tsconfig, .git).
   // What it left is kept under the run as evidence; installs are not.
   const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "agenteval-trial-"));
+  let log: string | undefined;
   try {
-    return await generateIn(scratch, params);
+    const out = await generateIn(scratch, params);
+    log = out.log;
+    return out;
+  } catch (err) {
+    log = (err as { log?: string }).log;
+    throw err;
   } finally {
+    // Anything the agent detached from its process group dies with the trial.
+    await killProcessesUnder(scratch);
     await keepEvidence(scratch, params.checkWorkDir);
-    await fs.rm(scratch, { recursive: true, force: true });
+    if (log) await fs.writeFile(path.join(params.checkWorkDir, AGENT_LOG), log, "utf-8");
+    // A process the agent left behind may still be writing; the trial's
+    // outcome must not hang on whether its temp dir could be removed.
+    await fs.rm(scratch, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 }).catch(() => undefined);
   }
 }
+
+/**
+ * A reused trial whose check has since changed is graded again, on the files
+ * it left (kept under its run), so fixing a check never means paying for the
+ * generations again. Null when the check is unchanged, is not a command, or
+ * the trial's files were not kept.
+ */
+async function regradeIfChanged(
+  suite: Suite,
+  reused: { record: RunRecord; dir: string },
+  t: { candidate: string; inputSlug: string; inputText: string; trial: number; checkWorkDir: string },
+): Promise<Partial<RunRecord> | null> {
+  const check = suite.check;
+  if (!check || check.kind !== "command") return null;
+  const { commandCheckVersion, runCommandCheck } = await import("../check.js");
+  const version = await commandCheckVersion(check.argv, check.versionFiles, suite.taskRoot);
+  if (reused.record.checkVersion === version) return null;
+  const kept = path.join(reused.dir, "checks", `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}`);
+  if (!(await fs.stat(kept).then((s) => s.isDirectory(), () => false))) return null;
+  const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "agenteval-regrade-"));
+  try {
+    await fs.cp(kept, scratch, { recursive: true });
+    const fixture = fixturePath(suite, t.inputSlug);
+    const result = await runCommandCheck({
+      argv: check.argv,
+      versionFiles: check.versionFiles,
+      taskRoot: suite.taskRoot,
+      timeoutMs: check.timeoutMs,
+      files: [],
+      output: reused.record.text,
+      input: t.inputText,
+      meta: { step: suite.step, candidate: t.candidate, input: t.inputSlug, trial: t.trial, ...(fixture ? { fixture } : {}), chained: false },
+      workDir: scratch,
+    });
+    await keepEvidence(scratch, t.checkWorkDir);
+    return {
+      checkPassed: result.passed,
+      checkOutput: result.output,
+      checkReason: result.reason,
+      checkState: result.state,
+      checkVersion: result.version,
+    };
+  } finally {
+    await fs.rm(scratch, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 }).catch(() => undefined);
+  }
+}
+
+/** What an agent command printed, kept beside the files it left. */
+export const AGENT_LOG = "AGENT_OUTPUT.log";
 
 /** Not kept as evidence: reinstallable, and large. */
 const NOT_EVIDENCE = new Set(["node_modules", ".git"]);
 
 async function keepEvidence(from: string, to: string): Promise<void> {
   await fs.mkdir(to, { recursive: true });
-  await fs.cp(from, to, { recursive: true, force: true, filter: (src) => !NOT_EVIDENCE.has(path.basename(src)) });
+  try {
+    await fs.cp(from, to, { recursive: true, force: true, filter: (src) => !NOT_EVIDENCE.has(path.basename(src)) });
+  } catch (err) {
+    // Files changing under the copy (a process still running) cost evidence, not the trial.
+    await fs.writeFile(path.join(to, "EVIDENCE_INCOMPLETE.txt"), `copying the work dir failed: ${err instanceof Error ? err.message : String(err)}\n`, "utf-8");
+  }
 }
 
 async function generateIn(workDir: string, params: Parameters<typeof generateOne>[0]): Promise<GenOutput> {
@@ -239,7 +308,7 @@ async function loadReusable(
   hash: string,
   currentRunId: string,
   ws: Workspace,
-): Promise<{ record: RunRecord; from: string } | null> {
+): Promise<{ record: RunRecord; from: string; dir: string } | null> {
   // Every task's runs, not just this one's: `trialHash` is content-addressed,
   // so a generation produced under another task is the same generation.
   // Several tasks share `code-utils`; scanning per-task only would re-buy it
@@ -262,7 +331,7 @@ async function loadReusable(
       // The hash covers the step's producer, input and candidate, so a
       // journal line with it is this trial; the step is implied.
       const journaled = await findJournaled(dir, hash);
-      if (journaled) return { record: journaled, from: displayPath(dir) };
+      if (journaled) return { record: journaled, from: displayPath(dir), dir };
       continue;
     }
     const text = await fs
@@ -271,7 +340,7 @@ async function loadReusable(
     // A row with no surviving output is not reusable: the point is to skip
     // the call, and there is nothing here to skip it with.
     if (text === null) continue;
-    return { record: recordFromRow(hit, text), from: displayPath(dir) };
+    return { record: recordFromRow(hit, text), from: displayPath(dir), dir };
   }
   return null;
 }
@@ -490,8 +559,9 @@ export async function runAll(params: {
     if (reuse) {
       const reused = await loadReusable(suite.step, task.hash, runId, params.ws);
       if (reused) {
-        params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from });
-        return { ...reused.record, candidate, inputSlug, trial, reusedFrom: reused.from };
+        const regraded = await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir });
+        params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
+        return { ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from };
       }
     }
 
@@ -519,7 +589,7 @@ export async function runAll(params: {
         fixtureDir: fixturePath(suite, inputSlug),
       });
       budget.add(g.costUsd + (g.retryCostUsd ?? 0));
-      const verdict = classifyCompletion({ finishReason: g.finishReason, refusal: g.refusal, parsedUnits: g.parsedUnits });
+      const verdict = classifyCompletion({ finishReason: finishForCompletion(def, g.finishReason, suite), refusal: g.refusal, parsedUnits: g.parsedUnits });
       params.emit({
         type: "trial",
         step: suite.step,

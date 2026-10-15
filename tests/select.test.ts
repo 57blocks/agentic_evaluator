@@ -228,6 +228,40 @@ test("prd-w38 fixture: no required checks → no recommendation", async () => {
 test("canonical report for codegen fixture names the recommendation, not pairwise champion", async () => {
   const html = renderRunReport(await loadBundle(path.join(FIXTURES, "codegen-w38")));
   assert.match(html, /sonnet-5/);
-  assert.match(html, /select-v1/);
+  assert.match(html, /select-v2/);
   assert.doesNotMatch(html, /makes no recommendation/);
+});
+
+const standing = (candidate: string, wins: number, losses: number, ties: number) => ({
+  candidate, wins, losses, ties, comparisons: wins + losses + ties,
+  win_rate: wins / (wins + losses + ties), absolute_mean: null, absolute_scored: 0,
+});
+
+test("highest-assurance: among candidates tied on assurance, the judge's pairwise score decides before cost", () => {
+  const rec = recommend({
+    operatingMode: "highest-assurance",
+    controlCandidate: null,
+    requiredChecks: ["plan-gates"],
+    mmd: null,
+    directionality: directional,
+    candidates: [cand("cheap", { generation_cost_per_success: 0.1 }), cand("good", { generation_cost_per_success: 9 }), cand("mid")],
+    judge: [standing("cheap", 2, 14, 8), standing("good", 16, 1, 7), standing("mid", 11, 6, 7)],
+  });
+
+  assert.equal(rec.chosen, "good");
+  assert.ok(rec.reasons.some((r) => /3 eligible candidates tie at .*; good is picked by the judge's pairwise score \(good 81%, next mid 60%\)/.test(r)), rec.reasons.join(" | "));
+});
+
+test("highest-assurance: with no judging, a tie still goes to the cheapest, and says so", () => {
+  const rec = recommend({
+    operatingMode: "highest-assurance",
+    controlCandidate: null,
+    requiredChecks: ["plan-gates"],
+    mmd: null,
+    directionality: directional,
+    candidates: [cand("pricey", { generation_cost_per_success: 5 }), cand("cheap", { generation_cost_per_success: 0.1 })],
+  });
+
+  assert.equal(rec.chosen, "cheap");
+  assert.ok(rec.reasons.some((r) => /2 eligible candidates tie at .*picked by generation cost per success.*no pairwise judging/.test(r)), rec.reasons.join(" | "));
 });

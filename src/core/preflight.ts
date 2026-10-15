@@ -25,6 +25,8 @@ import { directionality } from "../canon/rates.js";
 import { matchesShow } from "../canon/review.js";
 import { fixturePath, isDir } from "./fixture.js";
 import { restoreAnswerKey } from "./answer-key.js";
+import { e2eChain, e2eRootInputs } from "./plan.js";
+import { readInput } from "./generate.js";
 import { envRefs } from "../adapters/agent-cli.js";
 import type { CandidateDef } from "../canon/types.js";
 import { taskInputPath } from "../paths.js";
@@ -148,13 +150,25 @@ function stepFindings(suite: Suite): Finding[] {
   return [];
 }
 
-async function referenceFiles(taskRoot: string): Promise<string[]> {
-  const root = path.join(taskRoot, "references");
+/**
+ * A step's reference files, as (input, path within the answer, bytes):
+ * references/<step>/<input>/... when that exists, else references/<input>/...
+ * (the layout check-task's oracle probe reads).
+ */
+async function referenceFilesOf(suite: Suite): Promise<Array<{ input: string; rel: string; bytes: number }>> {
+  const root = path.join(suite.taskRoot, "references");
   const entries = await fs.readdir(root, { withFileTypes: true, recursive: true }).catch(() => []);
-  return entries
-    .filter((e) => e.isFile())
-    .map((e) => path.relative(root, path.join(e.parentPath, e.name)).split(path.sep).slice(1).join("/"))
-    .filter((rel) => rel !== "");
+  const out: Array<{ input: string; rel: string; bytes: number }> = [];
+  for (const e of entries.filter((x) => x.isFile())) {
+    const parts = path.relative(root, path.join(e.parentPath, e.name)).split(path.sep);
+    const perStep = parts[0] === suite.step && parts.length > 2;
+    const [input, ...rest] = perStep ? parts.slice(1) : parts;
+    if (input === undefined || rest.length === 0) continue;
+    // A per-step layout's files belong to that step alone.
+    if (!perStep && suite.inputs.length > 0 && !suite.inputs.includes(input)) continue;
+    out.push({ input, rel: rest.join("/"), bytes: (await fs.stat(path.join(e.parentPath, e.name))).size });
+  }
+  return out;
 }
 
 /** evaluators.human: the rubric exists, and `show` picks something out of a correct answer. */
@@ -166,7 +180,7 @@ async function reviewFindings(suite: Suite): Promise<Finding[]> {
     out.push({ severity: "blocking", code: "review.rubric-missing", message: `human review rubric ${human.rubricFile} not found in ${suite.taskRoot}` });
   }
   if (human.show.length > 0) {
-    const files = await referenceFiles(suite.taskRoot);
+    const files = (await referenceFilesOf(suite)).map((f) => f.rel);
     if (files.length > 0 && !files.some((f) => matchesShow(f, human.show))) {
       out.push({ severity: "warning", code: "review.show-empty", message: `human review show [${human.show.join(", ")}] matches no file in references/: a reviewer would see nothing to compare` });
     }
@@ -181,16 +195,12 @@ async function reviewFindings(suite: Suite): Promise<Finding[]> {
 async function judgeShowFindings(suite: Suite): Promise<Finding[]> {
   const show = suite.judgeShow;
   if (!show || show.length === 0 || (suite.judgeMethods ?? []).length === 0) return [];
-  const root = path.join(suite.taskRoot, "references");
-  const entries = await fs.readdir(root, { withFileTypes: true, recursive: true }).catch(() => []);
+  const files = await referenceFilesOf(suite);
   const bytesByInput = new Map<string, number>();
-  for (const e of entries.filter((x) => x.isFile())) {
-    const [input, ...rest] = path.relative(root, path.join(e.parentPath, e.name)).split(path.sep);
-    if (input === undefined || rest.length === 0 || !matchesShow(rest.join("/"), show)) continue;
-    const { size } = await fs.stat(path.join(e.parentPath, e.name));
-    bytesByInput.set(input, (bytesByInput.get(input) ?? 0) + size);
+  for (const f of files.filter((x) => matchesShow(x.rel, show))) {
+    bytesByInput.set(f.input, (bytesByInput.get(f.input) ?? 0) + f.bytes);
   }
-  if (entries.length === 0) return [];
+  if (files.length === 0) return [];
   if (bytesByInput.size === 0) {
     return [{ severity: "warning", code: "judge.show-empty", message: `judge show [${show.join(", ")}] matches no file in references/: the judge would read nothing` }];
   }
@@ -226,14 +236,28 @@ async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Fi
     ...(await fixtureFindings(suite)),
   ];
   if (suite.inputFrom) {
-    findings.push({ severity: "ok", code: "inputs.from-step", message: `inputs come from step ${suite.inputFrom} at run time; input checks skipped, the check is probed with an empty input` });
-    if (suite.check) findings.push(...(await probeCheck(suite, [{ slug: "from-previous-step", text: "" }], opts)).filter((f) => f.code === "check.null"));
-    return findings;
+    // Evaluated on its own inputs like any step; only the e2e arms hand it the previous step's output.
+    findings.push({ severity: "ok", code: "inputs.from-step", message: `in the end-to-end arms its input is step ${suite.inputFrom}'s ${suite.handoff === "workdir" ? "work dir" : "output"}; on its own it is evaluated on the inputs below` });
   }
   const inputs = await loadInputs(suite);
   findings.push(...inputFindings(suite, inputs));
   if (suite.check) findings.push(...(await probeCheck(suite, inputs, opts)));
   return findings;
+}
+
+/**
+ * workflow.e2e.final_checks, probed like a step's check: the chain's starting
+ * state (the first step's fixture, nothing delivered) must fail, and
+ * references/e2e/<input>/ — a delivered end product — must pass.
+ */
+async function e2eFindings(suites: readonly Suite[], opts: { keep?: boolean }): Promise<Finding[] | null> {
+  const chain = e2eChain(suites);
+  const last = chain?.[chain.length - 1];
+  if (!chain || !last?.e2eFinalCheck) return null;
+  const root = chain[0]!;
+  const probe: Suite = { ...root, step: "e2e", check: last.e2eFinalCheck, requiredChecks: [last.e2eFinalCheck.id] };
+  const inputs = await Promise.all(e2eRootInputs(root).map(async (slug) => ({ slug, text: await readInput(slug, root.taskRoot).catch(() => "") })));
+  return probeCheck(probe, inputs, opts);
 }
 
 export async function preflightTask(specPath: string, opts: { keep?: boolean } = {}): Promise<PreflightReport> {
@@ -242,6 +266,8 @@ export async function preflightTask(specPath: string, opts: { keep?: boolean } =
   // A run that was killed outright leaves references/ unreadable (answer-key.ts).
   const recovered = suites.length > 0 && restoreAnswerKey(suites[0]!.taskRoot);
   for (const suite of suites) steps.push({ step: suite.stepId ?? suite.step, findings: await preflightStep(suite, opts) });
+  const e2e = await e2eFindings(suites, opts);
+  if (e2e) steps.push({ step: "e2e", findings: e2e });
   if (recovered) {
     steps[0]!.findings.unshift({ severity: "warning", code: "references.restored", message: "references/ was left unreadable by an interrupted run; made readable again" });
   }
