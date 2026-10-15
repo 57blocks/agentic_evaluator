@@ -70,3 +70,18 @@ test("a command that does not exist is a spawn error", async () => {
     (e: unknown) => e instanceof SpawnError && e.code === "ENOENT",
   );
 });
+
+test("a process an agent detached from its group is stopped when the trial ends", async () => {
+  const { killProcessesUnder } = await import("../src/proc.js");
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "proc-"));
+  const script = path.join(dir, "server.js");
+  await fs.writeFile(script, "setTimeout(() => {}, 60000);\n");
+  const { spawn } = await import("node:child_process");
+  const daemon = spawn(process.execPath, [script], { detached: true, stdio: "ignore" });
+  daemon.unref();
+  await sleep(200);
+
+  assert.ok((await killProcessesUnder(dir)) >= 1);
+  await sleep(200);
+  assert.equal(alive(daemon.pid!), false);
+});

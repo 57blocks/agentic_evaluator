@@ -255,16 +255,33 @@ export interface RunOptions {
    * whatever it has, and `run.cancelled` says how much never got a turn.
    */
   signal?: AbortSignal;
+  /** Evaluate each step only; a chained workflow's end-to-end arms do not run (`--no-e2e`). */
+  skipE2e?: boolean;
+  /** Run only these steps (`--step`); the end-to-end arms then do not run. */
+  steps?: string[];
+  /** Run only these candidates (`--candidate`); the end-to-end arms then do not run. */
+  candidates?: string[];
 }
 
 export async function runSuite(suitePath: string, html: boolean, opts: RunOptions = {}): Promise<StepResult | null> {
   const emit = opts.onEvent ?? silentSink;
-  const suites = await loadWorkflow(suitePath);
+  const all = await loadWorkflow(suitePath);
+  const unknown = (opts.steps ?? []).filter((id) => !all.some((s) => s.step === id));
+  if (unknown.length > 0) throw new Error(`no step ${unknown.join(", ")} in ${suitePath} (steps: ${all.map((s) => s.step).join(", ")})`);
+  const chosenSteps = opts.steps ? all.filter((s) => opts.steps!.includes(s.step)) : all;
+  const strangers = (opts.candidates ?? []).filter((c) => !chosenSteps.some((s) => s.candidates.includes(c)));
+  if (strangers.length > 0) throw new Error(`no candidate ${strangers.join(", ")} in the steps run`);
+  const suites = opts.candidates
+    ? chosenSteps
+        .map((s) => ({ ...s, candidates: s.candidates.filter((c) => opts.candidates!.includes(c)) }))
+        .filter((s) => s.candidates.length > 0)
+    : chosenSteps;
+  if (opts.steps || opts.candidates) opts = { ...opts, skipE2e: true };
   const isSpec = /\.ya?ml$/i.test(suitePath);
   const reuse = process.env.EVAL_REUSE === "1";
 
   for (const suite of suites) emit({ type: "step.planned", plan: planStep(suite, { reuse }) });
-  const e2ePlan = planE2e(suites);
+  const e2ePlan = opts.skipE2e ? null : planE2e(suites);
   if (e2ePlan) emit({ type: "workflow.planned", e2e: e2ePlan });
   if (isSpec && !opts.yes) {
     emit({ type: "preview.only" });
@@ -321,7 +338,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
 
     if (nested) {
       const chosenByStep = Object.fromEntries(steps.map((s) => [s.id, s.chosen]));
-      const e2e = await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit, budget });
+      const e2e = opts.skipE2e ? null : await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit, budget });
       const control = e2e?.control ?? null;
       const record = buildWorkflowRecord({
         protocolVersion: suites[0].protocolVersion ?? "0.3",
@@ -356,7 +373,11 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
         validation: e2e?.validation ?? null,
       });
       await fs.writeFile(path.join(root, "workflow.json"), JSON.stringify(record, null, 2), "utf-8");
-      await fs.writeFile(path.join(root, "GAPS.md"), workflowGaps(steps, record.e2e_validation), "utf-8");
+      const skipped =
+        opts.skipE2e && planE2e(suites)
+          ? "\n- **end-to-end validation not run**: skipped with `--no-e2e`. Each step's pick stands on its own inputs; whether they work as a combination was not checked.\n"
+          : "";
+      await fs.writeFile(path.join(root, "GAPS.md"), workflowGaps(steps, record.e2e_validation) + skipped, "utf-8");
       if (html) await writeWorkflowReport(root);
       emit({
         type: "run.done",

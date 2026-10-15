@@ -1,12 +1,14 @@
 /**
- * Candidates × steps. Each cell is that candidate's pairwise win rate on that
- * step (tinted: stronger green above 50, red below) with its mean absolute
- * score underneath. ⬢ marks the judge's favourite on the step; "Recommended" marks the
- * selector's choice — the two are not the same thing and the grid shows both.
+ * Candidates × steps. Every cell says how often the candidate succeeded on the
+ * step and what a success cost. On a step a judge compared, the pairwise win
+ * rate leads (tinted: green above 50, red below); on a step with no judge, the
+ * success rate does — a dash there would hide that the step was decided on
+ * its checks. ⬢ marks the judge's favourite; "Recommended" the selector's
+ * choice — not the same thing, and the grid shows both.
  */
 
 import type { CandidateMeta, WorkflowStep } from "../../../../../workflow-report-model.js";
-import { fmtPct, fmtScore } from "../../../../../report-format.js";
+import { fmtPct, fmtUsd } from "../../../../../report-format.js";
 import { Badge } from "@/components/ui/badge";
 import { seriesColor } from "../tone";
 import { tintStyle } from "../charts/geometry";
@@ -20,14 +22,21 @@ function Cell({ step, candidate }: { step: WorkflowStep; candidate: string }) {
   const r = step.report;
   const row = r?.candidates.find((c) => c.id === candidate);
   if (!r || !row) return <td className="border border-border px-3 py-2 text-center text-muted-foreground">—</td>;
+  const judged = r.candidates.some((c) => c.winRate !== null);
   const fav = r.verdict.judge?.sole === true && r.verdict.judge.candidate === candidate;
+  const tries = row.outcomes.success + row.outcomes.failure + row.outcomes.undetermined;
+  const successPct = tries > 0 ? (row.outcomes.success / tries) * 100 : null;
+  const success = `${row.outcomes.success}/${tries}`;
+  const cost = row.costPerSuccess != null ? `${fmtUsd(row.costPerSuccess).replace(/(\.\d\d)\d+$/, "$1")}/success` : row.costObserved ? "no success" : "cost unobserved";
   return (
-    <td className="border border-border px-3 py-2 text-center" style={tintStyle(row.winRate, 0, 100)}>
+    <td className="border border-border px-3 py-2 text-center" style={tintStyle(judged ? row.winRate : successPct, 0, 100)}>
       <div className="flex items-center justify-center gap-1 font-mono text-sm font-semibold">
-        {fmtPct(row.winRate)}
+        {judged ? fmtPct(row.winRate) : success}
         {fav && <span title="The judge's favourite on this step">⬢</span>}
       </div>
-      <div className="font-mono text-[11px] text-muted-foreground">{fmtScore(row.absolute)}</div>
+      <div className="font-mono text-[11px] text-muted-foreground">
+        {judged ? `${success} passed · ${cost}` : cost}
+      </div>
       {row.chosen && <Badge className="mt-1">Recommended</Badge>}
     </td>
   );
@@ -64,8 +73,9 @@ export function Overview({ steps, candidates }: { steps: WorkflowStep[]; candida
         </table>
       </div>
       <Note>
-        The large number is the pairwise win rate (a tie counts as half); the small one is the absolute score out of 5. Win rate only shows who the judge prefers and swings widely on small samples;
-         the absolute score shows how far apart the quality is. ⬢ is the judge's favourite on the step; "Recommended" is what the selector chose by eligibility gates and operating mode.
+        On a step a judge compared, the large number is the pairwise win rate (a tie counts as half), which only shows who the judge prefers and swings widely on small samples;
+        on a step with no judge, it is the success count. Underneath: successes and the generation cost per success. ⬢ is the judge's favourite on the step; "Recommended"
+        is what the selector chose by eligibility gates and operating mode, the judge breaking a tie on assurance.
       </Note>
     </Section>
   );

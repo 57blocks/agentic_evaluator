@@ -533,6 +533,12 @@ provider:
 { "prompt_tokens": 1200, "completion_tokens": 3400, "cache_read_tokens": 81000, "cache_write_tokens": 9000 }
 ```
 
+A command that exits non-zero fails its trial whatever the check says. When
+the command is a harness with verdicts of its own (its gates, its verifier),
+declare `exit_code: ignore` on the step (or on the candidate's `cli`): the
+exit code is kept as evidence and the check decides. `combine` and `judge`
+apply it to runs recorded before it was declared.
+
 `prompt_tokens` is input not read from or written to a cache. A step's
 `max_cost_per_trial_usd` is handed to the command as `{{max_cost_usd}}` and
 `EVAL_MAX_COST_USD`, with the model's price as `EVAL_MODEL_PRICE` (JSON, per
@@ -590,7 +596,9 @@ workflow:
     final_checks: [app-gates]  # grade the chain's end product with this check
 ```
 
-`final_checks` replaces the last step's own check in the chain only: a step
+`e2e.steps.<step>` (`max_cost_per_trial_usd`, `maximum_completion_time_seconds`)
+raises a step's limits in the arms only, where it may do far more than on
+its own inputs. `final_checks` replaces the last step's own check in the chain only: a step
 evaluated on its own inputs (one task, say) and a chain's delivery (every
 task) usually need different checks. `e2e.judge` (`rubric_file`, and
 optionally `show` and `dimensions`) compares the two arms' deliveries case by

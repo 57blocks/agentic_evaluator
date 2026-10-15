@@ -173,6 +173,8 @@ export interface Suite {
    * cannot stop an agent's spending mid-run, only hand it the limit.
    */
   maxCostPerTrialUsd?: number;
+  /** `steps[].exit_code`: over every command candidate's `cli.exit_code` on this step. */
+  exitCode?: "fail" | "ignore";
   /**
    * `workflow.e2e.inputs`: the root inputs the end-to-end arms run on, when
    * not every input of the chain's first step (a whole chain can cost a day).
@@ -187,6 +189,8 @@ export interface Suite {
   e2eFinalCheck?: CheckConfig;
   /** `workflow.e2e.judge`: compare the two arms' deliveries (informs, never decides). */
   e2eJudge?: E2eJudgeConfig;
+  /** `workflow.e2e.steps.<id>`: this step's spend cap and time limit in the arms only. */
+  e2eLimits?: { maxCostPerTrialUsd?: number; timeoutMs?: number };
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;
