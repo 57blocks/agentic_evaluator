@@ -1,0 +1,286 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-flow-combined-2026-10-15T01-52-24-987Z/code",
+  "run_name": "agb-flow",
+  "step": {
+    "id": "code",
+    "version": "1"
+  },
+  "spec": {
+    "path": "tasks/agb-flow/spec.yaml",
+    "sha256": "599c1ed8970cdc55f43a8ffdf26f41d253a6b61fa518d519558cd133bf2f970d"
+  },
+  "test_set": {
+    "id": "code-v1",
+    "inputs": {
+      "demo-todo-T-001": "7c5df798e809842918fb3ba886aa15b380e4e84fd2e9e085cc6330d8ba86f673",
+      "demo-todo-T-006": "1ad71d2ebceb0d3c3ccc59dbc6955f6f81a6275b54025906f1aa164be8a7e209"
+    }
+  },
+  "candidates": {
+    "opus-5-5": {
+      "id": "opus-5-5",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "fable-5-1": {
+      "id": "fable-5-1",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-fable-5.1",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-fable-5-1",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "gpt-5-6-sol": {
+      "id": "gpt-5-6-sol",
+      "adapter": "agent-cli",
+      "model": "openai/gpt-5.6-sol",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "openai/gpt-5.6-sol",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "env": {
+          "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+          "ANTHROPIC_AUTH_TOKEN": "${OPENROUTER_API_KEY}",
+          "ANTHROPIC_API_KEY": ""
+        },
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "gemini-4-argon": {
+      "id": "gemini-4-argon",
+      "adapter": "agent-cli",
+      "model": "google/gemini-4-argon",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "google/gemini-4-argon",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "env": {
+          "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+          "ANTHROPIC_AUTH_TOKEN": "${OPENROUTER_API_KEY}",
+          "ANTHROPIC_API_KEY": ""
+        },
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "deepseek-v4-pro": {
+      "id": "deepseek-v4-pro",
+      "adapter": "agent-cli",
+      "model": "deepseek/deepseek-v4-pro-0813",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "deepseek-v4-pro",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "env": {
+          "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+          "ANTHROPIC_API_KEY": "${DEEPSEEK_API_KEY}",
+          "ANTHROPIC_AUTH_TOKEN": ""
+        },
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "deepseek-flash": {
+      "id": "deepseek-flash",
+      "adapter": "agent-cli",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "deepseek-flash",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "env": {
+          "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+          "ANTHROPIC_API_KEY": "${DEEPSEEK_API_KEY}",
+          "ANTHROPIC_AUTH_TOKEN": ""
+        },
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "kimi-k3": {
+      "id": "kimi-k3",
+      "adapter": "agent-cli",
+      "model": "moonshotai/kimi-k3",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "moonshotai/kimi-k3",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "env": {
+          "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+          "ANTHROPIC_AUTH_TOKEN": "${OPENROUTER_API_KEY}",
+          "ANTHROPIC_API_KEY": ""
+        },
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "glm-5-3": {
+      "id": "glm-5-3",
+      "adapter": "agent-cli",
+      "model": "z-ai/glm-5.3",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "z-ai/glm-5.3",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "env": {
+          "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+          "ANTHROPIC_AUTH_TOKEN": "${OPENROUTER_API_KEY}",
+          "ANTHROPIC_API_KEY": ""
+        },
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "glm-5-3-prime": {
+      "id": "glm-5-3-prime",
+      "adapter": "agent-cli",
+      "model": "z-ai/glm-5.3-prime",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "z-ai/glm-5.3-prime",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "env": {
+          "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+          "ANTHROPIC_AUTH_TOKEN": "${OPENROUTER_API_KEY}",
+          "ANTHROPIC_API_KEY": ""
+        },
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    },
+    "qwen-3-8-max": {
+      "id": "qwen-3-8-max",
+      "adapter": "agent-cli",
+      "model": "qwen/qwen3.8-max-0902",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "qwen/qwen3.8-max-0902",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "env": {
+          "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+          "ANTHROPIC_AUTH_TOKEN": "${OPENROUTER_API_KEY}",
+          "ANTHROPIC_API_KEY": ""
+        },
+        "version_sha": "7dafbe55243b09a09cce2a05324f029ae03705440f52b7d1ee0f210825817228"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "x-ai/grok-4.7",
+    "provider_route": "openrouter",
+    "methods": [
+      "pairwise-swap"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "task-tests"
+    ],
+    "check_version": "cmd-816df400+files-093e3e23",
+    "rubric_sha256": "fa8dfe5f7245d380aa9645d1a1ce4dd150412e73be73c684c824e6c26dc640ef",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "1fc69c82db6a66ecbce049b37384f5775e6a62046dfde264ec9bac1e3abcb884",
+    "score_template_sha256": "bd29d00842649718760473e403d8631e1e5f0388e9239b6dad6a18c301c50093"
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 3,
+    "timeout_ms": 3600000,
+    "benchmark_mode": "production-realistic",
+    "cache_mode": "cold"
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.1.0",
+    "git_sha": "6bbc718",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-10-14T21:47:15.831Z",
+  "finished_at": "2026-10-15T01:52:25.006Z"
+}

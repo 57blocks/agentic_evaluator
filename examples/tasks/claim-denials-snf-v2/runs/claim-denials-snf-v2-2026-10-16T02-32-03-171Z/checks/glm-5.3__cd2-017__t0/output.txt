@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-08-28",
+  "action_note": "The MAC denied the full charge as patient responsibility under CARC 119 (all 100 SNF days used), but the records show ~135 days with no inpatient hospital or skilled care between the 2024-10-22 SNF discharge and the 2025-03-07 hospital admission, which should have started a new benefit period on 2025-03-07 with a fresh 100 days. Verify the beneficiary's benefit period and days used in Medicare's own records (HIQA/CWF eligibility query) for any intervening stay the facility doesn't know about; if the new benefit period is confirmed, request a redetermination with documentation of the 60+ day break in care by 2025-08-28, otherwise the exhaustion stands and liability shifts to the patient."
+}

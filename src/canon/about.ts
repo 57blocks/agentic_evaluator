@@ -50,14 +50,38 @@ export async function readLabels(taskRoot: string, file: string): Promise<InputL
 
 const frozen = (m: RunManifest): boolean => m.description !== undefined || m.test_set.labels !== undefined || m.evaluators.check_description !== undefined;
 
-/** The run's own record when it has one; otherwise the task's current spec (a run dir is <task>/runs/<run>/). */
+const exists = (p: string): Promise<boolean> => fs.stat(p).then(() => true, () => false);
+
+/** The task dir holding the spec: <task>/runs/<run>/ for a step run, <task>/runs/<run>/<step>/ inside a workflow run. */
+async function taskRootOf(dir: string, specName: string): Promise<string | null> {
+  for (const up of [["..", ".."], ["..", "..", ".."]]) {
+    const root = path.resolve(dir, ...up);
+    if (await exists(path.join(root, specName))) return root;
+  }
+  return null;
+}
+
+/** A workflow run's description: its steps share one spec, so the first step that has a manifest says it. */
+export async function aboutOfWorkflow(root: string, stepIds: readonly string[]): Promise<RunAbout | null> {
+  for (const id of stepIds) {
+    const stepDir = path.join(root, id);
+    const raw = await fs.readFile(path.join(stepDir, "manifest.json"), "utf-8").catch(() => null);
+    if (raw === null) continue;
+    const about = await aboutOfRun(stepDir, JSON.parse(raw) as RunManifest);
+    return about.description ? about : null;
+  }
+  return null;
+}
+
+/** The run's own record when it has one; otherwise the task's current spec. */
 export async function aboutOfRun(dir: string, m: RunManifest): Promise<RunAbout> {
   if (frozen(m)) {
     return { description: m.description ?? null, checkDescription: m.evaluators.check_description ?? null, labels: m.test_set.labels ?? null, source: "frozen" };
   }
   const none: RunAbout = { description: null, checkDescription: null, labels: null, source: "none" };
   if (!m.spec.path) return none;
-  const taskRoot = path.resolve(dir, "..", "..");
+  const taskRoot = await taskRootOf(dir, path.basename(m.spec.path));
+  if (!taskRoot) return none;
   const specFile = path.join(taskRoot, path.basename(m.spec.path));
   try {
     const spec = parseSpec(await fs.readFile(specFile, "utf-8"), specFile);

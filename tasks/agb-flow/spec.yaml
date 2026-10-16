@@ -19,6 +19,7 @@
 
 protocol_version: "0.3"
 run_name: agb-flow
+description: "Which model should run each step of agb's flow (task breakdown, test design, code), and does the per-step best combination beat one model end to end? Each input is a real agb project at the moment that step began (demo-todo, chessicle and invoice for breakdown and test design; demo-todo tasks for code). Every candidate runs the step through the same wrapper; a check grades the work itself, and a judge compares candidates pairwise."
 # Counts what candidates report spending; past it no new trial starts.
 budget_usd: 600
 
@@ -160,21 +161,25 @@ evaluators:
   required_checks:
     plan-gates:
       kind: command
+      description: "The task plan claims every page and endpoint in the design and has no cycle between domains."
       argv: [node, checks/plan-gates.mjs]
       version_files: [checks/plan-gates.mjs]
       timeout_seconds: 300
     test-plan-gates:
       kind: command
+      description: "The test plan covers every acceptance criterion of the adopted task plan."
       argv: [node, checks/test-plan-gates.mjs]
       version_files: [checks/test-plan-gates.mjs]
       timeout_seconds: 300
     task-tests:
       kind: command
+      description: "The task's own acceptance tests, restored from the fixture, all pass."
       argv: [node, checks/task-tests.mjs]
       version_files: [checks/task-tests.mjs]
       timeout_seconds: 900
     app-gates:
       kind: command
+      description: "The delivered app installs, builds, and its whole test suite passes under agb smoke."
       argv: [node, checks/app-gates.mjs]
       version_files: [checks/app-gates.mjs]
       timeout_seconds: 2400

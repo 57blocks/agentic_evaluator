@@ -1,0 +1,100 @@
+# Smoke test of agb-flow: one cheap model, one input per step, no chain.
+# Same fixtures, checks and wrapper as spec.yaml.
+
+protocol_version: "0.3"
+run_name: agb-flow-smoke
+# Counts what candidates report spending, the e2e arms included; past it no
+# new trial starts.
+budget_usd: 5
+
+workflow:
+  steps:
+    - id: detail
+      version: "1"
+      test_set: { id: smoke, inputs: [demo-todo], fixture_dir: fixture/detail }
+      candidate_ids: [glm-5-3]
+      required_checks: [plan-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 2
+    - id: qa
+      version: "1"
+      test_set: { id: smoke, inputs: [demo-todo], fixture_dir: fixture/qa }
+      candidate_ids: [glm-5-3]
+      required_checks: [test-plan-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 1800
+      max_cost_per_trial_usd: 2
+    - id: code
+      version: "1"
+      test_set: { id: smoke, inputs: [demo-todo-T-001], fixture_dir: fixture/code }
+      candidate_ids: [glm-5-3]
+      required_checks: [task-tests]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3600
+      max_cost_per_trial_usd: 2
+
+# One command for every step: agents/agb-step.mjs reads EVAL_STEP and runs the
+# matching stage with the model it is given. argv names the model as the tool
+# knows it; `model` is the OpenRouter id agenteval prices its tokens with
+# (reports_usage: tokens). Providers are plain env, keys read at run time.
+x-providers:
+  deepseek: &deepseek
+    ANTHROPIC_BASE_URL: https://api.deepseek.com/anthropic
+    ANTHROPIC_API_KEY: ${DEEPSEEK_API_KEY}
+    ANTHROPIC_AUTH_TOKEN: ""
+  openrouter: &openrouter
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
+    ANTHROPIC_AUTH_TOKEN: ${OPENROUTER_API_KEY}
+    ANTHROPIC_API_KEY: ""
+
+candidates:
+  - id: glm-5-3
+    adapter: agent-cli
+    model: z-ai/glm-5.3
+    cli: { argv: [node, agents/agb-step.mjs, z-ai/glm-5.3, "{{max_cost_usd}}"], reports_usage: tokens, version_files: [agents/agb-step.mjs], env: *openrouter }
+
+evaluators:
+  required_checks:
+    plan-gates:
+      kind: command
+      argv: [node, checks/plan-gates.mjs]
+      version_files: [checks/plan-gates.mjs]
+      timeout_seconds: 300
+    test-plan-gates:
+      kind: command
+      argv: [node, checks/test-plan-gates.mjs]
+      version_files: [checks/test-plan-gates.mjs]
+      timeout_seconds: 300
+    task-tests:
+      kind: command
+      argv: [node, checks/task-tests.mjs]
+      version_files: [checks/task-tests.mjs]
+      timeout_seconds: 900
+    app-gates:
+      kind: command
+      argv: [node, checks/app-gates.mjs]
+      version_files: [checks/app-gates.mjs]
+      timeout_seconds: 2400
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/breakdown.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 3
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0

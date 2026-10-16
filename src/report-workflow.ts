@@ -19,6 +19,7 @@ import { PAGE_STYLE } from "./report-style.js";
 import { workflowNoVerdictLine, workflowVerdictLine, workflowVerdictTone } from "./report-model.js";
 import { plural, stepsHeadline, STEPS_NOT_VALIDATED } from "./report-format.js";
 import { FIRMNESS_LABEL, modeLabel } from "./report-copy.js";
+import { aboutOfWorkflow, type RunAbout } from "./canon/about.js";
 
 const usd = (n: number): string => `$${n.toFixed(4)}`;
 const num = (n: number | null, digits = 2): string => (n === null ? "—" : n.toFixed(digits));
@@ -166,7 +167,18 @@ function renderGaps(gaps: string): string {
   </section>`;
 }
 
-export function renderWorkflowReport(record: WorkflowRecord, gaps: string): string {
+/** What the workflow evaluates, before any result. Empty when its spec has no description. */
+function renderAbout(about: RunAbout | null): string {
+  if (!about?.description) return "";
+  const stale = about.source === "current-spec" ? `<p class="note">This run predates the description; it is read from the task's spec as it is now.</p>` : "";
+  return `<section class="card">
+    <h2>What this evaluates</h2>
+    <p>${escapeHtml(about.description)}</p>
+    ${stale}
+  </section>`;
+}
+
+export function renderWorkflowReport(record: WorkflowRecord, gaps: string, about: RunAbout | null = null): string {
   const steps = record.steps.length;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -183,6 +195,7 @@ export function renderWorkflowReport(record: WorkflowRecord, gaps: string): stri
       <div><dt>End-to-end</dt><dd>${record.e2e_validation ? escapeHtml(`${record.e2e_validation.verdict} · ${record.e2e_validation.firmness}`) : "not run"}</dd></div>
     </dl>
   </header>
+  ${renderAbout(about)}
   ${renderVerdict(record)}
   ${renderSteps(record)}
   ${renderChain(record)}
@@ -244,6 +257,7 @@ export async function writeWorkflowReport(root: string): Promise<string> {
   const record = await loadWorkflowRecord(root);
   const gaps = await workflowGapsFor(root, record);
   const out = path.join(root, "report.html");
-  await fs.writeFile(out, renderWorkflowReport(record, gaps), "utf-8");
+  const about = await aboutOfWorkflow(root, record.steps.map((s) => s.id));
+  await fs.writeFile(out, renderWorkflowReport(record, gaps, about), "utf-8");
   return out;
 }

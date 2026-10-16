@@ -1,0 +1,11 @@
+[
+  {
+    "service": "task",
+    "method": "POST",
+    "endpoint": "/api/tasks/:taskId/transitions",
+    "requestFields": "{ to: \"todo\" | \"in_progress\" | \"done\" }",
+    "responseFields": "{ id: string; status: \"todo\" | \"in_progress\" | \"done\" }",
+    "authType": "none",
+    "description": "按 WF-01 转移表校验并执行任务状态转移"
+  }
+]

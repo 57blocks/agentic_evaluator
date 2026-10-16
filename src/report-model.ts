@@ -31,6 +31,7 @@ import { planFromRun, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
 import { NO_PICK, plural, sha8 } from "./report-format.js";
 import { sliceRows, type SliceRow } from "./report-slices.js";
+import type { RunAbout } from "./canon/about.js";
 import {
   FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, recommendationSentence, type GateRow,
 } from "./report-copy.js";
@@ -496,9 +497,11 @@ export interface WorkflowReport {
   gaps: GapLine[];
   /** Every step's report side by side; null when the steps were not read. */
   digest: WorkflowDigest | null;
+  /** What the workflow evaluates (the spec's description); null when the spec has none. */
+  about: { description: string; fromCurrentSpec: boolean } | null;
 }
 
-export function buildWorkflowReport(record: WorkflowRecord, gaps: string, digest: WorkflowDigest | null = null): WorkflowReport {
+export function buildWorkflowReport(record: WorkflowRecord, gaps: string, digest: WorkflowDigest | null = null, about: RunAbout | null = null): WorkflowReport {
   const v = record.e2e_validation ?? null;
   return {
     kind: "workflow",
@@ -507,6 +510,7 @@ export function buildWorkflowReport(record: WorkflowRecord, gaps: string, digest
     tone: workflowVerdictTone(v),
     gaps: gapLines(gaps, true),
     digest,
+    about: about?.description ? { description: about.description, fromCurrentSpec: about.source === "current-spec" } : null,
   };
 }
 
@@ -521,7 +525,9 @@ export async function loadReportModel(dir: string): Promise<ReportModel> {
   if (await isWorkflowRun(dir)) {
     const record = await loadWorkflowRecord(dir);
     const { buildWorkflowDigest } = await import("./workflow-report-model.js");
-    return buildWorkflowReport(record, await workflowGapsFor(dir, record), await buildWorkflowDigest(dir, record));
+    const { aboutOfWorkflow } = await import("./canon/about.js");
+    const about = await aboutOfWorkflow(dir, record.steps.map((s) => s.id));
+    return buildWorkflowReport(record, await workflowGapsFor(dir, record), await buildWorkflowDigest(dir, record), about);
   }
   const { loadBundle } = await import("./report-v2.js");
   return buildStepReport(await loadBundle(dir));

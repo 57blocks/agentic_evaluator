@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary's SNF benefit period never reset: she was out of the hospital/SNF for only 13 days (2025-04-20 to 2025-05-02), far short of the 60 consecutive days needed to start a new period, so the 100-day cap carries over from the prior stay (91 days used) and Medicare correctly paid only the 9 remaining days (through 2025-05-15, matching CAS*PR*119 'benefit maximum reached'). The 6 days from 2025-05-16 to 2025-05-21 are non-covered and, with no Medigap or Medicaid on file, are the beneficiary's responsibility — bill her for those days after confirming a Notice of Medicare Non-Coverage was delivered before coverage ended."
+}

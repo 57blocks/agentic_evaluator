@@ -1,0 +1,106 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "contract-terms-long-2026-10-15T09-51-14-875Z",
+  "run_name": "contract-terms-long",
+  "step": {
+    "id": "extract",
+    "version": "1"
+  },
+  "spec": {
+    "path": "tasks/contract-terms-long/spec.yaml",
+    "sha256": "21d71611604e86c1478158c0ee6787b78e488ced547088891bc7837ebacb96d8"
+  },
+  "test_set": {
+    "id": "contract-terms-long",
+    "inputs": {
+      "ct-001": "a283a0c5fbba44cf40afc4a167daac8d371948cd29603669e7058e7d4c746a19",
+      "ct-002": "08217f6f872b8641e566fbddd5bbbea9853353dfc58a96b65176108f88dbca47",
+      "ct-003": "2977bb29bc1195514fd1f9c8f71ec14db0fe02dcb648e55d94fcafc6aa6a9ceb",
+      "ct-004": "6050e5c654d773b0cc466e7b41dbc98791d2aeea6221699aaf3d1c825ba73d20",
+      "ct-005": "84d844b4988b3063d222963adb0d7e62b15ab8065fcbbc81ab1b86758e416e40",
+      "ct-006": "2a05c53b2fc4c6890ddd7a8299700642f5ee24879ad5f59b0ad54478897e1cae"
+    }
+  },
+  "candidates": {
+    "sonnet-5": {
+      "id": "sonnet-5",
+      "model": "anthropic/claude-sonnet-5",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "kimi-k3": {
+      "id": "kimi-k3",
+      "model": "moonshotai/kimi-k3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "glm-5.3": {
+      "id": "glm-5.3",
+      "model": "z-ai/glm-5.3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "deepseek-v4.1-flash": {
+      "id": "deepseek-v4.1-flash",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    }
+  },
+  "control_candidate": "sonnet-5",
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter",
+    "methods": [
+      "absolute-1-5"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "terms-check"
+    ],
+    "check_version": "cmd-fbb3f38e+files-be659c66",
+    "rubric_sha256": "6eac7a68c20234aabf0d682115ca5f108788da3c6d1c12b5b21a6e295d68e35c",
+    "producer_template_sha256": "b5a137a963b162b18c8731132cef8956915392091d5defaf7773d4fef22b8ebb",
+    "judge_template_sha256": "4d88d04a68b0103ee15b0080f5fb8f98e007cd06d49ea783ab5675cc5a28744e",
+    "score_template_sha256": "9d83475ad970c126331629e2aeb9c6986672869041898f8debe868e1579e5f25"
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "lowest-cost",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 4,
+    "timeout_ms": 600000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold"
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.1.0",
+    "git_sha": "eb7393d",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-10-15T09:51:14.875Z",
+  "finished_at": "2026-10-15T09:54:13.035Z"
+}

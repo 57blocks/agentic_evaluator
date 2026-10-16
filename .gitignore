@@ -5,3 +5,8 @@ node_modules/
 dist/
 parity/
 .playwright-mcp/
+# Sample runs kept in the repo, so their reports open without paying for a run.
+!examples/tasks/agb-flow/runs/
+!examples/tasks/claim-denials-snf-v2/runs/
+!examples/tasks/contract-terms-long/runs/
+!examples/tasks/kyc-ubo-v2/runs/
