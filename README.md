@@ -21,6 +21,19 @@ candidate to use, why, what it cost, and what it could not observe.
 - **Keep the evidence**: every run writes its scores, costs, gaps and a
   self-contained `report.html` beside the task. A local dashboard browses them.
 
+## Where to start
+
+| you want to | do this | needs |
+|---|---|---|
+| see what a finished evaluation looks like | from a clone: `agenteval dash --workspace datasets` ([Datasets](#datasets)) | nothing: no key, no spend |
+| build an evaluation for a decision of your own | `agenteval install-skill`, then `/agenteval-new-task` in Claude Code ([Build a task with Claude Code](#build-a-task-with-claude-code)) | Claude Code; a key only when you choose to run |
+| try the tool in a minute | `agenteval init my-task && agenteval run my-task --yes --html` ([Quick start](#quick-start-free-offline)) | nothing: offline, free |
+| write a task by hand, file by file | [Tutorial](#tutorial-compare-two-models-on-your-own-prompt) | an OpenRouter key, under a cent |
+
+Whichever path: `agenteval plan <task>` and `agenteval check-task <task>` are
+free and say what a run would do before anything is billed, and
+`agenteval run` without `--yes` only prints that preview.
+
 ## Install
 
 Published on npm as [`57b-agenteval`](https://www.npmjs.com/package/57b-agenteval).
@@ -88,6 +101,49 @@ the two disagree. Budget is capped at $0.05.
 
 From here, edit `tasks/<name>/spec.yaml`: swap the models or use your own
 agent, add inputs, and raise the trials. See [Writing a task](#writing-a-task).
+
+## Build a task with Claude Code
+
+The fastest way to an evaluation you can trust is to let Claude Code build it
+with you. `agenteval install-skill` adds the `/agenteval-new-task` skill to
+your workspace; the skill interviews you, writes the files, and proves the
+task with the free checks before anything is billed.
+
+```bash
+mkdir my-evals && cd my-evals        # or your project: any directory works
+agenteval install-skill              # adds .claude/skills/agenteval-new-task/
+claude                               # open Claude Code here
+```
+
+Then, in Claude Code, start with the decision you need to make:
+
+```
+/agenteval-new-task which model should triage our support tickets, and is a cheaper one good enough?
+```
+
+What happens next:
+
+1. **The decision.** One sentence on the choice the task informs, what one
+   input is, and what a candidate is (a model, or an agent command).
+2. **Inputs.** It asks for real cases first (logs, past failures, cases you
+   write) and synthesizes only from examples you give it. You read every
+   input and sign off.
+3. **How right is decided.** A check script, reference answers it must pass,
+   and a judge where a script can't see the quality. It runs
+   `agenteval check-task` and shows you the check grading real answers; you
+   sign off again.
+4. **Candidates, gates, budget.** Then the plan, the cost, and one question:
+   run it? Nothing is billed without your yes.
+
+You end up with `tasks/<name>/` (spec, inputs, check, references, rubric) and,
+once you run it, a report that opens with what the task evaluates. Bring three
+to five real examples and a sentence on what makes a case hard; that is what
+makes the task worth its numbers. For a pipeline (*which model should run each
+stage?*), say so: the skill builds one step at a time with its own sign-offs.
+
+The skill is a copy: after upgrading agenteval, run
+`agenteval install-skill --force` to get the new version (it replaces any
+edits you made to the copy).
 
 ## Tutorial: compare two models on your own prompt
 
@@ -381,20 +437,9 @@ model and needs no key:
 It exits 1 when anything blocks, and `--json` prints the findings for
 scripts.
 
-**Building a task with Claude Code.** `agenteval install-skill` adds a
-`/agenteval-new-task` skill to the workspace, in `.claude/skills/`, with this
-README beside it as `reference.md` for the skill to read. In Claude
-Code it walks you through one task:
-
-1. The decision the task informs.
-2. Where realistic inputs come from: logs, past failures, cases you write.
-   Synthetic inputs come last.
-3. A check that tells right from wrong, plus reference answers.
-4. Candidates and gates.
-
-You sign off twice: once on the inputs, and once on how the check grades
-real answers. It runs `check-task` before anything is paid, and never
-starts a billed run without your yes.
+**Building a task with Claude Code.** `agenteval install-skill` adds the
+`/agenteval-new-task` skill, with this README beside it as `reference.md`;
+see [Build a task with Claude Code](#build-a-task-with-claude-code).
 
 **Rules `plan` enforces**
 
@@ -730,7 +775,8 @@ rebuilds `report.html` from these files (by run id or path); no number changes.
 ## Dashboard
 
 `agenteval dash` serves the workspace at http://127.0.0.1:4173 (`--port` to
-change it). The home page lists tasks, their latest verdicts and total spend;
+change it; `--workspace DIR` to serve another folder, e.g.
+`--workspace datasets` or `--workspace examples` in a clone). The home page lists tasks, their latest verdicts and total spend;
 a task's page shows its runs, its test plan read back from `spec.yaml`, and
 its files; a run's page opens each step's report. From a task's page you can
 also start a run: it first shows the plan and the budget, and runs only after

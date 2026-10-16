@@ -120,8 +120,27 @@ If yes for even one case, the check isn't ready: fix it, re-run `check-task`, sh
 - **Gates**: `minimum_reliability` and `minimum_required_check_pass_rate` default to 1.0 when a check exists — say so; lower them only if the user accepts candidates that sometimes fail.
 - **`budget_usd`**: a hard ceiling for the run.
 
+## Make the set tell the candidates apart
+
+A task whose candidates all score 100% answers only "the cheapest is enough". That can be the right answer, but find out cheaply, before the user pays for a large run or you build a generator.
+
+**Probe first.** Once the check works, write 5–8 items, one hard case each, and run every candidate on them (usually well under $1; still ask before running). If every candidate passes every item, more items of the same kind will not change that: change what the items test, and say so to the user. If they split, you know which kinds of case to multiply.
+
+**What separates candidates, and what doesn't** (from building the datasets in the agenteval repository's `datasets/`):
+
+- **Rules the candidate must bring, not rules you hand it.** Stating the rules in the prompt turns the task into reading: every model scored 30/30 on beneficial owners with the rules spelled out, and 21–26/30 when the prompt named only the law. Ask the user whether the decision is "can it apply rules we give it" or "does it know the domain's rules"; for the second, keep the rules out of the prompt.
+- **Extraction where the answer is in the text rarely separates strong models.** Longer documents, scan noise, amendments filed out of order and distractor clauses all left four models at 100% on contract terms. That is a finding to report, not a set to keep inflating.
+- **Boundaries and computed answers do separate them:** a threshold met by one euro, a deadline counted from the right date, a stake held through two companies that must be added rather than multiplied.
+
+**Every answer must follow from the input plus rules you can cite.** If the key needs a date, a threshold or a policy, it is in the input or in a written rule with its source. When rules decide the answer, write them to `RULES.md` with a quote and a source for each, and leave out cases the sources leave open: an item that rests on a contested reading grades the reading, not the candidate.
+
+**When you generate items** (a seeded script under `gen/`): build a structure, compute the answer from it in code that follows `RULES.md`, then render the text, so the key is right by construction. Keep about a third of the items ordinary, so a candidate is not rewarded only for rare cases. Tag each item by kind (`checks/manifest.json`: `{"<input>": {"tags": [...], "split": "dev" | "holdout"}}`) and hold out about 40%. Any noise or distraction you add must never alter a graded value; assert that in the generator.
+
+**After the first full run, read the failures before the scores.** An item every candidate fails is a suspect label until you have checked it against the rules. Misses that share one shape (every wrong deadline off by exactly five days) point to one rule, and that is the most useful thing to tell the user.
+
 ## Step 4 — Ready to run
 
+0. Make the report say what it tests: a top-level `description` (the decision and what the inputs are, in a few sentences), a `description` on the required check (what a pass means), and `test_set.labels_file: checks/manifest.json` when items are tagged, so the report breaks results down by tag (`reference.md`, "Saying what a task evaluates").
 1. `agenteval check-task <name>` reports **0 blocking**. Read the remaining warnings out to the user in one line each and let them decide.
 2. `agenteval plan <name>` — show the counts (generations, judge calls, budget).
 3. Ask for consent in one line: *"N candidates × M inputs × T trials, judge on/off, budget $B — run it?"* For a workflow, give it per step plus the chain: *"detail 10×3, qa 10×3, code 10×2, chain 2 arms on demo-todo, budget $600 — run it?"* Only on a yes: `agenteval run <name> --yes --html`, then point them at `runs/<run>/report.html` and `GAPS.md`.
@@ -137,3 +156,6 @@ Hand over: where the task lives, what `check-task` said, and that every edit to 
 - **A grand unified task.** One decision per task. A pipeline is one decision over several steps; unrelated decisions are separate tasks.
 - **Steps that start from upstream output when evaluated alone.** Give each step a fixed starting state (`fixture_dir`); chaining is for the e2e arms.
 - **Reusing a step's check as the chain's final check** without asking whether "this step's deliverable is right" and "the end product works" are the same claim.
+- **Scaling before a probe.** Thirty generated items that every candidate passes cost as much as six that show the same thing.
+- **Putting the rules in the prompt when the question is whether the candidate knows them.**
+- **An answer key the input cannot support**: a deadline whose rule or start date is not in the case, a policy nobody wrote down.
