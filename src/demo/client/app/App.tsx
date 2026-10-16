@@ -19,6 +19,7 @@ import { TaskPage } from "@/pages/TaskPage";
 import { RunPage } from "@/pages/RunPage";
 import { ReportPage } from "@/pages/ReportPage";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { isSnapshot, READ_ONLY, snapshotMeta } from "@/lib/snapshot";
 
 function Notice({ title, detail }: { title: string; detail?: string }) {
   return (
@@ -31,9 +32,22 @@ function Notice({ title, detail }: { title: string; detail?: string }) {
   );
 }
 
+/** Says, on every page of an export, that it is a frozen copy and when it was taken. */
+function SnapshotBanner() {
+  if (!isSnapshot()) return null;
+  const meta = snapshotMeta();
+  const when = meta ? ` of ${meta.workspace}, exported ${meta.exportedAt.slice(0, 16).replace("T", " ")} UTC` : "";
+  return (
+    <div role="note" className="border-b border-border bg-muted px-6 py-2 text-center text-xs text-muted-foreground">
+      Read-only copy{when}. Reports and evidence are as they were then; runs and reviews are not available.
+    </div>
+  );
+}
+
 function Shell({ crumbs, children }: { crumbs: Crumb[]; children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
+      <SnapshotBanner />
       <AppHeader />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-6 py-8">
         <Crumbs crumbs={crumbs} />
@@ -94,7 +108,7 @@ export function App() {
       ) : run && route.view === "report" ? (
         <ReportPage run={run} dir={route.dir} />
       ) : run && route.view === "review" ? (
-        <ReviewPage runId={run.id} reviewer={route.reviewer} />
+        isSnapshot() ? <Notice title="Blind review is not available here" detail={READ_ONLY} /> : <ReviewPage runId={run.id} reviewer={route.reviewer} />
       ) : run ? (
         <RunPage run={run} />
       ) : (

@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReportModel } from "../../../report-model.js";
 import type { RunView } from "../../catalog.js";
 import { getJson, reportUrl } from "@/lib/api";
+import { exportedHref } from "@/lib/snapshot";
 import { StepReport } from "@/features/report/StepReport";
 import { WorkflowReport } from "@/features/report/WorkflowReport";
 import { downloadHtml, exportName, standaloneHtml } from "@/features/report/export";
@@ -47,8 +48,9 @@ function fileOf(model: ReportModel): string {
 
 /** Where report.html sits for this directory, when the run wrote one. */
 function offlineHref(run: RunView, dir: string): string | null {
-  if (dir === run.dir && run.kind === "workflow") return `/artifact/${dir}/report.html`;
-  return run.steps.find((s) => s.dir === dir)?.reportHref ?? null;
+  const href = dir === run.dir && run.kind === "workflow" ? `/artifact/${dir}/report.html` : run.steps.find((s) => s.dir === dir)?.reportHref ?? null;
+  // An export writes report.html beside its index.html, at the same path without the leading slash.
+  return href ? exportedHref(href) : null;
 }
 
 export function ReportPage({ run, dir }: { run: RunView; dir: string }) {
