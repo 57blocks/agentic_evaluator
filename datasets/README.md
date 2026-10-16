@@ -22,7 +22,7 @@ agenteval run datasets/tasks/claim-denials-snf-v2 --yes --html   # billed
 | [`claim-denials-snf-v2`](tasks/claim-denials-snf-v2/spec.yaml) | `claim-denials-snf-v1` | 30 | triaging a denied Medicare fee-for-service SNF claim from raw 835 codes and the facility's records, with no payer manual | [RULES.md](tasks/claim-denials-snf-v2/RULES.md): 42 CFR, CMS manuals, X12 codes |
 | [`kyc-ubo-v2`](tasks/kyc-ubo-v2/spec.yaml) | `kyc-ubo-v1` | 30 | finding a company's beneficial owners from German register extracts under § 3 GwG | [RULES.md](tasks/kyc-ubo-v2/RULES.md): the statute and the BVA Transparenzregister FAQ |
 | [`contract-terms-long`](tasks/contract-terms-long/spec.yaml) | `contract-terms-v1` | 6 | extracting eight commercial terms from ~9,000-word scanned agreement packets | the generator: amendments applied by effective date and signature |
-| [`agb-flow`](tasks/agb-flow/spec.yaml) | — | 3 + 3 + 2 | which model should run each step of agb's flow: task breakdown, test design, code | checks that grade the work itself (`checks/`), and a pairwise judge |
+| [`agb-flow`](tasks/agb-flow/spec.yaml) | — | 3 + 3 + 2 | which model should run each step of agb's flow: task-breakdown, test-design, implementation | checks that grade the work itself (`checks/`), and a pairwise judge |
 
 The first three are synthetic and generated from a fixed seed
 (`node datasets/tasks/<name>/gen/generate.mjs` rebuilds the same files).
@@ -39,7 +39,7 @@ three generated sets; ten for agb-flow. Required-check passes:
 | claim-denials-snf-v2 | kimi-k3 28/30, sonnet-5 15/30, glm-5.3 12/30, deepseek-flash 11/30 | most misses are the redetermination deadline (receipt presumed 5 days after the notice); no candidate qualifies |
 | kyc-ubo-v2 | kimi-k3 26/30, sonnet-5 25/30, deepseek-flash 23/30, glm-5.3 21/30 | every model gets the ordinary items; misses are multiplied stakes and stakes held through two controlled companies |
 | contract-terms-long | every candidate 6/6 | length and scan noise do not separate these models: the cheapest is enough |
-| agb-flow | breakdown fable-5.1, test design opus-5.5, code deepseek-flash | 2–3 inputs a step: directional |
+| agb-flow | task-breakdown fable-5.1, test-design opus-5.5, implementation deepseek-flash | 2–3 inputs a step: directional |
 
 Each report opens with what the set evaluates and breaks the result down by
 input tag (ordinary items, each kind of trap, holdout split).
