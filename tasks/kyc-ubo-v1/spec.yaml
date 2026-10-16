@@ -20,6 +20,7 @@
 
 protocol_version: "0.3"
 run_name: kyc-ubo-v1
+description: "Can a model identify the beneficial owners of a company for corporate KYC when the rules are spelled out? 30 synthetic ownership structures (one to three layers); the prompt states the four rules (more than 25% direct, control of a company holding more than 25%, no multiplying through chains, managing-director fallback). A third are ordinary structures; the rest are traps at exactly 25%, exactly 50%, multiplied stakes and the fallback."
 budget_usd: 3
 
 workflow:
@@ -32,6 +33,7 @@ workflow:
       rubric_file: rubrics/ubo.md
       test_set:
         id: kyc-ubo-v1
+        labels_file: checks/manifest.json
         inputs:
           - ubo-001
           - ubo-002
@@ -93,6 +95,7 @@ evaluators:
   required_checks:
     ubo-check:
       kind: command
+      description: "The beneficial owners (name and basis), the fallback flag and the managing directors recorded under the fallback all match the answer key computed from the stated rules."
       argv: ["node", "checks/ubo-check.mjs"]
       version_files: [checks/ubo-check.mjs, checks/manifest.json]
       timeout_seconds: 30

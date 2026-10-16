@@ -15,6 +15,7 @@
 
 protocol_version: "0.3"
 run_name: kyc-ubo-v2-probe
+description: "Six hand-written German register extracts, to see whether a beneficial-owner set judged by German law (§ 3 GwG, BVA practice) would separate models before a generator was built. The prompt names the law but not its rules; each extract carries one trap (direct plus controlled stakes added, 6,250 vs 6,251 of 25,000 EUR, non-voting shares, two controlled vehicles, a KG's general partner, the Geschäftsführer fallback)."
 budget_usd: 1
 
 workflow:
@@ -58,6 +59,7 @@ evaluators:
   required_checks:
     ubo-check:
       kind: command
+      description: "The set of beneficial owners and of fictitious beneficial owners matches the hand-checked key, by name."
       argv: ["node", "checks/ubo-check.mjs"]
       version_files: [checks/ubo-check.mjs]
       timeout_seconds: 30

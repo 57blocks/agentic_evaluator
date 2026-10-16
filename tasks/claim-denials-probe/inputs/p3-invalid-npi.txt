@@ -1,0 +1,21 @@
+FACILITY: Maple Court Rehabilitation (synthetic)
+PAYER: Northgate Commercial Health (commercial plan, synthetic)
+
+CLAIM 90447 · SNF inpatient (bill type 0211)
+Member: Daniel Ostrowski · Service dates: 2025-06-01 to 2025-06-18 · Billed: $11,340.00
+Submitted to payer: 2025-06-25
+
+REMITTANCE (ERA dated 2025-07-03)
+Claim 90447 · Paid $0.00
+Adjustment: group CO, reason 16 — "Claim/service lacks information or has submission/billing error(s)."
+Remark N290 — "Missing/incomplete/invalid rendering provider primary identifier."
+
+CLAIM FORM EXCERPT
+Attending/rendering provider: Dr. Lena Marsh · NPI on claim: 1234567890 (fails the NPI check digit)
+Dr. Marsh's NPI in the credentialing file: 1356473829
+
+PAYER MANUAL EXCERPT — Northgate Commercial Health
+§3.2 Initial claims must be received within 180 days of the date of service.
+§5.1 A claim denied for missing or invalid information is not appealable. Send a corrected claim (frequency code 7) with the missing or corrected data.
+§5.2 Corrected claims must be received within 90 days of the remittance date.
+§8.1 Appeals of medical-necessity and authorization denials must be received within 60 days of the remittance date.

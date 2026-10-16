@@ -24,6 +24,7 @@
 
 protocol_version: "0.3"
 run_name: kyc-ubo-v2
+description: "Which model knows how German KYC identifies a company's beneficial owners (§ 3 GwG as the BVA Transparenzregister applies it)? 30 synthetic German register extracts with euro amounts; the prompt names the law but not its rules, which are in RULES.md, each quoted from the statute or the BVA FAQ. Ten ordinary items and twenty traps: nominal-amount boundaries, direct plus controlled stakes added, two controlled vehicles beside a 50/50 holding, non-voting shares, own shares, a KG's general partner, and the fallback."
 budget_usd: 5
 
 workflow:
@@ -36,6 +37,7 @@ workflow:
       rubric_file: rubrics/ubo.md
       test_set:
         id: kyc-ubo-v2
+        labels_file: checks/manifest.json
         inputs: [ubo2-001, ubo2-002, ubo2-003, ubo2-004, ubo2-005, ubo2-006, ubo2-007, ubo2-008, ubo2-009, ubo2-010, ubo2-011, ubo2-012, ubo2-013, ubo2-014, ubo2-015, ubo2-016, ubo2-017, ubo2-018, ubo2-019, ubo2-020, ubo2-021, ubo2-022, ubo2-023, ubo2-024, ubo2-025, ubo2-026, ubo2-027, ubo2-028, ubo2-029, ubo2-030]
       candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash]
       required_checks: [ubo-check]
@@ -68,6 +70,7 @@ evaluators:
   required_checks:
     ubo-check:
       kind: command
+      description: "The set of beneficial owners and of fictitious beneficial owners matches the key computed from RULES.md, by name; the stated basis is left to the judge."
       argv: ["node", "checks/ubo-check.mjs"]
       version_files: [checks/ubo-check.mjs, checks/manifest.json]
       timeout_seconds: 30

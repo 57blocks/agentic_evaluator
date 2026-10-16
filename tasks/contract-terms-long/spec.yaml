@@ -1,0 +1,91 @@
+# contract-terms-long — which model still extracts contract terms correctly
+# from a long, scanned document packet?
+#
+# Two hand-written probes (contract-terms-probe, -probe2: twelve short
+# agreements with structural traps) went 48/48 across four models. This set
+# tests what those did not: length and scan quality. Each packet is an
+# agreement of ~30 sections with the graded articles in the back half, five
+# schedules and six SOWs, each SOW stating its own term, cap and governing law
+# that do not override the agreement (about 9,000 words, ~20 pages). Noise
+# levels: clean, light and heavy OCR damage (character errors, hyphenated
+# wraps, page footers mid-sentence). Character damage never touches a graded
+# value, and gen/generate.mjs asserts each one is still in the text.
+#
+# This is the six-item first cut: if it separates the models, the generator
+# grows it to 30 with quotas on noise, length and trap.
+#
+# What it does not test: real-world contract variety (all packets come from
+# one clause library) or a wide schema (eight fields).
+#
+#   node tasks/contract-terms-long/gen/generate.mjs
+#   agenteval check-task contract-terms-long          # free
+#   agenteval run contract-terms-long --yes --html    # billed, about $1-2
+
+protocol_version: "0.3"
+run_name: contract-terms-long
+description: "Does contract-term extraction hold up on long, scanned document packets? Six synthetic packets of about 9,000 words (an agreement with the graded articles in its back half, five schedules, six SOWs with their own terms, caps and laws as distractors) at three scan-noise levels; character damage never touches a graded value. Extract eight terms as they stand on the status date."
+budget_usd: 3
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: extract
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/extract.md
+      rubric_file: rubrics/extract.md
+      test_set:
+        id: contract-terms-long
+        labels_file: checks/manifest.json
+        inputs: [ct-001, ct-002, ct-003, ct-004, ct-005, ct-006]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash]
+      required_checks: [terms-check]
+      judged_dimensions: [faithful]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 600
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    terms-check:
+      kind: command
+      description: "All eight extracted fields match the key the generator computed (amendments applied by effective date and signature)."
+      argv: ["node", "checks/terms-check.mjs"]
+      version_files: [checks/terms-check.mjs, checks/manifest.json]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/extract.md
+    methods: [absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/extract.md
+  default_temperature: 0
