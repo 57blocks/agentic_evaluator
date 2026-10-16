@@ -31,6 +31,44 @@ test("client: with a snapshot, reads come from it and writes are refused", async
   }
 });
 
+test("export: secret-looking task files are left out, and local paths are scrubbed", { skip: needsBuild }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "dash-export-ws-"));
+  const task = path.join(root, "tasks", "demo");
+  await fs.mkdir(task, { recursive: true });
+  await fs.writeFile(
+    path.join(task, "spec.yaml"),
+    [
+      'protocol_version: "0.3"',
+      "run_name: demo",
+      "workflow:",
+      "  steps:",
+      "    - id: s",
+      '      version: "1"',
+      "      test_set: { id: t, inputs: [a] }",
+      "      candidate_ids: [m1]",
+      "candidates:",
+      "  - { id: m1, model: x/y }",
+      "evaluators:",
+      "  judge: { model: g/j, rubric_file: r.md }",
+      "execution: { trials_per_case: 1 }",
+      "x-harness: { producer: prompt, prompt_file: p.md }",
+      "",
+    ].join("\n"),
+  );
+  await fs.writeFile(path.join(task, "notes.md"), `see ${os.homedir()}/private/thing and ${root}/tasks\n`);
+  for (const f of [".env", ".env.local", "deploy.pem", "id_rsa", "aws-credentials.json"]) await fs.writeFile(path.join(task, f), "SECRET=1\n");
+  const out = await fs.mkdtemp(path.join(os.tmpdir(), "dash-export-"));
+
+  const r = await exportDashboard(workspaceAt(root), out);
+
+  const data = (await Promise.all((await fs.readdir(path.join(out, "data"))).map((f) => fs.readFile(path.join(out, "data", f), "utf-8")))).join("");
+  assert.doesNotMatch(data, /SECRET=1/, "no secret file's content");
+  assert.deepEqual(r.skipped.sort(), ["demo/.env", "demo/.env.local", "demo/aws-credentials.json", "demo/deploy.pem", "demo/id_rsa"]);
+  assert.ok(!data.includes(os.homedir()), "no home directory path");
+  assert.ok(!data.includes(root), "no absolute workspace path");
+  assert.match(data, /see ~\/private\/thing/);
+});
+
 test("export: index.html carries the app inline, data scripts hold every page's reads, report pages sit beside it", { skip: needsBuild }, async () => {
   const out = await fs.mkdtemp(path.join(os.tmpdir(), "dash-export-"));
   const r = await exportDashboard(workspaceAt(path.resolve("datasets")), out);

@@ -37,6 +37,8 @@ export async function cmdDash(args: ParsedArgs, io: Io): Promise<ExitCode> {
     const r = await exportDashboard(ws, path.resolve(exportTo));
     const mb = (r.bytes / 1024 / 1024).toFixed(1);
     io.out(`✔ ${displayPath(path.join(r.outDir, "index.html"))} — ${r.responses} responses (${mb} MB), ${r.reports} report page(s)\n`);
+    if (r.skipped.length > 0) io.out(`  Left out as secret-looking: ${r.skipped.join(", ")}\n`);
+    io.out("  Local paths are replaced: the workspace by its folder name, your home directory by ~.\n");
     io.out(`  Open it in a browser, or zip ${displayPath(r.outDir)} and send it.\n`);
     return EXIT.ok;
   }

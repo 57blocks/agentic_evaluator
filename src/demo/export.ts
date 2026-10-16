@@ -18,6 +18,7 @@
  */
 
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createDemoServer, listenDemo } from "./server.js";
@@ -29,6 +30,15 @@ const STATIC_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".
 
 /** Evidence files a run page reads from each step (client/features/evidence). */
 const EVIDENCE_FILES = ["scores.jsonl", "evaluations.jsonl", "GAPS.md"];
+
+/**
+ * Task files that look like secrets never go into an export, which is made to
+ * be sent to someone: dotenv files, keys and certificates, credential stores.
+ * The live dashboard serves only to this machine; an export leaves it.
+ */
+const SECRET_FILE = /(^|\/)(\.env(\..*)?|\.npmrc|\.netrc|\.pgpass|id_(rsa|dsa|ecdsa|ed25519)(\.pub)?)$|\.(pem|key|p12|pfx|keystore)$|credential|secret/i;
+
+export const isSecretFile = (rel: string): boolean => SECRET_FILE.test(rel);
 
 /** Keep each data script well under what a browser parses comfortably in one go. */
 const CHUNK_BYTES = 8 * 1024 * 1024;
@@ -43,6 +53,8 @@ export interface ExportResult {
   responses: number;
   reports: number;
   bytes: number;
+  /** Task files left out as secret-looking, as `<task>/<path>`. */
+  skipped: string[];
 }
 
 interface CatalogShape {
@@ -50,12 +62,37 @@ interface CatalogShape {
   unfiled?: RunView[];
 }
 
-async function record(base: string, urls: Iterable<string>, into: Map<string, Recorded>): Promise<void> {
+/**
+ * Local paths say who made the export and where their files live: the
+ * workspace root becomes its folder name, the home directory `~`.
+ */
+function scrubber(root: string): (text: string) => string {
+  const home = os.homedir();
+  const name = path.basename(root);
+  const swaps: Array<[string, string]> = [[root, name], [home, "~"]];
+  return (text) => swaps.reduce((t, [from, to]) => (from.length > 1 ? t.split(from).join(to) : t), text);
+}
+
+async function record(base: string, urls: Iterable<string>, into: Map<string, Recorded>, scrub: (t: string) => string): Promise<void> {
   for (const url of urls) {
     if (into.has(url)) continue;
     const res = await fetch(base + url);
-    into.set(url, { status: res.status, body: await res.text() });
+    into.set(url, { status: res.status, body: scrub(await res.text()) });
   }
+}
+
+/** The catalog without the secret-looking files, so the export neither lists nor holds them. */
+function withoutSecrets(catalog: CatalogShape): { catalog: CatalogShape; skipped: string[] } {
+  const skipped: string[] = [];
+  const tasks = catalog.tasks.map((t) => {
+    const files = (t.files ?? []).filter((rel) => {
+      if (!isSecretFile(rel)) return true;
+      skipped.push(`${t.name}/${rel}`);
+      return false;
+    });
+    return { ...t, files };
+  });
+  return { catalog: { ...catalog, tasks }, skipped };
 }
 
 function runsOf(catalog: CatalogShape): RunView[] {
@@ -132,10 +169,12 @@ export async function exportDashboard(ws: Workspace, outDir: string): Promise<Ex
   const server = createDemoServer(ws);
   const base = await listenDemo(server, 0);
   try {
+    const scrub = scrubber(ws.root);
     const responses = new Map<string, Recorded>();
-    await record(base, ["/api/catalog", "/api/overview"], responses);
-    const catalog = JSON.parse(responses.get("/api/catalog")!.body) as CatalogShape;
-    await record(base, urlsFor(catalog), responses);
+    await record(base, ["/api/catalog", "/api/overview"], responses, scrub);
+    const { catalog, skipped } = withoutSecrets(JSON.parse(responses.get("/api/catalog")!.body) as CatalogShape);
+    responses.set("/api/catalog", { status: 200, body: JSON.stringify(catalog) });
+    await record(base, urlsFor(catalog), responses, scrub);
 
     await fs.rm(outDir, { recursive: true, force: true });
     await fs.mkdir(path.join(outDir, "data"), { recursive: true });
@@ -149,13 +188,13 @@ export async function exportDashboard(ws: Workspace, outDir: string): Promise<Ex
       if (!res.ok) continue;
       const file = path.join(outDir, r.rel);
       await fs.mkdir(path.dirname(file), { recursive: true });
-      await fs.writeFile(file, await res.text(), "utf-8");
+      await fs.writeFile(file, scrub(await res.text()), "utf-8");
     }
 
     const meta = { exportedAt: new Date().toISOString(), workspace: path.basename(ws.root) };
     await fs.writeFile(path.join(outDir, "index.html"), await pageHtml(dataScripts, meta), "utf-8");
     const bytes = chunks.reduce((n, c) => n + Buffer.byteLength(c), 0);
-    return { outDir, responses: responses.size, reports: reports.length, bytes };
+    return { outDir, responses: responses.size, reports: reports.length, bytes, skipped };
   } finally {
     server.close();
   }
