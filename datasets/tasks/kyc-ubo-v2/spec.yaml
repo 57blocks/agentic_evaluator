@@ -18,9 +18,9 @@
 # is not graded (one ground is enough, FAQ Teil 1 B I Nr. 9); the judge reads
 # it beside the check.
 #
-#   node examples/tasks/kyc-ubo-v2/gen/generate.mjs     # rebuild the set (same seed, same set)
-#   agenteval check-task examples/tasks/kyc-ubo-v2            # free
-#   agenteval run examples/tasks/kyc-ubo-v2 --yes --html      # billed
+#   node datasets/tasks/kyc-ubo-v2/gen/generate.mjs     # rebuild the set (same seed, same set)
+#   agenteval check-task datasets/tasks/kyc-ubo-v2            # free
+#   agenteval run datasets/tasks/kyc-ubo-v2 --yes --html      # billed
 
 protocol_version: "0.3"
 run_name: kyc-ubo-v2

@@ -17,9 +17,9 @@
 # benefit period; days past day 100 of the same period; and a three-day stay
 # that was met when counted from the inpatient admission order.
 #
-#   node examples/tasks/claim-denials-snf-v2/gen/generate.mjs     # rebuild (same seed, same set)
-#   agenteval check-task examples/tasks/claim-denials-snf-v2            # free
-#   agenteval run examples/tasks/claim-denials-snf-v2 --yes --html      # billed
+#   node datasets/tasks/claim-denials-snf-v2/gen/generate.mjs     # rebuild (same seed, same set)
+#   agenteval check-task datasets/tasks/claim-denials-snf-v2            # free
+#   agenteval run datasets/tasks/claim-denials-snf-v2 --yes --html      # billed
 
 protocol_version: "0.3"
 run_name: claim-denials-snf-v2
