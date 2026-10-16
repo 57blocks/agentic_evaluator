@@ -278,6 +278,22 @@ The agent samples run those agents **unsandboxed on your machine** — read the
 warnings in their `spec.yaml` and see [Safety](#safety) first. What an agent
 spends on its own provider is invisible to agenteval and its budget.
 
+## Datasets
+
+The repository (not the npm package) holds four evaluation datasets in
+[`datasets/`](datasets/README.md): Medicare claim denials, KYC beneficial
+owners, contract terms, and agb's own flow. Each has an answer key, the rules
+behind it where rules decide the answer, and one finished run, so you can read
+its results without paying for a run. From a clone:
+
+```bash
+agenteval dash --workspace datasets        # browse the four sets and their reports
+open datasets/tasks/*/runs/*/report.html   # or open the reports directly
+```
+
+[`datasets/README.md`](datasets/README.md) says what each set evaluates, where
+its answers come from, and what its run found.
+
 ## Concepts
 
 - **Workspace** — a directory with a `tasks/` folder. Commands find it by
