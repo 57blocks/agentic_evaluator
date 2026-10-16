@@ -146,3 +146,33 @@ export function runProcess(
     });
   });
 }
+
+/**
+ * Stop every process whose command line names `dir`: what an agent started
+ * and detached from its process group (a `tsx watch` dev server, `nohup
+ * npm run dev &`) survives the group kill and runs on after the trial,
+ * holding ports and memory. Matched on the dir's real path too, since macOS
+ * temp dirs show as /private/var/... in a process table.
+ */
+export async function killProcessesUnder(dir: string): Promise<number> {
+  const { realpath } = await import("node:fs/promises");
+  const { execFile } = await import("node:child_process");
+  const paths = [...new Set([dir, await realpath(dir).catch(() => dir)])];
+  let killed = 0;
+  for (const p of paths) {
+    const pids = await new Promise<number[]>((resolve) =>
+      execFile("pgrep", ["-f", p], (err, out) =>
+        resolve(err ? [] : String(out).split("\n").map(Number).filter((n) => n > 0 && n !== process.pid)),
+      ),
+    );
+    for (const pid of pids) {
+      try {
+        process.kill(pid, "SIGKILL");
+        killed += 1;
+      } catch {
+        // Gone already.
+      }
+    }
+  }
+  return killed;
+}

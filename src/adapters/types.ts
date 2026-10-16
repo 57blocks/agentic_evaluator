@@ -53,6 +53,12 @@ export interface ExecutionContext {
 
 export interface CandidateResult {
   /**
+   * agent-cli: what the command printed (stdout, then stderr; tails). Its
+   * answer is the files it left, so without this the agent's own account of
+   * a failure ("blocked on a permission", "budget spent") is lost.
+   */
+  log?: string;
+  /**
    * How the command was executed. Recorded rather than inferred: whether an
    * agent ran sandboxed or on the harness's own machine is part of what a
    * reader needs to weigh the result.
@@ -82,12 +88,15 @@ export type AdapterErrorKind = "timeout" | "cancelled" | "spawn" | "unknown";
 export class AdapterError extends Error {
   readonly kind: AdapterErrorKind;
   readonly ms: number;
+  /** What the command printed before it was stopped (a timeout), when there was a command. */
+  readonly log?: string;
 
-  constructor(message: string, fields: { kind: AdapterErrorKind; ms: number }) {
+  constructor(message: string, fields: { kind: AdapterErrorKind; ms: number; log?: string }) {
     super(message);
     this.name = "AdapterError";
     this.kind = fields.kind;
     this.ms = fields.ms;
+    if (fields.log !== undefined) this.log = fields.log;
   }
 }
 

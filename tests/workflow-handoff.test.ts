@@ -256,3 +256,17 @@ test("check-task blocks on a missing env var and a cap the step never sets, and 
   assert.ok(codes.includes("blocking:candidate.no-cost-cap"), codes.join(" "));
   assert.ok(codes.includes("warning:candidate.unpriced"), codes.join(" "));
 });
+
+test("workflow.e2e.steps raises a chained step's cap and time limit in the arms only", async () => {
+  const suites = await loadWorkflow(
+    await chainTask("  e2e:\n    steps:\n      review: { max_cost_per_trial_usd: 80, maximum_completion_time_seconds: 18000 }\n"),
+  );
+  const { e2eArmChain } = await import("../src/core/plan.js");
+
+  const arm = e2eArmChain(suites);
+
+  assert.equal(arm[1]!.maxCostPerTrialUsd, 80);
+  assert.equal(arm[1]!.timeoutMs, 18_000_000);
+  assert.equal(suites[1]!.maxCostPerTrialUsd, undefined, "the step's own evaluation is unchanged");
+  await assert.rejects(loadWorkflow(await chainTask("  e2e:\n    steps:\n      nowhere: { max_cost_per_trial_usd: 1 }\n")), /e2e\.steps nowhere are not steps of the chain/);
+});

@@ -88,9 +88,10 @@ export function e2eRootInputs(root: Suite): string[] {
 /** The chain as the arms run it: the last step graded by `e2e.final_checks` when declared. */
 export function e2eArmChain(chain: readonly Suite[]): Suite[] {
   const last = chain.length - 1;
-  return chain.map((s, i) =>
-    i === last && s.e2eFinalCheck ? { ...s, check: s.e2eFinalCheck, requiredChecks: [s.e2eFinalCheck.id] } : s,
-  );
+  return chain.map((s, i) => {
+    const limited = s.e2eLimits ? { ...s, ...s.e2eLimits } : s;
+    return i === last && s.e2eFinalCheck ? { ...limited, check: s.e2eFinalCheck, requiredChecks: [s.e2eFinalCheck.id] } : limited;
+  });
 }
 
 export function planE2e(suites: readonly Suite[]): E2ePlan | null {
