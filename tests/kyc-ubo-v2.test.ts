@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const TASK = path.resolve("examples/tasks/kyc-ubo-v2");
+const TASK = path.resolve("datasets/tasks/kyc-ubo-v2");
 const SOLVER = pathToFileURL(path.join(TASK, "gen", "solve.mjs")).href;
 const CHECK = path.join(TASK, "checks", "ubo-check.mjs");
 

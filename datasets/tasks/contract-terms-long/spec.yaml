@@ -17,9 +17,9 @@
 # What it does not test: real-world contract variety (all packets come from
 # one clause library) or a wide schema (eight fields).
 #
-#   node examples/tasks/contract-terms-long/gen/generate.mjs
-#   agenteval check-task examples/tasks/contract-terms-long          # free
-#   agenteval run examples/tasks/contract-terms-long --yes --html    # billed, about $1-2
+#   node datasets/tasks/contract-terms-long/gen/generate.mjs
+#   agenteval check-task datasets/tasks/contract-terms-long          # free
+#   agenteval run datasets/tasks/contract-terms-long --yes --html    # billed, about $1-2
 
 protocol_version: "0.3"
 run_name: contract-terms-long

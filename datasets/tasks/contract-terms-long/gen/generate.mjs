@@ -4,7 +4,7 @@
  * packet), references/<id>.txt (the answer key), checks/manifest.json (tags,
  * split) and contract-terms-long.jsonl (the whole set).
  *
- *   node examples/tasks/contract-terms-long/gen/generate.mjs
+ *   node datasets/tasks/contract-terms-long/gen/generate.mjs
  *
  * Same seed, same set. Every graded value is asserted to survive the noise
  * pass (noise.mjs `readable`), or generation fails.
