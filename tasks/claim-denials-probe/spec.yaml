@@ -12,8 +12,8 @@
 # benefit exhausted with Medicaid secondary and a "whichever is later"
 # deadline (p6). Answers are hand-checked; each key's "why" says what decides it.
 #
-#   agenteval check-task datasets/tasks/claim-denials-probe
-#   agenteval run datasets/tasks/claim-denials-probe --yes --html     # billed, well under $1
+#   agenteval check-task tasks/claim-denials-probe
+#   agenteval run tasks/claim-denials-probe --yes --html     # billed, well under $1
 
 protocol_version: "0.3"
 run_name: claim-denials-probe

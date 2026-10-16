@@ -57,20 +57,6 @@ gen/                the generator, seeded
 runs/<run>/         one finished run, with report.html
 ```
 
-## Earlier versions and probes
-
-How each set got its shape. A probe is a few hand-written items run against
-the candidates before a generator was built, to see whether a design
-separates them at all. Their runs are not kept in the repository.
-
-| task | what it was | what it showed |
-|---|---|---|
-| [`kyc-ubo-v1`](tasks/kyc-ubo-v1/spec.yaml) | 30 structures, the rules stated in the prompt | every model 30/30: stated rules make it reading, so v2 states only the law |
-| [`kyc-ubo-v2-probe`](tasks/kyc-ubo-v2-probe/spec.yaml) | 6 German register extracts, one trap each | two of four models missed stakes held through two controlled companies: worth a generator |
-| [`contract-terms-probe`](tasks/contract-terms-probe/spec.yaml) | 6 short agreements, one trap each | every model 6/6 |
-| [`contract-terms-probe2`](tasks/contract-terms-probe2/spec.yaml) | 6 packets where the trap is how documents relate | every model 6/6; length and scan noise were tried next (`contract-terms-long`) |
-| [`claim-denials-probe`](tasks/claim-denials-probe/spec.yaml) | 6 denials with the payer's manual in each file | 23/24: with the rules in the file, triage is reading; v2 drops the manual |
-
-The lesson across all three: a set separates models when the answer depends
-on rules the model must know (KYC v2, claim denials v2), not when the rules or
-the answer are in the text (KYC v1, every contract set).
+The earlier versions and hand-written probes that shaped these sets
+(`kyc-ubo-v1`, `kyc-ubo-v2-probe`, `contract-terms-probe`, `contract-terms-probe2`,
+`claim-denials-probe`) are in the repository's `tasks/`.

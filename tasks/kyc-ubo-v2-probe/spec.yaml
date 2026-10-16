@@ -10,8 +10,8 @@
 # Geschäftsführer and not the Prokurist (p6). Answers are hand-checked; the
 # reference's "rule" field says what decides each one.
 #
-#   agenteval check-task datasets/tasks/kyc-ubo-v2-probe
-#   agenteval run datasets/tasks/kyc-ubo-v2-probe --yes --html     # billed, well under $1
+#   agenteval check-task tasks/kyc-ubo-v2-probe
+#   agenteval run tasks/kyc-ubo-v2-probe --yes --html     # billed, well under $1
 
 protocol_version: "0.3"
 run_name: kyc-ubo-v2-probe
