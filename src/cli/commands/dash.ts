@@ -38,6 +38,8 @@ export async function cmdDash(args: ParsedArgs, io: Io): Promise<ExitCode> {
     const mb = (r.bytes / 1024 / 1024).toFixed(1);
     io.out(`✔ ${displayPath(path.join(r.outDir, "index.html"))} — ${r.responses} responses (${mb} MB), ${r.reports} report page(s)\n`);
     if (r.skipped.length > 0) io.out(`  Left out as secret-looking: ${r.skipped.join(", ")}\n`);
+    if (r.redacted > 0) io.out(`  Replaced ${r.redacted} key-like value(s) with [redacted] in reports, outputs and evidence\n`);
+    io.out("  Secret checks catch common key formats, not every secret: look before you send it.\n");
     io.out("  Local paths are replaced: the workspace by its folder name, your home directory by ~.\n");
     io.out(`  Open it in a browser, or zip ${displayPath(r.outDir)} and send it.\n`);
     return EXIT.ok;

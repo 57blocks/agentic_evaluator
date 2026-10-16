@@ -69,6 +69,55 @@ test("export: secret-looking task files are left out, and local paths are scrubb
   assert.match(data, /see ~\/private\/thing/);
 });
 
+test("redaction: common key formats are replaced, ordinary text is not", async () => {
+  const { redactSecrets } = await import("../src/demo/export.js");
+  const keys = [
+    "sk-or-v1-0123456789abcdef0123456789abcdef",
+    "sk-ant-api03-abcdefghijklmnopqrstuvwxyz012345",
+    "AKIAIOSFODNN7EXAMPLE",
+    "ghp_0123456789abcdefghijklmnopqrstuvwxyz",
+    "xoxb-1234567890-abcdefghij",
+    "-----BEGIN RSA PRIVATE KEY-----",
+  ];
+  for (const k of keys) {
+    const { text, count } = redactSecrets(`before ${k} after`);
+    assert.equal(count, 1, k);
+    assert.equal(text, "before [redacted] after", k);
+  }
+  const assigned = redactSecrets('OPENROUTER_API_KEY="abcdEFGH1234ijklMNOP5678"');
+  assert.equal(assigned.count, 1);
+  assert.doesNotMatch(assigned.text, /abcdEFGH1234/);
+  const dotenv = redactSecrets("OPENAI_API_KEY=abcdEFGH1234ijklMNOP5678\nOTHER=1");
+  assert.equal(dotenv.count, 1);
+  assert.equal(dotenv.text, "OPENAI_API_KEY=[redacted]\nOTHER=1");
+  for (const plain of [
+    "The redetermination deadline is 125 days after the notice; see token budget in RULES.md.",
+    "env: { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN: process.env.ANTHROPIC_AUTH_TOKEN }",
+    "settlementToken: paymentTokenEnum,",
+    'const token = document.getElementById("csrf");',
+    '"password": "correct horse battery staple"',
+  ]) {
+    assert.deepEqual(redactSecrets(plain), { text: plain, count: 0 }, plain);
+  }
+});
+
+test("export: a task file whose content holds a key is left out, whatever its name", { skip: needsBuild }, async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "dash-export-ws-"));
+  const task = path.join(root, "tasks", "demo");
+  await fs.mkdir(task, { recursive: true });
+  await fs.cp(path.resolve("datasets/tasks/kyc-ubo-v2/spec.yaml"), path.join(task, "spec.yaml"));
+  await fs.writeFile(path.join(task, "config.json"), '{"apiKey": "sk-or-v1-0123456789abcdef0123456789abcdef"}\n');
+  await fs.writeFile(path.join(task, "notes.md"), "nothing secret here\n");
+  const out = await fs.mkdtemp(path.join(os.tmpdir(), "dash-export-"));
+
+  const r = await exportDashboard(workspaceAt(root), out);
+
+  const data = (await Promise.all((await fs.readdir(path.join(out, "data"))).map((f) => fs.readFile(path.join(out, "data", f), "utf-8")))).join("");
+  assert.ok(r.skipped.includes("demo/config.json"), r.skipped.join(", "));
+  assert.doesNotMatch(data, /sk-or-v1-0123456789/);
+  assert.match(data, /nothing secret here/);
+});
+
 test("export: index.html carries the app inline, data scripts hold every page's reads, report pages sit beside it", { skip: needsBuild }, async () => {
   const out = await fs.mkdtemp(path.join(os.tmpdir(), "dash-export-"));
   const r = await exportDashboard(workspaceAt(path.resolve("datasets")), out);
