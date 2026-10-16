@@ -30,6 +30,7 @@ import type { WorkflowRecord } from "./canon/workflow.js";
 import { planFromRun, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
 import { NO_PICK, plural, sha8 } from "./report-format.js";
+import { sliceRows, type SliceRow } from "./report-slices.js";
 import {
   FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, recommendationSentence, type GateRow,
 } from "./report-copy.js";
@@ -334,6 +335,8 @@ export interface StepReport {
   plan: { candidates: number; inputs: number; trialsPer: number; trials: number };
   /** What this run tested, from its frozen manifest. */
   tested: PlanStep;
+  /** Required-check results per input tag and split; empty when the task labels no inputs. */
+  slices: SliceRow[];
   facts: Array<{ label: string; value: string }>;
   verdict: {
     firmness: Recommendation["firmness"];
@@ -399,6 +402,7 @@ export function buildStepReport(b: RunBundle): StepReport {
     startedAt: m.started_at.slice(0, 16).replace("T", " "),
     plan: { candidates: views.length, inputs, trialsPer: m.execution.trials_per_case, trials: b.trials.length },
     tested: planFromRun(b),
+    slices: sliceRows(b.about?.labels ?? null, b.trials, views.map((v) => v.id), m.evaluators.required_checks[0] ?? null),
     facts: [
       { label: "Spec", value: `${m.spec.path ?? "—"} · sha256 ${sha8(m.spec.sha256)}` },
       { label: "Test set", value: `${m.test_set.id ?? "—"} · ${inputs} input(s)` },

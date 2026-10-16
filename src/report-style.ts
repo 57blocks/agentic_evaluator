@@ -44,6 +44,7 @@ tbody tr{transition:background .12s ease}tbody tr:hover{background:var(--accent-
 ol.trace{margin:0;padding-left:1.2em;font-size:13px;color:var(--ink-2);display:grid;gap:8px}
 .pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
 .state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
+td.ok{color:var(--ok-fg)}td.bad{color:var(--bad-fg)}
 .two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
 .two-col>*{min-width:0;overflow:hidden}
 .two-col .table-wrap{overflow-x:auto}
