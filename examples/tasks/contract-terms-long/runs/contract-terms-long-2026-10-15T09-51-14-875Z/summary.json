@@ -1,0 +1,267 @@
+{
+  "run": "contract-terms-long-2026-10-15T09-51-14-875Z",
+  "step": "extract",
+  "inputs": [
+    "ct-001",
+    "ct-002",
+    "ct-003",
+    "ct-004",
+    "ct-005",
+    "ct-006"
+  ],
+  "candidates": [
+    {
+      "candidate": "sonnet-5",
+      "valid_attempts": 6,
+      "classified": 6,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "completion_states": {
+        "success": 6,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 6,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 6,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.045,
+      "p50_ms": 2859,
+      "p95_ms": 6003
+    },
+    {
+      "candidate": "kimi-k3",
+      "valid_attempts": 6,
+      "classified": 6,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "completion_states": {
+        "success": 6,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 6,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 6,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.021543,
+      "p50_ms": 7040,
+      "p95_ms": 7778
+    },
+    {
+      "candidate": "glm-5.3",
+      "valid_attempts": 6,
+      "classified": 6,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "completion_states": {
+        "success": 6,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 6,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 6,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.016625,
+      "p50_ms": 15383,
+      "p95_ms": 23421
+    },
+    {
+      "candidate": "deepseek-v4.1-flash",
+      "valid_attempts": 6,
+      "classified": 6,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "completion_states": {
+        "success": 6,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 6,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 6,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.006463,
+      "p50_ms": 13808,
+      "p95_ms": 20644
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "6 inputs; fewer than 10",
+      "no minimum meaningful difference declared"
+    ]
+  },
+  "integrity": {
+    "events": 96,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 67,
+    "threshold_ms": 300000,
+    "wall_ms": 178121,
+    "in_flight_gaps": 0
+  },
+  "budget": {
+    "limit_usd": 3,
+    "spent_usd": 0.975516,
+    "stopped_early": false,
+    "skipped": {
+      "generation": 0,
+      "judging": 0,
+      "scoring": 0
+    }
+  },
+  "judge_discrimination": {
+    "overall": {
+      "dimension": "overall",
+      "scored": 24,
+      "distinct": 2,
+      "min": 3,
+      "max": 5,
+      "saturated": false
+    },
+    "dimensions": [
+      {
+        "dimension": "faithful",
+        "scored": 24,
+        "distinct": 2,
+        "min": 3,
+        "max": 5,
+        "saturated": false
+      }
+    ],
+    "saturated": [],
+    "discriminates": true
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "terms-check",
+      "version": "cmd-fbb3f38e+files-be659c66",
+      "pass": 24,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "absolute-1-5",
+      "version": "google/gemini-3.1-pro-preview+rubric-6eac7a68+tpl-9d83475a",
+      "pass": 24,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}

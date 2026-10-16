@@ -1,0 +1,31 @@
+{
+  "projectKind": "client",
+  "mode": "greenfield",
+  "disabled": [],
+  "severityOverrides": {},
+  "domainPacks": [],
+  "subsystem": {
+    "minEndpoints": 15,
+    "minDomains": 2,
+    "maxDomainShare": 0.4
+  },
+  "models": {
+    "spec": "opus",
+    "coding": "sonnet",
+    "escalation": "opus"
+  },
+  "stack": {
+    "languages": [
+      "ts"
+    ],
+    "frontend": [
+      "react-router"
+    ],
+    "backend": [
+      "fastify"
+    ],
+    "data": [
+      "prisma"
+    ]
+  }
+}

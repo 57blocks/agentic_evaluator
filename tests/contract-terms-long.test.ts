@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const TASK = path.resolve("tasks/contract-terms-long");
+const TASK = path.resolve("examples/tasks/contract-terms-long");
 const mod = (file: string) => import(pathToFileURL(path.join(TASK, "gen", file)).href);
 const CHECK = path.join(TASK, "checks", "terms-check.mjs");
 

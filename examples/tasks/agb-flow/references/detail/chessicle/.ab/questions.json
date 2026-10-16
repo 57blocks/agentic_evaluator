@@ -1,0 +1,473 @@
+{
+  "questions": [
+    {
+      "id": "Q-001",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "question": "F008：对手的「最近评分」到底是必填还是选填？原文两句互斥。",
+      "source": "docs/PRD.source.md · F008：「The user must put in the opponent's most recent rating」与「If the user does not put in the most recent rating, ai can still identify the correct person if the inputted rating matches one of the previous ratings」",
+      "cost": "契约里这个字段是 required 还是 optional 会被 api-routes.json 固化，前端表单校验与后端消歧分支都照它建，改一次动三处",
+      "answer": "选填。姓名必填；评分与联合会是可选消歧线索。消歧顺序 name → (当前 rating ∪ ratings.uschess.org 历史 rating) → federation；三者都匹配不上时返回 200 与空 matches（reason: no_public_info），不报错。原文 F008 里那句 must 读成强烈建议，不是字段约束。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-002",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "question": "F010 评分评价：v1 是纯 Web 应用（无应用商店），而指标写的是「4–5 星评价」。评价收集在哪、走什么平台、放在哪个位置？",
+      "source": "docs/PRD.source.md · F010「Exact placement, platform, and review collection method are to be confirmed」+ Metrics「Rating/review target: 4–5 star reviews」+ In Scope「Mobile web and desktop web application」",
+      "cost": "站内评分要一张表加一个端点；跳外部商店则 v1 没有商店可跳。定不下来这条 P0 功能没有落点，且它没有验收标准",
+      "answer": "站内评分。落在 PAGE-007 分析报告看完后的弹层：IC-17 StarRating（1–5 星 + 可选文字），POST /api/reviews { stars: 1..5, text?: string }，实体 Review { userId, gameId, stars, text, createdAt }。验收标准 AC-009：看完一份分析报告后首次弹出，提交或关闭后 30 天内不再弹。Metrics 里的 4–5 星指的是这个站内分数，不是应用商店。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-003",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "detail",
+        "qa"
+      ],
+      "question": "US001 的标题与故事句在原文里缺失（只剩验收标准）。归一化按验收标准补了标题「Upload a Notation Sheet Photo」，这个理解对吗？",
+      "source": "docs/PRD.source.md 第 121–127 行：`## User Flow` 之后直接是 `Acceptance Criteria:`，没有 `### US001` 标题",
+      "cost": "AT-* 要锚到 AC-001，故事主体错了会让这条验收测试测错东西",
+      "answer": "对。US-001 = Upload a Notation Sheet Photo。故事句补成：作为一个刚打完比赛的棋手，我想拍一张记谱纸就把对局录入，不用逐步手敲。与 F005 对应，验收标准 AC-001 不变。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-004",
+      "stage": "prd",
+      "kind": "asset",
+      "blocks": [
+        "detail"
+      ],
+      "question": "原文 Overview 里那段「Bug:」——「plz use the chess piece style alpha」——是 v1 的棋子样式要求，还是上一轮对话的临时备注？",
+      "source": "docs/PRD.source.md · Overview 段：「Bug: The chess pieces are wonky and the ai can't fix it … so plz use the chess piece style alpha」",
+      "cost": "是要求的话它是一条设计 token / 资产约束，要进 UI 契约；当成备注忽略掉的话棋盘会用默认棋子，而原文明确说那分不清象和马",
+      "answer": "是要求。棋盘棋子使用 alpha piece set（开源棋子图集），不用默认图集。理由写在原文里：默认图集分不清象/马/兵。落成一条设计约束进 UI_CONTRACT.md 与 .ab/design-tokens.json。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-005",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "detail",
+        "qa"
+      ],
+      "question": "EH008（上传的不是记谱纸/不是棋类图片）：系统行为、用户文案、兜底三项原文全是 To be confirmed。怎么办？",
+      "source": "docs/PRD.source.md · EH008：System behavior / User feedback / Recovery 三行均为 To be confirmed",
+      "cost": "这是上传端点的错误契约的一支，定不下来后端不知道返回什么码、前端不知道渲染什么态",
+      "answer": "当成预扫失败的一种，只是文案不同。图像健康检查不过 → 走与 EH001 同一个 retake_required 状态，文案改成「这张图里没有看到记谱纸，请拍记录了着法的记谱纸」。不另开错误码、不另加前端状态。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-006",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "question": "EH009（同名对手过多）的兜底是什么？原文只写了「要求补充评分或联合会」，兜底为 To be confirmed。",
+      "source": "docs/PRD.source.md · EH009 · Recovery / fallback: To be confirmed",
+      "cost": "补了信息仍然分不出来时的行为没有定义 —— 那是对手检索端点最常见的一条返回",
+      "answer": "列出候选让用户指认。返回 200 { status: \"ambiguous\", candidates: [{ name, rating, federation, lastActive, sourceUrl }] }，渲染在 PAGE-009 已有的 disambiguation 状态里，不新增页面。候选超过 N 条时才回退到「请补充评分或联合会」。N 的取值归 arch。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-007",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "detail"
+      ],
+      "question": "EH003（分析崩溃重试一次仍失败 → 局部报告）的用户可见文案怎么写？",
+      "source": "docs/PRD.source.md · EH003 · User feedback: To be confirmed",
+      "cost": "局部报告这个状态没有文案，用户会以为分析完整",
+      "answer": "报告顶部一条横幅：「这份分析没能跑完：前 N 步已分析，第 N+1 步起缺失。重试这局」+ 一个重试按钮；未分析的步在着法表里置灰。量化到具体哪一步，用户才判得了还能不能用。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-008",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "detail"
+      ],
+      "question": "EH005：家长验证码过期/未收到，重发之后仍然完成不了同意，用户还想用这个 app —— 后续流程是什么？",
+      "source": "docs/PRD.source.md · EH005 · 「Additional follow-up flow if the user still wants to use the app is to be confirmed」",
+      "cost": "这是儿童注册最常见的掉队点，没有后续流程意味着账号卡在 code_sent 状态无处可去",
+      "answer": "账号挂起，随时可继续。账号停在 awaiting_consent 状态，孩子下次登录直接回到同意屏，可重发验证码或改家长邮箱；未同意前不能上传、不存任何对局数据。N 天后仍未完成则自动删除，N 的取值归 arch。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-009",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch"
+      ],
+      "question": "EH006：家长拒绝同意后账号被删除，恢复路径原文为 To be confirmed —— 同一个邮箱还能不能重新注册？",
+      "source": "docs/PRD.source.md · EH006 · Recovery / fallback: To be confirmed",
+      "cost": "涉及删除是硬删还是留一条拒绝记录（COPPA 下这两种取向相反），数据模型会照着建",
+      "answer": "硬删账号，但留一条拒绝记录。业务数据全删；另存一条只含家长邮箱哈希 + 时间戳的 consent_denials 记录。同一邮箱再注册时直接拒绝，避免孩子反复重试。那条哈希本身也是一项待法务确认的数据，并入 Q-012 的复核范围。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-010",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch"
+      ],
+      "question": "v1 官方支持哪些搜索服务与棋类平台？（TRD 列了 Lichess / Chess.com / ChessBase / uschess / FIDE / 通用搜索，但供应商全是 to be confirmed）",
+      "source": "docs/PRD.source.md · Open Questions「What search providers and chess platforms are officially supported in v1?」；docs/prd-source/chessicle-trd.md §2.2",
+      "cost": "每个外部源是一个适配器 + 一份 ToS 风险，选错要重写 Search/Prep 服务",
+      "answer": "v1 只做四个：身份核实用 ratings.uschess.org 的 MSA 爬虫 + FIDE 月度 XML dump（优先吃 dump 而不是实时爬）；对局来源用 Lichess API + Chess.com Published-Data API。ChessBase 与通用网页搜索推到 v1.1。学习推荐用一家搜索 API。每个源走独立适配器，礼貌限速、积极缓存、绝不登录。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-011",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "question": "家长能不能事后撤回同意？如果能，通过什么界面（后台页面 / 邮件里的签名链接）？",
+      "source": "docs/PRD.source.md · Open Questions「Can a parent revoke consent later, and if so, through what interface?」",
+      "cost": "撤回会牵出一个新页面 + 一个端点 + 一条数据删除流程；v1 不做也要显式写进 Out of Scope，否则 COPPA 复核时才发现",
+      "answer": "能撤回，走邮件里的签名链接。家长同意邮件里附一个长期有效的带签名撤回链接，点击后触发与 EH006 同一条删除流程。不建家长账号、不建家长后台页面。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-012",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "ship"
+      ],
+      "question": "COPPA：邮件验证码算不算「可验证的家长同意」？谁负责法务复核，什么时候出结论？",
+      "source": "docs/PRD.source.md · F009「Intended to be COPPA-compliant, but legal review is required」+ Open Questions 两条 + Risks 前两条",
+      "cost": "结论是「不算」的话同意流程要整个换（信用卡验证 / 签名表单），而那时代码已经写完了",
+      "answer": null,
+      "deferredAt": "2026-09-10",
+      "deferredNote": "人明确选择现在不答（法务/组织归属问题）。blocks 保持 ship —— 开发可往下走，上线前必须有结论。"
+    },
+    {
+      "id": "Q-013",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "question": "4G 下上传超过 30 秒会怎样？（原文只给了 20–30 秒的目标值，没给超时行为）",
+      "source": "docs/PRD.source.md · Open Questions「What happens if upload exceeds 30 seconds on 4G?」+ NFR Performance",
+      "cost": "超时是继续等、还是失败重传、还是降级 —— 这是 SSE 进度流的超时契约，前后端都要照它写",
+      "answer": "不硬超时。20–30 秒是目标值不是契约：超过 30 秒只在进度屏上改文案（「网络较慢，仍在上传…」），真正的硬上限设到 120 秒才判失败。理由是 F007 已经要求用户守在页面上，提前弄挂等于让他白守。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-014",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "detail"
+      ],
+      "question": "F006 歧义着法确认的 UI 具体长什么样？（原文两处都写 to be confirmed）",
+      "source": "docs/PRD.source.md · F006「Exact UI design is to be confirmed」+ Open Questions「What exact UI is used for ambiguous move confirmation?」",
+      "cost": "这是 PAGE-006 的全部内容，没有它这个页面拆不出任务，也写不出 data-testid 契约",
+      "answer": "以原型那一版为准。detail 阶段从 docs/AI Chess Analysis Tool/ 原型的 ocr 步骤抽出 PAGE-006 的布局与 data-testid 契约，不另做设计。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-015",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "detail"
+      ],
+      "question": "20–30 秒等待期间的进度屏用哪些组件？「不要离开此标签页」的警告文案怎么写？",
+      "source": "docs/PRD.source.md · Open Questions「What exact screens and UI components are used during the 20–30 second upload and pre-scan wait?」+ F007",
+      "cost": "F007 是 P0 且没有验收标准；警告文案是它唯一的用户可见产物",
+      "answer": "布局取原型的 processing 步骤（分阶段进度）；警告文案定为「分析中，请保持这个页面打开 —— 切换标签页、关闭浏览器或手机锁屏会中断，需要重新上传」。同时为 F007 补一条验收标准 AC-010：上传与分析进行中，页面持续显示分阶段进度与该警告，且在浏览器标签页失焦时仍然可见。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-016",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "detail",
+        "qa"
+      ],
+      "question": "无障碍（Accessibility）要求是什么？原文整段是 To be confirmed。",
+      "source": "docs/PRD.source.md · NFR · Accessibility: To be confirmed",
+      "cost": "目标用户里有学校 Chromebook 场景，无障碍要求会改组件选型；补做比一开始就做贵得多",
+      "answer": "WCAG 2.1 AA 作为 v1 基线：键盘可达、焦点可见、对比度 4.5:1、表单有 label、错误不只靠颜色。着法分类必须有颜色之外的第二重编码（原型的 CLS_SYM 符号表正好充当）。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-017",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch"
+      ],
+      "question": "安全项：加密（静态/传输）、口令策略、会话时长、审计日志 —— 原文全为 To be confirmed。v1 各取什么？",
+      "source": "docs/PRD.source.md · NFR · Security「Additional security requirements such as encryption, password policy, session duration, and audit logs: To be confirmed」",
+      "cost": "存的是儿童姓名、家长邮箱与同意记录，这几项定不下来鉴权模型没法收口",
+      "answer": "传输 TLS 1.2+ 与 HSTS；静态全库加密，child_name / parent_email 额外列级加密；会话 30 天滑动过期，cookie 为 httpOnly + Secure + SameSite=Lax；审计日志只记同意发出/确认/拒绝、账号删除、照片删除这几类；上传照片分析完立即删除，另加 S3 lifecycle 24 小时兜底。口令策略作废（Q-030 定的是无密码）。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-018",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch"
+      ],
+      "question": "除了「分析崩溃重试一次」，还有哪些重试/可靠性策略？（上传重试、外部 API 失败、SSE 断线）",
+      "source": "docs/PRD.source.md · NFR · Reliability「More detailed reliability and retry policies: To be confirmed」",
+      "cost": "外部依赖有六个（uschess / FIDE / Lichess / Chess.com / 搜索 / LLM），没有统一重试策略每个域会各写一套",
+      "answer": "一条统一策略，写成一条 DEC-*：所有外部调用走同一个带指数退避的客户端（最多 3 次，只重试幂等 GET 与 5xx/429）；对手检索某个源失败时降级为部分结果并标明哪个源没到，不整体失败；SSE 断线时前端自动重连并拉一次当前进度。EH003 的分析重试一次保持不变。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-019",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [],
+      "question": "首批目标人群是哪一个：初中生、高中生、本地俱乐部、教练，还是别的？",
+      "source": "docs/PRD.source.md · Target Users「First launch cohort: To be confirmed」+ Open Questions 第 1 条",
+      "cost": "不挡实现，挡的是上线后的增长动作与文案口吻",
+      "answer": "本地俱乐部 + 教练。理由：教练是乘数（一个教练带来一批学生），且成年人账号不走家长同意流程，首批验证能绕开 Q-012 那条未完结的 COPPA 风险。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-020",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [],
+      "question": "备用互动指标「每用户每周查看的分析报告数」目标值定多少？",
+      "source": "docs/PRD.source.md · Metrics「Backup engagement metric … target value to be confirmed」",
+      "cost": "不挡实现；不定的话这个指标没有判据，采集了也没人看",
+      "answer": "2 份/周。与主指标（周末比赛 4–5 局 × 60–80%）互相对得上。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-021",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [],
+      "question": "评价数达到多少才认为「4–5 星均分」这个信号可信？",
+      "source": "docs/PRD.source.md · Metrics「minimum review count to consider this reliable is to be confirmed」",
+      "cost": "不挡实现；与 Q-002 是同一个决定的两半",
+      "answer": "30 条站内评价。配合首月 500 用户的目标，30 条是首月内拿得到且不至于被个别差评带偏的量。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-022",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "code"
+      ],
+      "question": "analytics 事件的确切定义（事件名、触发时机、属性）是什么？",
+      "source": "docs/PRD.source.md · Metrics「Exact analytics event definitions: To be confirmed」",
+      "cost": "主成功指标（报告查看数 / 自报局数）靠这些事件算，事件名定错等于指标从第一天起就是错的",
+      "answer": "先定六个最小集：photo_uploaded / prescan_failed / moves_confirmed / analysis_completed / report_viewed / tournament_count_submitted。写进自建的 metric_events 表，不接第三方分析工具（COPPA 面更干净）。主指标 = report_viewed 去重计数 ÷ tournament_count_submitted 的值。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-023",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "ship"
+      ],
+      "question": "隐私政策由谁写、法务复核由谁负责？",
+      "source": "docs/PRD.source.md · Open Questions「Who owns the privacy policy and legal review?」",
+      "cost": "没有隐私政策就不能上线一个存儿童数据的产品",
+      "answer": null,
+      "deferredAt": "2026-09-10",
+      "deferredNote": "人明确选择现在不答（法务/组织归属问题）。blocks 保持 ship —— 开发可往下走，上线前必须有结论。"
+    },
+    {
+      "id": "Q-025",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [],
+      "question": "这份 PRD 的 Owner 是谁？（原文写 To be confirmed）",
+      "source": "docs/PRD.source.md · Overview「Owner: To be confirmed」",
+      "cost": "不挡实现；挡的是后面每一条待定该找谁裁决",
+      "answer": "xing（本仓库 git user: Xing Liu）。台账里其余条目的裁决人同此。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-026",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch"
+      ],
+      "question": "技术栈：后端用 Node.js(TypeScript) 还是 Python(FastAPI)？数据层用哪个 ORM/迁移工具？（前端 TRD 已提 React + TS + Vite；数据库已提 PostgreSQL）",
+      "source": "docs/prd-source/chessicle-trd.md §3「Backend: Node.js (TypeScript) or Python (FastAPI) — Either is fine」；数据层原文只写到 PostgreSQL，没有指定 ORM/迁移工具",
+      "cost": "探不到栈 ⇒ 按栈自门控的那批 gate 判不了，而报告看起来是通过的；知识包也注入不了对应那套约定。ORM 选择还决定 model-shape 那一维能不能判",
+      "answer": "全栈 TypeScript。前端 React 18 + TS + Vite 6 + Tailwind v4；后端 Node 22 + TypeScript + Fastify；数据 PostgreSQL + Prisma；棋规 chess.js 前后端共用同一份合法性校验；引擎 Stockfish 18 跑服务端 worker；进度用 SSE。理由：前端已是 TS、chess.js 可共用（TRD §3 自己要求的）、agb 在 ts 上 compile/build/audit/model-shape 四维都判得了。",
+      "rule": "stack-unknown",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-027",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch"
+      ],
+      "question": "OCR 与识别模型用哪家？TRD §10 把它列成一次 bake-off，且指出只有自托管开源 VLM 才能在解码时做合法着法约束（logit mask）。",
+      "source": "docs/prd-source/chessicle-trd.md §2.2 与 §10：Document OCR service / Recognition model 均为 provider to be confirmed",
+      "cost": "自托管与托管 API 是两套完全不同的部署形态与成本模型，选错要重写 OCR 服务并重做容量规划",
+      "answer": "托管分割 + 托管识别 + 后置合法性过滤。分割与识别都走托管文档 OCR 服务，beam search 在候选上做后置的合法着法过滤（拿不到 logits，做不了解码时硬约束）。TRD §4.1 阶段 6 的 beam search 与修复操作照建，只是约束从硬掩码降级为后置打分。≥90% 免人工纠正这个目标要按 TRD §10 用标注集实测，达不到再考虑自托管 VLM —— 走 OCR provider 适配器，换供应商不改上层。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-028",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch"
+      ],
+      "question": "自然语言解释与总结用哪家 LLM？",
+      "source": "docs/prd-source/chessicle-trd.md §2.2「LLM API — Provider to be confirmed」",
+      "cost": "首条解释 5 秒的 NFR 直接取决于它的延迟；换供应商要重做提示词与流式实现",
+      "answer": "Claude（Anthropic API）。分两档：首条解释走 Haiku 4.5 保 5 秒（AC-004），全局总结与战略败因走 Sonnet 5。两档的理由是同时满足延迟与质量两个 NFR。经 provider 适配器接入，与 OCR 是两个独立厂商。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-029",
+      "stage": "prd",
+      "kind": "asset",
+      "blocks": [
+        "detail"
+      ],
+      "question": "docs/prototype/ 里那份 Figma Make 原型（React + Tailwind v4 + shadcn，含完整分析报告界面）是 v1 UI 的准绳吗？还是只作参考？",
+      "source": "/Users/liuxing/workspace/57b/agb-test-repo/docs/AI Chess Analysis Tool/（Figma 设计稿 0IyzUw8wZAadl9rSQPM19l）；形态见 docs/PROTOTYPE.md",
+      "cost": "是准绳的话设计 token 与组件骨架直接从它抽，UI 契约照它写；只是参考的话 PAGE-006 等页面要重新设计（见 Q-014）",
+      "answer": "是准绳。docs/AI Chess Analysis Tool/ 的 src/styles/theme.css 与 App.tsx 里四张着法分类表（CLS_COLOR / CLS_BG / CLS_LABEL / CLS_SYM）是 .ab/design-tokens.json 的直接来源；其组件骨架是 UI_CONTRACT.md 的基准。它的技术形态与 Q-026 的前端选型一致。PAGE-006 的歧义确认 UI 以原型里那一版为准（见 Q-014）。",
+      "rule": "design-source-missing",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-030",
+      "stage": "prd",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "question": "账号凭证是什么形式？原文只说「sign up using email」，从没说有没有密码。",
+      "source": "docs/PRD.source.md · F009 与 Core Flow 第 1 步只写 email，NFR Security 里却提到「password policy: To be confirmed」——暗示有密码但没定义",
+      "cost": "邮箱魔法链接与邮箱+密码是两套鉴权模型、两套页面、两套安全要求，且与 Q-017 的口令策略互相牵制",
+      "answer": "邮箱验证码登录，无密码。POST /api/auth/request-code { email } → POST /api/auth/verify-code { email, code } → 会话 cookie。6 位码与 2 分钟过期复用家长同意流程的同一套邮件与验证码机制。不建 password 字段、不做密码找回、NFR 里的 password policy 作废。会话时长归 Q-017。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-031",
+      "stage": "arch",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "question": "app 怎么判定一个用户是「child」？PRD F009 只写「For child users, the app asks for parent email」，从没说判定方式；TRD §4.5.1 自己补了一个 PRD 里不存在的 birth_year 字段，且 13–17 岁的处理写着 To be confirmed。",
+      "source": "docs/PRD.source.md · F009「For child users, the app asks for parent email」（无判定方式）；docs/prd-source/chessicle-trd.md §4.5.1「Sign-up asks for email and birth year. Under-13 (COPPA age) → consent flow; 13–17 handling: To be confirmed」",
+      "cost": "users 表、WF-01 同意状态机与 signup 端点全都取决于它；判定方式定错等于 COPPA 的适用面从第一天起就是错的",
+      "answer": "收出生年（只存年份，不存完整生日）。signup 必填。<13 → status=pending_consent 走 WF-01 家长同意流程；≥13 → status=active 直接可用。13–17 不当儿童处理（COPPA 只管 <13）。birth_year 按儿童 PII 对待，与 child_name / parent_email 同档加密。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-032",
+      "stage": "arch",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "code"
+      ],
+      "question": "学习推荐的来源白名单是什么？TRD 自己标了「结果是给儿童看的，只许白名单，绝不给开放网络结果」，而白名单本身写着 list To be confirmed。",
+      "source": "docs/prd-source/chessicle-trd.md §4.3 step 3 与 Safety note；docs/PRD.source.md · F004",
+      "cost": "这是一条直接给儿童展示外部链接的通道。没有白名单就没有边界，而它出问题的形式是儿童看到不该看的内容",
+      "answer": "四个域名硬白名单：lichess.org/study、chess.com 的 lessons/articles、youtube.com（额外查频道白名单，不是整个 YouTube）、chessable.com。白名单存成配置不硬编码。写入 study_recommendations.url 前必须过三道：域名 ∈ allowlist；youtube.com 额外查 channel_id ∈ channel_allowlist；只许 https。全部不中就丢弃该条 —— 宁可推荐列表为空，也不降级为开放网络结果。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-033",
+      "stage": "arch",
+      "kind": "decision",
+      "blocks": [
+        "arch"
+      ],
+      "question": "POST /api/games/photo 可否安全重试？幂等键从哪来？冲突与 in-flight 的响应是什么？",
+      "source": "stage-arch 完成条件：创建类 POST 是否可安全重试必须回答；Q-013 定了 120 秒硬上限，网络不稳时客户端会重发",
+      "cost": "接了幂等键却不兑现比不接更糟 —— 客户端会以为重试安全；不接则比赛场网络下重发会重复扣 OCR 与 LLM 成本",
+      "answer": "客户端生成 idempotencyKey，写进 requestSchema（一次生成、重试复用）。同键重发返回同一个 jobId；同键不同请求体返回 409；in-flight 返回同一 jobId 而不是新建。兑现方式（原子占位）属于编码期。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    },
+    {
+      "id": "Q-034",
+      "stage": "arch",
+      "kind": "decision",
+      "blocks": [
+        "arch",
+        "code"
+      ],
+      "question": "四条 auth:public 的写端点（登录发码/验码、同意发码/重发）限流怎么定？",
+      "source": "stage-arch：auth=public 且方法为 POST/PUT/PATCH/DELETE 的端点必须回答 rateLimit；docs/prd-source/chessicle-trd.md §4.5.2 提议每账号每小时 5 个码",
+      "cost": "匿名可调用又有副作用（每次发一封邮件），不限流等于任何人都能拿它当邮件炮；而 rate-limit-declared 会对「一个 rateLimit 都没写」报汇总",
+      "answer": "四条全部声明 rateLimit: \"required\"，按邮箱与 IP 双维度各限一道：发码类 5 次/小时/邮箱，验证类 10 次/小时/邮箱。只按邮箱拦不住换邮箱刷，只按 IP 会误伤学校 NAT 出口（目标用户正是学校 Chromebook）。其余端点一律显式写 rateLimit: \"none\"。",
+      "answeredBy": "xing",
+      "answeredAt": "2026-09-10"
+    }
+  ]
+}

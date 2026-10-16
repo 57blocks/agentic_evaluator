@@ -1,0 +1,606 @@
+{
+  "tier": "L",
+  "source": "docs/PRD.source.md",
+  "mode": "normalize",
+  "note": "归一化产物。pages/routes/states 由 Core Flow 与 Exception Handling 反推；原文没有描述的字段一律留空并指向 Q-*，不编内容。",
+  "pages": [
+    {
+      "id": "PAGE-001",
+      "name": "Sign Up / Log In (email code)",
+      "route": "/login",
+      "layoutRegions": [
+        "Body: 邮箱注册 / 登录表单"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-09",
+          "name": "Request Login Code",
+          "interaction": "提交邮箱",
+          "effect": "发送 6 位验证码；儿童用户前往 Parental Consent (/consent)"
+        },
+        {
+          "id": "IC-18",
+          "name": "Verify Login Code",
+          "interaction": "提交验证码",
+          "effect": "建立会话后前往 Dashboard (/)"
+        }
+      ],
+      "staticElements": [
+        "产品名称"
+      ],
+      "states": [
+        "idle",
+        "code_sent",
+        "verifying",
+        "error"
+      ]
+    },
+    {
+      "id": "PAGE-002",
+      "name": "Parental Consent",
+      "route": "/consent",
+      "layoutRegions": [
+        "Body: 家长邮箱输入与验证码输入"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-01",
+          "name": "Resend Code",
+          "interaction": "点击",
+          "effect": "重发家长验证码，旧码立即失效"
+        },
+        {
+          "id": "IC-10",
+          "name": "Submit Code",
+          "interaction": "提交验证码",
+          "effect": "确认同意后前往 Dashboard (/)"
+        }
+      ],
+      "staticElements": [
+        "验证码 2 分钟过期说明"
+      ],
+      "states": [
+        "awaiting_parent_email",
+        "code_sent",
+        "expired",
+        "declined",
+        "confirmed"
+      ]
+    },
+    {
+      "id": "PAGE-003",
+      "name": "Dashboard",
+      "route": "/",
+      "layoutRegions": [
+        "Header: 产品名 + 开始分析",
+        "Body: 已分析对局列表"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-11",
+          "name": "Start Analysis",
+          "interaction": "点击",
+          "effect": "前往 Notation Photo Upload (/analyze/upload)"
+        },
+        {
+          "id": "IC-12",
+          "name": "Open Report",
+          "interaction": "点击某条对局",
+          "effect": "前往 Analysis Report (/games/:gameId)"
+        },
+        {
+          "id": "IC-13",
+          "name": "Opponent Prep",
+          "interaction": "点击",
+          "effect": "前往 Opponent Prep (/prep)"
+        }
+      ],
+      "staticElements": [
+        "对局总数"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "populated",
+        "error"
+      ]
+    },
+    {
+      "id": "PAGE-004",
+      "name": "Notation Photo Upload",
+      "route": "/analyze/upload",
+      "layoutRegions": [
+        "Body: 拍照 / 选择照片"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-02",
+          "name": "Upload Photo",
+          "interaction": "选择或拍摄并提交",
+          "effect": "前往 Stay-on-Tab Progress (/analyze/processing)"
+        },
+        {
+          "id": "IC-03",
+          "name": "Retake",
+          "interaction": "点击重拍",
+          "effect": "回到上传（EH001 可读率低于 80%）"
+        }
+      ],
+      "staticElements": [
+        "需保持在当前标签页的提示",
+        "非记谱纸图片时的重拍文案（EH008，与 EH001 同一状态）"
+      ],
+      "states": [
+        "idle",
+        "uploading",
+        "retake_required",
+        "error"
+      ]
+    },
+    {
+      "id": "PAGE-005",
+      "name": "Stay-on-Tab Progress",
+      "route": "/analyze/processing",
+      "layoutRegions": [
+        "Body: 进度与「不要离开此标签页」警告"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-14",
+          "name": "Progress Continue",
+          "interaction": "预扫通过后自动跳转",
+          "effect": "前往 Ambiguous Move Confirmation (/analyze/confirm)"
+        }
+      ],
+      "staticElements": [
+        "阶段进度",
+        "不要切换标签页 / 不要锁屏的警告文案（文案未定，见 Q-015）"
+      ],
+      "states": [
+        "warning",
+        "uploading",
+        "prescanning",
+        "reconstructing",
+        "error"
+      ]
+    },
+    {
+      "id": "PAGE-006",
+      "name": "Ambiguous Move Confirmation",
+      "route": "/analyze/confirm",
+      "layoutRegions": [
+        "Body: 不确定的半步及候选着法"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-04",
+          "name": "Candidate Move Picker",
+          "interaction": "从候选中选择或手工输入",
+          "effect": "确认全部歧义步后前往 Analysis Report (/games/:gameId)"
+        }
+      ],
+      "staticElements": [
+        "不确定着法的数量"
+      ],
+      "states": [
+        "loading",
+        "populated",
+        "submitting",
+        "error"
+      ]
+    },
+    {
+      "id": "PAGE-007",
+      "name": "Analysis Report",
+      "route": "/games/:gameId",
+      "layoutRegions": [
+        "Header: 战略失误与败因摘要",
+        "Body: 逐步分类与解释",
+        "Aside: 学习推荐"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-05",
+          "name": "Move List",
+          "interaction": "点击某一步",
+          "effect": "展开该步的分类与自然语言解释"
+        },
+        {
+          "id": "IC-06",
+          "name": "Study Recommendations",
+          "interaction": "点击条目",
+          "effect": "在新标签页打开外部学习材料（https://www.youtube.com/… / https://www.chess.com/lessons/… 等第三方 URL）—— 目的地在站外，不是本站页面"
+        },
+        {
+          "id": "IC-15",
+          "name": "Finish Tournament",
+          "interaction": "点击",
+          "effect": "前往 Tournament Games-Played Prompt (/analyze/tournament-count)"
+        },
+        {
+          "id": "IC-17",
+          "name": "Star Rating Prompt",
+          "interaction": "选择 1–5 星并可选填文字",
+          "effect": "提交站内评分；提交或关闭后 30 天内不再弹"
+        }
+      ],
+      "staticElements": [
+        "整体准确率",
+        "关键转折点",
+        "复发主题"
+      ],
+      "states": [
+        "loading",
+        "partial",
+        "populated",
+        "error",
+        "review_prompt"
+      ]
+    },
+    {
+      "id": "PAGE-008",
+      "name": "Tournament Games-Played Prompt",
+      "route": "/analyze/tournament-count",
+      "layoutRegions": [
+        "Body: 「这个比赛/周末你下了几盘？」"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-07",
+          "name": "Games Played Input",
+          "interaction": "提交数字",
+          "effect": "写入主成功指标分母后回到 Dashboard (/)"
+        }
+      ],
+      "staticElements": [
+        "提示文案"
+      ],
+      "states": [
+        "idle",
+        "submitting"
+      ]
+    },
+    {
+      "id": "PAGE-009",
+      "name": "Opponent Prep",
+      "route": "/prep",
+      "layoutRegions": [
+        "Header: 对手检索",
+        "Body: 公开对局与开局倾向"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-08",
+          "name": "Opponent Search",
+          "interaction": "输入姓名（+评分/联合会）并提交",
+          "effect": "在本页 (/prep) 内切换状态：searching → populated；多人同名时切到 disambiguation 态（Q-006 的 candidates 列表）。不离开 PAGE-009 Opponent Prep (/prep)"
+        },
+        {
+          "id": "IC-16",
+          "name": "Back to Dashboard",
+          "interaction": "点击",
+          "effect": "回到 Dashboard (/)"
+        }
+      ],
+      "staticElements": [
+        "无匹配时的说明"
+      ],
+      "states": [
+        "idle",
+        "searching",
+        "disambiguation",
+        "no_results",
+        "populated",
+        "error"
+      ]
+    },
+    {
+      "id": "PAGE-010",
+      "name": "Unsupported Browser Notice",
+      "route": "/unsupported",
+      "layoutRegions": [
+        "Body: 请使用 Chrome 或 Safari"
+      ],
+      "interactiveComponents": [],
+      "staticElements": [
+        "请改用 Chrome 或 Safari 的说明",
+        "回到 Dashboard (/) 的说明",
+        "本页只能由不支持的浏览器检测触发进入，不从 Dashboard (/) 导航"
+      ],
+      "states": [
+        "static"
+      ],
+      "entry": "非导航可达：浏览器嗅探判定为不支持时由前端路由强制跳入（EH007）。没有任何页面放链接指向它是刻意的"
+    },
+    {
+      "id": "PAGE-011",
+      "name": "Parental Consent Revocation",
+      "route": "/consent/revoke",
+      "layoutRegions": [
+        "Body: 确认撤回同意并删除账号"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-19",
+          "name": "Confirm Revocation",
+          "interaction": "点击确认",
+          "effect": "触发与 EH006 同一条删除流程，随后前往 Unsupported/Goodbye 说明"
+        }
+      ],
+      "staticElements": [
+        "撤回后数据将被删除的说明",
+        "链接来自家长同意邮件，无需登录",
+        "本页只能由家长同意邮件里的签名链接进入，站内不提供导航入口"
+      ],
+      "states": [
+        "idle",
+        "confirming",
+        "done",
+        "invalid_link"
+      ],
+      "entry": "非导航可达：只能从家长同意邮件里的签名链接进入（Q-011），无需登录。站内不放入口是刻意的 —— 撤回同意的主体是家长，而家长没有账号"
+    }
+  ],
+  "domain": {
+    "entities": [
+      {
+        "type": "User"
+      },
+      {
+        "type": "ParentConsent"
+      },
+      {
+        "type": "Game"
+      },
+      {
+        "type": "Move"
+      },
+      {
+        "type": "AnalysisReport"
+      },
+      {
+        "type": "StudyRecommendation"
+      },
+      {
+        "type": "OpponentProfile"
+      },
+      {
+        "type": "MetricEvent"
+      },
+      {
+        "type": "Review"
+      }
+    ],
+    "variables": [
+      {
+        "id": "VAR-01",
+        "name": "预扫可读率阈值（原文 80%）"
+      },
+      {
+        "id": "VAR-02",
+        "name": "家长验证码有效期（原文 2 分钟）"
+      },
+      {
+        "id": "VAR-03",
+        "name": "首条解释出现时限（原文约 5 秒）"
+      },
+      {
+        "id": "VAR-04",
+        "name": "提交照片到确认屏的时限（原文 20–30 秒）"
+      },
+      {
+        "id": "VAR-05",
+        "name": "OCR 免人工纠正准确率目标（原文 ≥90%）"
+      },
+      {
+        "id": "VAR-06",
+        "name": "评分弹层再次弹出的冷却期（30 天）"
+      },
+      {
+        "id": "VAR-07",
+        "name": "上传硬超时上限（120 秒，Q-013）"
+      },
+      {
+        "id": "VAR-08",
+        "name": "会话滑动过期时长（30 天，Q-017）"
+      }
+    ],
+    "rules": [
+      {
+        "id": "RULE-01",
+        "name": "可读率低于阈值则要求重拍（EH001）",
+        "inputVariableId": "VAR-01"
+      },
+      {
+        "id": "RULE-02",
+        "name": "验证码过期后需重发（EH005）",
+        "inputVariableId": "VAR-02"
+      },
+      {
+        "id": "RULE-03",
+        "name": "首条解释超时则显示加载态（F002）",
+        "inputVariableId": "VAR-03"
+      },
+      {
+        "id": "RULE-04",
+        "name": "评分弹层冷却（Q-002）",
+        "inputVariableId": "VAR-06"
+      }
+    ],
+    "workflows": [
+      {
+        "id": "WF-01",
+        "entity": "ParentConsent",
+        "initial": "awaiting_parent_email",
+        "states": [
+          "awaiting_parent_email",
+          "code_sent",
+          "expired",
+          "confirmed",
+          "declined",
+          "account_deleted",
+          "suspended_awaiting_consent"
+        ],
+        "transitions": [
+          {
+            "from": "awaiting_parent_email",
+            "to": "code_sent",
+            "action": "提交家长邮箱，系统发送验证码",
+            "actor": "child_user"
+          },
+          {
+            "from": "code_sent",
+            "to": "confirmed",
+            "action": "家长在 2 分钟内提交正确验证码",
+            "actor": "parent"
+          },
+          {
+            "from": "code_sent",
+            "to": "expired",
+            "action": "2 分钟内未提交",
+            "actor": "system"
+          },
+          {
+            "from": "expired",
+            "to": "code_sent",
+            "action": "点击 Resend Code，旧码立即失效",
+            "actor": "child_user"
+          },
+          {
+            "from": "code_sent",
+            "to": "declined",
+            "action": "家长拒绝同意",
+            "actor": "parent"
+          },
+          {
+            "from": "declined",
+            "to": "account_deleted",
+            "action": "展示「家长已拒绝」后删除账号",
+            "actor": "system"
+          },
+          {
+            "from": "expired",
+            "to": "suspended_awaiting_consent",
+            "action": "孩子离开页面，账号挂起（Q-008）",
+            "actor": "system"
+          },
+          {
+            "from": "suspended_awaiting_consent",
+            "to": "code_sent",
+            "action": "孩子再次登录，重发验证码或改家长邮箱",
+            "actor": "child_user"
+          },
+          {
+            "from": "suspended_awaiting_consent",
+            "to": "account_deleted",
+            "action": "N 天内仍未完成同意，自动删除（N 归 arch）",
+            "actor": "system"
+          },
+          {
+            "from": "confirmed",
+            "to": "declined",
+            "action": "家长点击邮件里的签名链接撤回同意（Q-011）",
+            "actor": "parent"
+          }
+        ]
+      },
+      {
+        "id": "WF-02",
+        "entity": "Game",
+        "initial": "uploading",
+        "states": [
+          "uploading",
+          "prescan_failed",
+          "reconstructing",
+          "awaiting_confirmation",
+          "analyzing",
+          "analysis_complete",
+          "analysis_partial",
+          "abandoned"
+        ],
+        "transitions": [
+          {
+            "from": "uploading",
+            "to": "prescan_failed",
+            "action": "预扫可读率低于 80%（EH001）",
+            "actor": "system"
+          },
+          {
+            "from": "prescan_failed",
+            "to": "uploading",
+            "action": "用户重拍并重新上传",
+            "actor": "user"
+          },
+          {
+            "from": "uploading",
+            "to": "reconstructing",
+            "action": "预扫通过，重建并校验着法合法性",
+            "actor": "system"
+          },
+          {
+            "from": "reconstructing",
+            "to": "awaiting_confirmation",
+            "action": "存在歧义着法，交由用户确认（EH002）",
+            "actor": "system"
+          },
+          {
+            "from": "awaiting_confirmation",
+            "to": "analyzing",
+            "action": "用户确认或更正全部歧义着法",
+            "actor": "user"
+          },
+          {
+            "from": "reconstructing",
+            "to": "analyzing",
+            "action": "无歧义着法，直接开始分析",
+            "actor": "system"
+          },
+          {
+            "from": "analyzing",
+            "to": "analysis_complete",
+            "action": "分析完成",
+            "actor": "system"
+          },
+          {
+            "from": "analyzing",
+            "to": "analysis_partial",
+            "action": "引擎崩溃或超时，重试一次仍失败则出局部报告（EH003）",
+            "actor": "system"
+          },
+          {
+            "from": "uploading",
+            "to": "abandoned",
+            "action": "用户切走标签页 / 关闭浏览器 / 手机休眠（EH004）",
+            "actor": "user"
+          },
+          {
+            "from": "reconstructing",
+            "to": "abandoned",
+            "action": "用户切走标签页 / 关闭浏览器 / 手机休眠（EH004）",
+            "actor": "user"
+          },
+          {
+            "from": "analyzing",
+            "to": "abandoned",
+            "action": "用户切走标签页 / 关闭浏览器 / 手机休眠（EH004）",
+            "actor": "user"
+          }
+        ]
+      }
+    ]
+  },
+  "openQuestions": ".ab/questions.json",
+  "decisions": {
+    "note": "由 .ab/questions.json 的裁决回写。这里只记影响机器可读层的那些；完整答案与出处以台账为准。",
+    "Q-001": "对手评分选填；消歧 name → (当前 ∪ 历史 rating) → federation",
+    "Q-002": "站内评分：IC-17 + Review 实体 + AC-009",
+    "Q-005": "EH008 并入 retake_required，仅文案不同",
+    "Q-006": "EH009 返回 candidates 列表，渲染在 PAGE-009 已有的 disambiguation 态",
+    "Q-008": "账号挂起 suspended_awaiting_consent，可恢复",
+    "Q-011": "家长可撤回：PAGE-011 /consent/revoke（邮件签名链接，无需登录）",
+    "Q-013": "20–30 秒是目标不是契约；硬上限 120 秒",
+    "Q-015": "F007 补验收标准 AC-010",
+    "Q-026": "全栈 TypeScript：React+Vite / Node+Fastify / PostgreSQL+Prisma / chess.js 共用",
+    "Q-030": "无密码，邮箱验证码登录"
+  }
+}

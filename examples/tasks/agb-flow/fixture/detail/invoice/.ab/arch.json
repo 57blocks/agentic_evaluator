@@ -1,0 +1,307 @@
+{
+  "components": [
+    {
+      "id": "CMP-001",
+      "name": "会话与门户接入",
+      "owns": {
+        "endpoints": [
+          "POST /api/auth/session",
+          "GET /api/health"
+        ],
+        "tables": []
+      },
+      "dependsOn": [
+        "CMP-002"
+      ],
+      "domain": "auth"
+    },
+    {
+      "id": "CMP-002",
+      "name": "组织档案与结算目标地址",
+      "owns": {
+        "endpoints": [
+          "GET /api/org/profile",
+          "GET /api/org/destinations",
+          "GET /api/org/destinations/:destinationId/entries"
+        ],
+        "tables": [
+          "organizations"
+        ]
+      },
+      "dependsOn": [],
+      "domain": "org"
+    },
+    {
+      "id": "CMP-003",
+      "name": "客户管理",
+      "owns": {
+        "endpoints": [
+          "GET /api/clients",
+          "POST /api/clients",
+          "PATCH /api/clients/:clientId",
+          "PUT /api/clients/:clientId/status"
+        ],
+        "tables": [
+          "clients"
+        ]
+      },
+      "dependsOn": [
+        "CMP-004"
+      ],
+      "domain": "client"
+    },
+    {
+      "id": "CMP-004",
+      "name": "发票",
+      "owns": {
+        "endpoints": [
+          "GET /api/invoices",
+          "GET /api/invoices/status-counts",
+          "POST /api/invoices",
+          "GET /api/invoices/:invoiceId",
+          "PATCH /api/invoices/:invoiceId",
+          "DELETE /api/invoices/:invoiceId",
+          "POST /api/invoices/:invoiceId/send",
+          "POST /api/invoices/:invoiceId/void"
+        ],
+        "tables": [
+          "invoices",
+          "invoice_items",
+          "invoice_payment_tokens",
+          "invoice_cc_recipients",
+          "invoice_status_logs",
+          "idempotency_keys"
+        ]
+      },
+      "dependsOn": [
+        "CMP-002",
+        "CMP-003"
+      ],
+      "domain": "invoice"
+    },
+    {
+      "id": "CMP-005",
+      "name": "周期发票",
+      "owns": {
+        "endpoints": [
+          "PUT /api/recurring-series/:seriesId/status"
+        ],
+        "tables": [
+          "recurring_series"
+        ]
+      },
+      "dependsOn": [
+        "CMP-004"
+      ],
+      "domain": "recurring"
+    },
+    {
+      "id": "CMP-006",
+      "name": "结算",
+      "owns": {
+        "endpoints": [
+          "GET /api/settlements",
+          "GET /api/settlements/summary",
+          "GET /api/settlements/settleable-invoices",
+          "POST /api/settlements/estimate",
+          "POST /api/settlements",
+          "GET /api/settlements/:requestId"
+        ],
+        "tables": [
+          "settlement_requests",
+          "settlement_request_invoices"
+        ]
+      },
+      "dependsOn": [
+        "CMP-002",
+        "CMP-004"
+      ],
+      "domain": "settlement"
+    },
+    {
+      "id": "CMP-007",
+      "name": "Dashboard 指标",
+      "owns": {
+        "endpoints": [
+          "GET /api/dashboard/invoice-sent",
+          "GET /api/dashboard/unreceived",
+          "GET /api/dashboard/received-by-token",
+          "GET /api/dashboard/last-received"
+        ],
+        "tables": []
+      },
+      "dependsOn": [
+        "CMP-004",
+        "CMP-006"
+      ],
+      "domain": "dashboard"
+    },
+    {
+      "id": "CMP-008",
+      "name": "付款方发票页",
+      "owns": {
+        "endpoints": [
+          "GET /api/pay/:token"
+        ],
+        "tables": []
+      },
+      "dependsOn": [
+        "CMP-004"
+      ],
+      "domain": "payer"
+    },
+    {
+      "id": "CMP-009",
+      "name": "外部回调入口",
+      "owns": {
+        "endpoints": [
+          "POST /api/webhooks/cobo",
+          "POST /api/webhooks/portal-install"
+        ],
+        "tables": [
+          "webhook_events"
+        ]
+      },
+      "dependsOn": [
+        "CMP-002",
+        "CMP-004",
+        "CMP-006"
+      ],
+      "domain": "webhook"
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-001",
+      "target": "用户发起的三条外部调用（生成支付链接 / 取消支付链接 / 提交 payout）单次超时 120 秒，且不做自动重试；超时即按既定路径回滚，重试由用户再次点击发起",
+      "landsOn": {
+        "endpoints": [
+          "POST /api/invoices/:invoiceId/send",
+          "POST /api/invoices/:invoiceId/void",
+          "POST /api/settlements"
+        ]
+      },
+      "verifiedBy": "AT-058"
+    },
+    {
+      "id": "CON-002",
+      "target": "发票停留在 Sending 或 Voiding 超过 24 小时须可被检出并在列表上给出 tooltip；恢复走内部对账接口，不做无对账的自动回滚",
+      "landsOn": {
+        "tables": [
+          "invoices",
+          "invoice_status_logs"
+        ]
+      },
+      "verifiedBy": "AT-059"
+    },
+    {
+      "id": "CON-003",
+      "target": "三个列表统一 offset 翻页式分页，默认每页 20 条，默认 Create Time 倒序；单页响应不得返回全量",
+      "landsOn": {
+        "endpoints": [
+          "GET /api/clients",
+          "GET /api/invoices",
+          "GET /api/settlements"
+        ]
+      },
+      "verifiedBy": "AT-060"
+    },
+    {
+      "id": "CON-004",
+      "target": "金额一律 2 位小数、以 decimal 存储与传输；payout 的 amount 最多两位非零小数，超出即被 Cobo 拒绝而不是四舍五入",
+      "landsOn": {
+        "tables": [
+          "invoices",
+          "invoice_items",
+          "settlement_requests"
+        ]
+      },
+      "verifiedBy": "AT-061"
+    },
+    {
+      "id": "CON-005",
+      "target": "Payer 链接的 token 必须不可枚举（≥128 bit 熵的随机值或带密钥签名），因为链接不设过期；对该端点限流以压制枚举尝试",
+      "landsOn": {
+        "endpoints": [
+          "GET /api/pay/:token"
+        ],
+        "tables": [
+          "invoices"
+        ]
+      },
+      "verifiedBy": "AT-062"
+    },
+    {
+      "id": "CON-006",
+      "target": "Cobo 回调须先按原始请求体字节验签再解析；事件 id 落库去重，同一事件重复投递只生效一次；事件顺序不保证，处理逻辑必须与顺序无关",
+      "landsOn": {
+        "endpoints": [
+          "POST /api/webhooks/cobo"
+        ],
+        "tables": [
+          "webhook_events"
+        ]
+      },
+      "verifiedBy": "AT-063"
+    },
+    {
+      "id": "CON-007",
+      "target": "所有业务表按 org_id 隔离：每条读写查询强制带 org_id 谓词，跨组织读取不得可能发生",
+      "landsOn": {
+        "tables": [
+          "clients",
+          "invoices",
+          "settlement_requests",
+          "recurring_series"
+        ]
+      },
+      "verifiedBy": "AT-064"
+    },
+    {
+      "id": "CON-008",
+      "target": "单张发票最多 50 行 item、最多 3 个 CC 收件人；上限在服务端强制，不只靠前端置灰",
+      "landsOn": {
+        "tables": [
+          "invoice_items",
+          "invoice_cc_recipients"
+        ]
+      },
+      "verifiedBy": "AT-065"
+    },
+    {
+      "id": "CON-009",
+      "target": "周期发票以 (series_id, 应发送日期) 为幂等键，同一期只能生成一张；失败重试 3 次后跳过本期并通知商户，next_send_date 正常往后走",
+      "landsOn": {
+        "tables": [
+          "recurring_series",
+          "invoices"
+        ]
+      },
+      "verifiedBy": "AT-054"
+    },
+    {
+      "id": "CON-010",
+      "target": "Invoice Sent 图表的日期范围最多 15 天，超出即拒绝并提示；服务端强制该上限，不依赖前端日期选择器",
+      "landsOn": {
+        "endpoints": [
+          "GET /api/dashboard/invoice-sent"
+        ]
+      },
+      "verifiedBy": "AT-040"
+    },
+    {
+      "id": "CON-011",
+      "target": "结算提交对每张发票做带前置条件的状态更新（status IN (Received, Settlement Failed) 才可进 Settling）；被其他请求占用的发票剔除后剩余照常提交，不整单失败、不做预占",
+      "landsOn": {
+        "endpoints": [
+          "POST /api/settlements"
+        ],
+        "tables": [
+          "invoices",
+          "settlement_request_invoices"
+        ]
+      },
+      "verifiedBy": "AT-066"
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const TASK = path.resolve("tasks/claim-denials-snf-v2");
+const TASK = path.resolve("examples/tasks/claim-denials-snf-v2");
 const rules = () => import(pathToFileURL(path.join(TASK, "gen", "rules.mjs")).href);
 const CHECK = path.join(TASK, "checks", "triage-check.mjs");
 

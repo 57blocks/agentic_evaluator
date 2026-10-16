@@ -97,6 +97,26 @@ test("manifest: a new run freezes the description, the check's description and t
   assert.deepEqual(m.test_set.labels, { a: { tags: ["normal"], split: "dev" } });
 });
 
+test("about: a workflow step's run dir (<task>/runs/<run>/<step>) finds the spec one level further up", async () => {
+  const manifest = { spec: { path: "tasks/demo/spec.yaml", sha256: "s" }, step: { id: "triage", version: "1" }, test_set: { id: "t", inputs: {} }, evaluators: {} } as unknown as RunManifest;
+  const stepDir = path.join(await taskWithRun(manifest), "triage");
+  await fs.mkdir(stepDir);
+  const about = await aboutOfRun(stepDir, manifest);
+  assert.equal(about.source, "current-spec");
+  assert.equal(about.description, "Which model triages a denied claim correctly.");
+});
+
+test("about: a workflow run takes its description from its first step's manifest", async () => {
+  const { aboutOfWorkflow } = await import("../src/canon/about.js");
+  const manifest = { spec: { path: "tasks/demo/spec.yaml", sha256: "s" }, step: { id: "triage", version: "1" }, test_set: { id: "t", inputs: {} }, evaluators: {} };
+  const root = await taskWithRun(manifest as unknown as RunManifest);
+  await fs.mkdir(path.join(root, "triage"));
+  await fs.writeFile(path.join(root, "triage", "manifest.json"), JSON.stringify(manifest));
+  const about = await aboutOfWorkflow(root, ["missing-step", "triage"]);
+  assert.equal(about?.description, "Which model triages a denied claim correctly.");
+  assert.equal(await aboutOfWorkflow(root, ["missing-step"]), null);
+});
+
 test("about: an older run reads the current spec, and says so", async () => {
   const manifest = { spec: { path: "tasks/demo/spec.yaml", sha256: "s" }, step: { id: "triage", version: "1" }, test_set: { id: "t", inputs: {} }, evaluators: {} } as unknown as RunManifest;
   const about = await aboutOfRun(await taskWithRun(manifest), manifest);
