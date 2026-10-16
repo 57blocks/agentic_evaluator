@@ -40,6 +40,10 @@ export interface PlanStep {
   id: string;
   /** What a candidate is asked to produce. Null when the source does not say. */
   task: string | null;
+  /** What this evaluation decides and tests (the spec's description). Null when the spec has none. */
+  about: string | null;
+  /** Where `about` came from for a finished run: its own record, or the task's spec as it is now. */
+  aboutSource?: "frozen" | "current-spec";
   inputFrom: string | null;
   inputs: PlanInput[];
   candidates: PlanCandidate[];
@@ -104,6 +108,7 @@ export function inputTitle(text: string): string {
 function checkHow(suite: Suite): Array<{ id: string; how: string }> {
   const c = suite.check;
   if (!c) return (suite.requiredChecks ?? []).map((id) => ({ id, how: "—" }));
+  if (suite.checkDescription) return [{ id: c.id, how: suite.checkDescription }];
   if (c.kind === "tsc") return [{ id: c.id, how: `compile the candidate's files with tsc --noEmit (config from ${c.scaffoldDir}/)` }];
   return [{ id: c.id, how: `run ${c.argv.join(" ")} in the trial dir, ${Math.round(c.timeoutMs / 1000)} s timeout` }];
 }
@@ -125,6 +130,7 @@ async function stepFromSuite(suite: Suite): Promise<PlanStep> {
   return {
     id: suite.step,
     task: PRODUCER[suite.producer ?? "prompt"] ?? null,
+    about: suite.description ?? null,
     inputFrom: suite.inputFrom ?? null,
     inputs,
     candidates: suite.candidates.map((id) => ({
@@ -179,6 +185,8 @@ export function planFromRun(b: RunBundle): PlanStep {
   return {
     id: m.step.id,
     task: null,
+    about: b.about?.description ?? null,
+    ...(b.about?.description && b.about.source !== "none" ? { aboutSource: b.about.source } : {}),
     inputFrom: null,
     inputs: inputs.map((id) => ({ id, title: null })),
     candidates: candidates.map((id) => ({
@@ -190,7 +198,7 @@ export function planFromRun(b: RunBundle): PlanStep {
     trials,
     checks: m.evaluators.required_checks.map((id) => ({
       id,
-      how: m.evaluators.check_version ? `version ${m.evaluators.check_version}` : "—",
+      how: b.about?.checkDescription ?? (m.evaluators.check_version ? `version ${m.evaluators.check_version}` : "—"),
     })),
     gates: gateLabels(rec.eligibility, m.evaluators.required_checks, m.operating_mode),
     mode: { id: m.operating_mode ?? null, label: modeLabel(m.operating_mode), explain: modeExplain(m.operating_mode) },

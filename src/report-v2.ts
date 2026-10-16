@@ -32,6 +32,8 @@ import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
 import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
 import { CHART_STYLES, renderHeatmap, renderRadar, renderTrialStrip } from "./report-charts.js";
+import { aboutOfRun, type RunAbout } from "./canon/about.js";
+import { sliceRows } from "./report-slices.js";
 import {
   EVIDENCE_STYLES,
   loadRawOutputs,
@@ -57,6 +59,8 @@ export interface RunBundle {
    * from `evaluations` so nothing that selects a candidate can read them.
    */
   reviews?: ReviewRow[];
+  /** What the run evaluated, in words (canon/about.ts); absent on bundles built in memory. */
+  about?: RunAbout;
 }
 
 async function loadReviews(dir: string): Promise<ReviewRow[]> {
@@ -88,10 +92,45 @@ export async function loadBundle(dir: string): Promise<RunBundle> {
     recommendation,
     gaps: await fs.readFile(path.join(dir, "GAPS.md"), "utf-8").catch(() => ""),
     reviews: await loadReviews(dir),
+    about: await aboutOfRun(dir, manifest),
   };
 }
 
 // ── rendering helpers ──────────────────────────────────────────────────────
+
+/** What the run evaluated and what a pass means, before any number. Empty when the spec says neither. */
+function renderAbout(b: RunBundle): string {
+  const a = b.about;
+  if (!a || (!a.description && !a.checkDescription)) return "";
+  const check = b.manifest.evaluators.required_checks[0];
+  const stale = a.source === "current-spec" ? `<p class="note">This run predates these descriptions; they are read from the task's spec as it is now.</p>` : "";
+  return `<section class="card">
+    <h2>What this evaluates</h2>
+    ${a.description ? `<p>${escapeHtml(a.description)}</p>` : ""}
+    ${a.checkDescription && check ? `<p class="note"><b>A pass of ${escapeHtml(check)}</b> means: ${escapeHtml(a.checkDescription)}</p>` : ""}
+    ${stale}
+  </section>`;
+}
+
+/** Required-check passes per input tag and split (report-slices.ts). Empty when the task labels no inputs. */
+function renderSlices(b: RunBundle, candidates: string[]): string {
+  const rows = sliceRows(b.about?.labels ?? null, b.trials, candidates, b.manifest.evaluators.required_checks[0] ?? null);
+  if (rows.length === 0) return "";
+  const cell = (c: { pass: number; graded: number }) => {
+    const cls = c.graded === 0 ? "" : c.pass === c.graded ? " ok" : c.pass / c.graded < 0.5 ? " bad" : "";
+    return `<td class="num${cls}">${c.graded === 0 ? "—" : `${c.pass}/${c.graded}`}</td>`;
+  };
+  const body = rows
+    .map((r) => `<tr><td class="mono">${escapeHtml(r.label)}</td><td class="num">${r.inputs}</td>${candidates.map((c) => cell(r.cells[c] ?? { pass: 0, graded: 0 })).join("")}</tr>`)
+    .join("");
+  return `<section class="card">
+    <h2>Results by input tag <span class="hint">required-check passes / graded trials, for the inputs carrying each tag or in each split</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tag</th><th class="num">Inputs</th>${candidates.map((c) => `<th class="num">${escapeHtml(c)}</th>`).join("")}</tr></thead>
+      <tbody>${body}</tbody>
+    </table></div>
+  </section>`;
+}
 
 function filterList(rec: Recommendation): string {
   return gateRows(rec)
@@ -243,6 +282,8 @@ export function renderRunReport(b: RunBundle): string {
     </dl>
   </header>
 
+  ${renderAbout(b)}
+
   ${renderHero(b, views, support)}
 
   <section class="card">
@@ -260,6 +301,8 @@ export function renderRunReport(b: RunBundle): string {
     </table></div>
     <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.${m.control_candidate ? ` Control candidate: ${escapeHtml(m.control_candidate)}.` : ""}</p>
   </section>
+
+  ${renderSlices(b, views.map((v) => v.id))}
 
   <div class="two-col">
     <section class="card">

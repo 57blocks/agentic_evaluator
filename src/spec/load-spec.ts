@@ -29,7 +29,7 @@ const DEFAULT_TIMEOUT_MS = 120_000;
 export interface EvalStep {
   id: string;
   version: string;
-  test_set: { id: string; inputs: string[]; fixture_dir?: string };
+  test_set: { id: string; inputs: string[]; fixture_dir?: string; labels_file?: string };
   candidate_ids: string[];
   required_checks?: string[];
   judged_dimensions?: string[];
@@ -65,6 +65,7 @@ export interface StepJudge {
 export interface EvalSpec {
   protocol_version: string;
   run_name: string;
+  description?: string;
   budget_usd?: number;
   workflow: {
     control_candidate?: string;
@@ -82,6 +83,7 @@ export interface EvalSpec {
         argv?: string[];
         version_files?: string[];
         timeout_seconds?: number;
+        description?: string;
       }
     >;
     judge: { model: string; provider_route?: string; rubric_file: string; methods?: string[]; show?: string[] };
@@ -408,6 +410,11 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     ...(step.max_cost_per_trial_usd !== undefined ? { maxCostPerTrialUsd: step.max_cost_per_trial_usd } : {}),
     ...e2eOf(spec, specPath),
     ...(step.test_set.fixture_dir ? { fixtureDir: step.test_set.fixture_dir } : {}),
+    ...(spec.description ? { description: spec.description } : {}),
+    ...(requiredChecks[0] && spec.evaluators.required_checks?.[requiredChecks[0]]?.description
+      ? { checkDescription: spec.evaluators.required_checks[requiredChecks[0]].description }
+      : {}),
+    ...(step.test_set.labels_file ? { labelsFile: step.test_set.labels_file } : {}),
   };
 }
 

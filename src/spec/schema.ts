@@ -22,6 +22,8 @@ export const SPEC_SCHEMA = {
   properties: {
     protocol_version: { type: "string", enum: [PROTOCOL_VERSION] },
     run_name: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{1,63}$" },
+    /** What this evaluation decides and tests, in a few sentences; the report opens with it. */
+    description: { type: "string", minLength: 1 },
     budget_usd: { type: "number", minimum: 0 },
     workflow: {
       type: "object",
@@ -65,6 +67,8 @@ export const SPEC_SCHEMA = {
                   id: { type: "string" },
                   inputs: { type: "array", minItems: 1, items: { type: "string" } },
                   fixture_dir: { type: "string", minLength: 1 },
+                  /** JSON, task-relative: { "<input>": { "tags": [...], "split": "dev" } }; the report breaks results down by it. */
+                  labels_file: { type: "string", minLength: 1 },
                 },
               },
               candidate_ids: { type: "array", minItems: 1, items: { type: "string" } },
@@ -187,6 +191,8 @@ export const SPEC_SCHEMA = {
               /** command only: files hashed into the evaluator version. */
               version_files: { type: "array", items: { type: "string" } },
               timeout_seconds: { type: "number", exclusiveMinimum: 0 },
+              /** What a pass means, in one sentence; the report shows it beside the pass rate. */
+              description: { type: "string", minLength: 1 },
             },
           },
         },

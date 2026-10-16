@@ -187,6 +187,12 @@ export interface Suite {
   e2eFinalCheck?: CheckConfig;
   /** `workflow.e2e.judge`: compare the two arms' deliveries (informs, never decides). */
   e2eJudge?: E2eJudgeConfig;
+  /** spec `description`: what this evaluation decides and tests. */
+  description?: string;
+  /** The step's required check's `description`: what a pass means. */
+  checkDescription?: string;
+  /** `test_set.labels_file`, task-relative: tags and split per input. */
+  labelsFile?: string;
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;
