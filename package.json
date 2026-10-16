@@ -30,7 +30,7 @@
     "agenteval": "tsx src/cli/index.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --import tsx --test tests/*.test.ts",
-    "build:demo": "vite build",
+    "build:demo": "vite build && vite build --mode static",
     "demo:dev": "vite",
     "parity": "tsx scripts/parity.ts",
     "prepack": "pnpm build:demo"
@@ -75,6 +75,7 @@
     "bin",
     "src",
     "dist/demo",
+    "dist/demo-static",
     "examples",
     "skills",
     "fixtures",
