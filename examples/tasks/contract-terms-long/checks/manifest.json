@@ -1,0 +1,81 @@
+{
+  "ct-001": {
+    "tags": [
+      "noise-clean",
+      "8k-12k-words",
+      "effective-defined",
+      "term-words",
+      "renewal-auto",
+      "cap-fixed",
+      "venue-differs"
+    ],
+    "split": "holdout",
+    "words": 8972
+  },
+  "ct-002": {
+    "tags": [
+      "hard",
+      "noise-clean",
+      "trap-executed-amendment",
+      "8k-12k-words",
+      "effective-as_of",
+      "term-words",
+      "renewal-none",
+      "cap-lesser_of"
+    ],
+    "split": "holdout",
+    "words": 9070
+  },
+  "ct-003": {
+    "tags": [
+      "noise-light",
+      "8k-12k-words",
+      "effective-as_of",
+      "term-words",
+      "renewal-auto",
+      "cap-greater_of",
+      "venue-differs"
+    ],
+    "split": "dev",
+    "words": 9049
+  },
+  "ct-004": {
+    "tags": [
+      "hard",
+      "noise-light",
+      "trap-out-of-order",
+      "8k-12k-words",
+      "effective-last_signature",
+      "term-words",
+      "renewal-auto",
+      "cap-greater_of"
+    ],
+    "split": "dev",
+    "words": 9161
+  },
+  "ct-005": {
+    "tags": [
+      "noise-heavy",
+      "8k-12k-words",
+      "effective-last_signature",
+      "term-words",
+      "renewal-none",
+      "cap-greater_of",
+      "venue-differs"
+    ],
+    "split": "dev",
+    "words": 9010
+  },
+  "ct-006": {
+    "tags": [
+      "noise-heavy",
+      "8k-12k-words",
+      "effective-last_signature",
+      "term-words",
+      "renewal-auto-defined",
+      "cap-fixed"
+    ],
+    "split": "holdout",
+    "words": 9045
+  }
+}

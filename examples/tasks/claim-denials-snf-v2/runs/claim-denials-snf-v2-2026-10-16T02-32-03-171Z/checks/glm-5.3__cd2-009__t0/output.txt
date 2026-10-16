@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-07-29",
+  "action_note": "The claim was returned as unprocessable (CO-16/MA130) because the required occurrence code 50 MDS assessment date was missing, so the MAC could not price it under PDPM; unprocessable claims have no appeal rights. Pull the assessment date from the MDS, add it to the claim, and resubmit as a new claim before the one-year timely filing deadline of 2026-07-29 (12 months from the 2025-07-29 through date)."
+}

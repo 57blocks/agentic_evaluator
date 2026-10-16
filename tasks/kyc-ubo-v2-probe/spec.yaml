@@ -1,0 +1,82 @@
+# kyc-ubo-v2-probe — six hand-written items to see whether the v2 design
+# separates models before building a generator for it.
+#
+# v1 stated the rules in the prompt and every model got 30/30. Here the
+# prompt names only § 3 GwG and BVA practice, and the inputs are German
+# register extracts with nominal amounts. Each item has one trap: direct +
+# controlled stakes added (p1), 6.250 vs 6.251 of 25.000 (p2), voting rights
+# apart from capital (p3), two controlled vehicles added and a 50/50 holding
+# (p4), the controller of a KG's general partner (p5), the fallback to the
+# Geschäftsführer and not the Prokurist (p6). Answers are hand-checked; the
+# reference's "rule" field says what decides each one.
+#
+#   agenteval check-task kyc-ubo-v2-probe
+#   agenteval run kyc-ubo-v2-probe --yes --html     # billed, well under $1
+
+protocol_version: "0.3"
+run_name: kyc-ubo-v2-probe
+description: "Six hand-written German register extracts, to see whether a beneficial-owner set judged by German law (§ 3 GwG, BVA practice) would separate models before a generator was built. The prompt names the law but not its rules; each extract carries one trap (direct plus controlled stakes added, 6,250 vs 6,251 of 25,000 EUR, non-voting shares, two controlled vehicles, a KG's general partner, the Geschäftsführer fallback)."
+budget_usd: 1
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: ubo
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/ubo.md
+      rubric_file: rubrics/ubo.md
+      test_set:
+        id: kyc-ubo-v2-probe
+        inputs: [p1-aggregation, p2-nominal-boundary, p3-voting-rights, p4-two-vehicles, p5-kg, p6-fallback]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash]
+      required_checks: [ubo-check]
+      judged_dimensions: [correct-basis]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 180
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    ubo-check:
+      kind: command
+      description: "The set of beneficial owners and of fictitious beneficial owners matches the hand-checked key, by name."
+      argv: ["node", "checks/ubo-check.mjs"]
+      version_files: [checks/ubo-check.mjs]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/ubo.md
+    methods: [absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/ubo.md
+  default_temperature: 0

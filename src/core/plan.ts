@@ -18,10 +18,15 @@ const DEFAULT_CONCURRENCY = 5;
 const MIN_INPUTS_FOR_MAGNITUDE = 10;
 
 /** The spec wins over the environment: a step that declares a limit means it. */
+/**
+ * Trials in flight: `--concurrency` (EVAL_CONCURRENCY) wins, as its help says,
+ * then the step's own `concurrency`, then `execution.concurrency`.
+ */
 export function resolveConcurrency(suite: Suite): number {
-  if (suite.concurrency && suite.concurrency > 0) return suite.concurrency;
   const parsed = parseInt(process.env.EVAL_CONCURRENCY ?? "", 10);
-  return Number.isNaN(parsed) ? DEFAULT_CONCURRENCY : Math.max(1, parsed);
+  if (!Number.isNaN(parsed)) return Math.max(1, parsed);
+  if (suite.concurrency && suite.concurrency > 0) return suite.concurrency;
+  return DEFAULT_CONCURRENCY;
 }
 
 /**
@@ -75,6 +80,20 @@ export function e2eChain(suites: readonly Suite[]): Suite[] | null {
   return ids.map((id) => byId.get(id)!);
 }
 
+/** The root inputs the end-to-end arms run on. */
+export function e2eRootInputs(root: Suite): string[] {
+  return root.e2eInputs ?? root.inputs;
+}
+
+/** The chain as the arms run it: the last step graded by `e2e.final_checks` when declared. */
+export function e2eArmChain(chain: readonly Suite[]): Suite[] {
+  const last = chain.length - 1;
+  return chain.map((s, i) => {
+    const limited = s.e2eLimits ? { ...s, ...s.e2eLimits } : s;
+    return i === last && s.e2eFinalCheck ? { ...limited, check: s.e2eFinalCheck, requiredChecks: [s.e2eFinalCheck.id] } : limited;
+  });
+}
+
 export function planE2e(suites: readonly Suite[]): E2ePlan | null {
   const chain = e2eChain(suites);
   if (!chain) return null;
@@ -83,7 +102,9 @@ export function planE2e(suites: readonly Suite[]): E2ePlan | null {
   return {
     controlCandidate: root.controlCandidate ?? null,
     chain: chain.map((s) => s.step),
-    perArm: root.inputs.length * trials * chain.length,
+    perArm: e2eRootInputs(root).length * trials * chain.length,
+    inputs: e2eRootInputs(root).length,
+    ...(root.e2eJudge ? { judgedCases: e2eRootInputs(root).length * trials } : {}),
   };
 }
 

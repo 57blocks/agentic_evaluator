@@ -1,0 +1,84 @@
+# claim-denials-probe — six hand-written skilled-nursing claim denials, to see
+# whether claim-denials-snf-v1 (the protocol page's sample) would separate
+# models before a generator is built for it.
+#
+# Each file holds the claim, its remittance (group and reason code with the
+# code's printed text), the claim history and an excerpt of the payer's
+# manual, so every answer, deadlines included, follows from the file. One
+# trap each: a timely-filing denial whose "earlier submission" was only a
+# clearinghouse rejection (p1) or did reach the payer (p2), an invalid NPI
+# where the manual forbids appeal (p3), a COB denial whose other coverage had
+# already ended (p4), unauthorized days past the retro-auth window (p5), and a
+# benefit exhausted with Medicaid secondary and a "whichever is later"
+# deadline (p6). Answers are hand-checked; each key's "why" says what decides it.
+#
+#   agenteval check-task claim-denials-probe
+#   agenteval run claim-denials-probe --yes --html     # billed, well under $1
+
+protocol_version: "0.3"
+run_name: claim-denials-probe
+description: "Six hand-written skilled-nursing claim denials, each with its remittance, claim history and an excerpt of the payer's manual, to see whether denial triage separates models when the rules are in the file. One trap each: timely filing with and without proof, an invalid NPI that cannot be appealed, a COB denial whose other coverage had ended, unauthorized days past the retro-auth window, and a benefit exhausted with Medicaid secondary."
+budget_usd: 1
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: triage
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/triage.md
+      rubric_file: rubrics/triage.md
+      test_set:
+        id: claim-denials-probe
+        inputs: [p1-filing-no-proof, p2-filing-with-proof, p3-invalid-npi, p4-cob-terminated, p5-auth-partial, p6-benefit-exhausted]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash]
+      required_checks: [triage-check]
+      judged_dimensions: [sound-action]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    triage-check:
+      kind: command
+      description: "Root cause, correctability, next action and deadline match the hand-checked key."
+      argv: ["node", "checks/triage-check.mjs"]
+      version_files: [checks/triage-check.mjs]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/triage.md
+    methods: [absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/triage.md
+  default_temperature: 0

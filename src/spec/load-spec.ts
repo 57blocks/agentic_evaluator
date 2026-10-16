@@ -10,6 +10,7 @@
  * the single-model e2e control chain (protocol §8).
  */
 
+import { readFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Ajv2020 } from "ajv/dist/2020.js";
@@ -29,7 +30,7 @@ const DEFAULT_TIMEOUT_MS = 120_000;
 export interface EvalStep {
   id: string;
   version: string;
-  test_set: { id: string; inputs: string[] };
+  test_set: { id: string; inputs: string[]; fixture_dir?: string; labels_file?: string };
   candidate_ids: string[];
   required_checks?: string[];
   judged_dimensions?: string[];
@@ -37,21 +38,47 @@ export interface EvalStep {
   operating_mode?: string;
   eligibility?: EligibilityDecl;
   maximum_completion_time_seconds?: number;
+  /** A spend cap per trial, handed to command candidates (they enforce it). */
+  max_cost_per_trial_usd?: number;
+  /** Trials in flight for this step; execution.concurrency otherwise. */
+  concurrency?: number;
+  /** Whether a command's non-zero exit fails its trials on this step (over cli.exit_code). */
+  exit_code?: "fail" | "ignore";
+  /** This step's judging, over evaluators.judge (whose model it keeps). */
+  judge?: StepJudge;
   /** Overrides x-harness.producer for this step. */
   producer?: "prompt" | "codegen";
   prompt_file?: string;
   rubric_file?: string;
   /** Prior step id whose output is this step's input during e2e control. Independent eval still uses test_set. */
   input_from?: string;
+  /** What a chained step starts from: the previous output as text (default), or its files. */
+  handoff?: "text" | "workdir";
+}
+
+/** Judging for one step (or the e2e arms): any field left out comes from evaluators.judge. */
+export interface StepJudge {
+  rubric_file?: string;
+  methods?: string[];
+  show?: string[];
+  dimensions?: string[];
 }
 
 /** Static shape of a validated spec (mirrors SPEC_SCHEMA; kept loose on purpose). */
 export interface EvalSpec {
   protocol_version: string;
   run_name: string;
+  description?: string;
   budget_usd?: number;
   workflow: {
     control_candidate?: string;
+    /** End-to-end validation: which root inputs the chain runs on, and what grades its end product. */
+    e2e?: {
+      inputs?: string[];
+      final_checks?: string[];
+      steps?: Record<string, { max_cost_per_trial_usd?: number; maximum_completion_time_seconds?: number }>;
+      judge?: { rubric_file: string; show?: string[]; dimensions?: string[] };
+    };
     steps: EvalStep[];
   };
   candidates: CandidateDef[];
@@ -64,9 +91,10 @@ export interface EvalSpec {
         argv?: string[];
         version_files?: string[];
         timeout_seconds?: number;
+        description?: string;
       }
     >;
-    judge: { model: string; provider_route?: string; rubric_file: string; methods?: string[] };
+    judge: { model: string; provider_route?: string; rubric_file: string; methods?: string[]; show?: string[] };
     human?: { rubric_file: string; method?: "pairwise"; show?: string[]; dimensions?: string[] };
   };
   execution: {
@@ -103,7 +131,9 @@ function vendorOf(modelId: string): string {
 }
 
 export function parseSpec(text: string, specPath: string): EvalSpec {
-  const data: unknown = parseYaml(text);
+  // `merge`: `<<: *anchor` folds shared blocks (one candidate's cli, a
+  // provider's env) into many, so a spec states them once.
+  const data: unknown = parseYaml(text, { merge: true });
   if (!validateSpec(data)) {
     const issues = (validateSpec.errors ?? [])
       .map((e) => `${e.instancePath || "/"} ${e.message ?? ""}`.trim())
@@ -131,7 +161,7 @@ function stepOverrides(step: EvalStep, spec: EvalSpec): {
   return {
     producer: step.producer ?? harness.producer,
     promptFile: step.prompt_file ?? harness.prompt_file,
-    rubricFile: step.rubric_file ?? spec.evaluators.judge.rubric_file,
+    rubricFile: step.judge?.rubric_file ?? step.rubric_file ?? spec.evaluators.judge.rubric_file,
   };
 }
 
@@ -218,6 +248,9 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
     if (steps.some((s) => s.input_from)) {
       throw specError(specPath, "input_from must form a single linear chain (no forks or cycles)");
     }
+    if (spec.workflow.e2e) {
+      throw specError(specPath, "workflow.e2e needs a chain: no step declares input_from");
+    }
     return;
   }
 
@@ -229,6 +262,25 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
     if (!steps[indexOf.get(id)!].candidate_ids.includes(control)) {
       throw specError(specPath, `control_candidate "${control}" is not in step "${id}" candidate_ids`);
     }
+  }
+  checkE2eBlock(spec, specPath, steps[indexOf.get(chain[0])!]);
+}
+
+/** workflow.e2e: its inputs are the chain's first step's, and its final check is declared. */
+function checkE2eBlock(spec: EvalSpec, specPath: string, root: EvalStep): void {
+  const e2e = spec.workflow.e2e;
+  if (!e2e) return;
+  const unknown = (e2e.inputs ?? []).filter((i) => !root.test_set.inputs.includes(i));
+  if (unknown.length > 0) {
+    throw specError(specPath, `workflow.e2e.inputs ${unknown.join(", ")} are not inputs of "${root.id}", where the chain starts`);
+  }
+  const strangers = Object.keys(e2e.steps ?? {}).filter((id) => !spec.workflow.steps.some((s) => s.id === id && (s.input_from || s.id === root.id)));
+  if (strangers.length > 0) {
+    throw specError(specPath, `workflow.e2e.steps ${strangers.join(", ")} are not steps of the chain`);
+  }
+  const undeclared = (e2e.final_checks ?? []).filter((c) => !spec.evaluators.required_checks?.[c]);
+  if (undeclared.length > 0) {
+    throw specError(specPath, `workflow.e2e.final_checks ${undeclared.join(", ")} have no evaluator definition`);
   }
 }
 
@@ -244,8 +296,8 @@ const ALL_JUDGE_METHODS: JudgeMethod[] = ["pairwise-swap", "absolute-1-5"];
  * billed a full judging pass on a step that had asked for none, and left no
  * way to declare a check-only step.
  */
-function judgeMethodsOf(spec: EvalSpec): JudgeMethod[] {
-  const declared = spec.evaluators.judge.methods;
+function judgeMethodsOf(spec: EvalSpec, own?: StepJudge): JudgeMethod[] {
+  const declared = own?.methods ?? spec.evaluators.judge.methods;
   if (!declared) return [...ALL_JUDGE_METHODS];
   return ALL_JUDGE_METHODS.filter((m) => declared.includes(m));
 }
@@ -288,13 +340,58 @@ function compileCheck(
   };
 }
 
+/** workflow.e2e, compiled: the same on every step (the chain reads it off its first and last). */
+function e2eOf(spec: EvalSpec, specPath: string, stepId: string): Pick<Suite, "e2eInputs" | "e2eFinalCheck" | "e2eJudge" | "e2eLimits"> {
+  const e2e = spec.workflow.e2e;
+  if (!e2e) return {};
+  const finalCheck = e2e.final_checks ? compileCheck(spec, specPath, "workflow.e2e", e2e.final_checks) : undefined;
+  const limits = e2e.steps?.[stepId];
+  return {
+    ...(limits
+      ? {
+          e2eLimits: {
+            ...(limits.max_cost_per_trial_usd !== undefined ? { maxCostPerTrialUsd: limits.max_cost_per_trial_usd } : {}),
+            ...(limits.maximum_completion_time_seconds !== undefined ? { timeoutMs: limits.maximum_completion_time_seconds * 1000 } : {}),
+          },
+        }
+      : {}),
+    ...(e2e.inputs ? { e2eInputs: [...e2e.inputs] } : {}),
+    ...(finalCheck ? { e2eFinalCheck: finalCheck } : {}),
+    ...(e2e.judge
+      ? {
+          e2eJudge: {
+            rubricFile: e2e.judge.rubric_file,
+            ...(e2e.judge.show?.length ? { show: [...e2e.judge.show] } : {}),
+            dimensions: [...(e2e.judge.dimensions ?? [])],
+          },
+        }
+      : {}),
+  };
+}
+
+/** A command candidate's version_files, hashed into its config (and so its trial identity). */
+function withVersionSha(c: CandidateDef, taskRoot: string): CandidateDef {
+  const files = c.cli?.version_files;
+  if (!c.cli || !files || files.length === 0) return c;
+  const parts = [...files].sort().map((rel) => {
+    let content = "<missing>";
+    try {
+      content = readFileSync(path.resolve(taskRoot, rel), "utf-8");
+    } catch {
+      // A missing file hashes as missing; check-task names it.
+    }
+    return `${rel}:${sha256(content)}`;
+  });
+  return { ...c, cli: { ...c.cli, version_sha: sha256(parts.join("\n")) } };
+}
+
 function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskRoot: string, step: EvalStep): Suite {
   const harness = spec["x-harness"]!;
   const { producer, promptFile, rubricFile } = stepOverrides(step, spec);
   const wanted = new Set(step.candidate_ids);
   const candidateDefs: Record<string, CandidateDef> = {};
   for (const c of spec.candidates) {
-    if (wanted.has(c.id)) candidateDefs[c.id] = { ...c, adapter: adapterIdOf(c, producer) };
+    if (wanted.has(c.id)) candidateDefs[c.id] = { ...withVersionSha(c, taskRoot), adapter: adapterIdOf(c, producer) };
   }
   const requiredChecks = step.required_checks ?? [];
   const check = compileCheck(spec, specPath, step.id, requiredChecks);
@@ -307,7 +404,8 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     rubricFile,
     candidates: [...step.candidate_ids],
     judge: spec.evaluators.judge.model,
-    judgeMethods: judgeMethodsOf(spec),
+    judgeMethods: judgeMethodsOf(spec, step.judge),
+    ...((step.judge?.show ?? spec.evaluators.judge.show)?.length ? { judgeShow: step.judge?.show ?? spec.evaluators.judge.show } : {}),
     inputs: [...step.test_set.inputs],
     trials: spec.execution.trials_per_case,
     temperature: harness.default_temperature ?? DEFAULT_TEMPERATURE,
@@ -315,7 +413,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
       ? step.maximum_completion_time_seconds * 1000
       : DEFAULT_TIMEOUT_MS,
     check,
-    dimensions: step.judged_dimensions ?? [],
+    dimensions: step.judge?.dimensions ?? step.judged_dimensions ?? [],
     human: spec.evaluators.human
       ? {
           rubricFile: spec.evaluators.human.rubric_file,
@@ -340,11 +438,21 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     controlCandidate: spec.workflow.control_candidate,
     benchmarkMode: spec.execution.benchmark_mode ?? "capability-neutral",
     cacheMode: spec.execution.cache_mode ?? "cold",
-    concurrency: spec.execution.concurrency,
+    concurrency: step.concurrency ?? spec.execution.concurrency,
     specSha,
     specPath,
     taskRoot,
     inputFrom: step.input_from,
+    ...(step.handoff ? { handoff: step.handoff } : {}),
+    ...(step.max_cost_per_trial_usd !== undefined ? { maxCostPerTrialUsd: step.max_cost_per_trial_usd } : {}),
+    ...(step.exit_code ? { exitCode: step.exit_code } : {}),
+    ...e2eOf(spec, specPath, step.id),
+    ...(step.test_set.fixture_dir ? { fixtureDir: step.test_set.fixture_dir } : {}),
+    ...(spec.description ? { description: spec.description } : {}),
+    ...(requiredChecks[0] && spec.evaluators.required_checks?.[requiredChecks[0]]?.description
+      ? { checkDescription: spec.evaluators.required_checks[requiredChecks[0]].description }
+      : {}),
+    ...(step.test_set.labels_file ? { labelsFile: step.test_set.labels_file } : {}),
   };
 }
 

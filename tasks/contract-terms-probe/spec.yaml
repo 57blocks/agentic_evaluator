@@ -1,0 +1,81 @@
+# contract-terms-probe — six hand-written agreements to see whether a
+# contract-terms extraction set would separate models, before building a
+# generator for it (the kyc-ubo lesson: v1's stated rules made it 30/30).
+#
+# One trap each: two executed amendments (c1), missing clauses that must stay
+# null (c2), Delaware law with New York venue and an effective date set by the
+# later signature (c3), a non-automatic renewal, a dated-vs-effective date and
+# a greater-of cap beside a carve-out cap (c4), a signed amendment followed by
+# an unsigned draft (c5), and a clean control (c6). Answers are hand-checked;
+# each reference's "why" says what decides it.
+#
+#   agenteval check-task contract-terms-probe
+#   agenteval run contract-terms-probe --yes --html     # billed, well under $1
+
+protocol_version: "0.3"
+run_name: contract-terms-probe
+description: "Six short hand-written service agreements, one trap each, to see whether extracting eight commercial terms (parties, effective date, term, renewal, notice, governing law, liability cap) separates models: two executed amendments, missing clauses that must stay null, law vs venue, a non-automatic renewal, an unsigned draft amendment, and a clean control."
+budget_usd: 1
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: extract
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/extract.md
+      rubric_file: rubrics/extract.md
+      test_set:
+        id: contract-terms-probe
+        inputs: [c1-two-amendments, c2-missing-clauses, c3-law-vs-venue, c4-wording, c5-unsigned-amendment, c6-clean]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash]
+      required_checks: [terms-check]
+      judged_dimensions: [faithful]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    terms-check:
+      kind: command
+      description: "All eight extracted fields match the hand-checked key (names case- and punctuation-insensitive, dates and numbers exact, the cap by type and amounts)."
+      argv: ["node", "checks/terms-check.mjs"]
+      version_files: [checks/terms-check.mjs]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/extract.md
+    methods: [absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/extract.md
+  default_temperature: 0

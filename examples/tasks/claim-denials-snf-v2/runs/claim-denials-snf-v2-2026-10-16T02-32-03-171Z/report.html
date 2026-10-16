@@ -1,0 +1,2954 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>claim-denials-snf-v2 run report</title>
+<style>
+:root{--ground:#F4F6F9;--surface:#fff;--surface-2:#FAFBFC;--ink:#2B3038;--ink-2:#6B7079;--ink-3:#919499;--rule:#E2E5EA;--accent:#1E78EE;--accent-2:#469BFF;--accent-soft:#EBF4FF;--champ:#F4F9FF;--ok-bg:#EBF9F2;--ok-fg:#1B9A6A;--bad-bg:#FFF0F0;--bad-fg:#F03B3B;--warn-bg:#FCF1D6;--warn-fg:#8A5A00;--shadow:0 2px 6px rgba(27,43,75,.08);--mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;--s1:#2A78D6;--s2:#EB6834;--s3:#1BAF7A;--s4:#EDA100}
+@media(prefers-color-scheme:dark){:root{--ground:#16191E;--surface:#1F2329;--surface-2:#272C33;--ink:#E6E8EC;--ink-2:#ABAEB2;--ink-3:#919499;--rule:#2E343C;--accent:#93C1FF;--accent-2:#469BFF;--accent-soft:rgba(70,155,255,.14);--champ:#1A2A3F;--ok-bg:#173A2C;--ok-fg:#8FE0BC;--bad-bg:#45211F;--bad-fg:#FFB9B9;--warn-bg:#3D3218;--warn-fg:#F6D58A;--shadow:0 2px 6px rgba(0,0,0,.3)}}
+body{margin:0;color:var(--ink);font:14px/1.55 "Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:44px 24px 80px;background:var(--ground)}
+.page{max-width:68rem;margin:0 auto;display:grid;gap:20px}
+.mono,td.num,code,pre,.kv dd{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.kv dd{font-size:13px}
+.small{font-size:12px}
+header.run{display:grid;gap:6px}.eyebrow{margin:0;font-size:13px;color:var(--accent);font-weight:600}
+h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.022em}h1 .id{font-family:var(--mono);font-weight:700;font-size:26px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:8px 0 0;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.kv div{display:grid;gap:2px}.kv dt{font-size:12px;color:var(--ink-3)}.kv dd{margin:0;font-size:13px;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--warn-fg);padding:16px 20px;border-radius:12px;box-shadow:var(--shadow)}
+.verdict.firm{border-left-color:var(--ok-fg)}.verdict.needs-review{border-left-color:var(--bad-fg)}
+.verdict .champ-line b{color:var(--accent)}
+.verdict .tag{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
+.verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
+.verdict p{margin:0}
+.champ-line{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}.champ-line b{font-weight:700}.champ-line .mode{color:var(--ink-2);font-weight:400}
+.trophy{font-size:18px}
+.champ-facts{margin:3px 0 6px;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+section.card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 24px 22px;display:grid;gap:12px;box-shadow:var(--shadow)}
+section.card h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--ink);display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-weight:600;color:var(--ink-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:8px 13px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--surface-2)}
+th.num,td.num{text-align:right;white-space:nowrap}
+td.num .bar{margin-right:8px}td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}tr:last-child td{border-bottom:none}
+td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:var(--mono)}
+td .sub{display:block;font-size:11px;color:var(--ink-3)}
+tr.control td.cand::after{content:"control";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
+tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}tr.gated td{color:var(--ink-3)}
+tbody tr{transition:background .12s ease}tbody tr:hover{background:var(--accent-soft)}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:baseline}
+.sw0{background:var(--s1)}.sw1{background:var(--s2)}.sw2{background:var(--s3)}.sw3{background:var(--s4)}
+.bar{display:inline-block;width:92px;height:9px;background:var(--surface-2);border-radius:99px;vertical-align:middle;margin-right:8px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--rule)}
+.bar span{display:block;height:100%;border-radius:99px;background:var(--accent-2)}
+.pill.pass{background:var(--ok-bg);color:var(--ok-fg)}.pill.miss{background:var(--bad-bg);color:var(--bad-fg)}
+ol.trace{margin:0;padding-left:1.2em;font-size:13px;color:var(--ink-2);display:grid;gap:8px}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
+td.ok{color:var(--ok-fg)}td.bad{color:var(--bad-fg)}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.two-col>*{min-width:0;overflow:hidden}
+.two-col .table-wrap{overflow-x:auto}
+.ledger td:first-child{color:var(--ink-2)}.ledger tr.total td{font-weight:600;border-top:2px solid var(--rule)}
+.note{font-size:12.5px;color:var(--ink-2);margin:0}code{background:var(--surface-2);padding:0 5px;border-radius:3px;font-size:12px}
+ul.gaps{margin:0;padding-left:1.1em;font-size:13px;color:var(--ink-2);display:grid;gap:4px}
+details{font-size:13px}summary{cursor:pointer;color:var(--accent);font-weight:500}
+pre{margin:8px 0 0;padding:12px;background:var(--surface-2);border-radius:6px;overflow-x:auto;font-size:12px;line-height:1.55;max-height:420px}
+.steps{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}.steps .arrow{align-self:center;color:var(--ink-3)}
+.step-card{flex:1 1 200px;min-width:0;display:grid;gap:6px;align-content:start;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.step-card.open{border-left:4px solid var(--bad-fg)}.step-card .idx{font-size:12px;color:var(--ink-2);font-weight:500}
+.step-card .pick{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);overflow-wrap:anywhere}.step-card.open .pick{font-family:inherit;color:var(--bad-fg)}
+.step-card .pill{justify-self:start}.step-card .small{color:var(--ink-2)}
+footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
+@media(max-width:480px){h1{font-size:20px}.verdict{grid-template-columns:1fr}section.card{padding:14px}}
+
+.pref-high{color:var(--ok-fg);font-weight:600}.pref-low{color:var(--ink-3)}
+
+.duel{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin:10px 0}
+.duel header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.duel .evidence{margin:6px 0 10px;color:var(--ink-2)}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid var(--rule)}
+.chip.win{background:var(--ok-bg);color:var(--ok-fg);border-color:transparent}
+.chip.tie{background:var(--surface-2);color:var(--ink-2);border-color:transparent}
+.chip.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:transparent}
+table.dims{width:100%}table.dims th{text-align:left;font-weight:500;white-space:nowrap;width:1%;padding-right:14px}
+details>summary{cursor:pointer;padding:6px 0;color:var(--ink-2)}
+pre.raw{max-height:460px;overflow:auto;background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-word;font-size:12px}
+.muted{color:var(--ink-3)}
+
+.viz-flat{color:var(--warn-fg)}
+.viz-flag{font-size:10px;font-weight:600;background:var(--warn-bg);color:var(--warn-fg);padding:0 5px;border-radius:3px;white-space:nowrap}
+.viz-void .viz-note{margin-top:8px}
+.viz{margin:14px 0 0;padding:0}
+.viz-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;align-items:start}
+.viz figcaption{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:baseline}
+.viz-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4px;font-size:12px;color:var(--ink-2)}
+.viz-lg{display:inline-flex;gap:6px;align-items:center}
+.viz-sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.viz-s0,.viz-c0{--viz:#2a78d6}.viz-s1,.viz-c1{--viz:#eb6834}.viz-s2,.viz-c2{--viz:#1baf7a}
+.viz-sw{background:var(--viz)}
+.viz-grid{fill:none;stroke:var(--rule);stroke-width:1}
+.viz-axis{font-size:11px;fill:var(--ink-2)}
+.viz-tick{font-size:10px;fill:var(--ink-3)}
+.viz-poly{fill:var(--viz);fill-opacity:.1;stroke:var(--viz);stroke-width:2}
+.viz-f0{--viz:#2a78d6}.viz-f1{--viz:#eb6834}.viz-f2{--viz:#1baf7a}
+.viz-dot{fill:var(--viz);stroke:var(--surface);stroke-width:2}
+.viz-bad{fill:var(--surface);stroke:var(--viz);stroke-width:2;stroke-dasharray:3 2}
+.viz-miss{font-size:11px;fill:var(--ink-3)}
+.viz-note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+table.viz-heat{width:100%;border-collapse:separate;border-spacing:2px}
+table.viz-heat th{font-size:12px;font-weight:500;color:var(--ink-2);text-align:left;white-space:nowrap}
+td.viz-cell{text-align:center;border-radius:4px;padding:8px 6px;font-variant-numeric:tabular-nums;color:#0d366b}
+td.viz-on-dark{color:#fff}
+td.viz-none{background:var(--surface-2);color:var(--ink-3)}
+.viz-scale{display:flex;gap:2px;align-items:center;margin-top:8px;font-size:11px;color:var(--ink-3)}
+.viz-step{width:26px;height:8px;border-radius:2px;display:inline-block}
+@media(prefers-color-scheme:dark){
+  .viz-s0,.viz-c0,.viz-f0{--viz:#3987e5}.viz-s1,.viz-c1,.viz-f1{--viz:#d95926}.viz-s2,.viz-c2,.viz-f2{--viz:#199e70}
+}
+</style></head>
+<body><div class="page">
+  <header class="run">
+    <p class="eyebrow">Agentic Evaluator · run report · protocol 0.3</p>
+    <h1>Step triage · <span class="id">claim-denials-snf-v2</span></h1>
+    <dl class="kv">
+      <div><dt>Spec</dt><dd>tasks/claim-denials-snf-v2/spec.yaml · sha256 97583c5f</dd></div>
+      <div><dt>Test set</dt><dd>claim-denials-snf-v2 · 30 input(s)</dd></div>
+      <div><dt>Trial plan</dt><dd>4 candidates × 30 inputs × 1 trial = 120</dd></div>
+      <div><dt>Judge</dt><dd>google/gemini-3.1-pro-preview · rubric da549ec6</dd></div>
+      <div><dt>Mode</dt><dd>capability-neutral · cold cache</dd></div>
+      <div><dt>Run time</dt><dd>2026-10-16 02:32 → 02:51</dd></div>
+      <div><dt>Operating mode</dt><dd>lowest cost · needs review · no recommendation · closest kimi-k3</dd></div>
+      <div><dt>harness</dt><dd>0.1.0 · eb7393d</dd></div>
+    </dl>
+  </header>
+
+  <section class="card">
+    <h2>What this evaluates</h2>
+    <p>Which model knows Medicare's rules well enough to triage a denied skilled-nursing claim? 30 synthetic Medicare fee-for-service Part A claims with raw 835 remittance codes and the facility's records, and no payer manual: the rules (42 CFR, the CMS manuals, the X12 code list) are in RULES.md and the model must know them. Eleven ordinary items; nineteen where the rule changes the answer: filing limits from the Through date, the redetermination deadline (125 days after the remittance), new benefit periods, days past day 100, and a three-day stay counted from the admission order.</p>
+    <p class="note"><b>A pass of triage-check</b> means: Root cause, correctability, next action and deadline match the key computed from RULES.md; the deadline must be the last day the rules allow.</p>
+    <p class="note">This run predates these descriptions; they are read from the task's spec as it is now.</p>
+  </section>
+
+  <div class="verdict needs-review">
+    <span class="tag">needs review</span>
+    <div>
+      <p class="champ-line"><b>No candidate to recommend</b> <span class="mode">· lowest cost</span></p>
+      <p class="champ-facts"></p>
+      <p class="sub">No candidate passes every gate. The closest is kimi-k3 (required check 93.3% (28/30), reliability 93.3% (28/30)); it is named for review, not adopted.</p>
+      <p class="sub">No pairwise comparison was available this run.</p>
+      <p class="sub">This step has no recommendation to adopt; someone needs to review the evidence below and decide.</p>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v3</span></h2>
+    <ol class="trace"><li><b>required-check pass rate ≥ 100%</b> — removed: sonnet-5 (required check passed 50.0% (15/30)); kimi-k3 (required check passed 93.3% (28/30)); glm-5.3 (required check passed 44.4% (12/27)); deepseek-v4.1-flash (required check passed 36.7% (11/30)). Remaining: none.</li><li><b>reliability ≥ 100%</b> — removed: nobody removed. Remaining: none.</li></ol>
+    
+    <p class="note">Passed every gate: none. The judge's win rate is for reference only and takes no part in selection.</p>
+  </section>
+
+  <section class="card">
+    <h2>Candidates <span class="hint">the same inputs, paired by candidate; 1 trial(s) per cell</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th><th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
+      <tbody><tr class="control gated">
+        <td class="cand"><span class="sw sw0"></span>sonnet-5<span class="model">gated out</span><span class="model">anthropic/claude-sonnet-5 · openrouter/claude-platform-on-aws</span></td>
+        <td><div class="state-list"><span class="ok">15 success</span><span class="bad">15 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill miss">15 / 30</span></td>
+        <td class="num">—<span class="sub">0 matches</span></td>
+        
+        <td class="num">5.0</td>
+        <td class="num">$0.0246</td>
+        <td class="num">12.6 s</td>
+        <td><div class="state-list"><span class="ok">30 success</span></div></td>
+      </tr><tr class="gated">
+        <td class="cand"><span class="sw sw1"></span>kimi-k3<span class="model">gated out</span><span class="model">moonshotai/kimi-k3 · openrouter/wafer</span></td>
+        <td><div class="state-list"><span class="ok">28 success</span><span class="bad">2 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill miss">28 / 30</span></td>
+        <td class="num">—<span class="sub">0 matches</span></td>
+        
+        <td class="num">5.0</td>
+        <td class="num">$0.0820</td>
+        <td class="num">28.0 s</td>
+        <td><div class="state-list"><span class="ok">30 success</span></div></td>
+      </tr><tr class="gated">
+        <td class="cand"><span class="sw sw2"></span>glm-5.3<span class="model">gated out</span><span class="model">z-ai/glm-5.3 · openrouter/mistral, openrouter, openrouter/modal</span></td>
+        <td><div class="state-list"><span class="ok">12 success</span><span class="bad">18 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill miss">12 / 27</span></td>
+        <td class="num">—<span class="sub">0 matches</span></td>
+        
+        <td class="num">5.0</td>
+        <td class="num">unobserved</td>
+        <td class="num">32.9 s</td>
+        <td><div class="state-list"><span class="ok">27 success</span><span class="bad">3 timeout</span></div></td>
+      </tr><tr class="gated">
+        <td class="cand"><span class="sw sw3"></span>deepseek-v4.1-flash<span class="model">gated out</span><span class="model">deepseek/deepseek-v4.1-flash · openrouter/primeintellect</span></td>
+        <td><div class="state-list"><span class="ok">11 success</span><span class="bad">19 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill miss">11 / 30</span></td>
+        <td class="num">—<span class="sub">0 matches</span></td>
+        
+        <td class="num">5.0</td>
+        <td class="num">$0.0125</td>
+        <td class="num">13.1 s</td>
+        <td><div class="state-list"><span class="ok">30 success</span></div></td>
+      </tr></tbody>
+    </table></div>
+    <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown. Control candidate: sonnet-5.</p>
+  </section>
+
+  <section class="card">
+    <h2>Results by input tag <span class="hint">required-check passes / graded trials, for the inputs carrying each tag or in each split</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tag</th><th class="num">Inputs</th><th class="num">sonnet-5</th><th class="num">kimi-k3</th><th class="num">glm-5.3</th><th class="num">deepseek-v4.1-flash</th></tr></thead>
+      <tbody><tr><td class="mono">normal</td><td class="num">11</td><td class="num ok">11/11</td><td class="num ok">11/11</td><td class="num">8/10</td><td class="num">7/11</td></tr><tr><td class="mono">ma130</td><td class="num">5</td><td class="num ok">5/5</td><td class="num ok">5/5</td><td class="num">3/4</td><td class="num bad">1/5</td></tr><tr><td class="mono">hard</td><td class="num">19</td><td class="num bad">4/19</td><td class="num">17/19</td><td class="num bad">4/17</td><td class="num bad">4/19</td></tr><tr><td class="mono">contractor-error</td><td class="num">15</td><td class="num bad">0/15</td><td class="num">13/15</td><td class="num bad">0/13</td><td class="num bad">1/15</td></tr><tr><td class="mono">span-dates</td><td class="num">5</td><td class="num bad">0/5</td><td class="num ok">5/5</td><td class="num bad">0/4</td><td class="num bad">0/5</td></tr><tr><td class="mono">benefit-period</td><td class="num">9</td><td class="num bad">4/9</td><td class="num">8/9</td><td class="num bad">4/9</td><td class="num bad">3/9</td></tr><tr><td class="mono">three-day-stay</td><td class="num">5</td><td class="num bad">0/5</td><td class="num">4/5</td><td class="num bad">0/4</td><td class="num bad">1/5</td></tr><tr><td class="mono">split: holdout</td><td class="num">12</td><td class="num">6/12</td><td class="num ok">12/12</td><td class="num bad">5/12</td><td class="num bad">3/12</td></tr><tr><td class="mono">split: dev</td><td class="num">18</td><td class="num">9/18</td><td class="num">16/18</td><td class="num bad">7/15</td><td class="num bad">8/18</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <div class="two-col">
+    <section class="card">
+      <h2>Evaluation coverage <span class="hint">the evaluators' own state, before any pass rate</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Evaluator</th><th>Version</th><th class="num">Expected</th><th class="num">pass / fail</th><th class="num">Not evaluated</th><th class="num">Evaluator error</th></tr></thead>
+        <tbody><tr><td>triage-check</td><td class="mono small">cmd-4244fef4+files-93cae0db</td>
+        <td class="num">117</td>
+        <td class="num">66 / 51</td>
+        <td class="num">0</td>
+        <td class="num">0</td></tr><tr><td>absolute-1-5</td><td class="mono small">google/gemini-3.1-pro-preview+rubric-da549ec6+tpl-a23e7d9d</td>
+        <td class="num">15</td>
+        <td class="num">15 / 0</td>
+        <td class="num">0</td>
+        <td class="num">0</td></tr></tbody>
+      </table></div>
+      <p class="note">No evaluator errors in this run.</p>
+    </section>
+    <section class="card">
+      <h2>Cost breakdown <span class="hint">source: provider-reported</span></h2>
+      <div class="table-wrap"><table class="ledger"><tbody>
+        <tr><td>Candidate generation · 120 trials</td><td class="num">$3.9135</td></tr>
+        <tr><td>Pairwise judging</td><td class="num">$0.0000</td></tr>
+        <tr><td>Absolute scoring</td><td class="num">$0.1162</td></tr>
+        <tr><td>Deterministic checks</td><td class="num">$0.0000</td></tr>
+        <tr><td>Retries and recovery</td><td class="num">$0.0000</td></tr>
+        <tr class="total"><td>Total</td><td class="num">$4.0297</td></tr>
+        <tr><td>Full cost per success</td><td class="num">—</td></tr>
+      </tbody></table></div>
+      <p class="note">Evaluation spend is 0.0× generation spend. Generation cost was not observed for glm-5.3, so the totals are a lower bound and cost per success is undefined.</p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Scoring profile <span class="hint">two lenses: magnitude from absolute scores, direction from pairwise win rate</span></h2>
+    <p class="note"><b>Note:</b> absolute scoring gave every candidate the same score on overall, sound-action. Those scores measured no difference, and the recommendation does not use them.</p>
+    
+    <div class="viz-grid2"><figure class="viz">
+    <figcaption>Overall score per trial <span class="hint">one dot per trial, no averaging; hollow dots are trials that did not complete</span></figcaption>
+    <svg viewBox="0 0 560 180" width="100%" role="img" aria-label="Absolute overall score for each candidate's each trial">
+      <line class="viz-grid" x1="132" y1="18" x2="132" y2="168"/><text class="viz-tick" x="132" y="12" text-anchor="middle">1</text><line class="viz-grid" x1="232" y1="18" x2="232" y2="168"/><text class="viz-tick" x="232" y="12" text-anchor="middle">2</text><line class="viz-grid" x1="332" y1="18" x2="332" y2="168"/><text class="viz-tick" x="332" y="12" text-anchor="middle">3</text><line class="viz-grid" x1="432" y1="18" x2="432" y2="168"/><text class="viz-tick" x="432" y="12" text-anchor="middle">4</text><line class="viz-grid" x1="532" y1="18" x2="532" y2="168"/><text class="viz-tick" x="532" y="12" text-anchor="middle">5</text><text class="viz-axis" x="122" y="34" text-anchor="end">sonnet-5</text><circle class="viz-dot viz-c0" cx="532" cy="30" r="6"><title>sonnet-5 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c0" cx="532" cy="37" r="6"><title>sonnet-5 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c0" cx="532" cy="23" r="6"><title>sonnet-5 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c0" cx="532" cy="37" r="6"><title>sonnet-5 · t0 · success · 5/5</title></circle><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-miss" x="138" y="34">success (not scored)</text><text class="viz-axis" x="122" y="72" text-anchor="end">kimi-k3</text><circle class="viz-dot viz-c1" cx="532" cy="68" r="6"><title>kimi-k3 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c1" cx="532" cy="75" r="6"><title>kimi-k3 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c1" cx="532" cy="61" r="6"><title>kimi-k3 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c1" cx="532" cy="75" r="6"><title>kimi-k3 · t0 · success · 5/5</title></circle><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-miss" x="138" y="72">success (not scored)</text><text class="viz-axis" x="122" y="110" text-anchor="end">glm-5.3</text><circle class="viz-dot viz-c2" cx="532" cy="106" r="6"><title>glm-5.3 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c2" cx="532" cy="113" r="6"><title>glm-5.3 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c2" cx="532" cy="99" r="6"><title>glm-5.3 · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c2" cx="532" cy="113" r="6"><title>glm-5.3 · t0 · success · 5/5</title></circle><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">timeout (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">timeout (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">timeout (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-miss" x="138" y="110">success (not scored)</text><text class="viz-axis" x="122" y="148" text-anchor="end">deepseek-v4.1-flash</text><circle class="viz-dot viz-c0" cx="532" cy="144" r="6"><title>deepseek-v4.1-flash · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c0" cx="532" cy="151" r="6"><title>deepseek-v4.1-flash · t0 · success · 5/5</title></circle><circle class="viz-dot viz-c0" cx="532" cy="137" r="6"><title>deepseek-v4.1-flash · t0 · success · 5/5</title></circle><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text><text class="viz-miss" x="138" y="148">success (not scored)</text>
+    </svg>
+  </figure></div><figure class="viz">
+    <figcaption>Magnitude · absolute score 1–5 <span class="hint">above 3 leans green, below 3 leans red, stronger the further away</span></figcaption>
+    <div class="table-wrap"><table class="viz-heat"><thead><tr><th>Candidate</th><th class="num viz-flat" title="Every candidate scored the same; no discrimination">sound-action <span class="viz-flag">no spread</span></th><th class="num">Overall</th></tr></thead><tbody><tr><th>sonnet-5</th><td class="viz-cell" style="background:rgba(34,197,94,0.400)" title="sonnet-5 · sound-action: 5.0/5">5.0</td><td class="num">5.0</td></tr><tr><th>kimi-k3</th><td class="viz-cell" style="background:rgba(34,197,94,0.400)" title="kimi-k3 · sound-action: 5.0/5">5.0</td><td class="num">5.0</td></tr><tr><th>glm-5.3</th><td class="viz-cell" style="background:rgba(34,197,94,0.400)" title="glm-5.3 · sound-action: 5.0/5">5.0</td><td class="num">5.0</td></tr><tr><th>deepseek-v4.1-flash</th><td class="viz-cell" style="background:rgba(34,197,94,0.400)" title="deepseek-v4.1-flash · sound-action: 5.0/5">5.0</td><td class="num">5.0</td></tr></tbody></table></div>
+    <div class="viz-scale"><span>1</span><span class="viz-step" style="background:rgba(239,68,68,0.400)"></span><span class="viz-step" style="background:rgba(239,68,68,0.250)"></span><span class="viz-step" style="background:rgba(34,197,94,0.100)"></span><span class="viz-step" style="background:rgba(34,197,94,0.250)"></span><span class="viz-step" style="background:rgba(34,197,94,0.400)"></span><span>5</span></div>
+    <p class="viz-note">On dimensions marked "no spread", every candidate got exactly the same score: the scorer did not tell them apart, which is not the same as the candidates being equal. These columns do not count toward the recommendation.</p>
+  </figure>
+    
+    <p class="note"><b>Two scales, two questions.</b> The upper table is <b>magnitude</b>: a 1–5 score given to each output on its own, showing how big the gap is. The lower table is <b>direction</b>: who was preferred in head-to-head comparisons, 0–100. Pairwise is zero-sum and its denominator is only the matches each candidate took part in. <code>0</code> means "lost every match", not "bad output", and likewise <code>100</code>. Both can be true at once: a candidate can narrowly lose every match (direction 0) while trailing by only 1 point on absolute score (magnitude 4.0 vs 5.0).</p>
+  </section>
+
+  
+
+  
+  <section class="card">
+    <h2>Every trial <span class="hint">the averages in the standings are computed from these rows</span></h2>
+    <table>
+      <thead><tr>
+        <th>Candidate</th><th>Input</th><th class="num">#</th><th>Completion</th><th>Outcome</th>
+        <th class="num">Overall</th><th class="num">sound-action</th><th>Pairwise</th>
+        <th class="num">Output tokens</th><th class="num">Cost</th><th class="num">Duration</th>
+      </tr></thead>
+      <tbody><tr>
+        <td>sonnet-5</td>
+        <td>cd2-001</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">321</td>
+        <td class="num">$0.0050</td>
+        <td class="num">7s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-001</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">865</td>
+        <td class="num">$0.0210</td>
+        <td class="num">21s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-001</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">1523</td>
+        <td class="num">$0.0073</td>
+        <td class="num">9s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-001</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">622</td>
+        <td class="num">$0.0008</td>
+        <td class="num">4s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-002</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">223</td>
+        <td class="num">$0.0040</td>
+        <td class="num">4s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-002</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">746</td>
+        <td class="num">$0.0181</td>
+        <td class="num">17s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-002</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">2363</td>
+        <td class="num">$0.0109</td>
+        <td class="num">16s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-002</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">753</td>
+        <td class="num">$0.0010</td>
+        <td class="num">4s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-003</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">197</td>
+        <td class="num">$0.0038</td>
+        <td class="num">4s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-003</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">1292</td>
+        <td class="num">$0.0312</td>
+        <td class="num">27s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-003</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">1028</td>
+        <td class="num">$0.0047</td>
+        <td class="num">5s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-003</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">637</td>
+        <td class="num">$0.0009</td>
+        <td class="num">4s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-004</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">509</td>
+        <td class="num">$0.0069</td>
+        <td class="num">8s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-004</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">1182</td>
+        <td class="num">$0.0286</td>
+        <td class="num">11s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-004</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td>—</td>
+        <td class="num">11114</td>
+        <td class="num">$0.0491</td>
+        <td class="num">51s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-004</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2377</td>
+        <td class="num">$0.0029</td>
+        <td class="num">11s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-005</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">453</td>
+        <td class="num">$0.0063</td>
+        <td class="num">7s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-005</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1381</td>
+        <td class="num">$0.0334</td>
+        <td class="num">11s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-005</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">7089</td>
+        <td class="num">$0.0314</td>
+        <td class="num">31s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-005</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2407</td>
+        <td class="num">$0.0030</td>
+        <td class="num">12s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-006</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">735</td>
+        <td class="num">$0.0092</td>
+        <td class="num">10s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-006</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1638</td>
+        <td class="num">$0.0395</td>
+        <td class="num">14s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-006</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">5971</td>
+        <td class="num">$0.0268</td>
+        <td class="num">30s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-006</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2494</td>
+        <td class="num">$0.0031</td>
+        <td class="num">12s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-007</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">371</td>
+        <td class="num">$0.0055</td>
+        <td class="num">7s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-007</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1418</td>
+        <td class="num">$0.0342</td>
+        <td class="num">11s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-007</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">7684</td>
+        <td class="num">$0.0343</td>
+        <td class="num">37s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-007</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4784</td>
+        <td class="num">$0.0058</td>
+        <td class="num">16s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-008</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">354</td>
+        <td class="num">$0.0053</td>
+        <td class="num">5s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-008</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1879</td>
+        <td class="num">$0.0453</td>
+        <td class="num">14s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-008</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2399</td>
+        <td class="num">$0.0108</td>
+        <td class="num">11s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-008</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">5818</td>
+        <td class="num">$0.0071</td>
+        <td class="num">21s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-009</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">595</td>
+        <td class="num">$0.0077</td>
+        <td class="num">7s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-009</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1423</td>
+        <td class="num">$0.0344</td>
+        <td class="num">11s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-009</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2626</td>
+        <td class="num">$0.0118</td>
+        <td class="num">13s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-009</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4289</td>
+        <td class="num">$0.0052</td>
+        <td class="num">12s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-010</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">427</td>
+        <td class="num">$0.0060</td>
+        <td class="num">6s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-010</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1148</td>
+        <td class="num">$0.0278</td>
+        <td class="num">9s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-010</td>
+        <td class="num">t0</td>
+        <td>timeout </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">0</td>
+        <td class="num">$0.0000</td>
+        <td class="num">300s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-010</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">7731</td>
+        <td class="num">$0.0093</td>
+        <td class="num">27s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-011</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">317</td>
+        <td class="num">$0.0049</td>
+        <td class="num">5s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-011</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1325</td>
+        <td class="num">$0.0320</td>
+        <td class="num">10s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-011</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">33012</td>
+        <td class="num">$0.1458</td>
+        <td class="num">180s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-011</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2936</td>
+        <td class="num">$0.0036</td>
+        <td class="num">12s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-012</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1568</td>
+        <td class="num">$0.0175</td>
+        <td class="num">18s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-012</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3933</td>
+        <td class="num">$0.0946</td>
+        <td class="num">30s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-012</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">10228</td>
+        <td class="num">$0.0452</td>
+        <td class="num">51s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-012</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3551</td>
+        <td class="num">$0.0043</td>
+        <td class="num">13s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-013</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1985</td>
+        <td class="num">$0.0217</td>
+        <td class="num">23s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-013</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3586</td>
+        <td class="num">$0.0863</td>
+        <td class="num">27s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-013</td>
+        <td class="num">t0</td>
+        <td>timeout </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">0</td>
+        <td class="num">$0.0000</td>
+        <td class="num">300s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-013</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4385</td>
+        <td class="num">$0.0053</td>
+        <td class="num">16s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-014</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1943</td>
+        <td class="num">$0.0213</td>
+        <td class="num">23s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-014</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4039</td>
+        <td class="num">$0.0972</td>
+        <td class="num">32s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-014</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3334</td>
+        <td class="num">$0.0152</td>
+        <td class="num">12s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-014</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3518</td>
+        <td class="num">$0.0043</td>
+        <td class="num">15s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-015</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">942</td>
+        <td class="num">$0.0113</td>
+        <td class="num">13s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-015</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2198</td>
+        <td class="num">$0.0530</td>
+        <td class="num">16s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-015</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">5284</td>
+        <td class="num">$0.0235</td>
+        <td class="num">30s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-015</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">5043</td>
+        <td class="num">$0.0061</td>
+        <td class="num">16s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-016</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1812</td>
+        <td class="num">$0.0200</td>
+        <td class="num">21s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-016</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4188</td>
+        <td class="num">$0.1007</td>
+        <td class="num">30s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-016</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4156</td>
+        <td class="num">$0.0185</td>
+        <td class="num">26s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-016</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4991</td>
+        <td class="num">$0.0061</td>
+        <td class="num">21s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-017</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">915</td>
+        <td class="num">$0.0112</td>
+        <td class="num">13s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-017</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">6120</td>
+        <td class="num">$0.1471</td>
+        <td class="num">56s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-017</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">10405</td>
+        <td class="num">$0.0464</td>
+        <td class="num">64s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-017</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3144</td>
+        <td class="num">$0.0039</td>
+        <td class="num">13s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-018</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1030</td>
+        <td class="num">$0.0123</td>
+        <td class="num">13s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-018</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4546</td>
+        <td class="num">$0.1093</td>
+        <td class="num">40s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-018</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">16958</td>
+        <td class="num">$0.0753</td>
+        <td class="num">102s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-018</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3218</td>
+        <td class="num">$0.0040</td>
+        <td class="num">12s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-019</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">625</td>
+        <td class="num">$0.0083</td>
+        <td class="num">8s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-019</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3340</td>
+        <td class="num">$0.0804</td>
+        <td class="num">28s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-019</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">16203</td>
+        <td class="num">$0.0715</td>
+        <td class="num">95s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-019</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4318</td>
+        <td class="num">$0.0053</td>
+        <td class="num">18s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-020</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1428</td>
+        <td class="num">$0.0163</td>
+        <td class="num">18s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-020</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3753</td>
+        <td class="num">$0.0903</td>
+        <td class="num">31s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-020</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">23766</td>
+        <td class="num">$0.1052</td>
+        <td class="num">122s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-020</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4487</td>
+        <td class="num">$0.0055</td>
+        <td class="num">19s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-021</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">666</td>
+        <td class="num">$0.0087</td>
+        <td class="num">9s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-021</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4001</td>
+        <td class="num">$0.0963</td>
+        <td class="num">30s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-021</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">12463</td>
+        <td class="num">$0.0551</td>
+        <td class="num">51s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-021</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3614</td>
+        <td class="num">$0.0045</td>
+        <td class="num">15s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-022</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1025</td>
+        <td class="num">$0.0123</td>
+        <td class="num">14s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-022</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4885</td>
+        <td class="num">$0.1175</td>
+        <td class="num">38s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-022</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">6607</td>
+        <td class="num">$0.0298</td>
+        <td class="num">30s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-022</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4418</td>
+        <td class="num">$0.0054</td>
+        <td class="num">17s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-023</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">997</td>
+        <td class="num">$0.0120</td>
+        <td class="num">13s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-023</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">7267</td>
+        <td class="num">$0.1747</td>
+        <td class="num">58s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-023</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">7342</td>
+        <td class="num">$0.0330</td>
+        <td class="num">35s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-023</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">5437</td>
+        <td class="num">$0.0066</td>
+        <td class="num">20s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-024</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1348</td>
+        <td class="num">$0.0155</td>
+        <td class="num">17s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-024</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">5285</td>
+        <td class="num">$0.1271</td>
+        <td class="num">49s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-024</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">6565</td>
+        <td class="num">$0.0296</td>
+        <td class="num">26s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-024</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">5298</td>
+        <td class="num">$0.0065</td>
+        <td class="num">21s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-025</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">810</td>
+        <td class="num">$0.0102</td>
+        <td class="num">10s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-025</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3181</td>
+        <td class="num">$0.0766</td>
+        <td class="num">30s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-025</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4767</td>
+        <td class="num">$0.0212</td>
+        <td class="num">24s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-025</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">6331</td>
+        <td class="num">$0.0076</td>
+        <td class="num">26s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-026</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2574</td>
+        <td class="num">$0.0277</td>
+        <td class="num">31s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-026</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">5906</td>
+        <td class="num">$0.1420</td>
+        <td class="num">66s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-026</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">7688</td>
+        <td class="num">$0.0345</td>
+        <td class="num">33s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-026</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4036</td>
+        <td class="num">$0.0050</td>
+        <td class="num">15s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-027</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1742</td>
+        <td class="num">$0.0194</td>
+        <td class="num">20s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-027</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4566</td>
+        <td class="num">$0.1098</td>
+        <td class="num">44s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-027</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">9308</td>
+        <td class="num">$0.0419</td>
+        <td class="num">89s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-027</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2947</td>
+        <td class="num">$0.0036</td>
+        <td class="num">11s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-028</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1403</td>
+        <td class="num">$0.0160</td>
+        <td class="num">17s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-028</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3658</td>
+        <td class="num">$0.0880</td>
+        <td class="num">32s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-028</td>
+        <td class="num">t0</td>
+        <td>timeout </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">0</td>
+        <td class="num">$0.0000</td>
+        <td class="num">300s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-028</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3704</td>
+        <td class="num">$0.0045</td>
+        <td class="num">12s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-029</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1631</td>
+        <td class="num">$0.0183</td>
+        <td class="num">20s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-029</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">4979</td>
+        <td class="num">$0.1197</td>
+        <td class="num">40s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-029</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">7669</td>
+        <td class="num">$0.0344</td>
+        <td class="num">35s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-029</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">3236</td>
+        <td class="num">$0.0040</td>
+        <td class="num">10s</td>
+      </tr><tr>
+        <td>sonnet-5</td>
+        <td>cd2-030</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2187</td>
+        <td class="num">$0.0239</td>
+        <td class="num">25s</td>
+      </tr><tr>
+        <td>kimi-k3</td>
+        <td>cd2-030</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">1615</td>
+        <td class="num">$0.0390</td>
+        <td class="num">15s</td>
+      </tr><tr>
+        <td>glm-5.3</td>
+        <td>cd2-030</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">22240</td>
+        <td class="num">$0.0988</td>
+        <td class="num">233s</td>
+      </tr><tr>
+        <td>deepseek-v4.1-flash</td>
+        <td>cd2-030</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+        <td class="num">2190</td>
+        <td class="num">$0.0027</td>
+        <td class="num">7s</td>
+      </tr></tbody>
+    </table>
+  </section>
+
+  
+  <section class="card">
+    <h2>Candidate outputs <span class="hint">exactly the text the judge saw</span></h2>
+    <details>
+        <summary>sonnet-5 · cd2-001 · t0 <span class="muted">354 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CAS*CO*18 confirms this was an exact resubmission of the already-paid claim (original paid 2025-03-21); no corrective action is needed—simply reconcile the AR and take no further billing action on this duplicate submission."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-001 · t0 <span class="muted">546 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The remittance shows CARC 18 (exact duplicate claim) with a CO adjustment, and facility records confirm the original claim was already paid on 2025-03-21; the 2025-03-26 resubmission was a billing error, so the denial is correct and no additional Medicare payment is due. Write off the duplicate (contractual obligation — do not bill the patient) and fix the internal process that caused the erroneous resubmission."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-001 · t0 <span class="muted">480 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "Claim 90225 was already paid in full on 2025-03-21; the 2025-03-26 resubmission was an identical claim with no changes, so the CO-18 (exact duplicate) denial is correct and Medicare owes nothing further. Post a contractual write-off to clear the duplicate from A/R — do not appeal, resubmit, or bill the patient (CO group code bars patient billing)."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-001 · t0 <span class="muted">338 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The claim was denied as an exact duplicate (CO 18) because the original claim was already paid on 2025-03-21. Do not resubmit or appeal; write off the duplicate claim and retain the remittance documentation."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-002 · t0 <span class="muted">299 characters</span></summary>
+        <pre class="raw">{"root_cause":"duplicate_claim","correctable":"no","next_action":"write_off","deadline":null,"action_note":"The original claim already paid on 2025-04-08; this resubmission was an erroneous duplicate correctly denied under CO-18, so no appeal or correction is needed—write off the duplicate claim."}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-002 · t0 <span class="muted">471 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The remittance denies the claim with CARC 18 (exact duplicate) because billing staff resubmitted the identical claim on 2025-04-12 after the original was already paid on 2025-04-08. No appeal or correction is warranted since Medicare already paid; adjust the duplicate off the books and flag the account to prevent resubmitting paid claims."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-002 · t0 <span class="muted">492 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The 2025-04-12 submission was an unchanged resubmission of the claim already paid on 2025-04-08, so the CO-18 (exact duplicate) denial is correct and Medicare will not pay the same stay twice. Post the $10,480.00 as a contractual adjustment/write-off (group code CO bars billing the patient) and retrain billing staff to verify claim status before resubmitting."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-002 · t0 <span class="muted">375 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The resubmitted claim is an exact duplicate of the original claim that was already paid on 2025-04-08, so the duplicate denial is correct. Do not appeal or rebill; write off the duplicate denial and retain documentation of the original payment."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-003 · t0 <span class="muted">308 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The original claim was already submitted and paid on 2025-05-29; this resubmission was an erroneous duplicate, so no further billing or appeal is warranted—simply adjust it off."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-003 · t0 <span class="muted">442 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CARC 18 confirms this is an exact duplicate of the claim already paid on 2025-05-29, so the denial is valid and no appeal or corrected claim is warranted. Post the contractual-obligation (CO) adjustment to clear the duplicate from A/R, confirm the original payment posted correctly, and do not bill the patient."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-003 · t0 <span class="muted">561 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The 2025-06-05 submission was an unchanged resubmission of claim 98565, which the MAC had already adjudicated and paid on 2025-05-29, so the denial as an exact duplicate (CARC 18, group code CO) is correct and no additional payment is due. Post the duplicate denial as a contractual write-off against the already-paid original claim, verify the 2025-05-29 payment is on the account, and do not appeal, rebill, or bill the patient."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-003 · t0 <span class="muted">396 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The remittance denies the claim with CO-18, indicating it is an exact duplicate; facility records show the original claim was already paid on 2025-05-29. No further Medicare payment is due, so write off the duplicate and prevent resubmission of already-paid claims."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-004 · t0 <span class="muted">411 characters</span></summary>
+        <pre class="raw">{"root_cause": "timely_filing", "correctable": "no", "next_action": "write_off", "deadline": null, "action_note": "CAS*CO*29 shows the claim was denied for exceeding the 1-year timely filing limit (DOS ended 2024-03-13, received 2025-04-08); the delay was due to an internal certification hold, not a CMS-recognized exception, so the denial cannot be appealed or corrected and the charges must be written off."}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-004 · t0 <span class="muted">623 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CARC 29 confirms the claim was denied because it was received 2025-04-08, past the one-calendar-year filing deadline of 2025-03-13 (measured from the 2024-03-13 through date). The delay resulted from the facility's own internal hold for a missing certification, which is not a recognized timely-filing exception under 42 CFR 424.44, so an appeal would fail; because the denial carries group code CO (contractual obligation), the charges must be written off and the beneficiary cannot be billed."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-004 · t0 <span class="muted">584 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CARC CO-29: the claim reached the MAC on 2025-04-08, 26 days past the 2025-03-13 timely-filing deadline (1 year from the 2024-03-13 through date), and the delay was the facility's own hold for a misplaced certification — not 'good cause' under Medicare's narrow exceptions. Write off the $19,650 as a contractual adjustment; Medicare bars billing the beneficiary when a provider fails to file timely, and a resubmission or redetermination would be denied."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-004 · t0 <span class="muted">349 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The claim was submitted after the 12-month Medicare timely filing deadline; the internal delay for a missing physician certification is not a valid good cause, so the denial is final and the amount should be written off."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-005 · t0 <span class="muted">418 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CAS*CO*29 confirms the claim was received 2025-06-20, past the 1-year filing deadline (2025-06-01) from the through date 2024-06-01; the delay was due to the facility's internal certification mix-up, not a CMS exception, so the denial cannot be appealed and the charge must be written off."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-005 · t0 <span class="muted">542 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The claim was received 2025-06-20, after the 12-month timely filing limit of 2025-06-01 (one year from the 2024-06-01 through date), and the facility's internal hold for a missing physician certification is not a Medicare exception to timely filing, so a redetermination cannot succeed. The CO group code makes the $10,370 a contractual obligation: it must be written off and may not be billed to the beneficiary."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-005 · t0 <span class="muted">580 characters</span></summary>
+        <pre class="raw">```json
+{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-11-01",
+  "action_note": "The MAC denied the claim CO-29 (time limit for filing expired), but the claim was received 2025-06-20, within Medicare's timely filing limit of December 31 of the year following the year of service (2025-12-31 for a 2024-06-01 through date), so the denial is in error. File a redetermination within 120 days of the 2025-07-04 remittance, attaching proof of the MAC's 2025-06-20 receipt date (e.g., the 277CA/claim acceptance report)."
+}
+```</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-005 · t0 <span class="muted">459 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The claim was denied as untimely because it was first submitted on 2025-06-20, after the 12-month filing deadline for the 2024-06-01 discharge. The delay was due to the facility's missing certification, not a MAC/CMS error, so the denial is not correctable and the provider must write off the charges and not bill the beneficiary."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-006 · t0 <span class="muted">488 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CAS*CO*29 indicates the claim exceeded Medicare's 12-month timely filing limit (DOS through 2024-06-24, filing deadline 2025-06-24, but claim was first submitted 2025-07-28); the delay was due to the facility's internal certification retrieval, not a recognized CMS exception, so the denial cannot be appealed or corrected and the charges must be written off."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-006 · t0 <span class="muted">537 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CARC 29 confirms the claim was denied because it was received 2025-07-28, past the one-calendar-year filing limit measured from the 2024-06-24 through date (deadline 2025-06-24). The facility's internal hold for a missing physician certification is not a timely-filing exception, and the CO group code makes this a provider contractual obligation, so write off the $11,040; the beneficiary may not be billed."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-006 · t0 <span class="muted">565 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The claim reached the MAC on 2025-07-28, past the 12-month timely filing limit of 2025-06-09 (one year from the 2024-06-09 from-date), and the delay was the facility's own hold for a missing certification, which is not a CMS 'good cause' exception, so neither a corrected claim nor a redetermination can get it paid. Because CO-29 is a contractual obligation, the facility must write off the $11,040.00 and may not bill the beneficiary."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-006 · t0 <span class="muted">414 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "The claim was received 2025-07-28, after the 12-month timely filing deadline (2025-06-24) for the 2024-06-24 discharge. The internal delay for a missing certification is not a Medicare good-cause exception, so the denial is final; write off the charges and do not bill the beneficiary."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-007 · t0 <span class="muted">454 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-02-26",
+  "action_note": "CAS*CO*16 with remark MA130 means the claim was returned as unprocessable due to the missing occurrence code 50 (qualifying hospital stay start date); add the missing date and resubmit as a new corrected claim within the one-year timely filing limit, since MA130 claims carry no appeal rights."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-007 · t0 <span class="muted">562 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-02-26",
+  "action_note": "The claim was denied as unprocessable (CARC 16, RARC MA130, claim status 21) because occurrence code 50 (MDS assessment date) was missing its date, as flagged on the 2025-03-08 edit report. Unprocessable claims carry no appeal rights, so submit a new claim with occurrence code 50 and the assessment reference date by the timely-filing limit of 2026-02-26 (12 months from the 2025-02-26 through date)."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-007 · t0 <span class="muted">597 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-02-26",
+  "action_note": "The MAC denied the full charge with CO-16 (claim lacks information needed for adjudication) and remark MA130 because the required occurrence code 50 (PDPM assessment) date was missing, which the facility's own 2025-03-08 edit report confirms. MA130 bars reopening this claim, so submit a new claim with the MDS assessment date in occurrence code 50 by 2026-02-26, the timely filing deadline (12 months from the 2025-02-26 through date)."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-007 · t0 <span class="muted">378 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-02-02",
+  "action_note": "Submit a corrected claim with occurrence code 50 (discharge date) completed; because the denial is unprocessable, no appeal is available, and the corrected claim must be filed within the original timely filing period."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-008 · t0 <span class="muted">414 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-07",
+  "action_note": "CARC 16/MA130 indicate the claim lacked required information; facility's own edit report confirms the attending physician NPI was missing, so a corrected claim with the NPI should be submitted within the 1-year timely filing limit from the through date."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-008 · t0 <span class="muted">592 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-07",
+  "action_note": "The MAC denied the claim as unprocessable (CARC 16 with RARC MA130) because the attending physician NPI was missing, matching the facility's 2025-04-29 edit report; unprocessable claims carry no appeal rights, so a redetermination is not available. Submit a new claim with the attending physician NPI included, ensuring the MAC receives it within one calendar year of the statement 'through' date (2025-04-07), i.e., by 2026-04-07."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-008 · t0 <span class="muted">535 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-07",
+  "action_note": "The claim was denied as unprocessable (CARC 16 with RARC MA130) because the attending physician NPI was missing; add the NPI and resubmit a corrected claim (bill type 0217 referencing ICN 2310016132425) before the timely filing limit of one year from the through date. Unprocessable denials carry no appeal rights, so correction and resubmission is the only path to payment."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-008 · t0 <span class="muted">392 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-03-15",
+  "action_note": "Submit a corrected claim with the attending physician NPI included. The denial is due to missing information, making the claim unprocessable with no appeal rights, so a corrected claim must be filed within the timely filing period."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-009 · t0 <span class="muted">464 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-07-29",
+  "action_note": "MA130/CO-16 indicates the claim was rejected as unprocessable (missing occurrence code 50 date identified in the facility's edit report); this is not appealable, so add the missing OC 50 date and resubmit a corrected claim within the one-year timely filing limit from the last service date (2025-07-29)."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-009 · t0 <span class="muted">581 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-07-29",
+  "action_note": "The MAC denied the claim as unprocessable (CARC 16 with remark MA130) because occurrence code 50 (the MDS assessment reference date required on SNF claims) was missing, as flagged on the 2025-08-10 edit report. Unprocessable claims carry no appeal rights, so submit a new claim with occurrence code 50 and the correct assessment date within the one-year timely-filing window, which runs from the 2025-07-29 through date."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-009 · t0 <span class="muted">564 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-07-29",
+  "action_note": "The claim was returned as unprocessable (CO-16/MA130) because the required occurrence code 50 MDS assessment date was missing, so the MAC could not price it under PDPM; unprocessable claims have no appeal rights. Pull the assessment date from the MDS, add it to the claim, and resubmit as a new claim before the one-year timely filing deadline of 2026-07-29 (12 months from the 2025-07-29 through date)."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-009 · t0 <span class="muted">341 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-07-29",
+  "action_note": "Submit a corrected claim with the missing occurrence code 50 (discharge date) because the denial is unprocessable and no appeal rights apply; do so within the timely filing period."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-010 · t0 <span class="muted">424 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-29",
+  "action_note": "Remark MA130 indicates the claim was unprocessable (missing occurrence code 50 assessment reference date), so no appeal rights apply; correct the claim with the missing occurrence date and resubmit before the one-year timely filing deadline from the through date."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-010 · t0 <span class="muted">535 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-29",
+  "action_note": "The MAC denied the claim as unprocessable (CARC 16 with RARC MA130) because occurrence code 50 (assessment date) was missing, matching the facility's own edit report. MA130 carries no appeal rights, so submit a new claim with occurrence code 50 and the correct MDS assessment reference date within the 12-month timely-filing window measured from the 2025-04-29 through date."
+}</pre>
+      </details><details><summary>glm-5.3 · cd2-010 · t0 <span class="muted">— this file is not in raw/</span></summary></details><details>
+        <summary>deepseek-v4.1-flash · cd2-010 · t0 <span class="muted">358 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-19",
+  "action_note": "Add occurrence code 50 with the discharge date (2025-04-29) and resubmit as a corrected claim. The claim was returned as unprocessable (MA130) due to missing information, so no appeal is available."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-011 · t0 <span class="muted">350 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-07-05",
+  "action_note": "CO-16/MA130 indicates the claim lacked the attending physician NPI; add the NPI and resubmit a corrected claim before the one-year timely filing deadline (from the through date of service)."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-011 · t0 <span class="muted">550 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-07-05",
+  "action_note": "The MAC denied the claim as unprocessable (CARC 16 with remark MA130) because the attending physician NPI was missing, matching the facility's 2025-07-13 edit report. MA130 carries no appeal rights, so the facility must add the attending NPI and submit a new claim within Medicare's one-year timely-filing window, which runs through 2026-07-05 (one year from the statement 'through' date)."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-011 · t0 <span class="muted">597 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-06-21",
+  "action_note": "The MAC denied the full charge as CO-16 with MA130 because the claim lacked the attending physician's NPI (confirmed by the facility's own 07/13 edit report), and MA130 states the claim may be resubmitted after corrections, so correcting and resubmitting — not appealing — is the proper path. Obtain the NPI, correct the claim, and resubmit it by 2026-06-21, the timely filing deadline (1 calendar year from the 2025-06-21 'from' date)."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-011 · t0 <span class="muted">377 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-06-21",
+  "action_note": "Submit a corrected claim with the attending physician's NPI. The denial is unprocessable (CO 16/MA130) due to missing information, so no appeal is available; a new claim must be filed within the timely filing period."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-012 · t0 <span class="muted">497 characters</span></summary>
+        <pre class="raw">```json
+{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-12-26",
+  "action_note": "The claim was received 2025-08-09, which is before the one-year timely-filing deadline (2025-08-16, one year after the 'through' date of 2024-08-16); the CO-29 denial appears to be an MAC error, so file a redetermination request with proof of the contractor's receipt date within 120 days of the remittance (by 2025-12-26) rather than writing it off."
+}
+```</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-012 · t0 <span class="muted">639 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-12-31",
+  "action_note": "The denial is erroneous: for institutional span-date claims, Medicare's 1-calendar-year filing limit runs from the claim's 'Through' date (2024-08-16), not the admission date, so the deadline was 2025-08-16 and the claim received 2025-08-09 was timely. File a redetermination request with proof of the contractor's 2025-08-09 receipt date within 120 days of the 2025-08-28 remittance (receipt presumed 5 days later); do not write off or bill the patient, since the CO adjustment bars beneficiary billing."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-012 · t0 <span class="muted">610 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-12-26",
+  "action_note": "The denial is in error: for institutional claims Medicare's 12-month timely-filing clock runs from the claim's through date (2024-08-16), so the filing deadline was 2025-08-16 and the claim received 2025-08-09 was timely — the staff note wrongly anchored on the admission date. File a redetermination request (payer claim control number 2687464227667) with proof of the 2025-08-09 receipt date (e.g., the 277CA/acceptance report) by 2025-12-26; do not write it off or rebill."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-012 · t0 <span class="muted">371 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-12-26",
+  "action_note": "Request a redetermination within 120 days of the remittance date. The denial is incorrect because for SNF Part A, the timely filing period runs from the discharge date (2024-08-16), so the claim received 2025-08-09 was within 12 months."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-013 · t0 <span class="muted">516 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-11-27",
+  "action_note": "Medicare's 1-year filing deadline runs from the 'through' date of the billing period (2024-08-03), making the deadline 2025-08-03; the claim was received 2025-07-12, well within that window, so the CO-29 denial is erroneous. File a redetermination request within 120 days of the 2025-07-30 remittance (by 2025-11-27) citing the through-date rule, rather than writing the claim off."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-013 · t0 <span class="muted">639 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-12-02",
+  "action_note": "The CARC 29 denial is erroneous: for span-dated institutional claims, the 1-year filing clock runs from the claim 'Through' date (2024-08-03), so the filing deadline was 2025-08-03 and the claim received 2025-07-12 was timely — the staff note wrongly measured from admission. File a redetermination request with the MAC within 120 days of receipt of the 2025-07-30 remittance (receipt presumed 5 days later, 2025-08-04), citing the through-date rule; do not write off or bill the patient (CO group code)."
+}</pre>
+      </details><details><summary>glm-5.3 · cd2-013 · t0 <span class="muted">— this file is not in raw/</span></summary></details><details>
+        <summary>deepseek-v4.1-flash · cd2-013 · t0 <span class="muted">385 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-11-27",
+  "action_note": "The claim was received 2025-07-12, within one year of the SNF through/discharge date (2024-08-03), so the timely filing denial is incorrect. Submit a redetermination request with proof of timely filing, including the through date and submission date."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-014 · t0 <span class="muted">437 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-02-15",
+  "action_note": "The MAC denied for CO-29 (time limit expired), but the claim's 'through' date is 2024-10-24 and it was received 2025-09-30, still within the 1-calendar-year filing limit; file a redetermination request within 120 days of the 2025-10-18 remittance, citing the timely receipt date to overturn the denial."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-014 · t0 <span class="muted">662 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-02-20",
+  "action_note": "The denial is erroneous: for a span bill, Medicare's 1-year filing clock runs from the statement 'through' date (2024-10-24), not the admission date, so the deadline was 2025-10-24 and the claim received 2025-09-30 was timely. File a redetermination with the MAC within 120 days of receipt of the 2025-10-18 remittance (presumed received 2025-10-23), attaching proof of the 2025-09-30 receipt date (e.g., 837/277CA acceptance reports); the CO-29 adjustment bars billing the patient, so do not write off or bill the beneficiary."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-014 · t0 <span class="muted">525 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-02-15",
+  "action_note": "The CO-29 denial is erroneous: for institutional claims Medicare's 12-month timely filing clock runs from the claim's through date (2024-10-24), so the filing deadline was 2025-10-24 and the claim was received 2025-09-30 — within the limit. File a redetermination request within 120 days of the 2025-10-18 remittance (by 2026-02-15) citing the through-date rule; do not write the claim off."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-014 · t0 <span class="muted">385 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-02-15",
+  "action_note": "The denial is incorrect because SNF Part A timely filing is one year from the discharge date (2024-10-24), and the claim was received 2025-09-30, within that period. Submit a redetermination request with the discharge date and proof of timely filing."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-015 · t0 <span class="muted">454 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-01-05",
+  "action_note": "The MAC's CO-29 denial is incorrect: the claim's 'through' date was 2024-09-10, making the one-year timely-filing deadline 2025-09-10, and the claim was received 2025-08-19—before that deadline. File a redetermination request within 120 days of the remittance date (by 2026-01-05) with proof of the timely receipt date."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-015 · t0 <span class="muted">569 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-01-10",
+  "action_note": "Request a redetermination with proof of timely filing: for institutional span-date claims the 1-year filing limit runs from the claim's 'Through' date (2024-09-10), so the deadline was 2025-09-10 and the claim received 2025-08-19 was timely — the CO-29 denial is a contractor error, not a write-off. The staff note wrongly measured from the admission date; file the appeal within 120 days of presumed RA receipt (2025-09-07 + 5 days)."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-015 · t0 <span class="muted">577 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-01-05",
+  "action_note": "File a redetermination request with the MAC within 120 days of the 2025-09-07 remittance: for institutional claims the 12-month timely filing clock runs from the claim's through date (2024-09-10, so the filing deadline was 2025-09-10), and the claim was received 2025-08-19, so CARC 29 is erroneous. Attach the remittance and proof of the contractor receipt date; do not write off or bill the patient (the CO group code bars patient billing)."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-015 · t0 <span class="muted">403 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-01-05",
+  "action_note": "The claim was received within one year of the SNF discharge date (2024-09-10), so the timely filing denial is incorrect. Submit a redetermination request with documentation showing the discharge date and proof of timely filing within 120 days of the remittance notice."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-016 · t0 <span class="muted">510 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-11-30",
+  "action_note": "CO-29 denial is based on date of service; CMS measures the one-year timely-filing limit from the claim's 'through' date (2024-07-20), not the admission date, so the claim received 2025-07-16 was actually filed within the limit. File a redetermination request within 120 days of the 2025-08-02 remittance date, citing the through-date rule and proof of the 2025-07-16 receipt."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-016 · t0 <span class="muted">619 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-12-05",
+  "action_note": "The MAC denied under CARC 29 as filed past the one-year limit, but for span-date institutional claims the 'through' date (2024-07-20) — not the admission date — sets the filing deadline (2025-07-20), and the claim was received 2025-07-16, so it was timely and the denial is erroneous. File a redetermination request with the claim, the remittance, and proof of the 2025-07-16 receipt date within 120 days of presumed receipt of the 2025-08-02 remittance (receipt presumed 2025-08-07)."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-016 · t0 <span class="muted">630 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-11-30",
+  "action_note": "CARC 29 (time limit for filing expired) is erroneous here: for an institutional claim the 12-month timely-filing clock runs from the through date (2024-07-20), so the deadline was 2025-07-20, and the contractor received the claim on 2025-07-16 — not from the admission date as the staff note assumed. File a first-level redetermination within 120 days of the 2025-08-02 remittance (by 2025-11-30) with proof of timely receipt (e.g., 277CA/claim acceptance timestamp); do not write the claim off."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-016 · t0 <span class="muted">370 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-12-01",
+  "action_note": "The claim was denied as late, but for SNF Part A, timely filing is measured from the discharge date (2024-07-20), so the 2025-07-16 submission was within the 12-month limit. Submit a redetermination request with proof of timely filing."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-017 · t0 <span class="muted">514 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-28",
+  "action_note": "MAC denied as prior benefit period's 100 SNF days exhausted, but records show a 136-day break (2024-10-22 to 2025-03-07) with no inpatient/SNF care, which started a new benefit period with fresh 100 days and a valid 3-day qualifying hospital stay (occurrence span 70). File a redetermination request with this documentation within 120 days of the 2025-04-30 remittance."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-017 · t0 <span class="muted">723 characters</span></summary>
+        <pre class="raw">```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-09-02",
+  "action_note": "CARC 119 shows the MAC processed the claim against the old benefit period's exhausted 100 days, but the confirmed 60+ day gap with no hospital/SNF care (2024-10-22 to 2025-03-07) ended that benefit period, so a new one began 2025-03-07 with a fresh 100 SNF days and a valid 3-day qualifying stay (2025-03-07 to 2025-03-12). File a redetermination with documentation of the break in care (hospital records and family/hospital confirmation of no intervening care) within 120 days of receipt of the 2025-04-30 remittance (receipt presumed 5 days after the notice date)."
+}
+```</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-017 · t0 <span class="muted">860 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-08-28",
+  "action_note": "The MAC denied the full charge as patient responsibility under CARC 119 (all 100 SNF days used), but the records show ~135 days with no inpatient hospital or skilled care between the 2024-10-22 SNF discharge and the 2025-03-07 hospital admission, which should have started a new benefit period on 2025-03-07 with a fresh 100 days. Verify the beneficiary's benefit period and days used in Medicare's own records (HIQA/CWF eligibility query) for any intervening stay the facility doesn't know about; if the new benefit period is confirmed, request a redetermination with documentation of the 60+ day break in care by 2025-08-28, otherwise the exhaustion stands and liability shifts to the patient."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-017 · t0 <span class="muted">436 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-28",
+  "action_note": "The MAC denied under CARC 119, but the prior SNF stay ended 2024-10-22 and there was no inpatient/SNF care until 2025-03-07, so a new benefit period began with a qualifying hospital stay. Request redetermination within 120 days and submit documentation of the 60-day break and hospital stay."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-018 · t0 <span class="muted">612 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-07-20",
+  "action_note": "The MAC denied under CAS 119 (SNF benefit days exhausted) based on the prior 100-day utilization, but facility records show a break in skilled care from 2024-10-30 to 2025-01-15 (77 days), which exceeds the 60-day threshold needed to end the benefit period and renew a fresh 100-day SNF benefit with a new qualifying 3-day hospital stay (2025-01-15–01-19). File a redetermination request with documentation of the break in care within 120 days of the remittance date."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-018 · t0 <span class="muted">681 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-07-25",
+  "action_note": "The MAC denied with CARC 119 (100-day SNF benefit maximum reached), but the beneficiary had a 77-day break with no hospital or SNF care after the prior stay ended 2024-10-30, so the old benefit period terminated after 60 days and a new benefit period with a fresh 100 SNF days began with the qualifying hospital stay on 2025-01-15. File a redetermination with documentation of the 60-day break (hospital record and family confirmation) within 120 days of receipt of the 2025-03-22 remittance (receipt presumed 5 days after the RA date)."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-018 · t0 <span class="muted">744 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-07-20",
+  "action_note": "The 119 denial is erroneous: the beneficiary had no inpatient hospital or SNF care for more than 60 consecutive days after the 2024-10-30 SNF discharge, which ended the old benefit period, and the 2025-01-15 to 2025-01-19 inpatient stay (occurrence span 70) opened a new benefit period with a fresh 100 days when she was admitted to the SNF on 2025-01-19. File a first-level redetermination within 120 days of the 2025-03-22 remittance, attaching the hospital discharge summary, the prior SNF discharge records, and documentation of the gap in care so the MAC can see the new benefit period applies."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-018 · t0 <span class="muted">347 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-07-20",
+  "action_note": "Request a redetermination and submit documentation showing no hospital or SNF care from 2024-10-30 to 2025-01-15, which is more than 60 days and establishes a new benefit period with available SNF days."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-019 · t0 <span class="muted">503 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-26",
+  "action_note": "CAS*PR*119 reflects exhausted 100 SNF days from the prior benefit period, but facility records show the beneficiary had no inpatient/SNF care for over 60 consecutive days (2024-11-22 to 2025-03-07), establishing a new benefit period with fresh 100 days; file a redetermination request with evidence of the 60-day break within 120 days of the remittance date."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-019 · t0 <span class="muted">639 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-26",
+  "action_note": "The MAC denied with CARC 119 (benefit maximum reached), apparently counting the 100 SNF days exhausted in the prior benefit period, but the confirmed break in hospital/SNF care from 2024-11-22 to 2025-03-07 exceeds 60 days, so that benefit period ended and the 2025-03-07 qualifying hospital stay began a new benefit period with 100 fresh SNF days. File a redetermination with documentation of the 60-day break in care and the 3-day qualifying stay within 120 days of the 2025-04-28 remittance."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-019 · t0 <span class="muted">716 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-26",
+  "action_note": "Reason code 119 shows the MAC treated the stay as falling in the old benefit period with all 100 days used, but the 60+ consecutive days with no hospital/SNF care (2024-11-22 to 2025-03-07) ended that period, and the 3-day inpatient stay (2025-03-07 to 2025-03-10) opened a new benefit period with 100 fresh days, so the denial is erroneous. File a redetermination request by 2025-08-26 (120 days from the 2025-04-28 remittance) with proof of the prior discharge date, the care-free interval, and the new qualifying stay, and hold the patient account pending the outcome."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-019 · t0 <span class="muted">333 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-26",
+  "action_note": "Submit a redetermination request with documentation showing the 60-day break (no hospital or SNF care from 2024-11-22 to 2025-03-07) to establish a new benefit period and restore SNF days."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-020 · t0 <span class="muted">619 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-09",
+  "action_note": "The MAC apparently treated this as a continuation of the prior benefit period (100 days used), but the beneficiary had a 91-day break in inpatient/SNF care (2025-01-21 to 2025-04-22), which exceeds the 60-day threshold and starts a new benefit period with a fresh 100-day SNF allotment. File a redetermination request with documentation of the break in care (discharge/admission dates, confirmation of no interim inpatient stay) within 120 days of the 2025-06-11 remittance."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-020 · t0 <span class="muted">666 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-14",
+  "action_note": "The MAC denied with CARC 119 because its records still show the 100 SNF days exhausted under the prior benefit period, but the confirmed 90-day break with no hospital or SNF care (2025-01-21 to 2025-04-22) ended that benefit period, so a new one began with the qualifying 3-day stay on 2025-04-22 and a fresh 100 days are available. File a redetermination request with documentation of the 60+ day break in care and the qualifying hospital stay by 2025-10-14 (120 days from presumed receipt of the 2025-06-11 remittance)."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-020 · t0 <span class="muted">678 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-09",
+  "action_note": "The MAC denied the full stay under CARC 119 (benefit maximum reached), but after the prior benefit period's 100 SNF days were exhausted the beneficiary had 90 consecutive days (1/22–4/21/2025) with no inpatient hospital or SNF care, so a new benefit period with a fresh 100 days began with the 4/22/2025 hospital admission (and the 3-day qualifying stay is met). File a redetermination with the MAC within 120 days of the 6/11/2025 remittance, attaching the prior SNF discharge summary and documentation of the 60+ day break in care."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-020 · t0 <span class="muted">382 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-09",
+  "action_note": "Submit a redetermination with documentation showing the 91-day gap without inpatient hospital or SNF care from 2025-01-22 to 2025-04-21, which ended the prior benefit period and established a new one; the prior 100 SNF days do not apply."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-021 · t0 <span class="muted">467 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-15",
+  "action_note": "CAS*PR*119 indicates MAC applied prior 100-day benefit exhaustion, but facility records show a 92-day break in institutional care (2024-11-10 to 2025-02-10) that renewed the benefit period before the 2025-02-16 admission; file a redetermination with proof of the break in care within 120 days of the 2025-04-17 remittance."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-021 · t0 <span class="muted">638 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-20",
+  "action_note": "File a redetermination request with the MAC documenting that the beneficiary had no hospital or SNF care for more than 60 consecutive days (2024-11-10 through 2025-02-10), so a new benefit period began with the qualifying hospital stay on 2025-02-10 and a fresh 100 SNF days are available; the CARC 119 denial wrongly applied the prior benefit period's exhausted 100 days. The deadline is 120 days from presumed receipt of the 2025-04-17 remittance (receipt presumed 5 days after the RA date)."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-021 · t0 <span class="muted">738 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-15",
+  "action_note": "The 100 days were used in a prior benefit period that ended because the beneficiary had more than 60 consecutive days (2024-11-10 to 2025-02-10) with no inpatient hospital or SNF care, so a new benefit period with a fresh 100 days began with the 2025-02-10 hospital admission and the 119 denial is in error. File a redetermination request by 2025-08-15 (120 days from the 2025-04-17 remittance) with the prior SNF discharge summary, documentation of the 60-day break in care, and the hospital admission/discharge records so the MAC establishes the new benefit period and reprocesses the claim."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-021 · t0 <span class="muted">419 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-15",
+  "action_note": "The MAC denied the claim as benefit exhausted, but the beneficiary had a 60+ day break without inpatient care, creating a new benefit period. File a redetermination with evidence of the prior SNF stay end date and the 60-day break to show a new 100-day benefit is available."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-022 · t0 <span class="muted">562 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 60-day home interval (2/27–4/4, only 37 days) was insufficient to start a new benefit period, so the prior stay's 71 used days carried over; the remaining 29 days ran out on 5/7, correctly matching the MAC's CO/PR 119 denial for 5/8–5/21. Since there is no other payer and the benefit period is genuinely exhausted, bill the beneficiary for the non-covered days (assuming proper SNF ABN/liability notice was issued)."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-022 · t0 <span class="muted">856 characters</span></summary>
+        <pre class="raw">```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 37 days (2025-02-27 to 2025-04-04) between her prior SNF discharge and the 2025-04-05 hospital admission — short of the 60-day break needed to start a new benefit period — so this stay drew on the same period's 100-day SNF maximum, of which 71 days were already used; Medicare correctly paid the remaining 29 days through 2025-05-07 and denied 2025-05-08 onward under CARC 119. The exhaustion is statutorily correct and cannot be reversed on appeal, and the PR group code assigns liability to the beneficiary, so with no Medigap or Medicaid on file the facility should bill the patient for the non-covered days (confirming the required SNFABN/liability notice was issued)."
+}
+```</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-022 · t0 <span class="muted">682 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the hospital/SNF for only 37 days (2025-02-27 to 2025-04-04), so the 60-day break was never met and the new 3-day qualifying hospital stay did not start a new benefit period; Medicare correctly paid only the 29 days remaining in the 100-day maximum (days 72-100, through 2025-05-07) and denied the rest under CARC 119. With no Medigap or Medicaid on file, the exhausted days (and the daily coinsurance) are the patient's responsibility — confirm a NOMNC was delivered before benefits ended, then bill the patient."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-022 · t0 <span class="muted">432 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "verify_then_decide",
+  "deadline": null,
+  "action_note": "The beneficiary exhausted the 100-day SNF benefit in the current benefit period (71 prior days + 29 days paid through 5/7 = 100). Medicare will not pay for days after 5/7. Verify whether a valid SNFABN was issued before billing the patient for the non-covered days; if not, write off."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-023 · t0 <span class="muted">480 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The break in care (2025-02-04 to 2025-03-13) was only 38 days, less than the 60 days needed to start a new benefit period, so the prior stay's 74 used days carried over; the 100-day SNF benefit was exhausted after day 26 (2025-04-13). Since there is no Medigap or Medicaid on file, bill the beneficiary directly for charges after day 100."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-023 · t0 <span class="muted">719 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Only 38 days elapsed between the prior SNF discharge (2025-02-03) and the qualifying hospital stay (2025-03-14), so the 60-day break needed to start a new benefit period was never met; with 74 SNF days already used in this benefit period, the 100-day benefit was exhausted on 2025-04-13 (day 26), and days 2025-04-14 through 2025-04-23 were correctly denied under CARC 119. Medicare cannot pay these days, so bill the beneficiary per the PR adjustment, provided a valid SNF ABN/notice of non-coverage was issued; if no notice was given, the facility must write the charges off."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-023 · t0 <span class="muted">897 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of inpatient care only 38 days (2025-02-04 to 2025-03-13), fewer than the 60 consecutive days needed to start a new benefit period, so the 74 days from the prior SNF stay carried over and the 100-day limit was exhausted on 2025-04-13; the MAC correctly paid the 26 remaining days and denied the last 10 under CARC 119 (benefit maximum reached), and no appeal or corrected claim can extend the hard 100-day cap. With no Medigap or Medicaid on file, bill Ms. Pruitt the $14,313.60 patient responsibility (the 10 non-covered days plus the $209.50/day coinsurance on paid days), provided a NOMNC was delivered by 2025-04-11; if timely notice was not given, the facility is liable for the non-covered days until proper notice is issued."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-023 · t0 <span class="muted">354 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Medicare correctly denied days after 2025-04-13 because the beneficiary exhausted the 100-day SNF benefit (74 prior days + 26 current days). Bill the patient for the noncovered days; no other coverage is on file."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-024 · t0 <span class="muted">530 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Beneficiary had only an 18-day break between the prior SNF stay (74 days used) and this admission, which does not meet the 60-consecutive-day requirement to start a new benefit period, so the same 100-day benefit period applies and was exhausted on 2025-03-12 (74+26=100). Charges for 2025-03-13 through 2025-03-27 are correctly beneficiary liability since no Medigap/Medicaid is on file."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-024 · t0 <span class="muted">615 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit was exhausted: with no 60-day break after the prior stay (only 18 days at home, 2025-01-25 to 2025-02-11), this admission remained in the same benefit period, so the 74 prior days plus 26 days here reached the 100-day maximum on 2025-03-12. Days 2025-03-13 through 2025-03-27 are non-covered and were adjusted to patient responsibility (PR 119), so bill the patient for those days, confirming the required notice of Medicare non-coverage was issued."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-024 · t0 <span class="muted">799 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the hospital/SNF for only 18 days (2025-01-25 to 2025-02-11), far short of the 60 consecutive days needed to start a new benefit period, so this stay continued the same benefit period with 74 days already used; Medicare correctly paid days 75-100 (through 2025-03-12) and the 100-day SNF limit is statutory, so the PR-119 balance of $16,296.40 (days 2025-03-13 to 2025-03-27) can never be paid by Medicare. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days after confirming a timely notice of non-coverage (NOMNC) was issued; if it was not, the facility is liable and should write the balance off."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-024 · t0 <span class="muted">397 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Medicare SNF 100-day benefit was exhausted in the same benefit period (74 prior days + 26 paid days = 100); days after 2025-03-12 are noncovered and patient responsibility. Bill the patient for the noncovered days after ensuring a valid SNFABN was issued."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-025 · t0 <span class="muted">553 characters</span></summary>
+        <pre class="raw">```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Because the beneficiary was out of a SNF/hospital for only 13 days (2025-04-20 to 2025-05-02), far short of the 60 consecutive days needed to start a new benefit period, the prior stay's 91 used days carried forward, leaving only 9 covered days (through 2025-05-15); the remaining days are correctly denied as benefit days exhausted (CAS 119) and must be billed to the patient absent other coverage."
+}
+```</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-025 · t0 <span class="muted">800 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 13-day break at home (2025-04-20 to 2025-05-02) was far short of the 60 consecutive days without inpatient/SNF care needed to start a new benefit period, so the 91 SNF days used in the prior stay carry over; the MAC correctly paid the remaining 9 days (days 92-100, through 2025-05-15) and denied 2025-05-16 to 2025-05-21 with PR-119, benefit maximum reached. Medicare cannot pay these days regardless of the qualifying hospital stay, so bill the beneficiary for the 6 exhausted days (PR adjustment, no Medigap/Medicaid on file), first confirming the required notice of non-coverage (SNF ABN/NOMNC) was issued so liability properly shifts to the patient."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-025 · t0 <span class="muted">775 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary's SNF benefit period never reset: she was out of the hospital/SNF for only 13 days (2025-04-20 to 2025-05-02), far short of the 60 consecutive days needed to start a new period, so the 100-day cap carries over from the prior stay (91 days used) and Medicare correctly paid only the 9 remaining days (through 2025-05-15, matching CAS*PR*119 'benefit maximum reached'). The 6 days from 2025-05-16 to 2025-05-21 are non-covered and, with no Medigap or Medicaid on file, are the beneficiary's responsibility — bill her for those days after confirming a Notice of Medicare Non-Coverage was delivered before coverage ended."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-025 · t0 <span class="muted">381 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Medicare SNF benefits are exhausted for this benefit period (91 prior days + 9 paid = 100); days 5/16–5/21 are noncovered. Bill the beneficiary for those days if a valid SNF ABN/notice was provided; otherwise write off the noncovered days."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-026 · t0 <span class="muted">439 characters</span></summary>
+        <pre class="raw">{"root_cause": "qualifying_stay_not_met", "correctable": "conditional", "next_action": "verify_then_decide", "deadline": "2025-11-02", "action_note": "Facility records show a 3-midnight inpatient stay (5/29-6/1) that should qualify, so confirm the hospital's claim/CWF record actually reflects inpatient status (not observation) for those dates; if confirmed, file a redetermination by the 120-day deadline, otherwise write off the stay."}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-026 · t0 <span class="muted">355 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-11-07",
+  "action_note": "File a redetermination with the hospital inpatient order and discharge record: May 29-31 are three qualifying inpatient days, the June 1 discharge day is excluded, and the direct June 1 SNF transfer was timely."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-026 · t0 <span class="muted">836 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-11-02",
+  "action_note": "Facility records show a signed inpatient admission on 2025-05-29 with discharge 2025-06-01 — three countable inpatient days (5/29–5/31), since observation time and the discharge day don't count — so the stay appears to qualify and the denial likely reflects how the hospital encounter posted in Medicare's system (e.g., billed as observation/outpatient or not yet processed). Verify the hospital's claim on the Common Working File or with the hospital: if it was billed outpatient, have the hospital correct/rebill as inpatient and then resubmit this claim; if it shows three inpatient days, file a redetermination by 2025-11-02 (120 days from the 2025-07-05 remittance)."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-026 · t0 <span class="muted">386 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-11-02",
+  "action_note": "Submit a redetermination request with the hospital record showing the inpatient admission order dated 2025-05-29 and discharge on 2025-06-01, which establishes a 3-day inpatient stay (5/29–5/31) and meets the SNF qualifying stay requirement."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-027 · t0 <span class="muted">568 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-03",
+  "action_note": "Hospital records show an inpatient admission order signed 2025-03-30 with discharge 2025-04-02, giving 3 qualifying inpatient days (3/30, 3/31, 4/1) and SNF admission within the 30-day window; the MAC appears to have miscounted the pre-admission observation time as part of the stay. File a redetermination request with the hospital UB-04/itemized record within 120 days of the 2025-06-05 remittance to overturn the denial."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-027 · t0 <span class="muted">654 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-08",
+  "action_note": "The denial is contradicted by the hospital record: the inpatient order was signed 2025-03-30 with discharge 2025-04-02, yielding three qualifying inpatient days (3/30, 3/31, 4/1 — the 3/29–3/30 ED/observation time is excluded but not needed), and the 2025-05-01 SNF admission fell within 30 days of hospital discharge. Request a redetermination from the MAC by 2025-10-08 (120 days from presumed receipt of the 2025-06-05 remittance), attaching the inpatient admission order and discharge summary as evidence."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-027 · t0 <span class="muted">715 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-10-03",
+  "action_note": "Verify with the hospital how the 3/29–4/2 encounter was actually billed, because the facility's record shows three countable inpatient days (3/30–4/1; admission day counts, discharge day does not, and observation time never counts) but the MAC decides based on the hospital's processed claim. If the hospital billed three inpatient days, request a redetermination with the hospital's UB-04 and signed admission order by 2025-10-03; if it billed the stay as observation only, have the hospital late-rebill as inpatient and then resubmit the SNF claim."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-027 · t0 <span class="muted">384 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-03",
+  "action_note": "Submit a redetermination request with hospital records showing the inpatient admission order dated 2025-03-30 and discharge on 2025-04-02, which establishes a 3-day qualifying inpatient stay; SNF admission on 2025-05-01 was within 30 days."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-028 · t0 <span class="muted">584 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-11",
+  "action_note": "Hospital record shows a signed inpatient admission order 2025-02-24 with discharge 2025-02-27, giving three consecutive inpatient days (2/24-2/26) that satisfy the 3-day qualifying stay rule; the pre-2/24 time was outpatient observation and correctly excluded. File a redetermination request within 120 days of the 2025-04-13 remittance, attaching the hospital admission/discharge documentation to show the qualifying stay was in fact met."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-028 · t0 <span class="muted">692 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-16",
+  "action_note": "The denial is erroneous: the hospital record shows an inpatient admission order signed 2025-02-24 with discharge 2025-02-27, which is three countable inpatient days (2/24, 2/25, 2/26; the discharge day is excluded and the ED/observation time on 2/23-2/24 is not needed), so the 3-day qualifying stay requirement is met and matches the occurrence span 70 on the claim. File a redetermination with the MAC within 120 days of RA receipt (presumed 5 days after the 2025-04-13 remittance), attaching the inpatient admission order and discharge summary."
+}</pre>
+      </details><details><summary>glm-5.3 · cd2-028 · t0 <span class="muted">— this file is not in raw/</span></summary></details><details>
+        <summary>deepseek-v4.1-flash · cd2-028 · t0 <span class="muted">386 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-08-11",
+  "action_note": "Submit a redetermination request with the hospital record showing the inpatient admission order signed 2025-02-24 and discharge 2025-02-27, which establishes a 3-day qualifying inpatient stay (2/24, 2/25, 2/26) before the 2/27 SNF admission."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-029 · t0 <span class="muted">658 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2026-01-07",
+  "action_note": "Facility records show an inpatient admission order signed 2025-06-27 with discharge 2025-06-30 (3 inpatient midnights), which should satisfy the 3-day qualifying stay rule, but CWF apparently reflects a different (observation-based) stay; confirm the hospital's final UB-04 dates/patient status and, if they support the 3-day stay, file a redetermination within 120 days of the remittance (by 2026-01-07) with the hospital record as evidence—otherwise correct the occurrence span and resubmit."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-029 · t0 <span class="muted">807 characters</span></summary>
+        <pre class="raw">```json
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-01-12",
+  "action_note": "Request a redetermination (first-level appeal) from the MAC with the hospital records: the inpatient admission order signed 2025-06-27 and discharge on 2025-06-30 yield 3 qualifying inpatient days (6/27, 6/28, 6/29; the discharge day is excluded and the observation time correctly does not count), and the 2025-07-24 SNF admission is within the 30-day window, so the denial is factually erroneous and the claim as submitted was correct. File within 120 days of presumed receipt of the 2025-09-09 remittance (receipt presumed 5 days after the RA date, i.e., 2025-09-14); the CO-96 adjustment is provider liability and may not be billed to the patient."
+}
+```</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-029 · t0 <span class="muted">667 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2026-01-07",
+  "action_note": "Facility records show a qualifying 3-day inpatient stay (admitted 6/27, discharged 6/30; the discharge day is not counted), so the MAC denial likely reflects the hospital having billed the encounter as observation, leaving no inpatient stay on Medicare's records. Verify with the hospital how 6/27-6/30 was billed: if inpatient, request a redetermination by 2026-01-07 with the signed admission order and discharge summary; if observation, have the hospital correct its claim first, then rebill/appeal."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-029 · t0 <span class="muted">361 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-01-12",
+  "action_note": "Submit a redetermination request with the hospital record showing inpatient admission on 2025-06-27 and discharge on 2025-06-30, which satisfies the 3-day qualifying stay (6/27–6/29) and SNF admission within 30 days."
+}</pre>
+      </details><details>
+        <summary>sonnet-5 · cd2-030 · t0 <span class="muted">565 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-10-05",
+  "action_note": "Hospital record shows inpatient order signed 2025-05-03 with discharge 2025-05-06, which should satisfy the 3-consecutive-day rule, but CWF apparently shows no qualifying inpatient stay. Confirm with the hospital that its claim was billed as inpatient (not observation) for 5/3-5/6; if so, file a redetermination with supporting records by 2025-10-05, otherwise write off or bill the patient per ABN."
+}</pre>
+      </details><details>
+        <summary>kimi-k3 · cd2-030 · t0 <span class="muted">420 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-05",
+  "action_note": "Request a redetermination and submit the hospital inpatient order and discharge record. Inpatient status began May 3 and continued through discharge on May 6, providing qualifying inpatient days on May 3, 4, and 5; the earlier observation time and discharge day do not count."
+}</pre>
+      </details><details>
+        <summary>glm-5.3 · cd2-030 · t0 <span class="muted">725 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-05",
+  "action_note": "The hospital record documents an inpatient admission on 2025-05-03 (signed order) through discharge on 2025-05-06 — three countable inpatient days, since the admission day counts, the discharge day does not, and the 05-01 to 05-03 observation days never count toward the qualifying stay — so the requirement was actually met and the denial is contradicted by the documentation. File a Medicare redetermination request by 2025-10-05 (120 days from the 2025-06-07 remittance), attaching the hospital admission order, discharge summary, and hospital claim showing the inpatient stay."
+}</pre>
+      </details><details>
+        <summary>deepseek-v4.1-flash · cd2-030 · t0 <span class="muted">347 characters</span></summary>
+        <pre class="raw">{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-05",
+  "action_note": "Submit a redetermination with the hospital record showing inpatient admission on 2025-05-03 and discharge on 2025-05-06; the 3-day qualifying stay is met because the discharge day is excluded (5/3–5/5)."
+}</pre>
+      </details>
+  </section>
+
+  <section class="card">
+    <h2>Fields this run did not observe <span class="hint">GAPS.md</span></h2>
+    <ul class="gaps"><li>**budget limit reached**: spent $4.0297 of $4.00; 0 generation(s), 0 judgement(s) and 102 scoring call(s) were never started. Every rate below is computed over the work that ran, so this run is partial — raise the budget or narrow the spec before comparing it with a complete one.</li><li>generation cost: **not observed** for 3 trial(s) (glm-5.3). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger <code>generation</code> and <code>total</code> are lower bounds, and <code>cost_per_success</code> / <code>cost_per_attempt</code> are null.</li><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: OpenRouter reported cached prompt tokens on some calls; recorded under <code>tokens.cached</code>, no cache cost breakdown.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: single-call producers, no interactive execution; recorded as not applicable.</li><li><code>tool_calls</code>: producers make no tool calls this milestone.</li><li><code>checkpoint</code>: not applicable to single-call trials.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>absolute scores show no discrimination on: overall, sound-action (every graded trial scored 5). A dimension with one distinct value measures nothing; treat those scores as not evaluated until the rubric carries per-dimension thresholds and the judge is calibrated.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector does not use pairwise win rate.</li><li>statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json) and recommendation.json firmness follows that label.</li></ul>
+  </section>
+
+  <section class="card">
+    <h2>Raw records</h2>
+    <details><summary>First line of scores.jsonl</summary><pre>{
+ "run": "claim-denials-snf-v2-2026-10-16T02-32-03-171Z",
+ "step": "triage",
+ "candidate": "sonnet-5",
+ "model_ref": "anthropic/claude-sonnet-5",
+ "deployment_ref": "openrouter/claude-platform-on-aws",
+ "input": "cd2-001",
+ "trial": 0,
+ "trial_hash": "657aaf470d6deec844ca68efbd52c2a10dd6b25b5dcc02b0dbc8373c8b633a11",
+ "completion_state": "success",
+ "truncated": false,
+ "task_outcome": "success",
+ "outcome_reasons": [
+  "triage-check: pass"
+ ],
+ "rule_version": "success-v2",
+ "checks": {
+  "triage-check": {
+   "state": "pass",
+   "version": "cmd-4244fef4+files-93cae0db",
+   "evidence": "[holdout; normal] all 4 fields right",
+   "reason": "pass"
+  }
+ },
+ "judge": {
+  "pairwise": null,
+  "absolute_overall": 5,
+  "absolute_dimensions": {
+   "sound-action": 5
+  }
+ },
+ "cost": {
+  "generation": 0.005028,
+  "retry": 0,
+  "source": "provider-reported"
+ },
+ "tokens": {
+  "prompt": 909,
+  "completion": 321,
+  "cached": 0
+ },
+ "ms": 7319,
+ "isolation": null,
+ "ttft_ms": null,
+ "cache": null,
+ "finish_reason": "stop",
+ "error": null,
+ "legacy_status": "ok",
+ "legacy_check_passed": true,
+ "reused_from": null
+}</pre></details>
+    <details><summary>manifest.json</summary><pre>{
+ "protocol_version": "0.3",
+ "run_id": "claim-denials-snf-v2-2026-10-16T02-32-03-171Z",
+ "run_name": "claim-denials-snf-v2",
+ "step": {
+  "id": "triage",
+  "version": "1"
+ },
+ "spec": {
+  "path": "tasks/claim-denials-snf-v2/spec.yaml",
+  "sha256": "97583c5f464c1da7385d1271cb517e37d983b8ee2a5effc538c1eaa59e2be3fc"
+ },
+ "test_set": {
+  "id": "claim-denials-snf-v2",
+  "inputs": {
+   "cd2-001": "4adc595ac80526352c74b423a278e54b85e5061a82101289c4ffc5475eb0daf5",
+   "cd2-002": "e5031b0cd830eb41569537f2fa75a24854f9f067a43601dfefedd4c11f351511",
+   "cd2-003": "02d80eb2475c620d60e251dad23718a023f4ca04b070e8defbb48897fbb01e32",
+   "cd2-004": "b507c362972e91fcd221c423dac06368de9ebcdd8fd3de4dfcf1965d955d5cde",
+   "cd2-005": "322b38c9a8dc74424485048a01913fd8f101deef529e42232dede1cbdc1073b4",
+   "cd2-006": "d832d2e027a14f19b68ebe58e273eddcfe934da0eb9dbeb3964c0270464ea3b7",
+   "cd2-007": "5a3f684293b9f1777deae6e745ada7426c1e6a512f9d8030facdb544313cca53",
+   "cd2-008": "88b524efb71adf6924c17aeb000344df14735b645d000c52ce4c3ce9c75b5c5a",
+   "cd2-009": "5e39ef2d4313f31f19ba4e1511fbe3e7cab17f0da30392b2aedb258cfc7f2434",
+   "cd2-010": "c863808a6894208c045f74e3addbd1427f39a76da967c4578f6a04f3ff1360f8",
+   "cd2-011": "38190bc4554bcac9d35af1dc664e8d67251637716dd71f9f625a3825c66a10a8",
+   "cd2-012": "eba2dab7b04eb0acfd218b21c65c1e5ce38e7e7c5af35c53a34523603866405f",
+   "cd2-013": "bc9c48cb972972872516e0f6d79c079230449ba256106088aaf9ad5fb84fdecf",
+   "cd2-014": "007952f2ab6eddff0c0c81165564f8c6e4b79d51e5a9fad6739981269981ffb7",
+   "cd2-015": "34c2c3df72fd11413313f8a29059437c1ed7c57bef4b8e82d679ababfe751004",
+   "cd2-016": "e4ea17ff6077e6074fe8b803e1b2ee0d4d27d3124249e5fc5362b719e092627e",
+   "cd2-017": "64a461e074881e93e0537187ba9d045158bea0e56a4699b7c24dbe4c7e6c0749",
+   "cd2-018": "4ef0a55b39637df2db60d227cd4ef7ffca87e718479ea3d9b94b8bdaac5a0ecc",
+   "cd2-019": "dd7167a85f0def89313dc569cc964221b5ceb1d488e7a37e34181bf69eb6b761",
+   "cd2-020": "a3dbcf957977f97441d49ec997e9a48013c5e57043ab4440cc9b1f3eb58ebc55",
+   "cd2-021": "98196085b22a45510683fab969c1b1c8ac4ab2df159761ecf4712684d9e274dc",
+   "cd2-022": "0af607a6d3789ecbb32e9745dc061e01729529b62c260c8a0f2f7c7d6e0805bf",
+   "cd2-023": "c1388559742b46e4cd388c1738bb9f15ada729d555012f77979a55a855195e64",
+   "cd2-024": "522c9118d124a8ad2f8d3d7632304bf49c0c946f2333ac0e60e84ef8e6e1284f",
+   "cd2-025": "30beea04125011adad2194df1609132229a680d2c2bf95b2d06f5b0adbc8b014",
+   "cd2-026": "1d6949604b540eb743dee37573283bbb65aaa908162c32cfb70f05f2c579aab7",
+   "cd2-027": "66c57b11ea57b687dbb2fb179e329030e616a521de9d6033581753b9d8a3bb25",
+   "cd2-028": "1ff9bf79152570ad1f5cb89f6870ac6809dd21afaafeb179fd905f63fd535aa1",
+   "cd2-029": "8396d1a8ed8492e74227858f0a45b168ce14a32a184170f8f91edb286113fb16",
+   "cd2-030": "98b8d3bf3c671ef40a0763657ba95654a8c50f13b81d1e9522fbc448ffb418e6"
+  }
+ },
+ "candidates": {
+  "sonnet-5": {
+   "id": "sonnet-5",
+   "model": "anthropic/claude-sonnet-5",
+   "provider_route": "openrouter",
+   "generation_settings": {
+    "temperature": 0
+   },
+   "adapter": "model-api"
+  },
+  "kimi-k3": {
+   "id": "kimi-k3",
+   "model": "moonshotai/kimi-k3",
+   "provider_route": "openrouter",
+   "generation_settings": {
+    "temperature": 0
+   },
+   "adapter": "model-api"
+  },
+  "glm-5.3": {
+   "id": "glm-5.3",
+   "model": "z-ai/glm-5.3",
+   "provider_route": "openrouter",
+   "generation_settings": {
+    "temperature": 0
+   },
+   "adapter": "model-api"
+  },
+  "deepseek-v4.1-flash": {
+   "id": "deepseek-v4.1-flash",
+   "model": "deepseek/deepseek-v4.1-flash",
+   "provider_route": "openrouter",
+   "generation_settings": {
+    "temperature": 0
+   },
+   "adapter": "model-api"
+  }
+ },
+ "control_candidate": "sonnet-5",
+ "judge": {
+  "model": "google/gemini-3.1-pro-preview",
+  "provider_route": "openrouter",
+  "methods": [
+   "absolute-1-5"
+  ]
+ },
+ "evaluators": {
+  "required_checks": [
+   "triage-check"
+  ],
+  "check_version": "cmd-4244fef4+files-93cae0db",
+  "rubric_sha256": "da549ec642b9d264983239cd73007d58d0588b369acf0249ded6296e568619be",
+  "producer_template_sha256": "96e31eb412f724caa4494eefb8cd5a47c56d520ed38ec7755037fe663c7713ae",
+  "judge_template_sha256": "1b63c2da955c5a526d6035ce768025ca6727639aac82a1ce271ab14dcc76c5fc",
+  "score_template_sha256": "a23e7d9d0f378e52e46fc44a8884db5a0a2675c84a48b5877ea2442b3a3e23b0"
+ },
+ "success_criteria": {
+  "mandatory_checks": "all"
+ },
+ "operating_mode": "lowest-cost",
+ "eligibility": {
+  "minimum_reliability": 1,
+  "minimum_required_check_pass_rate": 1,
+  "maximum_p95_ms": null,
+  "cost_ceiling_per_success_usd": null
+ },
+ "minimum_meaningful_difference": null,
+ "execution": {
+  "trials_per_case": 1,
+  "concurrency": 4,
+  "timeout_ms": 300000,
+  "benchmark_mode": "capability-neutral",
+  "cache_mode": "cold"
+ },
+ "harness": {
+  "name": "57b-agenteval",
+  "version": "0.1.0",
+  "git_sha": "eb7393d",
+  "node": "v24.14.0"
+ },
+ "started_at": "2026-10-16T02:32:03.171Z",
+ "finished_at": "2026-10-16T02:51:07.524Z"
+}</pre></details>
+  </section>
+
+  <footer><span>claim-denials-snf-v2-2026-10-16T02-32-03-171Z/</span><span>opens offline, no external dependencies</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
+</div></body></html>

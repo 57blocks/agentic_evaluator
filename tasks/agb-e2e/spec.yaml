@@ -1,0 +1,100 @@
+# agb end to end: from task breakdown to a delivered app, unattended.
+#
+# One trial = agents/agb-e2e.mjs on one agb project with PRD, design and
+# contracts in place: stage-detail writes the task plan, stage-qa the test
+# plan, then `agb run` builds every task. A candidate is a model config:
+# <plan model> for the two claude stages, <code model> for agb run.
+#
+# Success: every planned task is done, the app installs, builds, and its whole
+# test suite passes under `agb smoke` with no hard finding
+# (checks/final-gates.mjs). Other partial findings are counted, not gated.
+#
+# Judge: Gemini (a different vendor from every Claude candidate) reads the
+# plan, test plan, UI contract, README, source and tests (evaluators.judge.show;
+# not the lockfile, run log or the fixture's own docs) and scores each delivery
+# 1-5 per dimension, and compares pairs once there are two configs. It is
+# reported beside the pick: the check decides who qualifies.
+#
+# Input: demo-todo only, to measure what one full trial costs and how long it
+# takes before adding inputs and configs. Its reference is the end state the
+# project adopted (bb90b34) with two test-hygiene fixes (see README).
+#
+# A trial runs for hours and bills through claude: detail and qa are capped at
+# $15 and $10, agb run at $80 (AGB_E2E_MAX_RUN_COST). It runs in one fixed
+# sandbox claude must trust first (README, "Before the first run").
+protocol_version: "0.3"
+run_name: agb-e2e
+
+workflow:
+  control_candidate: e2e-opus-5-5
+  steps:
+    - id: e2e
+      version: "1"
+      test_set:
+        id: e2e-v1
+        inputs: [demo-todo-detail]
+      # Calibration: one config, one trial. Add e2e-opus-5-5-sonnet-5 and
+      # e2e-sonnet-5 once the cost of a trial is known.
+      candidate_ids: [e2e-opus-5-5]
+      required_checks: [final-gates]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: highest-assurance
+      judged_dimensions: [plan, tests, code, contract, handover]
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      # detail 50 min + qa 30 min + agb run 5 h, each capped by the wrapper.
+      maximum_completion_time_seconds: 23400
+
+candidates:
+  - id: e2e-opus-5-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb-e2e.mjs, claude-opus-5-5]
+      reports_usage: true   # the sum of what each stage reported
+  - id: e2e-opus-5-5-sonnet-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb-e2e.mjs, claude-opus-5-5, claude-sonnet-5]
+      reports_usage: true
+  - id: e2e-sonnet-5
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb-e2e.mjs, claude-sonnet-5]
+      reports_usage: true
+
+evaluators:
+  required_checks:
+    final-gates:
+      kind: command
+      argv: ["node", "checks/final-gates.mjs"]
+      version_files: [checks/final-gates.mjs]
+      timeout_seconds: 2400
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/e2e.md
+    methods: [absolute-1-5, pairwise-swap]
+    show:
+      - .ab/tasks.json
+      - .ab/test-plan.json
+      - UI_CONTRACT.md
+      - README.md
+      - "client/src/**"
+      - "server/src/**"
+      - "server/test/**"
+
+# The judge's OpenRouter spend; the candidates bill claude, outside this budget.
+budget_usd: 5
+
+execution:
+  trials_per_case: 1
+  concurrency: 1   # one sandbox: agents/agb-e2e.mjs refuses a second trial
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0

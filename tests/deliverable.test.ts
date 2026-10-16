@@ -32,3 +32,25 @@ test("codegen still counts its parsed files regardless of the step's checks", ()
   assert.equal(parsedUnitsFor("codegen", FILES, false), 1);
   assert.equal(parsedUnitsFor("model-api", FILES, true), undefined);
 });
+
+const PROJECT = [
+  { path: ".ab/tasks.json", content: "{}" },
+  { path: "package-lock.json", content: "lock" },
+  { path: "server/src/index.ts", content: "listen()" },
+  { path: "AGB_EVAL_LOG.txt", content: "log" },
+];
+
+test("judge.show narrows an agent's files to the ones the judge reads", () => {
+  const text = deliverableText("agent-cli", "", PROJECT, [".ab/tasks.json", "server/src/**"]);
+
+  assert.equal(text, renderArtifacts([PROJECT[0]!, PROJECT[2]!]));
+});
+
+test("no judge.show, or an empty one, keeps every file", () => {
+  assert.equal(deliverableText("agent-cli", "", PROJECT), renderArtifacts(PROJECT));
+  assert.equal(deliverableText("agent-cli", "", PROJECT, []), renderArtifacts(PROJECT));
+});
+
+test("judge.show that matches nothing says so instead of leaving the answer empty", () => {
+  assert.match(deliverableText("agent-cli", "", PROJECT, ["docs/**"]), /none of the 4 files left match judge\.show: docs\/\*\*/);
+});

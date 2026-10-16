@@ -1,0 +1,315 @@
+{
+  "endpoints": [
+    {
+      "method": "POST",
+      "endpoint": "/api/auth/session",
+      "domain": "auth",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "§Roles and Permission Matrix 的 Role source 行「Cobo 企业门户登录账户」；Q-069 确认门户交付的是 Cobo 签发的 JWT（载荷含 email / org_id / iss），按 Cobo JWKS 验签",
+      "requestSchema": "{ portalToken: string }",
+      "responseSchema": "{ token: string; expiresAt: string; org: { orgId: string; name: string; logoUrl: string } }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/health",
+      "domain": "auth",
+      "auth": "public",
+      "prdJustification": "【非 PRD 功能，照实标注】进程存活探针，是 runtime-smoke 三条不变量的第一条：没有它，任何自动化都无法判断服务起来了没有。不走鉴权、不读数据库、不暴露任何业务或环境信息。",
+      "requestSchema": "none",
+      "responseSchema": "{ status: \"ok\"; version: string }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/org/profile",
+      "domain": "org",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Entity: Invoice 的 from_name 行「来源 Cobo 企业账户」；§File and External Integration Spec 的 Output Template「内容包含商户名、Logo」",
+      "requestSchema": "none",
+      "responseSchema": "{ orgId: string; name: string; logoUrl: string }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/org/destinations",
+      "domain": "org",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Page Map 的 Settlement Request Page「选择币种、钱包地址与可结算发票」的 Wallet 下拉；Q-059 定其数据源为 Cobo destination 注册表的 list-all-destinations（只读）",
+      "requestSchema": "none",
+      "responseSchema": "{ items: { destinationId: string; name: string }[] }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/org/destinations/:destinationId/entries",
+      "domain": "org",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Page Map 的 Settlement Request Page 的 Wallet Address 下拉；Q-059 定其数据源为 list-destination-entries（只读），并需校对 chainId 与所选 token 的链一致",
+      "requestSchema": "{ token?: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\" }",
+      "responseSchema": "{ items: { entryId: string; address: string; chainId: string }[] }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/clients",
+      "domain": "client",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Basic Manageable-Object Page Rules > List Page「Client：按 Email 或 Name 搜索；按 Type、Status 过滤」，默认 Create Time 倒序",
+      "requestSchema": "{ page?: number; pageSize?: number; q?: string; type?: \"Enterprise\" | \"Personal\"; status?: \"Active\" | \"Frozen\" }",
+      "responseSchema": "{ items: { clientId: string; createTime: string; clientEmail: string; clientType: \"Enterprise\" | \"Personal\"; clientName: string; status: \"Active\" | \"Frozen\" }[]; page: number; pageSize: number; total: number }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/clients",
+      "domain": "client",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§US-001 / AC-001「Merchant clicks Add Client … the client is created with status Active」",
+      "requestSchema": "{ clientEmail: string; clientType: \"Enterprise\" | \"Personal\"; clientName: string }",
+      "responseSchema": "{ clientId: string; createTime: string; clientEmail: string; clientType: \"Enterprise\" | \"Personal\"; clientName: string; status: \"Active\" }"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/clients/:clientId",
+      "domain": "client",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Basic Manageable-Object Page Rules > Edit Page「Client：Client Type、Client Name；Client Email 只读」",
+      "requestSchema": "{ clientType?: \"Enterprise\" | \"Personal\"; clientName?: string }",
+      "responseSchema": "{ clientId: string; clientEmail: string; clientType: \"Enterprise\" | \"Personal\"; clientName: string; status: \"Active\" | \"Frozen\"; updateTime: string }"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/api/clients/:clientId/status",
+      "domain": "client",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Client State Transitions 的 Freeze / Unfreeze 两行；Q-007 定冻结前置为 7 个进行中状态（Sending / Pending / Received / Voiding / Settling / Settlement Failed / Overdue）",
+      "requestSchema": "{ status: \"Active\" | \"Frozen\" }",
+      "responseSchema": "{ clientId: string; status: \"Active\" | \"Frozen\" }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/invoices",
+      "domain": "invoice",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Basic Manageable-Object Page Rules > List Page「Invoice：按 Client Name 或 Category 搜索；按 Invoice Type、Token、Creation Time、Status 过滤」，默认 Creation Time 倒序",
+      "requestSchema": "{ page?: number; pageSize?: number; q?: string; invoiceType?: \"Regular\" | \"Recurring\"; token?: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; status?: \"Draft\" | \"Sending\" | \"Pending\" | \"Received\" | \"Voiding\" | \"Voided\" | \"Settling\" | \"Settled\" | \"Settlement Failed\" | \"Overdue\" | \"Error\"; createdFrom?: string; createdTo?: string }",
+      "responseSchema": "{ items: { invoiceId: string; createTime: string; invoiceType: \"Regular\" | \"Recurring\"; clientId: string; clientName: string; totalAmount: string; status: \"Draft\" | \"Sending\" | \"Pending\" | \"Received\" | \"Voiding\" | \"Voided\" | \"Settling\" | \"Settled\" | \"Settlement Failed\" | \"Overdue\" | \"Error\"; dueDate: string; seriesId?: string }[]; page: number; pageSize: number; total: number }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/invoices/status-counts",
+      "domain": "invoice",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Page Map 的 Invoice List「Main Modules：状态计数、搜索、过滤、发票表格」——计数覆盖全量而非当前页，故与列表分开",
+      "requestSchema": "none",
+      "responseSchema": "{ counts: { status: \"Draft\" | \"Sending\" | \"Pending\" | \"Received\" | \"Voiding\" | \"Voided\" | \"Settling\" | \"Settled\" | \"Settlement Failed\" | \"Overdue\" | \"Error\"; count: number }[]; total: number }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/invoices",
+      "domain": "invoice",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Invoice State Transitions 第 1 行「无 --Save Draft--> Draft，必填与格式校验通过；Due >= 1」；复制发票（§F005）同样落在这条，由前端用详情预填后新建",
+      "requestSchema": "{ clientId: string; issueDate: string; dueDate: string; paymentTokens: (\"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\")[]; items: { itemName: string; qty: number; unitPrice: string; discount?: string; tax?: string }[]; overallDiscount?: string; category?: string; memo?: string; ccRecipients?: string[]; recurring?: { frequency: \"Weekly\" | \"Bi-weekly\" | \"Monthly\" | \"Quarterly\" | \"Yearly\"; endType: \"End Date\" | \"No End Date\"; endDate?: string } }",
+      "responseSchema": "{ invoiceId: string; status: \"Draft\"; totalAmount: string; createTime: string }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/invoices/:invoiceId",
+      "domain": "invoice",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Basic Manageable-Object Page Rules > Detail Page「Invoice Detail：Invoice ID、Status、From、Issue Date、Due Date、Client、CC Recipient、Payment Token、Items、Overall Discount、Amount without tax、Total Tax amount、Discount、Total amount、Due、Category、Memo、Recurring 信息」",
+      "requestSchema": "none",
+      "responseSchema": "{ invoiceId: string; invoiceType: \"Regular\" | \"Recurring\"; status: \"Draft\" | \"Sending\" | \"Pending\" | \"Received\" | \"Voiding\" | \"Voided\" | \"Settling\" | \"Settled\" | \"Settlement Failed\" | \"Overdue\" | \"Error\"; fromName: string; fromLogoUrl: string; issueDate: string; dueDate: string; sendTime?: string; createTime: string; client: { clientId: string; clientName: string; clientEmail: string; status: \"Active\" | \"Frozen\" }; ccRecipients: string[]; paymentTokens: (\"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\")[]; items: { itemId: string; itemName: string; qty: number; unitPrice: string; discount: string; tax: string; amount: string }[]; overallDiscount: string; amountWithoutTax: string; totalTaxAmount: string; discountAmount: string; totalAmount: string; category?: string; memo?: string; voidReason?: string; errorReason?: string; paidToken?: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; paidAmount?: string; paymentUrl?: string; series?: { seriesId: string; status: \"Active\" | \"Discontinued\" | \"Completed\"; frequency: \"Weekly\" | \"Bi-weekly\" | \"Monthly\" | \"Quarterly\" | \"Yearly\"; endType: \"End Date\" | \"No End Date\"; endDate?: string; nextSendDate?: string } }"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/invoices/:invoiceId",
+      "domain": "invoice",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Invoice State Transitions 第 2 行「Draft --Save Draft--> Draft」；§F004「非 Draft 不可编辑」",
+      "requestSchema": "{ clientId?: string; issueDate?: string; dueDate?: string; paymentTokens?: (\"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\")[]; items?: { itemName: string; qty: number; unitPrice: string; discount?: string; tax?: string }[]; overallDiscount?: string; category?: string; memo?: string; ccRecipients?: string[]; recurring?: { frequency: \"Weekly\" | \"Bi-weekly\" | \"Monthly\" | \"Quarterly\" | \"Yearly\"; endType: \"End Date\" | \"No End Date\"; endDate?: string } }",
+      "responseSchema": "{ invoiceId: string; status: \"Draft\"; totalAmount: string; updateTime: string }"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/api/invoices/:invoiceId",
+      "domain": "invoice",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Delete「Draft Invoice 编辑页 Action 中 Delete」；Q-024 定为硬删除、不可恢复",
+      "requestSchema": "none",
+      "responseSchema": "{ invoiceId: string; deleted: true }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/invoices/:invoiceId/send",
+      "domain": "invoice",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Invoice State Transitions 第 3 行「Draft --Create&Send--> Sending，幂等；重复点击禁用」；AC-010「the second click is ignored or blocked by idempotency and only one invoice send attempt is created」",
+      "requestSchema": "{ idempotencyKey: string }",
+      "responseSchema": "{ invoiceId: string; status: \"Sending\"; acceptedAt: string }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/invoices/:invoiceId/void",
+      "domain": "invoice",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Invoice State Transitions「Pending --Void invoice--> Voiding，填写 3–500 字符原因」；Q-005 新增「Overdue --Void invoice--> Voiding」；AC-019「only one void request is processed」",
+      "requestSchema": "{ reason: string; idempotencyKey: string }",
+      "responseSchema": "{ invoiceId: string; status: \"Voiding\"; acceptedAt: string }"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/api/recurring-series/:seriesId/status",
+      "domain": "recurring",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Recurring Series State Transitions「Active --Discontinue--> Discontinued，商户确认 `Yes,I want to stop it.`」；Q-022 定 Series 除 Discontinue 外不对外暴露写接口",
+      "requestSchema": "{ status: \"Discontinued\" }",
+      "responseSchema": "{ seriesId: string; status: \"Discontinued\" }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/settlements",
+      "domain": "settlement",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Basic Manageable-Object Page Rules > List Page「Settlement：按 Settlement Request ID 搜索；按 Token、Status、Create Time 过滤」；Q-028 定默认 Create Time 倒序",
+      "requestSchema": "{ page?: number; pageSize?: number; q?: string; token?: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; status?: \"In Progress\" | \"Success\" | \"Failed\"; createdFrom?: string; createdTo?: string }",
+      "responseSchema": "{ items: { requestId: string; createTime: string; settlementToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; requestAmount: string; status: \"In Progress\" | \"Success\" | \"Failed\" }[]; page: number; pageSize: number; total: number }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/settlements/summary",
+      "domain": "settlement",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§User-visible Metrics 的 Last Settled Amount（「上一次结算成功的 Crypto 金额」）与 Total Settlement Pending（「当前结算中 Crypto 金额，按 Token 展示」）两行",
+      "requestSchema": "none",
+      "responseSchema": "{ lastSettled?: { requestId: string; settlementToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; amount: string; completedAt: string }; pendingByToken: { settlementToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; amount: string }[] }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/settlements/settleable-invoices",
+      "domain": "settlement",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Page Map 的 Settlement Request Page「可结算发票列表」；§F011「支持 Received 与 Settlement Failed 发票」；Q-021 定一次只结算一个 Token，列表只显示 paidToken 与之匹配的发票",
+      "requestSchema": "{ settlementToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; page?: number; pageSize?: number; q?: string }",
+      "responseSchema": "{ items: { invoiceId: string; clientName: string; paidToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; paidAmount: string; status: \"Received\" | \"Settlement Failed\"; receivedTime: string }[]; page: number; pageSize: number; total: number }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/settlements/estimate",
+      "domain": "settlement",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Page Responsibilities 的 Settlement Confirmation Page 行 Must Show「发票数量、金额、预估费用、费用说明」与 §Page Map 同页「确认结算金额、费用与提交」——这一页在提交之前，故费用必须有一条提交前的来源（Q-070）。Q-026 定「页面只展示后端返回值，不在前端自算」；Q-048 查证费用预估用 Cobo 的 Estimate fees。",
+      "requestSchema": "{ settlementToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; destinationId: string; entryId: string; invoiceIds: string[] }",
+      "responseSchema": "{ invoiceCount: number; requestAmount: string; coboPayEstimatedFee: string; invoiceServiceFee: string; totalEstimatedFee: string }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/settlements",
+      "domain": "settlement",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Settlement Request State Transitions 第 1 行「无 --Confirm settlement--> In Progress，已选 Token、Wallet Address、至少 1 张 Received / Settlement Failed 发票，幂等；重复点击不重复创建」；Q-050 定被占用的发票剔除后照常提交并告知商户",
+      "requestSchema": "{ settlementToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; destinationId: string; entryId: string; invoiceIds: string[]; idempotencyKey: string }",
+      "responseSchema": "{ requestId: string; status: \"In Progress\"; settlementToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; invoiceCount: number; requestAmount: string; coboPayEstimatedFee: string; invoiceServiceFee: string; totalEstimatedFee: string; removedInvoiceIds: string[] }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/settlements/:requestId",
+      "domain": "settlement",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§Basic Manageable-Object Page Rules > Detail Page「Settlement Detail：Settlement Request ID、Creation Time、Amount、Wallet Address、Status、关联发票」；Q-027 定 settlementId 在本页展示（回调写入前为空）",
+      "requestSchema": "{ page?: number; pageSize?: number; q?: string; status?: \"Settling\" | \"Settled\" | \"Settlement Failed\" }",
+      "responseSchema": "{ requestId: string; settlementId?: string; createTime: string; status: \"In Progress\" | \"Success\" | \"Failed\"; settlementToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; address: string; requestAmount: string; coboPayEstimatedFee: string; invoiceServiceFee: string; totalEstimatedFee: string; invoices: { items: { invoiceId: string; clientName: string; paidAmount: string; status: \"Settling\" | \"Settled\" | \"Settlement Failed\" }[]; page: number; pageSize: number; total: number } }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/dashboard/invoice-sent",
+      "domain": "dashboard",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§User-visible Metrics 的 Invoice Sent 行「每日已发送发票总金额 … 并按 Pending、Received、Settled、Error、Other 堆叠 / 自定义开始/结束日期，最多 15 天」；Q-016 定无汇率（稳定币 1:1，按 USD）；Q-046 定归日口径与 Other 的组成",
+      "requestSchema": "{ startDate: string; endDate: string }",
+      "responseSchema": "{ days: { date: string; pending: string; received: string; settled: string; error: string; other: string; total: string }[] }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/dashboard/unreceived",
+      "domain": "dashboard",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§User-visible Metrics 的 Unreceived 行「Sent 但未付款发票金额；Unpaid = Not Due + Overdue / 默认 Last 30 days，可选 Last 30 / 90 / 120 days / All」",
+      "requestSchema": "{ range: \"30d\" | \"90d\" | \"120d\" | \"all\" }",
+      "responseSchema": "{ notDue: string; overdue: string; total: string; overdueInvoiceCount: number }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/dashboard/received-by-token",
+      "domain": "dashboard",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§User-visible Metrics 的 Received Invoice 行「所选月份已收款发票按 Token 汇总金额 / 年月选择」；Q-008 定按 paidToken / paidAmount 汇总",
+      "requestSchema": "{ month: string }",
+      "responseSchema": "{ month: string; byToken: { paidToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; amount: string; invoiceCount: number }[]; total: string }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/dashboard/last-received",
+      "domain": "dashboard",
+      "auth": "required",
+      "audience": "user",
+      "prdJustification": "§User-visible Metrics 的 Last Received 行「最近一次 Received 发票的付款金额、付款方、日期」",
+      "requestSchema": "none",
+      "responseSchema": "{ last?: { invoiceId: string; clientName: string; paidToken: \"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\"; paidAmount: string; receivedTime: string } }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/pay/:token",
+      "domain": "payer",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "§Payer Page Map 的 Payer Invoice Detail「查看发票并在可支付时付款」；§EH007「Page read-only; Pay Now hidden」；Q-067 定链接不设过期，仅靠不可枚举的签名 token；Q-056 删除 Payer 页的 Select payment method 模块（币种在 Cobo 托管页选）",
+      "requestSchema": "none",
+      "responseSchema": "{ invoiceId: string; status: \"Draft\" | \"Sending\" | \"Pending\" | \"Received\" | \"Voiding\" | \"Voided\" | \"Settling\" | \"Settled\" | \"Settlement Failed\" | \"Overdue\" | \"Error\"; payable: boolean; fromName: string; fromLogoUrl: string; issueDate: string; dueDate: string; billedTo: { clientName: string; clientEmail: string }; paymentTokens: (\"Tron-USDT\" | \"Tron-USDC\" | \"ETH-USDT\" | \"ETH-USDC\")[]; items: { itemId: string; itemName: string; qty: number; unitPrice: string; discount: string; tax: string; amount: string }[]; overallDiscount: string; amountWithoutTax: string; totalTaxAmount: string; discountAmount: string; totalAmount: string; category?: string; memo?: string; paymentUrl?: string; statusNotice: string }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/webhooks/cobo",
+      "domain": "webhook",
+      "auth": "public",
+      "rateLimit": "required",
+      "prdJustification": "§File and External Integration Spec 的 Parsing/Processing Rules「付款回调更新 Received / Error；结算回调更新 Settlement Request 与 Invoice 状态」；Q-018 定验签头与算法、且 Cobo 不提供幂等字段，去重由我方按事件 id 实现；Q-054 定收到 payment.order.status.updated 后须拉单比对 received_token_amount 与 payable_amount",
+      "requestSchema": "{ raw: string }",
+      "responseSchema": "{ received: true }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/webhooks/portal-install",
+      "domain": "webhook",
+      "auth": "public",
+      "rateLimit": "required",
+      "prdJustification": "Q-052 查证的 Portal App 安装链路：Cobo 回调 manifest 里的 callback_url（approval_result 1=首次安装、2=更新设置，带 org_id），我方据此换取 org access token 并落 Organization 记录",
+      "requestSchema": "{ approval_result: number; org_id: string }",
+      "responseSchema": "{ received: true }"
+    }
+  ]
+}

@@ -1,0 +1,290 @@
+{
+  "endpoints": [
+    {
+      "method": "POST",
+      "endpoint": "/api/auth/request-code",
+      "domain": "auth",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "F009 Users sign up using email；Q-030 裁决为无密码验证码登录",
+      "requestSchema": "{ email: string; birthYear?: number }",
+      "responseSchema": "{ sent: true; expiresInSeconds: number }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/auth/verify-code",
+      "domain": "auth",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "Core Flow 1 User signs up or logs in with email",
+      "requestSchema": "{ email: string; code: string }",
+      "responseSchema": "{ userId: string; status: \"pending_consent\" | \"active\"; consentRequired: boolean }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/auth/me",
+      "domain": "auth",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "Core Flow 5 起的每一步都需要已登录用户",
+      "requestSchema": "none",
+      "responseSchema": "{ userId: string; email: string; status: \"pending_consent\" | \"active\"; birthYear: number }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/auth/logout",
+      "domain": "auth",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "Q-017 会话 30 天滑动过期，需要主动结束会话",
+      "requestSchema": "none",
+      "responseSchema": "{ ok: true }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/consent/request",
+      "domain": "consent",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "F009 For child users, the app asks for parent email, sends a code",
+      "requestSchema": "{ userId: string; parentEmail: string }",
+      "responseSchema": "{ status: \"code_sent\"; expiresInSeconds: 120 }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/consent/resend",
+      "domain": "consent",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "EH005 Display resend code button；TRD §4.5.2 重发使旧码立即失效",
+      "requestSchema": "{ userId: string }",
+      "responseSchema": "{ status: \"code_sent\"; expiresInSeconds: 120 }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/consent/confirm",
+      "domain": "consent",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "US-008 the system sends a code that expires after 2 minutes",
+      "requestSchema": "{ userId: string; code: string }",
+      "responseSchema": "{ status: \"confirmed\" | \"expired\" | \"invalid\" }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/consent/decline",
+      "domain": "consent",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "EH006 Parent declines consent → Account is deleted",
+      "requestSchema": "{ userId: string; code: string }",
+      "responseSchema": "{ status: \"declined\"; accountDeleted: true }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/consent/revoke",
+      "domain": "consent",
+      "auth": "public",
+      "audience": "user",
+      "rateLimit": "required",
+      "prdJustification": "Q-011 家长可撤回同意，走同意邮件里的长期签名链接（PAGE-011 /consent/revoke）",
+      "requestSchema": "{ token: string }",
+      "responseSchema": "{ status: \"revoked\"; accountDeleted: true }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/games/photo",
+      "domain": "game",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "F005 User uploads a photo of a handwritten notation sheet",
+      "requestSchema": "{ photo: File; idempotencyKey: string; playedAt?: string }",
+      "responseSchema": "{ jobId: string; status: \"uploading\" }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/games/jobs/{jobId}/events",
+      "domain": "game",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "F007 progress screen；TRD §4.1 每阶段向客户端上报进度（SSE）",
+      "requestSchema": "none",
+      "responseSchema": "{ stage: \"uploading\" | \"prescanning\" | \"reconstructing\" | \"awaiting_confirmation\" | \"failed\"; percent: number; readablePercent?: number; failure?: { code: \"prescan_failed\" | \"not_a_scoresheet\" | \"abandoned\" | \"timeout\"; message: string } }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/games/jobs/{jobId}",
+      "domain": "game",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "EH004 用户返回时需要知道这次扫描还在不在",
+      "requestSchema": "none",
+      "responseSchema": "{ jobId: string; status: \"uploading\" | \"prescanning\" | \"reconstructing\" | \"awaiting_confirmation\" | \"done\" | \"failed\"; gameId?: string; failure?: { code: \"prescan_failed\" | \"not_a_scoresheet\" | \"abandoned\" | \"timeout\"; message: string } }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/games/jobs/{jobId}/ambiguities",
+      "domain": "game",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "F006 the user sees uncertain moves and a list of candidate moves to choose from",
+      "requestSchema": "none",
+      "responseSchema": "{ items: { slotIndex: number; ply: number; side: \"w\" | \"b\"; candidates: { san: string; confidence: number }[]; repair?: \"inserted\" | \"deleted\" }[] }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/games/jobs/{jobId}/confirmations",
+      "domain": "game",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "US-003 I can quickly fix the game before analysis starts",
+      "requestSchema": "{ confirmations: { slotIndex: number; san: string }[] }",
+      "responseSchema": "{ gameId: string; status: \"confirmed\" }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/games",
+      "domain": "game",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "PAGE-003 Dashboard 已分析对局列表",
+      "requestSchema": "{ cursor?: string; limit?: number }",
+      "responseSchema": "{ items: { id: string; playedAt: string; opponentName?: string; accuracy?: number; reportStatus: \"complete\" | \"partial\" | \"none\" }[]; nextCursor: string | null }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/games/{gameId}",
+      "domain": "game",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "PAGE-007 分析报告需要对局本体（PGN）",
+      "requestSchema": "none",
+      "responseSchema": "{ id: string; pgn: string; playedAt: string; source: \"photo\" | \"manual\" }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/games/{gameId}/analysis",
+      "domain": "analysis",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "US-004 Given I have confirmed the reconstructed game, When the analysis starts",
+      "requestSchema": "{ idempotencyKey: string }",
+      "responseSchema": "{ analysisId: string; status: \"analyzing\" }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/analysis/{analysisId}/events",
+      "domain": "analysis",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "F002 first explanation should appear within about 5 seconds, with loading state if full analysis is still processing",
+      "requestSchema": "none",
+      "responseSchema": "{ kind: \"move\" | \"summary\" | \"done\" | \"failed\"; ply?: number; classification?: \"brilliant\" | \"great\" | \"best\" | \"excellent\" | \"good\" | \"inaccuracy\" | \"mistake\" | \"miss\" | \"blunder\"; evalCp?: number; explanation?: string; failure?: { code: \"engine_crash\" | \"timeout\"; message: string } }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/analysis/{analysisId}",
+      "domain": "analysis",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "F003 aggregates key turning points, recurring themes, and overall accuracy；EH003 局部报告",
+      "requestSchema": "none",
+      "responseSchema": "{ id: string; gameId: string; status: \"complete\" | \"partial\"; analysedThroughPly: number | null; engineVersion: string; depth: number; accuracy: number; summary: { strategicMistakes: string; whyLost: string; turningPoints: { ply: number; note: string }[]; recurringThemes: string[] }; moves: { ply: number; san: string; classification: \"brilliant\" | \"great\" | \"best\" | \"excellent\" | \"good\" | \"inaccuracy\" | \"mistake\" | \"miss\" | \"blunder\"; evalCp: number; explanation: string }[]; recommendations: { ply: number; conceptTag: string; title: string; url: string; source: \"lichess\" | \"chesscom\" | \"youtube\" | \"chessable\" }[] }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/analysis/{analysisId}/retry",
+      "domain": "analysis",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "Q-007 局部报告顶部横幅带一个「重试这局」按钮（EH003 自动重试一次之后的人工重试）",
+      "requestSchema": "{ idempotencyKey: string }",
+      "responseSchema": "{ analysisId: string; status: \"analyzing\" }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/opponents/search",
+      "domain": "prep",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "F008 User enters an opponent name, with rating and federation；Q-001 裁决评分为选填",
+      "requestSchema": "{ name: string; rating?: number; federation?: \"USCF\" | \"FIDE\"; platformUsername?: string; usChessId?: string }",
+      "responseSchema": "{ status: \"resolved\" | \"ambiguous\" | \"no_information\"; reportId?: string; candidates?: { source: \"uschess\" | \"fide\"; playerId: string; name: string; federation: string | null; currentRating: number | null; lastActive: string | null; sourceUrl: string }[] }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/opponents/reports/{reportId}",
+      "domain": "prep",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "US-007 I can review opening preferences, common patterns, and suggested preparation lines",
+      "requestSchema": "none",
+      "responseSchema": "{ id: string; opponentName: string; matchedProfile: { source: \"uschess\" | \"fide\"; playerId: string; currentRating: number | null; federation: string | null }; openingsAsWhite: { eco: string; name: string; games: number; score: number }[]; openingsAsBlack: { eco: string; name: string; games: number; score: number }[]; patterns: string[]; prepLines: { line: string; rationale: string }[]; sourcesQueried: { source: string; ok: boolean }[]; expiresAt: string }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/metrics/tournament-checkin",
+      "domain": "metrics",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "Metrics: the denominator is manually entered by the user through the prompt: How many games did you play in this tournament/weekend?",
+      "requestSchema": "{ gamesPlayed: number; periodStart: string; periodEnd: string }",
+      "responseSchema": "{ id: string }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/metrics/events",
+      "domain": "metrics",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "Q-022 六个事件的最小集写进自建 metric_events 表，不接第三方分析工具",
+      "requestSchema": "{ events: { name: \"photo_uploaded\" | \"prescan_failed\" | \"moves_confirmed\" | \"analysis_completed\" | \"report_viewed\" | \"tournament_count_submitted\"; gameId?: string; analysisId?: string; jobId?: string; reason?: string; occurredAt: string }[] }",
+      "responseSchema": "{ accepted: number }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/reviews",
+      "domain": "review",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "F010 Add a rating review mechanism；Q-002 裁决为站内评分（AC-009）",
+      "requestSchema": "{ stars: 1 | 2 | 3 | 4 | 5; text?: string; gameId?: string }",
+      "responseSchema": "{ id: string; createdAt: string }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/reviews/eligibility",
+      "domain": "review",
+      "auth": "required",
+      "audience": "user",
+      "rateLimit": "none",
+      "prdJustification": "AC-009 提交或关闭后 30 天内不再弹 —— 客户端需要知道这次该不该弹",
+      "requestSchema": "none",
+      "responseSchema": "{ shouldPrompt: boolean; nextEligibleAt: string | null }"
+    }
+  ]
+}

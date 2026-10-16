@@ -108,6 +108,14 @@ export function PlanStepCard({ step, title }: { step: PlanStep; title?: string }
         )}
       </CardHeader>
       <CardContent className="flex flex-col">
+        {step.about && (
+          <Row label="What it evaluates" hint={step.aboutSource === "current-spec" ? "from the current spec" : "from the spec"}>
+            <p className="text-sm leading-relaxed">{step.about}</p>
+            {step.aboutSource === "current-spec" && (
+              <p className="text-xs text-muted-foreground">This run predates the description; it is read from the task's spec as it is now.</p>
+            )}
+          </Row>
+        )}
         <Row label="Test inputs" hint={`${step.inputs.length}`}><Inputs step={step} /></Row>
         <Row label="Candidates" hint={`${step.candidates.length}`}><Candidates step={step} /></Row>
         <Row label="How success is decided" hint="required check"><Checks step={step} /></Row>

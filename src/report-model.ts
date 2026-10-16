@@ -30,6 +30,8 @@ import type { WorkflowRecord } from "./canon/workflow.js";
 import { planFromRun, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
 import { NO_PICK, plural, sha8 } from "./report-format.js";
+import { sliceRows, type SliceRow } from "./report-slices.js";
+import type { RunAbout } from "./canon/about.js";
 import {
   FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, recommendationSentence, type GateRow,
 } from "./report-copy.js";
@@ -334,6 +336,8 @@ export interface StepReport {
   plan: { candidates: number; inputs: number; trialsPer: number; trials: number };
   /** What this run tested, from its frozen manifest. */
   tested: PlanStep;
+  /** Required-check results per input tag and split; empty when the task labels no inputs. */
+  slices: SliceRow[];
   facts: Array<{ label: string; value: string }>;
   verdict: {
     firmness: Recommendation["firmness"];
@@ -399,6 +403,7 @@ export function buildStepReport(b: RunBundle): StepReport {
     startedAt: m.started_at.slice(0, 16).replace("T", " "),
     plan: { candidates: views.length, inputs, trialsPer: m.execution.trials_per_case, trials: b.trials.length },
     tested: planFromRun(b),
+    slices: sliceRows(b.about?.labels ?? null, b.trials, views.map((v) => v.id), m.evaluators.required_checks[0] ?? null),
     facts: [
       { label: "Spec", value: `${m.spec.path ?? "—"} · sha256 ${sha8(m.spec.sha256)}` },
       { label: "Test set", value: `${m.test_set.id ?? "—"} · ${inputs} input(s)` },
@@ -406,7 +411,7 @@ export function buildStepReport(b: RunBundle): StepReport {
       { label: "Judge", value: `${m.judge.model} · rubric ${sha8(m.evaluators.rubric_sha256)}` },
       { label: "Mode", value: `${m.execution.benchmark_mode} · ${m.execution.cache_mode} cache` },
       { label: "Run time", value: `${m.started_at.slice(0, 16).replace("T", " ")} → ${(m.finished_at ?? "").slice(11, 16)}` },
-      { label: "Operating mode", value: `${modeLabel(m.operating_mode)} · ${FIRMNESS_LABEL[rec.firmness]}${rec.chosen ? ` · recommend ${rec.chosen}` : ` · ${NO_PICK}`}` },
+      { label: "Operating mode", value: `${modeLabel(m.operating_mode)} · ${FIRMNESS_LABEL[rec.firmness]}${rec.chosen ? ` · recommend ${rec.chosen}` : ` · ${NO_PICK}${rec.closest ? ` · closest ${rec.closest.candidate}` : ""}`}` },
       { label: "Selection rule", value: rec.rule_version },
       { label: "harness", value: `${m.harness.version} · ${m.harness.git_sha ?? "—"}` },
     ],
@@ -492,9 +497,11 @@ export interface WorkflowReport {
   gaps: GapLine[];
   /** Every step's report side by side; null when the steps were not read. */
   digest: WorkflowDigest | null;
+  /** What the workflow evaluates (the spec's description); null when the spec has none. */
+  about: { description: string; fromCurrentSpec: boolean } | null;
 }
 
-export function buildWorkflowReport(record: WorkflowRecord, gaps: string, digest: WorkflowDigest | null = null): WorkflowReport {
+export function buildWorkflowReport(record: WorkflowRecord, gaps: string, digest: WorkflowDigest | null = null, about: RunAbout | null = null): WorkflowReport {
   const v = record.e2e_validation ?? null;
   return {
     kind: "workflow",
@@ -503,6 +510,7 @@ export function buildWorkflowReport(record: WorkflowRecord, gaps: string, digest
     tone: workflowVerdictTone(v),
     gaps: gapLines(gaps, true),
     digest,
+    about: about?.description ? { description: about.description, fromCurrentSpec: about.source === "current-spec" } : null,
   };
 }
 
@@ -517,7 +525,9 @@ export async function loadReportModel(dir: string): Promise<ReportModel> {
   if (await isWorkflowRun(dir)) {
     const record = await loadWorkflowRecord(dir);
     const { buildWorkflowDigest } = await import("./workflow-report-model.js");
-    return buildWorkflowReport(record, await workflowGapsFor(dir, record), await buildWorkflowDigest(dir, record));
+    const { aboutOfWorkflow } = await import("./canon/about.js");
+    const about = await aboutOfWorkflow(dir, record.steps.map((s) => s.id));
+    return buildWorkflowReport(record, await workflowGapsFor(dir, record), await buildWorkflowDigest(dir, record), about);
   }
   const { loadBundle } = await import("./report-v2.js");
   return buildStepReport(await loadBundle(dir));

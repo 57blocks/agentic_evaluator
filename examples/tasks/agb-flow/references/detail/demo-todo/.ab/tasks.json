@@ -1,0 +1,294 @@
+{
+  "domains": [
+    {
+      "id": "member",
+      "name": "成员",
+      "dependsOn": [],
+      "tasks": [
+        {
+          "id": "T-001",
+          "title": "查看与添加成员",
+          "role": "fullstack",
+          "description": "搭建前后端骨架（server 入口、SQLite 初始化、client 路由外壳），并实现成员名册的查看与新增：GET/POST /api/members 与 PAGE-004 的列表、加载/空态与新增表单。",
+          "dependsOn": [],
+          "coversRequirementIds": ["F006", "IC-18", "IC-19", "AC-12"],
+          "acceptanceCriteria": [
+            "成员管理页加载中显示骨架，名册为空时显示「还没有成员，先添加一位」，读写失败显示失败原因",
+            "输入已存在姓名点击添加成员（或回车）后，名册条数不变，输入框下方出现「该成员已存在」（AC-12）",
+            "添加成功后新成员出现在列表且输入框清空"
+          ],
+          "subSteps": [
+            {
+              "action": "定义成员契约与数据表",
+              "detail": "落地 members 表（id、name 唯一）与 GET/POST /api/members 的请求响应形状，对齐 _contracts/api-routes.json"
+            },
+            {
+              "action": "实现垂直切片",
+              "detail": "server 入口与 SQLite 初始化、client 路由外壳（四个路由占位）、成员列表与添加表单及聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "server/src/index.ts",
+              "server/src/db.ts",
+              "server/src/routes/members.ts",
+              "server/test/members.routes.test.ts",
+              "client/src/main.tsx",
+              "client/src/App.tsx",
+              "client/src/api/members.ts",
+              "client/src/pages/MembersPage.tsx",
+              "client/src/pages/MembersPage.test.tsx"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-002",
+          "title": "移除成员并释放其名下任务",
+          "role": "fullstack",
+          "description": "实现 DELETE /api/members/:memberId：删除成员记录的同时按 DEC-004 把其名下任务的 assigneeId 置空，并在 PAGE-004 接入移除确认与错误提示。",
+          "dependsOn": ["T-001"],
+          "coversRequirementIds": ["F006", "IC-20", "AC-13"],
+          "acceptanceCriteria": [
+            "点击移除并确认后，该成员从名册消失（AC-13）",
+            "移除后其原先负责的任务在看板上负责人显示为「未分配」，任务本身仍存在（AC-13，对应 DEC-004）",
+            "移除失败时列表不变，并显示失败原因"
+          ],
+          "subSteps": [
+            {
+              "action": "实现级联移除",
+              "detail": "同一次请求内删除成员并把 tasks.assigneeId 等于该成员的记录置为 null（DEC-004）"
+            },
+            {
+              "action": "接入移除交互",
+              "detail": "PAGE-004 移除按钮弹出确认，确认后调用接口并更新列表，失败态回显原因"
+            }
+          ],
+          "files": {
+            "creates": [],
+            "modifies": [
+              "server/src/routes/members.ts",
+              "server/test/members.routes.test.ts",
+              "client/src/api/members.ts",
+              "client/src/pages/MembersPage.tsx",
+              "client/src/pages/MembersPage.test.tsx"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "task",
+      "name": "任务",
+      "dependsOn": ["member"],
+      "tasks": [
+        {
+          "id": "T-003",
+          "title": "创建任务",
+          "role": "fullstack",
+          "description": "实现 POST /api/tasks 与 PAGE-002 新建任务页：标题必填校验、描述、负责人下拉（含未分配），提交成功回到看板，失败保留输入并显示原因。",
+          "dependsOn": ["T-001"],
+          "coversRequirementIds": [
+            "F001",
+            "F002",
+            "IC-08",
+            "IC-09",
+            "IC-10",
+            "IC-11",
+            "IC-12",
+            "AC-01",
+            "AC-02",
+            "AC-03",
+            "AC-04"
+          ],
+          "acceptanceCriteria": [
+            "标题为空时创建按钮禁用，失焦后标题下方出现「标题必填」（AC-01）",
+            "提交「写周报」后回到看板，待办列出现该卡片且待办列计数 +1（AC-02）",
+            "创建请求失败时停留在本页，已填标题与描述原样保留，页面顶部显示后端返回的失败原因（AC-03）",
+            "负责人下拉选项恰为 /members 当前名册加一项「未分配」，默认选中「未分配」（AC-04）"
+          ],
+          "subSteps": [
+            {
+              "action": "定义任务契约与数据表",
+              "detail": "落地 tasks 表（id、title、description、assigneeId 可空、status 默认 todo）与 POST /api/tasks 的请求响应形状"
+            },
+            {
+              "action": "实现垂直切片",
+              "detail": "后端创建端点、typed client、新建任务表单（含必填校验与提交态）及聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "server/src/routes/tasks.ts",
+              "server/test/tasks.create.test.ts",
+              "client/src/api/tasks.ts",
+              "client/src/pages/NewTaskPage.tsx",
+              "client/src/pages/NewTaskPage.test.tsx"
+            ],
+            "modifies": ["server/src/db.ts", "server/src/index.ts", "client/src/App.tsx"]
+          }
+        },
+        {
+          "id": "T-004",
+          "title": "任务详情查看与编辑",
+          "role": "fullstack",
+          "description": "实现 GET /api/tasks/:taskId 与 PATCH /api/tasks/:taskId，PAGE-003 展示标题/描述/负责人/状态徽标，标题与描述失焦即保存，负责人选择即保存，taskId 不存在时显示「任务不存在」。",
+          "dependsOn": ["T-003", "T-001"],
+          "coversRequirementIds": ["F001", "F002", "IC-13", "IC-14", "IC-15", "IC-17", "AC-05"],
+          "acceptanceCriteria": [
+            "打开存在的 taskId 展示标题、描述、负责人与状态徽标；打开不存在的 taskId 显示「任务不存在」并提供返回看板链接",
+            "标题/描述失焦即保存，保存中字段禁用，成功显示已保存标记，失败回滚为原值并显示原因（IC-13、IC-14）",
+            "改派负责人后立即保存，返回看板时原负责人工作量 -1、新负责人工作量 +1（AC-05）"
+          ],
+          "subSteps": [
+            {
+              "action": "实现详情读取与局部保存",
+              "detail": "GET 返回单条任务；PATCH 接受 title/description/assigneeId 的部分更新，不接受 status（DEC-002 留给独立端点）"
+            },
+            {
+              "action": "接入详情页交互",
+              "detail": "标题/描述内联编辑失焦保存、负责人下拉即时保存、不存在任务的 error 态、返回看板链接"
+            }
+          ],
+          "files": {
+            "creates": [
+              "client/src/pages/TaskDetailPage.tsx",
+              "client/src/pages/TaskDetailPage.test.tsx",
+              "server/test/tasks.detail.test.ts"
+            ],
+            "modifies": ["server/src/routes/tasks.ts", "client/src/api/tasks.ts", "client/src/App.tsx"]
+          }
+        },
+        {
+          "id": "T-005",
+          "title": "任务状态转移",
+          "role": "fullstack",
+          "description": "实现 POST /api/tasks/:taskId/transitions，服务端按 WF-01 转移表校验合法性（不接受客户端直接写 status，DEC-002），并在 PAGE-003 接入转移按钮组。",
+          "dependsOn": ["T-004"],
+          "coversRequirementIds": ["F003", "WF-01", "IC-16", "AC-06", "AC-07"],
+          "acceptanceCriteria": [
+            "todo 状态的任务只出现「开始处理」一个转移按钮；done 状态的任务不出现任何转移按钮（AC-06）",
+            "服务端按 WF-01 转移表校验，非法转移（如 done→in_progress）一律拒绝，无论客户端发送什么请求体（对应 DEC-002）",
+            "点击「标记完成」后状态徽标更新为已完成，且不再能被推进到其它状态（AC-07 在详情页的表现）"
+          ],
+          "subSteps": [
+            {
+              "action": "实现 WF-01 转移校验表",
+              "detail": "todo→in_progress、in_progress→todo、in_progress→done 三条合法转移，其余拒绝并返回可读错误"
+            },
+            {
+              "action": "接入转移按钮组",
+              "detail": "PAGE-003 按当前状态只渲染允许的转移按钮，点击 loading，成功更新状态徽标，失败显示原因"
+            }
+          ],
+          "files": {
+            "creates": [
+              "server/src/domain/taskWorkflow.ts",
+              "server/test/taskWorkflow.test.ts",
+              "server/test/tasks.transitions.test.ts",
+              "client/src/components/TransitionButtons.tsx",
+              "client/src/components/TransitionButtons.test.tsx"
+            ],
+            "modifies": ["server/src/routes/tasks.ts", "client/src/api/tasks.ts", "client/src/pages/TaskDetailPage.tsx"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "board",
+      "name": "看板",
+      "dependsOn": ["member", "task"],
+      "tasks": [
+        {
+          "id": "T-006",
+          "title": "看板任务列表、加载态与导航",
+          "role": "fullstack",
+          "description": "实现 GET /api/tasks 与 PAGE-001 看板主体：按状态分列渲染任务卡片，处理 loading/empty/error/populated 四态，接入新建任务、卡片详情、成员管理三处导航。",
+          "dependsOn": [],
+          "coversRequirementIds": ["PAGE-001", "F004", "IC-02", "IC-05", "IC-07", "AC-08", "AC-09"],
+          "acceptanceCriteria": [
+            "首次打开看板（未动显示已完成开关）时页面上不存在任何 done 状态的任务卡片（AC-08）",
+            "无任务时显示「还没有任务，点击「新建任务」开始」，且不显示空的状态列骨架（AC-09）",
+            "点击任务卡片导航到对应任务详情页；点击新建任务导航到 /tasks/new；点击成员管理导航到 /members"
+          ],
+          "subSteps": [
+            {
+              "action": "实现任务列表端点",
+              "detail": "GET /api/tasks 返回全量任务，默认只按 VAR-01（todo、in_progress）渲染分列"
+            },
+            {
+              "action": "实现看板主体与状态态",
+              "detail": "按状态分列的卡片渲染、三种非 populated 态、三处导航链接及聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "client/src/pages/BoardPage.tsx",
+              "client/src/pages/BoardPage.test.tsx",
+              "client/src/components/TaskCard.tsx"
+            ],
+            "modifies": ["server/src/routes/tasks.ts", "client/src/api/tasks.ts", "client/src/App.tsx"]
+          }
+        },
+        {
+          "id": "T-007",
+          "title": "筛选、当前成员高亮与工作量统计侧栏",
+          "role": "frontend",
+          "description": "在看板接入当前成员下拉（本地会话高亮）、负责人筛选（就地过滤）、显示已完成开关（就地增减已完成列），并按 RULE-01 渲染成员工作量侧栏。",
+          "dependsOn": ["T-006", "T-001"],
+          "coversRequirementIds": ["PAGE-001", "F005", "RULE-01", "VAR-01", "IC-01", "IC-03", "IC-04", "AC-10", "AC-11"],
+          "acceptanceCriteria": [
+            "侧栏中某成员的数字等于「负责人为该成员且状态属于 VAR-01（todo 或 in_progress）」的任务条数（AC-10）",
+            "选中负责人筛选后，看板上每张可见卡片的负责人均为该成员，各列计数同步更新（AC-11）",
+            "选择当前成员后该成员的任务卡片加高亮边框且筛选条件不变；切换显示已完成开关就地增减已完成列，不触发重新加载"
+          ],
+          "subSteps": [
+            {
+              "action": "实现客户端过滤与高亮",
+              "detail": "当前成员下拉与负责人筛选均为纯客户端状态，不重新请求；显示已完成开关控制已完成列的挂载"
+            },
+            {
+              "action": "实现工作量侧栏",
+              "detail": "按 RULE-01 对任务列表聚合，读取 GET /api/members 渲染成员名与工作量"
+            }
+          ],
+          "files": {
+            "creates": ["client/src/components/WorkloadSidebar.tsx", "client/src/components/WorkloadSidebar.test.tsx"],
+            "modifies": ["client/src/pages/BoardPage.tsx", "client/src/pages/BoardPage.test.tsx", "client/src/api/members.ts"]
+          }
+        },
+        {
+          "id": "T-008",
+          "title": "卡片状态推进与看板联动刷新",
+          "role": "frontend",
+          "description": "在看板卡片上接入状态推进按钮（复用 T-005 的转移端点）：成功后卡片移入目标列并刷新工作量侧栏，失败时卡片归位并弹出错误 toast。",
+          "dependsOn": ["T-006", "T-007", "T-005"],
+          "coversRequirementIds": ["PAGE-001", "F003", "IC-06", "AC-07"],
+          "acceptanceCriteria": [
+            "点击卡片状态推进按钮后按钮进入 loading；成功后卡片移入目标列，工作量侧栏刷新（AC-07）",
+            "失败时卡片归位到原列并弹出错误 toast，看板数据不发生实际变化"
+          ],
+          "subSteps": [
+            {
+              "action": "接入卡片按钮",
+              "detail": "按当前状态只渲染 WF-01 允许的下一步动作，调用 T-005 的转移端点"
+            },
+            {
+              "action": "实现乐观更新与回滚",
+              "detail": "成功后更新本地任务列表触发重新分列与侧栏重新聚合，失败回滚并弹出 toast"
+            }
+          ],
+          "files": {
+            "creates": [],
+            "modifies": [
+              "client/src/components/TaskCard.tsx",
+              "client/src/pages/BoardPage.tsx",
+              "client/src/pages/BoardPage.test.tsx",
+              "client/src/api/tasks.ts"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

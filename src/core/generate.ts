@@ -8,10 +8,15 @@
  */
 
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { LlmError, type LlmTrace } from "../llm.js";
 import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "../adapters/resolve.js";
 import type { ArtifactFile } from "../adapters/types.js";
+import { fixturePath, inputIdentity } from "./fixture.js";
+import { killProcessesUnder } from "../proc.js";
+import { finishForCompletion } from "./exit-policy.js";
+import { priceFromSpec } from "../pricing.js";
 import { deliverableText, parsedUnitsFor } from "../adapters/deliverable.js";
 import { displayPath, taskInputPath, resolveTaskAsset } from "../paths.js";
 import { listRunDirs, type Workspace } from "./workspace.js";
@@ -84,6 +89,8 @@ function deploymentRef(def: CandidateDef, provider: string | undefined): string 
 /** Output of a single generation (before it becomes a RunRecord). */
 export interface GenOutput {
   text: string;
+  /** agent-cli: what the command printed (see CandidateResult.log). */
+  log?: string;
   promptTokens: number;
   completionTokens: number;
   cachedTokens?: number;
@@ -119,7 +126,97 @@ export async function generateOne(params: {
   checkWorkDir: string;
   trace: LlmTrace;
   traceContext: Record<string, unknown>;
+  /** The input's fixture (`fixture_dir`), laid in before an agent starts. */
+  fixtureDir?: string | null;
+  /** A chained step's handoff: the previous step's files (`handoff: workdir`). */
+  seedFiles?: readonly ArtifactFile[];
 }): Promise<GenOutput> {
+  // The trial runs outside the repo (a project with no config of its own
+  // would otherwise pick up this repo's: vite.config.ts, tsconfig, .git).
+  // What it left is kept under the run as evidence; installs are not.
+  const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "agenteval-trial-"));
+  let log: string | undefined;
+  try {
+    const out = await generateIn(scratch, params);
+    log = out.log;
+    return out;
+  } catch (err) {
+    log = (err as { log?: string }).log;
+    throw err;
+  } finally {
+    // Anything the agent detached from its process group dies with the trial.
+    await killProcessesUnder(scratch);
+    await keepEvidence(scratch, params.checkWorkDir);
+    if (log) await fs.writeFile(path.join(params.checkWorkDir, AGENT_LOG), log, "utf-8");
+    // A process the agent left behind may still be writing; the trial's
+    // outcome must not hang on whether its temp dir could be removed.
+    await fs.rm(scratch, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 }).catch(() => undefined);
+  }
+}
+
+/**
+ * A reused trial whose check has since changed is graded again, on the files
+ * it left (kept under its run), so fixing a check never means paying for the
+ * generations again. Null when the check is unchanged, is not a command, or
+ * the trial's files were not kept.
+ */
+async function regradeIfChanged(
+  suite: Suite,
+  reused: { record: RunRecord; dir: string },
+  t: { candidate: string; inputSlug: string; inputText: string; trial: number; checkWorkDir: string },
+): Promise<Partial<RunRecord> | null> {
+  const check = suite.check;
+  if (!check || check.kind !== "command") return null;
+  const { commandCheckVersion, runCommandCheck } = await import("../check.js");
+  const version = await commandCheckVersion(check.argv, check.versionFiles, suite.taskRoot);
+  if (reused.record.checkVersion === version) return null;
+  const kept = path.join(reused.dir, "checks", `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}`);
+  if (!(await fs.stat(kept).then((s) => s.isDirectory(), () => false))) return null;
+  const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "agenteval-regrade-"));
+  try {
+    await fs.cp(kept, scratch, { recursive: true });
+    const fixture = fixturePath(suite, t.inputSlug);
+    const result = await runCommandCheck({
+      argv: check.argv,
+      versionFiles: check.versionFiles,
+      taskRoot: suite.taskRoot,
+      timeoutMs: check.timeoutMs,
+      files: [],
+      output: reused.record.text,
+      input: t.inputText,
+      meta: { step: suite.step, candidate: t.candidate, input: t.inputSlug, trial: t.trial, ...(fixture ? { fixture } : {}), chained: false },
+      workDir: scratch,
+    });
+    await keepEvidence(scratch, t.checkWorkDir);
+    return {
+      checkPassed: result.passed,
+      checkOutput: result.output,
+      checkReason: result.reason,
+      checkState: result.state,
+      checkVersion: result.version,
+    };
+  } finally {
+    await fs.rm(scratch, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 }).catch(() => undefined);
+  }
+}
+
+/** What an agent command printed, kept beside the files it left. */
+export const AGENT_LOG = "AGENT_OUTPUT.log";
+
+/** Not kept as evidence: reinstallable, and large. */
+const NOT_EVIDENCE = new Set(["node_modules", ".git"]);
+
+async function keepEvidence(from: string, to: string): Promise<void> {
+  await fs.mkdir(to, { recursive: true });
+  try {
+    await fs.cp(from, to, { recursive: true, force: true, filter: (src) => !NOT_EVIDENCE.has(path.basename(src)) });
+  } catch (err) {
+    // Files changing under the copy (a process still running) cost evidence, not the trial.
+    await fs.writeFile(path.join(to, "EVIDENCE_INCOMPLETE.txt"), `copying the work dir failed: ${err instanceof Error ? err.message : String(err)}\n`, "utf-8");
+  }
+}
+
+async function generateIn(workDir: string, params: Parameters<typeof generateOne>[0]): Promise<GenOutput> {
   const { suite, producer, promptTpl, inputSlug, inputText, def, temperature, timeoutMs, trace, traceContext } = params;
   const adapter = adapterFor(def, producer);
   const result = await adapter.execute(
@@ -134,12 +231,16 @@ export async function generateOne(params: {
       model: def.model,
       maxTokens: def.generation_settings?.max_tokens,
       cli: def.cli,
+      ...(def.price ? { price: priceFromSpec(def.price) } : {}),
+      ...(suite.maxCostPerTrialUsd !== undefined ? { maxCostUsd: suite.maxCostPerTrialUsd } : {}),
+      ...(params.fixtureDir ? { fixtureDir: params.fixtureDir } : {}),
+      ...(params.seedFiles ? { seedFiles: params.seedFiles } : {}),
     },
-    { workDir: params.checkWorkDir, taskRoot: suite.taskRoot, emit: trace, traceContext },
+    { workDir, taskRoot: suite.taskRoot, emit: trace, traceContext },
   );
   const out: GenOutput = {
     ...result,
-    text: deliverableText(adapter.id, result.text, result.artifacts),
+    text: deliverableText(adapter.id, result.text, result.artifacts, suite.judgeShow),
     parsedUnits: parsedUnitsFor(adapter.id, result.artifacts, suite.check !== undefined),
   };
   if (!suite.check) return out;
@@ -149,7 +250,7 @@ export async function generateOne(params: {
       ? await runCheck({
           files: result.artifacts,
           scaffoldDir: await resolveTaskAsset(suite.taskRoot, suite.check.scaffoldDir),
-          workDir: params.checkWorkDir,
+          workDir,
         })
       : await runCommandCheck({
           argv: suite.check.argv,
@@ -164,8 +265,12 @@ export async function generateOne(params: {
             candidate: params.def.id,
             input: params.inputSlug,
             trial: Number(params.traceContext.trial ?? 0),
+            // Where this input's fixture is, so a check can compare against
+            // the starting state; and whether the work dir was handed over.
+            ...(params.fixtureDir ? { fixture: params.fixtureDir } : {}),
+            chained: params.seedFiles !== undefined,
           },
-          workDir: params.checkWorkDir,
+          workDir,
         });
   return {
     ...out,
@@ -203,7 +308,7 @@ async function loadReusable(
   hash: string,
   currentRunId: string,
   ws: Workspace,
-): Promise<{ record: RunRecord; from: string } | null> {
+): Promise<{ record: RunRecord; from: string; dir: string } | null> {
   // Every task's runs, not just this one's: `trialHash` is content-addressed,
   // so a generation produced under another task is the same generation.
   // Several tasks share `code-utils`; scanning per-task only would re-buy it
@@ -218,16 +323,56 @@ async function loadReusable(
     .filter((e) => e.name !== currentRunId)
     .sort((a, b) => b.name.localeCompare(a.name));
 
-  for (const { dir } of candidates) {
+  // A multi-step run keeps each step under runs/<run>/<step>/.
+  const dirs = candidates.flatMap(({ dir }) => [dir, path.join(dir, step)]);
+  for (const dir of dirs) {
     const hit = await findTrialRow(dir, step, hash);
-    if (!hit) continue;
+    if (!hit) {
+      // The hash covers the step's producer, input and candidate, so a
+      // journal line with it is this trial; the step is implied.
+      const journaled = await findJournaled(dir, hash);
+      if (journaled) return { record: journaled, from: displayPath(dir), dir };
+      continue;
+    }
     const text = await fs
       .readFile(path.join(dir, "raw", `${safeName(hit.candidate)}__${hit.input}__t${hit.trial}.txt`), "utf-8")
       .catch(() => null);
     // A row with no surviving output is not reusable: the point is to skip
     // the call, and there is nothing here to skip it with.
     if (text === null) continue;
-    return { record: recordFromRow(hit, text), from: displayPath(dir) };
+    return { record: recordFromRow(hit, text), from: displayPath(dir), dir };
+  }
+  return null;
+}
+
+/**
+ * Each finished trial, appended the moment it finishes. A run's rows are
+ * written once every trial is done, so a run that dies at trial 50 of 81 used
+ * to leave nothing `--reuse` could find, and the 50 were bought again.
+ */
+export const JOURNAL_FILE = "trials.partial.jsonl";
+
+async function journal(outDir: string, record: RunRecord): Promise<void> {
+  await fs.mkdir(outDir, { recursive: true });
+  await fs.appendFile(path.join(outDir, JOURNAL_FILE), JSON.stringify(record) + "\n", "utf-8");
+}
+
+/** A finished trial with that hash from a run's journal (a run that did not finish), or null. */
+async function findJournaled(dir: string, hash: string): Promise<RunRecord | null> {
+  let raw: string;
+  try {
+    raw = await fs.readFile(path.join(dir, JOURNAL_FILE), "utf-8");
+  } catch {
+    return null;
+  }
+  for (const line of raw.split("\n")) {
+    if (line.trim() === "") continue;
+    try {
+      const r = JSON.parse(line) as RunRecord;
+      if (r.trialHash === hash && r.status === "ok") return r;
+    } catch {
+      // A line cut short by the crash itself.
+    }
   }
   return null;
 }
@@ -372,6 +517,8 @@ export async function runAll(params: {
   const tasks: GenTask[] = [];
   for (const inputSlug of suite.inputs) {
     const inputText = inputTextBySlug.get(inputSlug) ?? "";
+    const fixture = fixturePath(suite, inputSlug);
+    const identity = await inputIdentity(inputText, fixture);
     for (const candidate of suite.candidates) {
       const def = defOf(suite, candidate);
       const temperature = def.generation_settings?.temperature ?? baseTemperature;
@@ -386,7 +533,7 @@ export async function runAll(params: {
             producer,
             producerVersion: producer === "codegen" ? CODEGEN_PRODUCER_VERSION : "1",
             promptTemplateSha,
-            inputSha: sha256(inputText),
+            inputSha: sha256(identity),
             model: modelRefOf(def),
             temperature,
             maxTokens: def.generation_settings?.max_tokens,
@@ -412,8 +559,9 @@ export async function runAll(params: {
     if (reuse) {
       const reused = await loadReusable(suite.step, task.hash, runId, params.ws);
       if (reused) {
-        params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from });
-        return { ...reused.record, candidate, inputSlug, trial, reusedFrom: reused.from };
+        const regraded = await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir });
+        params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
+        return { ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from };
       }
     }
 
@@ -438,9 +586,10 @@ export async function runAll(params: {
         checkWorkDir,
         trace,
         traceContext: { phase: "generation", candidate, model: modelRefOf(def), input: inputSlug, trial },
+        fixtureDir: fixturePath(suite, inputSlug),
       });
       budget.add(g.costUsd + (g.retryCostUsd ?? 0));
-      const verdict = classifyCompletion({ finishReason: g.finishReason, refusal: g.refusal, parsedUnits: g.parsedUnits });
+      const verdict = classifyCompletion({ finishReason: finishForCompletion(def, g.finishReason, suite), refusal: g.refusal, parsedUnits: g.parsedUnits });
       params.emit({
         type: "trial",
         step: suite.step,
@@ -453,7 +602,7 @@ export async function runAll(params: {
         costSource: g.costSource,
         check: g.checkState,
       });
-      return {
+      const record: RunRecord = {
         candidate,
         inputSlug,
         trial,
@@ -484,6 +633,8 @@ export async function runAll(params: {
         // observed" for the one thing the sandbox exists to make visible.
         isolation: g.isolation,
       };
+      await journal(outDir, record);
+      return record;
     } catch (err) {
       const rec = errorRecord(task, err);
       budget.add(rec.costUsd + (rec.retryCostUsd ?? 0));

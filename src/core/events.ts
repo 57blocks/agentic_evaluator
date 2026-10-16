@@ -50,6 +50,10 @@ export interface E2ePlan {
   chain: string[];
   /** Generations in one arm. */
   perArm: number;
+  /** Root inputs the arms run on (workflow.e2e.inputs, or every input of the first step). */
+  inputs?: number;
+  /** Pairs the e2e judge would compare, at most one per case, when declared. */
+  judgedCases?: number;
 }
 
 export type Phase = "generating" | "judging" | "scoring";
@@ -105,6 +109,8 @@ export type RunEvent =
       ledgerTotal: number;
       ledgerSource: string;
       chosen: string | null;
+      /** Nearest gated-out candidate when nobody qualified; never adopted. */
+      closest?: string | null;
       firmness: string;
       html: boolean;
       /** Candidates the eligibility gate removed, and why. */
