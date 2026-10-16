@@ -87,7 +87,7 @@ interface Props {
 
 export function StepSection({ step, index, runId, root, colorOf }: Props) {
   const r = step.report;
-  const title = `Step ${index + 1} · ${step.id}`;
+  const title = `Step ${index + 1} · ${step.id}${step.report?.stepDescription ? ` — ${step.report.stepDescription}` : ""}`;
   if (!r) {
     return (
       <Section title={title} hint="This step's report could not be read">

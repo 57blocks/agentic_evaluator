@@ -20,7 +20,8 @@ export interface RunManifest {
   protocol_version: string;
   run_id: string;
   run_name: string;
-  step: { id: string; version: string | null };
+  /** `description`: what the step's candidates do; absent on runs made before it existed. */
+  step: { id: string; version: string | null; description?: string | null };
   spec: { path: string | null; sha256: string | null };
   /** The spec's description; absent on runs made before it existed (see canon/about.ts). */
   description?: string | null;
@@ -101,7 +102,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     protocol_version: suite.protocolVersion ?? "0.3",
     run_id: m.runId,
     run_name: suite.runName ?? suite.suiteId,
-    step: { id: suite.stepId ?? suite.step, version: suite.stepVersion ?? null },
+    step: { id: suite.stepId ?? suite.step, version: suite.stepVersion ?? null, description: suite.stepDescription ?? null },
     spec: { path: suite.specPath ?? null, sha256: suite.specSha ?? null },
     description: suite.description ?? null,
     test_set: {

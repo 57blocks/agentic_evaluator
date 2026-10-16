@@ -39,6 +39,7 @@ function StepCard({ index, step, row, onOpen }: { index: number; step: WorkflowS
       <span className="text-xs font-medium text-muted-foreground">
         {index + 1} · {step.id}
       </span>
+      {step.report?.stepDescription && <span className="text-xs leading-snug">{step.report.stepDescription}</span>}
       {row?.chosen ? (
         <span className="truncate font-mono text-base font-semibold text-brand">{row.chosen}</span>
       ) : (

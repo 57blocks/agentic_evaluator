@@ -9,9 +9,9 @@ budget_usd: 5
 
 workflow:
   steps:
-    - id: code
+    - id: implementation
       version: "1"
-      test_set: { id: smoke, inputs: [demo-todo-T-001], fixture_dir: fixture/code }
+      test_set: { id: smoke, inputs: [demo-todo-T-001], fixture_dir: fixture/implementation }
       candidate_ids: [glm-5-3]
       required_checks: [task-tests]
       success_criteria: { mandatory_checks: all }

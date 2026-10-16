@@ -101,12 +101,13 @@ export async function loadBundle(dir: string): Promise<RunBundle> {
 /** What the run evaluated and what a pass means, before any number. Empty when the spec says neither. */
 function renderAbout(b: RunBundle): string {
   const a = b.about;
-  if (!a || (!a.description && !a.checkDescription)) return "";
+  if (!a || (!a.description && !a.stepDescription && !a.checkDescription)) return "";
   const check = b.manifest.evaluators.required_checks[0];
   const stale = a.source === "current-spec" ? `<p class="note">This run predates these descriptions; they are read from the task's spec as it is now.</p>` : "";
   return `<section class="card">
     <h2>What this evaluates</h2>
     ${a.description ? `<p>${escapeHtml(a.description)}</p>` : ""}
+    ${a.stepDescription ? `<p><b>This step (${escapeHtml(b.manifest.step.id)})</b>: ${escapeHtml(a.stepDescription)}</p>` : ""}
     ${a.checkDescription && check ? `<p class="note"><b>A pass of ${escapeHtml(check)}</b> means: ${escapeHtml(a.checkDescription)}</p>` : ""}
     ${stale}
   </section>`;

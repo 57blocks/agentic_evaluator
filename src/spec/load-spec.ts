@@ -30,6 +30,7 @@ const DEFAULT_TIMEOUT_MS = 120_000;
 export interface EvalStep {
   id: string;
   version: string;
+  description?: string;
   test_set: { id: string; inputs: string[]; fixture_dir?: string; labels_file?: string };
   candidate_ids: string[];
   required_checks?: string[];
@@ -449,6 +450,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     ...e2eOf(spec, specPath, step.id),
     ...(step.test_set.fixture_dir ? { fixtureDir: step.test_set.fixture_dir } : {}),
     ...(spec.description ? { description: spec.description } : {}),
+    ...(step.description ? { stepDescription: step.description } : {}),
     ...(requiredChecks[0] && spec.evaluators.required_checks?.[requiredChecks[0]]?.description
       ? { checkDescription: spec.evaluators.required_checks[requiredChecks[0]].description }
       : {}),

@@ -1,16 +1,16 @@
 # agb's whole flow, in one spec: which model should run each step, and does
 # the per-step best combination beat one model end to end?
 #
-#   detail  task breakdown   .ab/tasks.json, UI_CONTRACT.md      (stage-detail)
-#   qa      test design      .ab/test-plan.json                  (stage-qa)
-#   code    implementation   every task, via `agb run`           (stage-code)
+#   task-breakdown   .ab/tasks.json, UI_CONTRACT.md   (agb stage-detail)
+#   test-design      .ab/test-plan.json               (agb stage-qa)
+#   implementation   every task, via `agb run`        (agb stage-code)
 #
 # Each step is evaluated on its own inputs: real agb projects at the moment
 # that step started (fixture/), the same for every model, so a step's result
 # does not depend on which model ran the step before.
 #
 # The end-to-end check (each step's pick chained, against opus-5.5 throughout)
-# is off for now. To turn it on: input_from + handoff: workdir on qa and code,
+# is off for now. To turn it on: input_from + handoff: workdir on test-design and implementation,
 # and a workflow.e2e block (inputs, final_checks: [app-gates], steps, judge).
 #
 # Every field here is supported (docs/design/agb-flow-gaps.md tracks how).
@@ -19,20 +19,21 @@
 
 protocol_version: "0.3"
 run_name: agb-flow
-description: "Which model should run each step of agb's flow (task breakdown, test design, code), and does the per-step best combination beat one model end to end? Each input is a real agb project at the moment that step began (demo-todo, chessicle and invoice for breakdown and test design; demo-todo tasks for code). Every candidate runs the step through the same wrapper; a check grades the work itself, and a judge compares candidates pairwise."
+description: "Which model should run each step of agb's flow (task breakdown, test design, implementation), and does the per-step best combination beat one model end to end? Each input is a real agb project at the moment that step began (demo-todo, chessicle and invoice for task breakdown and test design; demo-todo tasks for implementation). Every candidate runs the step through the same wrapper; a check grades the work itself, and a judge compares candidates pairwise."
 # Counts what candidates report spending; past it no new trial starts.
 budget_usd: 600
 
 workflow:
   steps:
-    - id: detail
+    - id: task-breakdown
       version: "1"
+      description: "Task breakdown: turn the PRD, design and API contracts into a task plan (.ab/tasks.json) and a UI contract."
       test_set:
-        id: detail-v1
+        id: task-breakdown-v1
         inputs: [demo-todo, chessicle, invoice]
         # each input is a directory as well as a text: fixture/<input>/
         # is laid into the work dir before the candidate starts.
-        fixture_dir: fixture/detail
+        fixture_dir: fixture/task-breakdown
       candidate_ids: &all [opus-5-5, fable-5-1, gpt-5-6-sol, gemini-4-argon, deepseek-v4-pro, deepseek-flash, kimi-k3, glm-5-3, glm-5-3-prime, qwen-3-8-max]
       required_checks: [plan-gates]
       success_criteria: { mandatory_checks: all }
@@ -48,12 +49,13 @@ workflow:
         show: [".ab/tasks.json", UI_CONTRACT.md]
         dimensions: [granularity, ordering, clarity, domains]
 
-    - id: qa
+    - id: test-design
       version: "1"
+      description: "Test design: write a test plan (.ab/test-plan.json) that covers every acceptance criterion of the adopted task plan."
       test_set:
-        id: qa-v1
+        id: test-design-v1
         inputs: [demo-todo, chessicle, invoice]
-        fixture_dir: fixture/qa
+        fixture_dir: fixture/test-design
       candidate_ids: *all
       required_checks: [test-plan-gates]
       success_criteria: { mandatory_checks: all }
@@ -68,16 +70,17 @@ workflow:
         dimensions: [coverage, falsifiable, levels, traceable]
       max_cost_per_trial_usd: 10
 
-    - id: code
+    - id: implementation
       version: "1"
+      description: "Implementation: build one task of the plan with agb run, so the task's own acceptance tests pass."
       test_set:
-        id: code-v1
+        id: implementation-v1
         # Two tasks of demo-todo, of two kinds, each from the project as it
         # stood just before it: T-001 starts from nothing (scaffold, server,
         # client, database); T-006 adds the board page to a working codebase.
         # In the chain the step builds every task.
         inputs: [demo-todo-T-001, demo-todo-T-006]
-        fixture_dir: fixture/code
+        fixture_dir: fixture/implementation
       candidate_ids: *all
       required_checks: [task-tests]
       # agb fails a task its own gates or verifier would not pass, however the
@@ -102,7 +105,8 @@ workflow:
       concurrency: 3
 
 # One command for every step: agents/agb-step.mjs reads EVAL_STEP and runs the
-# matching stage with the model it is given. argv names the model as the tool
+# matching agb stage (task-breakdown → stage-detail, test-design → stage-qa,
+# implementation → stage-code) with the model it is given. argv names the model as the tool
 # knows it; `model` is the OpenRouter id agenteval prices its tokens with
 # (reports_usage: tokens). Providers are plain env, keys read at run time.
 x-providers:
