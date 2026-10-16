@@ -1,0 +1,20 @@
+FACILITY: Brookside Skilled Nursing (synthetic)
+PAYER: Sample Advantage Health Plan (Medicare Advantage, synthetic)
+
+CLAIM 86233 · SNF inpatient (bill type 0211)
+Member: Walter Ng · Service dates: 2025-06-01 to 2025-06-20 · Billed: $14,000.00 (20 days at $700)
+Submitted to payer: 2025-06-27
+
+REMITTANCE (ERA dated 2025-07-10)
+Claim 86233 · Paid $9,212.00
+Line 1 · days 2025-06-01 to 2025-06-14 · paid at contract rate
+Line 2 · days 2025-06-15 to 2025-06-20 · Paid $0.00 · Adjustment: group CO, reason 197 — "Precertification/authorization/notification/pre-treatment absent."
+
+AUTHORIZATION ON FILE
+Auth SA-77812 · SNF days approved: 2025-06-01 through 2025-06-14 · Concurrent review due 2025-06-13 (no extension request on file)
+
+PAYER MANUAL EXCERPT — Sample Advantage Health Plan
+§4.1 Initial claims must be received within 90 days of the last date of service.
+§5.4 Retro-authorization requests for SNF days are accepted within 14 calendar days after the last date of service. After that, unauthorized days are provider liability.
+§5.5 Provider-liability days may not be billed to the member.
+§7.1 Appeals must be received within 60 days of the remittance date and include supporting documentation. Unauthorized days are not appealable unless a retro-authorization was requested within the §5.4 window.

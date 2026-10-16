@@ -1,0 +1,251 @@
+{
+  "cd2-001": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "duplicate-paid"
+  },
+  "cd2-002": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "duplicate-paid"
+  },
+  "cd2-003": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "duplicate-paid"
+  },
+  "cd2-004": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "late-filing"
+  },
+  "cd2-005": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "late-filing"
+  },
+  "cd2-006": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "late-filing"
+  },
+  "cd2-007": {
+    "tags": [
+      "normal",
+      "ma130"
+    ],
+    "split": "holdout",
+    "archetype": "unprocessable"
+  },
+  "cd2-008": {
+    "tags": [
+      "normal",
+      "ma130"
+    ],
+    "split": "dev",
+    "archetype": "unprocessable"
+  },
+  "cd2-009": {
+    "tags": [
+      "normal",
+      "ma130"
+    ],
+    "split": "dev",
+    "archetype": "unprocessable"
+  },
+  "cd2-010": {
+    "tags": [
+      "normal",
+      "ma130"
+    ],
+    "split": "dev",
+    "archetype": "unprocessable"
+  },
+  "cd2-011": {
+    "tags": [
+      "normal",
+      "ma130"
+    ],
+    "split": "holdout",
+    "archetype": "unprocessable"
+  },
+  "cd2-012": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "span-dates"
+    ],
+    "split": "holdout",
+    "archetype": "filing-through-date"
+  },
+  "cd2-013": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "span-dates"
+    ],
+    "split": "dev",
+    "archetype": "filing-through-date"
+  },
+  "cd2-014": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "span-dates"
+    ],
+    "split": "dev",
+    "archetype": "filing-through-date"
+  },
+  "cd2-015": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "span-dates"
+    ],
+    "split": "dev",
+    "archetype": "filing-through-date"
+  },
+  "cd2-016": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "span-dates"
+    ],
+    "split": "holdout",
+    "archetype": "filing-through-date"
+  },
+  "cd2-017": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "benefit-period"
+    ],
+    "split": "holdout",
+    "archetype": "new-benefit-period"
+  },
+  "cd2-018": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "benefit-period"
+    ],
+    "split": "dev",
+    "archetype": "new-benefit-period"
+  },
+  "cd2-019": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "benefit-period"
+    ],
+    "split": "dev",
+    "archetype": "new-benefit-period"
+  },
+  "cd2-020": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "benefit-period"
+    ],
+    "split": "dev",
+    "archetype": "new-benefit-period"
+  },
+  "cd2-021": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "benefit-period"
+    ],
+    "split": "holdout",
+    "archetype": "new-benefit-period"
+  },
+  "cd2-022": {
+    "tags": [
+      "hard",
+      "benefit-period"
+    ],
+    "split": "holdout",
+    "archetype": "benefit-exhausted"
+  },
+  "cd2-023": {
+    "tags": [
+      "hard",
+      "benefit-period"
+    ],
+    "split": "dev",
+    "archetype": "benefit-exhausted"
+  },
+  "cd2-024": {
+    "tags": [
+      "hard",
+      "benefit-period"
+    ],
+    "split": "dev",
+    "archetype": "benefit-exhausted"
+  },
+  "cd2-025": {
+    "tags": [
+      "hard",
+      "benefit-period"
+    ],
+    "split": "dev",
+    "archetype": "benefit-exhausted"
+  },
+  "cd2-026": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "three-day-stay"
+    ],
+    "split": "holdout",
+    "archetype": "qualifying-stay"
+  },
+  "cd2-027": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "three-day-stay"
+    ],
+    "split": "holdout",
+    "archetype": "qualifying-stay"
+  },
+  "cd2-028": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "three-day-stay"
+    ],
+    "split": "dev",
+    "archetype": "qualifying-stay"
+  },
+  "cd2-029": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "three-day-stay"
+    ],
+    "split": "dev",
+    "archetype": "qualifying-stay"
+  },
+  "cd2-030": {
+    "tags": [
+      "hard",
+      "contractor-error",
+      "three-day-stay"
+    ],
+    "split": "dev",
+    "archetype": "qualifying-stay"
+  }
+}

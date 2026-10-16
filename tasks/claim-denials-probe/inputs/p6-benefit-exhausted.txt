@@ -1,0 +1,20 @@
+FACILITY: Willow Bend Care Center (synthetic)
+PRIMARY PAYER: Sample Advantage Health Plan (Medicare Advantage, synthetic)
+SECONDARY PAYER: State Medicaid program (synthetic)
+
+CLAIM 91870 · SNF inpatient (bill type 0211)
+Member: Elsie Carmody · Service dates: 2025-09-01 to 2025-09-30 · Billed: $21,000.00
+Benefit period: began 2025-06-11 · SNF days used in this benefit period before 2025-09-01: 82
+
+REMITTANCE (ERA dated 2025-10-20)
+Claim 91870 · Paid $6,840.00 (days 2025-09-01 to 2025-09-18)
+Line 2 · days 2025-09-19 to 2025-09-30 · Paid $0.00 · Adjustment: group PR, reason 119 — "Benefit maximum for this time period or occurrence has been reached."
+
+MEMBER COVERAGE ON FILE
+Medicaid ID MCD-4410287 · active 2024-01-01 onward · Medicaid covers SNF days after the primary's benefit is exhausted.
+
+PAYER MANUAL EXCERPTS
+Sample Advantage §7.1: Appeals must be received within 60 days of the remittance date and include supporting documentation.
+Sample Advantage §8.2: SNF coverage is limited to 100 days per benefit period.
+State Medicaid §2.3: Claims for services after a primary payer's benefit is exhausted must be received within 365 days of the last date of service or 120 days of the primary payer's remittance date, whichever is later. Include the primary's remittance.
+State Medicaid §2.4: Members may not be billed for days Medicaid covers.
