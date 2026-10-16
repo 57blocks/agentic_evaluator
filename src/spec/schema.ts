@@ -37,6 +37,19 @@ export const SPEC_SCHEMA = {
           properties: {
             inputs: { type: "array", minItems: 1, items: { type: "string" } },
             final_checks: { type: "array", minItems: 1, items: { type: "string" } },
+            // Per step, in the arms only: a chained step can do far more than
+            // on its own inputs (every task, not one).
+            steps: {
+              type: "object",
+              additionalProperties: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  max_cost_per_trial_usd: { type: "number", exclusiveMinimum: 0 },
+                  maximum_completion_time_seconds: { type: "number", exclusiveMinimum: 0 },
+                },
+              },
+            },
             judge: {
               type: "object",
               additionalProperties: false,
@@ -102,6 +115,8 @@ export const SPEC_SCHEMA = {
               maximum_completion_time_seconds: { type: "number", exclusiveMinimum: 0 },
               max_cost_per_trial_usd: { type: "number", exclusiveMinimum: 0 },
               concurrency: { type: "integer", minimum: 1 },
+              // Over every command candidate's cli.exit_code, for this step.
+              exit_code: { type: "string", enum: ["fail", "ignore"] },
               // This step's judging; the judge model stays evaluators.judge.model.
               judge: {
                 type: "object",
@@ -166,6 +181,8 @@ export const SPEC_SCHEMA = {
               memory: { type: "string", minLength: 1 },
               cpus: { type: "string", minLength: 1 },
               reports_usage: { oneOf: [{ type: "boolean" }, { type: "string", enum: ["tokens"] }] },
+              version_files: { type: "array", items: { type: "string", minLength: 1 } },
+              exit_code: { type: "string", enum: ["fail", "ignore"] },
             },
           },
         },

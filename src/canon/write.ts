@@ -154,7 +154,7 @@ export function buildGaps(
   }
   const saturation = saturationGap(judgeDiscrimination(trials));
   if (saturation !== null) lines.push(saturation);
-  lines.push("- pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector does not use pairwise win rate.");
+  lines.push("- pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.");
   lines.push("- statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json) and recommendation.json firmness follows that label.");
   return lines.join("\n") + "\n";
 }

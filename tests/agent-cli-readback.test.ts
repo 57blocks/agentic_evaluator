@@ -26,3 +26,15 @@ test("a huge file and a binary one are left out of the answer, and named", async
   const skipped = events.find((e) => e.type === "model.response")?.skippedFiles ?? [];
   assert.deepEqual(skipped.sort(), ["app.db (binary)", `run.log (${3 * 1024 * 1024} bytes, over ${2 * 1024 * 1024})`]);
 });
+
+test("an agent's .git is not part of its answer", async () => {
+  const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "readback-"));
+  const code = "const fs = require('fs'); fs.mkdirSync('.git/refs', { recursive: true }); fs.writeFileSync('.git/HEAD', 'ref: refs/heads/main'); fs.writeFileSync('app.ts', 'x');";
+
+  const r = await agentCliAdapter.execute(
+    { stepId: "s", candidateId: "c", inputId: "i", inputText: "go", promptTemplate: "", temperature: 0, timeoutMs: 10_000, cli: { argv: [process.execPath, "-e", code] } },
+    { workDir, taskRoot: workDir },
+  );
+
+  assert.deepEqual(r.artifacts.map((f) => f.path), ["app.ts"]);
+});

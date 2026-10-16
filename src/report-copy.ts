@@ -166,7 +166,12 @@ function pickClause(rec: Recommendation): string {
         ? `${among}${chosen} has the shortest median duration (${(t.p50_ms / 1000).toFixed(1)} s). `
         : `${among}${chosen} is picked as fastest within the cost ceiling. `;
     case "highest-assurance":
+    {
+      // The selector's own reason says whether it was a tie, and what broke it.
+      const why = rec.reasons.find((r) => r.startsWith("highest assurance:") || r.includes("eligible candidates tie at"));
+      if (why?.includes("tie at")) return `${why.charAt(0).toUpperCase()}${why.slice(1)}. `;
       return t ? `${among}${chosen} has the highest reliability (${rateText(t.reliability)}). ` : `${among}${chosen} is picked by highest assurance. `;
+    }
     case "judge-preference":
       return `This step has no deterministic check to tell right from wrong, so the recommendation reflects only the judge model's preference: ${chosen} is preferred most. `;
     default:

@@ -29,7 +29,10 @@ import {
 } from "./types.js";
 
 const INPUT_FILE = ".eval-input.txt";
-const SKIP_NAMES = new Set(["node_modules", INPUT_FILE, USAGE_FILE]);
+// Not the deliverable: installs, version control (an agent that commits leaves
+// text objects in .git that would read back, and hand on, as a broken repo),
+// and agenteval's own files.
+const SKIP_NAMES = new Set(["node_modules", ".git", INPUT_FILE, USAGE_FILE]);
 
 const ENV_REF = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
 
@@ -219,7 +222,10 @@ async function runCommand(
     if (e.code === "ENOENT") throw new AdapterError(`command not found: ${cmd}`, { kind: "spawn", ms: e.ms });
     throw new AdapterError(e.message, { kind: "unknown", ms: Date.now() - t0 });
   }
-  if (ran.timedOut) throw new AdapterError("candidate CLI timed out", { kind: "timeout", ms: ran.ms });
+  // A timed-out agent's own account of where it was is the evidence of why.
+  if (ran.timedOut) {
+    throw new AdapterError("candidate CLI timed out", { kind: "timeout", ms: ran.ms, log: `${ran.stdout}${ran.stderr.trim() ? `\n--- stderr ---\n${ran.stderr}` : ""}` });
+  }
   const note = ran.droppedBytes > 0 ? `[agenteval: the first ${ran.droppedBytes} bytes of output were dropped; the tail is kept]\n` : "";
   // A signal (not ours: we only signal on timeout) ends it without a code.
   return { stdout: ran.stdout, stderr: note + ran.stderr, exitCode: ran.exitCode ?? 128 };
@@ -296,6 +302,7 @@ export const agentCliAdapter: CandidateAdapter = {
       context.emit?.({ type: "model.response", ...base, ms, ...(skipped.length > 0 ? { skippedFiles: skipped } : {}) });
       return {
         text: ran.stdout.trim() !== "" ? ran.stdout : ran.stderr,
+        log: `${ran.stdout}${ran.stderr.trim() ? `\n--- stderr ---\n${ran.stderr}` : ""}`,
         artifacts,
         promptTokens: usage.promptTokens,
         completionTokens: usage.completionTokens,

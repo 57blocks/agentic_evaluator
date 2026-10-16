@@ -20,7 +20,7 @@ import { processIo, type Io } from "../io.js";
 import { liveView, type LiveView } from "../live.js";
 import type { RunEvent } from "../../core/events.js";
 
-const KNOWN = ["yes", "html", "json", "plain", "reuse", "concurrency", "workspace"];
+const KNOWN = ["yes", "html", "json", "plain", "reuse", "concurrency", "workspace", "no-e2e", "step", "candidate"];
 
 export const RUN_HELP = `agenteval run <task> [options]
 
@@ -35,6 +35,12 @@ export const RUN_HELP = `agenteval run <task> [options]
   --plain             print one line per event even on an interactive terminal
   --reuse             reuse a prior identical generation (matched on trial hash)
   --concurrency N     max LLM calls in flight; overrides the spec
+  --step ID[,ID]      run only these steps (no end-to-end validation then):
+                      re-run one step, or re-grade it with --reuse
+  --candidate ID[,ID] run only these candidates (no end-to-end validation
+                      then): re-run the ones a fix concerns
+  --no-e2e            evaluate each step only: skip a chained workflow's
+                      end-to-end validation (GAPS.md says it was skipped)
   --workspace DIR     workspace to resolve <task> and write runs under
 
   Exits 0 when the run completed, 3 when it completed but the budget stopped
@@ -98,7 +104,13 @@ export async function cmdRun(args: ParsedArgs, io: Io): Promise<ExitCode> {
   };
 
   const report = await runWithView(live, () =>
-    runSuite(spec, args.flags.html === true, { yes: args.flags.yes === true, onEvent }),
+    runSuite(spec, args.flags.html === true, {
+      yes: args.flags.yes === true,
+      onEvent,
+      skipE2e: args.flags["no-e2e"] === true,
+      ...(stringFlag(args.flags, "step") ? { steps: stringFlag(args.flags, "step")!.split(",").map((s) => s.trim()).filter(Boolean) } : {}),
+      ...(stringFlag(args.flags, "candidate") ? { candidates: stringFlag(args.flags, "candidate")!.split(",").map((s) => s.trim()).filter(Boolean) } : {}),
+    }),
   );
   if (report === null && args.flags.yes !== true) return EXIT.ok; // planned, as asked
   return partial ? EXIT.partial : EXIT.ok;

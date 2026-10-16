@@ -1,0 +1,339 @@
+{
+  "components": [
+    {
+      "id": "CMP-001",
+      "name": "身份服务（无密码邮箱验证码）",
+      "domain": "auth",
+      "owns": {
+        "endpoints": [
+          "POST /api/auth/request-code",
+          "POST /api/auth/verify-code",
+          "GET /api/auth/me",
+          "POST /api/auth/logout"
+        ],
+        "tables": [
+          "users",
+          "login_codes",
+          "sessions"
+        ]
+      },
+      "dependsOn": [
+        "CMP-008"
+      ]
+    },
+    {
+      "id": "CMP-002",
+      "name": "家长同意服务",
+      "domain": "consent",
+      "owns": {
+        "endpoints": [
+          "POST /api/consent/request",
+          "POST /api/consent/resend",
+          "POST /api/consent/confirm",
+          "POST /api/consent/decline",
+          "POST /api/consent/revoke"
+        ],
+        "tables": [
+          "parent_consents",
+          "consent_denials",
+          "audit_events"
+        ]
+      },
+      "dependsOn": [
+        "CMP-001",
+        "CMP-008"
+      ]
+    },
+    {
+      "id": "CMP-003",
+      "name": "对局导入与 OCR 流水线",
+      "domain": "game",
+      "owns": {
+        "endpoints": [
+          "POST /api/games/photo",
+          "GET /api/games/jobs/{jobId}/events",
+          "GET /api/games/jobs/{jobId}",
+          "GET /api/games/jobs/{jobId}/ambiguities",
+          "POST /api/games/jobs/{jobId}/confirmations",
+          "GET /api/games",
+          "GET /api/games/{gameId}"
+        ],
+        "tables": [
+          "games",
+          "ocr_jobs",
+          "ocr_ambiguities",
+          "idempotency_keys"
+        ]
+      },
+      "dependsOn": [
+        "CMP-001",
+        "CMP-009",
+        "CMP-011"
+      ]
+    },
+    {
+      "id": "CMP-004",
+      "name": "分析服务（Stockfish + 解释）",
+      "domain": "analysis",
+      "owns": {
+        "endpoints": [
+          "POST /api/games/{gameId}/analysis",
+          "GET /api/analysis/{analysisId}/events",
+          "GET /api/analysis/{analysisId}",
+          "POST /api/analysis/{analysisId}/retry"
+        ],
+        "tables": [
+          "analysis_reports",
+          "analysis_moves",
+          "study_recommendations"
+        ]
+      },
+      "dependsOn": [
+        "CMP-003",
+        "CMP-010",
+        "CMP-012",
+        "CMP-013"
+      ]
+    },
+    {
+      "id": "CMP-005",
+      "name": "对手准备服务",
+      "domain": "prep",
+      "owns": {
+        "endpoints": [
+          "POST /api/opponents/search",
+          "GET /api/opponents/reports/{reportId}"
+        ],
+        "tables": [
+          "opponent_reports",
+          "rating_lookup_cache"
+        ]
+      },
+      "dependsOn": [
+        "CMP-001",
+        "CMP-010",
+        "CMP-014"
+      ]
+    },
+    {
+      "id": "CMP-006",
+      "name": "指标采集",
+      "domain": "metrics",
+      "owns": {
+        "endpoints": [
+          "POST /api/metrics/tournament-checkin",
+          "POST /api/metrics/events"
+        ],
+        "tables": [
+          "metric_events",
+          "tournament_checkins"
+        ]
+      },
+      "dependsOn": [
+        "CMP-001"
+      ]
+    },
+    {
+      "id": "CMP-007",
+      "name": "站内评分",
+      "domain": "review",
+      "owns": {
+        "endpoints": [
+          "POST /api/reviews",
+          "GET /api/reviews/eligibility"
+        ],
+        "tables": [
+          "reviews"
+        ]
+      },
+      "dependsOn": [
+        "CMP-001"
+      ]
+    },
+    {
+      "id": "CMP-008",
+      "name": "邮件投递（验证码与同意信）",
+      "owns": {
+        "tables": [
+          "email_deliveries"
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "CMP-009",
+      "name": "照片临时对象存储（S3，分析后删除 + 24h lifecycle）",
+      "owns": {
+        "tables": [
+          "photo_objects"
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "CMP-010",
+      "name": "外部数据源适配层（uschess / FIDE / Lichess / Chess.com / 搜索）",
+      "owns": {
+        "tables": [
+          "external_fetch_log"
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "CMP-011",
+      "name": "OCR 供应商适配器（托管分割 + 托管识别）",
+      "owns": {
+        "tables": [
+          "ocr_provider_calls"
+        ]
+      },
+      "dependsOn": [
+        "CMP-009"
+      ]
+    },
+    {
+      "id": "CMP-012",
+      "name": "Stockfish 18 引擎 worker 池",
+      "owns": {
+        "tables": [
+          "engine_jobs"
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "CMP-013",
+      "name": "LLM 适配器（Claude 两档）",
+      "owns": {
+        "tables": [
+          "llm_calls"
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "CMP-014",
+      "name": "学习/对手来源白名单与安全检索",
+      "owns": {
+        "tables": [
+          "source_allowlist"
+        ]
+      },
+      "dependsOn": [
+        "CMP-010"
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-001",
+      "target": "提交照片 → 着法确认屏 p50 ≤ 30s（比赛场 4G）；硬上限 120s 才判失败",
+      "landsOn": {
+        "endpoints": [
+          "POST /api/games/photo",
+          "GET /api/games/jobs/{jobId}/events"
+        ],
+        "tables": [
+          "ocr_jobs"
+        ]
+      }
+    },
+    {
+      "id": "CON-002",
+      "target": "确认着法后首条解释 ≤ 5s 出现（其余流式补）",
+      "landsOn": {
+        "endpoints": [
+          "POST /api/games/{gameId}/analysis",
+          "GET /api/analysis/{analysisId}/events"
+        ]
+      }
+    },
+    {
+      "id": "CON-003",
+      "target": "OCR 免人工纠正率 ≥ 90%（每半步），并分别跟踪整局零干预率与每局平均点击数",
+      "landsOn": {
+        "endpoints": [
+          "GET /api/games/jobs/{jobId}/ambiguities"
+        ],
+        "tables": [
+          "ocr_ambiguities"
+        ]
+      }
+    },
+    {
+      "id": "CON-004",
+      "target": "上传照片在分析完成后立即删除，且 S3 lifecycle 24h 兜底；任何情况下不进训练集",
+      "landsOn": {
+        "tables": [
+          "photo_objects",
+          "games"
+        ]
+      }
+    },
+    {
+      "id": "CON-005",
+      "target": "家长验证码 6 位、2 分钟过期、一次性；重发使旧码立即失效",
+      "landsOn": {
+        "endpoints": [
+          "POST /api/consent/request",
+          "POST /api/consent/resend",
+          "POST /api/consent/confirm"
+        ],
+        "tables": [
+          "parent_consents"
+        ]
+      }
+    },
+    {
+      "id": "CON-006",
+      "target": "发码类端点 5 次/小时/邮箱，验证类 10 次/小时/邮箱，并按 IP 各限一道",
+      "landsOn": {
+        "endpoints": [
+          "POST /api/auth/request-code",
+          "POST /api/auth/verify-code",
+          "POST /api/consent/request",
+          "POST /api/consent/resend"
+        ]
+      }
+    },
+    {
+      "id": "CON-007",
+      "target": "给儿童展示的外链 100% 来自白名单；命中不了则该条丢弃，绝不回退开放网络结果",
+      "landsOn": {
+        "endpoints": [
+          "GET /api/analysis/{analysisId}"
+        ],
+        "tables": [
+          "study_recommendations",
+          "source_allowlist"
+        ]
+      }
+    },
+    {
+      "id": "CON-008",
+      "target": "analysis_reports 记录 engine_version 与 depth，旧报告可复现",
+      "landsOn": {
+        "endpoints": [
+          "GET /api/analysis/{analysisId}"
+        ],
+        "tables": [
+          "analysis_reports"
+        ]
+      }
+    },
+    {
+      "id": "CON-009",
+      "target": "对手评分查询与报告缓存 7 天，礼貌限速、带真实 User-Agent、遵守 robots.txt、绝不登录",
+      "landsOn": {
+        "endpoints": [
+          "POST /api/opponents/search"
+        ],
+        "tables": [
+          "opponent_reports",
+          "rating_lookup_cache"
+        ]
+      }
+    }
+  ]
+}
