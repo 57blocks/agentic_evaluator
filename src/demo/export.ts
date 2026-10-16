@@ -40,6 +40,57 @@ const SECRET_FILE = /(^|\/)(\.env(\..*)?|\.npmrc|\.netrc|\.pgpass|id_(rsa|dsa|ec
 
 export const isSecretFile = (rel: string): boolean => SECRET_FILE.test(rel);
 
+/**
+ * Key formats a name check cannot catch: a key pasted into a file with an
+ * innocent name, or echoed into a candidate's output. A task file holding one
+ * is left out; anywhere else (a report, an output, evidence) the key itself is
+ * replaced, since the page needs the rest. A last line of defence, not a
+ * guarantee: look at what you export before sending it.
+ */
+const SECRET_PATTERNS: RegExp[] = [
+  /sk-or-v1-[A-Za-z0-9]{20,}/g,
+  /sk-ant-[A-Za-z0-9_-]{20,}/g,
+  /\bsk-(?:proj-)?[A-Za-z0-9_-]{32,}/g,
+  /\bAKIA[0-9A-Z]{16}\b/g,
+  /\bgh[pousr]_[A-Za-z0-9]{30,}/g,
+  /\bgithub_pat_[A-Za-z0-9_]{30,}/g,
+  /\bxox[abpr]-[A-Za-z0-9-]{10,}/g,
+  /\bAIza[0-9A-Za-z_-]{35}\b/g,
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----/g,
+];
+
+const SECRET_NAME = String.raw`[A-Za-z0-9_]*(?:api[_-]?key|secret|token|password|passwd)[A-Za-z0-9_]*`;
+
+/**
+ * A secret-named setting given a literal value: `API_KEY="…"` or `"token": "…"`
+ * (quoted, so `token: paymentTokenEnum` and `KEY: process.env.KEY` are code,
+ * not keys), and a dotenv line `API_KEY=…`. The value goes, the name stays.
+ */
+const SECRET_QUOTED = new RegExp(String.raw`\b(${SECRET_NAME}\\?["']?\s*[:=]\s*\\?["'])([A-Za-z0-9_\-/+=.]{16,})(?=\\?["'])`, "gi");
+const SECRET_DOTENV = new RegExp(String.raw`^(${SECRET_NAME}=)([^\s"'#]{16,})$`, "gim");
+
+/** A literal that looks like a key: long, and mixing letters with digits. */
+const keyLike = (value: string): boolean => /\d/.test(value) && /[A-Za-z]/.test(value) && !/^process\.env\./.test(value);
+
+export function redactSecrets(text: string): { text: string; count: number } {
+  let count = 0;
+  let out = text;
+  for (const re of SECRET_PATTERNS) {
+    out = out.replace(re, () => {
+      count++;
+      return "[redacted]";
+    });
+  }
+  for (const re of [SECRET_QUOTED, SECRET_DOTENV]) {
+    out = out.replace(re, (whole: string, name: string, value: string) => {
+      if (!keyLike(value)) return whole;
+      count++;
+      return `${name}[redacted]`;
+    });
+  }
+  return { text: out, count };
+}
+
 /** Keep each data script well under what a browser parses comfortably in one go. */
 const CHUNK_BYTES = 8 * 1024 * 1024;
 
@@ -53,8 +104,10 @@ export interface ExportResult {
   responses: number;
   reports: number;
   bytes: number;
-  /** Task files left out as secret-looking, as `<task>/<path>`. */
+  /** Task files left out as secret-looking, by name or by content, as `<task>/<path>`. */
   skipped: string[];
+  /** Keys replaced by `[redacted]` in reports, outputs and evidence. */
+  redacted: number;
 }
 
 interface CatalogShape {
@@ -73,11 +126,29 @@ function scrubber(root: string): (text: string) => string {
   return (text) => swaps.reduce((t, [from, to]) => (from.length > 1 ? t.split(from).join(to) : t), text);
 }
 
-async function record(base: string, urls: Iterable<string>, into: Map<string, Recorded>, scrub: (t: string) => string): Promise<void> {
+interface Recording {
+  into: Map<string, Recorded>;
+  scrub: (t: string) => string;
+  /** Task files dropped for what they contain. */
+  skipped: string[];
+  redacted: number;
+}
+
+const TASK_FILE = /^\/artifact\/task\/([^/]+)\/(.+)$/;
+
+async function record(base: string, urls: Iterable<string>, rec: Recording): Promise<void> {
   for (const url of urls) {
-    if (into.has(url)) continue;
+    if (rec.into.has(url)) continue;
     const res = await fetch(base + url);
-    into.set(url, { status: res.status, body: scrub(await res.text()) });
+    const { text, count } = redactSecrets(rec.scrub(await res.text()));
+    const taskFile = url.match(TASK_FILE);
+    if (taskFile && count > 0) {
+      rec.skipped.push(`${decodeURIComponent(taskFile[1])}/${taskFile[2].split("/").map(decodeURIComponent).join("/")}`);
+      rec.into.set(url, { status: 404, body: "" });
+      continue;
+    }
+    rec.redacted += count;
+    rec.into.set(url, { status: res.status, body: text });
   }
 }
 
@@ -169,12 +240,16 @@ export async function exportDashboard(ws: Workspace, outDir: string): Promise<Ex
   const server = createDemoServer(ws);
   const base = await listenDemo(server, 0);
   try {
-    const scrub = scrubber(ws.root);
     const responses = new Map<string, Recorded>();
-    await record(base, ["/api/catalog", "/api/overview"], responses, scrub);
-    const { catalog, skipped } = withoutSecrets(JSON.parse(responses.get("/api/catalog")!.body) as CatalogShape);
-    responses.set("/api/catalog", { status: 200, body: JSON.stringify(catalog) });
-    await record(base, urlsFor(catalog), responses, scrub);
+    const rec: Recording = { into: responses, scrub: scrubber(ws.root), skipped: [], redacted: 0 };
+    await record(base, ["/api/catalog", "/api/overview"], rec);
+    const { catalog, skipped: byName } = withoutSecrets(JSON.parse(responses.get("/api/catalog")!.body) as CatalogShape);
+    await record(base, urlsFor(catalog), rec);
+    // A file dropped for its content leaves the file list too.
+    const dropped = new Set(rec.skipped);
+    const listed = { ...catalog, tasks: catalog.tasks.map((t) => ({ ...t, files: (t.files ?? []).filter((f) => !dropped.has(`${t.name}/${f}`)) })) };
+    responses.set("/api/catalog", { status: 200, body: JSON.stringify(listed) });
+    const skipped = [...byName, ...rec.skipped];
 
     await fs.rm(outDir, { recursive: true, force: true });
     await fs.mkdir(path.join(outDir, "data"), { recursive: true });
@@ -188,13 +263,15 @@ export async function exportDashboard(ws: Workspace, outDir: string): Promise<Ex
       if (!res.ok) continue;
       const file = path.join(outDir, r.rel);
       await fs.mkdir(path.dirname(file), { recursive: true });
-      await fs.writeFile(file, scrub(await res.text()), "utf-8");
+      const { text, count } = redactSecrets(rec.scrub(await res.text()));
+      rec.redacted += count;
+      await fs.writeFile(file, text, "utf-8");
     }
 
     const meta = { exportedAt: new Date().toISOString(), workspace: path.basename(ws.root) };
     await fs.writeFile(path.join(outDir, "index.html"), await pageHtml(dataScripts, meta), "utf-8");
     const bytes = chunks.reduce((n, c) => n + Buffer.byteLength(c), 0);
-    return { outDir, responses: responses.size, reports: reports.length, bytes, skipped };
+    return { outDir, responses: responses.size, reports: reports.length, bytes, skipped, redacted: rec.redacted };
   } finally {
     server.close();
   }
