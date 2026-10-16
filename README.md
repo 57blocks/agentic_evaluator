@@ -488,7 +488,10 @@ It runs in a fresh, empty work dir. `{{input}}` is replaced by the test case
 The files it leaves behind are its deliverable; if it leaves none, its stdout
 is. It must exit 0: a non-zero exit is recorded as a failed attempt (with the
 exit code as the reason), even if it left files behind. Relative paths resolve
-against the task directory. Use `x-harness: { producer: codegen }`. Add
+against the task directory. The judge reads every file it left; when that is
+a whole project, `evaluators.judge.show` (globs such as `[README.md, "src/**"]`)
+narrows what the judge reads, and what the report shows, to those files. The
+check still gets every file. Use `x-harness: { producer: codegen }`. Add
 `image:` to run it in Docker (see [Safety](#safety)); `agenteval init` and the
 `custom-check` sample are working examples.
 
@@ -509,6 +512,42 @@ price itself. A wrapper that copies the figure from a harness it ran, as
 recorded as `estimated`, and `GAPS.md` names the candidates that reported
 their own cost.
 
+An agent tool's own cost figure assumes its own vendor's prices (claude
+prices any model it does not know at Opus rates). To have agenteval do the
+pricing, declare `reports_usage: tokens`, have the command report tokens only,
+and give the candidate the `model` it runs (an OpenRouter id, priced from the
+OpenRouter catalog) or a `price` (USD per million tokens) for a direct
+provider:
+
+```yaml
+  - id: deepseek-v4-pro
+    adapter: agent-cli
+    price: { input: 1.32, output: 3.96, cache_read: 0.044 }   # or: model: deepseek/deepseek-v4-pro-0813
+    cli:
+      argv: [node, agents/run.mjs, deepseek-v4-pro, "{{max_cost_usd}}"]
+      reports_usage: tokens
+      env: { ANTHROPIC_API_KEY: "${DEEPSEEK_API_KEY}" }
+```
+
+```json
+{ "prompt_tokens": 1200, "completion_tokens": 3400, "cache_read_tokens": 81000, "cache_write_tokens": 9000 }
+```
+
+A command that exits non-zero fails its trial whatever the check says. When
+the command is a harness with verdicts of its own (its gates, its verifier),
+declare `exit_code: ignore` on the step (or on the candidate's `cli`): the
+exit code is kept as evidence and the check decides. `combine` and `judge`
+apply it to runs recorded before it was declared.
+
+`prompt_tokens` is input not read from or written to a cache. A step's
+`max_cost_per_trial_usd` is handed to the command as `{{max_cost_usd}}` and
+`EVAL_MAX_COST_USD`, with the model's price as `EVAL_MODEL_PRICE` (JSON, per
+million tokens) so a wrapper can convert the cap into its tool's units;
+agenteval cannot stop an agent mid-run, so the command enforces it. `${NAME}`
+in `env` is read from the environment (or `.env.local`) when the command
+starts, so the spec and the run's records never hold the secret;
+`check-task` blocks when one is not set.
+
 ### Check scripts
 
 A `kind: command` check runs in the trial's work dir: the candidate's files,
@@ -524,6 +563,33 @@ Print `{"evidence": "...", "reason": "..."}` and both are kept with the trial.
 shows up in the evidence. `kind: tsc` with `scaffold_dir: scaffold` instead
 compiles the produced TypeScript against `scaffold/tsconfig.json`.
 
+### Saying what a task evaluates
+
+A report opens with what was evaluated, so a reader who never saw the spec
+knows what the numbers mean. Three optional fields carry it:
+
+```yaml
+description: "Which model triages a denied Medicare SNF claim correctly? 30 synthetic claims …"
+workflow:
+  steps:
+    - id: triage
+      test_set:
+        id: claim-denials
+        labels_file: checks/manifest.json   # { "cd-001": { "tags": ["hard", "span-dates"], "split": "holdout" } }
+evaluators:
+  required_checks:
+    triage-check:
+      kind: command
+      description: "Root cause, next action and deadline match the answer key."
+```
+
+`description` heads the report as **What it evaluates**; a check's
+`description` replaces its version hash under **How success is decided**; with
+`labels_file`, the report adds **Results by input tag**: the required check's
+passes per candidate for each tag and split. All three are frozen into the
+run's `manifest.json`. `agenteval report` on a run made before they existed
+reads them from the task's current spec and says so on the page.
+
 ### Workflows
 
 A task can have several steps, each evaluated on its own inputs. Add
@@ -531,6 +597,49 @@ A task can have several steps, each evaluated on its own inputs. Add
 whole chain twice — once with `control_candidate` on every step, once with each
 step's recommended candidate — and reports whether the combination beats the
 single model. The `chain-offline` sample shows this.
+
+In the chain, a step's input is the previous step's output, rendered as text.
+For agents whose next stage needs the project itself, add `handoff: workdir`
+to the chained step: its work dir then starts with the files the previous step
+left, and its input text stays the root input's.
+
+An input can also be a starting state: with `fixture_dir: fixture` under
+`test_set`, `fixture/<input>/` is copied into a command candidate's work dir
+before it starts (its contents are part of the trial's identity, so editing a
+fixture is a new trial). Several steps can then share input names, one
+fixture each; `references/<step>/<input>` takes precedence over
+`references/<input>`. A command candidate is told where it is through
+`EVAL_STEP`, `EVAL_INPUT` and `EVAL_CHAINED` (`1` when its work dir was handed
+over), so one command can serve every step; a check finds the fixture's path
+as `fixture` in `meta.json`.
+
+A whole chain can be far costlier than any one step. `workflow.e2e` bounds it:
+
+```yaml
+workflow:
+  control_candidate: opus
+  e2e:
+    inputs: [demo-todo]        # run the chain on these root inputs only
+    final_checks: [app-gates]  # grade the chain's end product with this check
+```
+
+`e2e.steps.<step>` (`max_cost_per_trial_usd`, `maximum_completion_time_seconds`)
+raises a step's limits in the arms only, where it may do far more than on
+its own inputs. `final_checks` replaces the last step's own check in the chain only: a step
+evaluated on its own inputs (one task, say) and a chain's delivery (every
+task) usually need different checks. `e2e.judge` (`rubric_file`, and
+optionally `show` and `dimensions`) compares the two arms' deliveries case by
+case, pairwise; like a step's judge it informs, and the gates decide.
+
+Steps differ in what to judge and how hard they are to run. A step can carry
+its own `judge` block (`rubric_file`, `methods`, `show`, `dimensions`; the
+judge model stays `evaluators.judge.model`) and its own `concurrency`.
+`--concurrency` on the command line overrides both.
+
+A long run that dies part way is resumed with `agenteval run <task> --yes
+--reuse`: every trial is journaled the moment it finishes
+(`trials.partial.jsonl`), and `--reuse` takes finished trials from there as
+well as from completed runs, so only the unfinished ones run again.
 
 ### How much to trust a result
 
@@ -631,11 +740,26 @@ you confirm those numbers. Stop the dashboard with Ctrl+C.
   network is off unless you set `network:`, and only the variables you list in
   `env:` are passed in. Every trial records whether it was isolated. The
   `docker-sandbox` sample shows both ways side by side.
+- Every trial, and its check, runs in a temp dir outside the workspace, so a
+  project with no config of its own never picks up the workspace's (a
+  `vite.config.ts`, a `tsconfig.json`). What it left is copied under the run
+  as evidence, without `node_modules` or `.git`.
+- While a run is in flight the task's `references/` is unreadable, so a
+  command candidate cannot read the answers; a check that grades against them
+  finds a private copy at `$EVAL_REFERENCES_DIR`. This stops an agent that
+  goes looking, not one set on breaking out: `image:` is the real boundary.
+- A command runs as its own process group. A timeout stops the whole tree
+  (the agent and whatever it started), as does Ctrl+C on agenteval. A
+  command that prints a lot is not stopped: the last 2 MB of its output are
+  kept. Files over 2 MB, or binary, are not read back as its answer; the
+  trace names them.
 - Check scripts and `tsc` always run on your machine. Declare only checks you
   would run yourself.
-- An agent's own spending is invisible to agenteval: it shows as unobserved,
-  and `budget_usd` cannot stop it. Only model candidates and the judge count
-  against the budget.
+- An agent's own spending is invisible to agenteval unless its command
+  reports it (`reports_usage`); unreported, it shows as unobserved. What is
+  reported counts against `budget_usd`, end-to-end arms included: past the
+  budget no new trial starts. One already running finishes, so cap each
+  trial too (`max_cost_per_trial_usd`).
 - The dashboard listens on 127.0.0.1 only and has no authentication.
 
 ## Troubleshooting
@@ -650,7 +774,7 @@ you confirm those numbers. Stop the dashboard with Ctrl+C.
 | every candidate gated: `required-check pass rate undefined (0/0)` | the step has no required check; add one, or use [judge-only grading](#judge-only-grading) |
 | every trial `skip ... budget limit reached` | `budget_usd` is too low — it must be above 0, even for a free task |
 | a candidate shows `evaluator_error` | your check crashed or exited with something other than 0/1 — the check's fault, not the candidate's |
-| a candidate `malformed` with `exited with code N` | the command candidate exited non-zero; its files were not graded |
+| a candidate `malformed` with `exited with code N` | the command candidate exited non-zero, so the trial failed; its check still ran on what it left, and the evidence is in the report |
 | exit code `3` | the run finished but is partial: read its `GAPS.md` |
 | a model fails mid-run | run `agenteval models <task>` after editing candidate ids |
 

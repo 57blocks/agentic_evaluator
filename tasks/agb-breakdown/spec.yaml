@@ -30,14 +30,17 @@ protocol_version: "0.3"
 run_name: agb-breakdown
 
 workflow:
-  control_candidate: agb-sonnet-5
+  control_candidate: agb-opus-5-5
   steps:
     - id: detail
       version: "1"
       test_set:
         id: breakdown-v1
         inputs: [demo-todo-detail, chessicle-detail, invoice-detail]
-      candidate_ids: [agb-opus-5, agb-opus-5-5, agb-sonnet-5]
+      # Round 2 (2026-10-14): other providers against opus-5.5, round 1's only
+      # model to pass all three. opus-5 and sonnet-5 stay declared for reruns.
+      candidate_ids: [agb-opus-5-5, agb-fable-5-1, agb-gpt-5-6-sol, agb-deepseek-v4-pro, agb-deepseek-flash,
+                      agb-kimi-k3, agb-glm-5-3, agb-glm-5-3-prime, agb-qwen-3-8-max]
       required_checks: [plan-gates]
       success_criteria:
         mandatory_checks: all
@@ -63,6 +66,49 @@ candidates:
     cli:
       argv: [node, agents/agb.mjs, claude-sonnet-5]
       reports_usage: true   # agents/agb.mjs writes claude's total_cost_usd
+  - id: agb-fable-5-1
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, claude-fable-5-1]
+      reports_usage: true   # agents/agb.mjs writes claude's total_cost_usd
+  # Other providers through claude's Anthropic-compatible endpoint
+  # (agents/providers.mjs): cost is recomputed from tokens at the provider's
+  # price, since claude would charge Opus rates.
+  - id: agb-deepseek-v4-pro
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, "deepseek:deepseek-v4-pro"]
+      reports_usage: true
+  - id: agb-deepseek-flash
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, "deepseek:deepseek-flash"]
+      reports_usage: true
+  - id: agb-kimi-k3
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, "openrouter:moonshotai/kimi-k3"]
+      reports_usage: true
+  - id: agb-glm-5-3
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, "openrouter:z-ai/glm-5.3"]
+      reports_usage: true
+  - id: agb-glm-5-3-prime
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, "openrouter:z-ai/glm-5.3-prime"]
+      reports_usage: true
+  - id: agb-qwen-3-8-max
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, "openrouter:qwen/qwen3.8-max-0902"]
+      reports_usage: true
+  - id: agb-gpt-5-6-sol
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/agb.mjs, "openrouter:openai/gpt-5.6-sol"]
+      reports_usage: true
 
 evaluators:
   required_checks:
@@ -86,7 +132,7 @@ evaluators:
 
 execution:
   trials_per_case: 1
-  concurrency: 1
+  concurrency: 3   # each trial has its own work dir; claude -p needs no trust
   benchmark_mode: production-realistic
   cache_mode: cold
   minimum_meaningful_difference: null

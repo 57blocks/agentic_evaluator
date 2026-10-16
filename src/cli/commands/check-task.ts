@@ -24,7 +24,7 @@ export const CHECK_TASK_HELP = `agenteval check-task <task> [options]
                 without an image, where it can read the answer key
 
   --json              print the findings as JSON
-  --keep              keep the probe work dirs under runs/ to inspect
+  --keep              keep the probe work dirs (in a temp dir, printed) to inspect
   --workspace DIR     workspace to resolve <task> under
 
   Exits 1 when any finding blocks, 0 otherwise.`;

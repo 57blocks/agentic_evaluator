@@ -16,9 +16,14 @@ export const SPEC_SCHEMA = {
   type: "object",
   additionalProperties: false,
   required: ["protocol_version", "run_name", "workflow", "candidates", "evaluators", "execution"],
+  // Any other `x-` key is the spec author's (YAML anchors to share, notes):
+  // never read by agenteval, so never rejected.
+  patternProperties: { "^x-": {} },
   properties: {
     protocol_version: { type: "string", enum: [PROTOCOL_VERSION] },
     run_name: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{1,63}$" },
+    /** What this evaluation decides and tests, in a few sentences; the report opens with it. */
+    description: { type: "string", minLength: 1 },
     budget_usd: { type: "number", minimum: 0 },
     workflow: {
       type: "object",
@@ -26,6 +31,37 @@ export const SPEC_SCHEMA = {
       required: ["steps"],
       properties: {
         control_candidate: { type: "string" },
+        e2e: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            inputs: { type: "array", minItems: 1, items: { type: "string" } },
+            final_checks: { type: "array", minItems: 1, items: { type: "string" } },
+            // Per step, in the arms only: a chained step can do far more than
+            // on its own inputs (every task, not one).
+            steps: {
+              type: "object",
+              additionalProperties: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  max_cost_per_trial_usd: { type: "number", exclusiveMinimum: 0 },
+                  maximum_completion_time_seconds: { type: "number", exclusiveMinimum: 0 },
+                },
+              },
+            },
+            judge: {
+              type: "object",
+              additionalProperties: false,
+              required: ["rubric_file"],
+              properties: {
+                rubric_file: { type: "string", minLength: 1 },
+                show: { type: "array", items: { type: "string", minLength: 1 } },
+                dimensions: { type: "array", items: { type: "string" } },
+              },
+            },
+          },
+        },
         steps: {
           type: "array",
           minItems: 1,
@@ -43,6 +79,9 @@ export const SPEC_SCHEMA = {
                 properties: {
                   id: { type: "string" },
                   inputs: { type: "array", minItems: 1, items: { type: "string" } },
+                  fixture_dir: { type: "string", minLength: 1 },
+                  /** JSON, task-relative: { "<input>": { "tags": [...], "split": "dev" } }; the report breaks results down by it. */
+                  labels_file: { type: "string", minLength: 1 },
                 },
               },
               candidate_ids: { type: "array", minItems: 1, items: { type: "string" } },
@@ -74,10 +113,26 @@ export const SPEC_SCHEMA = {
                 },
               },
               maximum_completion_time_seconds: { type: "number", exclusiveMinimum: 0 },
+              max_cost_per_trial_usd: { type: "number", exclusiveMinimum: 0 },
+              concurrency: { type: "integer", minimum: 1 },
+              // Over every command candidate's cli.exit_code, for this step.
+              exit_code: { type: "string", enum: ["fail", "ignore"] },
+              // This step's judging; the judge model stays evaluators.judge.model.
+              judge: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  rubric_file: { type: "string", minLength: 1 },
+                  methods: { type: "array", items: { type: "string", enum: ["pairwise-swap", "absolute-1-5"] } },
+                  show: { type: "array", items: { type: "string", minLength: 1 } },
+                  dimensions: { type: "array", items: { type: "string" } },
+                },
+              },
               producer: { type: "string", enum: ["prompt", "codegen"] },
               prompt_file: { type: "string" },
               rubric_file: { type: "string" },
               input_from: { type: "string" },
+              handoff: { type: "string", enum: ["text", "workdir"] },
             },
           },
         },
@@ -95,6 +150,17 @@ export const SPEC_SCHEMA = {
           adapter: { type: "string", enum: ["model-api", "codegen", "agent-cli"] },
           model: { type: "string" },
           provider_route: { type: "string" },
+          price: {
+            type: "object",
+            additionalProperties: false,
+            required: ["input", "output"],
+            properties: {
+              input: { type: "number", minimum: 0 },
+              output: { type: "number", minimum: 0 },
+              cache_read: { type: "number", minimum: 0 },
+              cache_write: { type: "number", minimum: 0 },
+            },
+          },
           generation_settings: {
             type: "object",
             additionalProperties: false,
@@ -114,7 +180,9 @@ export const SPEC_SCHEMA = {
               network: { type: "string", enum: ["none", "bridge"] },
               memory: { type: "string", minLength: 1 },
               cpus: { type: "string", minLength: 1 },
-              reports_usage: { type: "boolean" },
+              reports_usage: { oneOf: [{ type: "boolean" }, { type: "string", enum: ["tokens"] }] },
+              version_files: { type: "array", items: { type: "string", minLength: 1 } },
+              exit_code: { type: "string", enum: ["fail", "ignore"] },
             },
           },
         },
@@ -140,6 +208,8 @@ export const SPEC_SCHEMA = {
               /** command only: files hashed into the evaluator version. */
               version_files: { type: "array", items: { type: "string" } },
               timeout_seconds: { type: "number", exclusiveMinimum: 0 },
+              /** What a pass means, in one sentence; the report shows it beside the pass rate. */
+              description: { type: "string", minLength: 1 },
             },
           },
         },
@@ -166,6 +236,7 @@ export const SPEC_SCHEMA = {
               type: "array",
               items: { type: "string", enum: ["pairwise-swap", "absolute-1-5"] },
             },
+            show: { type: "array", items: { type: "string", minLength: 1 } },
           },
         },
       },

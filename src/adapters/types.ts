@@ -5,6 +5,7 @@
 
 import type { AgentCliConfig, CandidateAdapterId, CandidateDef, CostSource, Isolation } from "../canon/types.js";
 import type { LlmTrace } from "../llm.js";
+import type { ModelPrice } from "../pricing.js";
 import type { ProducerKind } from "../types.js";
 
 export type { CandidateAdapterId };
@@ -27,6 +28,14 @@ export interface CandidateRequest {
   maxTokens?: number;
   /** Required when the adapter is agent-cli. */
   cli?: AgentCliConfig;
+  /** agent-cli: a directory copied into the work dir before the command starts (`fixture_dir`). */
+  fixtureDir?: string;
+  /** agent-cli: files written into the work dir before it starts — a chained step's handoff. */
+  seedFiles?: readonly ArtifactFile[];
+  /** agent-cli with `reports_usage: tokens`: the price to use instead of `model`'s catalog price. */
+  price?: ModelPrice;
+  /** agent-cli: the step's spend cap per trial (`max_cost_per_trial_usd`). */
+  maxCostUsd?: number;
 }
 
 export interface ExecutionContext {
@@ -43,6 +52,12 @@ export interface ExecutionContext {
 }
 
 export interface CandidateResult {
+  /**
+   * agent-cli: what the command printed (stdout, then stderr; tails). Its
+   * answer is the files it left, so without this the agent's own account of
+   * a failure ("blocked on a permission", "budget spent") is lost.
+   */
+  log?: string;
   /**
    * How the command was executed. Recorded rather than inferred: whether an
    * agent ran sandboxed or on the harness's own machine is part of what a
@@ -73,12 +88,15 @@ export type AdapterErrorKind = "timeout" | "cancelled" | "spawn" | "unknown";
 export class AdapterError extends Error {
   readonly kind: AdapterErrorKind;
   readonly ms: number;
+  /** What the command printed before it was stopped (a timeout), when there was a command. */
+  readonly log?: string;
 
-  constructor(message: string, fields: { kind: AdapterErrorKind; ms: number }) {
+  constructor(message: string, fields: { kind: AdapterErrorKind; ms: number; log?: string }) {
     super(message);
     this.name = "AdapterError";
     this.kind = fields.kind;
     this.ms = fields.ms;
+    if (fields.log !== undefined) this.log = fields.log;
   }
 }
 

@@ -10,6 +10,7 @@ import { ReportHeader, RunFacts } from "./sections/Header";
 import { Verdict } from "./sections/Verdict";
 import { Candidates } from "./sections/Candidates";
 import { Gates } from "./sections/Gates";
+import { Slices } from "./sections/Slices";
 import { CoverageAndLedger } from "./sections/CoverageAndLedger";
 import { Profile } from "./sections/Profile";
 import { Duels, judgedFirst } from "./sections/Duels";
@@ -38,6 +39,7 @@ export function StepReport({ report: r }: { report: Model }) {
       <PlanStepCard step={r.tested} title="What was tested" />
       <Verdict verdict={r.verdict} eligible={r.eligible} total={r.candidates.length} />
       <Candidates candidates={r.candidates} control={r.control} />
+      <Slices slices={r.slices} candidates={r.candidates.map((c) => c.id)} />
       <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />
       <Profile
         absoluteRan={r.absoluteRan}

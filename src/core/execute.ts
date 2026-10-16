@@ -17,6 +17,7 @@ import { displayPath, resolveTaskAsset } from "../paths.js";
 import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
 import { silentSink, type RunEventSink } from "./events.js";
 import { methodsOf, planE2e, planStep, resolveConcurrency } from "./plan.js";
+import { hideAnswerKey } from "./answer-key.js";
 import { readInput, runAll, safeName } from "./generate.js";
 import { judgeAll, scoreAll } from "./evaluate.js";
 import { maybeRunE2eValidation } from "./e2e-arms.js";
@@ -214,6 +215,7 @@ async function executeSuite(params: {
     ledgerTotal: ledger.total,
     ledgerSource: ledger.source,
     chosen: recommendation.chosen,
+    closest: recommendation.closest?.candidate ?? null,
     firmness: recommendation.firmness,
     html,
     gated: recommendation.filters.flatMap((f) => f.removed),
@@ -254,114 +256,141 @@ export interface RunOptions {
    * whatever it has, and `run.cancelled` says how much never got a turn.
    */
   signal?: AbortSignal;
+  /** Evaluate each step only; a chained workflow's end-to-end arms do not run (`--no-e2e`). */
+  skipE2e?: boolean;
+  /** Run only these steps (`--step`); the end-to-end arms then do not run. */
+  steps?: string[];
+  /** Run only these candidates (`--candidate`); the end-to-end arms then do not run. */
+  candidates?: string[];
 }
 
 export async function runSuite(suitePath: string, html: boolean, opts: RunOptions = {}): Promise<StepResult | null> {
   const emit = opts.onEvent ?? silentSink;
-  const suites = await loadWorkflow(suitePath);
+  const all = await loadWorkflow(suitePath);
+  const unknown = (opts.steps ?? []).filter((id) => !all.some((s) => s.step === id));
+  if (unknown.length > 0) throw new Error(`no step ${unknown.join(", ")} in ${suitePath} (steps: ${all.map((s) => s.step).join(", ")})`);
+  const chosenSteps = opts.steps ? all.filter((s) => opts.steps!.includes(s.step)) : all;
+  const strangers = (opts.candidates ?? []).filter((c) => !chosenSteps.some((s) => s.candidates.includes(c)));
+  if (strangers.length > 0) throw new Error(`no candidate ${strangers.join(", ")} in the steps run`);
+  const suites = opts.candidates
+    ? chosenSteps
+        .map((s) => ({ ...s, candidates: s.candidates.filter((c) => opts.candidates!.includes(c)) }))
+        .filter((s) => s.candidates.length > 0)
+    : chosenSteps;
+  if (opts.steps || opts.candidates) opts = { ...opts, skipE2e: true };
   const isSpec = /\.ya?ml$/i.test(suitePath);
   const reuse = process.env.EVAL_REUSE === "1";
 
   for (const suite of suites) emit({ type: "step.planned", plan: planStep(suite, { reuse }) });
-  const e2ePlan = planE2e(suites);
+  const e2ePlan = opts.skipE2e ? null : planE2e(suites);
   if (e2ePlan) emit({ type: "workflow.planned", e2e: e2ePlan });
   if (isSpec && !opts.yes) {
     emit({ type: "preview.only" });
     return null;
   }
 
-  const generatedAt = new Date().toISOString();
-  const runName = suites[0].runName ?? suites[0].suiteId;
-  const runId = `${runName}-${generatedAt.replace(/[:.]/g, "-")}`;
-  const nested = suites.length > 1;
-  // The workspace the spec belongs to, not the one the user is standing in:
-  // a run is written beside its task, and reuse is scanned around it.
-  const ws = await workspaceForSpec(suitePath);
-  const root = path.join(runsRootFor(suites[0].taskRoot), runId);
-  if (nested) await fs.mkdir(root, { recursive: true });
+  // The answer key is unreadable while candidates run (src/core/answer-key.ts).
+  const answerKey = await hideAnswerKey(suites[0].taskRoot);
+  try {
+    const generatedAt = new Date().toISOString();
+    const runName = suites[0].runName ?? suites[0].suiteId;
+    const runId = `${runName}-${generatedAt.replace(/[:.]/g, "-")}`;
+    const nested = suites.length > 1;
+    // The workspace the spec belongs to, not the one the user is standing in:
+    // a run is written beside its task, and reuse is scanned around it.
+    const ws = await workspaceForSpec(suitePath);
+    const root = path.join(runsRootFor(suites[0].taskRoot), runId);
+    if (nested) await fs.mkdir(root, { recursive: true });
 
-  const budget = new BudgetGuard(suites[0].budgetUsd);
-  const steps: WorkflowStepInput[] = [];
-  let last: StepResult | null = null;
-  for (const suite of suites) {
-    if (opts.signal?.aborted && last !== null) break;
-    const layout = stepLayout(root, runId, suite.step, nested);
-    const done = await executeSuite({
-      suite,
-      ws,
-      emit,
-      signal: opts.signal,
-      outDir: layout.outDir,
-      runId: layout.runId,
-      html,
-      reuse,
-      generatedAt,
-      budget,
-    });
-    last = done;
+    const budget = new BudgetGuard(suites[0].budgetUsd);
+    const steps: WorkflowStepInput[] = [];
+    let last: StepResult | null = null;
+    for (const suite of suites) {
+      if (opts.signal?.aborted && last !== null) break;
+      const layout = stepLayout(root, runId, suite.step, nested);
+      const done = await executeSuite({
+        suite,
+        ws,
+        emit,
+        signal: opts.signal,
+        outDir: layout.outDir,
+        runId: layout.runId,
+        html,
+        reuse,
+        generatedAt,
+        budget,
+      });
+      last = done;
+      if (nested) {
+        steps.push({
+          id: suite.step,
+          dir: layout.dir,
+          operatingMode: done.recommendation.operating_mode,
+          chosen: done.recommendation.chosen,
+          firmness: done.recommendation.firmness,
+          eligible: done.recommendation.eligible,
+          gated: done.recommendation.filters.flatMap((f) => f.removed),
+          trials: done.trials,
+          ledger: done.ledger,
+          gaps: await fs.readFile(path.join(layout.outDir, "GAPS.md"), "utf-8").catch(() => ""),
+        });
+      }
+    }
+
     if (nested) {
-      steps.push({
-        id: suite.step,
-        dir: layout.dir,
-        operatingMode: done.recommendation.operating_mode,
-        chosen: done.recommendation.chosen,
-        firmness: done.recommendation.firmness,
-        eligible: done.recommendation.eligible,
-        gated: done.recommendation.filters.flatMap((f) => f.removed),
-        trials: done.trials,
-        ledger: done.ledger,
-        gaps: await fs.readFile(path.join(layout.outDir, "GAPS.md"), "utf-8").catch(() => ""),
+      const chosenByStep = Object.fromEntries(steps.map((s) => [s.id, s.chosen]));
+      const e2e = opts.skipE2e ? null : await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit, budget });
+      const control = e2e?.control ?? null;
+      const record = buildWorkflowRecord({
+        protocolVersion: suites[0].protocolVersion ?? "0.3",
+        runId,
+        runName,
+        steps,
+        control: control
+          ? {
+              kind: "control",
+              candidate: control.candidate,
+              assignment: control.assignment,
+              chain: control.chain,
+              cases: control.totals.cases,
+              success: control.totals.success,
+              failure: control.totals.failure,
+              undetermined: control.totals.undetermined,
+              cost_usd: control.totals.cost_usd,
+            }
+          : null,
+        proposed: e2e?.proposed
+          ? {
+              kind: "proposed",
+              assignment: e2e.proposed.assignment,
+              chain: e2e.proposed.chain,
+              cases: e2e.proposed.totals.cases,
+              success: e2e.proposed.totals.success,
+              failure: e2e.proposed.totals.failure,
+              undetermined: e2e.proposed.totals.undetermined,
+              cost_usd: e2e.proposed.totals.cost_usd,
+            }
+          : null,
+        validation: e2e?.validation ?? null,
+      });
+      await fs.writeFile(path.join(root, "workflow.json"), JSON.stringify(record, null, 2), "utf-8");
+      const skipped =
+        opts.skipE2e && planE2e(suites)
+          ? "\n- **end-to-end validation not run**: skipped with `--no-e2e`. Each step's pick stands on its own inputs; whether they work as a combination was not checked.\n"
+          : "";
+      await fs.writeFile(path.join(root, "GAPS.md"), workflowGaps(steps, record.e2e_validation) + skipped, "utf-8");
+      if (html) await writeWorkflowReport(root);
+      emit({
+        type: "run.done",
+        runId,
+        dir: displayPath(root),
+        steps: steps.map((s) => ({ id: s.id, chosen: s.chosen })),
+        totalUsd: record.ledger.total,
+        html,
       });
     }
+    return last;
+  } finally {
+    await answerKey.restore();
   }
-
-  if (nested) {
-    const chosenByStep = Object.fromEntries(steps.map((s) => [s.id, s.chosen]));
-    const e2e = await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit });
-    const control = e2e?.control ?? null;
-    const record = buildWorkflowRecord({
-      protocolVersion: suites[0].protocolVersion ?? "0.3",
-      runId,
-      runName,
-      steps,
-      control: control
-        ? {
-            kind: "control",
-            candidate: control.candidate,
-            assignment: control.assignment,
-            chain: control.chain,
-            cases: control.totals.cases,
-            success: control.totals.success,
-            failure: control.totals.failure,
-            undetermined: control.totals.undetermined,
-            cost_usd: control.totals.cost_usd,
-          }
-        : null,
-      proposed: e2e?.proposed
-        ? {
-            kind: "proposed",
-            assignment: e2e.proposed.assignment,
-            chain: e2e.proposed.chain,
-            cases: e2e.proposed.totals.cases,
-            success: e2e.proposed.totals.success,
-            failure: e2e.proposed.totals.failure,
-            undetermined: e2e.proposed.totals.undetermined,
-            cost_usd: e2e.proposed.totals.cost_usd,
-          }
-        : null,
-      validation: e2e?.validation ?? null,
-    });
-    await fs.writeFile(path.join(root, "workflow.json"), JSON.stringify(record, null, 2), "utf-8");
-    await fs.writeFile(path.join(root, "GAPS.md"), workflowGaps(steps, record.e2e_validation), "utf-8");
-    if (html) await writeWorkflowReport(root);
-    emit({
-      type: "run.done",
-      runId,
-      dir: displayPath(root),
-      steps: steps.map((s) => ({ id: s.id, chosen: s.chosen })),
-      totalUsd: record.ledger.total,
-      html,
-    });
-  }
-  return last;
 }

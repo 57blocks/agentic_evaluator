@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cobo Invoice — Merchant Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: '#F79009', primaryhover: '#DC7900', primaryactive: '#B54708',
+          primarysoft: '#FEEFDD', primarysofter: '#FFFAEB', primaryborder: '#FEE9C0', primarytext: '#93370D',
+          ink: '#101828', body: '#475467', muted: '#667085', faint: '#98A2B3',
+          line: '#E6EAF2', pagebg: '#F4F6FB',
+          info: '#2E5BFF', infosoft: '#EEF3FF', infoborder: '#D8E4FF', infotext: '#1D46D8',
+          success: '#12B76A', successsoft: '#E7F8F0', successborder: '#A6F4C5', successtext: '#067647',
+          teal: '#0E9384',
+          danger: '#F04438', dangertext: '#D92D20', dangerdark: '#B42318', dangersoft: '#FEF3F2', dangerborder: '#FECDCA',
+          usdt: '#26A17B', usdc: '#2775CA', usdcsoft: '#EAF1FE',
+        },
+        fontFamily: { sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'] },
+        boxShadow: {
+          card: '0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.05)',
+          raised: '0 4px 8px -2px rgba(16,24,40,0.10), 0 2px 4px -2px rgba(16,24,40,0.06)',
+          overlay: '0 20px 24px -4px rgba(16,24,40,0.10), 0 8px 8px -4px rgba(16,24,40,0.04)',
+        },
+      },
+    },
+  };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { height: 100%; }
+  body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  .gridline { position: absolute; left: 0; right: 0; border-top: 1px dashed #E6EAF2; }
+  .navitem { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #475467; width: 100%; text-align: left; transition: background .12s, color .12s; cursor: pointer; }
+  .navitem:hover { background: #F8FAFD; }
+  .navitem.active { background: #FEEFDD; color: #B54708; font-weight: 600; }
+  .fld { width: 100%; height: 40px; border-radius: 8px; border: 1px solid #E6EAF2; background: #fff; padding: 0 12px; font-size: 13px; color: #101828; outline: none; }
+  .fld:focus { border-color: #F79009; box-shadow: 0 0 0 3px rgba(247,144,9,0.18); }
+  .fld.err { border-color: #F04438; }
+  .fld:disabled { background: #F2F4F7; color: #98A2B3; }
+  textarea.fld { height: auto; padding: 10px 12px; }
+  select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2398A2B3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
+  .errmsg { margin-top: 6px; font-size: 12px; font-weight: 500; color: #D92D20; }
+  .hintmsg { margin-top: 6px; font-size: 11px; color: #98A2B3; }
+  .btn-p { height: 40px; padding: 0 16px; border-radius: 8px; background: #F79009; color: #fff; font-size: 13px; font-weight: 600; box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.05); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-p:hover { background: #DC7900; }
+  .btn-p:disabled { background: #E4E7EC; color: #98A2B3; cursor: not-allowed; box-shadow: none; }
+  .btn-s { height: 40px; padding: 0 16px; border-radius: 8px; background: #fff; border: 1px solid #E6EAF2; color: #475467; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-s:hover { background: #F8FAFD; }
+  .btn-d { height: 40px; padding: 0 16px; border-radius: 8px; background: #F04438; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-d:hover { background: #D92D20; }
+  .btn-do { height: 40px; padding: 0 16px; border-radius: 8px; background: #fff; border: 1px solid #FECDCA; color: #D92D20; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-do:hover { background: #FEF3F2; }
+  .act { font-size: 12px; font-weight: 600; color: #475467; cursor: pointer; white-space: nowrap; }
+  .act:hover { color: #101828; }
+  .act.pri { color: #F79009; } .act.pri:hover { color: #B54708; }
+  .act.dan { color: #D92D20; } .act.dan:hover { color: #B42318; }
+  .act.dis { color: #98A2B3; cursor: not-allowed; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 4px 10px; border: 1px solid transparent; white-space: nowrap; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 4px 10px; background: #fff; border: 1px solid #E6EAF2; color: #667085; cursor: pointer; white-space: nowrap; }
+  .chip:hover { border-color: #98A2B3; }
+  .chip.on { border: 2px solid #F79009; color: #B54708; padding: 3px 9px; }
+  .tkrow { display: flex; align-items: center; gap: 6px; }
+  .tkdot { width: 16px; height: 16px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; flex-shrink: 0; }
+  .tkdot.u { background: #E7F8F0; color: #26A17B; } .tkdot.c { background: #EAF1FE; color: #2775CA; }
+  .th { display: grid; align-items: center; gap: 12px; padding: 10px 16px; background: #FAFBFD; border-bottom: 1px solid #E6EAF2; font-size: 11px; font-weight: 600; color: #98A2B3; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tr { display: grid; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #E6EAF2; font-size: 13px; }
+  .tr:last-child { border-bottom: none; }
+  .tr:hover { background: #FAFBFD; }
+  .backdrop { position: fixed; inset: 0; background: rgba(16,24,40,0.4); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .toast { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 12px; padding: 12px 16px; box-shadow: 0 4px 8px -2px rgba(16,24,40,0.10), 0 2px 4px -2px rgba(16,24,40,0.06); border: 1px solid #E6EAF2; font-size: 13px; font-weight: 500; max-width: 420px; animation: tin .18s ease-out; }
+  @keyframes tin { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .spin { animation: sp 0.9s linear infinite; } @keyframes sp { to { transform: rotate(360deg); } }
+  .seg { display: flex; border-radius: 999px; border: 1px solid #E6EAF2; overflow: hidden; font-size: 11px; font-weight: 600; }
+  .seg button { padding: 4px 12px; color: #667085; cursor: pointer; background: #fff; }
+  .seg button.on { background: #FEEFDD; color: #B54708; }
+  .dl-row { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .dl-row .k { width: 150px; flex-shrink: 0; color: #98A2B3; font-weight: 500; }
+  .checkbox { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #98A2B3; background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .checkbox.on { background: #F79009; border-color: #F79009; }
+  .switch { width: 36px; height: 20px; border-radius: 999px; background: #E4E7EC; position: relative; cursor: pointer; transition: background .15s; flex-shrink: 0; }
+  .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(16,24,40,0.15); transition: left .15s; }
+  .switch.on { background: #F79009; } .switch.on::after { left: 18px; }
+</style>
+<style id="prototype-artifact-guard">.mermaid,.mermaidTooltip,[id^="mermaid-"],svg[id^="mermaid-"],.error-icon,.error-text{display:none!important}html{scroll-behavior:smooth;overflow-anchor:none}body{overflow-anchor:none}section[id],h1[id],h2[id],h3[id],h4[id]{scroll-margin-top:32px}[class*="badge"],[class*="pill"],[class*="tag"]{max-width:100%;line-height:1.35;white-space:normal}.hero [class*="badge"],header [class*="badge"],[class*="hero"] [class*="badge"],[class*="hero"] [class*="pill"],[class*="hero"] [class*="tag"]{display:inline-flex!important;width:max-content;max-width:100%;margin:0 0 14px 0!important;position:relative!important;top:auto!important;left:auto!important;right:auto!important;transform:none!important}.hero p,header p,[class*="hero"] p{clear:both;margin-top:10px!important;line-height:1.8!important}.hero h1,.hero h2,.hero h3,header h1,header h2,header h3,[class*="hero"] h1,[class*="hero"] h2,[class*="hero"] h3{clear:both;margin-top:8px!important;line-height:1.25!important}</style></head>
+<body class="bg-pagebg text-ink" data-bp-role-current="merchant">
+<div id="app" class="flex min-h-screen">
+
+  <!-- ============ MERCHANT SIDEBAR (shared chrome) ============ -->
+  <aside id="sidebar" data-bp-shared class="w-[248px] shrink-0 bg-white border-r border-line flex flex-col sticky top-0 h-screen">
+    <div class="flex items-center gap-3 px-5 pt-6 pb-5">
+      <div class="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#F79009] to-[#E35D00] flex items-center justify-center shadow-card">
+        <span class="text-white font-extrabold text-lg leading-none">C</span>
+      </div>
+      <div class="leading-tight">
+        <p class="font-bold text-[15px]">Cobo Invoice</p>
+        <p class="text-[11px] text-faint font-medium">Enterprise Portal</p>
+      </div>
+    </div>
+    <nav class="px-3 mt-1 space-y-1">
+      <p class="px-3 pb-1 text-[11px] font-semibold tracking-wider text-faint uppercase">Menu</p>
+      <button class="navitem active" data-bp-nav="dashboard" aria-current="page">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </button>
+      <button class="navitem" data-bp-nav="clients">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Client
+      </button>
+      <button class="navitem" data-bp-nav="invoices">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        Invoice
+        <span id="navInvCount" class="ml-auto text-[11px] font-semibold bg-[#F2F4F7] text-muted rounded-full px-2 py-0.5 tnum">0</span>
+      </button>
+      <button class="navitem" data-bp-nav="settlements">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+        Settlement
+      </button>
+    </nav>
+    <div class="mt-auto px-4 pb-5 space-y-4">
+      <div class="rounded-xl border border-line bg-[#FAFBFD] p-3.5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-[#0B1B3F] text-white flex items-center justify-center text-[11px] font-bold">DM</div>
+          <div class="leading-tight min-w-0">
+            <p class="text-[13px] font-semibold truncate">Demo Merchant</p>
+            <p class="text-[11px] text-faint truncate">Merchant account</p>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-teal">
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+          Cobo Pay connected
+        </div>
+      </div>
+      <p class="text-center text-[10px] text-faint font-medium">Powered by Cobo Pay</p>
+    </div>
+  </aside>
+
+  <!-- ============ MERCHANT MAIN COLUMN ============ -->
+  <div id="maincol" class="flex-1 min-w-0 flex flex-col">
+    <header id="topbar" data-bp-shared class="bg-white border-b border-line px-7 py-4 flex items-center gap-4 sticky top-0 z-40">
+      <div>
+        <h1 id="pageTitle" class="text-xl font-bold">Dashboard</h1>
+        <p id="pageDesc" class="text-[13px] text-muted mt-0.5">Overview of invoice collections, outstanding amounts and settlements.</p>
+      </div>
+      <div class="ml-auto flex items-center gap-4">
+        <div class="flex items-center gap-2 text-[13px] font-medium text-muted">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Mon, Sep 7, 2026
+        </div>
+        <div class="w-px h-6 bg-line"></div>
+        <!-- Demo role switcher (demo helper only) -->
+        <div class="flex flex-col items-end gap-1">
+          <div class="seg" data-bp-anchor="role-switcher">
+            <button data-bp-role="merchant" data-bp-role-label="Merchant" class="on" onclick="setRole('merchant')">Merchant</button>
+            <button data-bp-role="payer" data-bp-role-label="Payer" onclick="setRole('payer')">Payer</button>
+          </div>
+          <span class="text-[10px] text-faint font-medium">demo helper · role switcher</span>
+        </div>
+        <div class="w-px h-6 bg-line"></div>
+        <button id="bellBtn" data-bp-open="notifications" class="relative p-1" onclick="togglePanel('notifications')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="absolute top-0 right-0 w-2 h-2 rounded-full bg-danger"></span>
+        </button>
+        <div class="w-px h-6 bg-line"></div>
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-[#0B1B3F] text-white flex items-center justify-center text-[11px] font-bold">DM</div>
+          <div class="leading-tight">
+            <p class="text-[13px] font-semibold">Demo Merchant</p>
+            <p class="text-[11px] text-faint">Merchant</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="merchantViews" class="p-7">
+      <section data-bp-view="dashboard" data-bp-view-label="Dashboard"><div class="space-y-6">
+      <!-- KPI row -->
+      <div class="grid grid-cols-3 gap-5">
+        <div class="bg-white rounded-2xl border border-line shadow-card p-5 flex items-start gap-4" data-bp-anchor="kpi-invoice-sent">
+          <div class="w-11 h-11 rounded-xl bg-primarysoft text-primary flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[12px] font-semibold text-muted uppercase tracking-wide">Invoice Sent</p>
+            <p id="kpiSentAmt" class="mt-1 text-[26px] font-bold tnum leading-none">$24,900.00</p>
+            <p id="kpiSentMeta" class="mt-2 text-[12px] text-faint font-medium">Aug 21 – Sep 4 · 32 invoices sent</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-line shadow-card p-5 flex items-start gap-4" data-bp-anchor="kpi-unreceived">
+          <div class="w-11 h-11 rounded-xl bg-[#FFF4E5] text-primary flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[12px] font-semibold text-muted uppercase tracking-wide">Unreceived</p>
+            <p id="kpiUnrecAmt" class="mt-1 text-[26px] font-bold tnum leading-none">$12,540.00</p>
+            <p id="kpiUnrecMeta" class="mt-2 text-[12px] font-medium"><span class="text-dangertext font-semibold tnum">$3,520.00 overdue</span><span class="text-faint"> · last 30 days</span></p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-line shadow-card p-5 flex items-start gap-4" data-bp-anchor="kpi-received">
+          <div class="w-11 h-11 rounded-xl bg-successsoft text-teal flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[12px] font-semibold text-muted uppercase tracking-wide">Received · <span id="kpiRecMonth">Sep 2026</span></p>
+            <p id="kpiRecAmt" class="mt-1 text-[26px] font-bold tnum leading-none">$26,780.50</p>
+            <p id="kpiRecMeta" class="mt-2 text-[12px] text-faint font-medium">22 invoices · 4 payment tokens</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart + Unreceived -->
+      <div class="grid grid-cols-3 gap-5 items-stretch">
+        <div class="col-span-2 bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="chart-invoice-sent">
+          <div class="flex items-start gap-4 flex-wrap">
+            <div>
+              <h2 class="text-[15px] font-bold">Invoice Sent</h2>
+              <p class="text-[12px] text-muted mt-1">Daily sent invoice amounts in USD, stacked by current status.</p>
+            </div>
+            <div class="ml-auto flex flex-col items-end gap-1.5">
+              <div class="flex items-center gap-2">
+                <input type="date" id="dashFrom" data-bp-state="dash-from" class="fld !h-9 !w-[150px] !text-[12px]" value="2026-08-21">
+                <span class="text-faint text-[12px]">–</span>
+                <input type="date" id="dashTo" data-bp-state="dash-to" class="fld !h-9 !w-[150px] !text-[12px]" value="2026-09-04">
+                <button class="h-9 px-3 rounded-lg bg-white border border-line text-body text-[12px] font-semibold hover:bg-[#F8FAFD]" onclick="applyDashRange()">Apply</button>
+              </div>
+              <p class="text-[11px] text-faint font-medium">Max range 15 days</p>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center gap-5 text-[12px] font-medium text-body flex-wrap">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-[3px] bg-teal"></span>Settled</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-[3px] bg-success"></span>Received</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-[3px] bg-primary"></span>Pending</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-[3px] bg-danger"></span>Error</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-[3px] bg-faint"></span>Other</span>
+            <span class="ml-auto text-[11px] text-faint">Converted to USD at current FX rate</span>
+          </div>
+          <div class="mt-5 flex gap-3">
+            <div id="chartY" class="relative h-[240px] w-9 shrink-0 text-[11px] text-faint font-medium tnum"></div>
+            <div class="flex-1 min-w-0">
+              <div class="relative h-[240px]" id="chartPlot"></div>
+              <div class="mt-2 flex gap-[6px] text-[11px] text-faint font-medium tnum" id="chartX"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-line shadow-card p-6 flex flex-col" data-bp-anchor="panel-unreceived">
+          <div>
+            <h2 class="text-[15px] font-bold">Unreceived</h2>
+            <p class="text-[12px] text-muted mt-1">Sent but not yet paid.</p>
+          </div>
+          <div class="mt-4 flex rounded-lg bg-[#F2F4F7] p-1 text-[12px] font-semibold whitespace-nowrap" data-bp-state="unreceived-range" id="unrecTabs">
+            <button class="flex-1 text-center rounded-md px-2 py-1.5" data-v="30" onclick="setUnrec('30')">30 days</button>
+            <button class="flex-1 text-center rounded-md px-2 py-1.5" data-v="90" onclick="setUnrec('90')">90 days</button>
+            <button class="flex-1 text-center rounded-md px-2 py-1.5" data-v="120" onclick="setUnrec('120')">120 days</button>
+            <button class="flex-1 text-center rounded-md px-2 py-1.5" data-v="All" onclick="setUnrec('All')">All</button>
+          </div>
+          <p class="mt-5 text-[30px] font-bold tnum leading-none" id="unrecTotal">$12,540.00</p>
+          <p class="mt-1.5 text-[12px] text-faint font-medium" id="unrecCount">17 open invoices awaiting payment</p>
+          <div class="mt-5 h-2.5 rounded-full overflow-hidden flex" id="unrecBar"></div>
+          <div class="mt-4 space-y-3" id="unrecSplit"></div>
+          <div class="mt-auto pt-5">
+            <div class="rounded-xl bg-primarysofter border border-primaryborder px-3.5 py-3 flex items-start gap-2.5">
+              <svg class="shrink-0 mt-px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F79009" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              <p class="text-[12px] leading-relaxed text-primarytext font-medium" id="unrecWarn">3 invoices are past their due date. Send a reminder from the Invoice list.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Received by token + Last received -->
+      <div class="grid grid-cols-3 gap-5 items-stretch">
+        <div class="col-span-2 bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="panel-received-token">
+          <div class="flex items-start gap-4 flex-wrap">
+            <div>
+              <h2 class="text-[15px] font-bold">Received Invoice</h2>
+              <p class="text-[12px] text-muted mt-1">Amounts received in the selected month, grouped by payment token.</p>
+            </div>
+            <div class="ml-auto">
+              <select id="dashMonth" data-bp-state="dash-month" class="fld !h-9 !w-[180px] !text-[12px]" onchange="renderReceivedToken()">
+                <option value="2026-09" selected>September 2026</option>
+                <option value="2026-08">August 2026</option>
+                <option value="2026-07">July 2026</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-6 space-y-5" id="recTokenRows"></div>
+          <div class="mt-6 pt-4 border-t border-line flex items-center gap-3 flex-wrap">
+            <p class="text-[13px] font-semibold text-muted" id="recTotalLbl">Total received in September 2026</p>
+            <p class="ml-auto text-[16px] font-bold tnum" id="recTotalAmt">$26,780.50</p>
+            <span class="text-[11px] font-semibold text-successtext bg-successsoft rounded-full px-2.5 py-1 tnum" id="recTotalCnt">22 invoices paid</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-line shadow-card p-6 flex flex-col" data-bp-anchor="panel-last-received">
+          <div class="flex items-center gap-3">
+            <h2 class="text-[15px] font-bold">Last Received</h2>
+            <span class="ml-auto badge text-successtext bg-successsoft !border-successborder">Received</span>
+          </div>
+          <p class="text-[12px] text-muted mt-1">Most recent invoice payment.</p>
+          <div class="mt-6">
+            <p class="text-[32px] font-bold tnum leading-none" id="lastRecAmt">300.000000</p>
+            <p class="mt-2 text-[13px] font-semibold text-muted" id="lastRecToken">Tron-USDT <span class="text-faint font-medium">· ≈ $300.00</span></p>
+          </div>
+          <div class="mt-6 space-y-3.5 text-[13px]" id="lastRecMeta"></div>
+          <div class="mt-auto pt-6">
+            <div class="rounded-xl bg-infosoft border border-infoborder px-3.5 py-3 flex items-start gap-2.5">
+              <svg class="shrink-0 mt-px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E5BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              <p class="text-[12px] leading-relaxed text-infotext font-medium">Received invoices can be settled to your wallet from the <button class="font-semibold underline" onclick="go('settlements')">Settlement page</button>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+      <section data-bp-view="clients" data-bp-view-label="Client List" class="hidden"><div class="space-y-5">
+      <div class="bg-white rounded-2xl border border-line shadow-card p-4 flex items-center gap-3 flex-wrap" data-bp-anchor="client-toolbar">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#98A2B3" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input id="cliQ" data-bp-state="client-search" class="fld !pl-9 !w-[260px]" placeholder="Search by email or name" oninput="state.cliFilters.q=this.value;renderClients()">
+        </div>
+        <select id="cliType" data-bp-state="client-type-filter" class="fld !w-[150px]" onchange="state.cliFilters.type=this.value;renderClients()">
+          <option value="All">Type: All</option><option>Enterprise</option><option>Personal</option>
+        </select>
+        <select id="cliStatus" data-bp-state="client-status-filter" class="fld !w-[150px]" onchange="state.cliFilters.status=this.value;renderClients()">
+          <option value="All">Status: All</option><option>Active</option><option>Frozen</option>
+        </select>
+        <button class="btn-p ml-auto" data-bp-open="client-modal" onclick="openClientModal('add')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add Client
+        </button>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card overflow-hidden" data-bp-anchor="client-table">
+        <div class="th" style="grid-template-columns:170px 1.2fr 0.7fr 1.4fr 110px 150px">
+          <span>Create Time</span><span>Client Name</span><span>Client Type</span><span>Email Address</span><span>Status</span><span>Action</span>
+        </div>
+        <div id="clientRows"></div>
+      </div>
+    </div></section>
+      <section data-bp-view="invoices" data-bp-view-label="Invoice List" class="hidden"><div class="space-y-5">
+      <div class="flex items-center gap-2 flex-wrap" id="invChips" data-bp-state="invoice-status-chip" data-bp-anchor="invoice-status-chips"></div>
+      <div class="bg-white rounded-2xl border border-line shadow-card p-4 flex items-center gap-3 flex-wrap" data-bp-anchor="invoice-toolbar">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#98A2B3" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input id="invQ" data-bp-state="invoice-search" class="fld !pl-9 !w-[240px]" placeholder="Search by client name or category" oninput="state.invFilters.q=this.value;renderInvoices()">
+        </div>
+        <select id="invType" data-bp-state="invoice-type-filter" class="fld !w-[140px]" onchange="state.invFilters.type=this.value;renderInvoices()">
+          <option value="All">Type: All</option><option>Regular</option><option>Recurring</option>
+        </select>
+        <select id="invToken" data-bp-state="invoice-token-filter" class="fld !w-[150px]" onchange="state.invFilters.token=this.value;renderInvoices()">
+          <option value="All">Token: All</option><option>Tron-USDT</option><option>Tron-USDC</option><option>ETH-USDT</option><option>ETH-USDC</option>
+        </select>
+        <select id="invStatus" data-bp-state="invoice-status-filter" class="fld !w-[170px]" onchange="state.invFilters.status=this.value;state.invFilters.chip='All';renderInvoices()">
+          <option value="All">Status: All</option>
+          <option>Draft</option><option>Sending</option><option>Pending</option><option>Received</option><option>Voiding</option><option>Voided</option><option>Settling</option><option>Settled</option><option>Settlement Failed</option><option>Overdue</option><option>Error</option>
+        </select>
+        <button class="btn-p ml-auto" onclick="openInvoiceForm('create')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Create New Invoice
+        </button>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card overflow-hidden" data-bp-anchor="invoice-table">
+        <div class="th" style="grid-template-columns:150px 1.5fr 1fr 0.7fr 150px 120px 220px">
+          <span>Creation Time</span><span>Invoice ID</span><span>Client Name</span><span>Type</span><span class="text-right">Amount</span><span>Status</span><span>Action</span>
+        </div>
+        <div id="invoiceRows"></div>
+      </div>
+      <p class="text-[12px] text-faint font-medium px-1" id="invCount"></p>
+    </div></section>
+      <section data-bp-view="invoice-form" data-bp-view-label="Create / Edit / Duplicate Invoice" class="hidden"><div class="space-y-5">
+      <input type="hidden" id="formModeState" data-bp-state="invoice-form-mode" value="create">
+      <div class="flex items-center gap-3 flex-wrap">
+        <button class="act pri !text-[13px]" onclick="go('invoices')">← Back to Invoice List</button>
+        <span class="text-faint">·</span>
+        <h2 id="formTitle" class="text-[17px] font-bold">Create Invoice</h2>
+        <span id="formStatusBadge" class="hidden"></span>
+      </div>
+      <div class="grid grid-cols-[1fr_340px] gap-5 items-start">
+        <div class="space-y-5 min-w-0">
+          <!-- Basic info -->
+          <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="form-basic">
+            <p class="text-[15px] font-bold">Basic information</p>
+            <div class="mt-4 grid grid-cols-2 gap-x-6 gap-y-4">
+              <div>
+                <label class="text-[13px] font-medium">Invoice ID</label>
+                <input id="fId" class="fld mt-1.5" disabled>
+                <p class="hintmsg">System generated when saved.</p>
+              </div>
+              <div>
+                <label class="text-[13px] font-medium">From</label>
+                <input class="fld mt-1.5" value="Demo Merchant · locked to Cobo account" disabled>
+              </div>
+              <div>
+                <label class="text-[13px] font-medium">Issue Date <span class="text-danger">*</span></label>
+                <input id="fIssue" type="date" class="fld mt-1.5" data-bp-state="form-issue-date">
+                <p id="fIssueErr" class="errmsg hidden"></p>
+              </div>
+              <div>
+                <label class="text-[13px] font-medium">Due Date <span class="text-danger">*</span></label>
+                <input id="fDue" type="date" class="fld mt-1.5" data-bp-state="form-due-date">
+                <p id="fDueErr" class="errmsg hidden"></p>
+              </div>
+            </div>
+          </div>
+          <!-- Client -->
+          <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="form-client">
+            <div class="flex items-center gap-3">
+              <p class="text-[15px] font-bold">Client</p>
+              <button class="act pri ml-auto !text-[12px]" data-bp-open="client-modal" onclick="openClientModal('add')">+ Add Client</button>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-x-6 gap-y-4">
+              <div>
+                <label class="text-[13px] font-medium">Client <span class="text-danger">*</span></label>
+                <select id="fClient" class="fld mt-1.5" data-bp-state="form-client" onchange="formSelectClient(this.value)"></select>
+                <p id="fClientErr" class="errmsg hidden"></p>
+                <p class="hintmsg">Only Active clients can be selected.</p>
+              </div>
+              <div>
+                <label class="text-[13px] font-medium">CC Recipients</label>
+                <div class="mt-1.5 flex items-center gap-2 flex-wrap min-h-[40px] rounded-lg border border-line bg-white px-3 py-1.5" id="fCcChips"></div>
+                <button class="act pri mt-1.5 !text-[12px]" data-bp-open="cc-modal" onclick="openCcModal()">+ Add CC (max 3)</button>
+              </div>
+            </div>
+          </div>
+          <!-- Tokens -->
+          <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="form-tokens">
+            <p class="text-[15px] font-bold">Payment Token <span class="text-danger">*</span></p>
+            <p class="text-[12px] text-muted mt-1">The payer can pay with any selected token. Primary token is set by priority Tron-USDT &gt; Tron-USDC &gt; ETH-USDT &gt; ETH-USDC.</p>
+            <div class="mt-4 flex items-center gap-5 flex-wrap" id="fTokens"></div>
+            <p id="fTokenErr" class="errmsg hidden"></p>
+          </div>
+          <!-- Items -->
+          <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="form-items">
+            <div class="flex items-center gap-3">
+              <p class="text-[15px] font-bold">Items <span class="text-danger">*</span></p>
+              <button class="btn-s !h-8 !px-3 !text-[12px] ml-auto" onclick="formAddItem()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add Item
+              </button>
+            </div>
+            <div class="mt-4" id="fItems"></div>
+            <p id="fItemsErr" class="errmsg hidden"></p>
+            <div class="mt-4 grid grid-cols-3 gap-6">
+              <div>
+                <label class="text-[13px] font-medium">Overall Discount (%)</label>
+                <input id="fDiscount" type="number" min="0" max="100" step="0.01" class="fld mt-1.5" data-bp-state="form-overall-discount" oninput="state.form.discount=parseFloat(this.value)||0;renderFormTotals()">
+                <p id="fDiscountErr" class="errmsg hidden"></p>
+              </div>
+              <div>
+                <label class="text-[13px] font-medium">Category</label>
+                <input id="fCategory" class="fld mt-1.5" maxlength="100" placeholder="e.g. Consulting" oninput="state.form.category=this.value">
+                <p class="hintmsg">Optional · &lt;100 characters.</p>
+              </div>
+              <div>
+                <label class="text-[13px] font-medium">Memo</label>
+                <input id="fMemo" class="fld mt-1.5" maxlength="500" placeholder="Internal note shown on the invoice" oninput="state.form.memo=this.value">
+                <p class="hintmsg">Optional · &lt;500 characters.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Recurring -->
+          <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="form-recurring">
+            <div class="flex items-center gap-3">
+              <div>
+                <p class="text-[15px] font-bold">Recurring Invoice</p>
+                <p class="text-[12px] text-muted mt-1">Automatically generate and send this invoice on a schedule.</p>
+              </div>
+              <span class="switch ml-auto" id="fRecToggle" data-bp-state="form-recurring-toggle" onclick="formToggleRecurring()"></span>
+            </div>
+            <div id="fRecFields" class="hidden mt-4 grid grid-cols-3 gap-6">
+              <div>
+                <label class="text-[13px] font-medium">Frequency <span class="text-danger">*</span></label>
+                <select id="fRecFreq" class="fld mt-1.5" onchange="state.form.recurring.frequency=this.value">
+                  <option>Weekly</option><option>Bi-weekly</option><option selected>Monthly</option><option>Quarterly</option><option>Yearly</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[13px] font-medium">End Condition <span class="text-danger">*</span></label>
+                <select id="fRecEndType" class="fld mt-1.5" onchange="state.form.recurring.endType=this.value;document.getElementById('fRecEndDate').disabled=this.value!=='End Date'">
+                  <option selected>No End Date Manual Stop</option><option>End Date</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[13px] font-medium">End Date</label>
+                <input id="fRecEndDate" type="date" class="fld mt-1.5" disabled onchange="state.form.recurring.endDate=this.value">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Summary -->
+        <div class="space-y-5 sticky top-[92px]">
+          <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="form-summary">
+            <p class="text-[15px] font-bold">Summary</p>
+            <div id="fTotals" class="mt-4"></div>
+          </div>
+          <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="form-actions">
+            <p id="fErrorSummary" class="hidden mb-3 rounded-xl bg-dangersoft border border-dangerborder px-3.5 py-3 text-[12px] font-medium text-dangerdark"></p>
+            <div class="space-y-2.5">
+              <button class="btn-p w-full" id="btnCreateSend" onclick="tryCreateSend()">Create &amp; Send</button>
+              <button class="btn-s w-full" id="btnSaveDraft" onclick="saveDraft()">Save Draft</button>
+              <div id="formEditActions" class="hidden pt-1 border-t border-line space-y-2.5">
+                <button class="btn-s w-full" onclick="openInvoiceForm('duplicate', state.formId)">Duplicate</button>
+                <button class="btn-s w-full" onclick="sendReminder(state.formId)">Send Reminder</button>
+                <button class="btn-do w-full" data-bp-open="delete-modal" onclick="openDelete(state.formId)">Delete</button>
+              </div>
+            </div>
+            <p class="mt-3 text-[11px] text-faint leading-relaxed">Create &amp; Send generates a Cobo Pay payment link and emails the invoice. The invoice enters Sending, then Pending.</p>
+          </div>
+        </div>
+      </div>
+    </div></section>
+      <section data-bp-view="invoice-detail" data-bp-view-label="Invoice Detail" class="hidden"><div id="invoiceDetailRoot"></div></section>
+      <section data-bp-view="settlements" data-bp-view-label="Settlement List" class="hidden"><div class="space-y-5">
+      <div class="grid grid-cols-2 gap-5">
+        <button class="bg-white rounded-2xl border border-line shadow-card p-5 flex items-start gap-4 text-left hover:border-primaryborder transition-colors" data-bp-anchor="kpi-last-settled" onclick="openSettlementDetail(lastSuccessSettlementId())">
+          <div class="w-11 h-11 rounded-xl bg-successsoft text-teal flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[12px] font-semibold text-muted uppercase tracking-wide">Last Settled Amount</p>
+            <p class="mt-1 text-[26px] font-bold tnum leading-none" id="stlLastAmt">300.000000</p>
+            <p class="mt-2 text-[12px] text-faint font-medium" id="stlLastMeta">Tron-USDT · SR-20260902-b2c3 · View detail →</p>
+          </div>
+        </button>
+        <div class="bg-white rounded-2xl border border-line shadow-card p-5 flex items-start gap-4" data-bp-anchor="kpi-settlement-pending">
+          <div class="w-11 h-11 rounded-xl bg-primarysoft text-primary flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-[12px] font-semibold text-muted uppercase tracking-wide">Total Settlement Pending</p>
+            <div id="stlPendingRows" class="mt-2 space-y-1.5"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card p-4 flex items-center gap-3 flex-wrap" data-bp-anchor="settlement-toolbar">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#98A2B3" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input id="stlQ" data-bp-state="settlement-search" class="fld !pl-9 !w-[260px]" placeholder="Search by Settlement Request ID" oninput="state.stlFilters.q=this.value;renderSettlements()">
+        </div>
+        <select id="stlToken" data-bp-state="settlement-token-filter" class="fld !w-[150px]" onchange="state.stlFilters.token=this.value;renderSettlements()">
+          <option value="All">Token: All</option><option>Tron-USDT</option><option>Tron-USDC</option><option>ETH-USDT</option><option>ETH-USDC</option>
+        </select>
+        <select id="stlStatus" data-bp-state="settlement-status-filter" class="fld !w-[170px]" onchange="state.stlFilters.status=this.value;renderSettlements()">
+          <option value="All">Status: All</option><option>In Progress</option><option>Success</option><option>Failed</option><option>Partial Success</option>
+        </select>
+        <button class="btn-p ml-auto" onclick="openSettlementRequest()">Request Settlement</button>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card overflow-hidden" data-bp-anchor="settlement-table">
+        <div class="th" style="grid-template-columns:170px 1.6fr 170px 130px 110px">
+          <span>Create Time</span><span>Settlement Request ID</span><span class="text-right">Amount</span><span>Status</span><span>Action</span>
+        </div>
+        <div id="settlementRows"></div>
+      </div>
+    </div></section>
+      <section data-bp-view="settlement-request" data-bp-view-label="Settlement Request" class="hidden"><div class="space-y-5">
+      <div class="flex items-center gap-3">
+        <button class="act pri !text-[13px]" onclick="go('settlements')">← Back to Settlement</button>
+        <span class="text-faint">·</span>
+        <h2 class="text-[17px] font-bold">Request Settlement</h2>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="sr-config">
+        <div class="grid grid-cols-3 gap-6">
+          <div>
+            <label class="text-[13px] font-medium">Settlement Token <span class="text-danger">*</span></label>
+            <select id="srToken" class="fld mt-1.5" data-bp-state="sr-token" onchange="srTokenChanged()"></select>
+          </div>
+          <div>
+            <label class="text-[13px] font-medium">Wallet <span class="text-danger">*</span></label>
+            <select id="srWallet" class="fld mt-1.5" data-bp-state="sr-wallet" onchange="srWalletChanged()"></select>
+          </div>
+          <div>
+            <label class="text-[13px] font-medium">Wallet Address <span class="text-danger">*</span></label>
+            <select id="srAddress" class="fld mt-1.5" data-bp-state="sr-address" onchange="state.stlDraft.address=this.value;renderSrSummary()"></select>
+            <p class="hintmsg" id="srAddrHint">Addresses are returned by the Cobo Wallet API.</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card overflow-hidden" data-bp-anchor="sr-invoice-table">
+        <div class="px-4 pt-4 pb-3 flex items-center gap-3 flex-wrap">
+          <p class="text-[15px] font-bold">Available invoices</p>
+          <p class="text-[12px] text-faint">Received and Settlement Failed invoices in the selected token.</p>
+          <div class="relative ml-auto">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#98A2B3" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input id="srQ" data-bp-state="sr-invoice-search" class="fld !h-9 !pl-9 !w-[220px] !text-[12px]" placeholder="Search by client or invoice ID" oninput="state.stlDraft.q=this.value;renderSrInvoices()">
+          </div>
+        </div>
+        <div class="th" style="grid-template-columns:36px 1.6fr 1fr 110px 140px 110px">
+          <span><span class="checkbox" id="srSelectAll" onclick="srToggleAll()"></span></span><span>Invoice ID</span><span>Client</span><span>Due Date</span><span class="text-right">Amount</span><span>Status</span>
+        </div>
+        <div id="srInvoiceRows"></div>
+        <div class="px-4 py-3.5 bg-[#FAFBFD] border-t border-line flex items-center gap-4" data-bp-anchor="sr-summary">
+          <p class="text-[13px] text-muted" id="srSelCount">0 invoices selected</p>
+          <p class="text-[15px] font-bold tnum" id="srSelAmt">0.000000</p>
+          <button class="btn-p ml-auto" id="srNextBtn" disabled onclick="goToConfirm()">Settlement</button>
+        </div>
+      </div>
+    </div></section>
+      <section data-bp-view="settlement-confirm" data-bp-view-label="Settlement Confirmation" class="hidden"><div class="space-y-5 max-w-[720px]">
+      <div class="flex items-center gap-3">
+        <button class="act pri !text-[13px]" onclick="go('settlement-request')">← Back to Settlement Request</button>
+        <span class="text-faint">·</span>
+        <h2 class="text-[17px] font-bold">Confirm Settlement</h2>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="sc-summary">
+        <p class="text-[15px] font-bold">Settlement summary</p>
+        <div class="mt-4 grid grid-cols-2 gap-x-10 gap-y-3" id="scMeta"></div>
+        <div class="mt-5 rounded-xl border border-line overflow-hidden">
+          <div class="px-4 py-2.5 bg-[#FAFBFD] border-b border-line text-[11px] font-semibold text-faint uppercase tracking-wide">Amounts &amp; estimated fees</div>
+          <div class="p-4 space-y-2.5 text-[13px]" id="scFees"></div>
+        </div>
+        <div class="mt-4 rounded-xl bg-primarysofter border border-primaryborder px-3.5 py-3 flex items-start gap-2.5">
+          <svg class="shrink-0 mt-px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F79009" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <p class="text-[12px] leading-relaxed text-primarytext font-medium">Estimated — actual fees may differ. Invoice service fee is temporarily charged at 2% of the settlement amount (to be confirmed). Submission is idempotent: repeated clicks will not create duplicate requests.</p>
+        </div>
+        <div class="mt-5 flex justify-end gap-3">
+          <button class="btn-s" onclick="go('settlement-request')">Back</button>
+          <button class="btn-p" id="scConfirmBtn" onclick="submitSettlement()">Confirm</button>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="sc-invoices">
+        <p class="text-[15px] font-bold">Included invoices</p>
+        <div class="mt-3" id="scInvoiceList"></div>
+      </div>
+    </div></section>
+      <section data-bp-view="settlement-detail" data-bp-view-label="Settlement Detail" class="hidden"><div class="space-y-5">
+      <div class="flex items-center gap-3">
+        <button class="act pri !text-[13px]" onclick="go('settlements')">← Back to Settlement</button>
+        <span class="text-faint">·</span>
+        <h2 class="text-[17px] font-bold tnum" id="sdTitle">Settlement Request</h2>
+        <span id="sdBadge"></span>
+      </div>
+      <div id="sdBanner"></div>
+      <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="sd-info">
+        <p class="text-[15px] font-bold">Settlement information</p>
+        <div class="mt-4 grid grid-cols-2 gap-x-10 gap-y-3" id="sdMeta"></div>
+      </div>
+      <div class="bg-white rounded-2xl border border-line shadow-card overflow-hidden" data-bp-anchor="sd-invoices">
+        <div class="px-4 pt-4 pb-3 flex items-center gap-3 flex-wrap">
+          <p class="text-[15px] font-bold">Linked invoices</p>
+          <div class="relative ml-auto">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#98A2B3" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input id="sdQ" data-bp-state="sd-invoice-search" class="fld !h-9 !pl-9 !w-[220px] !text-[12px]" placeholder="Search invoices" oninput="state.stlDetailFilter.q=this.value;renderSdInvoices()">
+          </div>
+          <select id="sdStatus" data-bp-state="sd-status-filter" class="fld !h-9 !w-[180px] !text-[12px]" onchange="state.stlDetailFilter.status=this.value;renderSdInvoices()">
+            <option value="All">Result: All</option><option>Settled</option><option>Settlement Failed</option><option>Settling</option>
+          </select>
+        </div>
+        <div class="th" style="grid-template-columns:1.6fr 1fr 140px 130px 110px">
+          <span>Invoice ID</span><span>Client</span><span class="text-right">Amount</span><span>Result</span><span>Action</span>
+        </div>
+        <div id="sdInvoiceRows"></div>
+      </div>
+    </div></section>
+    </main>
+  </div>
+
+  <!-- ============ PAYER ROOT (chrome-less) ============ -->
+  <div id="payerRoot" class="hidden flex-1 min-h-screen">
+    <section data-bp-view="payer-email" data-bp-view-label="Invoice Email" class="hidden"><div class="min-h-screen bg-pagebg py-10 px-6">
+        <div class="max-w-[560px] mx-auto space-y-4">
+          <div class="flex items-center gap-2.5">
+            <span class="text-[11px] font-semibold text-primaryactive bg-primarysoft border border-primaryborder rounded-full px-2.5 py-1">demo helper · payer inbox preview</span>
+            <button class="ml-auto act" onclick="setRole('merchant')">Switch to Merchant view</button>
+          </div>
+          <div class="bg-white rounded-2xl border border-line shadow-card overflow-hidden" data-bp-anchor="payer-email-card">
+            <div class="px-5 py-3 bg-[#FAFBFD] border-b border-line text-[12px] text-muted">
+              <p><span class="font-semibold text-ink">Subject:</span> <span id="peSubject"></span></p>
+              <p class="mt-0.5"><span class="font-semibold text-ink">From:</span> Demo Merchant &lt;invoices@demo-merchant.com&gt; · <span class="font-semibold text-ink">To:</span> <span id="peTo"></span></p>
+            </div>
+            <div class="p-6">
+              <div class="rounded-xl border border-line p-5">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#F79009] to-[#E35D00] flex items-center justify-center"><span class="text-white text-[12px] font-extrabold">D</span></div>
+                  <p class="text-[13px] font-bold">Demo Merchant</p>
+                </div>
+                <p class="mt-4 text-[26px] font-bold tnum leading-none" id="peAmount"></p>
+                <p class="mt-2 text-[12px] text-faint font-medium" id="peMeta"></p>
+                <div class="mt-3 flex gap-1.5 flex-wrap" id="peTokens"></div>
+                <button class="btn-p mt-5 w-full" onclick="go('payer-invoice');renderPayerInvoice()">View Details</button>
+                <p class="mt-4 text-center text-[10px] text-faint font-medium">Powered by Cobo Pay</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></section>
+    <section data-bp-view="payer-invoice" data-bp-view-label="Payer Invoice Detail" class="hidden"><div class="min-h-screen bg-pagebg py-10 px-6">
+        <div class="max-w-[640px] mx-auto space-y-4">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] font-semibold text-primaryactive bg-primarysoft border border-primaryborder rounded-full px-2.5 py-1">demo helper</span>
+            <select id="payerDemoInv" class="fld !h-8 !w-[300px] !text-[12px]" data-bp-state="payer-demo-invoice" onchange="state.payerInvoiceId=this.value;state.payerToken=null;renderPayerInvoice()">
+              <option value="CL002-20260903-c3d4">Preview: Pending invoice (payable)</option>
+              <option value="CL002-20260801-d4e5">Preview: Overdue invoice</option>
+              <option value="CL001-20260904-e5f6">Preview: Received (paid) invoice</option>
+              <option value="CL002-20260909-j0k1">Preview: Voided invoice</option>
+              <option value="CL003-20260910-k1l2">Preview: Error invoice</option>
+            </select>
+            <button class="act" onclick="go('payer-email');renderPayerEmail()">View invoice email</button>
+            <button class="act ml-auto" onclick="setRole('merchant')">Switch to Merchant view</button>
+          </div>
+          <div id="payerInvoiceRoot"></div>
+        </div>
+      </div></section>
+    <section data-bp-view="payer-pay" data-bp-view-label="Cobo Pay Payment Page" class="hidden"><div class="min-h-screen bg-pagebg py-10 px-6">
+        <div class="max-w-[440px] mx-auto space-y-4">
+          <div class="bg-white rounded-2xl border border-line shadow-card p-6 text-center" data-bp-anchor="cobopay-card">
+            <div class="w-10 h-10 mx-auto rounded-[10px] bg-gradient-to-br from-[#F79009] to-[#E35D00] flex items-center justify-center"><span class="text-white font-extrabold text-[16px]">C</span></div>
+            <p class="mt-2 text-[12px] font-semibold text-muted">Cobo Pay · Checkout</p>
+            <p class="mt-3 text-[22px] font-bold tnum leading-none" id="ppAmount"></p>
+            <p class="mt-1.5 text-[12px] text-faint font-medium tnum" id="ppInvId"></p>
+            <div class="mt-4 rounded-xl border border-line bg-[#FAFBFD] p-4">
+              <div class="w-24 h-24 mx-auto rounded-lg bg-white border border-line grid grid-cols-4 grid-rows-4 gap-0.5 p-1.5">
+                <span class="bg-ink rounded-[1px]"></span><span class="bg-ink rounded-[1px]"></span><span class="bg-white"></span><span class="bg-ink rounded-[1px]"></span>
+                <span class="bg-white"></span><span class="bg-ink rounded-[1px]"></span><span class="bg-ink rounded-[1px]"></span><span class="bg-white"></span>
+                <span class="bg-ink rounded-[1px]"></span><span class="bg-white"></span><span class="bg-ink rounded-[1px]"></span><span class="bg-ink rounded-[1px]"></span>
+                <span class="bg-ink rounded-[1px]"></span><span class="bg-white"></span><span class="bg-white"></span><span class="bg-ink rounded-[1px]"></span>
+              </div>
+              <p class="mt-3 text-[11px] text-muted font-medium tnum break-all" id="ppAddress"></p>
+              <p class="mt-1 text-[10px] text-faint">Send exactly the shown amount on the matching network.</p>
+            </div>
+            <div class="mt-5 flex gap-2.5">
+              <button class="btn-s flex-1" onclick="payerCancelPay()">Cancel</button>
+              <button class="btn-p flex-1" id="ppPayBtn" onclick="payerConfirmPay()">Pay</button>
+            </div>
+            <button class="mt-3 text-[11px] font-medium text-faint underline" onclick="payerFailPay()">Simulate failure / timeout (demo helper)</button>
+            <p class="mt-3 text-[10px] text-faint">Payment result returns to the invoice page</p>
+          </div>
+        </div>
+      </div></section>
+  </div>
+
+  <!-- ============ NO PERMISSION ============ -->
+  <div id="noPermRoot" class="hidden flex-1 min-h-screen">
+    <section data-bp-view="no-permission" data-bp-view-label="No Permission"><div class="min-h-screen bg-pagebg py-16 px-6">
+        <div class="max-w-[440px] mx-auto bg-white rounded-2xl border border-line shadow-card p-8 text-center" data-bp-anchor="no-permission-card">
+          <div class="w-12 h-12 mx-auto rounded-2xl bg-[#F2F4F7] text-muted flex items-center justify-center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <p class="mt-4 text-[14px] font-bold">You do not have permission to access this page.</p>
+          <p class="mt-1 text-[12px] text-muted">Open the invoice link from your email, or sign in via the Cobo enterprise portal.</p>
+          <button class="btn-s mt-5" onclick="go('payer-invoice');renderPayerInvoice()">Back to invoice link</button>
+        </div>
+      </div></section>
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div id="modalRoot">
+
+  <!-- Add / Edit Client Modal -->
+  <div id="panel-client-modal" class="backdrop hidden" role="dialog" data-bp-panel="client-modal" data-bp-panel-label="Add / Edit Client Modal" onclick="if(event.target===this)closePanel('client-modal')">
+    <div class="bg-white rounded-2xl w-[480px] max-w-full p-6" style="box-shadow:var(--tw-shadow,0 20px 24px -4px rgba(16,24,40,0.10),0 8px 8px -4px rgba(16,24,40,0.04))">
+      <p id="cmTitle" class="text-[15px] font-bold">Add Client</p>
+      <p class="mt-1 text-[12px] text-muted">Clients can be selected as the payer when creating invoices.</p>
+      <div class="mt-5 space-y-4">
+        <div>
+          <label class="text-[13px] font-medium">Client Email <span class="text-danger">*</span></label>
+          <input id="cmEmail" class="fld mt-1.5" placeholder="name@company.com">
+          <p id="cmEmailErr" class="errmsg hidden"></p>
+        </div>
+        <div>
+          <label class="text-[13px] font-medium">Client Type <span class="text-danger">*</span></label>
+          <div class="mt-2 flex items-center gap-6 text-[13px] text-body">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="cmType" value="Enterprise" class="accent-[#F79009]">Enterprise</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="cmType" value="Personal" class="accent-[#F79009]">Personal</label>
+          </div>
+          <p id="cmTypeErr" class="errmsg hidden"></p>
+        </div>
+        <div>
+          <label class="text-[13px] font-medium">Client Name <span class="text-danger">*</span></label>
+          <input id="cmName" class="fld mt-1.5" placeholder="Company or full name (3–100 characters)">
+          <p id="cmNameErr" class="errmsg hidden"></p>
+          <p class="hintmsg">3–100 characters. Letters, numbers, spaces and common symbols.</p>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-3">
+        <button class="btn-s" onclick="closePanel('client-modal')">Cancel</button>
+        <button class="btn-p" id="cmSubmit" onclick="submitClientModal()">Add Client</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Freeze / Unfreeze Confirm Modal -->
+  <div id="panel-freeze-modal" class="backdrop hidden" role="dialog" data-bp-panel="freeze-modal" data-bp-panel-label="Freeze / Unfreeze Client Confirm" onclick="if(event.target===this)closePanel('freeze-modal')">
+    <div class="bg-white rounded-2xl w-[480px] max-w-full p-6" style="box-shadow:0 20px 24px -4px rgba(16,24,40,0.10),0 8px 8px -4px rgba(16,24,40,0.04)">
+      <div class="flex items-start gap-3">
+        <div id="fmIcon" class="w-10 h-10 rounded-xl bg-primarysoft text-primary flex items-center justify-center shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        </div>
+        <div>
+          <p id="fmTitle" class="text-[15px] font-bold">Freeze client</p>
+          <p id="fmDesc" class="mt-1 text-[12px] text-muted leading-relaxed"></p>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-3">
+        <button class="btn-s" onclick="closePanel('freeze-modal')">Cancel</button>
+        <button class="btn-p" id="fmSubmit" onclick="submitFreeze()">Freeze</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Void Invoice Modal -->
+  <div id="panel-void-modal" class="backdrop hidden" role="dialog" data-bp-panel="void-modal" data-bp-panel-label="Void Invoice Modal" onclick="if(event.target===this)closePanel('void-modal')">
+    <div class="bg-white rounded-2xl w-[480px] max-w-full p-6" style="box-shadow:0 20px 24px -4px rgba(16,24,40,0.10),0 8px 8px -4px rgba(16,24,40,0.04)">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-dangersoft text-danger flex items-center justify-center shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        </div>
+        <div>
+          <p class="text-[15px] font-bold">Void invoice</p>
+          <p id="vmDesc" class="mt-1 text-[12px] text-muted leading-relaxed"></p>
+        </div>
+      </div>
+      <label class="mt-4 block text-[13px] font-medium">Void reason <span class="text-danger">*</span></label>
+      <textarea id="vmReason" class="fld mt-1.5 min-h-[72px]" placeholder="Enter a reason (3–500 characters)" oninput="document.getElementById('vmCount').textContent=this.value.length+' / 500'"></textarea>
+      <p id="vmErr" class="errmsg hidden">Please enter a void reason (3–500 characters).</p>
+      <div class="mt-1.5 flex items-center"><p class="text-[11px] text-faint">Required · 3–500 characters</p><p class="ml-auto text-[11px] text-faint tnum" id="vmCount">0 / 500</p></div>
+      <div class="mt-5 flex justify-end gap-3">
+        <button class="btn-s" onclick="closePanel('void-modal')">Cancel</button>
+        <button class="btn-d" id="vmSubmit" onclick="submitVoid()">Void invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Draft Modal -->
+  <div id="panel-delete-modal" class="backdrop hidden" role="dialog" data-bp-panel="delete-modal" data-bp-panel-label="Delete Draft Invoice Confirm" onclick="if(event.target===this)closePanel('delete-modal')">
+    <div class="bg-white rounded-2xl w-[480px] max-w-full p-6" style="box-shadow:0 20px 24px -4px rgba(16,24,40,0.10),0 8px 8px -4px rgba(16,24,40,0.04)">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-dangersoft text-danger flex items-center justify-center shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </div>
+        <div>
+          <p class="text-[15px] font-bold">Delete draft invoice</p>
+          <p class="mt-1 text-[12px] text-muted leading-relaxed">Are you sure you want to delete this draft invoice? This cannot be undone.</p>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-3">
+        <button class="btn-s" onclick="closePanel('delete-modal')">Cancel</button>
+        <button class="btn-d" id="dmSubmit" onclick="submitDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discontinue Recurring Modal -->
+  <div id="panel-discontinue-modal" class="backdrop hidden" role="dialog" data-bp-panel="discontinue-modal" data-bp-panel-label="Discontinue Recurring Confirm" onclick="if(event.target===this)closePanel('discontinue-modal')">
+    <div class="bg-white rounded-2xl w-[480px] max-w-full p-6" style="box-shadow:0 20px 24px -4px rgba(16,24,40,0.10),0 8px 8px -4px rgba(16,24,40,0.04)">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-primarysoft text-primary flex items-center justify-center shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <div>
+          <p class="text-[15px] font-bold">Discontinue recurring invoice</p>
+          <p id="dmDiscDesc" class="mt-1 text-[12px] text-muted leading-relaxed">Future invoices will stop being generated. Already generated invoices keep their current statuses.</p>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-3">
+        <button class="btn-s" onclick="closePanel('discontinue-modal')">Cancel</button>
+        <button class="btn-p" id="dmDiscSubmit" onclick="submitDiscontinue()">Yes,I want to stop it.</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CC Recipients Modal -->
+  <div id="panel-cc-modal" class="backdrop hidden" role="dialog" data-bp-panel="cc-modal" data-bp-panel-label="CC Recipients Modal" onclick="if(event.target===this)closePanel('cc-modal')">
+    <div class="bg-white rounded-2xl w-[480px] max-w-full p-6" style="box-shadow:0 20px 24px -4px rgba(16,24,40,0.10),0 8px 8px -4px rgba(16,24,40,0.04)">
+      <p class="text-[15px] font-bold">CC Recipients</p>
+      <p class="mt-1 text-[12px] text-muted">Up to 3 additional emails will receive the invoice email.</p>
+      <div class="mt-4 space-y-3" id="ccRows"></div>
+      <button id="ccAddBtn" class="mt-3 h-9 px-3 rounded-lg bg-white border border-line text-body text-[12px] font-semibold inline-flex items-center gap-2" onclick="ccAddRow()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add a recipient
+      </button>
+      <div class="mt-6 flex justify-end gap-3">
+        <button class="btn-s" onclick="closePanel('cc-modal')">Cancel</button>
+        <button class="btn-p" onclick="ccSave()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Same-client draft confirm -->
+  <div id="panel-draft-exists" class="backdrop hidden" role="dialog" data-bp-panel="draft-exists" data-bp-panel-label="Draft Exists Confirm" onclick="if(event.target===this)closePanel('draft-exists')">
+    <div class="bg-white rounded-2xl w-[480px] max-w-full p-6" style="box-shadow:0 20px 24px -4px rgba(16,24,40,0.10),0 8px 8px -4px rgba(16,24,40,0.04)">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-primarysoft text-primary flex items-center justify-center shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        </div>
+        <div>
+          <p class="text-[15px] font-bold">Draft exists for this client</p>
+          <p class="mt-1 text-[12px] text-muted leading-relaxed">You have a draft invoice for the same client, do you still want to continue?</p>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-3">
+        <button class="btn-s" onclick="closePanel('draft-exists')">Cancel</button>
+        <button class="btn-p" onclick="closePanel('draft-exists');doCreateSend()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications dropdown -->
+  <div id="panel-notifications" class="hidden fixed top-[64px] right-6 z-[70] w-[360px]" role="dialog" data-bp-panel="notifications" data-bp-panel-label="Notifications">
+    <div class="bg-white rounded-2xl border border-line p-2" style="box-shadow:0 4px 8px -2px rgba(16,24,40,0.10),0 2px 4px -2px rgba(16,24,40,0.06)">
+      <p class="px-3 pt-2 pb-1 text-[12px] font-bold">Notifications</p>
+      <button class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#F8FAFD] flex items-start gap-2.5" onclick="closePanel('notifications');openInvoiceDetail('CL001-20260904-e5f6')">
+        <span class="w-7 h-7 rounded-lg bg-successsoft text-successtext flex items-center justify-center shrink-0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        <span><span class="block text-[12px] font-semibold">Payment received · 300.000000 Tron-USDT</span><span class="block text-[11px] text-faint mt-0.5">Alpha Labs paid CL001-20260904-e5f6 · Sep 4, 2026</span></span>
+      </button>
+      <button class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#F8FAFD] flex items-start gap-2.5" onclick="closePanel('notifications');openSettlementDetail('SR-20260902-b2c3')">
+        <span class="w-7 h-7 rounded-lg bg-infosoft text-info flex items-center justify-center shrink-0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span>
+        <span><span class="block text-[12px] font-semibold">Settlement succeeded · SR-20260902-b2c3</span><span class="block text-[11px] text-faint mt-0.5">300.000000 Tron-USDT settled to Operations Wallet</span></span>
+      </button>
+      <button class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#F8FAFD] flex items-start gap-2.5" onclick="closePanel('notifications');openInvoiceDetail('CL001-20260902-b2c3')">
+        <span class="w-7 h-7 rounded-lg bg-primarysoft text-primary flex items-center justify-center shrink-0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+        <span><span class="block text-[12px] font-semibold">Invoice still sending</span><span class="block text-[11px] text-faint mt-0.5">Please contact the super admin if remains in sending status for 24 hours.</span></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TOASTS ============ -->
+<div id="toastRoot" class="fixed top-5 right-5 z-[80] space-y-3"></div>
+
+<script>
+/* ================= CORE STATE ================= */
+const TODAY = '2026-09-07';
+const state = {
+  role: 'merchant',
+  view: 'dashboard',
+  invFilters: { q: '', status: 'All', type: 'All', token: 'All', chip: 'All' },
+  cliFilters: { q: '', type: 'All', status: 'All' },
+  stlFilters: { q: '', status: 'All', token: 'All' },
+  stlDetailFilter: { q: '', status: 'All' },
+  dash: { from: '2026-08-21', to: '2026-09-04', unreceived: '30', month: '2026-09' },
+  detailInvoiceId: null,
+  detailSettlementId: null,
+  formMode: 'create',        // create | edit | duplicate
+  formId: null,              // invoice id being edited/duplicated
+  form: null,                // working form model
+  stlDraft: null,            // settlement request draft
+  payerInvoiceId: 'CL002-20260903-c3d4',
+  payerToken: null,
+};
+
+/* ================= ROUTER ================= */
+const TITLES = {
+  'dashboard': ['Dashboard', 'Overview of invoice collections, outstanding amounts and settlements.'],
+  'clients': ['Clients', 'Manage payer clients used when creating invoices.'],
+  'invoices': ['Invoices', 'Track, create and manage invoices across their full lifecycle.'],
+  'invoice-form': ['Invoices', 'Create, edit or duplicate an invoice.'],
+  'invoice-detail': ['Invoices', 'Full invoice information and lifecycle actions.'],
+  'settlements': ['Settlement', 'Track settlement requests and start a new settlement.'],
+  'settlement-request': ['Settlement', 'Select token, wallet address and invoices to settle.'],
+  'settlement-confirm': ['Settlement', 'Review amounts and estimated fees before submitting.'],
+  'settlement-detail': ['Settlement', 'Settlement request details and linked invoice results.'],
+};
+const NAV_OF = { 'dashboard':'dashboard','clients':'clients','invoices':'invoices','invoice-form':'invoices','invoice-detail':'invoices','settlements':'settlements','settlement-request':'settlements','settlement-confirm':'settlements','settlement-detail':'settlements' };
+
+function go(view) {
+  if (state.role === 'payer' && !view.startsWith('payer') && view !== 'no-permission') view = 'no-permission';
+  state.view = view;
+  document.querySelectorAll('[data-bp-view]').forEach(v => v.classList.add('hidden'));
+  const el = document.querySelector(`[data-bp-view="${view}"]`);
+  if (el) el.classList.remove('hidden');
+  const isPayer = state.role === 'payer' || view.startsWith('payer');
+  document.getElementById('sidebar').classList.toggle('hidden', isPayer);
+  document.getElementById('maincol').classList.toggle('hidden', isPayer);
+  document.getElementById('payerRoot').classList.toggle('hidden', !isPayer);
+  document.getElementById('noPermRoot').classList.toggle('hidden', view !== 'no-permission');
+  if (!isPayer) {
+    const nav = NAV_OF[view] || 'dashboard';
+    document.querySelectorAll('#sidebar .navitem').forEach(b => {
+      const on = b.dataset.bpNav === nav;
+      b.classList.toggle('active', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    const t = TITLES[view] || TITLES.dashboard;
+    document.getElementById('pageTitle').textContent = t[0];
+    document.getElementById('pageDesc').textContent = t[1];
+  }
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('[data-bp-nav]').forEach(b => b.addEventListener('click', () => go(b.dataset.bpNav)));
+
+/* ================= ROLE SWITCH (demo helper) ================= */
+function setRole(role) {
+  state.role = role;
+  document.body.dataset.bpRoleCurrent = role;
+  document.querySelectorAll('[data-bp-role]').forEach(b => b.classList.toggle('on', b.dataset.bpRole === role));
+  if (role === 'payer') { go('payer-invoice'); renderPayerInvoice(); }
+  else go('dashboard');
+}
+
+/* ================= TOASTS ================= */
+const TOAST_ICON = {
+  success: '<span class="w-6 h-6 rounded-full bg-successsoft text-successtext flex items-center justify-center shrink-0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>',
+  error: '<span class="w-6 h-6 rounded-full bg-dangersoft text-dangertext flex items-center justify-center shrink-0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span>',
+  warn: '<span class="w-6 h-6 rounded-full bg-primarysoft text-primary flex items-center justify-center shrink-0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>',
+  info: '<span class="w-6 h-6 rounded-full bg-infosoft text-info flex items-center justify-center shrink-0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>',
+};
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.borderColor = { success: '#A6F4C5', error: '#FECDCA', warn: '#FEE9C0', info: '#D8E4FF' }[type];
+  t.innerHTML = TOAST_ICON[type] + `<p>${msg}</p>`;
+  document.getElementById('toastRoot').appendChild(t);
+  setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 320); }, 4000);
+}
+
+/* ================= MODAL SYSTEM ================= */
+function openPanel(id) {
+  const m = document.getElementById('panel-' + id);
+  if (m) m.classList.remove('hidden');
+}
+function closePanel(id) {
+  const m = document.getElementById('panel-' + id);
+  if (m) m.classList.add('hidden');
+}
+function togglePanel(id) {
+  const m = document.getElementById('panel-' + id);
+  if (m) m.classList.toggle('hidden');
+}
+function closeAllPanels() { document.querySelectorAll('[data-bp-panel]').forEach(m => m.classList.add('hidden')); }
+
+/* ================= SHARED RENDER HELPERS ================= */
+const TOKENS = ['Tron-USDT', 'Tron-USDC', 'ETH-USDT', 'ETH-USDC'];
+const TOKEN_NET = { 'Tron-USDT': 'TRON NETWORK', 'Tron-USDC': 'TRON NETWORK', 'ETH-USDT': 'ETHEREUM', 'ETH-USDC': 'ETHEREUM' };
+function tkdot(t) { return `<span class="tkdot ${t.includes('USDT') ? 'u' : 'c'}">${t.includes('USDT') ? 'T' : 'C'}</span>`; }
+function tkchip(t) { return `<span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-body bg-white border border-line rounded-full pl-1 pr-2.5 py-0.5">${tkdot(t)}${t}</span>`; }
+function fmt6(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }); }
+function fmt2(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fdate(iso) { if (!iso) return '—'; const [y, m, d] = iso.split('-'); const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m - 1]; return `${M} ${+d}, ${y}`; }
+function fdt(iso, hm) { return fdate(iso) + (hm ? ' ' + hm : ''); }
+
+const INV_BADGE = {
+  'Draft': 'text-muted bg-[#F2F4F7] !border-line',
+  'Sending': 'text-infotext bg-infosoft !border-infoborder',
+  'Pending': 'text-primaryactive bg-primarysoft !border-primaryborder',
+  'Received': 'text-successtext bg-successsoft !border-successborder',
+  'Voiding': 'text-body bg-[#F2F4F7] !border-line',
+  'Voided': 'text-faint bg-[#F2F4F7] !border-line line-through decoration-faint/60',
+  'Settling': 'text-teal bg-successsoft !border-successborder',
+  'Settled': 'text-white bg-teal',
+  'Settlement Failed': 'text-dangerdark bg-dangersoft !border-dangerborder',
+  'Overdue': 'text-dangertext bg-dangersoft !border-dangerborder',
+  'Error': 'text-white bg-danger',
+};
+const STL_BADGE = {
+  'In Progress': 'text-infotext bg-infosoft !border-infoborder',
+  'Success': 'text-successtext bg-successsoft !border-successborder',
+  'Failed': 'text-dangerdark bg-dangersoft !border-dangerborder',
+  'Partial Success': 'text-primarytext bg-primarysofter !border-primaryborder',
+};
+function ibadge(s) {
+  const tip = (s === 'Sending') ? ' title="Please contact the super admin if remains in sending status for 24 hours."' : (s === 'Voiding') ? ' title="Please contact the super admin if remains in voiding status for 24 hours."' : '';
+  return `<span class="badge ${INV_BADGE[s]}"${tip}>${s}</span>`;
+}
+function sbadge(s) { return `<span class="badge ${STL_BADGE[s]}">${s}</span>`; }
+function cbadge(s) {
+  return s === 'Active'
+    ? '<span class="badge text-successtext bg-successsoft !border-successborder"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span>'
+    : '<span class="badge text-muted bg-[#F2F4F7] !border-line"><span class="w-1.5 h-1.5 rounded-full bg-faint"></span>Frozen</span>';
+}
+function rsbadge(s) {
+  const c = { 'Active': 'text-successtext bg-successsoft !border-successborder', 'Discontinued': 'text-muted bg-[#F2F4F7] !border-line', 'Completed': 'text-teal bg-successsoft !border-successborder' }[s];
+  return `<span class="badge ${c}">${s}</span>`;
+}
+function spinner() { return '<svg class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>'; }
+/* ================= MOCK DATA ================= */
+const DB = {
+  clients: [
+    { id: 'CL-001', createTime: '2026-09-01 10:00', email: 'ap@alpha.com', type: 'Enterprise', name: 'Alpha Labs', status: 'Active' },
+    { id: 'CL-002', createTime: '2026-09-02 11:30', email: 'ben@example.com', type: 'Personal', name: 'Ben Miller', status: 'Active' },
+    { id: 'CL-003', createTime: '2026-09-03 09:20', email: 'finance@frozen.io', type: 'Enterprise', name: 'Frozen Finance', status: 'Frozen' },
+    { id: 'CL-004', createTime: '2026-09-04 14:10', email: 'ops@nexon.dev', type: 'Enterprise', name: 'Nexon Digital', status: 'Active' },
+    { id: 'CL-005', createTime: '2026-09-05 09:45', email: 'maya@orbitlabs.io', type: 'Personal', name: 'Maya Chen', status: 'Active' },
+    { id: 'CL-006', createTime: '2026-09-06 16:22', email: 'billing@quanta.fi', type: 'Enterprise', name: 'Quanta Systems', status: 'Active' },
+    { id: 'CL-007', createTime: '2026-09-07 11:05', email: 'tom@greenfield.app', type: 'Personal', name: 'Tom Green', status: 'Active' },
+    { id: 'CL-008', createTime: '2026-09-08 13:40', email: 'accounts@ledgerline.co', type: 'Enterprise', name: 'Ledgerline Ltd', status: 'Frozen' },
+  ],
+  series: [
+    { id: 'RS-001', status: 'Active', frequency: 'Monthly', endType: 'No End Date Manual Stop', endDate: null, nextSend: '2026-10-01', clientId: 'CL-001' },
+    { id: 'RS-002', status: 'Discontinued', frequency: 'Weekly', endType: 'No End Date Manual Stop', endDate: null, nextSend: null, clientId: 'CL-002' },
+    { id: 'RS-003', status: 'Completed', frequency: 'Quarterly', endType: 'End Date', endDate: '2026-09-01', nextSend: null, clientId: 'CL-001' },
+    { id: 'RS-004', status: 'Active', frequency: 'Weekly', endType: 'No End Date Manual Stop', endDate: null, nextSend: '2026-09-14', clientId: 'CL-007' },
+  ],
+  wallets: [
+    { id: 'WAL-001', name: 'Operations Wallet', addresses: { 'Tron-USDT': 'TAbcDefGh1234567890Demo001', 'Tron-USDC': 'TAbcDefGh1234567890Demo001' } },
+    { id: 'WAL-002', name: 'Treasury Wallet', addresses: { 'ETH-USDT': '0xAbcDef0123456789abcdefDemo002', 'ETH-USDC': '0xAbcDef0123456789abcdefDemo002' } },
+    { id: 'WAL-003', name: 'Backup Wallet', addresses: { 'Tron-USDT': 'TXyzBackupAddr9876543Demo003', 'Tron-USDC': 'TXyzBackupAddr9876543Demo003', 'ETH-USDT': '0x987BackupFedcbaDemo003', 'ETH-USDC': '0x987BackupFedcbaDemo003' } },
+  ],
+  invoices: [
+    { id: 'CL001-20260901-a1b2', type: 'Regular', status: 'Draft', createTime: '2026-09-01 09:12', issueDate: '2026-09-01', dueDate: '2026-10-01', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 100 }, category: 'Consulting', memo: 'September advisory retainer.', cc: [], recurring: null, items: [{ name: 'Advisory retainer · Sep', qty: 1, price: { 'Tron-USDT': 100 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260902-b2c3', type: 'Regular', status: 'Sending', createTime: '2026-09-02 10:30', issueDate: '2026-09-02', dueDate: '2026-10-02', clientId: 'CL-001', tokens: ['Tron-USDT', 'ETH-USDC'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 250, 'ETH-USDC': 250 }, category: 'Services', memo: '', cc: ['audit@alpha.com'], recurring: null, items: [{ name: 'Integration sprint 2', qty: 1, price: { 'Tron-USDT': 250, 'ETH-USDC': 250 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL002-20260903-c3d4', type: 'Regular', status: 'Pending', createTime: '2026-09-03 16:08', issueDate: '2026-09-03', dueDate: '2026-10-03', clientId: 'CL-002', tokens: ['Tron-USDC', 'ETH-USDC'], primaryToken: 'Tron-USDC', amounts: { 'Tron-USDC': 80, 'ETH-USDC': 80 }, category: 'Design', memo: 'Brand refresh — milestone 1.', cc: [], recurring: null, items: [{ name: 'Brand refresh · milestone 1', qty: 1, price: { 'Tron-USDC': 80, 'ETH-USDC': 80 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL002-20260801-d4e5', type: 'Regular', status: 'Overdue', createTime: '2026-08-01 14:47', issueDate: '2026-08-01', dueDate: '2026-08-31', clientId: 'CL-002', tokens: ['ETH-USDT'], primaryToken: 'ETH-USDT', amounts: { 'ETH-USDT': 120 }, category: 'Support', memo: '', cc: [], recurring: null, items: [{ name: 'Support package · Jul', qty: 12, price: { 'ETH-USDT': 10 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260904-e5f6', type: 'Regular', status: 'Received', createTime: '2026-09-04 10:24', issueDate: '2026-09-04', dueDate: '2026-10-04', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 300 }, category: 'Consulting', memo: '', cc: [], recurring: null, paidOn: '2026-09-04', items: [{ name: 'On-chain audit · phase 1', qty: 1, price: { 'Tron-USDT': 300 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260905-f6g7', type: 'Regular', status: 'Settling', createTime: '2026-09-05 11:02', issueDate: '2026-09-05', dueDate: '2026-10-05', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 300 }, category: 'Consulting', memo: '', cc: [], recurring: null, settlementRequestId: 'SR-20260901-a1b2', items: [{ name: 'On-chain audit · phase 2', qty: 1, price: { 'Tron-USDT': 300 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260908-v2w3', type: 'Regular', status: 'Settling', createTime: '2026-09-08 09:40', issueDate: '2026-09-08', dueDate: '2026-10-08', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 200 }, category: 'Consulting', memo: '', cc: [], recurring: null, settlementRequestId: 'SR-20260901-a1b2', items: [{ name: 'Monitoring setup', qty: 2, price: { 'Tron-USDT': 100 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260906-g7h8', type: 'Regular', status: 'Settled', createTime: '2026-09-06 15:55', issueDate: '2026-09-06', dueDate: '2026-10-06', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 300 }, category: 'Consulting', memo: '', cc: [], recurring: null, settlementRequestId: 'SR-20260902-b2c3', items: [{ name: 'On-chain audit · phase 3', qty: 1, price: { 'Tron-USDT': 300 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260910-y5z6', type: 'Regular', status: 'Settled', createTime: '2026-09-10 10:15', issueDate: '2026-09-10', dueDate: '2026-10-10', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 300 }, category: 'Consulting', memo: '', cc: [], recurring: null, settlementRequestId: 'SR-20260904-d4e5', items: [{ name: 'Audit addendum A', qty: 1, price: { 'Tron-USDT': 300 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260910-z6a7', type: 'Regular', status: 'Settled', createTime: '2026-09-10 10:18', issueDate: '2026-09-10', dueDate: '2026-10-10', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 400 }, category: 'Consulting', memo: '', cc: [], recurring: null, settlementRequestId: 'SR-20260904-d4e5', items: [{ name: 'Audit addendum B', qty: 2, price: { 'Tron-USDT': 200 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260907-h8i9', type: 'Regular', status: 'Settlement Failed', createTime: '2026-09-07 13:21', issueDate: '2026-09-07', dueDate: '2026-10-07', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 200 }, category: 'Consulting', memo: '', cc: [], recurring: null, settlementRequestId: 'SR-20260904-d4e5', items: [{ name: 'Pen-test retest', qty: 1, price: { 'Tron-USDT': 200 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL002-20260908-i9j0', type: 'Regular', status: 'Voiding', createTime: '2026-09-08 17:44', issueDate: '2026-09-08', dueDate: '2026-10-08', clientId: 'CL-002', tokens: ['ETH-USDC'], primaryToken: 'ETH-USDC', amounts: { 'ETH-USDC': 60 }, category: 'Design', memo: '', cc: [], recurring: null, items: [{ name: 'Icon set revision', qty: 1, price: { 'ETH-USDC': 60 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL002-20260909-j0k1', type: 'Regular', status: 'Voided', createTime: '2026-09-09 08:33', issueDate: '2026-09-09', dueDate: '2026-10-09', clientId: 'CL-002', tokens: ['ETH-USDC'], primaryToken: 'ETH-USDC', amounts: { 'ETH-USDC': 60 }, category: 'Design', memo: '', cc: [], recurring: null, voidReason: 'Client requested a corrected billing address before payment.', items: [{ name: 'Landing illustrations', qty: 1, price: { 'ETH-USDC': 60 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL003-20260910-k1l2', type: 'Regular', status: 'Error', createTime: '2026-09-10 12:09', issueDate: '2026-09-10', dueDate: '2026-10-10', clientId: 'CL-003', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 99 }, category: 'Subscription', memo: '', cc: [], recurring: null, items: [{ name: 'SaaS subscription · Sep', qty: 1, price: { 'Tron-USDT': 99 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260911-l2m3', type: 'Recurring', status: 'Pending', createTime: '2026-09-11 09:00', issueDate: '2026-09-11', dueDate: '2026-10-11', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 50 }, category: 'Subscription', memo: 'Monthly analytics subscription.', cc: [], recurring: { seriesId: 'RS-001' }, items: [{ name: 'Analytics subscription', qty: 1, price: { 'Tron-USDT': 50 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260912-m3n4', type: 'Regular', status: 'Draft', createTime: '2026-09-12 10:26', issueDate: '2026-09-12', dueDate: '2026-10-12', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 1 }, category: 'Test', memo: 'Boundary: amount equals 1.', cc: [], recurring: null, items: [{ name: 'Micro charge', qty: 1, price: { 'Tron-USDT': 1 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL001-20260913-n4o5', type: 'Regular', status: 'Draft', createTime: '2026-09-13 11:11', issueDate: '2026-09-13', dueDate: '2026-10-13', clientId: 'CL-001', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 0.999999 }, category: 'Test', memo: 'Boundary: below 1 — saving should fail.', cc: [], recurring: null, items: [{ name: 'Micro charge', qty: 1, price: { 'Tron-USDT': 0.999999 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL004-20260903-p5q6', type: 'Regular', status: 'Received', createTime: '2026-09-03 15:30', issueDate: '2026-09-03', dueDate: '2026-10-03', clientId: 'CL-004', tokens: ['Tron-USDC'], primaryToken: 'Tron-USDC', amounts: { 'Tron-USDC': 450 }, category: 'Development', memo: '', cc: [], recurring: null, paidOn: '2026-09-05', items: [{ name: 'Wallet integration · sprint 4', qty: 1, price: { 'Tron-USDC': 450 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL005-20260904-q6r7', type: 'Regular', status: 'Received', createTime: '2026-09-04 18:12', issueDate: '2026-09-04', dueDate: '2026-10-04', clientId: 'CL-005', tokens: ['ETH-USDT'], primaryToken: 'ETH-USDT', amounts: { 'ETH-USDT': 1200 }, category: 'Consulting', memo: '', cc: [], recurring: null, paidOn: '2026-09-06', items: [{ name: 'Tokenomics workshop', qty: 3, price: { 'ETH-USDT': 400 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL006-20260905-r7s8', type: 'Regular', status: 'Pending', createTime: '2026-09-05 14:50', issueDate: '2026-09-05', dueDate: '2026-10-05', clientId: 'CL-006', tokens: ['ETH-USDC'], primaryToken: 'ETH-USDC', amounts: { 'ETH-USDC': 2500 }, category: 'Development', memo: 'Milestone 2 of 3.', cc: [], recurring: null, items: [{ name: 'Custody module · milestone 2', qty: 1, price: { 'ETH-USDC': 2500 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL006-20260906-s8t9', type: 'Regular', status: 'Settlement Failed', createTime: '2026-09-06 09:05', issueDate: '2026-09-06', dueDate: '2026-10-06', clientId: 'CL-006', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 780 }, category: 'Development', memo: '', cc: [], recurring: null, items: [{ name: 'API hardening', qty: 1, price: { 'Tron-USDT': 780 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL004-20260909-x4y5', type: 'Regular', status: 'Settlement Failed', createTime: '2026-09-09 16:37', issueDate: '2026-09-09', dueDate: '2026-10-09', clientId: 'CL-004', tokens: ['ETH-USDC'], primaryToken: 'ETH-USDC', amounts: { 'ETH-USDC': 60 }, category: 'Development', memo: '', cc: [], recurring: null, settlementRequestId: 'SR-20260903-c3d4', items: [{ name: 'Gas fee reimbursement', qty: 1, price: { 'ETH-USDC': 60 }, discount: 0, tax: 0 }], discount: 0 },
+    { id: 'CL007-20260907-t9u0', type: 'Recurring', status: 'Pending', createTime: '2026-09-07 10:00', issueDate: '2026-09-07', dueDate: '2026-10-07', clientId: 'CL-007', tokens: ['Tron-USDT'], primaryToken: 'Tron-USDT', amounts: { 'Tron-USDT': 65 }, category: 'Subscription', memo: 'Weekly reporting subscription.', cc: [], recurring: { seriesId: 'RS-004' }, items: [{ name: 'Weekly reporting', qty: 1, price: { 'Tron-USDT': 65 }, discount: 0, tax: 0 }], discount: 0 },
+  ],
+  settlements: [
+    { id: 'SR-20260901-a1b2', createTime: '2026-09-01 10:20', status: 'In Progress', token: 'Tron-USDT', walletId: 'WAL-001', walletAddress: 'TAbcDefGh1234567890Demo001', invoiceIds: ['CL001-20260905-f6g7', 'CL001-20260908-v2w3'], amount: 500, coboFee: 2, serviceFee: 10, totalFee: 12 },
+    { id: 'SR-20260902-b2c3', createTime: '2026-09-02 09:14', status: 'Success', token: 'Tron-USDT', walletId: 'WAL-001', walletAddress: 'TAbcDefGh1234567890Demo001', invoiceIds: ['CL001-20260906-g7h8'], amount: 300, coboFee: 1, serviceFee: 6, totalFee: 7 },
+    { id: 'SR-20260903-c3d4', createTime: '2026-09-03 11:48', status: 'Failed', token: 'ETH-USDC', walletId: 'WAL-002', walletAddress: '0xAbcDef0123456789abcdefDemo002', invoiceIds: ['CL004-20260909-x4y5'], amount: 60, coboFee: 0.8, serviceFee: 1.2, totalFee: 2 },
+    { id: 'SR-20260904-d4e5', createTime: '2026-09-04 13:02', status: 'Partial Success', token: 'Tron-USDT', walletId: 'WAL-001', walletAddress: 'TAbcDefGh1234567890Demo001', invoiceIds: ['CL001-20260910-y5z6', 'CL001-20260910-z6a7', 'CL001-20260907-h8i9'], amount: 900, coboFee: 3, serviceFee: 18, totalFee: 21 },
+  ],
+};
+function inv(id) { return DB.invoices.find(i => i.id === id); }
+function cli(id) { return DB.clients.find(c => c.id === id); }
+function clientName(id) { const c = cli(id); return c ? c.name : '—'; }
+function newInvId(clientId) {
+  const c = cli(clientId); const short = c ? c.id.replace('-', '') : 'CUST';
+  return `${short}-${TODAY.replace(/-/g, '')}-${Math.random().toString(16).slice(2, 6)}`;
+}
+const INPROGRESS_FOR_FREEZE = ['Pending', 'Received', 'Settling', 'Overdue', 'Settlement Failed'];
+/* ================= DASHBOARD ================= */
+const DASH_DAYS = {
+  '15': [
+    { d: 'Aug 21', s: [36, 42, 30, 0, 0] }, { d: '22', s: [0, 24, 21, 0, 12] }, { d: '23', s: [0, 0, 18, 0, 0] },
+    { d: '24', s: [54, 48, 42, 0, 0] }, { d: '25', s: [0, 36, 36, 12, 12] }, { d: '26', s: [0, 18, 30, 0, 0] },
+    { d: '27', s: [72, 54, 48, 0, 0] }, { d: '28', s: [0, 30, 24, 0, 12] }, { d: '29', s: [0, 0, 30, 0, 0] },
+    { d: '30', s: [84, 60, 48, 0, 0] }, { d: '31', s: [0, 36, 30, 18, 0] }, { d: 'Sep 1', s: [48, 42, 36, 0, 0] },
+    { d: '2', s: [0, 48, 39, 0, 18] }, { d: '3', s: [54, 54, 48, 0, 0] }, { d: '4', s: [0, 36, 54, 0, 0] },
+  ],
+  '7': [
+    { d: 'Aug 29', s: [21, 24, 17, 0, 0] }, { d: '30', s: [0, 14, 12, 0, 7] }, { d: '31', s: [32, 28, 25, 0, 0] },
+    { d: 'Sep 1', s: [21, 21, 21, 7, 7] }, { d: '2', s: [42, 32, 28, 0, 0] }, { d: '3', s: [0, 18, 14, 0, 7] }, { d: '4', s: [28, 25, 21, 0, 0] },
+  ],
+};
+const SEG_COLORS = ['#0E9384', '#12B76A', '#F79009', '#F04438', '#98A2B3'];
+function renderChart() {
+  const from = document.getElementById('dashFrom').value, to = document.getElementById('dashTo').value;
+  const days = Math.round((new Date(to) - new Date(from)) / 86400000) + 1;
+  const key = days <= 7 ? '7' : '15';
+  const data = DASH_DAYS[key];
+  document.getElementById('chartY').innerHTML = [240, 180, 120, 60, 0].map((p, i) =>
+    `<span class="absolute right-0 translate-y-1/2" style="bottom:${p}px">${['$4k', '$3k', '$2k', '$1k', '$0'][i]}</span>`).join('');
+  document.getElementById('chartPlot').innerHTML =
+    [0, 60, 120, 180, 240].map(p => `<div class="gridline" style="bottom:${p}px"></div>`).join('') +
+    `<div class="absolute inset-0 flex items-end gap-[6px]">` + data.map(day =>
+      `<div class="flex-1 rounded-t-[4px] overflow-hidden flex flex-col-reverse">` +
+      day.s.map((h, i) => h ? `<div style="height:${h}px;background:${SEG_COLORS[i]}"></div>` : '').join('') + `</div>`
+    ).join('') + `</div>`;
+  document.getElementById('chartX').innerHTML = data.map(day => `<span class="flex-1 text-center">${day.d}</span>`).join('');
+  const fl = fdate(from).replace(', 2026', ''), tl = fdate(to);
+  document.getElementById('kpiSentMeta').textContent = `${fl} – ${tl} · ${key === '7' ? 14 : 32} invoices sent`;
+  document.getElementById('kpiSentAmt').textContent = key === '7' ? '$12,340.00' : '$24,900.00';
+}
+function applyDashRange() {
+  const from = document.getElementById('dashFrom').value, to = document.getElementById('dashTo').value;
+  if (!from || !to) return;
+  const days = Math.round((new Date(to) - new Date(from)) / 86400000) + 1;
+  if (days > 15 || days < 1) { toast('You cannot select a date range longer than 15 days.', 'warn'); return; }
+  renderChart();
+  toast('Dashboard date range applied.', 'info');
+}
+const UNREC = {
+  '30': { total: '$12,540.00', count: '17 open invoices awaiting payment', nd: '$9,020.00', ndc: '14 invoices', od: '$3,520.00', odc: '3 invoices past due date', pct: 72, warn: '3 invoices are past their due date. Send a reminder from the Invoice list.' },
+  '90': { total: '$18,910.00', count: '24 open invoices awaiting payment', nd: '$13,980.00', ndc: '19 invoices', od: '$4,930.00', odc: '5 invoices past due date', pct: 74, warn: '5 invoices are past their due date. Send a reminder from the Invoice list.' },
+  '120': { total: '$21,306.00', count: '27 open invoices awaiting payment', nd: '$15,546.00', ndc: '21 invoices', od: '$5,760.00', odc: '6 invoices past due date', pct: 73, warn: '6 invoices are past their due date. Send a reminder from the Invoice list.' },
+  'All': { total: '$23,480.00', count: '29 open invoices awaiting payment', nd: '$16,900.00', ndc: '22 invoices', od: '$6,580.00', odc: '7 invoices past due date', pct: 72, warn: '7 invoices are past their due date. Send a reminder from the Invoice list.' },
+};
+function setUnrec(v) {
+  state.dash.unreceived = v;
+  document.querySelectorAll('#unrecTabs button').forEach(b => {
+    const on = b.dataset.v === v;
+    b.classList.toggle('bg-white', on); b.classList.toggle('shadow-card', on); b.classList.toggle('text-primaryactive', on); b.classList.toggle('text-muted', !on);
+  });
+  const u = UNREC[v];
+  document.getElementById('unrecTotal').textContent = u.total;
+  document.getElementById('unrecCount').textContent = u.count;
+  document.getElementById('unrecBar').innerHTML = `<div class="bg-primary" style="width:${u.pct}%"></div><div class="bg-danger" style="width:${100 - u.pct}%"></div>`;
+  document.getElementById('unrecSplit').innerHTML = `
+    <div class="flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full bg-primary shrink-0"></span>
+      <div class="min-w-0"><p class="text-[13px] font-semibold">Not due</p><p class="text-[11px] text-faint font-medium">${u.ndc}</p></div>
+      <p class="ml-auto text-[15px] font-bold tnum">${u.nd}</p></div>
+    <div class="flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full bg-danger shrink-0"></span>
+      <div class="min-w-0"><p class="text-[13px] font-semibold">Overdue</p><p class="text-[11px] text-faint font-medium">${u.odc}</p></div>
+      <p class="ml-auto text-[15px] font-bold tnum text-dangertext">${u.od}</p></div>`;
+  document.getElementById('unrecWarn').textContent = u.warn;
+  document.getElementById('kpiUnrecAmt').textContent = u.total;
+  document.getElementById('kpiUnrecMeta').innerHTML = `<span class="text-dangertext font-semibold tnum">${u.od} overdue</span><span class="text-faint"> · ${v === 'All' ? 'all time' : 'last ' + v + ' days'}</span>`;
+}
+const REC_MONTH = {
+  '2026-09': { label: 'September 2026', total: '$26,780.50', count: '22 invoices paid', kpi: '$26,780.50', kpiMeta: '22 invoices · 4 payment tokens', rows: [
+    { t: 'Tron-USDT', amt: '9,800.000000', usd: '≈ $9,800.00 · 8 invoices', w: 100 },
+    { t: 'ETH-USDT', amt: '7,230.500000', usd: '≈ $7,230.50 · 6 invoices', w: 74 },
+    { t: 'Tron-USDC', amt: '6,400.000000', usd: '≈ $6,400.00 · 5 invoices', w: 65 },
+    { t: 'ETH-USDC', amt: '3,350.000000', usd: '≈ $3,350.00 · 3 invoices', w: 34 } ] },
+  '2026-08': { label: 'August 2026', total: '$18,240.00', count: '16 invoices paid', kpi: '$18,240.00', kpiMeta: '16 invoices · 3 payment tokens', rows: [
+    { t: 'Tron-USDT', amt: '8,900.000000', usd: '≈ $8,900.00 · 7 invoices', w: 100 },
+    { t: 'ETH-USDT', amt: '5,740.000000', usd: '≈ $5,740.00 · 5 invoices', w: 64 },
+    { t: 'Tron-USDC', amt: '3,600.000000', usd: '≈ $3,600.00 · 4 invoices', w: 40 } ] },
+  '2026-07': { label: 'July 2026', total: '$9,120.00', count: '9 invoices paid', kpi: '$9,120.00', kpiMeta: '9 invoices · 2 payment tokens', rows: [
+    { t: 'Tron-USDT', amt: '5,300.000000', usd: '≈ $5,300.00 · 5 invoices', w: 100 },
+    { t: 'ETH-USDC', amt: '3,820.000000', usd: '≈ $3,820.00 · 4 invoices', w: 72 } ] },
+};
+function renderReceivedToken() {
+  const m = document.getElementById('dashMonth').value;
+  const r = REC_MONTH[m];
+  document.getElementById('recTokenRows').innerHTML = r.rows.map(x => `
+    <div class="flex items-center gap-4">
+      <div class="w-[168px] shrink-0 flex items-center gap-2.5">
+        <span class="w-7 h-7 rounded-full ${x.t.includes('USDT') ? 'bg-successsoft text-usdt' : 'bg-usdcsoft text-usdc'} flex items-center justify-center text-[11px] font-extrabold shrink-0">${x.t.includes('USDT') ? 'T' : 'C'}</span>
+        <div class="leading-tight"><p class="text-[13px] font-semibold">${x.t}</p><p class="text-[10px] text-faint font-semibold tracking-wide">${TOKEN_NET[x.t]}</p></div>
+      </div>
+      <div class="flex-1 h-2.5 rounded-full bg-[#F2F4F7] overflow-hidden"><div class="h-full rounded-full ${x.t.includes('USDT') ? 'bg-usdt' : 'bg-usdc'}" style="width:${x.w}%"></div></div>
+      <div class="w-[190px] shrink-0 text-right leading-tight"><p class="text-[14px] font-bold tnum">${x.amt}</p><p class="text-[11px] text-faint font-medium tnum">${x.usd}</p></div>
+    </div>`).join('');
+  document.getElementById('recTotalLbl').textContent = `Total received in ${r.label}`;
+  document.getElementById('recTotalAmt').textContent = r.total;
+  document.getElementById('recTotalCnt').textContent = r.count;
+  document.getElementById('kpiRecMonth').textContent = m === '2026-09' ? 'Sep 2026' : m === '2026-08' ? 'Aug 2026' : 'Jul 2026';
+  document.getElementById('kpiRecAmt').textContent = r.kpi;
+  document.getElementById('kpiRecMeta').textContent = r.kpiMeta;
+}
+function renderLastReceived() {
+  const rec = DB.invoices.filter(i => ['Received', 'Settling', 'Settled', 'Settlement Failed'].includes(i.status) && i.paidOn)
+    .sort((a, b) => b.paidOn.localeCompare(a.paidOn))[0];
+  if (!rec) return;
+  const amt = rec.amounts[rec.primaryToken];
+  document.getElementById('lastRecAmt').textContent = fmt6(amt);
+  document.getElementById('lastRecToken').innerHTML = `${rec.primaryToken} <span class="text-faint font-medium">· ≈ $${fmt2(amt)}</span>`;
+  const stl = rec.settlementRequestId ? `In ${rec.settlementRequestId}` : (rec.status === 'Received' ? 'Not yet requested' : rec.status);
+  document.getElementById('lastRecMeta').innerHTML = `
+    <div class="flex items-center gap-3"><p class="w-[86px] shrink-0 text-faint font-medium">From</p><p class="font-semibold truncate">${clientName(rec.clientId)}</p></div>
+    <div class="flex items-center gap-3"><p class="w-[86px] shrink-0 text-faint font-medium">Paid on</p><p class="font-semibold tnum">${fdate(rec.paidOn)}</p></div>
+    <div class="flex items-center gap-3"><p class="w-[86px] shrink-0 text-faint font-medium">Invoice</p><button class="font-semibold tnum text-[12px] truncate text-primary" onclick="openInvoiceDetail('${rec.id}')">${rec.id}</button></div>
+    <div class="flex items-center gap-3"><p class="w-[86px] shrink-0 text-faint font-medium">Settlement</p><p class="font-medium text-muted">${stl}</p></div>`;
+}
+function renderDashboard() { renderChart(); setUnrec(state.dash.unreceived); renderReceivedToken(); renderLastReceived(); }
+/* ================= CLIENTS ================= */
+let clientModalMode = 'add', clientModalId = null, freezeTargetId = null;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function renderClients() {
+  const f = state.cliFilters;
+  let rows = DB.clients.slice().sort((a, b) => b.createTime.localeCompare(a.createTime));
+  if (f.q) rows = rows.filter(c => (c.email + ' ' + c.name).toLowerCase().includes(f.q.toLowerCase()));
+  if (f.type !== 'All') rows = rows.filter(c => c.type === f.type);
+  if (f.status !== 'All') rows = rows.filter(c => c.status === f.status);
+  const el = document.getElementById('clientRows');
+  if (!rows.length) {
+    el.innerHTML = `<div class="py-16 text-center">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-primarysoft text-primary flex items-center justify-center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/></svg>
+      </div>
+      <p class="mt-4 text-[14px] font-bold">There are no client records yet.</p>
+      <p class="mt-1 text-[12px] text-muted">Add a client to create invoices faster.</p>
+      <button class="btn-p mt-4 !h-9" data-bp-open="client-modal" onclick="openClientModal('add')">Add Client</button></div>`;
+    return;
+  }
+  el.innerHTML = rows.map(c => `
+    <div class="tr" style="grid-template-columns:170px 1.2fr 0.7fr 1.4fr 110px 150px" data-bp-anchor="client-row-${c.id}">
+      <span class="text-muted tnum text-[12px]">${c.createTime}</span>
+      <span class="font-semibold text-[13px] truncate">${c.name}</span>
+      <span class="text-muted text-[12px]">${c.type}</span>
+      <span class="text-body text-[13px] truncate">${c.email}</span>
+      <span>${cbadge(c.status)}</span>
+      <span class="flex items-center gap-3">
+        <button class="act" data-bp-open="client-modal" onclick="openClientModal('edit','${c.id}')">Edit</button>
+        ${c.status === 'Active'
+          ? `<button class="act dan" data-bp-open="freeze-modal" onclick="openFreeze('${c.id}')">Freeze</button>`
+          : `<button class="act pri" data-bp-open="freeze-modal" onclick="openFreeze('${c.id}')">Unfreeze</button>`}
+      </span>
+    </div>`).join('');
+}
+function openClientModal(mode, id) {
+  clientModalMode = mode; clientModalId = id || null;
+  const c = id ? cli(id) : null;
+  document.getElementById('cmTitle').textContent = mode === 'add' ? 'Add Client' : 'Edit Client';
+  document.getElementById('cmSubmit').textContent = mode === 'add' ? 'Add Client' : 'Save';
+  const em = document.getElementById('cmEmail');
+  em.value = c ? c.email : ''; em.disabled = mode === 'edit';
+  document.getElementById('cmName').value = c ? c.name : '';
+  document.querySelectorAll('input[name=cmType]').forEach(r => r.checked = c ? r.value === c.type : false);
+  ['cmEmailErr', 'cmTypeErr', 'cmNameErr'].forEach(x => document.getElementById(x).classList.add('hidden'));
+  em.classList.remove('err'); document.getElementById('cmName').classList.remove('err');
+  openPanel('client-modal');
+}
+function setFieldErr(inputId, errId, msg) {
+  const e = document.getElementById(errId); e.textContent = msg; e.classList.remove('hidden');
+  if (inputId) document.getElementById(inputId).classList.add('err');
+}
+function submitClientModal() {
+  const email = document.getElementById('cmEmail').value.trim();
+  const name = document.getElementById('cmName').value.trim();
+  const type = (document.querySelector('input[name=cmType]:checked') || {}).value;
+  ['cmEmailErr', 'cmTypeErr', 'cmNameErr'].forEach(x => document.getElementById(x).classList.add('hidden'));
+  document.getElementById('cmEmail').classList.remove('err'); document.getElementById('cmName').classList.remove('err');
+  let ok = true;
+  if (clientModalMode === 'add') {
+    if (!email) { setFieldErr('cmEmail', 'cmEmailErr', 'Please enter the client email.'); ok = false; }
+    else if (!EMAIL_RE.test(email)) { setFieldErr('cmEmail', 'cmEmailErr', 'Please enter correct email address'); ok = false; }
+    else if (DB.clients.some(c => c.email.toLowerCase() === email.toLowerCase())) { setFieldErr('cmEmail', 'cmEmailErr', `A client with the email ${email} already exists.`); ok = false; }
+  }
+  if (!type) { setFieldErr(null, 'cmTypeErr', clientModalMode === 'add' ? 'Please enter the client type.' : 'Please choose the client type.'); ok = false; }
+  if (!name) { setFieldErr('cmName', 'cmNameErr', 'Please enter the client name.'); ok = false; }
+  else if (name.length < 3 || name.length > 100) { setFieldErr('cmName', 'cmNameErr', 'Client name must be 3–100 characters.'); ok = false; }
+  if (!ok) return;
+  const btn = document.getElementById('cmSubmit');
+  btn.disabled = true; btn.innerHTML = spinner() + (clientModalMode === 'add' ? 'Adding…' : 'Saving…');
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = clientModalMode === 'add' ? 'Add Client' : 'Save';
+    if (clientModalMode === 'add') {
+      const nid = 'CL-' + String(DB.clients.length + 1).padStart(3, '0');
+      DB.clients.push({ id: nid, createTime: TODAY + ' ' + new Date().toTimeString().slice(0, 5), email, type, name, status: 'Active' });
+      toast('Successfully added the client.');
+      if (state.form) { formSelectClient(nid); }
+    } else {
+      const c = cli(clientModalId); c.type = type; c.name = name;
+      toast('Successfully edited the client.');
+    }
+    closePanel('client-modal');
+    renderClients(); if (state.view === 'invoice-form') renderFormClientOptions();
+  }, 700);
+}
+function openFreeze(id) {
+  freezeTargetId = id; const c = cli(id);
+  const freezing = c.status === 'Active';
+  document.getElementById('fmTitle').textContent = freezing ? 'Freeze client' : 'Unfreeze client';
+  document.getElementById('fmDesc').textContent = freezing
+    ? `${c.name} (${c.email}) will no longer be available for new invoices. Clients with in-progress invoices cannot be frozen.`
+    : `${c.name} (${c.email}) will become Active and can be used for invoices again.`;
+  document.getElementById('fmSubmit').textContent = freezing ? 'Freeze' : 'Unfreeze';
+  openPanel('freeze-modal');
+}
+function submitFreeze() {
+  const c = cli(freezeTargetId);
+  const freezing = c.status === 'Active';
+  if (freezing) {
+    const hasOpen = DB.invoices.some(i => i.clientId === c.id && INPROGRESS_FOR_FREEZE.includes(i.status));
+    if (hasOpen) { closePanel('freeze-modal'); toast("You can't freeze the client because there is an in-progress invoice.", 'warn'); return; }
+  }
+  const btn = document.getElementById('fmSubmit');
+  btn.disabled = true; btn.innerHTML = spinner() + 'Processing…';
+  setTimeout(() => {
+    btn.disabled = false;
+    c.status = freezing ? 'Frozen' : 'Active';
+    btn.textContent = freezing ? 'Freeze' : 'Unfreeze';
+    closePanel('freeze-modal');
+    toast(freezing ? 'Successfully freezed the client.' : 'Successfully unfreezed the client.');
+    renderClients();
+  }, 700);
+}
+/* ================= INVOICE LIST ================= */
+function invActions(i) {
+  const a = [];
+  const view = `<button class="act pri" onclick="openInvoiceDetail('${i.id}')">View Detail</button>`;
+  switch (i.status) {
+    case 'Draft': return [view.replace('View Detail', 'Edit').replace(`openInvoiceDetail('${i.id}')`, `openInvoiceForm('edit','${i.id}')`).replace('act pri', 'act'), `<button class="act" onclick="openInvoiceForm('duplicate','${i.id}')">Duplicate</button>`].join('');
+    case 'Sending': case 'Voiding': case 'Settling': return view;
+    case 'Pending': return [view, `<button class="act" onclick="sendReminder('${i.id}')">Send Reminder</button>`, `<button class="act" onclick="openInvoiceForm('duplicate','${i.id}')">Duplicate</button>`, `<button class="act dan" data-bp-open="void-modal" onclick="openVoid('${i.id}')">Void</button>`].join('');
+    case 'Overdue': return [view, `<button class="act" onclick="sendReminder('${i.id}')">Send Reminder</button>`, `<button class="act" onclick="openInvoiceForm('duplicate','${i.id}')">Duplicate</button>`].join('');
+    default: return [view, `<button class="act" onclick="openInvoiceForm('duplicate','${i.id}')">Duplicate</button>`].join('');
+  }
+}
+function renderInvChips() {
+  const counts = {};
+  DB.invoices.forEach(i => counts[i.status] = (counts[i.status] || 0) + 1);
+  const order = ['All', 'Draft', 'Sending', 'Pending', 'Received', 'Overdue', 'Settling', 'Settled', 'Settlement Failed', 'Voiding', 'Voided', 'Error'];
+  document.getElementById('invChips').innerHTML = order.map(s => {
+    const n = s === 'All' ? DB.invoices.length : (counts[s] || 0);
+    return `<button class="chip ${state.invFilters.chip === s ? 'on' : ''}" data-v="${s}" onclick="state.invFilters.chip='${s}';state.invFilters.status='All';document.getElementById('invStatus').value='All';renderInvoices()">${s} · <span class="tnum">${n}</span></button>`;
+  }).join('');
+}
+function renderInvoices() {
+  renderInvChips();
+  const f = state.invFilters;
+  let rows = DB.invoices.slice().sort((a, b) => b.createTime.localeCompare(a.createTime));
+  const effStatus = f.status !== 'All' ? f.status : f.chip;
+  if (effStatus !== 'All') rows = rows.filter(i => i.status === effStatus);
+  if (f.q) rows = rows.filter(i => (clientName(i.clientId) + ' ' + (i.category || '')).toLowerCase().includes(f.q.toLowerCase()));
+  if (f.type !== 'All') rows = rows.filter(i => i.type === f.type);
+  if (f.token !== 'All') rows = rows.filter(i => i.tokens.includes(f.token));
+  document.getElementById('navInvCount').textContent = DB.invoices.length;
+  const el = document.getElementById('invoiceRows');
+  document.getElementById('invCount').textContent = `Showing ${rows.length} of ${DB.invoices.length} invoices · sorted by Creation Time, newest first`;
+  if (!rows.length) {
+    el.innerHTML = `<div class="py-16 text-center">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-primarysoft text-primary flex items-center justify-center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+      </div>
+      <p class="mt-4 text-[14px] font-bold">There are no invoice records yet.</p>
+      <p class="mt-1 text-[12px] text-muted">Create your first invoice to start collecting payments.</p>
+      <button class="btn-p mt-4 !h-9" onclick="openInvoiceForm('create')">Create New Invoice</button></div>`;
+    return;
+  }
+  el.innerHTML = rows.map(i => `
+    <div class="tr" style="grid-template-columns:150px 1.5fr 1fr 0.7fr 150px 120px 220px" data-bp-anchor="invoice-row-${i.id}">
+      <span class="text-muted tnum text-[12px]">${i.createTime}</span>
+      <span class="font-semibold tnum text-[12px] truncate">${i.id}</span>
+      <span class="text-body truncate">${clientName(i.clientId)}</span>
+      <span class="text-muted text-[12px]">${i.type}</span>
+      <span class="text-right"><span class="font-bold tnum text-[12px] ${i.status === 'Overdue' ? 'text-dangertext' : ''}">${fmt6(i.amounts[i.primaryToken])}</span> <span class="text-[11px] text-faint font-medium">${i.primaryToken}</span></span>
+      <span>${ibadge(i.status)}</span>
+      <span class="flex items-center gap-3">${invActions(i)}</span>
+    </div>`).join('');
+}
+function sendReminder(id) {
+  const i = inv(id); const c = cli(i.clientId);
+  const subject = encodeURIComponent(`Payment reminder · Invoice ${i.id}`);
+  const body = encodeURIComponent(`Hi ${c.name},\n\nThis is a friendly reminder that invoice ${i.id} for ${fmt6(i.amounts[i.primaryToken])} ${i.primaryToken} is due on ${fdate(i.dueDate)}.\n\n— Demo Merchant`);
+  toast(`Opening your email client to remind ${c.name}…`, 'info');
+  window.location.href = `mailto:${c.email}?subject=${subject}&body=${body}`;
+}
+/* ================= VOID / DELETE / DISCONTINUE / CC ================= */
+let voidTargetId = null, deleteTargetId = null, discontinueSeriesId = null;
+function openVoid(id) {
+  voidTargetId = id; const i = inv(id);
+  document.getElementById('vmDesc').textContent = `${i.id} · ${clientName(i.clientId)} · ${fmt6(i.amounts[i.primaryToken])} ${i.primaryToken}. The payer will no longer be able to pay this invoice.`;
+  document.getElementById('vmReason').value = '';
+  document.getElementById('vmCount').textContent = '0 / 500';
+  document.getElementById('vmErr').classList.add('hidden');
+  openPanel('void-modal');
+}
+function submitVoid() {
+  const reason = document.getElementById('vmReason').value.trim();
+  if (reason.length < 3 || reason.length > 500) { document.getElementById('vmErr').classList.remove('hidden'); return; }
+  const btn = document.getElementById('vmSubmit');
+  btn.disabled = true; btn.innerHTML = spinner() + 'Voiding…';
+  const i = inv(voidTargetId);
+  setTimeout(() => {
+    i.status = 'Voiding'; i.voidReason = reason;
+    closePanel('void-modal'); renderInvoices(); if (state.view === 'invoice-detail') renderInvoiceDetail();
+    setTimeout(() => {
+      i.status = 'Voided';
+      btn.disabled = false; btn.textContent = 'Void invoice';
+      toast('Voided the invoice successfully');
+      renderInvoices(); renderDashboard(); if (state.view === 'invoice-detail') renderInvoiceDetail();
+    }, 1100);
+  }, 800);
+}
+function openDelete(id) { deleteTargetId = id; openPanel('delete-modal'); }
+function submitDelete() {
+  const btn = document.getElementById('dmSubmit');
+  btn.disabled = true; btn.innerHTML = spinner() + 'Deleting…';
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = 'Delete';
+    DB.invoices = DB.invoices.filter(x => x.id !== deleteTargetId);
+    closePanel('delete-modal');
+    toast('Draft invoice deleted.', 'info');
+    renderInvoices(); go('invoices');
+  }, 700);
+}
+function openDiscontinue(seriesId) {
+  discontinueSeriesId = seriesId;
+  const s = DB.series.find(x => x.id === seriesId);
+  document.getElementById('dmDiscDesc').textContent = `${seriesId} · ${s.frequency} · ${clientName(s.clientId)}. Future invoices will stop being generated. Already generated invoices keep their current statuses.`;
+  openPanel('discontinue-modal');
+}
+function submitDiscontinue() {
+  const btn = document.getElementById('dmDiscSubmit');
+  btn.disabled = true; btn.innerHTML = spinner() + 'Stopping…';
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = 'Yes,I want to stop it.';
+    const s = DB.series.find(x => x.id === discontinueSeriesId);
+    s.status = 'Discontinued'; s.nextSend = null;
+    closePanel('discontinue-modal');
+    toast('Recurring invoice discontinued.', 'info');
+    renderInvoiceDetail();
+  }, 700);
+}
+/* CC modal */
+let ccWorking = [];
+function openCcModal() {
+  ccWorking = state.form ? state.form.cc.slice() : [];
+  renderCcRows(); openPanel('cc-modal');
+}
+function renderCcRows() {
+  const el = document.getElementById('ccRows');
+  el.innerHTML = ccWorking.map((e, idx) => `
+    <div class="flex items-center gap-2">
+      <input class="fld" value="${e}" placeholder="recipient@email.com" onchange="ccWorking[${idx}]=this.value.trim()">
+      <button class="act dan shrink-0" onclick="ccWorking.splice(${idx},1);renderCcRows()">Remove</button>
+    </div>`).join('') || '<p class="text-[12px] text-faint">No CC recipients yet.</p>';
+  document.getElementById('ccAddBtn').disabled = ccWorking.length >= 3;
+  document.getElementById('ccAddBtn').classList.toggle('opacity-50', ccWorking.length >= 3);
+  document.getElementById('ccAddBtn').classList.toggle('cursor-not-allowed', ccWorking.length >= 3);
+}
+function ccAddRow() { if (ccWorking.length >= 3) return; ccWorking.push(''); renderCcRows(); }
+function ccSave() {
+  for (const e of ccWorking) {
+    if (!e) { toast('Please enter the recipient email.', 'error'); return; }
+    if (!EMAIL_RE.test(e)) { toast('Please enter the correct email address.', 'error'); return; }
+  }
+  state.form.cc = ccWorking.slice();
+  closePanel('cc-modal'); renderFormCc();
+}
+/* ================= INVOICE FORM (create / edit / duplicate) ================= */
+function blankForm() {
+  return { id: '', clientId: '', issueDate: TODAY, dueDate: '2026-10-07', tokens: [], items: [], discount: 0, category: '', memo: '', cc: [], recurring: { on: false, frequency: 'Monthly', endType: 'No End Date Manual Stop', endDate: null } };
+}
+function formFromInvoice(i) {
+  return { id: i.id, clientId: i.clientId, issueDate: i.issueDate, dueDate: i.dueDate, tokens: i.tokens.slice(),
+    items: i.items.map(x => ({ name: x.name, qty: x.qty, price: Object.assign({}, x.price), discount: x.discount, tax: x.tax })),
+    discount: i.discount || 0, category: i.category || '', memo: i.memo || '', cc: (i.cc || []).slice(),
+    recurring: i.recurring ? (() => { const s = DB.series.find(x => x.id === i.recurring.seriesId); return { on: true, frequency: s ? s.frequency : 'Monthly', endType: s ? s.endType : 'No End Date Manual Stop', endDate: s ? s.endDate : null }; })() : { on: false, frequency: 'Monthly', endType: 'No End Date Manual Stop', endDate: null } };
+}
+function openInvoiceForm(mode, id) {
+  state.formMode = mode; state.formId = id || null;
+  if (mode === 'create') state.form = blankForm();
+  else if (mode === 'edit') state.form = formFromInvoice(inv(id));
+  else { state.form = formFromInvoice(inv(id)); state.form.id = ''; state.form.issueDate = TODAY; state.form.dueDate = '2026-10-07'; }
+  document.getElementById('formModeState').value = mode;
+  document.getElementById('formTitle').textContent = mode === 'create' ? 'Create Invoice' : mode === 'edit' ? 'Edit Draft Invoice' : 'Duplicate Invoice';
+  const sb = document.getElementById('formStatusBadge');
+  if (mode === 'edit') { sb.className = 'badge text-muted bg-[#F2F4F7] !border-line'; sb.textContent = 'Draft'; sb.classList.remove('hidden'); }
+  else if (mode === 'duplicate') { sb.className = 'badge text-infotext bg-infosoft !border-infoborder'; sb.textContent = 'New draft · duplicated from ' + id; sb.classList.remove('hidden'); }
+  else sb.classList.add('hidden');
+  document.getElementById('formEditActions').classList.toggle('hidden', mode !== 'edit');
+  document.getElementById('fId').value = mode === 'edit' ? state.form.id : '(assigned on save)';
+  document.getElementById('fIssue').value = state.form.issueDate;
+  document.getElementById('fDue').value = state.form.dueDate;
+  document.getElementById('fDiscount').value = state.form.discount || '';
+  document.getElementById('fCategory').value = state.form.category;
+  document.getElementById('fMemo').value = state.form.memo;
+  document.getElementById('fErrorSummary').classList.add('hidden');
+  ['fIssueErr','fDueErr','fClientErr','fTokenErr','fItemsErr','fDiscountErr'].forEach(x => document.getElementById(x).classList.add('hidden'));
+  renderFormClientOptions(); renderFormTokens(); renderFormItems(); renderFormTotals(); renderFormCc();
+  const rt = document.getElementById('fRecToggle');
+  rt.classList.toggle('on', state.form.recurring.on);
+  document.getElementById('fRecFields').classList.toggle('hidden', !state.form.recurring.on);
+  document.getElementById('fRecFreq').value = state.form.recurring.frequency;
+  document.getElementById('fRecEndType').value = state.form.recurring.endType;
+  document.getElementById('fRecEndDate').disabled = state.form.recurring.endType !== 'End Date';
+  if (state.form.recurring.endDate) document.getElementById('fRecEndDate').value = state.form.recurring.endDate;
+  go('invoice-form');
+}
+function renderFormClientOptions() {
+  const sel = document.getElementById('fClient');
+  const actives = DB.clients.filter(c => c.status === 'Active');
+  sel.innerHTML = '<option value="">Select a client</option>' + actives.map(c => `<option value="${c.id}" ${state.form.clientId === c.id ? 'selected' : ''}>${c.name} · ${c.email}</option>`).join('');
+}
+function formSelectClient(id) { state.form.clientId = id; renderFormClientOptions(); }
+function renderFormTokens() {
+  document.getElementById('fTokens').innerHTML = TOKENS.map(t => {
+    const on = state.form.tokens.includes(t);
+    return `<button class="flex items-center gap-2 text-[13px] ${on ? 'font-semibold' : 'text-body'}" onclick="formToggleToken('${t}')">
+      <span class="checkbox ${on ? 'on' : ''}">${on ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : ''}</span>${tkdot(t)}${t}</button>`;
+  }).join('') + (state.form.tokens.length ? `<span class="text-[11px] text-faint font-medium">Primary: <span class="font-semibold text-body">${primaryOf(state.form.tokens)}</span></span>` : '');
+}
+function primaryOf(tokens) { return TOKENS.find(t => tokens.includes(t)); }
+function formToggleToken(t) {
+  const arr = state.form.tokens;
+  const idx = arr.indexOf(t);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(t);
+  state.form.items.forEach(it => { if (!state.form.tokens.includes(t)) delete it.price[t]; });
+  renderFormTokens(); renderFormItems(); renderFormTotals();
+}
+function formAddItem() { state.form.items.push({ name: '', qty: 1, price: {}, discount: 0, tax: 0 }); renderFormItems(); renderFormTotals(); }
+function formRemoveItem(idx) { state.form.items.splice(idx, 1); renderFormItems(); renderFormTotals(); }
+function formSetItem(idx, key, val, token) {
+  const it = state.form.items[idx];
+  if (key === 'price') it.price[token] = parseFloat(val) || 0;
+  else if (key === 'qty') it.qty = parseFloat(val) || 0;
+  else if (key === 'discount' || key === 'tax') it[key] = parseFloat(val) || 0;
+  else it[key] = val;
+  renderFormTotals();
+}
+function renderFormItems() {
+  const toks = state.form.tokens;
+  const el = document.getElementById('fItems');
+  if (!state.form.items.length) {
+    el.innerHTML = `<div class="rounded-xl border border-dashed border-line bg-[#FAFBFD] py-8 text-center">
+      <p class="text-[13px] font-semibold text-muted">No items yet</p>
+      <p class="text-[12px] text-faint mt-1">Add at least one product item to build the invoice.</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="space-y-3">` + state.form.items.map((it, idx) => `
+    <div class="rounded-xl border border-line p-4" data-bp-anchor="form-item-${idx}">
+      <div class="flex items-end gap-3">
+        <div class="flex-1 min-w-[220px]"><label class="text-[11px] font-medium text-faint">Item name</label>
+          <input class="fld mt-1" value="${it.name.replace(/"/g, '&quot;')}" placeholder="Product or service" oninput="formSetItem(${idx},'name',this.value)"></div>
+        <div class="w-[80px]"><label class="text-[11px] font-medium text-faint">Qty</label>
+          <input class="fld mt-1" type="number" min="1" step="1" value="${it.qty}" oninput="formSetItem(${idx},'qty',this.value)"></div>
+        <div class="w-[84px]"><label class="text-[11px] font-medium text-faint">Disc %</label>
+          <input class="fld mt-1" type="number" min="0" max="100" step="0.01" value="${it.discount || ''}" placeholder="0" oninput="formSetItem(${idx},'discount',this.value)"></div>
+        <div class="w-[84px]"><label class="text-[11px] font-medium text-faint">Tax %</label>
+          <input class="fld mt-1" type="number" min="0" max="100" step="0.01" value="${it.tax || ''}" placeholder="0" oninput="formSetItem(${idx},'tax',this.value)"></div>
+        <button class="h-10 w-10 shrink-0 rounded-lg border border-line bg-white text-dangertext hover:bg-[#FEF3F2] hover:border-[#FECDCA] transition-colors flex items-center justify-center" onclick="formRemoveItem(${idx})" title="Remove item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+      ${toks.length ? `<div class="flex flex-wrap gap-3 mt-3">
+        ${toks.map(t => `<div class="w-[120px] min-w-[120px] flex-1"><label class="text-[11px] font-medium text-faint block">${t} unit price</label>
+          <input class="fld mt-1" type="number" min="0" step="0.000001" value="${it.price[t] ?? ''}" placeholder="0.00" oninput="formSetItem(${idx},'price',this.value,'${t}')"></div>`).join('')}
+      </div>` : ''}
+    </div>`).join('') + `</div>`;
+}
+function computeTotals() {
+  const f = state.form, out = {};
+  f.tokens.forEach(t => {
+    let woTax = 0, taxSum = 0;
+    f.items.forEach(it => {
+      const base = (it.price[t] || 0) * (it.qty || 0) * (1 - (it.discount || 0) / 100);
+      woTax += base;
+      taxSum += base * (1 - (f.discount || 0) / 100) * (it.tax || 0) / 100;
+    });
+    const discAmt = woTax * (f.discount || 0) / 100;
+    out[t] = { woTax, discAmt, taxSum, total: woTax - discAmt + taxSum };
+  });
+  return out;
+}
+function renderFormTotals() {
+  const f = state.form, totals = computeTotals();
+  const el = document.getElementById('fTotals');
+  if (!f.tokens.length) { el.innerHTML = '<p class="text-[12px] text-faint">Select at least one payment token to see totals.</p>'; return; }
+  el.innerHTML = Object.keys(totals).map(t => {
+    const x = totals[t];
+    return `<div class="rounded-xl border border-line p-4 mb-3">
+      <div class="flex items-center gap-2 mb-2.5">${tkchip(t)}${primaryOf(f.tokens) === t ? '<span class="text-[10px] font-semibold text-primaryactive bg-primarysoft rounded-full px-2 py-0.5">PRIMARY</span>' : ''}</div>
+      <div class="space-y-1.5 text-[12px]">
+        <p class="flex justify-between"><span class="text-faint">Amount without tax</span><span class="font-semibold tnum">${fmt6(x.woTax)}</span></p>
+        <p class="flex justify-between"><span class="text-faint">Discount</span><span class="font-semibold tnum text-dangertext">-${fmt6(x.discAmt)}</span></p>
+        <p class="flex justify-between"><span class="text-faint">Total Tax amount</span><span class="font-semibold tnum">${fmt6(x.taxSum)}</span></p>
+        <p class="flex justify-between pt-1.5 border-t border-line"><span class="font-semibold">Due</span><span class="font-bold tnum ${x.total < 1 ? 'text-dangertext' : ''}">${fmt6(x.total)}</span></p>
+      </div></div>`;
+  }).join('') + `<p class="text-[11px] text-faint">Due must be ≥ 1 in every selected token. Amounts keep 6 decimal places.</p>`;
+}
+function renderFormCc() {
+  const el = document.getElementById('fCcChips');
+  el.innerHTML = state.form.cc.length
+    ? state.form.cc.map(e => `<span class="text-[11px] font-semibold text-body bg-[#F2F4F7] rounded-full px-2.5 py-1">${e}</span>`).join('')
+    : '<span class="text-[12px] text-faint">No CC recipients</span>';
+}
+function formToggleRecurring() {
+  const r = state.form.recurring; r.on = !r.on;
+  document.getElementById('fRecToggle').classList.toggle('on', r.on);
+  document.getElementById('fRecFields').classList.toggle('hidden', !r.on);
+}
+function validateForm(forSend) {
+  const f = state.form; const errs = [];
+  ['fIssueErr','fDueErr','fClientErr','fTokenErr','fItemsErr','fDiscountErr'].forEach(x => document.getElementById(x).classList.add('hidden'));
+  f.issueDate = document.getElementById('fIssue').value; f.dueDate = document.getElementById('fDue').value;
+  if (f.issueDate && f.issueDate > TODAY) { document.getElementById('fIssueErr').textContent = 'The invoice issue date cannot be later than the current date.'; document.getElementById('fIssueErr').classList.remove('hidden'); errs.push('issue'); }
+  if (f.dueDate && f.dueDate < TODAY) { document.getElementById('fDueErr').textContent = 'The invoice due date cannot before than the current date.'; document.getElementById('fDueErr').classList.remove('hidden'); errs.push('due'); }
+  if (!f.clientId) { document.getElementById('fClientErr').textContent = 'Please choose the client.'; document.getElementById('fClientErr').classList.remove('hidden'); errs.push('client'); }
+  else {
+    const c = cli(f.clientId);
+    if (c && c.status === 'Frozen') {
+      document.getElementById('fClientErr').textContent = forSend ? 'The selected client is frozen and can not create and send for the invoice.' : 'The selected client is frozen and can not save for the invoice.';
+      document.getElementById('fClientErr').classList.remove('hidden'); errs.push('frozen');
+    }
+  }
+  if (!f.tokens.length) { document.getElementById('fTokenErr').textContent = 'Please choose the payment token.'; document.getElementById('fTokenErr').classList.remove('hidden'); errs.push('token'); }
+  if (!f.items.length) { document.getElementById('fItemsErr').textContent = 'Please input product item.'; document.getElementById('fItemsErr').classList.remove('hidden'); errs.push('items'); }
+  else {
+    for (const it of f.items) {
+      if (!it.name.trim()) { document.getElementById('fItemsErr').textContent = 'Please input product item.'; document.getElementById('fItemsErr').classList.remove('hidden'); errs.push('items'); break; }
+      if (!it.qty || it.qty <= 0 || !Number.isInteger(it.qty)) { document.getElementById('fItemsErr').textContent = 'Qty must be an integer larger than 0.'; document.getElementById('fItemsErr').classList.remove('hidden'); errs.push('qty'); break; }
+      for (const t of f.tokens) { if (!it.price[t] || it.price[t] <= 0) { document.getElementById('fItemsErr').textContent = 'Unit price must be a number larger than 0.'; document.getElementById('fItemsErr').classList.remove('hidden'); errs.push('price'); break; } }
+      if (errs.length) break;
+      if ((it.discount || 0) < 0 || (it.discount || 0) >= 100) { document.getElementById('fItemsErr').textContent = 'Discount must be a number larger than 0 and less than 100.'; document.getElementById('fItemsErr').classList.remove('hidden'); errs.push('disc'); break; }
+      if ((it.tax || 0) < 0 || (it.tax || 0) >= 100) { document.getElementById('fItemsErr').textContent = 'Tax must be a number larger than 0 and less than 100.'; document.getElementById('fItemsErr').classList.remove('hidden'); errs.push('tax'); break; }
+    }
+  }
+  if ((f.discount || 0) < 0 || (f.discount || 0) >= 100) { document.getElementById('fDiscountErr').textContent = 'Overall discount must be a number larger than 0 and less than 100.'; document.getElementById('fDiscountErr').classList.remove('hidden'); errs.push('odisc'); }
+  const totals = computeTotals();
+  for (const t of f.tokens) { if (totals[t].total < 1) { toast('The invoice amount due must be greater than or equal to 1.', 'error'); errs.push('min'); break; } }
+  return errs;
+}
+function buildInvoiceFromForm(status) {
+  const f = state.form, totals = computeTotals();
+  const amounts = {}; f.tokens.forEach(t => amounts[t] = +totals[t].total.toFixed(6));
+  return { id: f.id || newInvId(f.clientId), type: f.recurring.on ? 'Recurring' : 'Regular', status,
+    createTime: TODAY + ' ' + new Date().toTimeString().slice(0, 5), issueDate: f.issueDate, dueDate: f.dueDate,
+    clientId: f.clientId, tokens: f.tokens.slice(), primaryToken: primaryOf(f.tokens), amounts,
+    category: f.category, memo: f.memo, cc: f.cc.slice(), discount: f.discount || 0,
+    recurring: null, items: f.items.map(x => ({ name: x.name, qty: x.qty, price: Object.assign({}, x.price), discount: x.discount || 0, tax: x.tax || 0 })) };
+}
+function attachSeries(invoice) {
+  const f = state.form;
+  if (!f.recurring.on) return;
+  const sid = 'RS-' + String(DB.series.length + 1).padStart(3, '0');
+  DB.series.push({ id: sid, status: 'Active', frequency: f.recurring.frequency, endType: f.recurring.endType, endDate: f.recurring.endType === 'End Date' ? f.recurring.endDate : null, nextSend: '2026-10-07', clientId: f.clientId });
+  invoice.recurring = { seriesId: sid };
+}
+function saveDraft() {
+  const errs = validateForm(false);
+  if (errs.length) { showFormErrors(errs); return; }
+  const btn = document.getElementById('btnSaveDraft');
+  btn.disabled = true; btn.innerHTML = spinner() + 'Saving…';
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = 'Save Draft';
+    if (state.formMode === 'edit') {
+      const old = inv(state.formId); const nu = buildInvoiceFromForm('Draft'); nu.id = old.id; nu.createTime = old.createTime;
+      Object.assign(old, nu);
+      toast('Successfully edited the draft invoice');
+    } else {
+      const nu = buildInvoiceFromForm('Draft'); attachSeries(nu); DB.invoices.push(nu);
+      toast('Save successfuly');
+    }
+    renderInvoices(); go('invoices');
+  }, 700);
+}
+function tryCreateSend() {
+  const errs = validateForm(true);
+  if (errs.length) { showFormErrors(errs); return; }
+  const f = state.form;
+  const dup = DB.invoices.some(i => i.clientId === f.clientId && i.status === 'Draft' && i.id !== state.formId);
+  if (dup && state.formMode !== 'edit') { openPanel('draft-exists'); return; }
+  doCreateSend();
+}
+function doCreateSend() {
+  const btn = document.getElementById('btnCreateSend');
+  btn.disabled = true; btn.innerHTML = spinner() + 'Sending…';
+  setTimeout(() => {
+    let rec;
+    if (state.formMode === 'edit') {
+      const old = inv(state.formId); rec = buildInvoiceFromForm('Sending'); rec.id = old.id; rec.createTime = old.createTime; Object.assign(old, rec); rec = old;
+    } else { rec = buildInvoiceFromForm('Sending'); attachSeries(rec); DB.invoices.push(rec); }
+    toast('Generating payment link and sending email…', 'info');
+    setTimeout(() => {
+      rec.status = 'Pending'; rec.sendTime = TODAY + ' ' + new Date().toTimeString().slice(0, 5);
+      btn.disabled = false; btn.innerHTML = 'Create &amp; Send';
+      toast('Successfully created and sent invoice');
+      renderInvoices(); renderDashboard(); go('invoices');
+    }, 1300);
+  }, 900);
+}
+function showFormErrors(errs) {
+  const el = document.getElementById('fErrorSummary');
+  el.textContent = 'Please fix the highlighted fields before continuing.';
+  el.classList.remove('hidden');
+}
+/* ================= INVOICE DETAIL ================= */
+function openInvoiceDetail(id) { state.detailInvoiceId = id; renderInvoiceDetail(); go('invoice-detail'); }
+function renderInvoiceDetail() {
+  const i = inv(state.detailInvoiceId); if (!i) { go('invoices'); return; }
+  const c = cli(i.clientId);
+  const totals = (() => { const o = {}; i.tokens.forEach(t => { let wo = 0, tx = 0; i.items.forEach(it => { const b = (it.price[t] || 0) * it.qty * (1 - (it.discount || 0) / 100); wo += b; tx += b * (1 - (i.discount || 0) / 100) * (it.tax || 0) / 100; }); const d = wo * (i.discount || 0) / 100; o[t] = { wo, d, tx, tot: wo - d + tx }; }); return o; })();
+  const actions = [];
+  if (i.status === 'Draft') actions.push(`<button class="btn-s !h-9 !text-[12px]" onclick="openInvoiceForm('edit','${i.id}')">Edit</button>`);
+  if (['Pending', 'Overdue'].includes(i.status)) actions.push(`<button class="btn-s !h-9 !text-[12px]" onclick="sendReminder('${i.id}')">Send Reminder</button>`);
+  actions.push(`<button class="btn-s !h-9 !text-[12px]" onclick="openInvoiceForm('duplicate','${i.id}')">Duplicate</button>`);
+  if (i.status === 'Pending') actions.push(`<button class="btn-do !h-9 !text-[12px]" data-bp-open="void-modal" onclick="openVoid('${i.id}')">Void</button>`);
+  if (i.status === 'Draft') actions.push(`<button class="btn-do !h-9 !text-[12px]" data-bp-open="delete-modal" onclick="openDelete('${i.id}')">Delete</button>`);
+  let banner = '';
+  if (i.status === 'Error') banner = `<div class="rounded-xl bg-dangersoft border border-dangerborder px-4 py-3 flex items-start gap-2.5" data-bp-anchor="detail-error-banner">
+    <svg class="shrink-0 mt-px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F04438" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    <p class="text-[12px] leading-relaxed text-dangerdark font-medium">Abnormal payment detected (overpaid / underpaid / mistaken payment). Please contact the super admin to handle this invoice.</p></div>`;
+  if (i.status === 'Voided') banner = `<div class="rounded-xl bg-[#F2F4F7] border border-line px-4 py-3" data-bp-anchor="detail-void-reason">
+    <p class="text-[12px] font-semibold text-body">Void reason</p><p class="text-[12px] text-muted mt-0.5">${i.voidReason || '—'}</p></div>`;
+  if (i.status === 'Sending') banner = `<div class="rounded-xl bg-infosoft border border-infoborder px-4 py-3 flex items-start gap-2.5">
+    <svg class="shrink-0 mt-px spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E5BFF" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    <p class="text-[12px] leading-relaxed text-infotext font-medium">Generating payment link and sending the invoice email. Please contact the super admin if remains in sending status for 24 hours.</p></div>`;
+  if (i.status === 'Voiding') banner = `<div class="rounded-xl bg-[#F2F4F7] border border-line px-4 py-3 flex items-start gap-2.5">
+    <svg class="shrink-0 mt-px spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#667085" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    <p class="text-[12px] leading-relaxed text-body font-medium">Cancelling the Cobo Pay payment link. Please contact the super admin if remains in voiding status for 24 hours.</p></div>`;
+  let recurringBlock = '';
+  if (i.recurring) {
+    const s = DB.series.find(x => x.id === i.recurring.seriesId);
+    if (s) recurringBlock = `<div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="detail-recurring">
+      <div class="flex items-center gap-3">
+        <p class="text-[15px] font-bold">Recurring</p>${rsbadge(s.status)}
+        ${s.status === 'Active' ? `<button class="act dan ml-auto" data-bp-open="discontinue-modal" onclick="openDiscontinue('${s.id}')">Discontinue</button>` : ''}
+      </div>
+      <div class="mt-4 space-y-3">
+        <div class="dl-row"><p class="k">Series ID</p><p class="font-semibold tnum text-[12px]">${s.id}</p></div>
+        <div class="dl-row"><p class="k">Frequency</p><p class="font-semibold">${s.frequency}</p></div>
+        <div class="dl-row"><p class="k">End condition</p><p class="font-semibold">${s.endType}${s.endDate ? ' · ' + fdate(s.endDate) : ''}</p></div>
+        ${s.nextSend ? `<div class="dl-row"><p class="k">Next send date</p><p class="font-semibold tnum">${fdate(s.nextSend)}</p></div>` : `<div class="dl-row"><p class="k">Next send date</p><p class="font-medium text-muted">${s.status === 'Discontinued' ? 'Stopped' : 'Completed'}</p></div>`}
+      </div></div>`;
+  }
+  document.getElementById('invoiceDetailRoot').innerHTML = `<div class="space-y-5">
+    <div class="flex items-center gap-3 flex-wrap">
+      <button class="act pri !text-[13px]" onclick="go('invoices')">← Back to Invoice List</button>
+      <span class="text-faint">·</span>
+      <h2 class="text-[17px] font-bold tnum">${i.id}</h2>
+      ${ibadge(i.status)}
+      <span class="text-[11px] font-semibold text-muted bg-[#F2F4F7] rounded-full px-2 py-0.5">${i.type}</span>
+      <div class="ml-auto flex items-center gap-2.5">${actions.join('')}</div>
+    </div>
+    ${banner}
+    <div class="grid grid-cols-[1fr_340px] gap-5 items-start">
+      <div class="space-y-5 min-w-0">
+        <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="detail-basic">
+          <p class="text-[15px] font-bold">Basic information</p>
+          <div class="mt-4 grid grid-cols-2 gap-x-10 gap-y-3">
+            <div class="dl-row"><p class="k">From</p><p class="font-semibold">Demo Merchant</p></div>
+            <div class="dl-row"><p class="k">Status</p><p>${ibadge(i.status)}</p></div>
+            <div class="dl-row"><p class="k">Issue Date</p><p class="font-semibold tnum">${fdate(i.issueDate)}</p></div>
+            <div class="dl-row"><p class="k">Due Date</p><p class="font-semibold tnum ${i.status === 'Overdue' ? 'text-dangertext' : ''}">${fdate(i.dueDate)}</p></div>
+            <div class="dl-row"><p class="k">Client</p><p class="font-semibold">${c ? c.name : '—'} <span class="text-faint font-medium">· ${c ? c.email : ''}</span></p></div>
+            <div class="dl-row"><p class="k">CC Recipient</p><p class="font-medium text-body">${i.cc && i.cc.length ? i.cc.join(', ') : '—'}</p></div>
+            <div class="dl-row"><p class="k">Payment Token</p><p class="flex gap-1.5 flex-wrap">${i.tokens.map(tkchip).join('')}</p></div>
+            <div class="dl-row"><p class="k">Category</p><p class="font-medium text-body">${i.category || '—'}</p></div>
+            <div class="dl-row"><p class="k">Memo</p><p class="font-medium text-body">${i.memo || '—'}</p></div>
+            ${i.settlementRequestId ? `<div class="dl-row"><p class="k">Settlement</p><button class="font-semibold tnum text-[12px] text-primary" onclick="openSettlementDetail('${i.settlementRequestId}')">${i.settlementRequestId}</button></div>` : ''}
+          </div>
+        </div>
+        ${recurringBlock}
+        <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="detail-items">
+          <p class="text-[15px] font-bold">Items</p>
+          <div class="mt-4 rounded-xl border border-line overflow-hidden">
+            <div class="th" style="grid-template-columns:1.5fr 60px 120px 80px 70px 130px"><span>Item</span><span>Qty</span><span class="text-right">Unit price</span><span class="text-right">Discount</span><span class="text-right">Tax</span><span class="text-right">Amount</span></div>
+            ${i.items.map(it => `<div class="tr" style="grid-template-columns:1.5fr 60px 120px 80px 70px 130px">
+              <span class="font-medium">${it.name}</span><span class="tnum text-muted">${it.qty}</span>
+              <span class="text-right tnum">${fmt6(it.price[i.primaryToken] || 0)}</span>
+              <span class="text-right tnum text-muted">${it.discount || 0}%</span><span class="text-right tnum text-muted">${it.tax || 0}%</span>
+              <span class="text-right font-semibold tnum">${fmt6((it.price[i.primaryToken] || 0) * it.qty * (1 - (it.discount || 0) / 100) * (1 - (i.discount || 0) / 100) * (1 + (it.tax || 0) / 100))}</span>
+            </div>`).join('')}
+          </div>
+          <p class="mt-2 text-[11px] text-faint">Amounts shown in primary token ${i.primaryToken}.</p>
+        </div>
+      </div>
+      <div class="space-y-5 sticky top-[92px]">
+        <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="detail-totals">
+          <p class="text-[15px] font-bold">Totals</p>
+          <div class="mt-4">
+          ${i.tokens.map(t => { const x = totals[t]; return `<div class="rounded-xl border border-line p-4 mb-3">
+            <div class="flex items-center gap-2 mb-2.5">${tkchip(t)}${i.primaryToken === t ? '<span class="text-[10px] font-semibold text-primaryactive bg-primarysoft rounded-full px-2 py-0.5">PRIMARY</span>' : ''}</div>
+            <div class="space-y-1.5 text-[12px]">
+              <p class="flex justify-between"><span class="text-faint">Amount without tax</span><span class="font-semibold tnum">${fmt6(x.wo)}</span></p>
+              <p class="flex justify-between"><span class="text-faint">Discount</span><span class="font-semibold tnum text-dangertext">-${fmt6(x.d)}</span></p>
+              <p class="flex justify-between"><span class="text-faint">Total Tax amount</span><span class="font-semibold tnum">${fmt6(x.tx)}</span></p>
+              <p class="flex justify-between"><span class="text-faint">Total amount</span><span class="font-semibold tnum">${fmt6(x.tot)}</span></p>
+              <p class="flex justify-between pt-1.5 border-t border-line"><span class="font-semibold">Due</span><span class="font-bold tnum">${fmt6(i.amounts[t])}</span></p>
+            </div></div>`; }).join('')}
+          </div>
+        </div>
+        ${['Pending', 'Overdue'].includes(i.status) ? `<div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="detail-payment-link">
+          <p class="text-[15px] font-bold">Payment link</p>
+          <p class="mt-2 text-[11px] text-faint leading-relaxed">Share this Cobo Pay link with the payer — it is the same page the email View Details button opens.</p>
+          <div class="mt-3 rounded-lg border border-line bg-[#FAFBFD] px-3 py-2.5 text-[11px] tnum text-muted break-all">https://pay.cobo.com/invoice/${i.id}</div>
+          <button class="btn-s w-full mt-3 !h-9 !text-[12px]" onclick="state.payerInvoiceId='${i.id}';setRole('payer')">Preview as Payer</button>
+        </div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+/* ================= SETTLEMENT LIST ================= */
+function lastSuccessSettlementId() {
+  const s = DB.settlements.filter(x => x.status === 'Success').sort((a, b) => b.createTime.localeCompare(a.createTime))[0];
+  return s ? s.id : null;
+}
+function renderSettlementKpis() {
+  const last = DB.settlements.filter(x => x.status === 'Success').sort((a, b) => b.createTime.localeCompare(a.createTime))[0];
+  document.getElementById('stlLastAmt').textContent = last ? fmt6(last.amount) : '—';
+  document.getElementById('stlLastMeta').textContent = last ? `${last.token} · ${last.id} · View detail →` : 'No successful settlement yet';
+  const pending = {};
+  DB.settlements.filter(x => x.status === 'In Progress').forEach(x => pending[x.token] = (pending[x.token] || 0) + x.amount);
+  const keys = Object.keys(pending);
+  document.getElementById('stlPendingRows').innerHTML = keys.length ? keys.map(t =>
+    `<p class="flex items-center gap-2 text-[15px] font-bold tnum">${tkdot(t)}${fmt6(pending[t])}<span class="text-[11px] text-faint font-medium">${t} · in progress</span></p>`).join('')
+    : '<p class="text-[15px] font-bold tnum">0.000000</p><p class="text-[11px] text-faint font-medium">No settlement in progress</p>';
+}
+function renderSettlements() {
+  renderSettlementKpis();
+  const f = state.stlFilters;
+  let rows = DB.settlements.slice().sort((a, b) => b.createTime.localeCompare(a.createTime));
+  if (f.q) rows = rows.filter(s => s.id.toLowerCase().includes(f.q.toLowerCase()));
+  if (f.token !== 'All') rows = rows.filter(s => s.token === f.token);
+  if (f.status !== 'All') rows = rows.filter(s => s.status === f.status);
+  const el = document.getElementById('settlementRows');
+  if (!rows.length) {
+    el.innerHTML = `<div class="py-16 text-center">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-primarysoft text-primary flex items-center justify-center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+      </div>
+      <p class="mt-4 text-[14px] font-bold">There are no settlement records yet.</p>
+      <p class="mt-1 text-[12px] text-muted">Settle received invoices to your wallet address.</p>
+      <button class="btn-p mt-4 !h-9" onclick="openSettlementRequest()">Request Settlement</button></div>`;
+    return;
+  }
+  el.innerHTML = rows.map(s => `
+    <div class="tr" style="grid-template-columns:170px 1.6fr 170px 130px 110px" data-bp-anchor="settlement-row-${s.id}">
+      <span class="text-muted tnum text-[12px]">${s.createTime}</span>
+      <span class="font-semibold tnum text-[12px] truncate">${s.id}</span>
+      <span class="text-right"><span class="font-bold tnum text-[12px]">${fmt6(s.amount)}</span> <span class="text-[11px] text-faint font-medium">${s.token}</span></span>
+      <span>${sbadge(s.status)}</span>
+      <span><button class="act pri" onclick="openSettlementDetail('${s.id}')">View Detail</button></span>
+    </div>`).join('');
+}
+/* ================= SETTLEMENT REQUEST / CONFIRM ================= */
+function settleableInvoices(token) {
+  return DB.invoices.filter(i => ['Received', 'Settlement Failed'].includes(i.status) && i.primaryToken === token && !i.settlementRequestId);
+}
+function openSettlementRequest() {
+  state.stlDraft = { token: null, walletId: null, address: null, selected: [], q: '' };
+  const tokSel = document.getElementById('srToken');
+  const avail = TOKENS.map(t => ({ t, n: settleableInvoices(t).length }));
+  const first = avail.find(x => x.n > 0);
+  tokSel.innerHTML = avail.map(x => `<option value="${x.t}" ${first && x.t === first.t ? 'selected' : ''} ${x.n === 0 ? 'disabled' : ''}>${x.t} (${x.n} available)</option>`).join('');
+  state.stlDraft.token = first ? first.t : TOKENS[0];
+  const walSel = document.getElementById('srWallet');
+  walSel.innerHTML = DB.wallets.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+  state.stlDraft.walletId = DB.wallets[0].id;
+  srWalletChanged();
+  go('settlement-request');
+}
+function srTokenChanged() { state.stlDraft.token = document.getElementById('srToken').value; state.stlDraft.selected = []; srWalletChanged(); }
+function srWalletChanged() {
+  state.stlDraft.walletId = document.getElementById('srWallet').value;
+  const w = DB.wallets.find(x => x.id === state.stlDraft.walletId);
+  const addr = w.addresses[state.stlDraft.token];
+  const sel = document.getElementById('srAddress');
+  if (addr) {
+    sel.disabled = false;
+    sel.innerHTML = `<option value="${addr}">${addr.slice(0, 10)}…${addr.slice(-6)}</option>`;
+    state.stlDraft.address = addr;
+    document.getElementById('srAddrHint').textContent = 'Addresses are returned by the Cobo Wallet API.';
+  } else {
+    sel.disabled = true;
+    sel.innerHTML = '<option value="">—</option>';
+    state.stlDraft.address = null;
+    document.getElementById('srAddrHint').textContent = 'No wallet address available for the selected token.';
+  }
+  renderSrInvoices();
+}
+function renderSrInvoices() {
+  const d = state.stlDraft;
+  let rows = settleableInvoices(d.token);
+  if (d.q) rows = rows.filter(i => (i.id + ' ' + clientName(i.clientId)).toLowerCase().includes(d.q.toLowerCase()));
+  const el = document.getElementById('srInvoiceRows');
+  if (!rows.length) {
+    el.innerHTML = `<div class="py-14 text-center">
+      <p class="text-[14px] font-bold">There are no invoices available for settlement.</p>
+      <p class="mt-1 text-[12px] text-muted">Wait for payments to arrive or retry Settlement Failed invoices.</p>
+      <button class="btn-s mt-4 !h-9" onclick="go('settlements')">Back to Settlement</button></div>`;
+  } else {
+    el.innerHTML = rows.map(i => {
+      const on = d.selected.includes(i.id);
+      return `<div class="tr" style="grid-template-columns:36px 1.6fr 1fr 110px 140px 110px" data-bp-anchor="sr-row-${i.id}">
+        <span><span class="checkbox ${on ? 'on' : ''}" data-bp-state="sr-select" onclick="srToggle('${i.id}')">${on ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : ''}</span></span>
+        <span class="font-semibold tnum text-[12px] truncate">${i.id}</span>
+        <span class="text-body truncate">${clientName(i.clientId)}</span>
+        <span class="text-muted tnum text-[12px]">${fdate(i.dueDate)}</span>
+        <span class="text-right font-bold tnum text-[12px]">${fmt6(i.amounts[i.primaryToken])}</span>
+        <span>${ibadge(i.status)}</span>
+      </div>`;
+    }).join('');
+  }
+  renderSrSummary();
+}
+function srToggle(id) {
+  const d = state.stlDraft;
+  const idx = d.selected.indexOf(id);
+  if (idx >= 0) d.selected.splice(idx, 1); else d.selected.push(id);
+  renderSrInvoices();
+}
+function srToggleAll() {
+  const d = state.stlDraft;
+  const all = settleableInvoices(d.token).map(i => i.id);
+  d.selected = d.selected.length === all.length ? [] : all.slice();
+  renderSrInvoices();
+}
+function renderSrSummary() {
+  const d = state.stlDraft;
+  const amt = d.selected.reduce((s, id) => s + inv(id).amounts[d.token], 0);
+  document.getElementById('srSelCount').textContent = `${d.selected.length} invoice${d.selected.length === 1 ? '' : 's'} selected`;
+  document.getElementById('srSelAmt').textContent = fmt6(amt) + ' ' + (d.token || '');
+  document.getElementById('srNextBtn').disabled = !(d.selected.length && d.address);
+}
+function goToConfirm() {
+  const d = state.stlDraft;
+  const amt = d.selected.reduce((s, id) => s + inv(id).amounts[d.token], 0);
+  const coboFee = +(amt * 0.005).toFixed(6), serviceFee = +(amt * 0.02).toFixed(6);
+  d.amount = +amt.toFixed(6); d.coboFee = coboFee; d.serviceFee = serviceFee; d.totalFee = +(coboFee + serviceFee).toFixed(6);
+  const w = DB.wallets.find(x => x.id === d.walletId);
+  document.getElementById('scMeta').innerHTML = `
+    <div class="dl-row"><p class="k">Settlement Token</p><p class="flex">${tkchip(d.token)}</p></div>
+    <div class="dl-row"><p class="k">Wallet</p><p class="font-semibold">${w.name}</p></div>
+    <div class="dl-row"><p class="k">Wallet Address</p><p class="font-semibold tnum text-[12px] break-all">${d.address}</p></div>
+    <div class="dl-row"><p class="k">Invoices</p><p class="font-semibold tnum">${d.selected.length}</p></div>`;
+  document.getElementById('scFees').innerHTML = `
+    <p class="flex justify-between"><span class="text-faint">Request amount</span><span class="font-bold tnum">${fmt6(d.amount)} ${d.token}</span></p>
+    <p class="flex justify-between"><span class="text-faint">Cobo Pay estimated fee</span><span class="font-semibold tnum">${fmt6(d.coboFee)} ${d.token}</span></p>
+    <p class="flex justify-between"><span class="text-faint">Invoice service fee (2%)</span><span class="font-semibold tnum">${fmt6(d.serviceFee)} ${d.token}</span></p>
+    <p class="flex justify-between pt-2.5 border-t border-line"><span class="font-semibold">Total estimated fee</span><span class="font-bold tnum text-dangertext">${fmt6(d.totalFee)} ${d.token}</span></p>
+    <p class="flex justify-between"><span class="font-semibold">You will receive (est.)</span><span class="font-bold tnum text-successtext">${fmt6(d.amount - d.totalFee)} ${d.token}</span></p>`;
+  document.getElementById('scInvoiceList').innerHTML = d.selected.map(id => { const i = inv(id); return `
+    <div class="flex items-center gap-3 py-2.5 border-b border-line last:border-0 text-[13px]">
+      <span class="font-semibold tnum text-[12px] truncate">${i.id}</span>
+      <span class="text-muted">${clientName(i.clientId)}</span>
+      <span class="ml-auto font-bold tnum text-[12px]">${fmt6(i.amounts[d.token])} ${d.token}</span>
+      ${ibadge(i.status)}
+    </div>`; }).join('');
+  document.getElementById('scConfirmBtn').disabled = !d.address;
+  go('settlement-confirm');
+}
+function submitSettlement() {
+  const d = state.stlDraft;
+  const btn = document.getElementById('scConfirmBtn');
+  if (btn.disabled) return;
+  btn.disabled = true; btn.innerHTML = spinner() + 'Submitting…';
+  setTimeout(() => {
+    btn.disabled = false; btn.innerHTML = 'Confirm';
+    const sid = 'SR-' + TODAY.replace(/-/g, '') + '-' + Math.random().toString(16).slice(2, 6);
+    DB.settlements.push({ id: sid, createTime: TODAY + ' ' + new Date().toTimeString().slice(0, 5), status: 'In Progress', token: d.token, walletId: d.walletId, walletAddress: d.address, invoiceIds: d.selected.slice(), amount: d.amount, coboFee: d.coboFee, serviceFee: d.serviceFee, totalFee: d.totalFee });
+    d.selected.forEach(id => { const i = inv(id); i.status = 'Settling'; i.settlementRequestId = sid; });
+    toast('Settlement Request submitted successfully.', 'info');
+    renderSettlements(); renderInvoices(); go('settlements');
+  }, 1000);
+}
+/* ================= SETTLEMENT DETAIL ================= */
+function openSettlementDetail(id) { state.detailSettlementId = id; renderSettlementDetail(); go('settlement-detail'); }
+function renderSettlementDetail() {
+  const s = DB.settlements.find(x => x.id === state.detailSettlementId);
+  if (!s) { go('settlements'); return; }
+  const w = DB.wallets.find(x => x.id === s.walletId);
+  document.getElementById('sdTitle').textContent = s.id;
+  document.getElementById('sdBadge').innerHTML = sbadge(s.status);
+  let banner = '';
+  if (s.status === 'Partial Success') banner = `<div class="rounded-xl bg-primarysofter border border-primaryborder px-4 py-3 flex items-start gap-2.5">
+    <svg class="shrink-0 mt-px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F79009" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+    <p class="text-[12px] leading-relaxed text-primarytext font-medium">Some invoices settled successfully and some failed. Failed invoices are marked Settlement Failed and can be selected in a future settlement request.</p></div>`;
+  if (s.status === 'Failed') banner = `<div class="rounded-xl bg-dangersoft border border-dangerborder px-4 py-3 flex items-start gap-2.5">
+    <svg class="shrink-0 mt-px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F04438" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    <p class="text-[12px] leading-relaxed text-dangerdark font-medium">All linked invoices failed settlement reconciliation. The invoices are marked Settlement Failed and can be retried in a new request.</p></div>`;
+  if (s.status === 'In Progress') banner = `<div class="rounded-xl bg-infosoft border border-infoborder px-4 py-3 flex items-start gap-2.5">
+    <svg class="shrink-0 mt-px spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E5BFF" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    <p class="text-[12px] leading-relaxed text-infotext font-medium">Reconciling and settling via Cobo. Linked invoices are Settling until the callback completes.</p></div>`;
+  document.getElementById('sdBanner').innerHTML = banner;
+  document.getElementById('sdMeta').innerHTML = `
+    <div class="dl-row"><p class="k">Request ID</p><p class="font-semibold tnum text-[12px]">${s.id}</p></div>
+    <div class="dl-row"><p class="k">Creation Time</p><p class="font-semibold tnum">${s.createTime}</p></div>
+    <div class="dl-row"><p class="k">Settlement Token</p><p class="flex">${tkchip(s.token)}</p></div>
+    <div class="dl-row"><p class="k">Status</p><p>${sbadge(s.status)}</p></div>
+    <div class="dl-row"><p class="k">Wallet</p><p class="font-semibold">${w ? w.name : s.walletId}</p></div>
+    <div class="dl-row"><p class="k">Wallet Address</p><p class="font-semibold tnum text-[12px] break-all">${s.walletAddress}</p></div>
+    <div class="dl-row"><p class="k">Request amount</p><p class="font-bold tnum">${fmt6(s.amount)} ${s.token}</p></div>
+    <div class="dl-row"><p class="k">Total est. fee</p><p class="font-semibold tnum">${fmt6(s.totalFee)} ${s.token}</p></div>`;
+  renderSdInvoices();
+}
+function renderSdInvoices() {
+  const s = DB.settlements.find(x => x.id === state.detailSettlementId); if (!s) return;
+  const f = state.stlDetailFilter;
+  let rows = s.invoiceIds.map(inv).filter(Boolean);
+  if (f.q) rows = rows.filter(i => (i.id + ' ' + clientName(i.clientId)).toLowerCase().includes(f.q.toLowerCase()));
+  if (f.status !== 'All') rows = rows.filter(i => i.status === f.status);
+  const el = document.getElementById('sdInvoiceRows');
+  if (!rows.length) { el.innerHTML = '<p class="py-10 text-center text-[13px] text-faint">No invoices match the current filters.</p>'; return; }
+  el.innerHTML = rows.map(i => `
+    <div class="tr" style="grid-template-columns:1.6fr 1fr 140px 130px 110px" data-bp-anchor="sd-row-${i.id}">
+      <span class="font-semibold tnum text-[12px] truncate">${i.id}</span>
+      <span class="text-body truncate">${clientName(i.clientId)}</span>
+      <span class="text-right font-bold tnum text-[12px]">${fmt6(i.amounts[s.token])} <span class="text-[11px] text-faint font-medium">${s.token}</span></span>
+      <span>${ibadge(i.status)}</span>
+      <span><button class="act pri" onclick="openInvoiceDetail('${i.id}')">View Detail</button></span>
+    </div>`).join('');
+}
+/* ================= PAYER ================= */
+function renderPayerEmail() {
+  const i = inv(state.payerInvoiceId) || inv('CL002-20260903-c3d4');
+  const c = cli(i.clientId);
+  document.getElementById('peSubject').textContent = `${i.id} from Demo Merchant`;
+  document.getElementById('peTo').textContent = c ? c.email : '';
+  document.getElementById('peAmount').innerHTML = `${fmt6(i.amounts[i.primaryToken])} <span class="text-[13px] font-semibold text-muted">${i.primaryToken}</span>`;
+  document.getElementById('peMeta').textContent = `Due ${fdate(i.dueDate)} · To ${c ? c.name : ''}`;
+  document.getElementById('peTokens').innerHTML = i.tokens.map(tkchip).join('');
+}
+function payerStatusBlock(i) {
+  const payable = i.status === 'Pending' && i.dueDate >= TODAY;
+  if (payable) {
+    const sel = state.payerToken || i.primaryToken;
+    return `<div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="payer-paybox">
+      <p class="text-[11px] font-semibold text-faint uppercase tracking-wide">Select payment method</p>
+      <div class="mt-2.5 space-y-1.5">
+        ${i.tokens.map(t => `<button class="w-full flex items-center gap-2 rounded-lg ${sel === t ? 'border-2 border-primary bg-primarysofter' : 'border border-line'} px-3 py-2.5 text-[12px] font-semibold" data-bp-state="payer-token" onclick="state.payerToken='${t}';renderPayerInvoice()">
+          ${tkdot(t)}${t}<span class="ml-auto tnum">${fmt6(i.amounts[t] || i.amounts[i.primaryToken])}</span></button>`).join('')}
+      </div>
+      <button class="btn-p w-full mt-4" onclick="openPayerPay()">Pay Now</button>
+      <p class="mt-2.5 text-[11px] text-faint text-center">You will be redirected to Cobo Pay to complete the payment.</p>
+    </div>`;
+  }
+  const msgs = {
+    'Overdue': ['warn', 'This invoice is overdue.', 'The due date has passed. Please contact the merchant before paying.'],
+    'Received': ['ok', 'This invoice has been paid.', `Received ${fmt6(i.amounts[i.primaryToken])} ${i.primaryToken}${i.paidOn ? ' on ' + fdate(i.paidOn) : ''}. Pay Now is hidden for non-pending invoices.`],
+    'Settling': ['ok', 'This invoice has been paid.', 'The payment is being settled to the merchant wallet.'],
+    'Settled': ['ok', 'This invoice has been paid and settled.', 'No further action is needed.'],
+    'Settlement Failed': ['warn', 'This invoice has been paid.', 'Settlement to the merchant is being retried. No further payment is needed.'],
+    'Voiding': ['gray', 'This invoice is being voided.', 'The merchant is cancelling this invoice. Please contact the merchant if you have questions.'],
+    'Voided': ['gray', 'This invoice has been voided.', i.voidReason ? 'Reason: ' + i.voidReason : 'The merchant cancelled this invoice.'],
+    'Error': ['err', 'Abnormal payment detected.', 'An overpayment, underpayment or mistaken payment was detected. Please contact the merchant or super admin.'],
+    'Sending': ['info', 'This invoice is being prepared.', 'The merchant is generating the payment link. Please check again shortly.'],
+    'Draft': ['gray', 'This invoice is not payable yet.', 'The merchant has not sent this invoice.'],
+  };
+  const [kind, title, sub] = msgs[i.status] || msgs.Draft;
+  const style = { ok: 'border-successborder bg-successsoft/40', warn: 'bg-primarysofter border-primaryborder', err: 'bg-dangersoft border-dangerborder', gray: 'bg-[#F2F4F7] border-line', info: 'bg-infosoft border-infoborder' }[kind];
+  const iconColor = { ok: '#067647', warn: '#F79009', err: '#F04438', gray: '#667085', info: '#2E5BFF' }[kind];
+  return `<div class="rounded-2xl border ${style} p-6" data-bp-anchor="payer-readonly-banner">
+    <div class="flex items-center gap-3">
+      <span class="w-9 h-9 rounded-xl bg-white/70 border border-line flex items-center justify-center shrink-0">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${kind === 'ok' ? '<path d="M20 6L9 17l-5-5"/>' : kind === 'err' ? '<path d="M18 6L6 18M6 6l12 12"/>' : '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'}</svg>
+      </span>
+      <div><p class="text-[14px] font-bold">${title}</p><p class="text-[12px] text-muted mt-0.5">${sub}</p></div>
+    </div></div>`;
+}
+function renderPayerInvoice() {
+  const i = inv(state.payerInvoiceId); if (!i) return;
+  const c = cli(i.clientId);
+  if (!state.payerToken) state.payerToken = i.primaryToken;
+  const amt = i.amounts[state.payerToken] ?? i.amounts[i.primaryToken];
+  const sel = document.getElementById('payerDemoInv'); if (sel) sel.value = i.id;
+  document.getElementById('payerInvoiceRoot').innerHTML = `<div class="space-y-4">
+    <div class="bg-white rounded-2xl border border-line shadow-card p-6" data-bp-anchor="payer-invoice-card">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#F79009] to-[#E35D00] flex items-center justify-center"><span class="text-white text-[12px] font-extrabold">D</span></div>
+        <p class="text-[13px] font-bold">Demo Merchant</p>
+        <span class="ml-auto">${ibadge(i.status)}</span>
+      </div>
+      <p class="mt-5 text-[30px] font-bold tnum leading-none">${fmt6(amt)} <span class="text-[14px] font-semibold text-muted">${state.payerToken}</span></p>
+      <p class="mt-2 text-[12px] text-faint font-medium tnum">${i.id}</p>
+      <div class="mt-5 pt-4 border-t border-line grid grid-cols-2 gap-x-8 gap-y-3 text-[13px]">
+        <div class="flex gap-3"><p class="w-[80px] shrink-0 text-faint font-medium">From</p><p class="font-semibold">Demo Merchant</p></div>
+        <div class="flex gap-3"><p class="w-[80px] shrink-0 text-faint font-medium">Billed To</p><p class="font-semibold">${c ? c.name : '—'}</p></div>
+        <div class="flex gap-3"><p class="w-[80px] shrink-0 text-faint font-medium">Issue Date</p><p class="font-semibold tnum">${fdate(i.issueDate)}</p></div>
+        <div class="flex gap-3"><p class="w-[80px] shrink-0 text-faint font-medium">Due Date</p><p class="font-semibold tnum ${i.status === 'Overdue' ? 'text-dangertext' : ''}">${fdate(i.dueDate)}</p></div>
+        <div class="flex gap-3"><p class="w-[80px] shrink-0 text-faint font-medium">Category</p><p class="font-medium text-body">${i.category || '—'}</p></div>
+        <div class="flex gap-3"><p class="w-[80px] shrink-0 text-faint font-medium">Memo</p><p class="font-medium text-body">${i.memo || '—'}</p></div>
+      </div>
+      <div class="mt-5 pt-4 border-t border-line">
+        <p class="text-[11px] font-semibold text-faint uppercase tracking-wide mb-2">Items</p>
+        ${i.items.map(it => `<div class="flex items-center gap-3 py-2 text-[13px] border-b border-line last:border-0">
+          <p class="font-medium truncate">${it.name} <span class="text-faint">× ${it.qty}</span></p>
+          <p class="ml-auto font-semibold tnum shrink-0">${fmt6((it.price[state.payerToken] || it.price[i.primaryToken] || 0) * it.qty)}</p></div>`).join('')}
+        <div class="flex items-center gap-3 pt-3 text-[14px]"><p class="font-bold">Total due</p><p class="ml-auto font-bold tnum">${fmt6(amt)} ${state.payerToken}</p></div>
+      </div>
+    </div>
+    ${payerStatusBlock(i)}
+    <p class="text-center text-[10px] text-faint font-medium">Powered by Cobo Pay</p>
+  </div>`;
+}
+function openPayerPay() {
+  const i = inv(state.payerInvoiceId);
+  const amt = i.amounts[state.payerToken] ?? i.amounts[i.primaryToken];
+  document.getElementById('ppAmount').textContent = `${fmt6(amt)} ${state.payerToken}`;
+  document.getElementById('ppInvId').textContent = i.id;
+  document.getElementById('ppAddress').textContent = state.payerToken.startsWith('Tron') ? 'TQrXvDemoMerchantAddr9f001' : '0xDemoMerchantAddrabc002';
+  go('payer-pay');
+}
+function payerConfirmPay() {
+  const btn = document.getElementById('ppPayBtn');
+  btn.disabled = true; btn.innerHTML = spinner() + 'Processing…';
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = 'Pay';
+    const i = inv(state.payerInvoiceId);
+    i.status = 'Received'; i.paidOn = TODAY;
+    toast('Payment successful — invoice marked as Received.');
+    renderPayerInvoice(); go('payer-invoice');
+  }, 1300);
+}
+function payerCancelPay() { toast('Payment cancelled. You can retry anytime before the due date.', 'info'); renderPayerInvoice(); go('payer-invoice'); }
+function payerFailPay() { toast('Payment failed. Please try again or contact the merchant.', 'error'); renderPayerInvoice(); go('payer-invoice'); }
+
+/* ================= INIT ================= */
+document.addEventListener('click', e => {
+  const p = document.getElementById('panel-notifications');
+  if (p && !p.classList.contains('hidden') && !p.contains(e.target) && !document.getElementById('bellBtn').contains(e.target)) p.classList.add('hidden');
+});
+renderDashboard(); renderClients(); renderInvoices(); renderSettlements();
+</script>
+<script id="prototype-artifact-guard-script">(function(){var cleaning=false;function cleanMermaidErrors(){if(cleaning)return;cleaning=true;document.querySelectorAll(".mermaid,.mermaidTooltip,[id^=mermaid-],svg[id^=mermaid-],.error-icon,.error-text").forEach(function(n){n.remove();});document.querySelectorAll("body *").forEach(function(n){var t=(n.textContent||"").trim();if(!t)return;if(t.includes("Syntax error in text")||t.includes("mermaid version")){var target=n.closest("svg,div,section,pre,body>*")||n;if(target&&target!==document.body)target.remove();}});cleaning=false;}function fixDesignHeroSpacing(){document.querySelectorAll(".hero,[class*=hero],header").forEach(function(root){root.querySelectorAll("[class*=badge],[class*=pill],[class*=tag]").forEach(function(el){el.style.position="relative";el.style.top="auto";el.style.left="auto";el.style.right="auto";el.style.transform="none";el.style.display="inline-flex";el.style.marginBottom="14px";});root.querySelectorAll("p,h1,h2,h3").forEach(function(el){el.style.clear="both";if(!el.style.marginTop)el.style.marginTop="10px";});});}function removeStage2TopRightMenu(){document.querySelectorAll(".ds-nav-links,.top-links,.top-nav-links,.header-links,.nav-links").forEach(function(n){var t=(n.textContent||"").replace(/\s+/g,"");if(/(颜色|字体|间距|圆角|阴影|组件|速查|Colors|Type|Typography|Spacing|Radius|Shadow|Components|Patterns)/i.test(t)){n.style.display="none";n.setAttribute("aria-hidden","true");}});}function revealStage2Content(){document.querySelectorAll("main,[role=main],.ds-body,.content,.main-content,.design-content,.design-system-content,.container,.page-content,section").forEach(function(n){n.style.visibility="visible";n.style.opacity="1";n.style.transform="none";n.style.filter="none";if(getComputedStyle(n).display==="none")n.style.display="block";});document.documentElement.style.visibility="visible";document.body.style.visibility="visible";document.body.style.opacity="1";document.body.style.transform="none";}function stabilizeStage2Toc(){document.querySelectorAll(".ds-toc,.toc,.sidebar,.side-nav,.left-nav,.nav-panel").forEach(function(n){var pos=getComputedStyle(n).position;if(pos==="static"||pos==="relative"){n.style.position="sticky";n.style.top="0";n.style.alignSelf="start";n.style.maxHeight="100vh";n.style.overflow="auto";n.style.zIndex="10";}});}function resetStage2InitialScroll(){try{if("scrollRestoration" in history)history.scrollRestoration="manual";}catch(e){}if(location.hash)return;var reset=function(){var scroller=document.scrollingElement||document.documentElement;window.scrollTo(0,0);if(scroller)scroller.scrollTop=0;document.body.scrollTop=0;window.dispatchEvent(new Event("resize"));};requestAnimationFrame(function(){reset();requestAnimationFrame(reset);});}function removeUselessPrototypeModals(){document.querySelectorAll("[role=dialog],.modal,[class*=modal],[class*=overlay],[class*=backdrop]").forEach(function(n){var t=(n.textContent||"").trim();if(/(发现一个本地草稿|本地草稿|Session recovery|恢复草稿|草稿)/i.test(t)){n.remove();}});document.body.style.filter="";document.body.style.backdropFilter="";}cleanMermaidErrors();fixDesignHeroSpacing();removeUselessPrototypeModals();new MutationObserver(function(){requestAnimationFrame(function(){cleanMermaidErrors();removeUselessPrototypeModals();});}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});})();</script></body>
+</html>

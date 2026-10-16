@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Clara Kramer",
+      "basis": "Clara Kramer holds a majority (60%) in Auental Holding GmbH and sole ownership (100%) in Weidenhof Beteiligungs GmbH. Under the control-attribution rule for multi-tier structures, a majority stake (>50%) in an intermediary leads to full (100%) pass-through of that intermediary's holding in the target company, rather than multiplication of percentages. Thus her indirect share in Lindmoor Lebensmittel GmbH is 14% (via Auental Holding GmbH) + 14% (via Weidenhof Beteiligungs GmbH) = 28%, exceeding the 25% threshold under § 3 Abs. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "None of the direct shareholders of Lindmoor Lebensmittel GmbH (Emil Kessler 15%, Matthias Brandt 2%, Vera Pohl 5%, Clara Kuhn 20%) individually exceed 25%, and the Weidenhof Holding GmbH (30% stake) is equally split 50/50 between Fabian Vogt and Lena Haas, so neither controls it with a majority and their multiplied indirect shares (15% each) stay below 25%, disqualifying both. However, Clara Kramer holds a controlling majority (60%) in Auental Holding GmbH and full ownership (100%) in Weidenhof Beteiligungs GmbH; since she has majority control in both intermediaries, their respective 14% stakes in Lindmoor are each fully attributed to her, summing to 28%, which surpasses the 25% threshold. Ines Haas, holding only a minority (40%) in Auental Holding GmbH without control, does not qualify. As a natural person (Clara Kramer) is identified exceeding the 25% threshold, no fictitious beneficial owner designation is required."
+}
+```

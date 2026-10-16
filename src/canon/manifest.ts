@@ -12,6 +12,7 @@ import { INSTALL_ROOT } from "../paths.js";
 import type { Suite } from "../types.js";
 import type { CandidateDef, EligibilityThresholds } from "./types.js";
 import { resolveEligibility } from "./select.js";
+import { readLabels, type InputLabels } from "./about.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -21,7 +22,14 @@ export interface RunManifest {
   run_name: string;
   step: { id: string; version: string | null };
   spec: { path: string | null; sha256: string | null };
-  test_set: { id: string | null; inputs: Record<string, string> };
+  /** The spec's description; absent on runs made before it existed (see canon/about.ts). */
+  description?: string | null;
+  test_set: {
+    id: string | null;
+    inputs: Record<string, string>;
+    /** Tags and split per input, from test_set.labels_file, frozen at the start of the run. */
+    labels?: InputLabels | null;
+  };
   candidates: Record<string, CandidateDef>;
   control_candidate: string | null;
   judge: { model: string; provider_route: string | null; methods: string[] };
@@ -29,6 +37,8 @@ export interface RunManifest {
     required_checks: string[];
     check_version: string | null;
     rubric_sha256: string;
+    /** What a pass of the required check means (its spec `description`). */
+    check_description?: string | null;
     producer_template_sha256: string;
     judge_template_sha256: string;
     score_template_sha256: string;
@@ -93,7 +103,12 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     run_name: suite.runName ?? suite.suiteId,
     step: { id: suite.stepId ?? suite.step, version: suite.stepVersion ?? null },
     spec: { path: suite.specPath ?? null, sha256: suite.specSha ?? null },
-    test_set: { id: suite.testSetId ?? null, inputs: m.inputShas },
+    description: suite.description ?? null,
+    test_set: {
+      id: suite.testSetId ?? null,
+      inputs: m.inputShas,
+      labels: suite.labelsFile && suite.taskRoot ? await readLabels(suite.taskRoot, suite.labelsFile) : null,
+    },
     candidates: suite.candidateDefs ?? {},
     control_candidate: suite.controlCandidate ?? null,
     judge: {
@@ -105,6 +120,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
       required_checks: suite.requiredChecks ?? [],
       check_version: m.checkVersion,
       rubric_sha256: m.rubricSha,
+      check_description: suite.checkDescription ?? null,
       producer_template_sha256: m.producerTemplateSha,
       judge_template_sha256: m.judgeTemplateSha,
       score_template_sha256: m.scoreTemplateSha,

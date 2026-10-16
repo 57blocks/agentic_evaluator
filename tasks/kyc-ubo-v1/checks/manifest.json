@@ -1,0 +1,264 @@
+{
+  "ubo-001": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo-002": {
+    "tags": [
+      "normal",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo-003": {
+    "tags": [
+      "normal",
+      "director-is-shareholder"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo-004": {
+    "tags": [
+      "normal",
+      "director-is-shareholder"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo-005": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo-006": {
+    "tags": [
+      "normal",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo-007": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo-008": {
+    "tags": [
+      "normal",
+      "director-is-shareholder"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo-009": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo-010": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo-011": {
+    "tags": [
+      "hard",
+      "threshold-boundary",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "threshold"
+  },
+  "ubo-012": {
+    "tags": [
+      "hard",
+      "threshold-boundary",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "threshold"
+  },
+  "ubo-013": {
+    "tags": [
+      "hard",
+      "threshold-boundary",
+      "director-is-shareholder"
+    ],
+    "split": "dev",
+    "archetype": "threshold"
+  },
+  "ubo-014": {
+    "tags": [
+      "hard",
+      "threshold-boundary"
+    ],
+    "split": "dev",
+    "archetype": "threshold"
+  },
+  "ubo-015": {
+    "tags": [
+      "hard",
+      "control-not-product",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "control"
+  },
+  "ubo-016": {
+    "tags": [
+      "hard",
+      "control-not-product",
+      "two-layers",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "control"
+  },
+  "ubo-017": {
+    "tags": [
+      "hard",
+      "control-not-product",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "control"
+  },
+  "ubo-018": {
+    "tags": [
+      "hard",
+      "control-not-product",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "control"
+  },
+  "ubo-019": {
+    "tags": [
+      "hard",
+      "product-not-control",
+      "two-layers",
+      "fallback",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "product-trap"
+  },
+  "ubo-020": {
+    "tags": [
+      "hard",
+      "product-not-control",
+      "two-layers",
+      "fallback"
+    ],
+    "split": "holdout",
+    "archetype": "product-trap"
+  },
+  "ubo-021": {
+    "tags": [
+      "hard",
+      "product-not-control",
+      "two-layers",
+      "fallback"
+    ],
+    "split": "dev",
+    "archetype": "product-trap"
+  },
+  "ubo-022": {
+    "tags": [
+      "hard",
+      "product-not-control",
+      "two-layers",
+      "fallback"
+    ],
+    "split": "dev",
+    "archetype": "product-trap"
+  },
+  "ubo-023": {
+    "tags": [
+      "hard",
+      "controlled-small-stake",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "small-holding"
+  },
+  "ubo-024": {
+    "tags": [
+      "hard",
+      "controlled-small-stake",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "small-holding"
+  },
+  "ubo-025": {
+    "tags": [
+      "hard",
+      "control-chain",
+      "three-layers"
+    ],
+    "split": "holdout",
+    "archetype": "chain"
+  },
+  "ubo-026": {
+    "tags": [
+      "hard",
+      "control-chain",
+      "three-layers",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "chain"
+  },
+  "ubo-027": {
+    "tags": [
+      "hard",
+      "control-chain",
+      "three-layers"
+    ],
+    "split": "dev",
+    "archetype": "chain"
+  },
+  "ubo-028": {
+    "tags": [
+      "hard",
+      "fallback",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "fallback"
+  },
+  "ubo-029": {
+    "tags": [
+      "hard",
+      "fallback",
+      "threshold-boundary",
+      "director-is-shareholder"
+    ],
+    "split": "holdout",
+    "archetype": "fallback"
+  },
+  "ubo-030": {
+    "tags": [
+      "hard",
+      "fallback",
+      "director-is-shareholder"
+    ],
+    "split": "dev",
+    "archetype": "fallback"
+  }
+}

@@ -194,6 +194,11 @@ export function WorkflowReport({ report, runId, dir }: Props) {
         title={<span className="font-mono">{record.run_name}</span>}
         subtitle={`${record.steps.length} steps (${record.steps.map((s) => s.id).join(" → ")}), ${record.handoff ? "each step's output feeds the next" : "each evaluated independently"}`}
       />
+      {report.about && (
+        <Section title="What it evaluates" hint={report.about.fromCurrentSpec ? "from the task's current spec; this run predates the description" : undefined}>
+          <p className="text-sm leading-relaxed">{report.about.description}</p>
+        </Section>
+      )}
       {d && (
         <dl className="flex flex-wrap gap-x-6 gap-y-1 text-xs">
           <div className="flex gap-1.5"><dt className="text-muted-foreground">Judge</dt><dd className="font-mono">{d.judge ?? "—"}</dd></div>

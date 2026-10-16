@@ -8,6 +8,8 @@
  * without reimplementing any of it.
  */
 
+import { cmdJudge, JUDGE_HELP } from "./commands/judge.js";
+import { cmdCombine, COMBINE_HELP } from "./commands/combine.js";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -34,7 +36,7 @@ interface Command {
   run: (args: ParsedArgs, io: Io) => Promise<ExitCode>;
 }
 
-const VALUED = ["workspace", "concurrency", "port"] as const;
+const VALUED = ["workspace", "concurrency", "port", "step", "candidate"] as const;
 
 export const COMMANDS: Record<string, Command> = {
   "check-task": { summary: "check a task before paying for a run", help: CHECK_TASK_HELP, valued: VALUED, run: cmdCheckTask },
@@ -44,6 +46,8 @@ export const COMMANDS: Record<string, Command> = {
   init: { summary: "create a runnable task to edit", help: INIT_HELP, valued: VALUED, run: cmdInit },
   models: { summary: "are this task's models reachable from here, and at what price", help: MODELS_HELP, valued: VALUED, run: cmdModels },
   report: { summary: "re-render a run's report.html", help: REPORT_HELP, valued: VALUED, run: cmdReport },
+  combine: { summary: "build one run from a run and its re-grades and re-runs", help: COMBINE_HELP, valued: VALUED, run: cmdCombine },
+  judge: { summary: "judge a finished run again, without generating", help: JUDGE_HELP, valued: VALUED, run: cmdJudge },
   review: { summary: "review a run blind, in the dashboard", help: REVIEW_HELP, valued: [...VALUED, "reviewer"], run: cmdReview },
   dash: { summary: "serve the dashboard", help: DASH_HELP, valued: VALUED, run: cmdDash },
   "install-skill": { summary: "add the /agenteval-new-task skill for Claude Code", help: INSTALL_SKILL_HELP, valued: VALUED, run: cmdInstallSkill },

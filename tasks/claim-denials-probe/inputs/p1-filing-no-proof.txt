@@ -1,0 +1,28 @@
+FACILITY: Brookside Skilled Nursing (synthetic)
+PAYER: Sample Advantage Health Plan (Medicare Advantage, synthetic)
+
+CLAIM 83012 · SNF inpatient (bill type 0211)
+Member: Ruth Delaney · Service dates: 2025-04-01 to 2025-04-30 · Billed: $18,450.00
+Submitted to payer: 2025-08-14
+
+REMITTANCE (ERA dated 2025-08-28)
+Claim 83012 · Paid $0.00
+Adjustment: group CO, reason 29 — "The time limit for filing has expired."
+
+CLAIM HISTORY
+2025-05-20  Claim sent via clearinghouse (batch 5521).
+2025-05-20  Clearinghouse report 999/277: REJECTED — "subscriber ID invalid format". Claim not forwarded to payer.
+2025-08-12  Subscriber ID corrected from the member's new card.
+2025-08-14  Claim resent; clearinghouse accepted and forwarded.
+2025-08-15  Payer acknowledgment 277CA: claim received.
+Payer acknowledgments (277CA) on file for this claim: 2025-08-15 only.
+
+STAFF NOTE (2025-08-29)
+"Resubmitted after eligibility fix. Original went out 2025-05-20 so we were on time — please appeal."
+
+PAYER MANUAL EXCERPT — Sample Advantage Health Plan
+§4.1 Initial claims must be received within 90 days of the last date of service.
+§4.2 Proof of timely filing: a payer acknowledgment (277CA) showing the claim was received by the plan within the filing limit, even if that claim was later rejected or denied. Clearinghouse reports are not proof of receipt by the plan.
+§4.3 Claims denied for timely filing without proof under §4.2 are provider liability and may not be billed to the member.
+§6.1 Corrected claims (frequency code 7) must be received within 90 days of the remittance date.
+§7.1 Appeals must be received within 60 days of the remittance date and include supporting documentation.

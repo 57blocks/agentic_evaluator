@@ -17,6 +17,8 @@
  */
 
 import { execFile } from "node:child_process";
+import { runProcess, type SpawnError } from "./proc.js";
+import { referencesCopyFor } from "./core/answer-key.js";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -258,7 +260,7 @@ export async function runCommandCheck(params: {
   /** The deliverable text, for checks that grade prose or JSON rather than files. */
   output: string;
   input: string;
-  meta: { step: string; candidate: string; input: string; trial: number };
+  meta: { step: string; candidate: string; input: string; trial: number; fixture?: string; chained?: boolean };
   workDir: string;
   /** Task dir the check's argv and version files resolve against. */
   taskRoot: string;
@@ -301,44 +303,34 @@ export async function runCommandCheck(params: {
   }
 
   const [program, ...args] = resolvedArgv;
-  return new Promise((resolve) => {
-    execFile(
-      program,
-      args,
-      { cwd: params.workDir, timeout: params.timeoutMs, maxBuffer: 20 * 1024 * 1024 },
-      (error, stdout, stderr) => {
-        const { evidence, reason } = evidenceOf(`${stdout ?? ""}`);
-        const errText = `${stderr ?? ""}`.trim().slice(0, MAX_OUTPUT_CHARS);
-        if (!error) {
-          resolve({ state: "pass", passed: true, exitCode: COMMAND_EXIT_PASS, output: evidence, version, ...(reason ? { reason } : {}) });
-          return;
-        }
-        const e = error as NodeJS.ErrnoException & { killed?: boolean; code?: unknown };
-        if (typeof e.code === "number" && e.code === COMMAND_EXIT_FAIL) {
-          resolve({
-            state: "fail",
-            passed: false,
-            exitCode: COMMAND_EXIT_FAIL,
-            output: evidence || errText,
-            version,
-            ...(reason ? { reason } : {}),
-          });
-          return;
-        }
-        const why = e.killed
-          ? `check timed out after ${params.timeoutMs}ms`
-          : e.code === "ENOENT"
-            ? `check program not found: ${program}`
-            : `check exited with ${String(e.code)}`;
-        resolve({
-          state: "evaluator_error",
-          passed: false,
-          exitCode: typeof e.code === "number" ? e.code : -1,
-          output: errText || evidence || why,
-          version,
-          reason: why,
-        });
-      },
-    );
-  });
+  let ran;
+  try {
+    // Its own process group: a check that starts a server (a smoke test)
+    // cannot leave it running past a timeout.
+    // While a run hides the task's references/, a check reads its private copy.
+    const references = referencesCopyFor(taskRoot);
+    const env = references ? { ...process.env, EVAL_REFERENCES_DIR: references } : process.env;
+    ran = await runProcess(program, args, { cwd: params.workDir, env, timeoutMs: params.timeoutMs, tailBytes: 20 * 1024 * 1024 });
+  } catch (err) {
+    const e = err as SpawnError;
+    const why = e.code === "ENOENT" ? `check program not found: ${program}` : `check could not start: ${e.message}`;
+    return { state: "evaluator_error", passed: false, exitCode: -1, output: why, version, reason: why };
+  }
+  const { evidence, reason } = evidenceOf(ran.stdout);
+  const errText = ran.stderr.trim().slice(0, MAX_OUTPUT_CHARS);
+  if (!ran.timedOut && ran.exitCode === COMMAND_EXIT_PASS) {
+    return { state: "pass", passed: true, exitCode: COMMAND_EXIT_PASS, output: evidence, version, ...(reason ? { reason } : {}) };
+  }
+  if (!ran.timedOut && ran.exitCode === COMMAND_EXIT_FAIL) {
+    return { state: "fail", passed: false, exitCode: COMMAND_EXIT_FAIL, output: evidence || errText, version, ...(reason ? { reason } : {}) };
+  }
+  const why = ran.timedOut ? `check timed out after ${params.timeoutMs}ms` : `check exited with ${String(ran.exitCode ?? "a signal")}`;
+  return {
+    state: "evaluator_error",
+    passed: false,
+    exitCode: ran.exitCode ?? -1,
+    output: errText || evidence || why,
+    version,
+    reason: why,
+  };
 }
