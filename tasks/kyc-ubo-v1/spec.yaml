@@ -14,9 +14,9 @@
 # reasoning and is reported beside it; the pick is the cheapest model that
 # passes every item.
 #
-#   node datasets/tasks/kyc-ubo-v1/gen/generate.mjs     # rebuild the set (same seed, same set)
-#   agenteval check-task datasets/tasks/kyc-ubo-v1            # free
-#   agenteval run datasets/tasks/kyc-ubo-v1 --yes --html      # billed
+#   node tasks/kyc-ubo-v1/gen/generate.mjs     # rebuild the set (same seed, same set)
+#   agenteval check-task tasks/kyc-ubo-v1            # free
+#   agenteval run tasks/kyc-ubo-v1 --yes --html      # billed
 
 protocol_version: "0.3"
 run_name: kyc-ubo-v1
