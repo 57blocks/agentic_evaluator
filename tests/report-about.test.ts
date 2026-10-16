@@ -18,6 +18,7 @@ workflow:
   steps:
     - id: triage
       version: "1"
+      description: Decide why a claim was denied and what to do next.
       test_set: { id: t, inputs: [a, b], labels_file: checks/manifest.json }
       candidate_ids: [m1]
       required_checks: [triage-check]
@@ -39,6 +40,7 @@ test("spec: description, a check's description and a labels file compile onto th
   assert.equal(suite.description, "Which model triages a denied claim correctly.");
   assert.equal(suite.checkDescription, "Root cause, next action and deadline must match the key.");
   assert.equal(suite.labelsFile, "checks/manifest.json");
+  assert.equal(suite.stepDescription, "Decide why a claim was denied and what to do next.");
 });
 
 test("spec: an empty description is rejected", () => {
@@ -83,7 +85,7 @@ async function taskWithRun(manifest: Partial<RunManifest>): Promise<string> {
 test("about: a run that froze its description reports it as frozen", async () => {
   const manifest = { spec: { path: "tasks/demo/spec.yaml", sha256: "s" }, step: { id: "triage", version: "1" }, description: "Frozen text.", test_set: { id: "t", inputs: {}, labels: { a: { tags: ["x"] } } }, evaluators: { check_description: "Frozen check." } } as unknown as RunManifest;
   const about = await aboutOfRun(await taskWithRun(manifest), manifest);
-  assert.deepEqual(about, { description: "Frozen text.", checkDescription: "Frozen check.", labels: { a: { tags: ["x"] } }, source: "frozen" });
+  assert.deepEqual(about, { description: "Frozen text.", stepDescription: null, checkDescription: "Frozen check.", labels: { a: { tags: ["x"] } }, source: "frozen" });
 });
 
 test("manifest: a new run freezes the description, the check's description and the labels", async () => {
@@ -95,6 +97,7 @@ test("manifest: a new run freezes the description, the check's description and t
   assert.equal(m.description, "Which model triages a denied claim correctly.");
   assert.equal(m.evaluators.check_description, "Root cause, next action and deadline must match the key.");
   assert.deepEqual(m.test_set.labels, { a: { tags: ["normal"], split: "dev" } });
+  assert.equal(m.step.description, "Decide why a claim was denied and what to do next.");
 });
 
 test("about: a workflow step's run dir (<task>/runs/<run>/<step>) finds the spec one level further up", async () => {
@@ -115,6 +118,8 @@ test("about: a workflow run takes its description from its first step's manifest
   const about = await aboutOfWorkflow(root, ["missing-step", "triage"]);
   assert.equal(about?.description, "Which model triages a denied claim correctly.");
   assert.equal(await aboutOfWorkflow(root, ["missing-step"]), null);
+  const { stepDescriptionsOf } = await import("../src/canon/about.js");
+  assert.deepEqual(await stepDescriptionsOf(root, ["missing-step", "triage"]), [{ id: "triage", description: "Decide why a claim was denied and what to do next." }]);
 });
 
 test("about: an older run reads the current spec, and says so", async () => {
@@ -123,5 +128,6 @@ test("about: an older run reads the current spec, and says so", async () => {
   assert.equal(about.source, "current-spec");
   assert.equal(about.description, "Which model triages a denied claim correctly.");
   assert.equal(about.checkDescription, "Root cause, next action and deadline must match the key.");
+  assert.equal(about.stepDescription, "Decide why a claim was denied and what to do next.");
   assert.deepEqual(about.labels, { a: { tags: ["normal"], split: "dev" } });
 });

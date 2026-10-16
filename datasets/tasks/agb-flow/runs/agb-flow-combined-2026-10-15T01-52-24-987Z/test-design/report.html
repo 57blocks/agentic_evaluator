@@ -106,10 +106,10 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 <body><div class="page">
   <header class="run">
     <p class="eyebrow">Agentic Evaluator · run report · protocol 0.3</p>
-    <h1>Step qa · <span class="id">agb-flow</span></h1>
+    <h1>Step test-design · <span class="id">agb-flow</span></h1>
     <dl class="kv">
       <div><dt>Spec</dt><dd>tasks/agb-flow/spec.yaml · sha256 b4317382</dd></div>
-      <div><dt>Test set</dt><dd>qa-v1 · 3 input(s)</dd></div>
+      <div><dt>Test set</dt><dd>test-design-v1 · 3 input(s)</dd></div>
       <div><dt>Trial plan</dt><dd>10 candidates × 3 inputs × 1 trial = 30</dd></div>
       <div><dt>Judge</dt><dd>x-ai/grok-4.7 · rubric de6ad17d</dd></div>
       <div><dt>Mode</dt><dd>production-realistic · cold cache</dd></div>
@@ -122,6 +122,7 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
   <section class="card">
     <h2>What this evaluates</h2>
     <p>Which model should run each step of agb's flow (task breakdown, test design, code), and does the per-step best combination beat one model end to end? Each input is a real agb project at the moment that step began (demo-todo, chessicle and invoice for breakdown and test design; demo-todo tasks for code). Every candidate runs the step through the same wrapper; a check grades the work itself, and a judge compares candidates pairwise.</p>
+    <p><b>This step (test-design)</b>: Test design: write a test plan (.ab/test-plan.json) that covers every acceptance criterion of the adopted task plan.</p>
     <p class="note"><b>A pass of test-plan-gates</b> means: The test plan covers every acceptance criterion of the adopted task plan.</p>
     <p class="note">This run predates these descriptions; they are read from the task's spec as it is now.</p>
   </section>
@@ -1667,8 +1668,8 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
   <section class="card">
     <h2>Raw records</h2>
     <details><summary>First line of scores.jsonl</summary><pre>{
- "run": "agb-flow-combined-2026-10-15T01-52-24-987Z/qa",
- "step": "qa",
+ "run": "agb-flow-combined-2026-10-15T01-52-24-987Z/test-design",
+ "step": "test-design",
  "candidate": "opus-5-5",
  "model_ref": "anthropic/claude-opus-5.5",
  "deployment_ref": "openrouter/local-cli",
@@ -1749,10 +1750,10 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 }</pre></details>
     <details><summary>manifest.json</summary><pre>{
  "protocol_version": "0.3",
- "run_id": "agb-flow-combined-2026-10-15T01-52-24-987Z/qa",
+ "run_id": "agb-flow-combined-2026-10-15T01-52-24-987Z/test-design",
  "run_name": "agb-flow",
  "step": {
-  "id": "qa",
+  "id": "test-design",
   "version": "1"
  },
  "spec": {
@@ -1760,7 +1761,7 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
   "sha256": "b43173828e81825dae7144a4c8ddcf611397d2196447b10ea8f3367f2db99dcc"
  },
  "test_set": {
-  "id": "qa-v1",
+  "id": "test-design-v1",
   "inputs": {
    "demo-todo": "9ffe96cbe0dcc1fbe29ae3cac4859888f40e435c97bd51d0f01a484fef36eb55",
    "chessicle": "b7dad749775e19deaa9105a33cbc60b8b28c56c14abe9271ae81724bdf238ed2",
@@ -1996,5 +1997,5 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 }</pre></details>
   </section>
 
-  <footer><span>qa/</span><span>opens offline, no external dependencies</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
+  <footer><span>test-design/</span><span>opens offline, no external dependencies</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
 </div></body></html>

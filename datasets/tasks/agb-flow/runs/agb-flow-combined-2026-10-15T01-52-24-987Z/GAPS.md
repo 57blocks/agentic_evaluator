@@ -17,17 +17,17 @@ Collected from every step plus the end-to-end pass. Each step directory keeps it
 
 ## Individual steps
 
-- `detail`: generation cost: **not observed** for 3 trial(s) (qwen-3-8-max). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger `generation` and `total` are lower bounds, and `cost_per_success` / `cost_per_attempt` are null.
-- `detail`: evaluator errors: none in this run.
-- `detail`: **combined run**: built from agb-flow-2026-10-14T07-38-33-255Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.
-- `qa`: generation cost: **not observed** for 3 trial(s) (qwen-3-8-max). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger `generation` and `total` are lower bounds, and `cost_per_success` / `cost_per_attempt` are null.
-- `qa`: evaluator errors: none in this run.
-- `qa`: **combined run**: built from agb-flow-2026-10-14T07-38-33-255Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.
-- `qa`: **judged after the run**: `agenteval judge` compared 108 pair(s) with x-ai/grok-4.7 on the files each trial left, minus those unchanged from the fixture; 0 judge call(s) failed.
-- `code`: generation cost: **not observed** for 2 trial(s) (qwen-3-8-max). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger `generation` and `total` are lower bounds, and `cost_per_success` / `cost_per_attempt` are null.
-- `code`: evaluator errors: 1 evaluator invocation(s) failed and are recorded as evaluator_error rows (excluded from candidate rates).
-- `code`: **combined run**: built from agb-flow-2026-10-14T07-38-33-255Z, agb-flow-2026-10-14T20-29-17-783Z, agb-flow-2026-10-14T21-47-15-831Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.
-- `code`: **judged after the run**: `agenteval judge` compared 72 pair(s) with x-ai/grok-4.7 on the files each trial left, minus those unchanged from the fixture; 0 judge call(s) failed.
+- `task-breakdown`: generation cost: **not observed** for 3 trial(s) (qwen-3-8-max). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger `generation` and `total` are lower bounds, and `cost_per_success` / `cost_per_attempt` are null.
+- `task-breakdown`: evaluator errors: none in this run.
+- `task-breakdown`: **combined run**: built from agb-flow-2026-10-14T07-38-33-255Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.
+- `test-design`: generation cost: **not observed** for 3 trial(s) (qwen-3-8-max). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger `generation` and `total` are lower bounds, and `cost_per_success` / `cost_per_attempt` are null.
+- `test-design`: evaluator errors: none in this run.
+- `test-design`: **combined run**: built from agb-flow-2026-10-14T07-38-33-255Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.
+- `test-design`: **judged after the run**: `agenteval judge` compared 108 pair(s) with x-ai/grok-4.7 on the files each trial left, minus those unchanged from the fixture; 0 judge call(s) failed.
+- `implementation`: generation cost: **not observed** for 2 trial(s) (qwen-3-8-max). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger `generation` and `total` are lower bounds, and `cost_per_success` / `cost_per_attempt` are null.
+- `implementation`: evaluator errors: 1 evaluator invocation(s) failed and are recorded as evaluator_error rows (excluded from candidate rates).
+- `implementation`: **combined run**: built from agb-flow-2026-10-14T07-38-33-255Z, agb-flow-2026-10-14T20-29-17-783Z, agb-flow-2026-10-14T21-47-15-831Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.
+- `implementation`: **judged after the run**: `agenteval judge` compared 72 pair(s) with x-ai/grok-4.7 on the files each trial left, minus those unchanged from the fixture; 0 judge call(s) failed.
 
 ## End to end
 

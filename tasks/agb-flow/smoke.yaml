@@ -9,9 +9,9 @@ budget_usd: 5
 
 workflow:
   steps:
-    - id: detail
+    - id: task-breakdown
       version: "1"
-      test_set: { id: smoke, inputs: [demo-todo], fixture_dir: fixture/detail }
+      test_set: { id: smoke, inputs: [demo-todo], fixture_dir: fixture/task-breakdown }
       candidate_ids: [glm-5-3]
       required_checks: [plan-gates]
       success_criteria: { mandatory_checks: all }
@@ -19,9 +19,9 @@ workflow:
       eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
       maximum_completion_time_seconds: 3000
       max_cost_per_trial_usd: 2
-    - id: qa
+    - id: test-design
       version: "1"
-      test_set: { id: smoke, inputs: [demo-todo], fixture_dir: fixture/qa }
+      test_set: { id: smoke, inputs: [demo-todo], fixture_dir: fixture/test-design }
       candidate_ids: [glm-5-3]
       required_checks: [test-plan-gates]
       success_criteria: { mandatory_checks: all }
@@ -29,9 +29,9 @@ workflow:
       eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
       maximum_completion_time_seconds: 1800
       max_cost_per_trial_usd: 2
-    - id: code
+    - id: implementation
       version: "1"
-      test_set: { id: smoke, inputs: [demo-todo-T-001], fixture_dir: fixture/code }
+      test_set: { id: smoke, inputs: [demo-todo-T-001], fixture_dir: fixture/implementation }
       candidate_ids: [glm-5-3]
       required_checks: [task-tests]
       success_criteria: { mandatory_checks: all }

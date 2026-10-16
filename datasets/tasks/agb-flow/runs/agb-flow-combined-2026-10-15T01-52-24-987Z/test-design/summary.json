@@ -1,6 +1,6 @@
 {
-  "run": "agb-flow-combined-2026-10-15T01-52-24-987Z/detail",
-  "step": "detail",
+  "run": "agb-flow-combined-2026-10-15T01-52-24-987Z/test-design",
+  "step": "test-design",
   "inputs": [
     "demo-todo",
     "chessicle",
@@ -50,9 +50,9 @@
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 4.445824,
-      "p50_ms": 1019740,
-      "p95_ms": 1317041
+      "generation_cost_per_success": 1.505837,
+      "p50_ms": 360661,
+      "p95_ms": 391650
     },
     {
       "candidate": "fable-5-1",
@@ -97,9 +97,9 @@
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 9.906049,
-      "p50_ms": 1735953,
-      "p95_ms": 1807089
+      "generation_cost_per_success": 4.129358,
+      "p50_ms": 428587,
+      "p95_ms": 665709
     },
     {
       "candidate": "gpt-5-6-sol",
@@ -144,22 +144,22 @@
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 2.362299,
-      "p50_ms": 1176204,
-      "p95_ms": 1353475
+      "generation_cost_per_success": 0.741038,
+      "p50_ms": 263087,
+      "p95_ms": 363338
     },
     {
       "candidate": "gemini-4-argon",
       "valid_attempts": 3,
       "classified": 3,
       "task_success_rate": {
-        "value": 0.3333333333333333,
-        "numerator": 1,
+        "value": 1,
+        "numerator": 3,
         "denominator": 3
       },
       "reliability": {
-        "value": 0.3333333333333333,
-        "numerator": 1,
+        "value": 1,
+        "numerator": 3,
         "denominator": 3
       },
       "evaluation_coverage": {
@@ -173,16 +173,16 @@
         "denominator": 3
       },
       "completion_states": {
-        "success": 1,
+        "success": 3,
         "refusal": 0,
         "timeout": 0,
-        "malformed": 2,
+        "malformed": 0,
         "cancelled": 0,
         "provider_error": 0
       },
       "outcomes": {
-        "success": 1,
-        "failure": 2,
+        "success": 3,
+        "failure": 0,
         "undetermined": 0
       },
       "check_states": {
@@ -191,9 +191,9 @@
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 39.744028,
-      "p50_ms": 983504,
-      "p95_ms": 983504
+      "generation_cost_per_success": 6.492119,
+      "p50_ms": 586219,
+      "p95_ms": 862640
     },
     {
       "candidate": "deepseek-v4-pro",
@@ -238,9 +238,9 @@
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 0.702781,
-      "p50_ms": 1444335,
-      "p95_ms": 1770822
+      "generation_cost_per_success": 0.273815,
+      "p50_ms": 363160,
+      "p95_ms": 444305
     },
     {
       "candidate": "deepseek-flash",
@@ -285,22 +285,22 @@
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 0.127959,
-      "p50_ms": 749788,
-      "p95_ms": 770372
+      "generation_cost_per_success": 0.056401,
+      "p50_ms": 260918,
+      "p95_ms": 342081
     },
     {
       "candidate": "kimi-k3",
       "valid_attempts": 3,
       "classified": 3,
       "task_success_rate": {
-        "value": 0.6666666666666666,
-        "numerator": 2,
+        "value": 1,
+        "numerator": 3,
         "denominator": 3
       },
       "reliability": {
-        "value": 0.6666666666666666,
-        "numerator": 2,
+        "value": 1,
+        "numerator": 3,
         "denominator": 3
       },
       "evaluation_coverage": {
@@ -309,8 +309,8 @@
         "denominator": 3
       },
       "required_check_pass_rate": {
-        "value": 0.6666666666666666,
-        "numerator": 2,
+        "value": 1,
+        "numerator": 3,
         "denominator": 3
       },
       "completion_states": {
@@ -322,19 +322,19 @@
         "provider_error": 0
       },
       "outcomes": {
-        "success": 2,
-        "failure": 1,
+        "success": 3,
+        "failure": 0,
         "undetermined": 0
       },
       "check_states": {
-        "pass": 2,
-        "fail": 1,
+        "pass": 3,
+        "fail": 0,
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 3.086789,
-      "p50_ms": 1290060,
-      "p95_ms": 1479399
+      "generation_cost_per_success": 1.117965,
+      "p50_ms": 340017,
+      "p95_ms": 620917
     },
     {
       "candidate": "glm-5-3",
@@ -379,22 +379,22 @@
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 0.661852,
-      "p50_ms": 1042034,
-      "p95_ms": 1170884
+      "generation_cost_per_success": 0.335739,
+      "p50_ms": 263102,
+      "p95_ms": 748720
     },
     {
       "candidate": "glm-5-3-prime",
       "valid_attempts": 3,
       "classified": 3,
       "task_success_rate": {
-        "value": 0.6666666666666666,
-        "numerator": 2,
+        "value": 1,
+        "numerator": 3,
         "denominator": 3
       },
       "reliability": {
-        "value": 0.6666666666666666,
-        "numerator": 2,
+        "value": 1,
+        "numerator": 3,
         "denominator": 3
       },
       "evaluation_coverage": {
@@ -403,8 +403,8 @@
         "denominator": 3
       },
       "required_check_pass_rate": {
-        "value": 0.6666666666666666,
-        "numerator": 2,
+        "value": 1,
+        "numerator": 3,
         "denominator": 3
       },
       "completion_states": {
@@ -416,19 +416,19 @@
         "provider_error": 0
       },
       "outcomes": {
-        "success": 2,
-        "failure": 1,
+        "success": 3,
+        "failure": 0,
         "undetermined": 0
       },
       "check_states": {
-        "pass": 2,
-        "fail": 1,
+        "pass": 3,
+        "fail": 0,
         "not_evaluated": 0,
         "evaluator_error": 0
       },
-      "generation_cost_per_success": 3.470563,
-      "p50_ms": 1117020,
-      "p95_ms": 2092453
+      "generation_cost_per_success": 1.435612,
+      "p50_ms": 399672,
+      "p95_ms": 628327
     },
     {
       "candidate": "qwen-3-8-max",
@@ -486,12 +486,12 @@
     ]
   },
   "integrity": {
-    "events": 498,
+    "events": 60,
     "gaps_over_threshold": 0,
-    "longest_gap_ms": 22,
+    "longest_gap_ms": 0,
     "threshold_ms": 300000,
-    "wall_ms": 24243657,
-    "in_flight_gaps": 17
+    "wall_ms": 6355129,
+    "in_flight_gaps": 5
   },
   "judge_discrimination": {
     "overall": {
@@ -508,19 +508,19 @@
   },
   "evaluation_coverage": [
     {
-      "evaluator": "plan-gates",
-      "version": "cmd-e1f9a9f4+files-8deb853d",
-      "pass": 25,
-      "fail": 2,
+      "evaluator": "test-plan-gates",
+      "version": "cmd-856b32ab+files-6649cf11",
+      "pass": 27,
+      "fail": 0,
       "not_evaluated": 0,
       "evaluator_error": 0
     },
     {
       "evaluator": "pairwise-swap",
-      "version": "x-ai/grok-4.7+rubric-b613cd5e+tpl-f111f170",
+      "version": "x-ai/grok-4.7+rubric-de6ad17d+tpl-33c11860",
       "pass": 108,
       "fail": 0,
-      "not_evaluated": 27,
+      "not_evaluated": 0,
       "evaluator_error": 0
     }
   ]

@@ -42,6 +42,8 @@ export interface PlanStep {
   task: string | null;
   /** What this evaluation decides and tests (the spec's description). Null when the spec has none. */
   about: string | null;
+  /** What this step's candidates do (the step's description). Null when the step has none. */
+  stepAbout: string | null;
   /** Where `about` came from for a finished run: its own record, or the task's spec as it is now. */
   aboutSource?: "frozen" | "current-spec";
   inputFrom: string | null;
@@ -131,6 +133,7 @@ async function stepFromSuite(suite: Suite): Promise<PlanStep> {
     id: suite.step,
     task: PRODUCER[suite.producer ?? "prompt"] ?? null,
     about: suite.description ?? null,
+    stepAbout: suite.stepDescription ?? null,
     inputFrom: suite.inputFrom ?? null,
     inputs,
     candidates: suite.candidates.map((id) => ({
@@ -186,6 +189,7 @@ export function planFromRun(b: RunBundle): PlanStep {
     id: m.step.id,
     task: null,
     about: b.about?.description ?? null,
+    stepAbout: b.about?.stepDescription ?? null,
     ...(b.about?.description && b.about.source !== "none" ? { aboutSource: b.about.source } : {}),
     inputFrom: null,
     inputs: inputs.map((id) => ({ id, title: null })),

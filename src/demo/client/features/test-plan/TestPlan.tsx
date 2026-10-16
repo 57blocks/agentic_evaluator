@@ -100,6 +100,7 @@ export function PlanStepCard({ step, title }: { step: PlanStep; title?: string }
     <Card className={SECTION_CARD}>
       <CardHeader>
         <CardTitle className={SECTION_TITLE}>{title ?? `Step ${step.id}`}</CardTitle>
+        {step.stepAbout && <p className="text-sm">{step.stepAbout}</p>}
         {(step.task || step.inputFrom) && (
           <CardDescription>
             {step.task}
