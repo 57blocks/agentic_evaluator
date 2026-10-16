@@ -21,6 +21,8 @@ export type InputLabels = Record<string, InputLabel>;
 
 export interface RunAbout {
   description: string | null;
+  /** What this step's candidates do (the step's own description). */
+  stepDescription: string | null;
   checkDescription: string | null;
   labels: InputLabels | null;
   /** "frozen": from this run's manifest. "current-spec": from the task's spec as it is now. */
@@ -48,7 +50,8 @@ export async function readLabels(taskRoot: string, file: string): Promise<InputL
   return parseLabels(JSON.parse(await fs.readFile(full, "utf-8")), file);
 }
 
-const frozen = (m: RunManifest): boolean => m.description !== undefined || m.test_set.labels !== undefined || m.evaluators.check_description !== undefined;
+const frozen = (m: RunManifest): boolean =>
+  m.description !== undefined || m.step.description !== undefined || m.test_set.labels !== undefined || m.evaluators.check_description !== undefined;
 
 const exists = (p: string): Promise<boolean> => fs.stat(p).then(() => true, () => false);
 
@@ -73,12 +76,31 @@ export async function aboutOfWorkflow(root: string, stepIds: readonly string[]):
   return null;
 }
 
+/** What each step of a workflow run does, in step order; a step with no description is left out. */
+export async function stepDescriptionsOf(root: string, stepIds: readonly string[]): Promise<Array<{ id: string; description: string }>> {
+  const out: Array<{ id: string; description: string }> = [];
+  for (const id of stepIds) {
+    const stepDir = path.join(root, id);
+    const raw = await fs.readFile(path.join(stepDir, "manifest.json"), "utf-8").catch(() => null);
+    if (raw === null) continue;
+    const about = await aboutOfRun(stepDir, JSON.parse(raw) as RunManifest);
+    if (about.stepDescription) out.push({ id, description: about.stepDescription });
+  }
+  return out;
+}
+
 /** The run's own record when it has one; otherwise the task's current spec. */
 export async function aboutOfRun(dir: string, m: RunManifest): Promise<RunAbout> {
   if (frozen(m)) {
-    return { description: m.description ?? null, checkDescription: m.evaluators.check_description ?? null, labels: m.test_set.labels ?? null, source: "frozen" };
+    return {
+      description: m.description ?? null,
+      stepDescription: m.step.description ?? null,
+      checkDescription: m.evaluators.check_description ?? null,
+      labels: m.test_set.labels ?? null,
+      source: "frozen",
+    };
   }
-  const none: RunAbout = { description: null, checkDescription: null, labels: null, source: "none" };
+  const none: RunAbout = { description: null, stepDescription: null, checkDescription: null, labels: null, source: "none" };
   if (!m.spec.path) return none;
   const taskRoot = await taskRootOf(dir, path.basename(m.spec.path));
   if (!taskRoot) return none;
@@ -90,11 +112,12 @@ export async function aboutOfRun(dir: string, m: RunManifest): Promise<RunAbout>
     const labelsFile = step?.test_set.labels_file;
     const about: RunAbout = {
       description: spec.description ?? null,
+      stepDescription: step?.description ?? null,
       checkDescription: (checkId && spec.evaluators.required_checks?.[checkId]?.description) || null,
       labels: labelsFile ? await readLabels(taskRoot, labelsFile).catch(() => null) : null,
       source: "current-spec",
     };
-    return about.description || about.checkDescription || about.labels ? about : none;
+    return about.description || about.stepDescription || about.checkDescription || about.labels ? about : none;
   } catch {
     return none;
   }

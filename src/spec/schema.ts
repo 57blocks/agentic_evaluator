@@ -72,6 +72,8 @@ export const SPEC_SCHEMA = {
             properties: {
               id: { type: "string" },
               version: { type: "string" },
+              /** What this step's candidates do, in a sentence; shown beside the step's id. */
+              description: { type: "string", minLength: 1 },
               test_set: {
                 type: "object",
                 additionalProperties: false,

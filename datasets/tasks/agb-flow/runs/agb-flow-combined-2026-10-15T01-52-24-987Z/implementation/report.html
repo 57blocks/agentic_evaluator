@@ -106,10 +106,10 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 <body><div class="page">
   <header class="run">
     <p class="eyebrow">Agentic Evaluator · run report · protocol 0.3</p>
-    <h1>Step code · <span class="id">agb-flow</span></h1>
+    <h1>Step implementation · <span class="id">agb-flow</span></h1>
     <dl class="kv">
       <div><dt>Spec</dt><dd>tasks/agb-flow/spec.yaml · sha256 599c1ed8</dd></div>
-      <div><dt>Test set</dt><dd>code-v1 · 2 input(s)</dd></div>
+      <div><dt>Test set</dt><dd>implementation-v1 · 2 input(s)</dd></div>
       <div><dt>Trial plan</dt><dd>10 candidates × 2 inputs × 1 trial = 20</dd></div>
       <div><dt>Judge</dt><dd>x-ai/grok-4.7 · rubric fa8dfe5f</dd></div>
       <div><dt>Mode</dt><dd>production-realistic · cold cache</dd></div>
@@ -122,6 +122,7 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
   <section class="card">
     <h2>What this evaluates</h2>
     <p>Which model should run each step of agb's flow (task breakdown, test design, code), and does the per-step best combination beat one model end to end? Each input is a real agb project at the moment that step began (demo-todo, chessicle and invoice for breakdown and test design; demo-todo tasks for code). Every candidate runs the step through the same wrapper; a check grades the work itself, and a judge compares candidates pairwise.</p>
+    <p><b>This step (implementation)</b>: Implementation: build one task of the plan with agb run, so the task's own acceptance tests pass.</p>
     <p class="note"><b>A pass of task-tests</b> means: The task's own acceptance tests, restored from the fixture, all pass.</p>
     <p class="note">This run predates these descriptions; they are read from the task's spec as it is now.</p>
   </section>
@@ -1223,8 +1224,8 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
   <section class="card">
     <h2>Raw records</h2>
     <details><summary>First line of scores.jsonl</summary><pre>{
- "run": "agb-flow-combined-2026-10-15T01-52-24-987Z/code",
- "step": "code",
+ "run": "agb-flow-combined-2026-10-15T01-52-24-987Z/implementation",
+ "step": "implementation",
  "candidate": "gpt-5-6-sol",
  "model_ref": "openai/gpt-5.6-sol",
  "deployment_ref": "openrouter/local-cli",
@@ -1305,10 +1306,10 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 }</pre></details>
     <details><summary>manifest.json</summary><pre>{
  "protocol_version": "0.3",
- "run_id": "agb-flow-combined-2026-10-15T01-52-24-987Z/code",
+ "run_id": "agb-flow-combined-2026-10-15T01-52-24-987Z/implementation",
  "run_name": "agb-flow",
  "step": {
-  "id": "code",
+  "id": "implementation",
   "version": "1"
  },
  "spec": {
@@ -1316,7 +1317,7 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
   "sha256": "599c1ed8970cdc55f43a8ffdf26f41d253a6b61fa518d519558cd133bf2f970d"
  },
  "test_set": {
-  "id": "code-v1",
+  "id": "implementation-v1",
   "inputs": {
    "demo-todo-T-001": "7c5df798e809842918fb3ba886aa15b380e4e84fd2e9e085cc6330d8ba86f673",
    "demo-todo-T-006": "1ad71d2ebceb0d3c3ccc59dbc6955f6f81a6275b54025906f1aa164be8a7e209"
@@ -1591,5 +1592,5 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 }</pre></details>
   </section>
 
-  <footer><span>code/</span><span>opens offline, no external dependencies</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
+  <footer><span>implementation/</span><span>opens offline, no external dependencies</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
 </div></body></html>

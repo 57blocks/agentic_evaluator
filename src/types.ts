@@ -195,6 +195,8 @@ export interface Suite {
   description?: string;
   /** The step's required check's `description`: what a pass means. */
   checkDescription?: string;
+  /** The step's own `description`: what its candidates do. */
+  stepDescription?: string;
   /** `test_set.labels_file`, task-relative: tags and split per input. */
   labelsFile?: string;
   /** sha256 of the spec file as loaded, and its repo-relative path. */

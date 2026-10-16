@@ -10,9 +10,9 @@
  * (EVAL_CHAINED). This sets all of agb's model slots to <model>, commits the
  * tree and runs the step:
  *
- *   detail  `claude -p` + stage-detail       .ab/tasks.json, UI_CONTRACT.md
- *   qa      `claude -p` + stage-qa           .ab/test-plan.json
- *   code    `agb run`: one task (the plan cut down to the input's task), or,
+ *   task-breakdown  `claude -p` + stage-detail   .ab/tasks.json, UI_CONTRACT.md
+ *   test-design     `claude -p` + stage-qa       .ab/test-plan.json
+ *   implementation  `agb run`: one task (the plan cut down to the input's task), or,
  *           chained, every task in the plan
  *
  * Tokens are reported, not dollars (reports_usage: tokens): agenteval prices
@@ -28,7 +28,9 @@ import os from "node:os";
 import path from "node:path";
 
 const [model, capArg] = process.argv.slice(2);
-const step = process.env.EVAL_STEP;
+/** agenteval's step id → the agb stage it runs. Below, `step` is the stage. */
+const STAGE = { "task-breakdown": "detail", "test-design": "qa", implementation: "code" };
+const step = STAGE[process.env.EVAL_STEP];
 const chained = process.env.EVAL_CHAINED === "1";
 const cwd = process.cwd();
 const AGB_HOME = process.env.AGB_HOME ?? path.join(os.homedir(), "workspace", "57b", "agb");
@@ -46,8 +48,8 @@ function refuse(msg) {
 }
 
 const cap = Number(capArg);
-if (!model || !(cap > 0) || !["detail", "qa", "code"].includes(step)) {
-  refuse("usage: agb-step.mjs <model> <max-cost-usd>, with EVAL_STEP detail|qa|code (agenteval sets it)");
+if (!model || !(cap > 0) || !step) {
+  refuse(`usage: agb-step.mjs <model> <max-cost-usd>, with EVAL_STEP ${Object.keys(STAGE).join("|")} (agenteval sets it)`);
 }
 if (!AGB.every(existsSync)) refuse(`agb not found under ${AGB_HOME} (set AGB_HOME)`);
 if (step !== "code" && !existsSync(path.join(PLUGIN, "skills", `stage-${step}`))) {

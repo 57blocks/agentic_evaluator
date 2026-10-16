@@ -627,13 +627,14 @@ compiles the produced TypeScript against `scaffold/tsconfig.json`.
 ### Saying what a task evaluates
 
 A report opens with what was evaluated, so a reader who never saw the spec
-knows what the numbers mean. Three optional fields carry it:
+knows what the numbers mean. Four optional fields carry it:
 
 ```yaml
 description: "Which model triages a denied Medicare SNF claim correctly? 30 synthetic claims …"
 workflow:
   steps:
     - id: triage
+      description: "Decide why a claim was denied and what to do next."
       test_set:
         id: claim-denials
         labels_file: checks/manifest.json   # { "cd-001": { "tags": ["hard", "span-dates"], "split": "holdout" } }
@@ -644,11 +645,13 @@ evaluators:
       description: "Root cause, next action and deadline match the answer key."
 ```
 
-`description` heads the report as **What it evaluates**; a check's
-`description` replaces its version hash under **How success is decided**; with
-`labels_file`, the report adds **Results by input tag**: the required check's
-passes per candidate for each tag and split. All three are frozen into the
-run's `manifest.json`. `agenteval report` on a run made before they existed
+`description` heads the report as **What it evaluates**; a step's
+`description` stands beside the step's id wherever it appears (a workflow's
+step cards, a step's report), so name steps for what they do and say it there;
+a check's `description` replaces its version hash under **How success is
+decided**; with `labels_file`, the report adds **Results by input tag**: the
+required check's passes per candidate for each tag and split. All four are
+frozen into the run's `manifest.json`. `agenteval report` on a run made before they existed
 reads them from the task's current spec and says so on the page.
 
 ### Workflows

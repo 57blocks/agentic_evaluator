@@ -31,7 +31,7 @@ export function StepReport({ report: r }: { report: Model }) {
   return (
     <article className="flex flex-col gap-5">
       <ReportHeader
-        eyebrow={`Run report · step ${r.stepId}`}
+        eyebrow={`Run report · step ${r.stepId}${r.stepDescription ? ` — ${r.stepDescription}` : ""}`}
         title={<span className="font-mono">{r.runName}</span>}
         subtitle={`${r.startedAt} · ${plural(plan.candidates, "candidate")} × ${plural(plan.inputs, "input")} × ${plural(plan.trialsPer, "trial")} each = ${plural(plan.trials, "trial")}`}
       />

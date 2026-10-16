@@ -5,8 +5,8 @@
   "handoff": false,
   "steps": [
     {
-      "id": "detail",
-      "dir": "detail",
+      "id": "task-breakdown",
+      "dir": "task-breakdown",
       "operating_mode": "highest-assurance",
       "chosen": "fable-5-1",
       "firmness": "directional",
@@ -52,8 +52,8 @@
       }
     },
     {
-      "id": "qa",
-      "dir": "qa",
+      "id": "test-design",
+      "dir": "test-design",
       "operating_mode": "highest-assurance",
       "chosen": "opus-5-5",
       "firmness": "directional",
@@ -90,8 +90,8 @@
       }
     },
     {
-      "id": "code",
-      "dir": "code",
+      "id": "implementation",
+      "dir": "implementation",
       "operating_mode": "highest-assurance",
       "chosen": "deepseek-flash",
       "firmness": "directional",

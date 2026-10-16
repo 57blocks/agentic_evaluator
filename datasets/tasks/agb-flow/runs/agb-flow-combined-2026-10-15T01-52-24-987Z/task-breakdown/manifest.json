@@ -1,9 +1,9 @@
 {
   "protocol_version": "0.3",
-  "run_id": "agb-flow-combined-2026-10-15T01-52-24-987Z/qa",
+  "run_id": "agb-flow-combined-2026-10-15T01-52-24-987Z/task-breakdown",
   "run_name": "agb-flow",
   "step": {
-    "id": "qa",
+    "id": "task-breakdown",
     "version": "1"
   },
   "spec": {
@@ -11,7 +11,7 @@
     "sha256": "b43173828e81825dae7144a4c8ddcf611397d2196447b10ea8f3367f2db99dcc"
   },
   "test_set": {
-    "id": "qa-v1",
+    "id": "task-breakdown-v1",
     "inputs": {
       "demo-todo": "9ffe96cbe0dcc1fbe29ae3cac4859888f40e435c97bd51d0f01a484fef36eb55",
       "chessicle": "b7dad749775e19deaa9105a33cbc60b8b28c56c14abe9271ae81724bdf238ed2",
@@ -210,13 +210,13 @@
   },
   "evaluators": {
     "required_checks": [
-      "test-plan-gates"
+      "plan-gates"
     ],
-    "check_version": "cmd-856b32ab+files-6649cf11",
-    "rubric_sha256": "de6ad17d5950ad166e3ae79fc46c8fcf27d7e3645d1933f47e3128e1d6865c2c",
+    "check_version": "cmd-e1f9a9f4+files-8deb853d",
+    "rubric_sha256": "b613cd5e74225868f9763e5ece23d1c7b5b349cfb2b59bdf8f26c8b27201e9ad",
     "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
-    "judge_template_sha256": "33c11860c8bda624a9b9b00eab2cf6fd215d65dfee44ca86218ec8e63007cb10",
-    "score_template_sha256": "bd29d00842649718760473e403d8631e1e5f0388e9239b6dad6a18c301c50093"
+    "judge_template_sha256": "f111f17067aa7f79246fb342825f37eefc791b4ee57c0cefc07646a828f0571c",
+    "score_template_sha256": "e50980d9eec0b0a583fa3a4a1099a38b065f7610ee4b66cad1b23ef2e3ce61f7"
   },
   "success_criteria": {
     "mandatory_checks": "all"
@@ -232,16 +232,16 @@
   "execution": {
     "trials_per_case": 1,
     "concurrency": 3,
-    "timeout_ms": 1800000,
+    "timeout_ms": 3000000,
     "benchmark_mode": "production-realistic",
     "cache_mode": "cold"
   },
   "harness": {
     "name": "57b-agenteval",
     "version": "0.1.0",
-    "git_sha": "6bbc718",
+    "git_sha": "725c108",
     "node": "v24.14.0"
   },
   "started_at": "2026-10-14T07:38:33.255Z",
-  "finished_at": "2026-10-15T01:52:25.002Z"
+  "finished_at": "2026-10-15T01:52:24.990Z"
 }

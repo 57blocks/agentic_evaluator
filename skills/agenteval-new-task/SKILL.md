@@ -38,7 +38,7 @@ Use this when the candidates run a pipeline — stages whose output the next sta
 1. *Which candidate is best at each step?* — every step is evaluated on its own inputs.
 2. *Does the per-step best combination beat one candidate end to end?* — chain the steps (`input_from`), set `workflow.control_candidate`, and the run also executes the whole chain twice: control on every step, then each step's pick.
 
-**Break the pipeline into steps first.** List the stages with the user — per stage: what it starts from, what it leaves behind, what "right" means. Show this as a short table and get a yes before writing inputs. Fewer steps is better: only make a stage its own step if they'd plausibly pick a different candidate for it.
+**Break the pipeline into steps first.** List the stages with the user — per stage: what it starts from, what it leaves behind, what "right" means. Name each step for what it does (`task-breakdown`, not an internal stage name like `detail`), and give it a one-sentence `description`; reports show both. Show this as a short table and get a yes before writing inputs. Fewer steps is better: only make a stage its own step if they'd plausibly pick a different candidate for it.
 
 **Then run Steps 1–3 below once per step.** Each step has its own inputs, its own required check, its own references, and **its own two sign-offs**. Do not batch the sign-offs across steps; a user who approves three steps' inputs at once has read none of them.
 
@@ -61,11 +61,11 @@ Per step, decide:
 
 | step | starts from (`fixture/<step>/<input>/`) | candidate leaves | required check |
 |---|---|---|---|
-| `detail` | a real project with PRD, design and contracts in place (3 projects) | `.ab/tasks.json`, `UI_CONTRACT.md` | `plan-gates`: every page and endpoint claimed, no domain cycle |
-| `qa` | the adopted task plan in place (same 3 projects) | `.ab/test-plan.json` | `test-plan-gates`: every acceptance criterion covered |
-| `code` | the project just before one task (inputs `demo-todo-T-001`, `demo-todo-T-006`: a from-scratch task and a feature on a working codebase) | the implemented task | `task-tests`: the task's acceptance tests — restored from the fixture, not the candidate's copy — all pass |
+| `task-breakdown` | a real project with PRD, design and contracts in place (3 projects) | `.ab/tasks.json`, `UI_CONTRACT.md` | `plan-gates`: every page and endpoint claimed, no domain cycle |
+| `test-design` | the adopted task plan in place (same 3 projects) | `.ab/test-plan.json` | `test-plan-gates`: every acceptance criterion covered |
+| `implementation` | the project just before one task (inputs `demo-todo-T-001`, `demo-todo-T-006`: a from-scratch task and a feature on a working codebase) | the implemented task | `task-tests`: the task's acceptance tests — restored from the fixture, not the candidate's copy — all pass |
 
-What it shows: each step starts from a real snapshot, so `qa`'s result doesn't depend on who ran `detail`; one command (`agents/agb-step.mjs`) serves every step via `EVAL_STEP`; caps differ per step (detail $15/50 min, qa $10/30 min, code $10/60 min, code at `concurrency: 3` because each trial builds an app); `detail` adds a step judge (`rubrics/breakdown.md`, `show: [".ab/tasks.json", UI_CONTRACT.md]`) for granularity and ordering a script can't see. The chain adds `input_from` + `handoff: workdir` on `qa` and `code`, and `workflow.e2e` with `inputs: [demo-todo]` (the chain's code step builds every task) and `final_checks: [app-gates]` (installs, builds, the whole test suite passes) — a different check from `task-tests`, because one task passing and a delivered app working are different claims. `references/e2e/demo-todo/` is the delivered app.
+What it shows: each step starts from a real snapshot, so `test-design`'s result doesn't depend on who ran `task-breakdown`; one command (`agents/agb-step.mjs`) serves every step via `EVAL_STEP`; caps differ per step (task-breakdown $15/50 min, test-design $10/30 min, implementation $10/60 min, implementation at `concurrency: 3` because each trial builds an app); `task-breakdown` adds a step judge (`rubrics/breakdown.md`, `show: [".ab/tasks.json", UI_CONTRACT.md]`) for granularity and ordering a script can't see. The chain adds `input_from` + `handoff: workdir` on `test-design` and `implementation`, and `workflow.e2e` with `inputs: [demo-todo]` (the chain's implementation step builds every task) and `final_checks: [app-gates]` (installs, builds, the whole test suite passes) — a different check from `task-tests`, because one task passing and a delivered app working are different claims. `references/e2e/demo-todo/` is the delivered app.
 
 ## Step 1 — Inputs
 
@@ -143,7 +143,7 @@ A task whose candidates all score 100% answers only "the cheapest is enough". Th
 0. Make the report say what it tests: a top-level `description` (the decision and what the inputs are, in a few sentences), a `description` on the required check (what a pass means), and `test_set.labels_file: checks/manifest.json` when items are tagged, so the report breaks results down by tag (`reference.md`, "Saying what a task evaluates").
 1. `agenteval check-task <name>` reports **0 blocking**. Read the remaining warnings out to the user in one line each and let them decide.
 2. `agenteval plan <name>` — show the counts (generations, judge calls, budget).
-3. Ask for consent in one line: *"N candidates × M inputs × T trials, judge on/off, budget $B — run it?"* For a workflow, give it per step plus the chain: *"detail 10×3, qa 10×3, code 10×2, chain 2 arms on demo-todo, budget $600 — run it?"* Only on a yes: `agenteval run <name> --yes --html`, then point them at `runs/<run>/report.html` and `GAPS.md`.
+3. Ask for consent in one line: *"N candidates × M inputs × T trials, judge on/off, budget $B — run it?"* For a workflow, give it per step plus the chain: *"task-breakdown 10×3, test-design 10×3, implementation 10×2, chain 2 arms on demo-todo, budget $600 — run it?"* Only on a yes: `agenteval run <name> --yes --html`, then point them at `runs/<run>/report.html` and `GAPS.md`.
 
 Hand over: where the task lives, what `check-task` said, and that every edit to inputs or the check should be followed by `check-task` again. Suggest committing `tasks/<name>/` (runs are gitignored).
 
