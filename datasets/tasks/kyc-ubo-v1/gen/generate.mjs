@@ -4,7 +4,7 @@
  * answer key), checks/manifest.json (tags, split, provenance) and
  * kyc-ubo-v1.jsonl (the whole set, one item per line).
  *
- *   node tasks/kyc-ubo-v1/gen/generate.mjs
+ *   node datasets/tasks/kyc-ubo-v1/gen/generate.mjs
  *
  * Same seed, same set. Changing the seed, a builder or a rule is a new version.
  */
