@@ -49,7 +49,7 @@ export const COMMANDS: Record<string, Command> = {
   combine: { summary: "build one run from a run and its re-grades and re-runs", help: COMBINE_HELP, valued: VALUED, run: cmdCombine },
   judge: { summary: "judge a finished run again, without generating", help: JUDGE_HELP, valued: VALUED, run: cmdJudge },
   review: { summary: "review a run blind, in the dashboard", help: REVIEW_HELP, valued: [...VALUED, "reviewer"], run: cmdReview },
-  dash: { summary: "serve the dashboard", help: DASH_HELP, valued: VALUED, run: cmdDash },
+  dash: { summary: "serve the dashboard, or export it as files", help: DASH_HELP, valued: [...VALUED, "export"], run: cmdDash },
   "install-skill": { summary: "add the /agenteval-new-task skill for Claude Code", help: INSTALL_SKILL_HELP, valued: VALUED, run: cmdInstallSkill },
 };
 

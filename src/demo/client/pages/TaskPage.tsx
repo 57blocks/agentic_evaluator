@@ -15,6 +15,7 @@ import { primaryReportDir, runStamp, spendLabel } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { FileBrowser } from "@/features/task-files/FileBrowser";
 import { RunButton, RunPanel } from "@/features/run-control/RunControl";
+import { isSnapshot } from "@/lib/snapshot";
 import { useRun } from "@/features/run-control/useRun";
 import { TestPlan } from "@/features/test-plan/TestPlan";
 import {
@@ -112,7 +113,7 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
       <header className="flex flex-col gap-1">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-2xl font-extrabold tracking-tight">{task.name}</h1>
-          <RunButton run={run} />
+          {!isSnapshot() && <RunButton run={run} />}
         </div>
         <p className="text-[13px] text-muted-foreground">
           {task.specPath}
@@ -132,7 +133,7 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
         </p>
       </header>
 
-      <RunPanel run={run} />
+      {!isSnapshot() && <RunPanel run={run} />}
 
       <section aria-label="Runs" className={cn(SECTION_CARD, "flex flex-col gap-3 border border-border bg-card p-4")}>
         <h2 className={SECTION_TITLE}>Runs ({task.runs.length})</h2>
