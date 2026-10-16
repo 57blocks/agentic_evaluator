@@ -782,6 +782,18 @@ its files; a run's page opens each step's report. From a task's page you can
 also start a run: it first shows the plan and the budget, and runs only after
 you confirm those numbers. Stop the dashboard with Ctrl+C.
 
+To show it to someone who doesn't run agenteval, export it:
+
+```bash
+agenteval dash --workspace datasets --export ~/Desktop/agenteval-dashboard
+```
+
+The folder opens by double-clicking `index.html`, with no server and no
+install, and looks and navigates like the live dashboard: every task, run,
+report and evidence table as it is at export time. It is read-only: no runs,
+no reviews, and a banner says when it was exported. Zip the folder to send
+it; the four datasets come to about 12 MB.
+
 ## Controlling cost
 
 - Run `plan` first. `run` without `--yes` is the same preview, so a typo cannot

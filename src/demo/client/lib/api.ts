@@ -8,6 +8,8 @@
  * miss as an answer, because an artifact a run never wrote is normal.
  */
 
+import { isSnapshot, READ_ONLY, snapshotResponse } from "./snapshot";
+
 /** Percent-encode each segment but keep the separators. */
 function encodePath(rel: string): string {
   return rel.split("/").map(encodeURIComponent).join("/");
@@ -28,10 +30,20 @@ export function taskFileUrl(task: string, rel: string): string {
   return `/artifact/task/${encodeURIComponent(task)}/${encodePath(rel)}`;
 }
 
-export async function getJson<T>(url: string): Promise<T> {
+/** A GET: from the export's snapshot when the page is one, else from the server. */
+async function read(url: string): Promise<{ ok: boolean; status: number; text: () => Promise<string> }> {
+  if (isSnapshot()) {
+    const hit = snapshotResponse(url);
+    return { ok: hit.status >= 200 && hit.status < 300, status: hit.status, text: async () => hit.body };
+  }
   const res = await fetch(url);
+  return { ok: res.ok, status: res.status, text: () => res.text() };
+}
+
+export async function getJson<T>(url: string): Promise<T> {
+  const res = await read(url);
   if (!res.ok) throw new Error(`${url} — HTTP ${res.status}`);
-  return (await res.json()) as T;
+  return JSON.parse(await res.text()) as T;
 }
 
 /**
@@ -43,13 +55,13 @@ export async function getJson<T>(url: string): Promise<T> {
  * reader to very different places.
  */
 export async function getText(url: string): Promise<string> {
-  let res: Response;
+  let res: Awaited<ReturnType<typeof read>>;
   try {
-    res = await fetch(url);
+    res = await read(url);
   } catch {
     throw new Error("Cannot reach the dashboard server (is agenteval dash still running?)");
   }
-  if (res.status === 404) throw new Error("That file is not on the server");
+  if (res.status === 404) throw new Error(isSnapshot() ? "That file is not in this export" : "That file is not on the server");
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
 }
@@ -57,7 +69,7 @@ export async function getText(url: string): Promise<string> {
 /** Text, or null when the file is not there. */
 export async function getTextOrNull(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url);
+    const res = await read(url);
     return res.ok ? await res.text() : null;
   } catch {
     return null;
@@ -72,6 +84,7 @@ export interface JsonResponse<T> {
 
 /** POST that hands back the status too: the run API answers 409 with data. */
 export async function postJson<T>(url: string, payload: unknown): Promise<JsonResponse<T>> {
+  if (isSnapshot()) throw new Error(READ_ONLY);
   const res = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -81,6 +94,7 @@ export async function postJson<T>(url: string, payload: unknown): Promise<JsonRe
 }
 
 export async function del(url: string): Promise<void> {
+  if (isSnapshot()) throw new Error(READ_ONLY);
   await fetch(url, { method: "DELETE" });
 }
 

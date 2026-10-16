@@ -18,7 +18,13 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "src/demo/client");
 const API_ORIGIN = process.env.DEMO_API_ORIGIN ?? "http://127.0.0.1:4173";
 
-export default defineConfig({
+/**
+ * `vite build --mode static` builds the copy `agenteval dash --export` ships:
+ * one JS file and one CSS file with fonts inlined, so the exporter can put
+ * both inside index.html and the page opens from disk (file://), where a
+ * browser loads no module script or chunk from a separate file.
+ */
+export default defineConfig(({ mode }) => ({
   root,
   base: "./",
   plugins: [react(), tailwindcss()],
@@ -27,13 +33,24 @@ export default defineConfig({
     // not in the harness source tree they would otherwise land in.
     alias: { "@": root },
   },
-  build: {
-    outDir: path.resolve(here, "dist/demo"),
-    emptyOutDir: true,
-    // The demo is read locally; a readable bundle is worth more than bytes.
-    minify: false,
-    sourcemap: true,
-  },
+  build:
+    mode === "static"
+      ? {
+          outDir: path.resolve(here, "dist/demo-static"),
+          emptyOutDir: true,
+          minify: true,
+          sourcemap: false,
+          cssCodeSplit: false,
+          assetsInlineLimit: 100_000_000,
+          rollupOptions: { output: { inlineDynamicImports: true } },
+        }
+      : {
+          outDir: path.resolve(here, "dist/demo"),
+          emptyOutDir: true,
+          // The demo is read locally; a readable bundle is worth more than bytes.
+          minify: false,
+          sourcemap: true,
+        },
   server: {
     port: 5174,
     proxy: {
@@ -41,4 +58,4 @@ export default defineConfig({
       "/artifact": API_ORIGIN,
     },
   },
-});
+}));
