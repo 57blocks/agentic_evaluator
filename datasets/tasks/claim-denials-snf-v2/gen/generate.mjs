@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * Regenerates the kyc-ubo-v2 set: inputs/<id>.txt, references/<id>.txt (the
- * answer key), checks/manifest.json (tags, split) and kyc-ubo-v2.jsonl (the
- * whole set, one item per line).
+ * Regenerates the claim-denials-snf-v2 set: inputs/<id>.txt, references/<id>.txt
+ * (the answer key), checks/manifest.json (tags, split) and
+ * claim-denials-snf-v2.jsonl (the whole set).
  *
- *   node examples/tasks/kyc-ubo-v2/gen/generate.mjs
+ *   node datasets/tasks/claim-denials-snf-v2/gen/generate.mjs
  *
  * Same seed, same set. Changing the seed, a builder or a rule is a new version.
  */
@@ -12,15 +12,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { solve } from "./solve.mjs";
-import { QUOTA, buildStructure } from "./structures.mjs";
-import { nameSource, render } from "./render.mjs";
+import { ARCHETYPES, QUOTA } from "./structures.mjs";
+import { render } from "./render.mjs";
 
-const SEED = 20261015;
-const VERSION = "kyc-ubo-v2";
+const SEED = 20261016; // v2.1: same seed; reworded the qualifying-stay narrative and dropped an edit message that read as a coding error
+const VERSION = "claim-denials-snf-v2";
+const TASK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const HOLDOUT_EVERY = 5; // items 0 and 1 of every 5 in the set are holdout: 40%
 const HOLDOUT_FIRST = 2;
-const TASK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 /** mulberry32: small, seeded, the same on every machine. */
 function seeded(seed) {
@@ -34,36 +33,18 @@ function seeded(seed) {
   };
 }
 
-function assertWellFormed(id, { entities }) {
-  for (const [name, e] of Object.entries(entities)) {
-    const sum = e.holders.reduce((n, h) => n + h.nominal, 0) + (e.ownShares ?? 0);
-    if (e.capital !== undefined && sum !== e.capital) throw new Error(`${id}: shares of ${name} add up to ${sum}, capital is ${e.capital}`);
-    if (e.holders.some((h) => !Number.isInteger(h.nominal) || h.nominal <= 0)) throw new Error(`${id}: ${name} has a share that is not a whole positive euro amount`);
-  }
-}
-
-/** Tags from what the item contains, on top of the builder's own. */
-function derivedTags(answer, register) {
-  const extra = [];
-  if (answer.fictitious_beneficial_owners.length > 0) extra.push("fallback");
-  if (register.prokura.length > 0) extra.push("prokurist");
-  return extra;
-}
-
 function buildSet() {
   const rng = seeded(SEED);
   const items = [];
   for (const [archetype, count] of Object.entries(QUOTA)) {
     for (let k = 0; k < count; k++) {
-      const id = `ubo2-${String(items.length + 1).padStart(3, "0")}`;
-      const { structure, register, tags } = buildStructure(rng, nameSource(rng), archetype);
-      assertWellFormed(id, structure);
-      const answer = solve(structure);
+      const id = `cd2-${String(items.length + 1).padStart(3, "0")}`;
+      const c = { ...ARCHETYPES[archetype].build(rng), claimNo: String(80000 + Math.floor(rng() * 19999)) };
       items.push({
         id,
-        input: render(rng, structure, register),
-        expected: answer,
-        tags: [...new Set([...tags, ...derivedTags(answer, register)])],
+        input: render(rng, c),
+        expected: c.expected,
+        tags: ARCHETYPES[archetype].tags,
         split: items.length % HOLDOUT_EVERY < HOLDOUT_FIRST ? "holdout" : "dev",
         provenance: { source: "synthetic", generator: `gen/generate.mjs seed ${SEED}`, rules: "RULES.md", archetype, version: VERSION },
       });
@@ -74,7 +55,7 @@ function buildSet() {
 
 function clearGenerated(dir) {
   fs.mkdirSync(dir, { recursive: true });
-  for (const f of fs.readdirSync(dir)) if (f.startsWith("ubo2-")) fs.rmSync(path.join(dir, f));
+  for (const f of fs.readdirSync(dir)) if (f.startsWith("cd2-")) fs.rmSync(path.join(dir, f));
 }
 
 function write(items) {
@@ -93,5 +74,4 @@ function write(items) {
 const items = buildSet();
 write(items);
 const holdout = items.filter((i) => i.split === "holdout").length;
-const fallback = items.filter((i) => i.expected.fictitious_beneficial_owners.length > 0).length;
-process.stdout.write(`${items.length} items (${holdout} holdout), ${fallback} fallback, ids ${items[0].id}…${items.at(-1).id}\n`);
+process.stdout.write(`${items.length} items (${holdout} holdout), ids ${items[0].id}…${items.at(-1).id}\n`);
