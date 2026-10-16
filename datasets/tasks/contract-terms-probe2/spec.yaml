@@ -8,8 +8,8 @@
 # lesser-of cap beside a carve-out cap (h6). Answers are hand-checked; each
 # reference's "why" says what decides it.
 #
-#   agenteval check-task contract-terms-probe2
-#   agenteval run contract-terms-probe2 --yes --html     # billed, well under $1
+#   agenteval check-task datasets/tasks/contract-terms-probe2
+#   agenteval run datasets/tasks/contract-terms-probe2 --yes --html     # billed, well under $1
 
 protocol_version: "0.3"
 run_name: contract-terms-probe2
