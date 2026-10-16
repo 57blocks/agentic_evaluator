@@ -28,32 +28,9 @@ Each spec's header comment says what to look at. The free tasks declare
 `methods: []`, so no judge is called even when a key is configured — `plan`
 shows `pairwise off · absolute off` for every step.
 
-## Sample datasets, with a finished run
-
-Golden datasets for the [Agent Evaluation Protocol](https://agent-eval-protocol.vercel.app/#golden)
-page's samples, plus agb's own flow. Each ships with one finished run, so its
-report opens without paying for a run. The data is synthetic except agb-flow,
-whose inputs are snapshots of real agb projects.
-
-| task | what it evaluates | result of the run kept here |
-|---|---|---|
-| [`claim-denials-snf-v2`](tasks/claim-denials-snf-v2/spec.yaml) | triaging 30 denied Medicare SNF claims from raw 835 codes, with no payer manual: the rules ([RULES.md](tasks/claim-denials-snf-v2/RULES.md), from 42 CFR and CMS manuals) must be known | kimi-k3 28/30, sonnet-5 15/30, glm-5.3 12/30, deepseek-flash 11/30; no model qualifies |
-| [`kyc-ubo-v2`](tasks/kyc-ubo-v2/spec.yaml) | finding a company's beneficial owners from 30 German register extracts under § 3 GwG ([RULES.md](tasks/kyc-ubo-v2/RULES.md), from the statute and the BVA FAQ) | kimi-k3 26/30, sonnet-5 25/30, deepseek-flash 23/30, glm-5.3 21/30; no model qualifies |
-| [`contract-terms-long`](tasks/contract-terms-long/spec.yaml) | extracting eight terms from ~9,000-word scanned agreement packets with SOW distractors | every model 6/6: the cheapest is enough |
-| [`agb-flow`](tasks/agb-flow/spec.yaml) | which model should run each step of agb's flow (task breakdown, test design, code), ten candidates | breakdown fable-5.1, test design opus-5.5, code deepseek-flash (directional) |
-
-```bash
-open examples/tasks/claim-denials-snf-v2/runs/*/report.html    # the report as the run wrote it
-agenteval dash --workspace examples                            # or browse all four in the dashboard
-node examples/tasks/claim-denials-snf-v2/gen/generate.mjs      # rebuild a set (same seed, same files)
-agenteval check-task examples/tasks/claim-denials-snf-v2       # free
-agenteval run examples/tasks/claim-denials-snf-v2 --yes --html # billed, about $4
-```
-
-Each report opens with what the task evaluates and breaks the result down by
-input tag (ordinary items, each kind of trap, holdout). agb-flow's inputs live
-in its `fixture/`; running it needs agb and keys for every provider, and the
-run kept here cost about $300.
+For evaluation datasets with answer keys and a finished run each
+(claim denials, KYC beneficial owners, contract terms, agb's flow), see
+[`datasets/`](../datasets/README.md).
 
 To make your own, copy the closest task into your workspace's `tasks/` and
 edit it. The full walkthrough is the [README](../README.md).

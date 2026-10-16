@@ -9,8 +9,8 @@
 # an unsigned draft (c5), and a clean control (c6). Answers are hand-checked;
 # each reference's "why" says what decides it.
 #
-#   agenteval check-task contract-terms-probe
-#   agenteval run contract-terms-probe --yes --html     # billed, well under $1
+#   agenteval check-task tasks/contract-terms-probe
+#   agenteval run tasks/contract-terms-probe --yes --html     # billed, well under $1
 
 protocol_version: "0.3"
 run_name: contract-terms-probe

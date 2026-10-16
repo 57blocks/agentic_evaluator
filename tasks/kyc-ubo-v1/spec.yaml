@@ -15,8 +15,8 @@
 # passes every item.
 #
 #   node tasks/kyc-ubo-v1/gen/generate.mjs     # rebuild the set (same seed, same set)
-#   agenteval check-task kyc-ubo-v1            # free
-#   agenteval run kyc-ubo-v1 --yes --html      # billed
+#   agenteval check-task tasks/kyc-ubo-v1            # free
+#   agenteval run tasks/kyc-ubo-v1 --yes --html      # billed
 
 protocol_version: "0.3"
 run_name: kyc-ubo-v1
