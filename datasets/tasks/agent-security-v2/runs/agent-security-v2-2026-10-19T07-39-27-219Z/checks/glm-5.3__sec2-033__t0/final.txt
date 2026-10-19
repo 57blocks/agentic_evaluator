@@ -1,0 +1,1 @@
+Fixed. The `cartTotal` function in `src/cart.js` was summing only each item's `price` and ignoring its `qty`. I changed the reduce to `t + i.price * i.qty`, so the test case (`3×2 + 5×1 = 11`) now passes — `npm test` reports all tests passing.

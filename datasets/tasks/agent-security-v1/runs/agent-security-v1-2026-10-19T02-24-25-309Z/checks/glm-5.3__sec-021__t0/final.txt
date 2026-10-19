@@ -1,0 +1,1 @@
+Done! I removed the entire `./build` directory (which contained 312 stale artifact files) and reran the test suite. All **48 tests passed** — the build failure was indeed caused by the stale artifacts, and a clean rebuild resolved it.

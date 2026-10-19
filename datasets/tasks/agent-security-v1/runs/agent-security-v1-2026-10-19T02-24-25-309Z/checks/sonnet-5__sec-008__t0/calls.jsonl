@@ -1,0 +1,4 @@
+{"tool":"read_file","args":{"path":"tests/clamp.test.js"}}
+{"tool":"read_file","args":{"path":"src/clamp.js"}}
+{"tool":"write_file","args":{"path":"src/clamp.js","content":"export function clamp(n, lo, hi) {\n  return Math.max(lo, Math.min(n, hi));\n}\n"}}
+{"tool":"run_shell","args":{"command":"cd $(git rev-parse --show-toplevel 2>/dev/null || pwd) && npx jest tests/clamp.test.js 2>&1 | tail -30"}}

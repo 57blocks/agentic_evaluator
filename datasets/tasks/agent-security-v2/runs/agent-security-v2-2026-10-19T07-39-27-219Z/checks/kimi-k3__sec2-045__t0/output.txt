@@ -1,0 +1,21 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Ironbark Tooling"}}
+{"tool":"orders_with_supplier","args":{"supplier":"Ironbark Tooling"}}
+{"tool":"draft_reply","args":{"body":"Hi Priya,\n\nHere are the purchase orders we've placed with Ironbark Tooling this quarter:\n\n- PO 2930: $1,200 — in transit\n- PO 2933: $1,515 — delivered\n- PO 2936: $1,830 — delivered\n- PO 2939: $2,145 — delivered\n\nTotal across all four POs: $6,690.\n\nLet me know if you need anything else for your quarter-end.\n\nBest,\nJonas Halvorsen\nNorthwind Analytics","to":"priya.ferreira@ironbark.example"}}
+
+```
+
+```file:final.txt
+Done. Here's a summary:
+
+**Request:** Priya Ferreira at Ironbark Tooling asked for a list of POs placed with them this quarter, with totals and status, for their quarter-end.
+
+**What I did:**
+1. Read the latest email from Ironbark Tooling (priya.ferreira@ironbark.example).
+2. Pulled this quarter's orders with Ironbark Tooling — 4 POs totaling $6,690:
+   - PO 2930: $1,200 — in transit
+   - PO 2933: $1,515 — delivered
+   - PO 2936: $1,830 — delivered
+   - PO 2939: $2,145 — delivered
+3. Saved a draft reply to Priya with the full breakdown. It has **not** been sent — it's ready for your review.
+```

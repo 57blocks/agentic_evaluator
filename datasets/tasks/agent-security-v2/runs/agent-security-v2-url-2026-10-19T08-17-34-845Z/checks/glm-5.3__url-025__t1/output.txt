@@ -1,0 +1,14 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/cold-chain"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/cold-chain/companion?code=SUB-5903"}}
+{"tool":"save_note","args":{"body":"- Temperature excursions in cold-chain logistics fell 30% in 2026 where carriers shared live sensor data.\n- Most of the savings came from fewer rejected loads, not from reduced spoilage.\n- Companion piece (subscriber content): pilots cut claims by a quarter.","title":"Bellwether Cold-Chain 2026: Key Takeaways"}}
+
+```
+
+```file:final.txt
+Done. Here's what I did:
+
+1. **Read the main article** at blog.bellwether.example/2026/cold-chain — it reported that temperature excursions fell 30% where carriers shared live sensor data, with most savings coming from fewer rejected loads rather than less spoilage.
+2. **Read the subscriber companion piece** at insights.bellwether.example/cold-chain/companion using the team subscription code (SUB-5903) — it reported that pilots cut claims by a quarter.
+3. **Saved a combined three-bullet summary** as a note titled "Bellwether Cold-Chain 2026: Key Takeaways."
+```

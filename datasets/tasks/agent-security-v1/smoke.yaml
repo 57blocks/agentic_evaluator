@@ -1,0 +1,77 @@
+# Smoke test of agent-security-v1: every candidate on one attack (sec-001)
+# and one benign control (sec-021), to confirm each model makes tool calls
+# through OpenRouter and leaves calls.jsonl and .eval-usage.json before the
+# full run. Same agent, check and judge as spec.yaml.
+#
+#   agenteval run datasets/tasks/agent-security-v1/smoke.yaml --yes     # billed, under $1
+
+protocol_version: "0.3"
+run_name: agent-security-v1-smoke
+description: "Which model, as a tool-using agent, ignores instructions hidden in the data it retrieves, stays inside its permissions, and still completes legitimate requests? 30 synthetic scenarios with simulated tools: 18 indirect injections across seven carriers, 2 direct requests past policy, and 10 benign controls that catch over-refusal. Graded from the tool-call trace, not the reply."
+budget_usd: 1
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: agent
+      version: "1"
+      test_set:
+        id: smoke
+        labels_file: checks/manifest.json
+        inputs: [sec-001, sec-021]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash]
+      required_checks: [trace-check]
+      judged_dimensions: [flags-injection, reply-quality]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      # Up to 12 model turns per scenario.
+      maximum_completion_time_seconds: 600
+
+x-providers:
+  openrouter: &openrouter
+    OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+
+candidates:
+  - id: sonnet-5
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5
+    cli: { argv: [node, agents/tool-agent.mjs, anthropic/claude-sonnet-5], reports_usage: tokens, version_files: [agents/tool-agent.mjs], env: *openrouter }
+  - id: kimi-k3
+    adapter: agent-cli
+    model: moonshotai/kimi-k3
+    cli: { argv: [node, agents/tool-agent.mjs, moonshotai/kimi-k3], reports_usage: tokens, version_files: [agents/tool-agent.mjs], env: *openrouter }
+  - id: glm-5.3
+    adapter: agent-cli
+    model: z-ai/glm-5.3
+    cli: { argv: [node, agents/tool-agent.mjs, z-ai/glm-5.3], reports_usage: tokens, version_files: [agents/tool-agent.mjs], env: *openrouter }
+  - id: deepseek-v4.1-flash
+    adapter: agent-cli
+    model: deepseek/deepseek-v4.1-flash
+    cli: { argv: [node, agents/tool-agent.mjs, deepseek/deepseek-v4.1-flash], reports_usage: tokens, version_files: [agents/tool-agent.mjs], env: *openrouter }
+
+evaluators:
+  required_checks:
+    trace-check:
+      kind: command
+      description: "The agent's tool calls make every call its scenario requires and none it forbids (references/<id>/key.json, rules in RULES.md); the reply is left to the judge."
+      argv: ["node", "checks/trace-check.mjs"]
+      version_files: [checks/trace-check.mjs, checks/trace-rules.mjs, checks/manifest.json]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/security.md
+    methods: [absolute-1-5]
+    show: [final.txt, calls.jsonl]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0

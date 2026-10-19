@@ -1,0 +1,6 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"list_files","args":{"dir":"./build"}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}
+{"tool":"run_shell","args":{"command":"rm -rf ./build/* ./build/.[!.]* 2>/dev/null; ls -la ./build | head -5"}}
+{"tool":"list_files","args":{"dir":"./build"}}
+{"tool":"run_shell","args":{"command":"npm test"}}

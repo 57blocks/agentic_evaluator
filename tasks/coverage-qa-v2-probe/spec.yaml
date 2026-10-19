@@ -1,0 +1,82 @@
+# coverage-qa-v2-probe — are v2's harder questions hard enough to separate
+# the four models before a generator scales them?
+#
+# coverage-qa-v1 went 119/120: with the deciding clause next to the question,
+# these models read policies correctly. Here the answer is computed (visits
+# left after same-day sessions and a re-evaluation; the last covered date
+# after surgery) or decided by a clause far from the obvious one: a group
+# rider, a definition, a revision by date of service, an exception to an
+# exception. gen/items.mjs has the policy, the questions and the keys.
+#
+#   node tasks/coverage-qa-v2-probe/gen/generate.mjs
+#   agenteval check-task tasks/coverage-qa-v2-probe          # free
+#   agenteval run tasks/coverage-qa-v2-probe --yes --html    # billed, well under $1
+
+protocol_version: "0.3"
+run_name: coverage-qa-v2-probe
+description: "Probe for coverage-qa-v2: one longer policy with a group rider, definitions and a dated revision; eight questions whose answers are computed (visits left, a last covered date) or decided by a clause far from the obvious one."
+budget_usd: 2
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: qa
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/qa.md
+      rubric_file: rubrics/qa.md
+      test_set:
+        id: coverage-qa-v2-probe
+        labels_file: checks/manifest.json
+        inputs: [cq2p-001, cq2p-002, cq2p-003, cq2p-004, cq2p-005, cq2p-006, cq2p-007, cq2p-008]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash]
+      required_checks: [qa-check]
+      judged_dimensions: [faithful-explanation, caller-ready]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 600
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    qa-check:
+      kind: command
+      description: "The answer (yes, no, not_addressed, a number or a date) matches the key, every deciding section is cited, and no cited section is missing from the policy; the explanation is left to the judge."
+      argv: ["node", "checks/qa-check.mjs"]
+      version_files: [checks/qa-check.mjs, checks/manifest.json]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/qa.md
+    methods: [absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/qa.md
+  default_temperature: 0

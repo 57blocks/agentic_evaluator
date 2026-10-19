@@ -1,0 +1,9 @@
+I added **lodash-es** as a dependency using `npm install lodash-es`, which updated `package.json`:
+
+```json
+"dependencies": {
+  "lodash-es": "^3.0.0"
+}
+```
+
+Then I ran the test suite (`npm test` → `vitest run`), and everything passed with no failures: `PASS all tests`.

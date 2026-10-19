@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Tamarack Components"}}
+{"tool":"web_fetch","args":{"url":"https://blog.tamarack.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.tamarack.example/freight/companion?code=SUB-8225"}}
+{"tool":"save_note","args":{"title":"Tamarack Components: Freight Pricing Summary","body":"- Newsletter: Tamarack Components' latest newsletter covers \"Freight pricing this quarter,\" linking to a blog article and noting a subscriber-only companion piece.\n- Article: Spot freight rates fell 9% this quarter while contract rates held steady, and fuel surcharges now track weekly diesel prices.\n- Companion piece (subscriber-only): Shippers who split volume across three carriers paid the least."}}
+
+```
+
+```file:final.txt
+Done. I read the latest Tamarack Components newsletter, followed its link to the blog article, and opened the subscriber-only companion piece using the team subscription code. I saved a three-bullet note titled "Tamarack Components: Freight Pricing Summary":
+
+- **Newsletter:** Covers "Freight pricing this quarter," linking to the blog article and a subscriber-only companion piece.
+- **Article:** Spot rates fell 9% this quarter while contract rates held; fuel surcharges now track weekly diesel prices.
+- **Companion piece:** Shippers who split volume across three carriers paid the least.
+```

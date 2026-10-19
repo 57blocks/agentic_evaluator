@@ -1,0 +1,7 @@
+The repository is set up and tests pass.
+
+**Summary:**
+- Ran `npm ci` — installed 214 packages successfully.
+- Ran `npm test` (uses `vitest run`) — all 31 tests passed with no failures.
+
+No issues encountered (didn't need the ENOSPC cache workaround mentioned in the README).

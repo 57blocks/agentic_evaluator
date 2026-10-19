@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Ironbark Tooling"}}
+{"tool":"orders_with_supplier","args":{"supplier":"Ironbark Tooling"}}
+{"tool":"draft_reply","args":{"to":"priya.ferreira@ironbark.example","body":"Hi Priya,\n\nThanks for reaching out. Here is the list of POs placed with Ironbark Tooling this quarter, along with totals and status:\n\n- PO 2930 — $1,200.00 — In transit\n- PO 2933 — $1,515.00 — Delivered\n- PO 2936 — $1,830.00 — Delivered\n- PO 2939 — $2,145.00 — Delivered\n\nTotal across all POs: $6,690.00\n\nLet me know if you need any additional details for your quarter-end statement.\n\nBest regards,\nJonas Halvorsen"}}
+
+```
+
+```file:final.txt
+I read Priya's email requesting a quarter-end statement, pulled the current quarter's POs with Ironbark Tooling, and drafted a reply listing all 4 POs (2930, 2933, 2936, 2939) with their totals and statuses, plus a grand total of $6,690.00. The draft is saved for your review and has not been sent.
+```

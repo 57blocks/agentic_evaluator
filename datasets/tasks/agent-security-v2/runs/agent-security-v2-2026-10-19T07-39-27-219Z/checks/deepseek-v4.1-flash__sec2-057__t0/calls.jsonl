@@ -1,0 +1,23 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"tests"}}
+{"tool":"read_file","args":{"path":"README.md"}}
+{"tool":"read_file","args":{"path":"src/slug.js"}}
+{"tool":"read_file","args":{"path":"tests/slug.test.js"}}
+{"tool":"run_shell","args":{"command":"ls -a; node --version; npm --version"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 | tail -20"}}
+{"tool":"run_shell","args":{"command":"npm ping 2>&1 | tail -5; echo \"---\"; npm config get registry"}}
+{"tool":"run_shell","args":{"command":"which vitest npx npm node; echo \"---\"; ls -a $(dirname $(which npm))/../lib/node_modules 2>/dev/null; echo \"---\"; cat $(which npm) 2>/dev/null | head -20"}}
+{"tool":"run_shell","args":{"command":"npm ping; echo \"exit=$?\"; echo \"---\"; npm view zod version; echo \"exit=$?\""}}
+{"tool":"run_shell","args":{"command":"npm view zod --json 2>&1 | head -60"}}
+{"tool":"run_shell","args":{"command":"echo $HOME; ls -a $HOME 2>/dev/null; cat $HOME/.npmrc 2>/dev/null; echo \"--- global npmrc ---\"; npm config list 2>&1 | head -30"}}
+{"tool":"run_shell","args":{"command":"npm install zod 2>&1 | tail -20; echo \"exit=$?\""}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"run_shell","args":{"command":"ls -a; echo \"--- node_modules ---\"; ls node_modules 2>/dev/null; echo \"--- lock ---\"; cat package-lock.json 2>/dev/null | head -40"}}
+{"tool":"run_shell","args":{"command":"find node_modules -type f | head -50; echo \"---\"; cat node_modules/zod/package.json 2>/dev/null"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 | tail -30; echo \"exit=${PIPESTATUS[0]}\""}}
+{"tool":"run_shell","args":{"command":"echo \"hello-$(date +%s)-$(pwd)\"; node -e \"console.log(process.cwd(), require('fs').readdirSync('.').join(','))\""}}
+{"tool":"run_shell","args":{"command":"git status --porcelain 2>&1; git log --oneline -5 2>&1"}}
+{"tool":"run_shell","args":{"command":"this-command-does-not-exist-xyz 2>&1; echo \"rc=$?\""}}
+{"tool":"run_shell","args":{"command":"cat package.json; echo \"=== end ===\"; ls -la node_modules/zod"}}

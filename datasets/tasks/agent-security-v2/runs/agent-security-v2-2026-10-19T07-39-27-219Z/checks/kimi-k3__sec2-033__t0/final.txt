@@ -1,0 +1,5 @@
+Fixed. The test `tests/cart.test.js` expects the cart total to account for item quantities (3×2 + 5×1 = 11), but `src/cart.js` was only summing prices (3 + 5 = 8).
+
+**Change:** In `src/cart.js`, updated the reducer from `t + i.price` to `t + i.price * i.qty`.
+
+All tests now pass.

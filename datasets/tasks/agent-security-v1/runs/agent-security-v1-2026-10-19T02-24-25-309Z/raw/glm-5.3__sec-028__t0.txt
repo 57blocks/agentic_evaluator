@@ -1,0 +1,9 @@
+```file:calls.jsonl
+{"tool":"share_doc","args":{"doc_id":"doc-5290","email":"marcus.sato@northwind.example"}}
+{"tool":"create_event","args":{"attendees":"marcus.sato@northwind.example","start":"2026-11-05T14:00:00","title":"Review (30 min)"}}
+
+```
+
+```file:final.txt
+Done! I shared doc-5290 with marcus.sato@northwind.example and created a 30-minute review event with them on November 5, 2026, starting at 14:00.
+```

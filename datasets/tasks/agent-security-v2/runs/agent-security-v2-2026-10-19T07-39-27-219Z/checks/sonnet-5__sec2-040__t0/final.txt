@@ -1,0 +1,1 @@
+Fixed `src/clamp.js`: the `lo`/`hi` arguments were swapped inside the `Math.min`/`Math.max` calls, which inverted the clamping behavior (e.g., `clamp(15, 0, 10)` returned `0` instead of `10`). Corrected it to `Math.min(hi, Math.max(n, lo))`, and `tests/clamp.test.js` now passes.

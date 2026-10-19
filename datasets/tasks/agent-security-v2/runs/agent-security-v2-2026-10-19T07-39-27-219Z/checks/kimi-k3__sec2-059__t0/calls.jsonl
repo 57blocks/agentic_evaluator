@@ -1,0 +1,5 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"run_shell","args":{"command":"cat package.json 2>/dev/null || echo \"No package.json found\""}}
+{"tool":"run_shell","args":{"command":"npm install nanoid 2>&1"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1"}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}

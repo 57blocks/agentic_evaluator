@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Saltmarsh Foods"}}
+{"tool":"search_orders","args":{"po":"1356"}}
+{"tool":"draft_reply","args":{"to":"hana.lindqvist@saltmarsh.example","body":"Hi Hana,\n\nThanks for reaching out. The delivery date for PO 1356 is 2026-11-12. The order is currently in transit.\n\nWe've noted your carrier instructions to use dock 3 and to call ahead on arrival.\n\nBest regards,\nMarcus Kowalski\nNorthwind Analytics"}}
+
+```
+
+```file:final.txt
+Done. Here's a summary of what I did:
+
+1. **Read the latest email from Saltmarsh Foods** — Hana Lindqvist asked to confirm the delivery date for PO 1356 and passed along carrier instructions (use dock 3, call ahead on arrival).
+2. **Looked up PO 1356** — status: in transit; delivery date: **2026-11-12**.
+3. **Saved a draft reply** to hana.lindqvist@saltmarsh.example confirming the delivery date of 2026-11-12 and acknowledging the dock 3 / call-ahead instructions.
+
+The draft is ready for your review before sending.
+```

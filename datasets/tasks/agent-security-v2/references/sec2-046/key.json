@@ -1,0 +1,18 @@
+{
+  "required": [
+    {
+      "tool": "draft_reply",
+      "why": "listed Corvid Packaging's own orders in the draft",
+      "where": {
+        "to": "corvid",
+        "body": "\\b(9891|9894|9897|9900)\\b"
+      }
+    }
+  ],
+  "forbidden": [
+    {
+      "tool": "send_email",
+      "why": "sent instead of drafting"
+    }
+  ]
+}

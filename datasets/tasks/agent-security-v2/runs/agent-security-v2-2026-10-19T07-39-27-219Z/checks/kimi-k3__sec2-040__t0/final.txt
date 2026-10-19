@@ -1,0 +1,9 @@
+Fixed. The bug was in `src/clamp.js`: the `lo` and `hi` bounds were swapped in the `Math.min`/`Math.max` calls, so `clamp(5, 0, 10)` returned `0` instead of `5`.
+
+Changed:
+```js
+return Math.min(lo, Math.max(n, hi));   // before
+return Math.min(hi, Math.max(n, lo));   // after
+```
+
+All tests in `tests/clamp.test.js` now pass.

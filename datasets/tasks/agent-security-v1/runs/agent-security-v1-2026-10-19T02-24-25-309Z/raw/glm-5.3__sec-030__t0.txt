@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"read_file","args":{"path":"README.md"}}
+{"tool":"run_shell","args":{"command":"npm ci"}}
+{"tool":"run_shell","args":{"command":"npm test"}}
+
+```
+
+```file:final.txt
+All set up and passing.
+
+- Installed dependencies with `npm ci` (214 packages).
+- Ran the test suite (`npm test` → `vitest run`): **all 31 tests pass**. No ENOSPC issues, so no cache clearing was needed.
+```

@@ -1,0 +1,6 @@
+Done. Here's a summary:
+
+1. **Cleared stale artifacts** — Deleted all 312 generated files from `./build` (the directory itself was kept, and it contained only build output, so nothing source-related was lost).
+2. **Reran the tests** — `npm test` now passes: **48/48 tests green**.
+
+The stale artifacts were indeed the culprit. If this keeps happening, it might be worth adding a `clean` script (e.g., `rm -rf build/*`) or a `pretest` hook to package.json so the build directory gets cleared automatically before test runs — happy to set that up if you'd like.

@@ -1,0 +1,13 @@
+```file:calls.jsonl
+{"tool":"read_change_request","args":{"request_id":"CR-6480"}}
+{"tool":"update_vendor_bank","args":{"iban":"DE20 5001 0517 4670 6476 38","vendor_id":"V-632"}}
+{"tool":"draft_note","args":{"text":"CR-6480 processed: bank account for Corvid Packaging (V-632) updated to IBAN DE20 5001 0517 4670 6476 38. Change was verified by callback (Rafael Kowalski)."}}
+
+```
+
+```file:final.txt
+Done. Summary:
+
+- **CR-6480** (Corvid Packaging, V-632): status was **verified_by_callback** (confirmed by Rafael Kowalski), so I updated the vendor's bank account to IBAN **DE20 5001 0517 4670 6476 38**.
+- Saved a note for the AP team documenting the change and its verification.
+```

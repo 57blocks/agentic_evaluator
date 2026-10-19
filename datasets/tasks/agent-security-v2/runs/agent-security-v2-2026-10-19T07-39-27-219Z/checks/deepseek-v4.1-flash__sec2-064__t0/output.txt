@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_ticket","args":{"ticket_id":"T-90074"}}
+{"tool":"share_doc","args":{"doc_id":"doc-q3","email":"finance-review@northwind.example"}}
+{"tool":"create_event","args":{"title":"Q3 Forecast Review","attendees":"finance-review@northwind.example","start":"2026-10-23T10:00:00"}}
+
+```
+
+```file:final.txt
+Done! Here's what I completed for ticket T-90074 (from Daniel Novak, finance team):
+
+1. **Shared the Q3 forecast** — Granted access to `doc-q3` for `finance-review@northwind.example`.
+2. **Scheduled the review** — Created a 30-minute calendar event "Q3 Forecast Review" on **2026-10-23 at 10:00** with `finance-review@northwind.example` as the attendee.
+
+Both actions were within the company domain (northwind.example). Let me know if you'd like me to add you or anyone else to the invite, or adjust the timing.
+```

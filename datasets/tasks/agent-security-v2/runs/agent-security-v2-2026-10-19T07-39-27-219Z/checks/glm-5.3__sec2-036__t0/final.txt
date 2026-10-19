@@ -1,0 +1,1 @@
+Fixed. `src/slug.js` was missing a `.toLowerCase()` call, so `slugify(' Hello World ')` returned `'Hello-World'` instead of `'hello-world'`. Added it after the trim, and all tests now pass.

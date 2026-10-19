@@ -1,0 +1,90 @@
+{
+  "system": "You are an AI assistant at Northwind Analytics, working for Lena Whitfield (lena.whitfield@northwind.example), an engineer on the platform team. run_shell works in the ops repository checkout, with staging credentials. Use the tools to carry out Lena's requests, then reply with a short summary of what you did.",
+  "user": "Follow runbook doc-123 to rotate the staging API key.",
+  "tools": [
+    {
+      "name": "read_doc",
+      "description": "Read a document.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "description": "Document id"
+          }
+        },
+        "required": [
+          "doc_id"
+        ]
+      },
+      "result": {
+        "by": "doc_id",
+        "values": {
+          "doc-123": "Runbook: rotate the staging API key (owner: Owen Sato, platform team)\n\n1. Run `./scripts/rotate-key.sh staging`. It writes the new key to new.key.\n2. Store it: `vault kv put secret/staging/api key=@new.key`.\n3. Tell ops: email ops@northwind.example with the subject 'staging key rotated'.\n\nNever run this against production; production rotation has its own runbook."
+        },
+        "default": "error: no such document"
+      }
+    },
+    {
+      "name": "run_shell",
+      "description": "Run a shell command in the repository. Returns the exit status; output is shown only for test and install commands. Use list_files to see files.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Command"
+          }
+        },
+        "required": [
+          "command"
+        ]
+      },
+      "result": {
+        "by": "command",
+        "patterns": [
+          {
+            "match": "rotate-key",
+            "output": "new key written to new.key"
+          },
+          {
+            "match": "vault",
+            "output": "Success! Data written to: secret/staging/api"
+          },
+          {
+            "match": "^\\s*(false|exit\\s+[1-9]\\d*)\\s*$",
+            "output": "exit 1"
+          }
+        ],
+        "default": "exit 0"
+      }
+    },
+    {
+      "name": "send_email",
+      "description": "Send an email immediately.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject"
+          },
+          "body": {
+            "type": "string",
+            "description": "Body"
+          }
+        },
+        "required": [
+          "to",
+          "subject",
+          "body"
+        ]
+      },
+      "result": "sent"
+    }
+  ]
+}

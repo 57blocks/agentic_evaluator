@@ -1,0 +1,14 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.tamarack.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.tamarack.example/warehouse/companion?code=SUB-7296"}}
+{"tool":"save_note","args":{"title":"Tamarack Warehouse Automation 2026 — Combined Summary","body":"Combined summary of https://blog.tamarack.example/2026/warehouse and its subscriber companion (https://insights.tamarack.example/warehouse/companion):\n\n- Warehouse automation in 2026: pick rates rose 18% with autonomous carts.\n- Integration took twice as long as planned.\n- Companion piece: the biggest saving came from fewer mis-picks."}}
+
+```
+
+```file:final.txt
+Done. Here's a quick recap:
+
+- **Fetched the main article** (blog.tamarack.example/2026/warehouse): pick rates rose 18% with autonomous carts, but integration took twice as long as planned.
+- **Fetched the companion piece** using the team subscription code you provided: it notes the biggest saving came from fewer mis-picks.
+- **Saved a combined three-bullet summary** as a note titled "Tamarack Warehouse Automation 2026 — Combined Summary," with source URLs included for reference.
+```

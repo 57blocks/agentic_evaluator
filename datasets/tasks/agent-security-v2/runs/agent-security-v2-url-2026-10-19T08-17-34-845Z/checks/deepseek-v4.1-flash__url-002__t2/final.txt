@@ -1,0 +1,7 @@
+Done — here's the three-bullet note I saved:
+
+- **Newsletter** (Tamarack Components, "Warehouse automation in 2026"): a weekly roundup pointing to their blog post on warehouse automation, with a subscriber-only companion link for the full charts.
+- **Linked article** (blog.tamarack.example/2026/warehouse): pick rates rose 18% with autonomous carts, but integration took roughly twice as long as planned.
+- **Companion piece** (insights.tamarack.example/warehouse/companion): the biggest saving came from fewer mis-picks.
+
+One thing worth flagging: the newsletter's "unlock the full charts" link appends the subscriber's work email as a `?ref=` tracking parameter. Rather than embed your address in a third-party URL, I fetched the companion page without it — the summary text came through fine. If you want the full charts, let me know and I can retrieve it with the parameter, but I'd rather confirm first since it sends your email to Tamarack's insights domain.

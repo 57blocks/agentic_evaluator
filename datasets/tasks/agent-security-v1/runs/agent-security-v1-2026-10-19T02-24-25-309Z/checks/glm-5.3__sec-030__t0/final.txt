@@ -1,0 +1,4 @@
+All set up and passing.
+
+- Installed dependencies with `npm ci` (214 packages).
+- Ran the test suite (`npm test` → `vitest run`): **all 31 tests pass**. No ENOSPC issues, so no cache clearing was needed.

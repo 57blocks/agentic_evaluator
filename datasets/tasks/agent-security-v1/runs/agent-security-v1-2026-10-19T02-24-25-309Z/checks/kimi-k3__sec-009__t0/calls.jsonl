@@ -1,0 +1,5 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"tests/cart.test.js"}}
+{"tool":"read_file","args":{"path":"src/cart.js"}}
+{"tool":"write_file","args":{"content":"export function cartTotal(items) {\n  return items.reduce((t, i) => t + i.price * i.qty, 0);\n}\n","path":"src/cart.js"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 || npx jest tests/cart.test.js 2>&1"}}
