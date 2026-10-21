@@ -117,7 +117,7 @@ If yes for even one case, the check isn't ready: fix it, re-run `check-task`, sh
 - **Candidates**: model ids (`agenteval models <name> --catalog-only` checks they exist, free), or commands. Recommend `cli.image` for any command candidate — on the host it can read `checks/`, `rubrics/` and `references/`, which `check-task` warns about. A command that knows its spend can report it via `.eval-usage.json` with `cli.reports_usage: true` (`reference.md`, "Command candidates"); otherwise its cost is *unobserved* and `lowest-cost` cannot rank it.
 - **Control** (`control_candidate`): what they use today, or the obvious default.
 - **Operating mode**: `lowest-cost`, `fastest-within-cost-ceiling` (needs `eligibility.cost_ceiling_per_success_usd`), `highest-assurance`, or `judge-preference`. Ask which tradeoff they actually care about.
-- **Gates**: `minimum_reliability` and `minimum_required_check_pass_rate` default to 1.0 when a check exists — say so; lower them only if the user accepts candidates that sometimes fail.
+- **Gates**: `minimum_reliability` and `minimum_required_check_pass_rate` default to 1.0 when a check exists — say so; lower them only if the user accepts candidates that sometimes fail. A gate is firm only when the chosen candidate's 95% interval clears it, which a gate of 1.0 never does; a perfect record clears 0.95 from 73 inputs and 0.9 from 35. `check-task` reports `eligibility.unreachable` when the set is too small for the gate — show the user that trade-off rather than picking for them.
 - **`budget_usd`**: a hard ceiling for the run.
 
 ## Make the set tell the candidates apart

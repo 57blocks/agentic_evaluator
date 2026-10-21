@@ -10,12 +10,13 @@
  *   evaluation coverage   classified / valid attempts — infra failures show here
  *   required-check pass   pass / (pass + fail) — executed checks only
  *
- * A result is `directional` unless the sample and a predeclared minimum
- * meaningful difference both support a firm claim.
+ * A result is `directional` unless the sample, a predeclared minimum
+ * meaningful difference and the statistics (stats.ts) all support a firm claim.
  */
 
 import type { TrialRow } from "./rows.js";
 import { INFRA_COMPLETION_STATES } from "./states.js";
+import { MIN_DIFFERING_INPUTS } from "./stats.js";
 import type { CompletionState, EvaluationState } from "./types.js";
 
 export interface Rate {
@@ -45,8 +46,6 @@ export interface Directionality {
   directional: boolean;
   reasons: string[];
 }
-
-export const FIRM_MIN_INPUTS = 10;
 
 export const rate = (numerator: number, denominator: number): Rate => ({
   value: denominator > 0 ? numerator / denominator : null,
@@ -108,9 +107,15 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
   };
 }
 
+/**
+ * What the sample and the spec allow before any result is in. The selector
+ * adds the statistical reasons (stats.ts) once it has the rows.
+ */
 export function directionality(inputCount: number, mmd: number | null | undefined): Directionality {
   const reasons: string[] = [];
-  if (inputCount < FIRM_MIN_INPUTS) reasons.push(`${inputCount} inputs; fewer than ${FIRM_MIN_INPUTS}`);
+  if (inputCount < MIN_DIFFERING_INPUTS) {
+    reasons.push(`${inputCount} input${inputCount === 1 ? "" : "s"}; no comparison can be significant with fewer than ${MIN_DIFFERING_INPUTS}`);
+  }
   if (mmd === null || mmd === undefined) reasons.push("no minimum meaningful difference declared");
   return { directional: reasons.length > 0, reasons };
 }

@@ -709,11 +709,19 @@ well as from completed runs, so only the unfinished ones run again.
 
 Every verdict carries a confidence:
 
-- **firm** — at least 10 inputs *and* `execution.minimum_meaningful_difference`
-  declared (the smallest gap you consider real), and not `judge-preference`.
+- **firm** — all of:
+  - `execution.minimum_meaningful_difference` is declared (the smallest gap
+    you consider real);
+  - every eligibility gate still holds at the low end of the chosen
+    candidate's 95% (Wilson) interval, counted per input. 30 of 30 is
+    consistent with a true rate of 0.89, so a gate of 1.0 is never firm;
+    a perfect record clears 0.95 from 73 inputs and 0.9 from 35;
+  - in `highest-assurance`, the chosen candidate beats the runner-up on an
+    exact sign test over inputs;
+  - the mode is not `judge-preference`.
 - **directional** — otherwise: enough to look at the evidence, not to decide.
   Most small runs are directional, and `judge-preference` always is; the report
-  lists why.
+  lists why, and its "How sure" section shows the intervals.
 - **needs review** — no candidate passed the gates, so nothing was recommended.
 
 Raise `trials_per_case` to see how stable a candidate is; add inputs to see how

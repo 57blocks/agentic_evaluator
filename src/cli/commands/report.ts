@@ -1,9 +1,11 @@
 /**
  * `agenteval report <run>` — re-render a finished run's page.
  *
- * Reads only. Re-rendering never re-derives a number: the canonical rows are
- * on disk and this turns them into HTML again, which is what makes it safe to
- * run against a run that cost real money.
+ * Never calls a model and never touches the rows: scores, evaluations and the
+ * ledger stay as recorded. What a rule derives from them — the
+ * recommendation, GAPS.md, items.json and the page — is written again under
+ * the current rules, which is what makes it safe to run against a run that
+ * cost real money.
  */
 
 import fs from "node:fs/promises";
@@ -18,7 +20,9 @@ import type { Io } from "../io.js";
 
 export const REPORT_HELP = `agenteval report <run> [options]
 
-  Re-render report.html for a finished run. Reads only — no number changes.
+  Re-render report.html for a finished run under the current rules, with its
+  recommendation.json, GAPS.md and items.json. Never calls a model; the
+  recorded scores, evaluations and costs are not changed.
 
   <run>               a run id, or a path to a run directory
   --workspace DIR     workspace to look the run id up in`;

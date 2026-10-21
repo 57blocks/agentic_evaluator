@@ -7,6 +7,7 @@
  *   ledger.json        itemized cost
  *   summary.json       per-candidate rates + directionality
  *   recommendation.json eligibility filters + operating-mode choice (pure)
+ *   items.json         per-input classes and effective N (item-stats.ts)
  *   GAPS.md            fields the protocol wants that this run could not observe
  */
 
@@ -20,6 +21,7 @@ import { recommendFromCanon, type Recommendation } from "./select.js";
 import { INFRA_COMPLETION_STATES } from "./states.js";
 import { budgetGap, type BudgetState } from "./budget.js";
 import { judgeDiscrimination, saturationGap, type JudgeDiscrimination } from "./discrimination.js";
+import { itemGaps, itemStats } from "./item-stats.js";
 import type { TraceIntegrity } from "./trace.js";
 
 export interface CanonSummary {
@@ -154,9 +156,24 @@ export function buildGaps(
   }
   const saturation = saturationGap(judgeDiscrimination(trials));
   if (saturation !== null) lines.push(saturation);
+  lines.push(...itemGaps(itemStats(trials)));
   lines.push("- pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.");
-  lines.push("- statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json) and recommendation.json firmness follows that label.");
+  lines.push("- statistical uncertainty: the chosen candidate's gated rates carry Wilson 95% intervals, and a highest-assurance pick must beat the runner-up on an exact sign test over inputs (recommendation.json `evidence`). Inputs generated from one template are still treated as independent, which overstates certainty when they share a template.");
   return lines.join("\n") + "\n";
+}
+
+/** GAPS.md for a finished run, from what the bundle on disk records. */
+export function gapsFor(bundle: { manifest: RunManifest; trials: readonly TrialRow[]; evaluations: readonly EvaluationRow[]; summary: CanonSummary }): string {
+  return buildGaps(
+    bundle.trials,
+    bundle.evaluations,
+    bundle.summary.integrity,
+    bundle.summary.budget,
+    bundle.manifest.judge.methods,
+    Object.entries(bundle.manifest.candidates)
+      .filter(([, def]) => def.cli?.reports_usage === true)
+      .map(([id]) => id),
+  );
 }
 
 export async function writeCanonBundle(
@@ -178,20 +195,8 @@ export async function writeCanonBundle(
     fs.writeFile(path.join(runDir, "ledger.json"), JSON.stringify(bundle.ledger, null, 2), "utf-8"),
     fs.writeFile(path.join(runDir, "summary.json"), JSON.stringify(bundle.summary, null, 2), "utf-8"),
     fs.writeFile(path.join(runDir, "recommendation.json"), JSON.stringify(recommendation, null, 2), "utf-8"),
-    fs.writeFile(
-      path.join(runDir, "GAPS.md"),
-      buildGaps(
-        bundle.trials,
-        bundle.evaluations,
-        bundle.summary.integrity,
-        bundle.summary.budget,
-        bundle.manifest.judge.methods,
-        Object.entries(bundle.manifest.candidates)
-          .filter(([, def]) => def.cli?.reports_usage === true)
-          .map(([id]) => id),
-      ),
-      "utf-8",
-    ),
+    fs.writeFile(path.join(runDir, "items.json"), JSON.stringify(itemStats(bundle.trials), null, 2), "utf-8"),
+    fs.writeFile(path.join(runDir, "GAPS.md"), gapsFor(bundle), "utf-8"),
   ]);
   return recommendation;
 }
