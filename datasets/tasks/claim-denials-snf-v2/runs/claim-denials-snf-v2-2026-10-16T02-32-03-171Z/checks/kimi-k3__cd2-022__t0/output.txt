@@ -1,9 +1,0 @@
-```json
-{
-  "root_cause": "benefit_limit_exhausted",
-  "correctable": "no",
-  "next_action": "bill_patient",
-  "deadline": null,
-  "action_note": "The beneficiary was home only 37 days (2025-02-27 to 2025-04-04) between her prior SNF discharge and the 2025-04-05 hospital admission — short of the 60-day break needed to start a new benefit period — so this stay drew on the same period's 100-day SNF maximum, of which 71 days were already used; Medicare correctly paid the remaining 29 days through 2025-05-07 and denied 2025-05-08 onward under CARC 119. The exhaustion is statutorily correct and cannot be reversed on appeal, and the PR group code assigns liability to the beneficiary, so with no Medigap or Medicaid on file the facility should bill the patient for the non-covered days (confirming the required SNFABN/liability notice was issued)."
-}
-```
