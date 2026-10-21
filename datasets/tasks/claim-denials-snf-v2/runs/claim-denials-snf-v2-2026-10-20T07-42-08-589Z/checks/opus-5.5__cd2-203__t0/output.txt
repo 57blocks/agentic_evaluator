@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of a hospital or SNF for only 28 days (2025-03-31 to 2025-04-27), short of the 60 consecutive days needed to end a benefit period. That left 23 of 100 SNF days after the prior stay's 77, which Medicare correctly paid from 2025-05-01 through 2025-05-23. The days from 2025-05-24 onward are patient responsibility (PR/CARC 119) with no secondary coverage on file, so bill the patient and do not appeal."
+}
+```

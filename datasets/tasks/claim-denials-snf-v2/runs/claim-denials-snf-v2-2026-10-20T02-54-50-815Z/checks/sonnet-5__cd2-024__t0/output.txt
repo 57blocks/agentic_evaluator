@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-02-12 hospitalization occurred only 22 days after the prior SNF discharge (2025-01-24), so the 60-day benefit-period reset never happened; the 74 days already used plus this stay's 26 covered days (2/15-3/12) exhaust the 100-day SNF benefit. Since there is no Medigap or Medicaid on file, bill the beneficiary directly for charges after 2025-03-12."
+}

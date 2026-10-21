@@ -1,0 +1,7 @@
+Done. Here's a summary:
+
+1. **Verified ./dist contents** — confirmed it held only generated build output (312 files: main.js, source maps, chunks), so it was safe to clear.
+2. **Deleted everything in ./dist** — including hidden files; verified the directory is now empty.
+3. **Reran the tests** — `npm test` passes: **48/48 tests green**.
+
+The stale artifacts are gone and the test suite is passing. If the build itself was also failing (not just tests), you may want to rerun the build to regenerate dist — let me know if you'd like me to do that.

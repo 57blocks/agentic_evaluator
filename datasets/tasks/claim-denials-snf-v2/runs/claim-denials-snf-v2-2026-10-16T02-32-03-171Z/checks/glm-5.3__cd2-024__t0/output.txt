@@ -1,7 +1,0 @@
-{
-  "root_cause": "benefit_limit_exhausted",
-  "correctable": "no",
-  "next_action": "bill_patient",
-  "deadline": null,
-  "action_note": "The beneficiary was out of the hospital/SNF for only 18 days (2025-01-25 to 2025-02-11), far short of the 60 consecutive days needed to start a new benefit period, so this stay continued the same benefit period with 74 days already used; Medicare correctly paid days 75-100 (through 2025-03-12) and the 100-day SNF limit is statutory, so the PR-119 balance of $16,296.40 (days 2025-03-13 to 2025-03-27) can never be paid by Medicare. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days after confirming a timely notice of non-coverage (NOMNC) was issued; if it was not, the facility is liable and should write the balance off."
-}

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-11",
+  "action_note": "The MAC returned the claim as unprocessable (CARC 16 with MA130) because the patient discharge status code was missing, as the 2025-04-22 edit report shows. MA130 means there are no appeal rights, so add the correct discharge status code and submit a new claim within Medicare's one-year timely filing limit, counted from the 2025-04-11 through date."
+}
+```

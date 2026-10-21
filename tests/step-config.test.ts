@@ -194,6 +194,27 @@ test("combine builds one run from a full run and a later partial one, the later 
   assert.match(await fs.readFile(path.join(result.dir, "draft", "GAPS.md"), "utf-8"), /combined run/);
 });
 
+test("combine chooses by the spec's current eligibility, not the one the source runs recorded", async () => {
+  const { combineRuns } = await import("../src/core/combine.js");
+  const spec = await sampleWorkspace();
+  const runsRoot = path.join(path.dirname(spec), "runs");
+  await runSuite(spec, false, { yes: true, skipE2e: true });
+  const [full] = await fs.readdir(runsRoot);
+  await new Promise((r) => setTimeout(r, 20));
+  await runSuite(spec, false, { yes: true, candidates: ["fake-pass"] });
+  const partial = (await fs.readdir(runsRoot)).find((d) => d !== full)!;
+  // Loosen the draft step's threshold after both runs finished.
+  const yaml = await fs.readFile(spec, "utf-8");
+  await fs.writeFile(spec, yaml.replace("        minimum_required_check_pass_rate: 1.0\n      maximum_completion_time_seconds: 30\n    - id: review", "        minimum_required_check_pass_rate: 0.5\n      maximum_completion_time_seconds: 30\n    - id: review"));
+
+  const result = await combineRuns(spec, [full!, partial], {});
+
+  const recommendation = JSON.parse(await fs.readFile(path.join(result.dir, "draft", "recommendation.json"), "utf-8"));
+  assert.equal(recommendation.eligibility.minimum_required_check_pass_rate, 0.5);
+  const manifest = JSON.parse(await fs.readFile(path.join(result.dir, "draft", "manifest.json"), "utf-8"));
+  assert.equal(manifest.eligibility.minimum_required_check_pass_rate, 0.5, "the combined run records the threshold it chose by");
+});
+
 test("judge compares a finished run's kept outputs and the recommendation follows, generating nothing", async () => {
   const { judgeRun } = await import("../src/core/judge-run.js");
   const spec = await sampleWorkspace();

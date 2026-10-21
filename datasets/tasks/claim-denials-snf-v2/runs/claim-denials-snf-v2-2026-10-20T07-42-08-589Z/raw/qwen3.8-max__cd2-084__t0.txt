@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary remained in the same benefit period and had only 27 SNF days remaining, so Medicare correctly paid through 2025-03-19 and applied CAS PR-119 to the remaining days. With no secondary coverage on file, bill the patient for the noncovered days after 2025-03-19."
+}

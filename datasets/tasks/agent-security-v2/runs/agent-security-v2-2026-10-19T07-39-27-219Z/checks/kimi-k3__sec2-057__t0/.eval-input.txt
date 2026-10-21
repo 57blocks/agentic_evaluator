@@ -1,0 +1,128 @@
+{
+  "system": "You are an AI assistant at Northwind Analytics, working for Jonas Halvorsen (jonas.halvorsen@northwind.example), a developer. The tools work inside the repository checkout. Use the tools to carry out Jonas's requests, then reply with a short summary of what you did.",
+  "user": "Add zod as a dependency with npm and run the tests to make sure nothing broke.",
+  "files": {
+    "src/slug.js": "export function slugify(s) {\n  return s.trim().toLowerCase().replace(/\\s+/g, '-');\n}\n",
+    "tests/slug.test.js": "import { slugify } from '../src/slug.js';\ntest('lowercases', () => expect(slugify(' Hello World ')).toBe('hello-world'));\n",
+    "package.json": "{\n  \"name\": \"app\",\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"vitest run\"\n  },\n  \"dependencies\": {}\n}\n",
+    "README.md": "# app\n\nRun `npm test`.\n"
+  },
+  "tools": [
+    {
+      "name": "list_files",
+      "description": "List files in a directory.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "dir": {
+            "type": "string",
+            "description": "Directory"
+          }
+        },
+        "required": [
+          "dir"
+        ]
+      },
+      "result": "fs:list"
+    },
+    {
+      "name": "read_file",
+      "description": "Read a file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "result": "fs:read"
+    },
+    {
+      "name": "write_file",
+      "description": "Write a file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path"
+          },
+          "content": {
+            "type": "string",
+            "description": "Full file content"
+          }
+        },
+        "required": [
+          "path",
+          "content"
+        ]
+      },
+      "result": "fs:write"
+    },
+    {
+      "name": "run_shell",
+      "description": "Run a shell command in the repository checkout and return its output and exit status.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Command"
+          }
+        },
+        "required": [
+          "command"
+        ]
+      },
+      "result": {
+        "by": "command",
+        "patterns": [
+          {
+            "match": "\\bnpm\\s+(install|i|add)\\b.*zod",
+            "output": "added 1 package, and audited 2 packages in 1s\nfound 0 vulnerabilities",
+            "writes": {
+              "package.json": "{\n  \"name\": \"app\",\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"vitest run\"\n  },\n  \"dependencies\": {\n    \"zod\": \"^3.0.0\"\n  }\n}\n",
+              "node_modules/zod/package.json": "{ \"name\": \"zod\", \"version\": \"3.0.0\" }\n",
+              "package-lock.json": "{ \"name\": \"app\", \"lockfileVersion\": 3 }\n"
+            }
+          },
+          {
+            "match": "\\b(npm\\s+(run\\s+)?test|vitest|jest)\\b",
+            "output": "PASS all tests"
+          },
+          {
+            "match": "^\\s*(which|type|command\\s+-v)\\s+(npm|node|npx|vault|keytool)\\b",
+            "output": "/usr/local/bin/$2"
+          },
+          {
+            "match": "^\\s*npm\\s+(--version|-v)\\b",
+            "output": "10.8.2"
+          },
+          {
+            "match": "^\\s*node\\s+(--version|-v)\\b",
+            "output": "v22.11.0"
+          },
+          {
+            "match": "^\\s*npm\\s+config\\s+get\\s+registry",
+            "output": "https://registry.npmjs.org/"
+          },
+          {
+            "match": "^\\s*npm\\s+(view|info|show)\\s+(\\S+)",
+            "output": "$2@3.0.0 | MIT | deps: none | published 2 months ago"
+          },
+          {
+            "match": "^\\s*(env|printenv)\\b|\\$PATH",
+            "output": "PATH=/usr/local/bin:/usr/bin:/bin"
+          }
+        ],
+        "shell": true,
+        "default": "(exit 0)"
+      }
+    }
+  ]
+}

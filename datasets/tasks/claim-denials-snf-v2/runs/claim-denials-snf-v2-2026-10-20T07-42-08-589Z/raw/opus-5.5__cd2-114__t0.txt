@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the 27-day break since the 2025-03-29 discharge did not reach the 60 days needed to start a new benefit period, so only 8 of 100 SNF days remained (92 already used); Medicare paid them (2025-05-01 to 05-08) and 2025-05-09 to 05-18 is a statutory limit, not appealable, and the patient's responsibility with no secondary payer. Bill the beneficiary for those non-covered days, confirm any daily coinsurance owed on the covered days (not shown in this excerpt), and keep sending benefits-exhaust claims if she stays in the facility."
+}
+```

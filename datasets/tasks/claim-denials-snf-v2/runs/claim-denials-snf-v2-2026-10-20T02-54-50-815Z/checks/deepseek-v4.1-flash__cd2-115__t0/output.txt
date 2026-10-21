@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "verify_then_decide",
+  "deadline": null,
+  "action_note": "Medicare correctly denied days after 2025-04-01 because the beneficiary exhausted the 100-day SNF benefit in the same benefit period (prior stay used 88 days and the gap was <60 days). Verify whether a SNF ABN was issued before billing the patient for the noncovered days; if not, write off the patient responsibility."
+}

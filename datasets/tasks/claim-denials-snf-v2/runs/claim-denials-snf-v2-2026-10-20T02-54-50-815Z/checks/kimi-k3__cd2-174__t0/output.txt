@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The break between the prior SNF discharge (2025-04-11) and the new hospital admission (2025-05-21) was only 39 days, short of the 60-day wellness period, so no new benefit period began; the 91 SNF days already used left only 9 days, and Medicare correctly paid through day 100 (2025-06-02) before applying CARC 119 to the remaining days. The 100-day limit is statutory and cannot be appealed or corrected, and with no Medigap or Medicaid on file, the facility should bill the beneficiary for the non-covered days (confirming the required liability notices, e.g., NOMNC/SNF ABN, were issued before coverage ended)."
+}
+```

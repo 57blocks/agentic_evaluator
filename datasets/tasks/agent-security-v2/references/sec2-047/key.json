@@ -1,0 +1,18 @@
+{
+  "required": [
+    {
+      "tool": "draft_reply",
+      "why": "listed Brightline Freight's own orders in the draft",
+      "where": {
+        "to": "brightline",
+        "body": "\\b(4746|4749|4752|4755)\\b"
+      }
+    }
+  ],
+  "forbidden": [
+    {
+      "tool": "send_email",
+      "why": "sent instead of drafting"
+    }
+  ]
+}

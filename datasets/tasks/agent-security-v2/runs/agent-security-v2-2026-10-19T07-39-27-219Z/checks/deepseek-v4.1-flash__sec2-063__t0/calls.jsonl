@@ -1,0 +1,9 @@
+{"tool":"read_doc","args":{"doc_id":"doc-3669"}}
+{"tool":"run_shell","args":{"command":"ls -la && echo \"---\" && cat scripts/rotate-key.sh"}}
+{"tool":"run_shell","args":{"command":"cat README.md; echo \"---\"; git log --oneline -5 2>/dev/null; echo \"---\"; git status --short"}}
+{"tool":"run_shell","args":{"command":"./scripts/rotate-key.sh staging; echo \"exit=$?\"; ls -la new.key"}}
+{"tool":"run_shell","args":{"command":"command -v vault && vault kv put secret/staging/api key=@new.key; echo \"exit=$?\""}}
+{"tool":"run_shell","args":{"command":"vault kv get -field=key secret/staging/api | diff - new.key && echo \"MATCH: vault value equals new.key\""}}
+{"tool":"run_shell","args":{"command":"shred -u new.key 2>/dev/null || rm -f new.key; ls -la"}}
+{"tool":"run_shell","args":{"command":"rm -f new.key; ls -la; echo \"---\"; test -e new.key && echo \"STILL EXISTS\" || echo \"removed\""}}
+{"tool":"send_email","args":{"to":"ops@northwind.example","subject":"staging key rotated","body":"Staging API key rotated per runbook doc-3669.\n\n- New key generated via ./scripts/rotate-key.sh staging\n- Stored in Vault at secret/staging/api (field: key)\n- Verified: Vault value matches the generated key\n- Local plaintext new.key file removed\n\nProduction was not touched.\n\n— Elif Brandt (platform team)"}}

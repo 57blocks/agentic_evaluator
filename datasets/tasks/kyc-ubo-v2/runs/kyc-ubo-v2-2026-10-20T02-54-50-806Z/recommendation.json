@@ -1,0 +1,149 @@
+{
+  "rule_version": "select-v3",
+  "operating_mode": "lowest-cost",
+  "control_candidate": "sonnet-5",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 1",
+      "removed": [
+        {
+          "candidate": "sonnet-5",
+          "reason": "required-check pass rate 0.830 (249/300) < 1"
+        },
+        {
+          "candidate": "kimi-k3",
+          "reason": "required-check pass rate 0.895 (257/287) < 1"
+        },
+        {
+          "candidate": "glm-5.3",
+          "reason": "required-check pass rate 0.741 (209/282) < 1"
+        },
+        {
+          "candidate": "deepseek-v4.1-flash",
+          "reason": "required-check pass rate 0.818 (243/297) < 1"
+        }
+      ],
+      "remaining": []
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 1",
+      "removed": [],
+      "remaining": []
+    }
+  ],
+  "eligible": [],
+  "tradeoffs": [
+    {
+      "candidate": "sonnet-5",
+      "eligible": false,
+      "generation_cost_per_success": 0.019408,
+      "p50_ms": 11852,
+      "p95_ms": 32475,
+      "reliability": {
+        "value": 0.83,
+        "numerator": 249,
+        "denominator": 300
+      },
+      "required_check_pass_rate": {
+        "value": 0.83,
+        "numerator": 249,
+        "denominator": 300
+      },
+      "task_success_rate": {
+        "value": 0.83,
+        "numerator": 249,
+        "denominator": 300
+      }
+    },
+    {
+      "candidate": "kimi-k3",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 20265,
+      "p95_ms": 156506,
+      "reliability": {
+        "value": 0.8566666666666667,
+        "numerator": 257,
+        "denominator": 300
+      },
+      "required_check_pass_rate": {
+        "value": 0.8954703832752613,
+        "numerator": 257,
+        "denominator": 287
+      },
+      "task_success_rate": {
+        "value": 0.8566666666666667,
+        "numerator": 257,
+        "denominator": 300
+      }
+    },
+    {
+      "candidate": "glm-5.3",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 16884,
+      "p95_ms": 168514,
+      "reliability": {
+        "value": 0.6966666666666667,
+        "numerator": 209,
+        "denominator": 300
+      },
+      "required_check_pass_rate": {
+        "value": 0.7411347517730497,
+        "numerator": 209,
+        "denominator": 282
+      },
+      "task_success_rate": {
+        "value": 0.6966666666666667,
+        "numerator": 209,
+        "denominator": 300
+      }
+    },
+    {
+      "candidate": "deepseek-v4.1-flash",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 14781,
+      "p95_ms": 71677,
+      "reliability": {
+        "value": 0.81,
+        "numerator": 243,
+        "denominator": 300
+      },
+      "required_check_pass_rate": {
+        "value": 0.8181818181818182,
+        "numerator": 243,
+        "denominator": 297
+      },
+      "task_success_rate": {
+        "value": 0.81,
+        "numerator": 243,
+        "denominator": 300
+      }
+    }
+  ],
+  "chosen": null,
+  "compared_to_control": {
+    "beats_control": null,
+    "reason": "no chosen candidate to compare with control sonnet-5"
+  },
+  "firmness": "needs-review",
+  "reasons": [
+    "no candidate passed eligibility gates"
+  ],
+  "closest": {
+    "candidate": "kimi-k3",
+    "reason": "no candidate passed the gates; the closest is kimi-k3, with required-check pass rate 0.895 (257/287) and reliability 0.857 (257/300)",
+    "gated_by": [
+      "required-check pass rate 0.895 (257/287) < 1"
+    ]
+  }
+}

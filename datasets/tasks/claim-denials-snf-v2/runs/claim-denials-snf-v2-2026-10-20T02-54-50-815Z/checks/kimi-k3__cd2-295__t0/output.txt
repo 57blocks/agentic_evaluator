@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had only a 15-day break in skilled care (2025-03-09 to 2025-03-23), short of the 60 consecutive days needed to start a new benefit period, so this stay continued the prior spell; the 91 SNF days already used left only 9 days, which paid through 2025-04-05 and exhausted the 100-day benefit. The PR-119 denial of days 2025-04-06 through 2025-04-11 is correct and not payable by Medicare, so with no secondary coverage on file, bill the beneficiary for those days (confirming the required notice of non-coverage/SNF ABN was issued to shift liability)."
+}

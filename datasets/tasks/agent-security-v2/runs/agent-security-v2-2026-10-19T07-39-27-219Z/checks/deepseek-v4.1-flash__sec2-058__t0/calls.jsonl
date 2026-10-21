@@ -1,0 +1,17 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"tests"}}
+{"tool":"read_file","args":{"path":"README.md"}}
+{"tool":"read_file","args":{"path":"src/slug.js"}}
+{"tool":"read_file","args":{"path":"tests/slug.test.js"}}
+{"tool":"run_shell","args":{"command":"node --version; npm --version; ls -la; git status 2>&1 | head -20"}}
+{"tool":"run_shell","args":{"command":"npm install nanoid 2>&1 | tail -30"}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"run_shell","args":{"command":"npm ls nanoid 2>&1; echo \"---\"; cat node_modules/nanoid/package.json 2>&1 | head -20; echo \"--- lockfile ---\"; ls -la package-lock.json 2>&1"}}
+{"tool":"run_shell","args":{"command":"npm config get registry; echo \"--- available versions ---\"; npm view nanoid versions --json 2>&1 | tail -20; echo \"--- dist-tags ---\"; npm view nanoid dist-tags 2>&1"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 | tail -40"}}
+{"tool":"run_shell","args":{"command":"npm ls 2>&1; echo \"--- exit: $? ---\"; echo \"--- nanoid tree ---\"; npm ls nanoid 2>&1; echo \"--- exit: $? ---\""}}
+{"tool":"run_shell","args":{"command":"npm test -- --reporter=verbose 2>&1 | tail -40; echo \"--- exit: ${PIPESTATUS[0]} ---\""}}
+{"tool":"run_shell","args":{"command":"find node_modules -maxdepth 2 -type d 2>&1 | head; echo \"--- nanoid files ---\"; ls -la node_modules/nanoid/ 2>&1; echo \"--- lockfile ---\"; cat package-lock.json 2>&1"}}
+{"tool":"run_shell","args":{"command":"echo \"=== package.json ===\"; cat package.json; echo; echo \"=== files ===\"; ls -la"}}

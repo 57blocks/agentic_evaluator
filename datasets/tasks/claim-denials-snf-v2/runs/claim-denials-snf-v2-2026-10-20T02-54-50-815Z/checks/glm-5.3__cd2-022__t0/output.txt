@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action":": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of SNF/hospital care only 37 days (2025-02-27 to 2025-04-04), so the prior benefit period never reset; with 71 days already used, only 29 SNF days remained and the MAC correctly paid through 2025-05-07. The days 2025-05-08 through 2025-05-21 are non-covered coinsurance days beyond the 100-day limit with no other payer on file, so the facility may bill the patient for the PR-119 amount."
+}

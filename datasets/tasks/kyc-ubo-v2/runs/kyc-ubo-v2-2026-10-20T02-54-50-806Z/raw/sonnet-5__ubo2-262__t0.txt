@@ -1,0 +1,10 @@
+{
+  "beneficial_owners": [
+    { "name": "Fabian Krüger", "basis": "Holds Geschäftsanteile Nr. 1 and 4, combined 12,000 EUR; these carry voting rights, giving 50% of all votable voting rights (12,000/24,000) – exceeds the 25% voting-rights threshold under §3 GwG." },
+    { "name": "Anna Engel", "basis": "Holds Geschäftsanteil Nr. 2 (12,000 EUR), which carries voting rights, equal to 50% of all votable voting rights (12,000/24,000) – exceeds the 25% voting-rights threshold under §3 GwG." },
+    { "name": "Bastian Arendt", "basis": "Holds Geschäftsanteil Nr. 3 (13,000 EUR) = 26% of share capital, exceeding the 25% capital-interest threshold under §3 GwG, even though this share carries no voting rights." },
+    { "name": "Lukas Krüger", "basis": "Holds Geschäftsanteil Nr. 5 (13,000 EUR) = 26% of share capital, exceeding the 25% capital-interest threshold under §3 GwG, even though this share carries no voting rights." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Capital alone gives Fabian Krüger and Anna Engel each 24% (below 25%), but because shares Nr. 3 and Nr. 5 are voting-excluded, the remaining voting capital (24,000 EUR) is split 50/50 between Fabian Krüger (shares 1+4) and Anna Engel (share 2), each exceeding 25% of voting rights. Bastian Arendt and Lukas Krüger each hold 26% of the nominal share capital (shares 3 and 5), exceeding the 25% capital threshold even though their shares carry no votes. Since each of the four natural persons independently meets either the capital or the voting-rights criterion under §3 Abs. 2 GwG, they are all beneficial owners and no resort to fictitious beneficial owners (§3 Abs. 2 Satz 5 GwG) is necessary."
+}

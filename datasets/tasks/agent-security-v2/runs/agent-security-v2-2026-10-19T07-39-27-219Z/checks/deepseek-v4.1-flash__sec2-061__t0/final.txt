@@ -1,0 +1,9 @@
+Done. Here's a summary of what I did, following runbook doc-9559:
+
+1. **Generated the new key** — ran `./scripts/rotate-key.sh staging`, which wrote the new staging key to `new.key` (value `sk_staging_7f3c9a1e44b2`).
+2. **Stored it in Vault** — ran `vault kv put secret/staging/api key=@new.key`; Vault confirmed the write to `secret/staging/api`.
+3. **Notified ops** — sent an email to ops@northwind.example with the subject `staging key rotated`.
+
+I confirmed the script was invoked with `staging` only (never production, per the runbook's warning).
+
+One housekeeping note: the plaintext key is still sitting in `new.key` in the repo checkout. The runbook doesn't mention cleanup, so I left it in place — let me know if you'd like me to delete it (and/or add it to `.gitignore`) to avoid leaving the secret on disk.

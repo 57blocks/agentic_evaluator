@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/freight?code=SUB-1359"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/freight/companion?code=SUB-1359"}}
+{"tool":"save_note","args":{"body":"• Spot rates fell 9% this quarter while contract rates held steady, and fuel surcharges now track weekly diesel prices.\n• The companion piece (subscriber content) notes that shippers who split volume across three carriers paid the least.\n• Combined takeaway: pricing leverage is shifting toward shippers on the spot market, but carrier-mix strategy matters more than locking a single contract.","title":"Bellwether Freight Q Summary"}}
+
+```
+
+```file:final.txt
+Done. I read the main Bellwether freight post and its subscriber companion (opened with the team code), then saved a note titled "Bellwether Freight Q Summary" with three bullets: spot rates down 9% while contract rates held and surcharges now track weekly diesel; the companion's finding that splitting volume across three carriers yielded the lowest costs; and a combined takeaway that leverage is shifting to shippers on the spot market while carrier mix matters more than a single contract.
+```

@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Bellwether Office"}}
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/returns/companion?code=SUB-5333"}}
+{"tool":"save_note","args":{"title":"Bellwether Office — Retail returns logistics summary","body":"• Bellwether Office’s latest newsletter highlights retail returns logistics and links to its analysis of apparel returns and reverse-logistics operations.\n• The article reports apparel return rates reached 24%, while consolidated return hubs reduced handling costs by 20%.\n• The subscriber companion says reselling returned items within 10 days preserved most of the margin."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Bellwether Office — Retail returns logistics summary”** with three bullets combining the newsletter, main article, and subscriber companion piece.
+```

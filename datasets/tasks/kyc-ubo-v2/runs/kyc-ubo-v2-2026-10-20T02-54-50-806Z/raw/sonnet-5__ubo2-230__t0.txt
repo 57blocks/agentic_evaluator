@@ -1,0 +1,10 @@
+{
+  "beneficial_owners": [
+    { "name": "Nils Brenner", "basis": "Holds Geschäftsanteil Nr. 4 (55.000 EUR = 55% of share capital), exceeding the 25% capital threshold under § 3 Abs. 2 GwG, even though this share carries no voting rights" },
+    { "name": "Oskar Brandt", "basis": "Holds 15% of capital, but after excluding the non-voting share (Nr. 4), his voting share among voting capital (45.000 EUR) is 15.000/45.000 = 33,33%, exceeding the 25% voting-rights threshold" },
+    { "name": "Greta Lindqvist", "basis": "Holds 15% of capital; voting share among voting capital is 33,33%, exceeding the 25% voting-rights threshold" },
+    { "name": "Helena Becker", "basis": "Holds combined 15% of capital (two Geschäftsanteile); voting share among voting capital is 33,33%, exceeding the 25% voting-rights threshold" }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Because Geschäftsanteil Nr. 4 (55% of capital, held by Nils Brenner) carries no voting rights, total voting capital is reduced to 45.000 EUR, held equally by Oskar Brandt, Greta Lindqvist and Helena Becker (15.000 EUR each), giving each 33,33% of voting rights – above the 25% threshold under § 3 Abs. 2 GwG. Nils Brenner himself qualifies independently because his capital share (55%) alone exceeds 25%, regardless of voting rights, since § 3 GwG treats capital share and voting rights as alternative criteria. As all four are natural persons directly holding qualifying interests, no fictitious beneficial owners need to be named."
+}

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never had a 60-day break in inpatient care (only 25 days at home, 2025-04-09 to 2025-05-03), so the 2025-05-09 SNF admission continued the same benefit period in which 82 of the 100 SNF days were already used; coverage correctly ended 2025-05-26 (day 100), and the remaining days were denied under CARC 119 as patient responsibility. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days 2025-05-27 through 2025-06-01 (confirming the required notice of non-coverage was issued)."
+}

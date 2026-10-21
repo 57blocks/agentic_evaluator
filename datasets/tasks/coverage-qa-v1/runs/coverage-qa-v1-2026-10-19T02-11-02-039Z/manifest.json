@@ -1,0 +1,370 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "coverage-qa-v1-2026-10-19T02-11-02-039Z",
+  "run_name": "coverage-qa-v1",
+  "step": {
+    "id": "qa",
+    "version": "1",
+    "description": null
+  },
+  "spec": {
+    "path": "tasks/coverage-qa-v1/spec.yaml",
+    "sha256": "fa55ea7e26a099a9f6c9eefa020d143d2f4bb71c7212e5b69f6c9c01946213ee"
+  },
+  "description": "Which model answers a coverage question from a published medical policy correctly and cites the clause that decides it? 30 questions on three synthetic policies; 21 hard (two clauses together, exceptions, a revised threshold, scope, limits, and silent policies). Graded by script on the answer and citations; the explanation is judged, pairwise as well, so a person's blind review calibrates the judge.",
+  "test_set": {
+    "id": "coverage-qa-v1",
+    "inputs": {
+      "cq-001": "a94cb58e57aab5efb7301e7b71039f480f9a4a91121d8449376c1fb406060515",
+      "cq-002": "36afb329a7ff4b480a6afe945540b5f5dd3f898f56a0525e4baa6aee11efde3b",
+      "cq-003": "60f00897ec0bb778ce3ed55e1e9a601c3b9507e51859c9255e80886b9256e812",
+      "cq-004": "273c1456b16d47ad672ecbe060a8e294d116ab50b6d62c794ed66d54bbc1f572",
+      "cq-005": "2f43f2c363dcafb7a9e9812bd23ad1fa730a9310ceb7422de5ad985b476d1420",
+      "cq-006": "3c015f8456720a6651c29f5db6e6e2623fa7e374c45233c5826443243883e4f7",
+      "cq-007": "2bc06d9779f153ffaa7e2fb7563858fd6d9afcdd57c49004ddfafa878776be9b",
+      "cq-008": "f76ca9ec4cd3217e5b5f2f878798c53b63aa9ddeea2af2f5f0e4979f2874a77d",
+      "cq-009": "764f03674f67aceb770875bbac9625724256a97f4c69e1ff4f9f58ebf2cfc611",
+      "cq-010": "e654db98cd9daa79e841083b8e94088791aba0cacf6cfd53b9d1e9da683dc922",
+      "cq-011": "3da4bd00f87d3b562b05f5c6c1ebacac6bd69988114e39f6857fd50abcd37e70",
+      "cq-012": "6c0ba3f3a59727e794130d0175f72002da3f3724af66d6d80066f3e4d43fd6e2",
+      "cq-013": "0877bc2e70395a6d2e085ba7d7c247fa9693ca1e0e4e1c224bf1134d3cfc868c",
+      "cq-014": "de1e0cc1862a51788e252bbc9ac14bd937e3e18f270487c9ed990e4c2534eaff",
+      "cq-015": "9e3394df712bd89627435c704d7967e7e273eaee5fcee7a674b880c8071834ab",
+      "cq-016": "7be039433b506d252f52aa5feba83236fb209f817f7a059d1aad4f8a114d3caf",
+      "cq-017": "b866f5b30b5635947601e61c32b44600e350a9cf4eb86fccadc7e2c00d6f823a",
+      "cq-018": "bad1d7977c3a192555ba59d56241d14d295c6dfd832ef24ce2b3b35b52c8a07c",
+      "cq-019": "a4ea3eb1aaa40ec60e16106a528da206f8523fd2c76011ef8ec698e08e030642",
+      "cq-020": "ffdc30a944e0aeb811aa9fd1b1589a80cd4c363c1aa1107ce95bd59927665d9f",
+      "cq-021": "4516bab54ceabd92fb7c0e4b7be545832f16023929207dd2160114e21db77fe9",
+      "cq-022": "b35d6e335b1afd8eab6ea95b16cb6bbc2325776c211a39a453a04149159027ef",
+      "cq-023": "218923111ce0a5db711ed20e34e48717a7de11bf60f7432fe4c853d58633db1c",
+      "cq-024": "daf596e4ca8f163193d274c334835324a17e271fb88ba979ae7c61d3358a59b5",
+      "cq-025": "05b038332d529af53fafef029140edf16e8a781a58fd7a7d2d42728e9e629278",
+      "cq-026": "6a463a086cf9cfbad9837e064675d08dd24be53897beabf1475cb3f9da61b6d6",
+      "cq-027": "901a8b81cbb17aa15f5700f2dbc8d55b9bc7f66024a4ef7bac7eeb3c056fa188",
+      "cq-028": "e1b0438958d70c81d9610fde1790c4ea724f4650ca347058e40c1cb87b51222f",
+      "cq-029": "d5c1730dcb62c0a150d5a36e0ae7905845cd152df96b300269a000a76015bd66",
+      "cq-030": "af9c278999cc2ad7aab5c5d44cd312127a6a1b33927ed76a4671e24a6775431a"
+    },
+    "labels": {
+      "cq-001": {
+        "tags": [
+          "hard",
+          "two-clause",
+          "revision",
+          "MP-214"
+        ],
+        "split": "holdout"
+      },
+      "cq-002": {
+        "tags": [
+          "hard",
+          "two-clause",
+          "MP-214"
+        ],
+        "split": "holdout"
+      },
+      "cq-003": {
+        "tags": [
+          "hard",
+          "exception",
+          "MP-214"
+        ],
+        "split": "dev"
+      },
+      "cq-004": {
+        "tags": [
+          "normal",
+          "MP-214"
+        ],
+        "split": "dev"
+      },
+      "cq-005": {
+        "tags": [
+          "hard",
+          "limit",
+          "MP-214"
+        ],
+        "split": "dev"
+      },
+      "cq-006": {
+        "tags": [
+          "hard",
+          "limit",
+          "MP-214"
+        ],
+        "split": "holdout"
+      },
+      "cq-007": {
+        "tags": [
+          "hard",
+          "scope",
+          "MP-214"
+        ],
+        "split": "holdout"
+      },
+      "cq-008": {
+        "tags": [
+          "normal",
+          "MP-214"
+        ],
+        "split": "dev"
+      },
+      "cq-009": {
+        "tags": [
+          "normal",
+          "MP-214"
+        ],
+        "split": "dev"
+      },
+      "cq-010": {
+        "tags": [
+          "hard",
+          "not-addressed",
+          "MP-214"
+        ],
+        "split": "dev"
+      },
+      "cq-011": {
+        "tags": [
+          "normal",
+          "MP-307"
+        ],
+        "split": "holdout"
+      },
+      "cq-012": {
+        "tags": [
+          "hard",
+          "two-clause",
+          "MP-307"
+        ],
+        "split": "holdout"
+      },
+      "cq-013": {
+        "tags": [
+          "hard",
+          "revision",
+          "limit",
+          "MP-307"
+        ],
+        "split": "dev"
+      },
+      "cq-014": {
+        "tags": [
+          "hard",
+          "exception",
+          "MP-307"
+        ],
+        "split": "dev"
+      },
+      "cq-015": {
+        "tags": [
+          "normal",
+          "MP-307"
+        ],
+        "split": "dev"
+      },
+      "cq-016": {
+        "tags": [
+          "hard",
+          "limit",
+          "MP-307"
+        ],
+        "split": "holdout"
+      },
+      "cq-017": {
+        "tags": [
+          "normal",
+          "MP-307"
+        ],
+        "split": "holdout"
+      },
+      "cq-018": {
+        "tags": [
+          "hard",
+          "not-addressed",
+          "MP-307"
+        ],
+        "split": "dev"
+      },
+      "cq-019": {
+        "tags": [
+          "normal",
+          "MP-307"
+        ],
+        "split": "dev"
+      },
+      "cq-020": {
+        "tags": [
+          "hard",
+          "limit",
+          "MP-307"
+        ],
+        "split": "dev"
+      },
+      "cq-021": {
+        "tags": [
+          "hard",
+          "limit",
+          "MP-118"
+        ],
+        "split": "holdout"
+      },
+      "cq-022": {
+        "tags": [
+          "hard",
+          "exception",
+          "MP-118"
+        ],
+        "split": "holdout"
+      },
+      "cq-023": {
+        "tags": [
+          "hard",
+          "limit",
+          "MP-118"
+        ],
+        "split": "dev"
+      },
+      "cq-024": {
+        "tags": [
+          "hard",
+          "revision",
+          "MP-118"
+        ],
+        "split": "dev"
+      },
+      "cq-025": {
+        "tags": [
+          "hard",
+          "exception",
+          "MP-118"
+        ],
+        "split": "dev"
+      },
+      "cq-026": {
+        "tags": [
+          "normal",
+          "MP-118"
+        ],
+        "split": "holdout"
+      },
+      "cq-027": {
+        "tags": [
+          "hard",
+          "two-clause",
+          "exception",
+          "MP-118"
+        ],
+        "split": "holdout"
+      },
+      "cq-028": {
+        "tags": [
+          "hard",
+          "two-clause",
+          "MP-118"
+        ],
+        "split": "dev"
+      },
+      "cq-029": {
+        "tags": [
+          "normal",
+          "MP-118"
+        ],
+        "split": "dev"
+      },
+      "cq-030": {
+        "tags": [
+          "hard",
+          "not-addressed",
+          "MP-118"
+        ],
+        "split": "dev"
+      }
+    }
+  },
+  "candidates": {
+    "sonnet-5": {
+      "id": "sonnet-5",
+      "model": "anthropic/claude-sonnet-5",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "kimi-k3": {
+      "id": "kimi-k3",
+      "model": "moonshotai/kimi-k3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "glm-5.3": {
+      "id": "glm-5.3",
+      "model": "z-ai/glm-5.3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "deepseek-v4.1-flash": {
+      "id": "deepseek-v4.1-flash",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    }
+  },
+  "control_candidate": "sonnet-5",
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter",
+    "methods": [
+      "pairwise-swap",
+      "absolute-1-5"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "qa-check"
+    ],
+    "check_version": "cmd-c4732e69+files-ec9000f9",
+    "rubric_sha256": "897bdf3d73dfdef2feff5ef3b80ad7f4cf1126377451d9a2922f67249884a66d",
+    "check_description": "The answer (yes, no, not_addressed) matches the key, every deciding section is cited, and no cited section is missing from the policy; the explanation is left to the judge.",
+    "producer_template_sha256": "d302edeb533652b27db535071ee15f98d2c50ed8367b65aee0be21bd8f4b5543",
+    "judge_template_sha256": "9af0b3412a439bf95b525d999f6b035a6f686102359a999357c4622ddf5005a5",
+    "score_template_sha256": "f9f235de599b971f86808a1ba581b5b77d449c0653167643323a87dca3d2eec7"
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "lowest-cost",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 4,
+    "timeout_ms": 600000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold"
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.2.0",
+    "git_sha": "a7ff533",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-10-19T02:11:02.039Z",
+  "finished_at": "2026-10-19T02:34:14.380Z"
+}

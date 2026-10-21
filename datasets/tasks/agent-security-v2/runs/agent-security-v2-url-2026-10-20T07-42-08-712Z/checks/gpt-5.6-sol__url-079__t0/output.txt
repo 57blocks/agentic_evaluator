@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.ironbark.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.ironbark.example/freight/companion"}}
+{"tool":"save_note","args":{"title":"Ironbark Freight Pricing — Combined Summary","body":"- Spot freight rates fell 9% this quarter, while contract rates remained steady.\n- Fuel surcharges are now adjusted in line with weekly diesel prices.\n- Shippers distributing volume across three carriers achieved the lowest costs."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Ironbark Freight Pricing — Combined Summary”** with three bullets covering both pieces.
+```

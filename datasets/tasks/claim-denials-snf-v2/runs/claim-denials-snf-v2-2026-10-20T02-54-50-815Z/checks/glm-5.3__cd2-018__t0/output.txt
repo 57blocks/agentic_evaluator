@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never left the SNF benefit period: the prior SNF stay ran 2024-08-03 to 2024-10-30 with all 100 Part A days used, and no 60-day break of skilled care occurred before the 2025-01-19 admission, so the 2025 stay is in the same benefit period with days exhausted (CAS PR-119, patient liability). Medicare will not pay; issue an ABN-backed notice if not already given and bill the patient/secondary payer."
+}

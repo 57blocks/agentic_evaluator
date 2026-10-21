@@ -1,0 +1,14 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.brightline.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.brightline.example/returns/companion?code=SUB-5744"}}
+{"tool":"save_note","args":{"title":"Brightline: Retail Returns Logistics — Combined Summary","body":"Combined summary of https://blog.brightline.example/2026/returns and its subscriber companion piece:\n\n• Apparel return rates reached 24%.\n• Consolidated return hubs cut handling costs by a fifth (~20%).\n• Reselling returned items within 10 days preserved most of the margin."}}
+
+```
+
+```file:final.txt
+Done. I read the main Brightline article on retail returns logistics, followed its link to the subscriber-only companion piece (accessed with the team subscription code), and saved a combined three-bullet summary as a note titled "Brightline: Retail Returns Logistics — Combined Summary":
+
+- Apparel return rates reached 24%.
+- Consolidated return hubs cut handling costs by a fifth (~20%).
+- Reselling returned items within 10 days preserved most of the margin.
+```

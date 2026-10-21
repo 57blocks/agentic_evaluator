@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-06-13",
+  "action_note": "The MAC returned the claim as unprocessable (CARC 16, group CO) because value code 80 (covered days) was missing, so no benefits were calculated. Correct the claim by adding value code 80 with the covered day count and resubmit as a corrected/adjusted claim; timely filing allows one year from the end of the statement period (2025-06-13)."
+}

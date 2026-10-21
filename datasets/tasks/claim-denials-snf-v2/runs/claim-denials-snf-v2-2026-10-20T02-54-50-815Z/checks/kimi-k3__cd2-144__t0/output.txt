@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never left the benefit period: only 29 days elapsed between the prior SNF discharge (2025-01-11) and the hospital readmission (2025-02-10), short of the 60-day break needed to start a new spell of illness, so the 90 SNF days already used left only 10 covered days (2025-02-15 through 2025-02-24); days after that exceed the 100-day SNF maximum and were correctly denied with CARC 119 as patient responsibility. Bill the beneficiary for the non-covered days (first confirming the required notice of Medicare non-coverage was issued), since no corrected claim or appeal can overcome the statutory benefit maximum and no other payer is on file."
+}
+```

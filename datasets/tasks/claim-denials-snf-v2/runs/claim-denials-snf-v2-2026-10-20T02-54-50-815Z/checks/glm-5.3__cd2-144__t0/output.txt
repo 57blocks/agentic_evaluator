@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay (2024-10-14 to 2025-01-11) used all 90 days of the benefit period, and the beneficiary was out of care only 29 days (2025-01-12 to 2025-02-09) before the 2025-02-10 hospital admission, so no new benefit period began; the 2025-02-15 SNF admission falls in the same exhausted benefit period (a new one would not start until 60 consecutive days out of care, i.e., 2025-03-13, after this stay ended). The PR-119 adjustment makes the non-covered days patient responsibility, and with no Medigap or Medicaid on file the facility should bill the resident for the denied days; no appeal or corrected claim will change the outcome."
+}

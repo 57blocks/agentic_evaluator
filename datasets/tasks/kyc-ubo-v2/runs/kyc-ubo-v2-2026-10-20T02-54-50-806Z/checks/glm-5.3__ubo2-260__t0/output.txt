@@ -1,0 +1,22 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Fabian Becker",
+      "basis": "Holds 13,000 EUR of the 50,000 EUR share capital = 26% (>25%) per the Gesellschafterliste; qualifies under § 3 Abs. 2 Nr. 1 GwG via Kapitalanteile, even though his share (No. 1) is non-voting."
+    },
+    {
+      "name": "Konrad Buchholz",
+      "basis": "Holds 12,000 of the 24,000 votes = 50% (>25%), because the shares No. 1 (Becker) and No. 4 (Ziegler) carry no voting rights; qualifies under § 3 Abs. 2 Nr. 1 GwG via Stimmrechte (his capital share alone is only 24%)."
+    },
+    {
+      "name": "Theresa Sommer",
+      "basis": "Aggregating her two holdings (7,200 + 4,800 = 12,000 EUR) she holds only 24% of capital, but 12,000 of the 24,000 votes = 50% of voting rights (>25%); qualifies under § 3 Abs. 2 Nr. 1 GwG via Stimmrechte."
+    },
+    {
+      "name": "Henrik Ziegler",
+      "basis": "Holds 13,000 EUR of the 50,000 EUR share capital = 26% (>25%) per the Gesellschafterliste; qualifies under § 3 Abs. 2 Nr. 1 GwG via Kapitalanteile, even though his share (No. 4) is non-voting."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 2 Nr. 1 GwG as applied in Transparenzregister/BVA practice (Kapitalanteile taken from the Gesellschafterliste, Stimmrechte from the Satzung), every natural person holding more than 25% of the capital shares or the voting rights is a beneficial owner. Fabian Becker and Henrik Ziegler each hold 26% of the 50,000 EUR share capital and qualify via Kapitalanteile, even though their shares (No. 1 and No. 4) carry no votes. Konrad Buchholz (24% capital) and Theresa Sommer (24% after aggregating her two holdings of 7,200 and 4,800 EUR) fail the capital test, but because shares No. 1 and No. 4 are non-voting only 24,000 votes exist in total, so each of them holds 12,000 votes, i.e. 50% of the voting rights, and qualifies via Stimmrechte. All holdings are direct, and since no voting pacts, pools, trust arrangements, veto rights or usufruct exist, § 3 Abs. 2 Nr. 2 adds no one. Because natural persons qualify under Nr. 1, the fiction under Nr. 3 does not apply: Geschäftsführerin Mara Brenner is neither a beneficial owner nor a fictitious beneficial owner, so the fictitious list remains empty."
+}

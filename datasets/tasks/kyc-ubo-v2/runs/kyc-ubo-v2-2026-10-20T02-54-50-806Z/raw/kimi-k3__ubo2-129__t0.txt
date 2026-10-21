@@ -1,0 +1,11 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Bastian Becker", "basis": "Holds two shareholdings that must be aggregated (EUR 6,800 + EUR 10,200 = EUR 17,000 of EUR 50,000 = 34%), exceeding the 25% threshold of § 3 Abs. 1 GwG." },
+    { "name": "Theo Krüger", "basis": "Holds EUR 16,500 of EUR 50,000 = 33% of the shares/voting rights, exceeding the 25% threshold of § 3 Abs. 1 GwG." },
+    { "name": "Konrad Kuhn", "basis": "Holds EUR 16,500 of EUR 50,000 = 33% of the shares/voting rights, exceeding the 25% threshold of § 3 Abs. 1 GwG." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "With a Stammkapital of EUR 50,000 and no deviating voting-rights provisions, each euro of Nennbetrag carries one vote. Bastian Becker's two listed stakes are aggregated to 34%, and Theo Krüger and Konrad Kuhn each hold 33%; all three natural persons therefore directly hold more than 25% of the capital and voting rights and qualify as wirtschaftlich Berechtigte under § 3 Abs. 1 GwG. No Stimmbindungs-, Pool-, Treuhand-, Veto- or Nießbrauch arrangements exist that would attribute or shift control. Since natural persons qualify, the fictitious-beneficial-owner fallback (§ 3 Abs. 3 GwG, i.e. the Geschäftsführer) does not apply; Vera Brandt is merely managing director without any shareholding and is therefore not a beneficial owner."
+}
+```

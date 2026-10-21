@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 39 days at home (2025-02-04 to 2025-03-14) is under 60, so this admission falls in the same benefit period, which leaves only 24 of 100 SNF days after the 76 already used; Medicare correctly paid 2025-03-18 through 2025-04-10 and assigned 2025-04-11 to 2025-04-15 as patient responsibility (CARC 119, benefit maximum reached). There is no Medigap or Medicaid on file, so bill the beneficiary for the exhausted days plus any coinsurance, and keep submitting benefits-exhaust claims to Medicare while he remains in a certified bed."
+}

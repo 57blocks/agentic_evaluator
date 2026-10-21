@@ -1,0 +1,9 @@
+{
+  "beneficial_owners": [
+    { "name": "Ines Winter", "basis": "Holds 4.800 EUR + 3.200 EUR = 8.000 EUR (20% of nominal capital), but since the company's own shares (16.000 EUR) carry no voting rights, her effective voting share is 8.000/24.000 = 33,3% > 25% per § 3 Abs. 2 Nr. 1 GwG." },
+    { "name": "Theo Lindqvist", "basis": "Holds 8.000 EUR (20% of capital); voting share on the reduced voting base (24.000 EUR, excluding treasury shares) is 33,3% > 25%." },
+    { "name": "Felix Brenner", "basis": "Holds 8.000 EUR (20% of capital); voting share on the reduced voting base (24.000 EUR) is 33,3% > 25%." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Based purely on nominal capital shares (40.000 EUR total), no shareholder exceeds 25%. However, the company's own shares (eigene Geschäftsanteile, 16.000 EUR) carry no voting rights while held by the GmbH, so the relevant voting base for the 25%-Stimmrechte test under § 3 Abs. 2 Nr. 1 GwG is reduced to 24.000 EUR. On this base, each of Ines Winter, Theo Lindqvist and Felix Brenner holds exactly 8.000 EUR, i.e. 33,3% of voting rights, exceeding the 25% threshold. All three therefore qualify as beneficial owners; no fictitious beneficial owner designation is required since natural persons meeting the criterion were identified."
+}

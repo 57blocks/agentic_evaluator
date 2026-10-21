@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Tobias Sommer", "basis": "Holds 55% of the share capital (27.500 of 50.000 EUR), which is more than 25% (§ 3 Abs. 2 S. 1 Nr. 1 GwG). This applies even though his share Nr. 5 carries no voting rights." },
+    { "name": "Kai Wendt", "basis": "Controls 33,33% of the voting rights (7.500 of 22.500 votes), which is more than 25% (§ 3 Abs. 2 S. 1 Nr. 2 GwG)." },
+    { "name": "Jonas Faber", "basis": "Shares Nr. 2 and Nr. 3 together total 7.500 EUR, giving him 33,33% of the voting rights (7.500 of 22.500 votes), which is more than 25% (§ 3 Abs. 2 S. 1 Nr. 2 GwG)." },
+    { "name": "Fabian Vogt", "basis": "Controls 33,33% of the voting rights (7.500 of 22.500 votes), which is more than 25% (§ 3 Abs. 2 S. 1 Nr. 2 GwG)." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 2 GwG, holding more than 25% of the capital and controlling more than 25% of the voting rights are separate grounds; either one is enough. Tobias Sommer holds 55% of the capital, so he qualifies even though § 7 Abs. 3 of the articles removes the voting rights from his share. Without his share, 22.500 votes remain. Kai Wendt, Jonas Faber (two shares of 3.000 and 4.500 EUR combined) and Fabian Vogt each hold 15% of the capital, which is below the threshold. However, each has 7.500 votes, or 33,33% of the voting rights, so all three qualify through voting control. No voting agreements, trusts, vetoes or usufruct rights exist. Because natural persons qualify, there are no fictitious beneficial owners, and the managing director Ida Falk is not listed."
+}
+```

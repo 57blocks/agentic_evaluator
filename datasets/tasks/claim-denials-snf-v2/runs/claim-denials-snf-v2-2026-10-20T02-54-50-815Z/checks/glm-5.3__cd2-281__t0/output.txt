@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-05",
+  "action_note": "The MAC denied the entire charge as CO-16 (claim lacks information needed for adjudication) because the required occurrence code 50 MDS assessment date was omitted, leaving the HIPPS code unverifiable. Pull the assessment date from the MDS, confirm it supports the billed HIPPS code, and resubmit as a corrected claim (bill type 0271, frequency code 7, referencing ICN 2295470261946) by the timely-filing deadline of 2026-04-05; as a CO-group denial the resident cannot be billed for the balance."
+}

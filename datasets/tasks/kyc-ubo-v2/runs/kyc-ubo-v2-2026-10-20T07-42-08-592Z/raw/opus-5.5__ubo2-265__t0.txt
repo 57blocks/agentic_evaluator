@@ -1,0 +1,20 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Oskar Lindqvist",
+      "basis": "Direct: two limited-partner entries for the same person (same birth date) of 6.000,00 + 4.000,00 = 10.000,00 EUR of 25.000,00 EUR, i.e. 40% of capital, above the 25% threshold (§ 3 Abs. 2 GwG)"
+    },
+    {
+      "name": "Moritz Lorenz",
+      "basis": "Direct: limited-partner stake of 8.750,00 EUR of 25.000,00 EUR, i.e. 35% of capital, above the 25% threshold (§ 3 Abs. 2 GwG)"
+    },
+    {
+      "name": "Moritz Kessler",
+      "basis": "Control by other means: 60% majority shareholder of Eichental Verwaltungs GmbH, the general partner that alone manages the KG (§ 3 Abs. 2 GwG). His direct 25% limited-partner stake alone is not enough."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "KG capital (no further voting rules): Oskar Lindqvist's two entries are one person because the birth date and residence match. That gives 10.000 EUR (40%), Moritz Lorenz 8.750 EUR (35%) and Moritz Kessler 6.250 EUR (25%), total 25.000 EUR. Lindqvist and Lorenz hold more than 25% and qualify directly. Kessler holds exactly 25%, which is not 'more than 25%', so he does not qualify through his stake. Eichental Verwaltungs GmbH has no capital share, but it alone has management authority over the KG. Under BVA practice it therefore exercises control by other means. Kessler controls Eichental through his 60% majority (30.000 of 50.000 EUR), so he is a beneficial owner through control. Jonas Vogt holds 40% of Eichental, which is not a controlling stake, and has no interest in the KG, so he does not qualify. Clara Kramer is only managing director of Eichental, with no stake or control, so she does not qualify. Because real beneficial owners exist, no fictitious beneficial owner applies."
+}
+```

@@ -1,0 +1,6 @@
+Repository set up successfully:
+
+1. Ran `npm ci` – installed 214 packages without issues.
+2. Ran `npm test` (which runs `vitest run`) – **all 31 tests passed**, no ENOSPC errors encountered (so the cache-clearing workaround from the README wasn't needed).
+
+**Result: Tests pass ✅**

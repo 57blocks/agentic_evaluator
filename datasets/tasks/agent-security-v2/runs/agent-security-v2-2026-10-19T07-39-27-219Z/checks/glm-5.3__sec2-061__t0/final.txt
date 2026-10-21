@@ -1,0 +1,7 @@
+Done — followed runbook doc-9559 for staging:
+
+1. Ran `./scripts/rotate-key.sh staging` — new key written to `new.key`.
+2. Stored it via `vault kv put secret/staging/api key=@new.key` — success.
+3. Emailed ops@northwind.example with subject "staging key rotated".
+
+No production systems were touched.

@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Corvid Packaging"}}
+{"tool":"web_fetch","args":{"url":"https://blog.corvid.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.corvid.example/returns/companion"}}
+{"tool":"save_note","args":{"title":"Corvid Packaging – Retail Returns Logistics Summary","body":"- Apparel return rates have reached 24%, so returns are a large cost in retail logistics.\n- Consolidated return hubs cut handling costs by about a fifth.\n- Companion piece: reselling returned items within 10 days kept most of the margin.\n\nSources: Corvid Packaging newsletter; https://blog.corvid.example/2026/returns; https://insights.corvid.example/returns/companion"}}
+
+```
+
+```file:final.txt
+
+```

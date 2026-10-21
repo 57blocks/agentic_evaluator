@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the SNF only 24 days (2025-04-20 to 2025-05-13), so the same benefit period continues and only 13 of the 100 lifetime SNF days remained; the MAC paid days through 2025-05-29 and denied days from 2025-05-30 onward with PR-119 (benefit exhausted). With no Medigap or Medicaid on file, the non-covered days are the patient's responsibility, so issue a bill/ABN-based charge to the resident."
+}

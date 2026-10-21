@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Ida Arendt",
+      "basis": "Indirectly holds >25% of Brunnfeld Maschinenbau GmbH: she controls Brunnfeld Invest GmbH (60% > 50%, majority control) which holds 15% of the target, and she controls Falkenhorst Invest GmbH (70% > 50%, majority control) which holds 12% of the target. Because she exercises majority control over both intermediate companies, their full stakes (15% + 12% = 27%) are attributed to her in full (no dilution), exceeding the 25% threshold under § 3 Abs. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "No natural person holds more than 25% of Brunnfeld Maschinenbau GmbH directly (highest direct holder is Felix Pohl at 20%). Checking the corporate shareholders: Kestrel Beteiligungs GmbH (30% of target) is split 50/50 between Anika Engel and Lukas Roth, neither of whom has majority control, so only proportional attribution (15% each) applies, below 25%. Brunnfeld Invest GmbH (15% of target) and Falkenhorst Invest GmbH (12% of target) are both majority-controlled by Ida Arendt (60% and 70% respectively), so under the control-based look-through rule their full stakes are attributed to her rather than multiplied proportionally, giving her 15% + 12% = 27%, which exceeds the 25% threshold. Ines Brenner (40% of Brunnfeld Invest, no control) and Paula Winter (30% of Falkenhorst, no control) only reach proportional stakes of 6% and 3.6% respectively, well below 25%. Hence Ida Arendt is the sole natural person beneficial owner; no fictitious beneficial owner is needed."
+}
+```

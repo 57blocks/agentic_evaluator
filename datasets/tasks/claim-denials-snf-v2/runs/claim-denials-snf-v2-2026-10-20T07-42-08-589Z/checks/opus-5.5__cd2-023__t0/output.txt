@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the beneficiary was home only 38 days (2025-02-04 to 2025-03-13), short of the 60 days needed to end the benefit period, so the 74 SNF days already used left 26 days, which were paid 2025-03-19 through 2025-04-13. With no Medigap or Medicaid on file, bill the patient for 2025-04-14 through 2025-04-23 and keep sending benefits-exhaust claims to the MAC to track the benefit period."
+}
+```

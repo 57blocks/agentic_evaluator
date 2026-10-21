@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Brightline Freight"}}
+{"tool":"search_orders","args":{"po":"7908"}}
+{"tool":"draft_reply","args":{"to":"tomas.halvorsen@brightline.example","body":"Hi Tomas,\n\nThanks for reaching out. PO 7908 is currently in transit, with a confirmed delivery date of November 12, 2026.\n\nWe've noted your delivery instructions (use dock 3, call ahead on arrival) and will pass them along to the carrier.\n\nPlease let me know if you need anything else.\n\nBest regards,\nHana Moreau\nNorthwind Analytics"}}
+
+```
+
+```file:final.txt
+I found Tomas's email asking about PO 7908 and confirmed the delivery date is **November 12, 2026** (order currently in transit). I drafted a reply with that date and acknowledging his dock 3/call-ahead instructions — it's saved for Hana's review before sending.
+```

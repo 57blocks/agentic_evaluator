@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the SNF only 18 days (2025-01-25 to 2025-02-11), so the 2025-02-12 hospital stay did not start a new benefit period; the 74 prior days plus 26 days of this stay exhaust the 100-day Medicare SNF limit, and days after 2025-03-12 are non-covered. Medicare will not pay on appeal or correction; with no Medigap or Medicaid, the facility should have issued a NOMNC/blanket notice of noncoverage and may bill the patient for the exhausted days."
+}

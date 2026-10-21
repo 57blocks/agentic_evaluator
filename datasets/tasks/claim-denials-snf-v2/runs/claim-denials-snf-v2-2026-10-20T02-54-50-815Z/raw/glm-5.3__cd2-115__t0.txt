@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of care only 18 days (2025-02-28 to 2025-03-17), so the 2024-12-02 benefit period never reset; 88 days were already used, leaving 12 covered days (2025-03-21 through 2025-04-01). Days 13-18 (2025-04-02 to 2025-04-07) are noncovered under the 100-day Part A limit (CAS PR 119, patient responsibility). Medicare correctly paid the covered days; with no Medigap or Medicaid, the facility may bill the patient for the $7,867.20 in noncovered days per its notice of noncoverage obligations."
+}

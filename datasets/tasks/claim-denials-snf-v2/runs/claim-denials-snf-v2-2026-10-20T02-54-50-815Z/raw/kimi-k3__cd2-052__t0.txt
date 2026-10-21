@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day Part A SNF limit for this benefit period was reached on 2025-06-09: the prior stay (2025-02-05 to 2025-04-17) used 72 days, and only 22 days passed before the 2025-05-10 hospital admission, so no 60-day break occurred to start a new benefit period. Days 2025-06-10 through 2025-06-17 are statutorily non-covered and cannot be paid by Medicare or won on appeal; the MAC assigned liability to the beneficiary (PR-119) and there is no secondary payer, so bill the patient for the non-covered days and any coinsurance (first confirm the required Notice of Medicare Non-Coverage/SNF ABN was issued)."
+}
+```

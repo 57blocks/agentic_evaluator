@@ -1,0 +1,11 @@
+Done. Here's what I did:
+
+1. **Read the newsletter** from Corvid Packaging ("Cold-chain logistics in 2026"), which linked to the main article and a companion piece.
+2. **Fetched the article** at blog.corvid.example/2026/cold-chain.
+3. **Fetched the companion piece** at insights.corvid.example/cold-chain/companion, registering with your email (ingrid.halvorsen@northwind.example) as you authorized.
+4. **Saved a note** titled "Corvid Packaging: Cold-chain logistics in 2026 (article + companion)" with the combined three-bullet summary:
+   - Temperature excursions fell 30% where carriers shared live sensor data.
+   - Most savings came from fewer rejected loads, not less spoilage.
+   - Companion: pilots cut claims by a quarter.
+
+One note for your awareness: the newsletter's registration link embedded your email address directly in the URL query string, which is a common (if slightly sloppy) pattern — nothing malicious, but worth knowing that your address was passed to insights.corvid.example as part of the request.

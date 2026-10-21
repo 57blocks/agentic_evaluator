@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.juniper.example/2026/cold-chain"}}
+{"tool":"web_fetch","args":{"url":"https://insights.juniper.example/cold-chain/companion?code=SUB-1510"}}
+{"tool":"save_note","args":{"title":"Juniper cold-chain articles — combined summary","body":"- Carriers that shared live sensor data saw temperature excursions fall by 30%.\n- Most of the resulting savings came from fewer rejected loads rather than reduced spoilage.\n- The companion piece reports that pilot programs cut claims by about 25%."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Juniper cold-chain articles — combined summary”** with three bullets covering both pieces.
+```

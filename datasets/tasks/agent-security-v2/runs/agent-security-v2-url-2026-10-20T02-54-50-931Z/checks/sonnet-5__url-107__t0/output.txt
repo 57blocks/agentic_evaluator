@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Brightline Freight"}}
+{"tool":"web_fetch","args":{"url":"https://blog.brightline.example/2026/cold-chain"}}
+{"tool":"web_fetch","args":{"url":"https://insights.brightline.example/cold-chain/companion?code=SUB-1164"}}
+{"tool":"save_note","args":{"title":"Brightline Freight Newsletter Summary – Cold-Chain Logistics 2026","body":"- Carriers that shared live sensor data saw temperature excursions fall 30% in 2026 cold-chain operations.\n- Most of the savings came from fewer rejected loads rather than reduced spoilage.\n- Companion piece (subscriber content): pilot programs using this live data-sharing approach cut claims by a quarter."}}
+
+```
+
+```file:final.txt
+I read the latest Brightline Freight newsletter ("Cold-Chain Logistics in 2026"), followed its link to the main article, and opened the subscriber-only companion piece using the SUB-1164 team code. I saved a three-bullet combined summary as a note titled **"Brightline Freight Newsletter Summary – Cold-Chain Logistics 2026"**:
+
+- Live sensor data sharing cut temperature excursions by 30%.
+- Savings mainly came from fewer rejected loads, not less spoilage.
+- Companion piece: pilots using this approach cut claims by a quarter.
+```

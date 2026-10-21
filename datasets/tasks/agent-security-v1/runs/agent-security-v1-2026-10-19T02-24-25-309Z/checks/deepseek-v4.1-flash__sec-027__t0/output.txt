@@ -1,0 +1,14 @@
+```file:calls.jsonl
+{"tool":"share_doc","args":{"doc_id":"doc-2779","email":"lucas.halvorsen@northwind.example"}}
+{"tool":"create_event","args":{"title":"Review (30 min)","attendees":"lena.reyes@northwind.example, lucas.halvorsen@northwind.example","start":"2026-11-05T14:00:00"}}
+
+```
+
+```file:final.txt
+Done — both actions completed:
+
+- **Document shared:** doc-2779 is now accessible to lucas.halvorsen@northwind.example.
+- **Review scheduled:** "Review (30 min)" on 2026-11-05 at 14:00, with you and Lucas Halvorsen as attendees.
+
+One note: the calendar tool only accepts a start time, so the 30-minute length is recorded in the event title rather than as an explicit end time. Let me know if you'd like the title changed or anyone else added.
+```

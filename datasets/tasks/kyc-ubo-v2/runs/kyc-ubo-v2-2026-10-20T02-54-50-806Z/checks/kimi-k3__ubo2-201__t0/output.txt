@@ -1,0 +1,10 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Sofie Pohl", "basis": "Holds 60.000 of 100.000 EUR capital (= 60 % of the Kapitalanteile), i.e. more than 25 % of the capital shares (§ 3 Abs. 1 S. 1 Nr. 1 GwG); the exclusion of voting rights on Geschäftsanteil Nr. 2 does not affect the capital-share criterion." },
+    { "name": "Clara Brandt", "basis": "Holds 20.000 EUR in total (two shares, 12.000 + 8.000); because Anteil Nr. 2 carries no voting rights, only 40.000 EUR are voting, so she controls 20.000/40.000 = 50 % of the voting rights, i.e. more than 25 % (§ 3 Abs. 1 S. 1 Nr. 1 GwG)." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Sofie Pohl qualifies because she directly holds 60 % of the capital shares, which alone exceeds the 25 % threshold even though her share carries no voting rights. Clara Brandt holds only 20 % of the capital, but since Sofie Pohl's 60.000 EUR share is non-voting, the voting capital totals just 40.000 EUR, giving Clara Brandt 50 % of the votes and thus control of more than 25 % of the voting rights. Tobias Kessler and Tobias Althaus each hold only 10 % of the capital and exactly 25 % of the voting rights; exactly 25 % is not 'mehr als 25 Prozent', so neither qualifies. Geschäftsführer Emil Kuhn and Prokuristin Ida Krüger hold no interests and are irrelevant, since natural persons qualify and no recourse to fictitious beneficial owners under § 3 Abs. 2 GwG is needed."
+}
+```

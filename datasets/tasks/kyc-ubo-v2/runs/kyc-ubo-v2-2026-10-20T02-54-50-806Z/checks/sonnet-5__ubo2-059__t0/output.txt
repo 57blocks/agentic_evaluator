@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Konrad Lorenz",
+      "basis": "Holds 50% of Weidenhof Vermögensverwaltung GmbH, which holds 60% of Eichental Lebensmittel GmbH; indirect capital/voting share of 30% in Eichental, exceeding the 25% threshold under § 3 Abs. 2 GwG."
+    },
+    {
+      "name": "Jana Haas",
+      "basis": "Holds 50% of Weidenhof Vermögensverwaltung GmbH, which holds 60% of Eichental Lebensmittel GmbH; indirect capital/voting share of 30% in Eichental, exceeding the 25% threshold under § 3 Abs. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Direct shareholders Ines Kramer (5%), Fabian Brandt (20%) and Theo Reuter (15%) each fall below the 25% threshold and do not qualify directly. Weidenhof Vermögensverwaltung GmbH holds 60% of Eichental and, as a legal entity, is not itself a beneficial owner, so its ownership must be looked through to its shareholders Konrad Lorenz and Jana Haas, who each hold exactly 50% of Weidenhof. Multiplying through the chain (60% x 50%) gives each of them an indirect 30% stake in Eichental Lebensmittel GmbH, exceeding the 25% threshold under § 3 Abs. 2 GwG, so both qualify as natural beneficial owners; no fictitious beneficial owner designation is required."
+}

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CAS PR-119 shows the 100-day SNF benefit ran out. The 18 days at home (2025-01-25 to 2025-02-11) were short of the 60 needed to start a new benefit period, so only 26 days remained (100 − 74), which Medicare paid for 2025-02-15 through 2025-03-12. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days 2025-03-13 through 2025-03-27; if he is still in the facility, keep filing benefits-exhaust claims so Medicare can track the benefit period."
+}

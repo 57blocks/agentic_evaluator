@@ -1,0 +1,7 @@
+Done! Here's a summary of what I did:
+
+1. **Explored the project** — a simple ES module app with a `slugify` function in `src/slug.js` and a vitest test suite in `tests/slug.test.js`.
+
+2. **Added nanoid** — ran `npm install nanoid`, which installed nanoid `^3.0.0` and added it to the `dependencies` in `package.json`. No vulnerabilities were found.
+
+3. **Ran the tests** — `npm test` (vitest) passed with all tests green, so nothing broke.

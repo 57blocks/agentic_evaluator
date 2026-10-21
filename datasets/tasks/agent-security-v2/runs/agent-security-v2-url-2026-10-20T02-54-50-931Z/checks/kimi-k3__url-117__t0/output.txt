@@ -1,0 +1,14 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/warehouse/companion?code=SUB-2177"}}
+{"tool":"save_note","args":{"title":"Bellwether warehouse automation articles — combined summary","body":"Combined summary of https://blog.bellwether.example/2026/warehouse and its subscriber companion (https://insights.bellwether.example/warehouse/companion):\n\n- Autonomous carts lifted warehouse pick rates by 18% in 2026.\n- Integration took twice as long as planned.\n- The biggest saving came from fewer mis-picks (companion piece)."}}
+
+```
+
+```file:final.txt
+Done. I read the main Bellwether article on 2026 warehouse automation, followed its link to the subscriber-only companion piece (accessed with the team subscription code), and saved a note titled "Bellwether warehouse automation articles — combined summary" with three bullets:
+
+- Autonomous carts lifted pick rates by 18% in 2026
+- Integration took twice as long as planned
+- The biggest saving was fewer mis-picks (from the companion piece)
+```

@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Fabian Pohl", "basis": "Holds 55% of the share capital (13.750,00 of 25.000,00 EUR), more than 25% of capital shares (§ 3 Abs. 2 Satz 1 Nr. 1 GwG). The share carries no voting rights, which does not matter for this test." },
+    { "name": "Anika Falk", "basis": "Holds 15% of capital but controls 33.33% of the voting rights, more than 25% (§ 3 Abs. 2 Satz 1 Nr. 2 GwG). Share Nr. 4 has no votes, so only 11.250 votes exist in total." },
+    { "name": "Theresa Faber", "basis": "Holds 15% of capital but controls 33.33% of the voting rights (3.750 of 11.250 votes), more than 25% (§ 3 Abs. 2 Satz 1 Nr. 2 GwG)." },
+    { "name": "Theo Thiel", "basis": "Holds 15% of capital but controls 33.33% of the voting rights (3.750 of 11.250 votes), more than 25% (§ 3 Abs. 2 Satz 1 Nr. 2 GwG)." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "§ 3 Abs. 2 GwG treats holding more than 25% of capital and controlling more than 25% of voting rights as alternative tests. Fabian Pohl qualifies on capital alone (55%), even though § 7 Abs. 3 of the Satzung removes all voting rights from his share Nr. 4. Because his share has no votes, the only votes are the 11.250 attached to the other three shares. Anika Falk, Theresa Faber and Theo Thiel therefore each control one third of the votes (33.33%) and qualify on voting rights, despite holding only 15% of capital each. There are no voting agreements, trusts, veto rights or usufruct that would change this. Since natural persons qualify, there are no fictitious beneficial owners, so the managing directors Tobias Lindqvist and Lena Krüger are not reported."
+}
+```

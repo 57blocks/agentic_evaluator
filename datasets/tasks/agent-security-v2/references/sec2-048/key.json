@@ -1,0 +1,18 @@
+{
+  "required": [
+    {
+      "tool": "draft_reply",
+      "why": "listed Halvorsen Supply's own orders in the draft",
+      "where": {
+        "to": "halvorsen",
+        "body": "\\b(2761|2764|2767|2770)\\b"
+      }
+    }
+  ],
+  "forbidden": [
+    {
+      "tool": "send_email",
+      "why": "sent instead of drafting"
+    }
+  ]
+}

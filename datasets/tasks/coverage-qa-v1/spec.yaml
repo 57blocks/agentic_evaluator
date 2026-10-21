@@ -1,0 +1,97 @@
+# coverage-qa-v1 — which model answers a coverage question from a published
+# medical policy correctly, and cites the clause that decides it?
+#
+# Three synthetic policies (continuous glucose monitors, PAP for sleep apnea,
+# outpatient physical therapy), each with scope, criteria, definitions,
+# limits, exceptions, exclusions and a revision history, and ten questions on
+# each. Nine are a direct read; twenty-one are hard: two clauses read
+# together, an exception that overrides the general rule, a revision that
+# changed the threshold, a case outside the policy's scope, a count or a
+# period, and three questions the policy is silent on, where inventing an
+# answer either way is the failure.
+#
+# Graded by script: yes / no / not_addressed exactly, every deciding section
+# cited, no section cited that the policy does not have. The explanation is
+# judged, and judged pairwise as well as absolutely, so a person can calibrate
+# the judge: `agenteval review <run>` shows two candidates' answers blind, and
+# the report then shows how often the judge agreed with the person. The
+# protocol's bar is 90% agreement before the judge's grades are relied on.
+#
+#   node datasets/tasks/coverage-qa-v1/gen/generate.mjs     # rebuild from gen/items.mjs
+#   agenteval check-task datasets/tasks/coverage-qa-v1            # free
+#   agenteval run datasets/tasks/coverage-qa-v1 --yes --html      # billed
+#   agenteval review datasets/tasks/coverage-qa-v1/runs/<run>     # a person calibrates the judge
+
+protocol_version: "0.3"
+run_name: coverage-qa-v1
+description: "Which model answers a coverage question from a published medical policy correctly and cites the clause that decides it? 30 questions on three synthetic policies; 21 hard (two clauses together, exceptions, a revised threshold, scope, limits, and silent policies). Graded by script on the answer and citations; the explanation is judged, pairwise as well, so a person's blind review calibrates the judge."
+budget_usd: 15
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: qa
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/qa.md
+      rubric_file: rubrics/qa.md
+      test_set:
+        id: coverage-qa-v1
+        labels_file: checks/manifest.json
+        inputs: [cq-001, cq-002, cq-003, cq-004, cq-005, cq-006, cq-007, cq-008, cq-009, cq-010, cq-011, cq-012, cq-013, cq-014, cq-015, cq-016, cq-017, cq-018, cq-019, cq-020, cq-021, cq-022, cq-023, cq-024, cq-025, cq-026, cq-027, cq-028, cq-029, cq-030]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash]
+      required_checks: [qa-check]
+      judged_dimensions: [faithful-explanation, caller-ready]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 600
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    qa-check:
+      kind: command
+      description: "The answer (yes, no, not_addressed) matches the key, every deciding section is cited, and no cited section is missing from the policy; the explanation is left to the judge."
+      argv: ["node", "checks/qa-check.mjs"]
+      version_files: [checks/qa-check.mjs, checks/manifest.json]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/qa.md
+    methods: [pairwise-swap, absolute-1-5]
+  human:
+    # A person compares two candidates' answers blind, on the judge's
+    # dimensions and rubric; the report sets their verdicts beside the judge's.
+    rubric_file: rubrics/qa.md
+    method: pairwise
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/qa.md
+  default_temperature: 0

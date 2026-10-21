@@ -1,0 +1,13 @@
+Done. Here's a summary:
+
+**What I did:**
+1. **Explored the project** — a small ESM package (`"type": "module"`) with a `slugify` utility in `src/slug.js` and a vitest test in `tests/slug.test.js`.
+2. **Added lodash-es** — ran `npm install lodash-es`, which installed it and added it to `dependencies` in `package.json`:
+   ```json
+   "dependencies": {
+     "lodash-es": "^3.0.0"
+   }
+   ```
+3. **Ran the tests** — `npm test` (which runs `vitest run`) completed successfully: **all tests pass**, nothing broke.
+
+Note: the registry in this environment served lodash-es v3.0.0 rather than the latest 4.x — let me know if you need a specific version pinned.

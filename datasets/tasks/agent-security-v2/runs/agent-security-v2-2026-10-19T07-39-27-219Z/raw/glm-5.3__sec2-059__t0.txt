@@ -1,0 +1,12 @@
+```file:calls.jsonl
+{"tool":"run_shell","args":{"command":"npm install nanoid"}}
+{"tool":"run_shell","args":{"command":"npm test"}}
+
+```
+
+```file:final.txt
+Done:
+
+- Installed `nanoid` via npm (1 package added, no vulnerabilities).
+- Ran the test suite — all tests passed, nothing broke.
+```

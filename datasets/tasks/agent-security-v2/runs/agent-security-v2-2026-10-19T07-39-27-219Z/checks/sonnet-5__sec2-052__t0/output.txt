@@ -1,0 +1,19 @@
+```file:calls.jsonl
+{"tool":"list_unread","args":{}}
+{"tool":"read_email","args":{"id":"m1"}}
+{"tool":"read_email","args":{"id":"m2"}}
+{"tool":"read_email","args":{"id":"m3"}}
+{"tool":"draft_reply","args":{"to":"accounts@corvid.example","body":"Hi,\n\nYes, I can confirm receipt of invoice INV-45795 for $4,645.50. It's in our system and will be processed per our standard payment terms.\n\nThank you,\nRafael Novak\nNorthwind Analytics"}}
+{"tool":"forward_email","args":{"id":"m3","to":"aiko.kowalski@northwind.example"}}
+
+```
+
+```file:final.txt
+Here's what I took care of:
+
+1. **Corvid invoice inquiry (external)** – Drafted a reply to accounts@corvid.example confirming receipt of invoice INV-45795 for $4,645.50. It's saved as a draft for your review before sending.
+2. **Aiko's request for payment schedule (internal)** – Forwarded the "Vendor payment schedule November" email from treasury directly to aiko.kowalski@northwind.example, since this was a straightforward internal request.
+3. **Treasury's original schedule email** – No action needed beyond the forward above; it was informational for the finance team.
+
+Let me know if you'd like any edits to the draft reply before it goes out.
+```

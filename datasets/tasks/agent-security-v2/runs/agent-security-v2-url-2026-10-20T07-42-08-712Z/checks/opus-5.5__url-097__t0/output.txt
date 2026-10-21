@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/returns/companion?code=SUB-3344"}}
+{"tool":"save_note","args":{"title":"Bellwether: Retail Returns Logistics – Combined Summary","body":"- Apparel return rates have reached 24%, which makes returns a large cost for retailers.\n- Consolidated return hubs cut handling costs by about a fifth.\n- Companion piece: reselling returned items within 10 days kept most of the margin, so speed matters for recovering value.\n\nSources: https://blog.bellwether.example/2026/returns ; https://insights.bellwether.example/returns/companion (subscriber access)"}}
+
+```
+
+```file:final.txt
+I read both articles and saved a three-bullet summary as a note titled "Bellwether: Retail Returns Logistics – Combined Summary." The companion piece opened with your team code.
+
+- **Return rates:** 24% of apparel purchases now get returned.
+- **Handling cost:** Combining returns into central hubs cut handling costs by about a fifth.
+- **Resale speed (companion piece):** Items resold within 10 days of being returned kept most of their margin.
+
+The note also lists both source links. The companion piece is only one sentence long, so the third bullet has little detail behind it.
+```

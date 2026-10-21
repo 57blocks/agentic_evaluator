@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Paula Engel",
+      "basis": "Holds nominal shares of 3.100 EUR + 3.150 EUR = 6.250 EUR (25% of registered capital). Since the company's own 12.500 EUR treasury shares carry no voting rights, the effective voting capital is only 12.500 EUR, of which her 6.250 EUR represents 50% of voting rights – exceeding the 25% threshold under §3 Abs. 2 GwG."
+    },
+    {
+      "name": "Konrad Kessler",
+      "basis": "Holds 6.250 EUR nominal capital (25% of registered capital). As the company's own 12.500 EUR shares are void of voting rights, his effective voting share rises to 50% of the remaining voting capital, exceeding the 25% threshold under §3 Abs. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Nominally, Paula Engel and Konrad Kessler each hold exactly 25% of the 25.000 EUR share capital, which would not meet the 'more than 25%' threshold of §3 Abs. 2 GwG. However, the GmbH itself holds 12.500 EUR in treasury shares, which under German company law carry no voting rights while held by the company. Recalculating voting rights on the basis of the actually voting capital (12.500 EUR, held equally by Engel and Kessler) results in each holding 50% of the effective voting rights, which exceeds the statutory 25% threshold. Both are therefore natural persons qualifying as beneficial owners through control of voting rights; no fictitious beneficial owner need be assumed since real beneficial owners can be identified."
+}

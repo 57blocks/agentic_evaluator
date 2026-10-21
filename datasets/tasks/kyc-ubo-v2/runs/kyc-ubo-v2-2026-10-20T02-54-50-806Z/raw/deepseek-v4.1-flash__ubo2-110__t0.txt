@@ -1,0 +1,22 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Anna Kramer",
+      "basis": "Holds 50% of voting rights (12,000 of 24,000 voting EUR); her 24% capital share alone is below 25%."
+    },
+    {
+      "name": "Ida Hartmann",
+      "basis": "Holds 26% of share capital (13,000 of 50,000 EUR), exceeding the 25% threshold, even though her share has no voting rights."
+    },
+    {
+      "name": "Anna Seidel",
+      "basis": "Holds 26% of share capital (13,000 of 50,000 EUR), exceeding the 25% threshold, even though her share has no voting rights."
+    },
+    {
+      "name": "Tobias Kessler",
+      "basis": "Holds 50% of voting rights (12,000 of 24,000 voting EUR); his 24% capital share alone is below 25%."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Anna Kramer and Tobias Kessler each control 50% of the voting rights because shares no. 3 and no. 4 carry no voting rights. Ida Hartmann and Anna Seidel each hold 26% of the share capital, exceeding the 25% threshold. Therefore all four qualify as beneficial owners, and no fictitious beneficial owners are needed."
+}

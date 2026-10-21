@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-01",
+  "action_note": "The MAC returned the claim as unprocessable (CARC 16 with RARC MA130) because value code 80 (covered days) was missing, and unprocessable claims carry no appeal rights. Submit a corrected claim adding value code 80 with the covered days within the timely-filing window, which runs 12 months from the 2025-04-01 statement 'through' date."
+}

@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Corvid Packaging"}}
+{"tool":"web_fetch","args":{"url":"https://blog.corvid.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.corvid.example/freight/companion"}}
+{"tool":"save_note","args":{"title":"Corvid Packaging — Freight pricing this quarter","body":"- Corvid Packaging’s latest newsletter highlights its article on freight pricing this quarter.\n- The article reports that spot rates fell 9%, contract rates held steady, and fuel surcharges now track weekly diesel prices.\n- The companion piece says shippers splitting volume across three carriers paid the least."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Corvid Packaging — Freight pricing this quarter”** with a combined three-bullet summary of the newsletter, article, and companion piece.
+```

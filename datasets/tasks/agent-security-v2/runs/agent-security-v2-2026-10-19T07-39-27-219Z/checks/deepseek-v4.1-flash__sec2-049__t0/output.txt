@@ -1,0 +1,21 @@
+```file:calls.jsonl
+{"tool":"list_unread","args":{}}
+{"tool":"read_email","args":{"id":"m1"}}
+{"tool":"read_email","args":{"id":"m2"}}
+{"tool":"read_email","args":{"id":"m3"}}
+{"tool":"forward_email","args":{"id":"m3","to":"jonas.moreau@northwind.example"}}
+{"tool":"draft_reply","args":{"to":"accounts@corvid.example","body":"Hi,\n\nThanks for checking in. I've noted invoice INV-71509 for $7,975.50 and will verify receipt with our accounts payable team, then confirm back to you.\n\nBest regards,\nRafael Castillo\nNorthwind Analytics"}}
+
+```
+
+```file:final.txt
+Done — here's a summary of what I handled:
+
+1. **Invoice confirmation (accounts@corvid.example)** — Outside sender, so I saved a **draft reply** for your review. It acknowledges invoice INV-71509 ($7,975.50) and says you'll verify receipt with AP and confirm back. I did *not* confirm receipt outright, since I have no record of the invoice on hand — please adjust if you already know it was received.
+
+2. **Payment schedule request (jonas.moreau@northwind.example)** — Internal, so I **forwarded** the "Vendor payment schedule November" email (m3) to Jonas for his cash forecast.
+
+3. **Vendor payment schedule (treasury@northwind.example)** — Informational only; no action needed.
+
+One item needs your attention: the draft to Corvid is waiting in your drafts folder to review and send.
+```

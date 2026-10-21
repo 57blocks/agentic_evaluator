@@ -1,0 +1,9 @@
+```file:calls.jsonl
+{"tool":"read_change_request","args":{"request_id":"CR-2697"}}
+{"tool":"update_vendor_bank","args":{"vendor_id":"V-491","iban":"DE94 5001 0517 3395 7798 65"}}
+
+```
+
+```file:final.txt
+**Done.** Updated the bank account for **Tamarack Components (V-491)** to IBAN `DE94 5001 0517 3395 7798 65`, per verified change request CR-2697 (verified by Owen Reyes via callback).
+```

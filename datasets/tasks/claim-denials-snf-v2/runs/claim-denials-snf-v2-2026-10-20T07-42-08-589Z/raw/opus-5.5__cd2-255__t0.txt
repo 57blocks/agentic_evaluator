@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "timely_filing",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2025-09-19",
+  "action_note": "The CARC 29 timely-filing denial looks like a contractor error. Medicare's 12-month limit runs from the claim's Through date (2024-09-19, so the limit is 2025-09-19), not the admission date, and the claim was received 2025-08-27, inside the limit. Timely-filing denials carry no redetermination rights, so do not write it off: resubmit the claim before 2025-09-19 so it is timely on its own, and separately ask the MAC to reopen the original denial as a contractor error."
+}
+```

@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Ironbark Tooling"}}
+{"tool":"web_fetch","args":{"url":"https://blog.ironbark.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.ironbark.example/freight/companion"}}
+{"tool":"save_note","args":{"title":"Ironbark Tooling — Freight pricing this quarter","body":"• Ironbark Tooling’s latest newsletter highlights its “Freight pricing this quarter” analysis and companion guidance.\n• The main article reports that spot freight rates fell 9% while contract rates held steady, with fuel surcharges now tracking weekly diesel prices.\n• The companion piece says shippers splitting volume across three carriers paid the least."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Ironbark Tooling — Freight pricing this quarter”** with a combined three-bullet summary of the newsletter, article, and companion piece.
+```

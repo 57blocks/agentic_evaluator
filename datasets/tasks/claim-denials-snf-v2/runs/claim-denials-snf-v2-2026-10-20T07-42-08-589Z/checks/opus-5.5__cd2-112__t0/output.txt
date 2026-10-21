@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the beneficiary was home only 23 days (2025-03-09 to 2025-03-31), short of the 60 needed to end the benefit period, so the 76 days used earlier left 24 SNF days, which ran out 2025-04-28. Bill the beneficiary for 2025-04-29 through 2025-05-09 (no Medigap or Medicaid on file), and bill any Part B-eligible services from those days, such as therapy, on a 22x claim."
+}

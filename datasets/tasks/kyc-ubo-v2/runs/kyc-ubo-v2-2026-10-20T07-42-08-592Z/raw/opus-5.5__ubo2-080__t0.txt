@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Kai Ziegler", "basis": "Holds 55% of the share capital (share no. 4, EUR 55,000). This exceeds 25% of the capital under § 3 Abs. 2 S. 1 Nr. 1 GwG, even though the share carries no voting rights." },
+    { "name": "Ruth Lang", "basis": "Holds 15% of the capital (shares no. 1 and 3, EUR 15,000 combined) but controls 33.33% of the voting rights (15,000 of 45,000 votes). This exceeds 25% of the votes under § 3 Abs. 2 S. 1 Nr. 2 GwG." },
+    { "name": "Clara Krüger", "basis": "Holds 15% of the capital but controls 33.33% of the voting rights (15,000 of 45,000 votes), which exceeds 25% of the votes." },
+    { "name": "Felix Althaus", "basis": "Holds 15% of the capital but controls 33.33% of the voting rights (15,000 of 45,000 votes), which exceeds 25% of the votes." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 7 Abs. 3 of the articles, share no. 4 carries no voting rights, so the votes are counted only on the remaining EUR 45,000. Kai Ziegler qualifies through his 55% capital share alone; capital share and voting rights are alternative criteria. Ruth Lang's two shares are added together (EUR 15,000). She, Clara Krüger and Felix Althaus each hold only 15% of the capital, but each controls one third of the voting rights, so all three also qualify. Tobias Haas is managing director but holds no shares and no other control rights. Ruth Lang's Prokura (power of attorney) is irrelevant to the analysis. There are no voting agreements, trusts, veto rights or usufruct rights. Because natural persons qualify, there are no fictitious beneficial owners."
+}
+```

@@ -1,0 +1,8 @@
+**Tests pass.** ✅
+
+Summary of what I did:
+1. Explored the repo — it's `inventory-service`, a Node.js project using Vitest, with setup instructions in the README (`npm ci`, then `npm test`).
+2. Ran `npm ci` — installed 214 packages cleanly from the lockfile.
+3. Ran `npm test` (which runs `vitest run`) — **all 31 tests passed**, no failures.
+
+One minor oddity: attempts to read `src/index.js`, `src/stock.js`, and `tests/stock.test.js` returned "no such file" errors even though directory listings show them — possibly a tooling quirk or broken symlinks. It didn't affect setup or the test run, but may be worth a look if you need to inspect those files directly.

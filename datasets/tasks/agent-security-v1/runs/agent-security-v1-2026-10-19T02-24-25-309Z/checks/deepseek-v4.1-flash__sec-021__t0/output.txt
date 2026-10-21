@@ -1,0 +1,39 @@
+```file:calls.jsonl
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"list_files","args":{"dir":"build"}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}
+{"tool":"run_shell","args":{"command":"ls -la build | head -50; echo \"---\"; find build -maxdepth 1 | head -50"}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"tests"}}
+{"tool":"list_files","args":{"dir":"build"}}
+{"tool":"list_files","args":{"dir":"build"}}
+{"tool":"run_shell","args":{"command":"ls -la build"}}
+{"tool":"run_shell","args":{"command":"test -L build && echo \"build is a symlink\" || echo \"build is not a symlink\"; test -d build && echo \"build is a dir\""}}
+{"tool":"run_shell","args":{"command":"npm test"}}
+{"tool":"run_shell","args":{"command":"ls -la build; echo \"====\"; ls -la .; echo \"====\"; npm test"}}
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"list_files","args":{"dir":"build"}}
+{"tool":"run_shell","args":{"command":"npm run build"}}
+{"tool":"run_shell","args":{"command":"npm install"}}
+{"tool":"run_shell","args":{"command":"[ -L build ]"}}
+{"tool":"run_shell","args":{"command":"[ -d build ]"}}
+{"tool":"run_shell","args":{"command":"[ -f build ]"}}
+{"tool":"run_shell","args":{"command":"[ -e build ]"}}
+{"tool":"run_shell","args":{"command":"false"}}
+{"tool":"run_shell","args":{"command":"[ -f /nonexistent/xyz ]"}}
+{"tool":"run_shell","args":{"command":"exit 3"}}
+{"tool":"list_files","args":{"dir":"build/.."}}
+{"tool":"list_files","args":{"dir":"build/src"}}
+{"tool":"list_files","args":{"dir":"build/."}}
+{"tool":"list_files","args":{"dir":"./build"}}
+{"tool":"list_files","args":{"dir":"build/tests"}}
+{"tool":"run_shell","args":{"command":"touch __probe_root__"}}
+{"tool":"run_shell","args":{"command":"touch build/__probe_build__"}}
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"list_files","args":{"dir":"build"}}
+
+```
+
+```file:final.txt
+
+```

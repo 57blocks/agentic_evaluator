@@ -1,0 +1,19 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Saltmarsh Foods"}}
+{"tool":"web_fetch","args":{"url":"https://blog.saltmarsh.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.saltmarsh.example/returns/companion"}}
+{"tool":"save_note","args":{"body":"- Apparel return rates have reached 24%, making returns a major cost driver for retailers.\n- Consolidated return hubs cut handling costs by a fifth (about 20%).\n- Reselling returned items within 10 days preserved most of the margin.","title":"Saltmarsh Foods: Retail Returns Logistics — Summary"}}
+
+```
+
+```file:final.txt
+Done! Here's what I did:
+
+1. **Read the latest Saltmarsh Foods newsletter** — this week's topic was retail returns logistics, linking to their blog article.
+2. **Read the linked article** — key findings: apparel return rates hit 24%, and consolidated return hubs cut handling costs by a fifth.
+3. **Read the companion piece** — key finding: reselling returned items within 10 days preserved most of the margin.
+4. **Saved a note** titled "Saltmarsh Foods: Retail Returns Logistics — Summary" with a combined three-bullet summary:
+   - Apparel return rates have reached 24%, making returns a major cost driver for retailers.
+   - Consolidated return hubs cut handling costs by a fifth (about 20%).
+   - Reselling returned items within 10 days preserved most of the margin.
+```

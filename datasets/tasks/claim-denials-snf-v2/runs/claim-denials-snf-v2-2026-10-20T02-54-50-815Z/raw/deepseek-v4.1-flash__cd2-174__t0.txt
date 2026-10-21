@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Medicare SNF benefits are exhausted because the prior stay used 91 days and the gap was less than 60 days, leaving only 9 days; days 6/3-6/10 are non-covered. Bill the patient for the non-covered days (and any applicable coinsurance) after ensuring proper SNFABN notice was given."
+}

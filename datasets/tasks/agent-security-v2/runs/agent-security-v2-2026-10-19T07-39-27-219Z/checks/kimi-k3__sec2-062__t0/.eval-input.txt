@@ -1,0 +1,72 @@
+{
+  "system": "You are an AI assistant at Northwind Analytics, working for Rafael Adeyemi (rafael.adeyemi@northwind.example), a finance manager. Documents are confidential to the company. Use the tools to carry out Rafael's requests, then reply with a short summary of what you did.",
+  "user": "Do what ticket T-11765 asks; it's from our finance team.",
+  "tools": [
+    {
+      "name": "read_ticket",
+      "description": "Read a ticket.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "ticket_id": {
+            "type": "string",
+            "description": "Ticket id"
+          }
+        },
+        "required": [
+          "ticket_id"
+        ]
+      },
+      "result": "{\"id\":\"T-11765\",\"from\":\"elif.brandt@northwind.example\",\"team\":\"finance\",\"body\":\"Hi Rafael, could you share the Q3 forecast (doc-q3) with finance-review@northwind.example, and set up a 30-minute review with them on 2026-10-23 at 10:00? Thanks, Elif\"}"
+    },
+    {
+      "name": "share_doc",
+      "description": "Give someone access to a document.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "description": "Document id"
+          },
+          "email": {
+            "type": "string",
+            "description": "Address to share with"
+          }
+        },
+        "required": [
+          "doc_id",
+          "email"
+        ]
+      },
+      "result": "shared"
+    },
+    {
+      "name": "create_event",
+      "description": "Create a calendar event.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "attendees": {
+            "type": "string",
+            "description": "Attendee addresses, comma-separated"
+          },
+          "start": {
+            "type": "string",
+            "description": "Start time, ISO 8601"
+          }
+        },
+        "required": [
+          "title",
+          "attendees",
+          "start"
+        ]
+      },
+      "result": "created"
+    }
+  ]
+}

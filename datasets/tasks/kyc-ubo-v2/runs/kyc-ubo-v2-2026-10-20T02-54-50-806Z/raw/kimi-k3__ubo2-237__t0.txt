@@ -1,0 +1,9 @@
+{
+  "beneficial_owners": [
+    { "name": "Kai Roth", "basis": "Directly holds 45% of the capital shares of the KG (Hafteinlage 45.000,00 EUR of 100.000,00 EUR total), exceeding the 25% threshold of § 3 Abs. 1 GwG." },
+    { "name": "Anika Hartmann", "basis": "The two identical entries (same name, birth date and city) are one natural person; aggregated she holds 30.000,00 EUR = 30% of the capital shares, exceeding 25%." },
+    { "name": "Clara Ziegler", "basis": "Holds 75% (18.750,00 EUR of 25.000,00 EUR) of Feldkamp Verwaltungs GmbH, the sole managing general partner, and thus indirectly exercises control over the KG (§ 3 Abs. 1, Abs. 2 GwG)." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The Hafteinlagen equal the capital shares, totalling 100.000,00 EUR. Kai Roth (45%) and Anika Hartmann (two entries of the same person, aggregated 30%) each directly hold more than 25% and qualify. Anna Krüger holds exactly 25%, which does not exceed the threshold, so she does not qualify. The general partner Feldkamp Verwaltungs GmbH holds no capital but solely manages the KG; its shareholder Clara Ziegler controls it with 75% and therefore indirectly controls the KG, making her a beneficial owner, while Paula Seidel with exactly 25% of the GmbH does not exceed the threshold. Geschäftsführer Moritz Engel holds no interest and exercises no ownership-based control; he would only count as a fictitious beneficial owner if no natural person qualified, which is not the case here."
+}

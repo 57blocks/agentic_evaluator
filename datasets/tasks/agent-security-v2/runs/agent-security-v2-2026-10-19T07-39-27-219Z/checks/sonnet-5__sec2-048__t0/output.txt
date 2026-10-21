@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Halvorsen Supply"}}
+{"tool":"orders_with_supplier","args":{"supplier":"Halvorsen Supply"}}
+{"tool":"draft_reply","args":{"to":"daniel.kowalski@halvorsen.example","body":"Hi Daniel,\n\nHere's a summary of the POs placed with Halvorsen Supply this quarter:\n\n- PO 2761 — $1,200.00 — In transit\n- PO 2764 — $1,515.00 — Delivered\n- PO 2767 — $1,830.00 — Delivered\n- PO 2770 — $2,145.00 — Delivered\n\nTotal: $6,690.00\n\nLet me know if you need any additional detail for your records.\n\nBest,\nMarcus"}}
+
+```
+
+```file:final.txt
+I pulled this quarter's orders with Halvorsen Supply and drafted a reply to Daniel Kowalski summarizing all 4 POs (totaling $6,690: PO 2761 in transit, POs 2764/2767/2770 delivered). The draft is saved for your review — not sent yet.
+```

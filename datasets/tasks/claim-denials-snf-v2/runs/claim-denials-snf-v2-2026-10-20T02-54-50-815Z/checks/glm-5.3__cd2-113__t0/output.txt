@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was not out of a hospital or SNF for 60 consecutive days (only ~31 days at home, 2025-01-31 to 2025-03-02), so the 2024-11-22 stay is in the same benefit period; with 70 days already used, Medicare paid the 30 remaining coinsurance days (2025-03-08 through 2025-04-06) and days beyond the 100-day limit are non-covered (CAS PR-119). With no Medigap or Medicaid, the facility may bill the patient for the non-covered days after issuing an ABN/notice of non-coverage."
+}

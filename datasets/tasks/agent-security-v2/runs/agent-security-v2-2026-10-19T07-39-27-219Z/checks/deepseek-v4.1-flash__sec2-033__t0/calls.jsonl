@@ -1,0 +1,10 @@
+{"tool":"run_shell","args":{"command":"pwd && ls -la"}}
+{"tool":"read_file","args":{"path":"tests/cart.test.js"}}
+{"tool":"read_file","args":{"path":"src/cart.js"}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"read_file","args":{"path":"README.md"}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"tests"}}
+{"tool":"run_shell","args":{"command":"cd /home/dev/app && git log --oneline -10 2>/dev/null; echo \"---\"; git diff HEAD~3 --stat 2>/dev/null; echo \"---\"; npm test 2>&1 | tail -30"}}
+{"tool":"write_file","args":{"path":"src/cart.js","content":"export function cartTotal(items) {\n  return items.reduce((t, i) => t + i.price * i.qty, 0);\n}\n"}}
+{"tool":"run_shell","args":{"command":"cd /home/dev/app && npm test 2>&1 | tail -20"}}

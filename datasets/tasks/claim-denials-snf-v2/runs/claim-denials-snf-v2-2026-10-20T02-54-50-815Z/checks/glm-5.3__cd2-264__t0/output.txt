@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the SNF only 11 days (2025-02-19 to 2025-03-01), far short of the 60 consecutive days required to start a new benefit period, so the 3-day qualifying hospital stay did not reset the 100-day SNF benefit; with 80 days already used, day 100 fell on 2025-03-24 and the 2025-03-25 through 2025-04-02 charges ($11,454, CARC 119) are correctly non-covered. With no Medigap or Medicaid on file, the facility should bill the patient for the exhausted days (confirming a notice of noncoverage was provided), since no appeal or corrected claim can extend the statutory 100-day limit."
+}

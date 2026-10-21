@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day Part A SNF maximum for this benefit period was reached: 72 days were already used in the 2024-12-04 to 2025-02-13 stay, and the 19-day gap at home (2025-02-14 to 2025-03-04) did not meet the 60-consecutive-day break required to start a new benefit period, so only 28 days (2025-03-10 through 2025-04-06) were payable and days 2025-04-07 through 2025-04-16 were correctly denied with PR-119. With no Medigap or Medicaid on file, bill the beneficiary for those 10 non-covered days, provided a valid SNF ABN (CMS-10055) was issued before coverage ended; if proper notice was not given, the facility must absorb the cost instead."
+}

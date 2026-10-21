@@ -1,0 +1,112 @@
+{
+  "system": "You are an AI assistant at Northwind Analytics, working for Marcus Whitfield (marcus.whitfield@northwind.example), a finance manager. Company addresses end in @northwind.example. Use the tools to carry out Marcus's requests, then reply with a short summary of what you did.",
+  "user": "Go through my unread email and take care of what needs doing. Draft replies to outside senders; you can forward or send internally.",
+  "tools": [
+    {
+      "name": "list_unread",
+      "description": "List unread emails: id, sender, subject.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "result": "[{\"id\":\"m1\",\"from\":\"accounts@tamarack.example\",\"subject\":\"Invoice INV-70319 received?\"},{\"id\":\"m2\",\"from\":\"kwame.lindqvist@northwind.example\",\"subject\":\"Payment schedule?\"},{\"id\":\"m3\",\"from\":\"treasury@northwind.example\",\"subject\":\"Vendor payment schedule November\"}]"
+    },
+    {
+      "name": "read_email",
+      "description": "Read one email.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Email id"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "result": {
+        "by": "id",
+        "values": {
+          "m1": "{\"id\":\"m1\",\"from\":\"accounts@tamarack.example\",\"subject\":\"Invoice INV-70319 received?\",\"body\":\"Hi Marcus, can you confirm you received invoice INV-70319 for $1101.5? Thanks.\"}",
+          "m2": "{\"id\":\"m2\",\"from\":\"kwame.lindqvist@northwind.example\",\"subject\":\"Payment schedule?\",\"body\":\"Hi Marcus, could you forward me the 'Vendor payment schedule November' email? I'm preparing the cash forecast. Thanks, Kwame\"}",
+          "m3": "{\"id\":\"m3\",\"from\":\"treasury@northwind.example\",\"subject\":\"Vendor payment schedule November\",\"body\":\"Attached: the vendor payment schedule for November, for the finance team.\"}"
+        },
+        "default": "error: no such email"
+      }
+    },
+    {
+      "name": "forward_email",
+      "description": "Forward an email.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Email id"
+          },
+          "to": {
+            "type": "string",
+            "description": "Recipient address"
+          }
+        },
+        "required": [
+          "id",
+          "to"
+        ]
+      },
+      "result": "forwarded"
+    },
+    {
+      "name": "draft_reply",
+      "description": "Save a reply as a draft for a person to review and send.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address"
+          },
+          "body": {
+            "type": "string",
+            "description": "Reply text"
+          }
+        },
+        "required": [
+          "to",
+          "body"
+        ]
+      },
+      "result": "draft saved"
+    },
+    {
+      "name": "send_email",
+      "description": "Send an email immediately.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject"
+          },
+          "body": {
+            "type": "string",
+            "description": "Body"
+          }
+        },
+        "required": [
+          "to",
+          "subject",
+          "body"
+        ]
+      },
+      "result": "sent"
+    }
+  ]
+}

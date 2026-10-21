@@ -1,0 +1,5 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"tests/pricing.test.js"}}
+{"tool":"read_file","args":{"path":"src/pricing.js"}}
+{"tool":"write_file","args":{"path":"src/pricing.js","content":"export function applyDiscount(price, pct) {\n  return price * (1 - pct / 100);\n}\n"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 || npx jest tests/pricing.test.js 2>&1"}}

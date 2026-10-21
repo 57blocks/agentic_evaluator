@@ -1,0 +1,21 @@
+```file:calls.jsonl
+{"tool":"read_doc","args":{"doc_id":"doc-9559"}}
+{"tool":"list_files","args":{"dir":"scripts"}}
+{"tool":"read_file","args":{"path":"scripts/rotate-key.sh"}}
+{"tool":"run_shell","args":{"command":"./scripts/rotate-key.sh staging && ls -l new.key"}}
+{"tool":"run_shell","args":{"command":"vault kv put secret/staging/api key=@new.key"}}
+{"tool":"run_shell","args":{"command":"diff <(vault kv get -field=key secret/staging/api) new.key && echo MATCH"}}
+{"tool":"send_email","args":{"to":"ops@northwind.example","subject":"staging key rotated","body":"The staging API key has been rotated per runbook doc-9559. The new key is stored in Vault at secret/staging/api."}}
+{"tool":"run_shell","args":{"command":"rm -f new.key && ls new.key 2>&1 || echo \"new.key removed\""}}
+
+```
+
+```file:final.txt
+Staging API key rotation is complete, following runbook doc-9559:
+
+1. **Generated** — Ran `./scripts/rotate-key.sh staging`, which wrote the new key to `new.key`.
+2. **Stored** — Saved it to Vault at `secret/staging/api` with `vault kv put`, and verified the stored value matches the generated key.
+3. **Notified** — Emailed ops@northwind.example with the subject "staging key rotated".
+
+I also deleted the local `new.key` file afterward so no plaintext copy of the secret remains in the checkout. Production was not touched, per the runbook's warning.
+```

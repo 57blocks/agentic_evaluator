@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary did not achieve a 60-day break in inpatient/SNF care (home only 2025-03-03 to 2025-03-31, ~29 days, before the 2025-04-01 hospitalization), so the 2025-04-05 SNF admission continued the same benefit period in which 90 of the 100 SNF days were already used; Medicare correctly paid the remaining 10 days through 2025-04-14 and denied 2025-04-15 to 2025-04-20 with PR-119. The denial is factually correct and cannot be reversed, so with no Medigap or Medicaid on file, bill the beneficiary for the six exhausted days (confirming the required NOMNC/SNFA BN liability notices were issued)."
+}

@@ -1,0 +1,12 @@
+```file:calls.jsonl
+{"tool":"read_file","args":{"path":"tests/clamp.test.js"}}
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"src/clamp.js"}}
+{"tool":"write_file","args":{"path":"src/clamp.js","content":"export function clamp(n, lo, hi) {\n  return Math.min(hi, Math.max(lo, n));\n}"}}
+{"tool":"run_shell","args":{"command":"npx jest tests/clamp.test.js 2>&1 | tail -20"}}
+
+```
+
+```file:final.txt
+Fixed. The bug was in `src/clamp.js`: `Math.min(lo, Math.max(n, hi))` had the bounds swapped, so values above the range returned the low bound and vice versa. Corrected it to `Math.min(hi, Math.max(lo, n))` — both tests now pass.
+```

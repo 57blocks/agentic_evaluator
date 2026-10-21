@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (PR) is correct: the beneficiary had only 31 days at home after the 2025-01-30 discharge, short of the 60 days needed to end the benefit period, so the 30 days left after the prior 70-day stay ran out on 2025-04-06. Bill the patient for 2025-04-07 through 2025-04-20 (there is no Medigap or Medicaid on file), and keep submitting monthly benefits-exhaust no-pay claims while she remains in a certified bed so the contractor can track the benefit period."
+}
+```

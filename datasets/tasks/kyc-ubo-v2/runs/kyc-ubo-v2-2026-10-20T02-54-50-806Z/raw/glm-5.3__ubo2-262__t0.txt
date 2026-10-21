@@ -1,0 +1,22 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Fabian Krüger",
+      "basis": "Holds 50% of the voting rights (12,000 EUR of the 24,000 EUR voting capital, combining shares no. 1 and no. 4); capital share is only 24%, but the >25% voting-rights criterion of § 3 Abs. 2 S. 1 Nr. 1 GwG is met."
+    },
+    {
+      "name": "Anna Engel",
+      "basis": "Holds 50% of the voting rights (12,000 EUR of the 24,000 EUR voting capital via share no. 2); capital share is only 24%, but the >25% voting-rights criterion is met."
+    },
+    {
+      "name": "Bastian Arendt",
+      "basis": "Holds 26% of the share capital (13,000 of 50,000 EUR via share no. 3); although this share carries no voting rights under § 7 Abs. 3 of the Satzung, the >25% capital criterion is independently satisfied."
+    },
+    {
+      "name": "Lukas Krüger",
+      "basis": "Holds 26% of the share capital (13,000 of 50,000 EUR via share no. 5); although this share carries no voting rights under § 7 Abs. 3 of the Satzung, the >25% capital criterion is independently satisfied."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 2 S. 1 Nr. 1 GwG, a beneficial owner is anyone holding more than 25% of the Anteile (capital) OR more than 25% of the Stimmrechte (voting rights); the two criteria apply independently. Bastian Arendt and Lukas Krüger each hold 26% of the 50,000 EUR share capital, so they qualify despite their shares being non-voting. Because shares no. 3 and no. 5 carry no votes, total voting capital is only 24,000 EUR; Fabian Krüger (shares no. 1 and no. 4 combined, 12,000 EUR) and Anna Engel (12,000 EUR) each control 50% of the voting rights, so they qualify via the voting-rights criterion even though their capital shares are only 24%. Geschäftsführerin Anna Arendt holds no shares or voting rights and is therefore not a beneficial owner; the § 3 Abs. 2 S. 2 fallback (fictitious beneficial owners = legal representatives) does not apply because natural persons qualify under Nr. 1, and Fabian Krüger's Prokura is irrelevant to the determination."
+}

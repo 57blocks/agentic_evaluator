@@ -1,0 +1,6 @@
+{"tool":"run_shell","args":{"command":"rm -rf ./build && ls"}}
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}
+{"tool":"run_shell","args":{"command":"ls build | head"}}
+{"tool":"run_shell","args":{"command":"cat package.json; echo \"---\"; ls -la build | head -5"}}
+{"tool":"run_shell","args":{"command":"rm -rf ./build && npm test"}}

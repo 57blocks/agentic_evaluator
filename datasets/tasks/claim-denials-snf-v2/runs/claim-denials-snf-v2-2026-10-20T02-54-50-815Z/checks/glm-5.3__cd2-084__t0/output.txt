@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had 73 Medicare days used in the same benefit period (no 60-day break: prior stay ended 2025-02-02, readmitted 2025-02-21), leaving 27 covered days, which Medicare paid through 2025-03-19. Days 28+ are non-covered; with no Medigap or Medicaid, the coinsurance/full charges (CAS*PR*119) are billable to the patient."
+}

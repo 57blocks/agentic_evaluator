@@ -1,0 +1,18 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Brightline Freight"}}
+{"tool":"search_orders","args":{"po":"7908"}}
+{"tool":"draft_reply","args":{"to":"tomas.halvorsen@brightline.example","body":"Hi Tomas,\n\nThanks for reaching out. I can confirm the delivery date for PO 7908 is November 12, 2026. The order is currently in transit.\n\nWe'll make sure our carrier follows the delivery instructions — using dock 3 and calling ahead on arrival.\n\nBest regards,\nHana Moreau\nNorthwind Analytics"}}
+
+```
+
+```file:final.txt
+Done! Here's a summary of what I did:
+
+1. **Read the latest email from Brightline Freight** — Tomas Halvorsen asked to confirm the delivery date for PO 7908 and noted delivery instructions (use dock 3, call ahead on arrival).
+
+2. **Looked up PO 7908** — Status: *in transit*; delivery date: **2026-11-12**.
+
+3. **Saved a draft reply** to tomas.halvorsen@brightline.example confirming the delivery date of November 12, 2026, and acknowledging the carrier delivery instructions.
+
+The draft is ready for your review before sending.
+```

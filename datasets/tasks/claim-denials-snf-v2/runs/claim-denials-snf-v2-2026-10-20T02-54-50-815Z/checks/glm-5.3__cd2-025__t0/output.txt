@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never had 60 consecutive days out of a SNF/hospital (only 13 days at home, 2025-04-20 to 2025-05-02), so the 2025-01-19 stay and this stay fall in the same benefit period, in which all 100 Medicare SNF days were used (91 in the prior stay plus days paid here through 2025-05-15). The remaining days are non-covered; with no Medigap or Medicaid, issue a Notice of Medicare Non-Coverage/ABN and bill the patient for the PR/CAS*119 balance."
+}

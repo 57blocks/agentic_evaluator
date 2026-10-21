@@ -262,5 +262,2370 @@
     ],
     "split": "dev",
     "archetype": "no-control"
+  },
+  "ubo2-031": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-032": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-033": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-034": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-035": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-036": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-037": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-038": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-039": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-040": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-041": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-042": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-043": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-044": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-045": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-046": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-047": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-048": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-049": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-050": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-051": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-052": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-053": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-054": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-055": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-056": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-057": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-058": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-059": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-060": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-061": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-062": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-063": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-064": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-065": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-066": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-067": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-068": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-069": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-070": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-071": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-072": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-073": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-074": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-075": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-076": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-077": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-078": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-079": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-080": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-081": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-082": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-083": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-084": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-085": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-086": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-087": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-088": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-089": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-090": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-091": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-092": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-093": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-094": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-095": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-096": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-097": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-098": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-099": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-100": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-101": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-102": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-103": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-104": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-105": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-106": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-107": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-108": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-109": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-110": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-111": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-112": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-113": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-114": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-115": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-116": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-117": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-118": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-119": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-120": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-121": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-122": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-123": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-124": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-125": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-126": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-127": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-128": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-129": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-130": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-131": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-132": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-133": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-134": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-135": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-136": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-137": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-138": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-139": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-140": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-141": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-142": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-143": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-144": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-145": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-146": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-147": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-148": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-149": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-150": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-151": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-152": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-153": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-154": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-155": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-156": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-157": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-158": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-159": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-160": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-161": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-162": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-163": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-164": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-165": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-166": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-167": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-168": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-169": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-170": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-171": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-172": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-173": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-174": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-175": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-176": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-177": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-178": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-179": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-180": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-181": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-182": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-183": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-184": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-185": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-186": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-187": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-188": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-189": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-190": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-191": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-192": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-193": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-194": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-195": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-196": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-197": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-198": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-199": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-200": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-201": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-202": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-203": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-204": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-205": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-206": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-207": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-208": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-209": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-210": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-211": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-212": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-213": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-214": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-215": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-216": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-217": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-218": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-219": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-220": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-221": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-222": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-223": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-224": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-225": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-226": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-227": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-228": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-229": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-230": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-231": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-232": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-233": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-234": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-235": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-236": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-237": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-238": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-239": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-240": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-241": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-242": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-243": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-244": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-245": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-246": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-247": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-248": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-249": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-250": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-251": {
+    "tags": [
+      "hard",
+      "nominal-boundary",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-252": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-253": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-254": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-255": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-256": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-257": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-258": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-259": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-260": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-261": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-262": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-263": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-264": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-265": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-266": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-267": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-268": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-269": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-270": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-271": {
+    "tags": [
+      "normal"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-272": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-273": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-274": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-275": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-276": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-277": {
+    "tags": [
+      "normal",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "normal"
+  },
+  "ubo2-278": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-279": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-280": {
+    "tags": [
+      "normal"
+    ],
+    "split": "dev",
+    "archetype": "normal"
+  },
+  "ubo2-281": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-282": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "holdout",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-283": {
+    "tags": [
+      "hard",
+      "nominal-boundary"
+    ],
+    "split": "dev",
+    "archetype": "nominal-boundary"
+  },
+  "ubo2-284": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-285": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "aggregation"
+  },
+  "ubo2-286": {
+    "tags": [
+      "hard",
+      "aggregation",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "aggregation"
+  },
+  "ubo2-287": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-288": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-289": {
+    "tags": [
+      "hard",
+      "two-vehicles",
+      "no-control-50-50",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "two-vehicles"
+  },
+  "ubo2-290": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "voting-rights"
+  },
+  "ubo2-291": {
+    "tags": [
+      "hard",
+      "voting-rights"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-292": {
+    "tags": [
+      "hard",
+      "voting-rights",
+      "prokurist"
+    ],
+    "split": "holdout",
+    "archetype": "voting-rights"
+  },
+  "ubo2-293": {
+    "tags": [
+      "hard",
+      "own-shares",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-294": {
+    "tags": [
+      "hard",
+      "own-shares"
+    ],
+    "split": "dev",
+    "archetype": "own-shares"
+  },
+  "ubo2-295": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "kg"
+  },
+  "ubo2-296": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-297": {
+    "tags": [
+      "hard",
+      "kg-general-partner",
+      "two-layers"
+    ],
+    "split": "holdout",
+    "archetype": "kg"
+  },
+  "ubo2-298": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-299": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers",
+      "prokurist"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
+  },
+  "ubo2-300": {
+    "tags": [
+      "hard",
+      "no-control-50-50",
+      "fallback",
+      "two-layers"
+    ],
+    "split": "dev",
+    "archetype": "no-control"
   }
 }

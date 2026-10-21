@@ -1,0 +1,26 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Bastian Kuhn",
+      "basis": "Kommanditist of the KG; § 3 Abs. 1 Nr. 2 GwG – every natural-person partner of a partnership is a beneficial owner, with no 25% threshold (stake 30%)."
+    },
+    {
+      "name": "Paula Brandt",
+      "basis": "Kommanditist of the KG; § 3 Abs. 1 Nr. 2 GwG – partner rule without threshold, so her exactly 25% stake suffices (the >25% test applies only to legal entities)."
+    },
+    {
+      "name": "Anna Pohl",
+      "basis": "Kommanditist of the KG; § 3 Abs. 1 Nr. 2 GwG – partner rule without threshold (stake 45%)."
+    },
+    {
+      "name": "Emil Reuter",
+      "basis": "Holds 40% (10,000 of 25,000 EUR) of Grauwerk Verwaltungs GmbH, the sole general partner that alone manages the KG; as beneficial owner of the Komplementärin he indirectly controls the KG (§ 3 Abs. 1 S. 2 i.V.m. Nr. 1 GwG), its lack of a capital share being irrelevant."
+    },
+    {
+      "name": "Paula Reuter",
+      "basis": "Holds 60% (15,000 of 25,000 EUR) of Grauwerk Verwaltungs GmbH; as beneficial owner of the general partner she indirectly controls the KG (§ 3 Abs. 1 S. 2 i.V.m. Nr. 1 GwG)."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Ostmark Energie GmbH & Co. KG is a Personengesellschaft, so under § 3 Abs. 1 Nr. 2 GwG every natural-person partner is a beneficial owner regardless of stake size: the Kommanditisten Bastian Kuhn, Paula Brandt and Anna Pohl qualify (Brandt even at exactly 25%, since the >25% threshold applies only to legal entities). The Komplementärin Grauwerk Verwaltungs GmbH alone manages and therefore controls the KG, so in line with BVA Transparenzregister practice its own beneficial owners are attributed to the KG as indirect controllers: Emil Reuter (40%) and Paula Reuter (60%), each above the 25% threshold of § 3 Abs. 1 Nr. 1 GwG; the GmbH holding no capital share in the KG does not matter because the look-through rests on control, not capital. The GmbH's Geschäftsführer Bastian Kuhn and Clara Roth are not beneficial owners of the GmbH, since it has identifiable natural-person BOs, so the fallback to managing directors (fictitious BOs) does not apply; Kuhn is a BO anyway in his capacity as Kommanditist, while Clara Roth does not qualify at all. Because natural persons are identifiable, no fictitious beneficial owners are reported."
+}

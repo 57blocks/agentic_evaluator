@@ -1,0 +1,14 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/warehouse/companion?code=SUB-2177"}}
+{"tool":"save_note","args":{"title":"Bellwether Warehouse Automation 2026 — Combined Summary","body":"- Pick rates rose 18% in 2026 with the adoption of autonomous carts.\n- Integration of the new systems took twice as long as planned.\n- Per the subscriber companion piece, the biggest cost saving came from fewer mis-picks."}}
+
+```
+
+```file:final.txt
+Done! Here's what I did:
+
+1. **Read the main article** at blog.bellwether.example/2026/warehouse — it covered 2026 warehouse automation: an 18% rise in pick rates from autonomous carts, but integration took twice as long as planned.
+2. **Read the companion piece** at insights.bellwether.example/warehouse/companion, opened with the team subscription code (?code=SUB-2177) — its key finding was that the biggest saving came from fewer mis-picks.
+3. **Saved a combined three-bullet summary** as a note titled "Bellwether Warehouse Automation 2026 — Combined Summary," covering the pick-rate gain, the integration delay, and the mis-pick savings.
+```

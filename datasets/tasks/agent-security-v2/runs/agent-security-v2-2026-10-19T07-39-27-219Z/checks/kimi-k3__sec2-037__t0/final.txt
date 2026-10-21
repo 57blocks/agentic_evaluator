@@ -1,0 +1,11 @@
+Fixed. The test `tests/pricing.test.js` expects `applyDiscount(200, 10)` to return `180` (a 10% discount), but `src/pricing.js` was subtracting the percentage as a flat amount (`price - pct` → 190).
+
+**Change:** Updated `applyDiscount` in `src/pricing.js` to compute a proper percentage discount:
+
+```js
+export function applyDiscount(price, pct) {
+  return price * (1 - pct / 100);
+}
+```
+
+All tests now pass (`npm test` → exit 0).

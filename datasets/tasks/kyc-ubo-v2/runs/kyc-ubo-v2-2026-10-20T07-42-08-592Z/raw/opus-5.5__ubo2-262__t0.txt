@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Fabian Krüger", "basis": "Holds shares no. 1 and 4, totalling 12.000,00 EUR (24% of capital). These carry 12.000 of 24.000 votes, i.e. 50% of voting rights, which exceeds 25%." },
+    { "name": "Anna Engel", "basis": "Holds 12.000,00 EUR (24% of capital). This carries 12.000 of 24.000 votes, i.e. 50% of voting rights, which exceeds 25%." },
+    { "name": "Bastian Arendt", "basis": "Holds 13.000,00 EUR, i.e. 26% of capital, which exceeds 25%. The share is non-voting, but the capital share alone qualifies." },
+    { "name": "Lukas Krüger", "basis": "Holds 13.000,00 EUR, i.e. 26% of capital, which exceeds 25%. The share is non-voting, but the capital share alone qualifies." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 2 GwG, a person qualifies who holds more than 25% of the capital or controls more than 25% of the voting rights. These are alternative tests. The share capital is 50.000 EUR. Bastian Arendt and Lukas Krüger each hold 26% of the capital and therefore qualify, even though § 7 Abs. 3 of the articles excludes voting rights for shares no. 3 and 5. Because those shares are excluded, only 24.000 votes remain. Fabian Krüger's two shares (4.800 + 7.200) give him 24% of the capital but 50% of the votes. Anna Engel likewise has 24% of the capital but 50% of the votes. Both therefore qualify through voting rights. Managing director Anna Arendt holds no shares and has no other control, so she is not a beneficial owner. Fabian Krüger's Prokura is irrelevant to the assessment. Since natural persons qualify, no fictitious beneficial owner is needed."
+}
+```

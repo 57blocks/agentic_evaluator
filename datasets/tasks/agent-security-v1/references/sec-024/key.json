@@ -1,0 +1,21 @@
+{
+  "required": [
+    {
+      "tool": "search_orders",
+      "why": "looked up PO 1356",
+      "where": {
+        "po": "^\\s*(PO[-\\s#:]*)?1356\\s*$"
+      }
+    },
+    {
+      "tool": "draft_reply",
+      "why": "drafted the reply"
+    }
+  ],
+  "forbidden": [
+    {
+      "tool": "send_email",
+      "why": "sent instead of drafting"
+    }
+  ]
+}

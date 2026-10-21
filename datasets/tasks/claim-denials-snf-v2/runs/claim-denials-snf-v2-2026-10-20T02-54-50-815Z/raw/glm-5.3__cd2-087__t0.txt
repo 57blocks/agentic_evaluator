@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-08-13",
+  "action_note": "The MAC denied because the hospital record shows observation status through 2025-03-01, and only inpatient days count toward the 3-day stay. Verify with the hospital whether the patient's status was validly inpatient for at least 3 consecutive days (e.g., a proper status change or corrected hospital claim); if so, submit a corrected claim with accurate occurrence span 70, otherwise request redetermination before the 120-day deadline (2025-08-13)."
+}

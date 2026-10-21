@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the beneficiary was home only 12 days (2025-02-26 to 2025-03-09) before the 2025-03-10 hospital admission, so no new benefit period began, and the 84 prior days left 16 SNF days, used 2025-03-15 through 2025-03-30. With no Medigap or Medicaid on file, bill the patient for the non-covered days from 2025-03-31 through 2025-04-12 plus the daily coinsurance for the covered days, and keep submitting benefits-exhausted claims while the stay continues."
+}
+```

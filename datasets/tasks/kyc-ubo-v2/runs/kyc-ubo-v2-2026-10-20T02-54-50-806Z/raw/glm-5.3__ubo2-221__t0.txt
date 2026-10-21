@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Jonas Brenner",
+      "basis": "Aggregated holdings of 25,001.00 EUR (entries 1 and 3, same person) = 25.001% of Stammkapital, exceeding the >25% threshold under § 3 Abs. 1 Nr. 1 GwG"
+    },
+    {
+      "name": "Fabian Kramer",
+      "basis": "Holding of 49,999.00 EUR = 49.999% of Stammkapital, exceeding the >25% threshold under § 3 Abs. 1 Nr. 1 GwG"
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Jonas Brenner appears twice in the shareholder list (identical date of birth and city), so his holdings must be aggregated: 24,750.00 EUR + 251.00 EUR = 25,001.00 EUR, i.e. 25.001% of the 100,000.00 EUR Stammkapital, which exceeds the 'more than 25%' threshold and makes him a beneficial owner. Fabian Kramer holds 49.999% and also qualifies. Anika Krüger holds exactly 25.000%, which does not exceed 25%, and since the articles contain no special voting-rights arrangements, pooling, or similar instruments, she does not qualify under § 3 GwG. Geschäftsführer Lukas Brenner is neither a beneficial owner nor a fictitious beneficial owner, because natural persons qualifying under § 3 Abs. 1 GwG exist, so the fallback to legal representatives under § 3 Abs. 1 S. 5 GwG is not triggered."
+}

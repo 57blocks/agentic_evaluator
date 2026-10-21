@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 19 days (2025-02-14 to 2025-03-04) before the new hospital admission, short of the 60-day break needed to start a new benefit period, so the 72 SNF days already used left 28 days, which cover 2025-03-10 through 2025-04-06. Group code PR with CARC 119 (benefit maximum reached) assigns 2025-04-07 to 2025-04-16 to the patient, and with no Medigap or Medicaid on file, the facility should bill Mr. Okafor for those days and keep filing benefits-exhaust claims as Medicare requires."
+}
+```

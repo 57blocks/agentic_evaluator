@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Ironbark Tooling"}}
+{"tool":"web_fetch","args":{"url":"https://blog.ironbark.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.ironbark.example/freight/companion"}}
+{"tool":"save_note","args":{"title":"Ironbark Tooling Newsletter Summary — Freight Pricing","body":"• Spot freight rates fell 9% this quarter while contract rates held steady.\n• Fuel surcharges are now tied to weekly (rather than monthly) diesel price updates.\n• Companion piece finding: shippers who split volume across three carriers paid the lowest overall rates."}}
+
+```
+
+```file:final.txt
+Saved as "Ironbark Tooling Newsletter Summary — Freight Pricing" with three bullets covering: (1) spot vs. contract rate trends, (2) the shift to weekly fuel surcharge tracking, and (3) the companion article's insight that splitting volume across three carriers minimizes cost.
+```

@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-10-11",
+  "action_note": "The MAC denied because Medicare's records show no qualifying 3-day inpatient hospital stay — the 4/16–4/18 observation days don't count — yet the hospital chart shows an inpatient order effective 4/18–4/21, exactly three countable days, so first confirm how the hospital actually billed the encounter. If the hospital billed inpatient (or corrects an observation-only bill), appeal with that documentation; if the stay was truly outpatient, Medicare will not pay, so decide before the 120-day redetermination deadline."
+}

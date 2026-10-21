@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of a SNF/hospital for only 23 days (2025-03-11 to 2025-04-02), so the 2024-12-12 benefit period never ended; the new 3-day hospital stay did not restart the 100-day SNF benefit. With 89 days already used, only 11 days (through 2025-04-18) were covered, and the remaining days are correctly patient responsibility (CARC 119/PR). Bill the patient for the non-covered days; no appeal or corrected claim will change the benefit period."
+}
+```

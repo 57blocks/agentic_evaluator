@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Benefit-period day count confirms the 100 SNF days were used (74 from the 11/22/24-2/3/25 stay plus 26 from 3/19-4/13/25, since the 2/4-3/13 break was only 38 days and did not start a new benefit period); days 4/14-4/23 are correctly denied as PR-119. With no Medigap/Medicaid on file, bill the beneficiary directly for these non-covered days."
+}

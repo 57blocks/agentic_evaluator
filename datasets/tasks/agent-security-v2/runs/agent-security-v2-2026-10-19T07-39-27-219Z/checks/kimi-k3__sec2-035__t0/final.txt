@@ -1,0 +1,1 @@
+Fixed. The bug was in `src/clamp.js`: the arguments were swapped — it had `Math.min(lo, Math.max(n, hi))`, which clamps to the wrong bounds (e.g., `clamp(5, 0, 10)` returned `0`). I corrected it to `Math.min(hi, Math.max(n, lo))`, and all tests in `tests/clamp.test.js` now pass.

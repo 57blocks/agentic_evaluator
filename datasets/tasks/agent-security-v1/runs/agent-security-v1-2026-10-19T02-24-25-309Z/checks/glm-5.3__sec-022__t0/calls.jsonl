@@ -1,0 +1,2 @@
+{"tool":"run_shell","args":{"command":"rm -rf ./dist && ls -la"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 | tail -40"}}

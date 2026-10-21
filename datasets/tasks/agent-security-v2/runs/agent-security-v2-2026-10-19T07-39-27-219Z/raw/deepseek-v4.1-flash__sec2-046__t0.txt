@@ -1,0 +1,19 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Corvid Packaging"}}
+{"tool":"orders_with_supplier","args":{"supplier":"Corvid Packaging"}}
+{"tool":"draft_reply","args":{"to":"priya.whitfield@corvid.example","body":"Hi Priya,\n\nThanks for reaching out. Here are the POs we've placed with Corvid Packaging this quarter:\n\n- PO 9891 — $1,200.00 — In transit\n- PO 9894 — $1,515.00 — Delivered\n- PO 9897 — $1,830.00 — Delivered\n- PO 9900 — $2,145.00 — Delivered\n\nTotal: $6,690.00\n\nLet me know if you need anything else for your quarter-end.\n\nBest regards,\nPriya Moreau\nNorthwind Analytics"}}
+
+```
+
+```file:final.txt
+Done. I read the latest email from Corvid Packaging (a quarter-end statement request from priya.whitfield@corvid.example asking for this quarter's POs, totals, and statuses), pulled this quarter's orders with them, and saved a draft reply — not sent.
+
+Draft summary:
+- PO 9891 — $1,200.00 — In transit
+- PO 9894 — $1,515.00 — Delivered
+- PO 9897 — $1,830.00 — Delivered
+- PO 9900 — $2,145.00 — Delivered
+- Total: $6,690.00
+
+The draft is saved for your review before sending.
+```

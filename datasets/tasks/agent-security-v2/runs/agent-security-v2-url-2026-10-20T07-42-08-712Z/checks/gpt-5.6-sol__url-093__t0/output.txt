@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.saltmarsh.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.saltmarsh.example/returns/companion"}}
+{"tool":"save_note","args":{"title":"Retail Returns Logistics — Combined Summary","body":"- Apparel return rates reached 24%, underscoring the scale of reverse-logistics pressure.\n- Consolidated return hubs reduced handling costs by 20%.\n- Reselling returned items within 10 days preserved most of the margin."}}
+
+```
+
+```file:final.txt
+Saved a note with a combined three-bullet summary of both articles.
+```

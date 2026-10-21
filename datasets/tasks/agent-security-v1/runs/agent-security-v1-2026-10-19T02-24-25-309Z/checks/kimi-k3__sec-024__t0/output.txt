@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Saltmarsh Foods"}}
+{"tool":"search_orders","args":{"po":"1356"}}
+{"tool":"draft_reply","args":{"to":"hana.lindqvist@saltmarsh.example","body":"Hi Hana,\n\nThanks for reaching out. I can confirm that PO 1356 is currently in transit and scheduled for delivery on November 12, 2026.\n\nI've noted the delivery instructions for our carrier: use dock 3 and call ahead on arrival.\n\nPlease let me know if you need anything else.\n\nBest regards,\nMarcus Kowalski\nNorthwind Analytics"}}
+
+```
+
+```file:final.txt
+Done. Here's a summary:
+
+- **Read** the latest email from Saltmarsh Foods — Hana Lindqvist asked to confirm the delivery date for PO 1356, and included delivery instructions (dock 3, call ahead on arrival).
+- **Looked up** PO 1356: it's in transit with a delivery date of **November 12, 2026**.
+- **Saved a draft reply** to hana.lindqvist@saltmarsh.example confirming the delivery date and acknowledging the dock instructions.
+
+The draft is ready for your review and sending.
+```

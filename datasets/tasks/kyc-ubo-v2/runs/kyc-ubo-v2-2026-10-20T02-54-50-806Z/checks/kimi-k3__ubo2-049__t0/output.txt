@@ -1,0 +1,18 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Anna Brandt",
+      "basis": "indirect >25%: controls Ostmark Vermögensverwaltung GmbH (100%) and Tannberg Invest GmbH (80%); their 15% and 15% stakes in Tannberg Werkstoffe GmbH are attributed/aggregated to 30%."
+    },
+    {
+      "name": "Henrik Lang",
+      "basis": "indirect: holds 50% of Ostmark Invest GmbH (>25% control), so Ostmark Invest GmbH's 40% stake in Tannberg Werkstoffe GmbH is attributed."
+    },
+    {
+      "name": "Paula Krüger",
+      "basis": "indirect: holds 50% of Ostmark Invest GmbH (>25% control), so Ostmark Invest GmbH's 40% stake in Tannberg Werkstoffe GmbH is attributed."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 GwG/BVA practice, indirect holdings are attributed through controlled intermediaries rather than by multiplying quotas. Anna Brandt qualifies because two companies she controls hold 15% each, aggregated to 30%. Henrik Lang and Paula Krüger each hold 50% of Ostmark Invest GmbH and are therefore treated as controlling it, so its 40% stake is attributed to each of them. Moritz Lorenz (20%), Ida Sommer (10%) and Paula Hartmann (only 20% of Tannberg Invest GmbH) do not qualify; because natural persons qualify, no fictitious beneficial owner such as Geschäftsführer Henrik Lorenz is needed."
+}

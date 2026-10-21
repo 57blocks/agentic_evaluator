@@ -1,0 +1,16 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Oskar Kramer",
+      "basis": "Holds 50% of Falkenhorst Vermögensverwaltung GmbH, which holds 60% of Auental Handel GmbH; indirect share = 50% x 60% = 30% > 25% threshold under §3 Abs.2 GwG."
+    },
+    {
+      "name": "Ida Hartmann",
+      "basis": "Holds 50% of Falkenhorst Vermögensverwaltung GmbH, which holds 60% of Auental Handel GmbH; indirect share = 50% x 60% = 30% > 25% threshold under §3 Abs.2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Direct shareholders of Auental Handel GmbH each hold below the 25% threshold (Vera Seidel 10%, Theresa Reuter 5%, Oskar Krüger 20% aggregated from two tranches, Clara Kuhn 5%), so none qualifies directly. Falkenhorst Vermögensverwaltung GmbH holds 60% of Auental and must be looked through to its natural-person shareholders. Since neither Oskar Kramer nor Ida Hartmann controls Falkenhorst alone (50/50 split, no control agreements), their indirect holdings are calculated proportionally: 50% x 60% = 30% each, exceeding the 25% threshold. Both therefore qualify as beneficial owners under §3 Abs.2 GwG; no fictitious beneficial owner designation is required."
+}
+```

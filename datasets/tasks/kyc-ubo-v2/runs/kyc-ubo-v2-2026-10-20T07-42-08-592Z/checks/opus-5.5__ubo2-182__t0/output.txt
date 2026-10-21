@@ -1,0 +1,16 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Matthias Brenner",
+      "basis": "Directly holds shares no. 1 and 3 (25.200,00 EUR + 16.800,00 EUR = 42.000,00 EUR), i.e. 70% of capital and voting rights. This exceeds 25% and gives majority control (§ 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Felix Becker",
+      "basis": "Directly holds 18.000,00 EUR of 60.000,00 EUR, i.e. 30% of capital and voting rights. This exceeds the 25% threshold (§ 3 Abs. 2 GwG)."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The share capital is 60.000,00 EUR. Matthias Brenner appears twice in the shareholder list under the same name and date of birth, so his two shares are added together: 42.000,00 EUR, or 70%. Felix Becker holds 30%. Both direct holdings exceed 25% of capital and voting rights, and the extracts show no deviating voting rules or other control arrangements, so both are beneficial owners under § 3 Abs. 2 GwG. Because natural persons qualify, no fictitious beneficial owner is needed. Anna Sommer is a managing director only and holds no shares. Her role does not make her a beneficial owner."
+}
+```

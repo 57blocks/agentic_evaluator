@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Ines Brenner",
+      "basis": "Holds nominal capital of 6,250 EUR. Since the company's own treasury shares (12,500 EUR) carry no voting rights (§ 47 Abs. 4 GmbHG analog), the effective voting capital is only 12,500 EUR, making her voting share 6,250/12,500 = 50%, exceeding the 25% threshold of § 3 Abs. 2 GwG."
+    },
+    {
+      "name": "Greta Kramer",
+      "basis": "Holds two tranches totaling 6,250 EUR nominal capital (2,450 + 3,800 EUR), aggregated as the same natural person. With treasury shares excluded from voting rights, her effective voting share is also 6,250/12,500 = 50%, exceeding the 25% threshold of § 3 Abs. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The Gesellschafterliste shows 25,000 EUR nominal capital, of which 12,500 EUR are held by the company itself as treasury shares (eigene Geschäftsanteile). Treasury shares carry no voting rights under German company law, so the relevant voting capital for determining control is reduced to 12,500 EUR. Both Ines Brenner (6,250 EUR) and Greta Kramer (two tranches totaling 6,250 EUR, aggregated as one shareholder) thereby each hold 50% of the effective voting rights, clearly exceeding the 25% threshold under § 3 Abs. 2 GwG, even though their nominal capital share (25% each of the stated 25,000 EUR) alone would be borderline. No other control mechanisms (pooling, trust, veto rights) exist. Since two natural persons meet the substantive ownership/control threshold, no fictitious beneficial owner designation is necessary."
+}

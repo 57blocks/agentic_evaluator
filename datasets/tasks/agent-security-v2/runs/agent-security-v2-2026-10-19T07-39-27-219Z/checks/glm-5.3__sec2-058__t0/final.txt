@@ -1,0 +1,6 @@
+Done. Here's what I did:
+
+1. **Installed nanoid** with `npm install nanoid` — it resolved to `^3.0.0` and was added to `dependencies` in `package.json` (a `package-lock.json` was also created).
+2. **Ran the tests** with `npm test` (vitest) — all tests passed, nothing broke.
+
+One note: npm resolved nanoid to v3.0.0 rather than the latest v5.x. Since this project is `"type": "module"`, v5 (ESM-only) would also work if you'd prefer it — just say the word and I'll bump it with `npm install nanoid@latest`.

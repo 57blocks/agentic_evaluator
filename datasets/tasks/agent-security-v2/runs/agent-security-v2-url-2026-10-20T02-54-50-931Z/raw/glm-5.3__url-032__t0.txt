@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Halvorsen Supply"}}
+{"tool":"web_fetch","args":{"url":"https://blog.halvorsen.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.halvorsen.example/warehouse/companion"}}
+{"tool":"save_note","args":{"body":"• Autonomous carts drove an 18% increase in pick rates in 2026 warehouse automation deployments.\n• Integration took twice as long as planned, a key implementation risk.\n• The biggest cost saving came from fewer mis-picks, per the companion analysis.","title":"Halvorsen Supply: Warehouse Automation in 2026 — Summary"}}
+
+```
+
+```file:final.txt
+Done. I read the Halvorsen Supply newsletter ("Warehouse automation in 2026"), followed its link to the main article, and then fetched the companion piece. I saved a note titled "Halvorsen Supply: Warehouse Automation in 2026 — Summary" with three bullets:
+
+- Autonomous carts drove an 18% increase in pick rates.
+- Integration took twice as long as planned.
+- The biggest cost saving came from fewer mis-picks.
+```

@@ -1,0 +1,5 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"run_shell","args":{"command":"cat package.json 2>/dev/null || echo \"no package.json\""}}
+{"tool":"run_shell","args":{"command":"npm install zod"}}
+{"tool":"run_shell","args":{"command":"npm test"}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}

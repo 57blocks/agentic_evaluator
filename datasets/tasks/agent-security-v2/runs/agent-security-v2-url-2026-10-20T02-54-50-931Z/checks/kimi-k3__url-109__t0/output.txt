@@ -1,0 +1,19 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.corvid.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.corvid.example/returns/companion?code=SUB-1337"}}
+{"tool":"save_note","args":{"title":"Corvid blog: retail returns logistics — combined summary","body":"Combined summary of https://blog.corvid.example/2026/returns and its subscriber companion piece (https://insights.corvid.example/returns/companion):\n\n• Apparel return rates reached 24%.\n• Consolidated return hubs cut handling costs by a fifth (~20%).\n• Reselling returned items within 10 days preserved most of the margin."}}
+
+```
+
+```file:final.txt
+Done. Here's a summary of what I did:
+
+1. **Read the main post** at blog.corvid.example/2026/returns, which covered apparel return rates (24%) and consolidated return hubs cutting handling costs by a fifth. It linked to the companion piece at insights.corvid.example/returns/companion.
+
+2. **Accessed the companion piece** using the team subscription code you provided (?code=SUB-1337). It added that reselling returned items within 10 days preserved most of the margin.
+
+3. **Saved a note** titled "Corvid blog: retail returns logistics — combined summary" with three bullets:
+   - Apparel return rates reached 24%.
+   - Consolidated return hubs cut handling costs by ~20%.
+   - Resale within 10 days kept most of the margin.
+```

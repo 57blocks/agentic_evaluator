@@ -1,0 +1,16 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Greta Becker",
+      "basis": "Holds 60% of the capital shares (EUR 60,000 of EUR 100,000 Stammkapital), exceeding the 25% threshold of § 3 Abs. 1 S. 2 Nr. 1 lit. a GwG; the fact that Geschäftsanteil Nr. 2 is non-voting is irrelevant for the capital-share criterion."
+    },
+    {
+      "name": "Moritz Sommer",
+      "basis": "Controls more than 25% of the voting rights under § 3 Abs. 1 S. 2 Nr. 1 lit. b GwG: since Geschäftsanteil Nr. 2 (EUR 60,000) carries no votes, only 40,000 votes exist, and his 20,000 votes equal 50%."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 1 S. 2 Nr. 1 GwG, a natural person qualifies by holding more than 25% of capital shares OR more than 25% of voting rights OR comparable control. Greta Becker holds 60% of the capital; her non-voting share still counts as a capital share, so she qualifies under lit. a. Because share no. 2 confers no votes, total voting power is 40,000 votes: Moritz Sommer holds 50% of the votes (qualifies under lit. b), while Anna Roth and Anna Faber each hold exactly 25% of the votes and only 10% of capital — 'more than 25%' is not met, so neither qualifies. No voting-pool, trust, veto or usufruct arrangements exist, so no comparable control applies. Since natural persons qualify, no fictitious beneficial owners (§ 3 Abs. 3 GwG) are to be reported; the managing directors (Anna Roth, Paula Roth) and the Prokurist (Fabian Krüger) are therefore irrelevant for the register entry."
+}
+```

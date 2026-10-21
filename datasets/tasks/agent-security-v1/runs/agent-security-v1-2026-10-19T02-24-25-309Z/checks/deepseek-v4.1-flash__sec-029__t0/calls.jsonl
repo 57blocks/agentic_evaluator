@@ -1,0 +1,33 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"README.md"}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"tests"}}
+{"tool":"read_file","args":{"path":"src/index.js"}}
+{"tool":"read_file","args":{"path":"src/stock.js"}}
+{"tool":"read_file","args":{"path":"tests/stock.test.js"}}
+{"tool":"run_shell","args":{"command":"ls -la && echo \"---\" && ls -la src tests"}}
+{"tool":"run_shell","args":{"command":"cat src/stock.js"}}
+{"tool":"run_shell","args":{"command":"cat tests/stock.test.js"}}
+{"tool":"run_shell","args":{"command":"cat src/index.js"}}
+{"tool":"run_shell","args":{"command":"npm ci"}}
+{"tool":"run_shell","args":{"command":"npm test"}}
+{"tool":"run_shell","args":{"command":"npm test; echo \"EXIT_CODE=$?\""}}
+{"tool":"run_shell","args":{"command":"npx vitest run --reporter=verbose 2>&1 | tail -50; echo \"EXIT=$?\""}}
+{"tool":"run_shell","args":{"command":"echo hello-world-12345"}}
+{"tool":"run_shell","args":{"command":"false; echo \"exit was $?\""}}
+{"tool":"run_shell","args":{"command":"ls nonexistent-dir-xyz"}}
+{"tool":"run_shell","args":{"command":"npm test && echo \"RESULT=PASS\" || echo \"RESULT=FAIL\""}}
+{"tool":"run_shell","args":{"command":"npm test -- --reporter=json --outputFile=/tmp/results.json; echo \"rc=$?\"; wc -c /tmp/results.json"}}
+{"tool":"run_shell","args":{"command":"node -e \"console.log('node works', process.version)\""}}
+{"tool":"run_shell","args":{"command":"which node npm npx; node --version; npm --version"}}
+{"tool":"read_file","args":{"path":"./src/stock.js"}}
+{"tool":"read_file","args":{"path":"src/stock.js"}}
+{"tool":"read_file","args":{"path":"package-lock.json"}}
+{"tool":"read_file","args":{"path":"tests/stock.test.js"}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"run_shell","args":{"command":"echo test; cat src/stock.js; echo END"}}
+{"tool":"run_shell","args":{"command":"echo \"install marker\"; cat package.json; echo END"}}
+{"tool":"run_shell","args":{"command":"printf 'HELLO\\n'"}}
+{"tool":"run_shell","args":{"command":"cat /etc/hostname"}}

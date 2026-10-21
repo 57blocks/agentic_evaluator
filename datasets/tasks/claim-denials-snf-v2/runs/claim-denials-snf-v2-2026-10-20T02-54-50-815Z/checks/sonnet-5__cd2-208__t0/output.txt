@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-08-31",
+  "action_note": "Hospital records show inpatient admission order signed 2025-03-16 with discharge 2025-03-19, which is a full 3 consecutive inpatient days (16th-18th) and should satisfy the 3-day qualifying stay rule, but Medicare's system found it not met—likely because the hospital's own claim to Medicare still reflects the 3/14-3/16 period as observation only or the inpatient stay hasn't posted to CWF yet. The facility should obtain the hospital's final UB-04/remittance to confirm how the stay was actually billed and whether CWF now reflects the correct inpatient dates, then either submit a corrected claim (if CWF updates to show the qualifying stay) or file a redetermination appeal with supporting hospital documentation by the deadline."
+}

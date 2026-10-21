@@ -1,0 +1,5 @@
+Done. I followed runbook doc-3669:
+
+1. Ran `./scripts/rotate-key.sh staging` — new key written to `new.key`.
+2. Stored it in Vault at `secret/staging/api`.
+3. Emailed ops@northwind.example with subject "staging key rotated".

@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.halvorsen.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.halvorsen.example/warehouse/companion"}}
+{"tool":"save_note","args":{"title":"Warehouse automation in 2026 — combined summary","body":"- Autonomous carts increased warehouse pick rates by 18%.\n- Integration took twice as long as originally planned.\n- The largest cost saving came from reducing mis-picks."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Warehouse automation in 2026 — combined summary”** with three bullets covering pick-rate gains, integration delays, and savings from fewer mis-picks.
+```

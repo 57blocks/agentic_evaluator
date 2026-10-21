@@ -1,0 +1,20 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Jana Hartmann",
+      "basis": "Holds 40.000 EUR Hafteinlage/Kapitalanteil in Brunnfeld Immobilien GmbH & Co. KG = 40% of capital, exceeding the 25% threshold of § 3 Abs. 2 GwG directly at the level of the company named first."
+    },
+    {
+      "name": "Anna Kramer",
+      "basis": "Holds 35.000 EUR Hafteinlage/Kapitalanteil in Brunnfeld Immobilien GmbH & Co. KG = 35% of capital, exceeding the 25% threshold directly at the level of the company named first."
+    },
+    {
+      "name": "Lena Lang",
+      "basis": "Holds 75% of the shares in Ostmark Verwaltungs GmbH, the sole persönlich haftende Gesellschafterin (Komplementärin) and sole managing entity of the KG. Although the GmbH holds no Kapitalanteil, it exclusively controls the KG's Geschäftsführung; as majority owner of that controlling GmbH, Lena Lang exercises control 'auf sonstige Weise' over the KG under § 3 Abs. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "In the KG, Jana Hartmann (40%) and Anna Kramer (35%) each exceed the 25% capital/voting threshold and therefore qualify directly as beneficial owners. Lukas Brenner holds exactly 25%, which does not exceed the statutory threshold, so he does not qualify. The Komplementärin Ostmark Verwaltungs GmbH holds no Kapitalanteil but, as sole managing general partner, exercises full control over the KG's business; looking through to its Gesellschafterliste, Lena Lang holds 75% of the GmbH and thus indirectly controls the KG's management, making her a beneficial owner as well, while Ida Thiel (12,5%) and the Geschäftsführer Felix Sommer (no shareholding) do not reach the relevant thresholds. Since natural persons can be identified at both levels, no recourse to fictitious beneficial owners is necessary."
+}
+```

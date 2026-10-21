@@ -1,0 +1,10 @@
+{
+  "beneficial_owners": [
+    { "name": "Clara Ziegler", "basis": "Holds 15,000 EUR of 45,000 EUR voting rights (33.33%) >25%." },
+    { "name": "Jonas Sommer", "basis": "Holds 55,000 EUR of 100,000 EUR capital (55%) >25%, despite no voting rights." },
+    { "name": "Anna Pohl", "basis": "Holds 15,000 EUR of 45,000 EUR voting rights (33.33%) >25%." },
+    { "name": "Emil Pohl", "basis": "Holds 15,000 EUR of 45,000 EUR voting rights (33.33%) >25%." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Jonas Sommer holds 55% of the capital, exceeding 25% even though his share has no voting rights. Clara Ziegler, Anna Pohl, and Emil Pohl each hold 15,000 EUR of the 45,000 EUR total voting rights (33.33%), exceeding 25% voting rights. Therefore all four are beneficial owners; no fictitious beneficial owners are needed."
+}

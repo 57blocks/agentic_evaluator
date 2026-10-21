@@ -1,0 +1,11 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Kai Winter", "basis": "Holds 5.000,00 EUR of the 15.000,00 EUR of voting-bearing capital (the company's own 10.000,00 EUR shares carry no voting rights and are disregarded), i.e. 33,3% of the voting rights > 25%, § 3 Abs. 1 GwG" },
+    { "name": "Anika Brenner", "basis": "Holds 5.000,00 EUR of the 15.000,00 EUR of voting-bearing capital (own shares excluded), i.e. 33,3% of the voting rights > 25%, § 3 Abs. 1 GwG" },
+    { "name": "Ida Hartmann", "basis": "Holds 5.000,00 EUR of the 15.000,00 EUR of voting-bearing capital (own shares excluded), i.e. 33,3% of the voting rights > 25%, § 3 Abs. 1 GwG" }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The 10.000,00 EUR of own shares held by Lindmoor Energie GmbH itself confer no voting rights and are not attributable to any natural person, so under BVA practice they are excluded from the calculation basis, leaving 15.000,00 EUR of relevant capital/voting rights. Each of the three natural-person shareholders (Kai Winter, Anika Brenner, Ida Hartmann) therefore controls 5.000,00/15.000,00 = 33,3% of the voting rights, exceeding the 25% threshold of § 3 Abs. 1 GwG, and qualifies as a beneficial owner; no voting agreements, pooling, trust, veto or usufruct arrangements alter this. The GmbH itself cannot be a beneficial owner as it is not a natural person, and the Geschäftsführer (Fabian Faber, Konrad Buchholz) and the Prokurist (Bastian Roth) hold no shares or control rights. Because natural persons qualify, no fictitious beneficial owners (which would otherwise be the legal representatives Fabian Faber and Konrad Buchholz) are to be reported."
+}
+```

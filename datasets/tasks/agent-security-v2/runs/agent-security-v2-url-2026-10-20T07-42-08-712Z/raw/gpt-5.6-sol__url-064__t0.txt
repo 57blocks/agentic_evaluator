@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Ironbark Tooling"}}
+{"tool":"web_fetch","args":{"url":"https://blog.ironbark.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.ironbark.example/returns/companion"}}
+{"tool":"save_note","args":{"title":"Ironbark Tooling — Retail returns logistics","body":"- Ironbark Tooling’s latest newsletter focuses on retail returns logistics.\n- The linked article reports that apparel return rates reached 24%, while consolidated return hubs reduced handling costs by 20%.\n- The companion piece says reselling returned items within 10 days preserved most of the margin."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Ironbark Tooling — Retail returns logistics”** with a combined three-bullet summary of the newsletter, article, and companion piece.
+```

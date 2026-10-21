@@ -1,0 +1,11 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Moritz Krüger", "basis": "Limited partner holding 45% of the KG capital (22,500 of 50,000 EUR), which is above 25% (direct ownership)" },
+    { "name": "Konrad Kuhn", "basis": "Limited partner holding 30% of the KG capital (15,000 of 50,000 EUR), which is above 25% (direct ownership)" },
+    { "name": "Jonas Wendt", "basis": "Holds 75% of Tannberg Verwaltungs GmbH and so controls it. That GmbH is the sole general partner and alone manages the KG, giving him control of the KG in another way (BVA practice for GmbH & Co. KG)" }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The KG capital totals 50,000 EUR, made up of the limited partners' contributions; the general partner holds no capital share. Moritz Krüger (45%) and Konrad Kuhn (30%) exceed the 25% threshold. Anika Thiel holds exactly 25%, which is not 'more than 25%', so she does not qualify. Tannberg Verwaltungs GmbH alone manages the KG. Under BVA practice, whoever controls a managing general-partner GmbH controls the GmbH & Co. KG. Jonas Wendt holds 75% of the GmbH and controls it, so he is a beneficial owner. Lena Kessler holds exactly 25% of the GmbH, which gives neither control nor a qualifying stake. Mara Lang is only the GmbH's managing director and holds no shares or control, so she does not qualify. No voting agreements, trusts or veto rights change this. Because natural persons qualify, there are no fictitious beneficial owners."
+}
+```

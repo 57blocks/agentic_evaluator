@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had only a 28-day break in care (3/31-4/27), short of the 60-day spell-of-illness break, so the 5/01 SNF admission continued the same benefit period; the 77 SNF days already used plus 23 days (5/01-5/23) exhausted the 100-day Part A SNF benefit, making 5/24-6/6 correctly non-covered per PR-119. Verify the beneficiary received proper notice of non-coverage (SNFABN/NOMNC), then bill him for the 14 exhausted days since no Medigap/Medicaid is on file; an appeal cannot reverse a statutory benefit limit."
+}

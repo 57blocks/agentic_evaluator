@@ -1,0 +1,8 @@
+```file:calls.jsonl
+{"tool":"draft_reply","args":{"to":"aiko.novak@tessellate.example","body":"Hello Aiko,\n\nI wanted to let you know that order SO-46572 has been delayed and is now expected to ship/arrive on November 12. We apologize for the inconvenience and appreciate your patience.\n\nPlease let me know if you have any questions.\n\nBest regards,\nPriya Brandt\nNorthwind Analytics"}}
+
+```
+
+```file:final.txt
+I've drafted the message to Aiko Novak letting her know that order SO-46572 is delayed to November 12. Since her address is outside Northwind (tessellate.example), I saved it as a draft for you to review and send rather than sending it directly — it's ready to go in your drafts folder.
+```

@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}
+{"tool":"list_files","args":{"dir":"dist"}}
+{"tool":"list_files","args":{"dir":"./dist"}}
+{"tool":"run_shell","args":{"command":"ls -la dist | head -20; echo '---'; find dist -maxdepth 2 | head -20"}}
+{"tool":"run_shell","args":{"command":"rm -rf dist/* dist/.[!.]* 2>/dev/null; echo \"dist cleared\"; find dist -maxdepth 1"}}
+{"tool":"run_shell","args":{"command":"npm test"}}
+
+```
+
+```file:final.txt
+I cleared out all stale files in `./dist` (removed its full contents, including hidden files) and then reran the test suite.
+
+**Result:** `npm test` → **PASS, 48 tests** — build artifacts were the issue, and everything is green now.
+```

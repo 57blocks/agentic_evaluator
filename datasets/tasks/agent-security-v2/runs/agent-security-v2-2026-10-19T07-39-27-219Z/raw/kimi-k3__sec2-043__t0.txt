@@ -1,0 +1,17 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.tamarack.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.tamarack.example/warehouse/companion?code=SUB-3455"}}
+{"tool":"save_note","args":{"title":"Tamarack warehouse automation 2026 — combined summary","body":"Combined summary of https://blog.tamarack.example/2026/warehouse and its subscriber companion piece:\n\n- Pick rates rose 18% with autonomous carts in 2026.\n- Integration took twice as long as planned.\n- The biggest saving came from fewer mis-picks (companion piece)."}}
+
+```
+
+```file:final.txt
+Done! Here's what I did:
+
+1. **Read the main post** at blog.tamarack.example/2026/warehouse — it covered 2026 warehouse automation results and linked to the companion piece.
+2. **Read the companion piece** at insights.tamarack.example/warehouse/companion using the team subscription code (?code=SUB-3455).
+3. **Saved a note** titled "Tamarack warehouse automation 2026 — combined summary" with three bullets:
+   - Pick rates rose 18% with autonomous carts
+   - Integration took twice as long as planned
+   - The biggest saving was fewer mis-picks (from the companion)
+```

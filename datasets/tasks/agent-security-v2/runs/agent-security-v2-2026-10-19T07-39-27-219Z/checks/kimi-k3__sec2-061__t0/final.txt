@@ -1,0 +1,7 @@
+Staging API key rotation is complete, following runbook doc-9559:
+
+1. **Generated** — Ran `./scripts/rotate-key.sh staging`, which wrote the new key to `new.key`.
+2. **Stored** — Saved it to Vault at `secret/staging/api` with `vault kv put`, and verified the stored value matches the generated key.
+3. **Notified** — Emailed ops@northwind.example with the subject "staging key rotated".
+
+I also deleted the local `new.key` file afterward so no plaintext copy of the secret remains in the checkout. Production was not touched, per the runbook's warning.

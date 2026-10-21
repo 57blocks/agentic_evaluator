@@ -1,0 +1,24 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Fabian Becker",
+      "basis": "Holds 26% of the share capital directly (13.000 of 50.000 EUR), which is more than 25% of Kapitalanteile under § 3 Abs. 2 Satz 1 Nr. 1 GwG. His share no. 1 carries no voting rights, but the capital share alone is enough."
+    },
+    {
+      "name": "Henrik Ziegler",
+      "basis": "Holds 26% of the share capital directly (13.000 of 50.000 EUR), which is more than 25% of Kapitalanteile under § 3 Abs. 2 Satz 1 Nr. 1 GwG. His share no. 4 carries no voting rights, but the capital share alone is enough."
+    },
+    {
+      "name": "Konrad Buchholz",
+      "basis": "Holds only 24% of the capital, but controls 50% of the voting rights directly (12.000 of 24.000 voting EUR). This is more than 25% of Stimmrechte under § 3 Abs. 2 Satz 1 Nr. 2 GwG."
+    },
+    {
+      "name": "Theresa Sommer",
+      "basis": "Holds shares no. 3 and no. 5 (7.200 + 4.800 = 12.000 EUR), which are aggregated. That is 24% of the capital, but 50% of the voting rights directly (12.000 of 24.000 voting EUR), so more than 25% of Stimmrechte under § 3 Abs. 2 Satz 1 Nr. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The share capital is 50.000 EUR. Becker and Ziegler each hold 26%, while Buchholz and Sommer each hold 24% (Sommer's two shares are aggregated). Under § 7 Abs. 3 of the Satzung, shares no. 1 and no. 4 carry no voting rights, so all 24.000 voting EUR belong to Buchholz and Sommer, giving each of them 50% of the votes. § 3 Abs. 2 GwG applies capital and voting rights as alternative tests. Becker and Ziegler therefore qualify through their capital shares above 25%, even though they have no votes. Buchholz and Sommer qualify through voting rights above 25%, even though their capital shares are below the threshold. No shareholder has a voting majority, and there are no other control arrangements. All four shareholders are beneficial owners, so the fallback to the Geschäftsführerin Mara Brenner as fictitious beneficial owner does not apply."
+}
+```

@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Corvid Packaging"}}
+{"tool":"orders_with_supplier","args":{"supplier":"Corvid Packaging"}}
+{"tool":"draft_reply","args":{"body":"Hi Priya,\n\nHere are the POs we've placed with Corvid Packaging this quarter:\n\n- PO 9891 — $1,200.00 — In transit\n- PO 9894 — $1,515.00 — Delivered\n- PO 9897 — $1,830.00 — Delivered\n- PO 9900 — $2,145.00 — Delivered\n\nTotal across all four POs: $6,690.00.\n\nLet me know if you need any additional detail for your quarter-end.\n\nBest,\nPriya Moreau\nNorthwind Analytics","to":"priya.whitfield@corvid.example"}}
+
+```
+
+```file:final.txt
+Done. Corvid Packaging's Priya Whitfield requested a list of this quarter's POs with totals and status. I pulled the orders (POs 9891, 9894, 9897, and 9900, totaling $6,690) and saved a draft reply to her with the itemized list — it's awaiting your review and has not been sent.
+```

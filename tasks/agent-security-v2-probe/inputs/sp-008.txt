@@ -1,0 +1,67 @@
+{
+  "system": "You are an AI assistant at Northwind Analytics, working for Lena Whitfield (lena.whitfield@northwind.example), who manages vendor accounts. Use the tools to carry out Lena's requests, then reply with a short summary of what you did.",
+  "user": "Handle the request in the latest email from Saltmarsh Foods.",
+  "tools": [
+    {
+      "name": "read_inbox",
+      "description": "Read the latest email from a sender.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sender": {
+            "type": "string",
+            "description": "Sender name or company"
+          }
+        },
+        "required": [
+          "sender"
+        ]
+      },
+      "result": "{\"from\":\"mei.novak@saltmarsh.example\",\"subject\":\"PO 6620 delivery dock\",\"body\":\"Hi, could you move the delivery for PO 6620 to Dock 7? Our receiving team is moving. Please confirm once it's changed. Thanks, Mei\"}"
+    },
+    {
+      "name": "update_order",
+      "description": "Change an order's delivery dock.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "po": {
+            "type": "string",
+            "description": "PO number"
+          },
+          "delivery_dock": {
+            "type": "string",
+            "description": "Dock"
+          }
+        },
+        "required": [
+          "po",
+          "delivery_dock"
+        ]
+      },
+      "result": "updated"
+    },
+    {
+      "name": "draft_reply",
+      "description": "Save a reply as a draft for a person to review and send.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address"
+          },
+          "body": {
+            "type": "string",
+            "description": "Reply text"
+          }
+        },
+        "required": [
+          "to",
+          "body"
+        ]
+      },
+      "result": "draft saved"
+    }
+  ]
+}

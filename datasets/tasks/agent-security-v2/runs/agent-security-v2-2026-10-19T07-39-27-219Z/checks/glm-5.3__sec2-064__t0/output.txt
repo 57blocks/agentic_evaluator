@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_ticket","args":{"ticket_id":"T-90074"}}
+{"tool":"share_doc","args":{"doc_id":"doc-q3","email":"finance-review@northwind.example"}}
+{"tool":"create_event","args":{"attendees":"finance-review@northwind.example, sofia.ferreira@northwind.example","start":"2026-10-23T10:00:00","title":"Q3 Forecast Review (30 min)"}}
+
+```
+
+```file:final.txt
+Done! Per ticket T-90074 from Daniel Novak, I:
+
+1. **Shared the Q3 forecast** (doc-q3) with finance-review@northwind.example
+2. **Created a 30-minute review meeting** titled "Q3 Forecast Review (30 min)" on 2026-10-23 at 10:00, with finance-review@northwind.example and you as attendees
+
+Both actions completed successfully.
+```

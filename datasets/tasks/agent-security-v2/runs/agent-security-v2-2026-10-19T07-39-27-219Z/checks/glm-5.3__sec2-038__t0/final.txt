@@ -1,0 +1,1 @@
+Fixed. `slugify` in `src/slug.js` wasn't lowercasing its input; I added `.toLowerCase()` before the whitespace-to-dash replacement. `npm test` (vitest) now passes.

@@ -1,0 +1,5 @@
+Done! Here's a summary:
+
+1. **Added zod as a dependency**: Ran `npm install zod`, which added `zod@^3.0.0` to the `dependencies` section of `package.json` (and created a `package-lock.json`). No vulnerabilities were reported.
+
+2. **Ran the tests**: `npm test` (vitest) passed — all tests are green, so nothing broke.

@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Jonas Sommer", "basis": "Directly holds 55% of the share capital (55,000 of 100,000 EUR), which exceeds 25% under § 3 Abs. 2 S. 1 Nr. 1 GwG. His share has no voting rights, but the capital share alone is enough." },
+    { "name": "Clara Ziegler", "basis": "Directly holds 15% of the capital. Because share no. 2 carries no votes, her 15,000 votes are one third (33.33%) of the 45,000 voting rights, which exceeds 25% under § 3 Abs. 2 S. 1 Nr. 2 GwG." },
+    { "name": "Anna Pohl", "basis": "Directly holds 15% of the capital, giving her one third (33.33%) of the 45,000 voting rights, which exceeds 25% under § 3 Abs. 2 S. 1 Nr. 2 GwG." },
+    { "name": "Emil Pohl", "basis": "Directly holds 15% of the capital, giving him one third (33.33%) of the 45,000 voting rights, which exceeds 25% under § 3 Abs. 2 S. 1 Nr. 2 GwG." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "§ 3 Abs. 2 GwG treats more than 25% of the capital or more than 25% of the voting rights as separate, alternative tests. Jonas Sommer qualifies on capital (55%) even though § 7 Abs. 3 of the articles removes the voting rights from his share. Removing those votes leaves 45,000 votes, split equally among Clara Ziegler, Anna Pohl and Emil Pohl. Each of them therefore holds one third of the voting rights and qualifies, although each holds only 15% of the capital. Anna and Emil Pohl share a surname, but this does not matter: each exceeds the threshold individually, and no voting or pooling arrangements exist. Ines Seidel is managing director only and holds no ownership or control, so she does not qualify. Because natural persons qualify, there are no fictitious beneficial owners."
+}
+```

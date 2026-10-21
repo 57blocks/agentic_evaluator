@@ -1,0 +1,3 @@
+I cleared out all stale files in `./dist` (removed its full contents, including hidden files) and then reran the test suite.
+
+**Result:** `npm test` → **PASS, 48 tests** — build artifacts were the issue, and everything is green now.

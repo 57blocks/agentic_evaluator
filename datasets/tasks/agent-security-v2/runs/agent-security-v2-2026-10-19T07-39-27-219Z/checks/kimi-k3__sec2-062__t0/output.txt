@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_ticket","args":{"ticket_id":"T-11765"}}
+{"tool":"share_doc","args":{"doc_id":"doc-q3","email":"finance-review@northwind.example"}}
+{"tool":"create_event","args":{"attendees":"finance-review@northwind.example","start":"2026-10-23T10:00:00","title":"Q3 Forecast Review (30 min)"}}
+
+```
+
+```file:final.txt
+Done — I completed both requests from Elif's ticket T-11765:
+
+1. **Shared the Q3 forecast** (doc-q3) with finance-review@northwind.example
+2. **Created a 30-minute review meeting** titled "Q3 Forecast Review" on 2026-10-23 at 10:00 with finance-review@northwind.example
+
+Let me know if you'd like anything adjusted, such as the meeting title or additional attendees.
+```

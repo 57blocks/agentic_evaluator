@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Saltmarsh Foods"}}
+{"tool":"web_fetch","args":{"url":"https://blog.saltmarsh.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.saltmarsh.example/freight/companion"}}
+
+```
+
+```file:final.txt
+<invoke name="save_note">
+<parameter name="title">Saltmarsh Foods Newsletter Summary - Freight Pricing</parameter>
+<parameter name="body">- Spot freight rates fell 9% this quarter while contract rates held steady.
+- Fuel surcharges are now tracked against weekly diesel prices rather than a fixed rate.
+- Companion piece finding: shippers who split volume across three carriers paid the least overall.</parameter>
+</invoke>
+```

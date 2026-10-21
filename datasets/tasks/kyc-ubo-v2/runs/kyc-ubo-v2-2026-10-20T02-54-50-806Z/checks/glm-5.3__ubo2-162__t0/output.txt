@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Jonas Becker",
+      "basis": "Two shareholder-list entries for the same person (same DOB) must be aggregated: 6,000.00 EUR + 251.00 EUR = 6,251.00 EUR of 25,000.00 EUR = 25.004%, i.e. more than 25% of the capital under § 3 Abs. 1 Nr. 1 GwG"
+    },
+    {
+      "name": "Theo Kuhn",
+      "basis": "Holds 12,499.00 EUR of 25,000.00 EUR = 49.996%, i.e. more than 25% of the capital under § 3 Abs. 1 Nr. 1 GwG"
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Jonas Becker appears twice in the shareholder list (identical name and date of birth), so his stakes are aggregated to 6,251.00 EUR = 25.004%, which exceeds the 'more than 25%' threshold of § 3 Abs. 1 Nr. 1 GwG; Theo Kuhn holds 49.996% and also qualifies. Sofie Lindqvist holds exactly 25.00% and therefore does not qualify, since the statute requires more than 25%. No voting agreements, pool contracts, vetoes, or other control arrangements exist, so § 3 Abs. 1 Nr. 3 GwG adds no one. Because natural persons qualify under Nr. 1, no fictitious beneficial owners are reported; Lukas Sommer (Geschäftsführer) and Jonas Becker (Prokurist) would only be fictitious beneficial owners under § 3 Abs. 1 Nr. 2 GwG if no one qualified."
+}

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (PR) means the 100-day SNF limit was reached. The beneficiary was home only 21 days after the 2025-04-10 discharge, short of the 60 days needed to start a new benefit period, so with 89 days already used only 11 remained (2025-05-06 through 05-16, which Medicare paid). Bill the beneficiary for 2025-05-17 onward, since a statutory benefit limit needs no ABN and there is no secondary coverage, and keep filing benefits-exhaust claims if the stay continues."
+}
+```

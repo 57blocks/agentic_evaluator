@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Only 15 days passed between the 2025-03-08 discharge and the 2025-03-24 hospital admission, short of the 60 days needed to start a new benefit period. The 9 SNF days left (100 minus 91) ran out on 2025-04-05, so Medicare correctly assigned 2025-04-06 through 2025-04-11 to the patient (CARC 119, PR), and with no Medigap or Medicaid on file the facility should bill the beneficiary for those days."
+}
+```

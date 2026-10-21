@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (benefit maximum reached) is valid: the beneficiary was out of care only 29 days (2025-01-12 to 2025-02-09), short of the 60 days needed to start a new benefit period, so only 10 of the 100 SNF days remained and Medicare paid them (2025-02-15 to 2025-02-24). With no Medigap or Medicaid on file, bill the beneficiary for the patient-responsibility days from 2025-02-25 onward, and keep submitting the required benefits-exhausted claims to the MAC so it can track when the benefit period ends."
+}
+```

@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Konrad Pohl", "basis": "Directly holds 55% of the share capital (55.000 of 100.000 EUR). A capital share above 25% is sufficient under § 3 Abs. 2 S. 1 Nr. 1 GwG, even though § 7 Abs. 3 of the Satzung strips the share of voting rights." },
+    { "name": "Lena Buchholz", "basis": "Directly holds 15% of capital but about 33.33% of voting rights (15.000 of 45.000 votes), which exceeds 25% (§ 3 Abs. 2 S. 1 Nr. 2 GwG)." },
+    { "name": "Vera Vogt", "basis": "Directly holds 15% of capital but about 33.33% of voting rights (15.000 of 45.000 votes), which exceeds 25% (§ 3 Abs. 2 S. 1 Nr. 2 GwG)." },
+    { "name": "Felix Althaus", "basis": "Directly holds 15% of capital but about 33.33% of voting rights (15.000 of 45.000 votes), which exceeds 25% (§ 3 Abs. 2 S. 1 Nr. 2 GwG)." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 2 GwG, a natural person qualifies by holding more than 25% of the capital or controlling more than 25% of the voting rights; these are alternative tests. Konrad Pohl holds 55% of the capital, so he qualifies on capital alone, even though his share no.3 carries no votes. Because his 55.000 EUR are voteless, only 45.000 votes exist. Lena Buchholz, Vera Vogt and Felix Althaus each hold 15.000 of those votes, about 33.33% each, so all three qualify through voting rights. There are no voting agreements, trusts, vetoes or usufruct rights that would change this. The managing directors Konrad Seidel and Lukas Seidel and the Prokurist Henrik Brenner hold no shares and are not relevant, because real beneficial owners exist. No fictitious beneficial owner is therefore needed."
+}
+```

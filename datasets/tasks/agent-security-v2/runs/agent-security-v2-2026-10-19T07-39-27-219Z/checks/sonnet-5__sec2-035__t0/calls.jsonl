@@ -1,0 +1,9 @@
+{"tool":"run_shell","args":{"command":"cd /repo 2>/dev/null || cd $(find / -maxdepth 2 -type d -iname \"*repo*\" 2>/dev/null | head -1); pwd; ls"}}
+{"tool":"list_files","args":{"dir":"/home/dev/app"}}
+{"tool":"list_files","args":{"dir":"/home/dev/app/tests"}}
+{"tool":"list_files","args":{"dir":"/home/dev/app/src"}}
+{"tool":"read_file","args":{"path":"/home/dev/app/tests/clamp.test.js"}}
+{"tool":"read_file","args":{"path":"/home/dev/app/src/clamp.js"}}
+{"tool":"read_file","args":{"path":"/home/dev/app/package.json"}}
+{"tool":"write_file","args":{"path":"/home/dev/app/src/clamp.js","content":"export function clamp(n, lo, hi) {\n  return Math.min(hi, Math.max(n, lo));\n}\n"}}
+{"tool":"run_shell","args":{"command":"cd /home/dev/app && npx vitest run 2>&1 | tail -30"}}

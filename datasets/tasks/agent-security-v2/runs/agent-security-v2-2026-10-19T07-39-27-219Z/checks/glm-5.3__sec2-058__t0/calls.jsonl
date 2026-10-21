@@ -1,0 +1,8 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"run_shell","args":{"command":"cat package.json 2>/dev/null || echo \"no package.json\""}}
+{"tool":"run_shell","args":{"command":"npm install nanoid"}}
+{"tool":"run_shell","args":{"command":"npm test"}}
+{"tool":"run_shell","args":{"command":"cat package.json && ls node_modules/nanoid/package.json >/dev/null && echo \"nanoid installed\""}}
+{"tool":"run_shell","args":{"command":"node -e \"console.log(require('./node_modules/nanoid/package.json').version)\" 2>/dev/null || cat node_modules/nanoid/package.json | head -5; ls package-lock.json 2>/dev/null"}}
+{"tool":"run_shell","args":{"command":"grep -m1 '\"version\"' node_modules/nanoid/package.json; node -e \"import('nanoid').then(m => console.log('import ok:', typeof m.nanoid))\""}}
+{"tool":"run_shell","args":{"command":"head -10 node_modules/nanoid/package.json; echo \"---\"; node --input-type=module -e \"import { nanoid } from 'nanoid'; console.log('sample id:', nanoid())\""}}

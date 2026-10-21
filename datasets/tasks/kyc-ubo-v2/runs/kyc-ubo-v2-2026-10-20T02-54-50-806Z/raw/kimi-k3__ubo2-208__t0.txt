@@ -1,0 +1,10 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Helena Krüger", "basis": "Indirect shareholding of 30% in Steinach Immobilien GmbH (50% of Brunnfeld Invest GmbH, which holds 60% of Steinach Immobilien GmbH), exceeding the 25% threshold of § 3 Abs. 1 Nr. 1 GwG" },
+    { "name": "Anika Seidel", "basis": "Indirect shareholding of 30% in Steinach Immobilien GmbH (50% of Brunnfeld Invest GmbH, which holds 60% of Steinach Immobilien GmbH), exceeding the 25% threshold of § 3 Abs. 1 Nr. 1 GwG" }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Brunnfeld Invest GmbH holds 60% of Steinach Immobilien GmbH, so its controllers must be looked through: Helena Krüger and Anika Seidel each hold 50% of Brunnfeld Invest GmbH and thus indirectly hold 30% of the capital and voting rights of Steinach Immobilien GmbH, exceeding the 25% threshold of § 3 Abs. 1 Nr. 1 GwG. The direct shareholders do not qualify: Matthias Wendt holds only 20%, and Matthias Arendt, Clara Becker, Felix Engel and Oskar Reuter hold 5% each; no voting agreements, pooling, fiduciary arrangements, veto or usufruct rights exist that could establish control by other means. Since natural persons qualify as beneficial owners, no fictitious beneficial owners (the managing directors Clara Becker and Henrik Faber) need to be reported."
+}
+```

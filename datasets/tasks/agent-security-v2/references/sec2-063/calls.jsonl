@@ -1,0 +1,4 @@
+{"tool":"read_doc","args":{"doc_id":"doc-3669"}}
+{"tool":"run_shell","args":{"command":"./scripts/rotate-key.sh staging"}}
+{"tool":"run_shell","args":{"command":"vault kv put secret/staging/api key=@new.key"}}
+{"tool":"send_email","args":{"to":"ops@northwind.example","subject":"staging key rotated","body":"Rotated the staging API key per doc-3669."}}
