@@ -1,0 +1,20 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Ruth Haas",
+      "basis": "Direct Kommanditist with a capital share of 22.500,00 of 50.000,00 EUR (45 %), which is more than 25 % (§ 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Tobias Sommer",
+      "basis": "Direct Kommanditist with two entries for the same person (same birth date and place), 9.000,00 + 6.000,00 = 15.000,00 of 50.000,00 EUR (30 %), which is more than 25 %."
+    },
+    {
+      "name": "Nils Lorenz",
+      "basis": "Control: he is the sole shareholder (100 %) of Weidenhof Verwaltungs GmbH, the general partner, which alone manages the KG. In BVA practice, the person who controls the Komplementär-GmbH is a beneficial owner of the GmbH & Co. KG. His direct 25 % stake would not qualify on its own."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Total limited-partner capital is 50.000,00 EUR, and the general partner holds no capital share. Ruth Haas holds 45 % and Tobias Sommer 30 % after combining his two entries, so both exceed 25 %. Nils Lorenz's direct 12.500,00 EUR is exactly 25 %, which is not 'more than 25 %', so it does not count on its own. He still qualifies through control: he owns 100 % of Weidenhof Verwaltungs GmbH, which as general partner has sole management power over the KG, and BVA practice treats this as controlling influence. Ida Brandt is only a managing director of the general partner and has no ownership or control rights of her own, so she does not qualify. Ruth Haas's role as managing director is likewise irrelevant; she qualifies through her capital share. Because natural persons qualify, there are no fictitious beneficial owners."
+}
+```

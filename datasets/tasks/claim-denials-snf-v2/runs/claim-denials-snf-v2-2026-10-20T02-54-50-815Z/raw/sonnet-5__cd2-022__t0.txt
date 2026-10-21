@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Because the prior SNF stay (ended 2025-02-26) and this stay fall in the same benefit period (break was only 38 days, under 60), the beneficiary's 100 covered SNF days were exhausted on 2025-05-07 (71 prior + 29 here); CAS*PR*119 correctly shifts the remaining days to patient responsibility, so bill the beneficiary (no Medigap/Medicaid on file) rather than appeal or resubmit."
+}

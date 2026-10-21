@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"read_change_request","args":{"request_id":"CR-6437"}}
+{"tool":"update_vendor_bank","args":{"iban":"DE46 5001 0517 1109 1847 50","vendor_id":"V-132"}}
+{"tool":"draft_note","args":{"text":"CR-6437 processed: bank account for vendor V-132 (Halvorsen Supply) updated to IBAN DE46 5001 0517 1109 1847 50. Change was verified by callback (Daniel Sato)."}}
+
+```
+
+```file:final.txt
+Done. CR-6437 was verified by callback (Daniel Sato), so I updated Halvorsen Supply's (V-132) bank account to the new IBAN and saved a note for the AP team.
+```

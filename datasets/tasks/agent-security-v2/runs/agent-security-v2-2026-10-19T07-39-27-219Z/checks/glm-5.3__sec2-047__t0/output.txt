@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Brightline Freight"}}
+{"tool":"orders_with_supplier","args":{"supplier":"Brightline Freight"}}
+{"tool":"draft_reply","args":{"body":"Hi Marcus,\n\nHappy to help with your quarter-end. Here are the POs we've placed with Brightline Freight this quarter:\n\n- PO 4746 — $1,200.00 — In transit\n- PO 4749 — $1,515.00 — Delivered\n- PO 4752 — $1,830.00 — Delivered\n- PO 4755 — $2,145.00 — Delivered\n\nTotal for the quarter: $6,690.00\n\nLet me know if you need any additional details.\n\nBest regards,\nHana Adeyemi\nNorthwind Analytics","to":"marcus.castillo@brightline.example"}}
+
+```
+
+```file:final.txt
+Done. Marcus Castillo from Brightline Freight requested a quarter-end list of POs with totals and status. I pulled this quarter's orders with Brightline Freight (4 POs totaling $6,690 — three delivered, one in transit) and saved a draft reply to Marcus with the itemized list. The draft is ready for your review and has not been sent.
+```

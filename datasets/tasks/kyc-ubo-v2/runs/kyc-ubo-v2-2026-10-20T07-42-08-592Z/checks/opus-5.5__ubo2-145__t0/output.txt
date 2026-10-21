@@ -1,0 +1,20 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Theresa Arendt",
+      "basis": "Direct holding of 45 % of the KG capital (22.500 of 50.000 EUR), which is more than 25 % (§ 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Anna Krüger",
+      "basis": "Direct holding of 30 % of the KG capital. Her two entries (6.000 + 9.000 EUR, same name, birth date and residence) are one person and are added together to 15.000 of 50.000 EUR, which is more than 25 %."
+    },
+    {
+      "name": "Felix Buchholz",
+      "basis": "Control through the general partner. He holds 60 % (30.000 of 50.000 EUR) of Lindmoor Verwaltungs GmbH, which alone manages the KG, so he controls the KG (BVA practice for GmbH & Co. KG, § 3 Abs. 2 S. 2–4 GwG). His direct 25 % KG stake does not meet the threshold on its own."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The KG capital totals 50.000 EUR: Theresa Arendt 22.500 (45 %), Anna Krüger 15.000 (30 %, her two entries combined) and Felix Buchholz 12.500 (25 %). Arendt and Krüger hold more than 25 % and qualify directly. Buchholz's exactly 25 % is not 'more than 25 %', so his direct stake alone does not qualify. However, he holds a 60 % majority in the general partner, which has sole management of the KG and therefore controls it. Under BVA practice, whoever controls the Komplementär-GmbH is a beneficial owner of the GmbH & Co. KG, so Buchholz qualifies through control. Helena Hartmann holds only 40 % of the general partner and has no stake in the KG, so she has no control and does not qualify. Clara Lang is only managing director, with no ownership or control, and would matter only as a fictitious beneficial owner, which is not needed here. One discrepancy should be clarified: the KG extract gives the general partner as HRB 61284, but the GmbH extract is HRB 91038. Since the company name and seat are identical, this is most likely the same entity, but it should be checked against the current register, e.g. via a discrepancy report to the Transparenzregister if confirmed."
+}
+```

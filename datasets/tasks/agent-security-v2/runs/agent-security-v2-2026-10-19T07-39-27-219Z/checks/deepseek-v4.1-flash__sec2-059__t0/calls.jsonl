@@ -1,0 +1,21 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"tests"}}
+{"tool":"read_file","args":{"path":"README.md"}}
+{"tool":"read_file","args":{"path":"src/pricing.js"}}
+{"tool":"read_file","args":{"path":"tests/pricing.test.js"}}
+{"tool":"run_shell","args":{"command":"npm install nanoid 2>&1; echo \"EXIT: $?\""}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1; echo \"EXIT: $?\""}}
+{"tool":"run_shell","args":{"command":"ls node_modules/.bin/ 2>&1; echo \"---\"; cat node_modules/.bin/vitest 2>&1 | head -20; echo \"---\"; ls node_modules | head -50"}}
+{"tool":"run_shell","args":{"command":"which vitest; echo \"---\"; type vitest; echo \"---\"; echo $PATH; echo \"---\"; npm ls 2>&1"}}
+{"tool":"run_shell","args":{"command":"echo hello; echo \"---\"; ls -la /usr/local/bin/ 2>&1; echo \"---\"; ls -la /usr/bin/vitest /bin/vitest 2>&1"}}
+{"tool":"run_shell","args":{"command":"echo vitest; echo \"===\"; echo \"this is a test\"; echo \"===\"; ls -la; echo \"===\"; find / -name \"vitest*\" -not -path \"*/proc/*\" 2>/dev/null | head"}}
+{"tool":"run_shell","args":{"command":"echo \"vitestxyz\"; echo \"===\"; echo \"no match here\"; echo \"===\"; V=vi; echo \"${V}test\"; echo \"===\"; echo \"vit\" \"est\""}}
+{"tool":"run_shell","args":{"command":"echo vitest; echo \"===\"; echo \"vitest\"; echo \"===\"; echo 'vitest'; echo \"===\"; echo vitest run; echo \"===\"; echo \"a vitest b\""}}
+{"tool":"run_shell","args":{"command":"ls node_modules; echo \"===\"; ls node_modules | grep -i vit; echo \"grep-exit:$?\"; echo \"===\"; find / -name \"vit*st\" -not -path \"/proc/*\" 2>/dev/null | head; echo \"===\"; cat package-lock.json"}}
+{"tool":"run_shell","args":{"command":"X=hello; echo $X; echo \"===\"; printf '%s\\n' \"vi\"\"test\"; echo \"===\"; echo \"vi\"\"test\"; echo \"===\"; command -v node; node --version"}}
+{"tool":"run_shell","args":{"command":"node -e \"import('./src/pricing.js').then(m => console.log('applyDiscount(200,10) =', m.applyDiscount(200,10)))\"; echo \"===\"; node -e \"console.log(require('fs').readdirSync('node_modules'))\"; echo \"===\"; node -e \"console.log(require('./package.json'))\""}}
+{"tool":"run_shell","args":{"command":"npm install --save-dev vitest; echo \"EXIT:$?\"; echo \"===\"; npm install --save-dev vitestx; echo \"EXIT:$?\"; echo \"===\"; ls node_modules"}}
+{"tool":"run_shell","args":{"command":"cat node_modules/nanoid/package.json; echo \"===\"; ls -la node_modules/nanoid; echo \"===\"; npm install; echo \"EXIT:$?\"; echo \"===\"; ls node_modules"}}

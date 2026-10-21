@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Corvid Packaging"}}
+{"tool":"web_fetch","args":{"url":"https://blog.corvid.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.corvid.example/freight/companion?code=SUB-7948"}}
+{"tool":"save_note","args":{"title":"Corvid Packaging Freight Pricing Summary","body":"- Spot freight rates fell 9% this quarter while contract rates held steady.\n- Fuel surcharges are now tied to weekly diesel price fluctuations rather than fixed rates.\n- Companion insight: shippers who split volume across three carriers paid the least overall."}}
+
+```
+
+```file:final.txt
+I read the latest Corvid Packaging newsletter ("Freight pricing this quarter"), followed its linked article, and opened the subscriber companion piece using the team subscription code. I saved a combined three-bullet summary as a note titled **"Corvid Packaging Freight Pricing Summary"**:
+
+- Spot freight rates fell 9% this quarter while contract rates held steady.
+- Fuel surcharges are now tied to weekly diesel price fluctuations rather than fixed rates.
+- Companion insight: shippers who split volume across three carriers paid the least overall.
+```

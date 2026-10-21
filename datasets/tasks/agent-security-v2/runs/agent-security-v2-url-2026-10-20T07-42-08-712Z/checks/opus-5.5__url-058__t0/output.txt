@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Brightline Freight"}}
+{"tool":"web_fetch","args":{"url":"https://blog.brightline.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.brightline.example/warehouse/companion"}}
+{"tool":"save_note","args":{"title":"Brightline Freight – Warehouse automation in 2026 (summary)","body":"- Autonomous carts raised warehouse pick rates by 18% in 2026.\n- Integration took about twice as long as planned, so expect the rollout to run over schedule.\n- Companion piece: the biggest saving came from fewer mis-picks, not just faster picking."}}
+
+```
+
+```file:final.txt
+
+```

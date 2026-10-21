@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 37-day gap at home (2025-02-27 to 2025-04-04) is under 60 days, so this stay is in the same benefit period as the prior stay. Only 29 of the 100 SNF days were left (71 already used), so Medicare correctly paid through 2025-05-07 and denied 2025-05-08 to 2025-05-21 under CARC 119; with no Medigap or Medicaid on file, bill the beneficiary for those days and the coinsurance shown as patient responsibility."
+}
+```

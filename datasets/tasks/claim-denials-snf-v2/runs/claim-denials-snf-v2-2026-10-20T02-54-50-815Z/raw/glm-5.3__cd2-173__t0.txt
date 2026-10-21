@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay used 77 of the 100 SNF benefit days, and the 17 days at home (2025-03-31 to 2025-04-16) did not meet the 60-consecutive-day requirement to start a new benefit period, so only 23 days remained. Medicare correctly paid 23 days (through 2025-05-12) and denied the rest as exhausted benefit days (PR-119, patient responsibility); with no Medigap or Medicaid on file, the facility may bill the beneficiary for the non-covered days."
+}
+```

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The break at home (2025-04-08 to 2025-05-10) was only 33 days, under the 60-day wellness period needed to start a new benefit period, so this stay continued the prior spell; the 80 SNF days already used left only 20 days, exhausting the 100-day benefit on 2025-06-03 exactly as the remittance shows. Days 2025-06-04 through 2025-06-12 were denied with PR-119 (patient responsibility) and no Medigap/Medicaid exists, so bill the beneficiary the $11,454 for the non-covered days; an appeal would be futile because the 100-day limit is statutory."
+}
+```

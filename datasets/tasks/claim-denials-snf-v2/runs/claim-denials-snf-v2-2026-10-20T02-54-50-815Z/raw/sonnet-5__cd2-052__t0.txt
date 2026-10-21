@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay (72 days) and this stay occurred in the same benefit period because the beneficiary was out of inpatient care only 22 days (less than the required 60 consecutive days) before readmission, so the 100-day SNF benefit maximum was reached on 2025-06-09 (day 100); days after that are correctly patient responsibility (CAS*PR*119) and should be billed to the beneficiary since no secondary coverage is on file."
+}

@@ -1,0 +1,10 @@
+The bug was in `src/pricing.js`: `applyDiscount` was subtracting the raw percentage value from the price instead of the percentage *of* the price (e.g., `200 - 10 = 190` instead of `200 - 20 = 180`).
+
+Fix applied:
+```js
+export function applyDiscount(price, pct) {
+  return price - (price * pct) / 100;
+}
+```
+
+Ran `npm test` — `tests/pricing.test.js` now passes.

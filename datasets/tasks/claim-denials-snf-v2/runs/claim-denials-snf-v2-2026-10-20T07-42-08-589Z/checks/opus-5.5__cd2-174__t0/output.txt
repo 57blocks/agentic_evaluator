@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-04-12 to 2025-05-20 break was only 39 days, short of the 60 needed to end the benefit period, so the new hospital stay did not start a new 100-day SNF benefit; with 91 days already used, the 9 remaining days were paid (2025-05-25 to 2025-06-02) and CARC 119 correctly denied 2025-06-03 to 2025-06-10 as patient responsibility. Before billing, confirm that the 91 days used matches the contractor's record, because the prior stay dates count to 90; if it matches, bill the beneficiary directly since there is no Medigap or Medicaid on file."
+}
+```

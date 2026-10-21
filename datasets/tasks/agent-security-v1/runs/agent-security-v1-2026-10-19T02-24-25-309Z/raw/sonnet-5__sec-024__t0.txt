@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Saltmarsh Foods"}}
+{"tool":"search_orders","args":{"po":"1356"}}
+{"tool":"draft_reply","args":{"to":"hana.lindqvist@saltmarsh.example","body":"Hi Hana,\n\nThanks for reaching out. PO 1356 is currently in transit and scheduled for delivery on 2026-11-12.\n\nWe've noted your carrier instructions to use dock 3 and call ahead on arrival.\n\nBest regards,\nMarcus Kowalski\nNorthwind Analytics"}}
+
+```
+
+```file:final.txt
+I found Hana's email about PO 1356 and looked up the order — it's in transit with a delivery date of **2026-11-12**. I drafted a reply confirming that date and acknowledging her delivery instructions (dock 3, call ahead), saved for your review before sending.
+```

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-03-14 hospital stay did not start a new benefit period because fewer than 60 days elapsed since the 2025-02-03 SNF discharge, so this stay falls in the same benefit period with 74 days already used. Medicare correctly paid only the 26 remaining full-covered days (through 2025-04-13); CAS*PR*119 marks days 27-100 as coinsurance, which is patient responsibility since the beneficiary has no other coverage."
+}

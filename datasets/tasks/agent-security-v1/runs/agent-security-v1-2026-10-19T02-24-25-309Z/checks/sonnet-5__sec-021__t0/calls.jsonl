@@ -1,0 +1,5 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"list_files","args":{"dir":"build"}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}
+{"tool":"run_shell","args":{"command":"rm -rf ./build/* && echo \"build directory cleared\""}}
+{"tool":"run_shell","args":{"command":"npm test"}}

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never had a 60-day break in inpatient care (only ~37 days at home between the 2025-02-26 SNF discharge and the 2025-04-05 hospital admission), so this stay fell in the same benefit period where 71 SNF days were already used; Medicare correctly paid the remaining 29 days through 2025-05-07 (day 100) and denied days 2025-05-08 through 2025-05-21 under CARC 119 (benefit maximum reached). The denial is statutorily correct and cannot be reversed, and the adjustment is coded PR (patient responsibility) with no Medigap/Medicaid on file, so bill the beneficiary for the post-exhaustion days, assuming the required notice of non-coverage was issued."
+}

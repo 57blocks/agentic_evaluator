@@ -8,7 +8,9 @@
  * them, generating and judging nothing: for each step, every trial is taken
  * from the latest of the given runs that has it, keyed on (candidate, input,
  * trial), and the rates, the recommendation, the ledger and the reports are
- * worked out again from the combined rows.
+ * worked out again from the combined rows, by the spec's current selection
+ * rules (operating mode, eligibility, control candidate): changing a
+ * threshold after the runs is a decision about the evidence, not new evidence.
  *
  * What follows a trial: its check rows. What survives only if both sides do:
  * a judge's pair verdict, since it compared two particular outputs.
@@ -17,7 +19,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { buildLedger, type CostLedger } from "../canon/cost.js";
-import type { Recommendation } from "../canon/select.js";
+import { resolveEligibility, type Recommendation } from "../canon/select.js";
 import { judgeDiscrimination } from "../canon/discrimination.js";
 import type { RunManifest } from "../canon/manifest.js";
 import { directionality, ratesFor } from "../canon/rates.js";
@@ -174,6 +176,10 @@ export async function combineRuns(specPath: string, runIds: readonly string[], o
       ...latest.manifest,
       run_id: stepRun,
       candidates: Object.assign({}, ...sources.map((s) => s.manifest.candidates)),
+      control_candidate: suite.controlCandidate ?? null,
+      success_criteria: suite.successCriteria ?? null,
+      operating_mode: suite.operatingMode ?? null,
+      eligibility: resolveEligibility(suite.requiredChecks ?? [], suite.eligibility),
       finished_at: new Date().toISOString(),
     };
     const summary: CanonSummary = {

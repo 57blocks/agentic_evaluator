@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was readmitted only 30 days after the prior SNF discharge, so the 60-day break needed to start a new benefit period was not met; with 92 SNF days already used in this benefit period, Medicare paid the remaining 8 days (through 2025-04-19) and denied 2025-04-20 through 2025-05-01 under CARC 119 (100-day SNF maximum reached). The denial is statutorily correct and the adjustment is PR (patient responsibility) with no other coverage on file, so bill the beneficiary for the non-covered days, first confirming the required notice of Medicare non-coverage was given."
+}

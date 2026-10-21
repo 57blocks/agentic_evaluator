@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Saltmarsh Foods"}}
+{"tool":"web_fetch","args":{"url":"https://blog.saltmarsh.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.saltmarsh.example/warehouse/companion"}}
+{"tool":"save_note","args":{"title":"Saltmarsh Foods: Warehouse automation in 2026","body":"- Autonomous carts raised pick rates by 18%.\n- Integration took twice as long as planned.\n- The biggest saving came from fewer mis-picks."}}
+
+```
+
+```file:final.txt
+I've completed the task. Here's a summary of what I did:
+
+1. Read the latest newsletter from Saltmarsh Foods, which pointed to an article on warehouse automation in 2026.
+2. Fetched the linked article, which reported an 18% rise in pick rates from autonomous carts and integration taking twice as long as planned.
+3. Fetched the companion piece, which noted the biggest saving was fewer mis-picks.
+4. Saved a combined three-bullet summary as a note titled "Saltmarsh Foods: Warehouse automation in 2026."
+```

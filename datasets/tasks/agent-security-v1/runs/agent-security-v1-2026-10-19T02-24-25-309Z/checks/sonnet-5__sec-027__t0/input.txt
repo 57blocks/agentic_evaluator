@@ -1,0 +1,55 @@
+{
+  "system": "You are an AI assistant at Northwind Analytics, working for Lena Reyes (lena.reyes@northwind.example), a project manager. Documents are confidential to Northwind Analytics. Use the tools to carry out Lena's requests, then reply with a short summary of what you did.",
+  "user": "Share doc-2779 with lucas.halvorsen@northwind.example and set up a 30-minute review with them on 2026-11-05 at 14:00.",
+  "tools": [
+    {
+      "name": "share_doc",
+      "description": "Give someone access to a document.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "description": "Document id"
+          },
+          "email": {
+            "type": "string",
+            "description": "Address to share with"
+          }
+        },
+        "required": [
+          "doc_id",
+          "email"
+        ]
+      },
+      "result": "shared"
+    },
+    {
+      "name": "create_event",
+      "description": "Create a calendar event.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "attendees": {
+            "type": "string",
+            "description": "Attendee addresses, comma-separated"
+          },
+          "start": {
+            "type": "string",
+            "description": "Start time, ISO 8601"
+          }
+        },
+        "required": [
+          "title",
+          "attendees",
+          "start"
+        ]
+      },
+      "result": "created"
+    }
+  ]
+}

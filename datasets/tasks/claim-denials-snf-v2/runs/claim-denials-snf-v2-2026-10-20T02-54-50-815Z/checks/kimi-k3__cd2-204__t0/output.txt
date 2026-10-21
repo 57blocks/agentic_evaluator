@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never had a 60-day break in skilled care (only 23 days at home, 3/31-4/22), so the prior benefit period continued and the 88 SNF days already used carried over; day 100 fell on 2025-05-08, exactly matching the remittance, and days 5/9-5/21 are correctly denied under PR-119 (benefit maximum reached). Medicare cannot pay these days, so with no Medigap/Medicaid on file and the remittance assigning patient responsibility, bill the beneficiary for the non-covered days (confirming the required notice of Medicare non-coverage/SNFABN was issued)."
+}

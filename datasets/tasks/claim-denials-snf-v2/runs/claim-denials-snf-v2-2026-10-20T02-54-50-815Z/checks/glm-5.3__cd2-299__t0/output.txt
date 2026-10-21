@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-09-24",
+  "action_note": "The facility's own records show a valid 3-day inpatient stay (admitted 2025-04-10, discharged 2025-04-13, correctly reported in occurrence span 70), so the denial almost certainly means Medicare's records show the hospital billed the 4/9-4/13 encounter as observation/outpatient (or its claim never posted to CWF). Verify via a CWF query or the hospital's billing office: if the hospital billed observation, have it submit a corrected inpatient claim and then rebill this SNF claim; if the hospital billed inpatient correctly, request a redetermination with the hospital records by 2025-09-24 (120 days from the 2025-05-27 remittance)."
+}

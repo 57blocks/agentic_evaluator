@@ -1,0 +1,8 @@
+{
+  "beneficial_owners": [
+    { "name": "Konrad Engel", "basis": "Holds combined share capital of 9.750,00 EUR + 251,00 EUR = 10.001,00 EUR, i.e. 25,0025% of the 40.000 EUR Stammkapital, thus more than 25% of capital/voting rights (§ 3 Abs. 2 GwG)." },
+    { "name": "Matthias Brenner", "basis": "Holds 19.999,00 EUR of the 40.000 EUR Stammkapital, i.e. 49,9975%, thus more than 25% of capital/voting rights (§ 3 Abs. 2 GwG)." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Shares must be aggregated per shareholder across all entries in the Gesellschafterliste. Konrad Engel's two tranches sum to 10.001 EUR (25,0025%), which exceeds the 25% threshold, so he qualifies as beneficial owner. Matthias Brenner holds 19.999 EUR (49,9975%), clearly above 25%, and also qualifies. Bastian Ziegler holds exactly 10.000 EUR (25,0%), which does not exceed 25% and therefore does not meet the statutory threshold, so he is not a beneficial owner. No pooling, voting, trust, veto or usufruct agreements exist that would alter control, so no fictitious beneficial owners need to be named since natural persons qualify directly."
+}

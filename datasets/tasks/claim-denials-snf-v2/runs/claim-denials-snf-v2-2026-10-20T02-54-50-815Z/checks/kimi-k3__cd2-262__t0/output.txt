@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the beneficiary was out of inpatient care only 18 days (2025-05-01 to 2025-05-18), short of the 60-day break needed to start a new benefit period, so the 77 days used in the prior SNF stay carry over and day 100 of the benefit period fell on 2025-06-14, making 2025-06-15 through 2025-06-19 non-covered. Medicare cannot pay these days and there is no Medigap or Medicaid on file, so bill the beneficiary for the PR-119 amount (assuming the required notice of Medicare non-coverage was issued before coverage ended)."
+}

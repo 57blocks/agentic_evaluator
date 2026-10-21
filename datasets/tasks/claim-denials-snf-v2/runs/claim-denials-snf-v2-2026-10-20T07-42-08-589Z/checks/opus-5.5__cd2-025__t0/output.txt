@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (benefit maximum reached) is correct. The 13 days at home (2025-04-20 to 2025-05-02) fall short of the 60-day break needed to end the benefit period, so the 91 SNF days already used plus the 9 paid days (2025-05-07 to 05-15) reach the 100-day limit, and the beneficiary has no secondary coverage. Bill the patient for the PR-119 amount for 2025-05-16 to 05-21 and any coinsurance on the paid days, and keep submitting benefits-exhaust no-pay claims while she stays at a skilled level of care so the benefit period is tracked."
+}
+```

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was at home only 36 days (2025-04-14 to 2025-05-19), fewer than the 60 consecutive days needed to end the benefit period, so the 2025-05-20 hospital stay did not start a new period. The 78 days used in the prior stay plus 22 covered days here exhausted the 100-day SNF limit on 2025-06-13, making the remaining days noncovered. With no Medigap or Medicaid on file, issue an ABN-compliant bill to the patient for the noncovered days."
+}
+```

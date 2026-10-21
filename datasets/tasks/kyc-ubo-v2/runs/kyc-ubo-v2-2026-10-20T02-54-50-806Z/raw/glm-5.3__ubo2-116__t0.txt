@@ -1,0 +1,10 @@
+{
+  "beneficial_owners": [
+    { "name": "Felix Lang", "basis": "Kommanditist with 24,000 of 60,000 EUR Hafteinlage (40% capital share), above 25% threshold" },
+    { "name": "Greta Brenner", "basis": "Kommanditist with 21,000 of 60,000 EUR Hafteinlage (35% capital share), above 25% threshold" },
+    { "name": "Theo Kuhn", "basis": "Kommanditist (15,000 EUR = exactly 25%, not more) but holds 40% of the general partner Eichental Verwaltungs GmbH (12,000 of 30,000 EUR), controlling the Komplementärin" },
+    { "name": "Felix Haas", "basis": "Holds 60% of the general partner Eichental Verwaltungs GmbH (18,000 of 30,000 EUR), thus controlling the Komplementärin of the KG" }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "For a KG, the partners are beneficial owners in proportion to their capital shares; here the Kommanditisten hold 40% (Felix Lang), 35% (Greta Brenner) and 25% (Theo Kuhn, not more than 25%, so not qualifying on that basis alone). The Komplementärin is a GmbH without capital share, so the natural persons controlling it qualify: Felix Haas (60%) and Theo Kuhn (40%) of Eichental Verwaltungs GmbH. Theo Kuhn therefore qualifies via the general partner. The managing directors Bastian Wendt and Oskar Arendt are not beneficial owners absent shareholdings or special control rights, and no other control arrangements exist."
+}

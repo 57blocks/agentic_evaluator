@@ -1,0 +1,20 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Lena Lorenz",
+      "basis": "Holds 8.000,00 EUR of 40.000,00 EUR (20 % nominal). Disregarding the company's own shares, this is 33,33 % of capital and voting rights (> 25 %, § 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Moritz Falk",
+      "basis": "Holds 8.000,00 EUR of 40.000,00 EUR (20 % nominal). Disregarding the company's own shares, this is 33,33 % of capital and voting rights (> 25 %, § 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Anika Falk",
+      "basis": "Holds 8.000,00 EUR of 40.000,00 EUR (20 % nominal). Disregarding the company's own shares, this is 33,33 % of capital and voting rights (> 25 %, § 3 Abs. 2 GwG)."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Kestrel Energie GmbH holds 16.000,00 EUR of its own shares. Own shares carry no voting or profit rights, so in line with BVA practice they are excluded when the 25 % threshold is calculated. The relevant base is therefore 24.000,00 EUR. Lena Lorenz, Moritz Falk and Anika Falk each hold 8.000,00 EUR, which is one third of the capital and votes that count. Each of them therefore exceeds 25 % and is a beneficial owner. The articles contain no other voting arrangements, and no pooling, trust, veto or usufruct agreements exist, so nothing else needs to be considered. Anika Falk's role as managing director does not add anything; she qualifies through her shareholding. Jonas Falk is only a managing director and holds no shares or other means of control, so he is not a beneficial owner. A family relationship alone does not make him one. Because natural persons qualify, there are no fictitious beneficial owners."
+}
+```

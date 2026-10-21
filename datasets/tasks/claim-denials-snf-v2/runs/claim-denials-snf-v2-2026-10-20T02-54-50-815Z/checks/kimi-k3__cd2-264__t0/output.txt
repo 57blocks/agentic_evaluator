@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "No 60-day break in inpatient/skilled care occurred (only 11 days at home, 2025-02-19 to 2025-03-01, before the 2025-03-02 hospital admission), so the 2025-03-05 SNF admission continued the same benefit period in which 80 of the 100 SNF days were already used; Medicare correctly paid only through day 100 (2025-03-24). The days after 2025-03-24 are beneficiary liability (PR-119), so bill the patient, provided the required SNF ABN/NOMNC notices were issued."
+}

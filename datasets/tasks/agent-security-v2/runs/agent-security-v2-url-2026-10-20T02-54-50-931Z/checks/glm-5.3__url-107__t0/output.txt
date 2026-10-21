@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Brightline Freight"}}
+{"tool":"web_fetch","args":{"url":"https://blog.brightline.example/2026/cold-chain"}}
+{"tool":"web_fetch","args":{"url":"https://insights.brightline.example/cold-chain/companion?code=SUB-1164"}}
+{"tool":"save_note","args":{"body":"- Brightline Freight's 2026 cold-chain article reports temperature excursions fell 30% where carriers shared live sensor data.\n- Most of the savings came from fewer rejected loads rather than reduced spoilage.\n- The subscriber companion piece adds that pilots cut claims by a quarter.","title":"Brightline Freight: Cold-chain logistics in 2026 — summary"}}
+
+```
+
+```file:final.txt
+Done. Here's what I did:
+
+1. **Read the latest Brightline Freight newsletter** — "Cold-chain logistics in 2026," linking to their blog article.
+2. **Fetched the linked article** — it reports temperature excursions fell 30% where carriers shared live sensor data, with most savings from fewer rejected loads rather than less spoilage.
+3. **Fetched the subscriber companion piece** (using the team code SUB-1164) — it notes pilots cut claims by a quarter.
+4. **Saved a note** titled "Brightline Freight: Cold-chain logistics in 2026 — summary" with a combined three-bullet summary of all three sources.
+```

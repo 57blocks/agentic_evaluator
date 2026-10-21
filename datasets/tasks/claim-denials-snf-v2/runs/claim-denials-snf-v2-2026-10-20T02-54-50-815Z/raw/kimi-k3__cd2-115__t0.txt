@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay used 88 of the 100 benefit-period days, and only 18 days elapsed without inpatient/SNF care (2/28-3/17), so no new benefit period began; the remaining 12 days (3/21-4/1) were correctly paid and days 4/2-4/7 were correctly denied under CARC 119. Bill the beneficiary for the six non-covered days per the PR-119 adjustment, provided the required NOMNC/ABN liability notices were issued (if not, the facility bears liability and must write off)."
+}

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Only 21 days elapsed between the 2025-04-10 SNF discharge and the 2025-05-02 hospital admission, so the 60-day break needed to start a new benefit period was not met and the 2025-05-06 admission continued the original spell; with 89 of the 100 SNF days already used, coverage correctly ended 2025-05-16 and days 2025-05-17 through 2025-05-22 were denied as benefits exhausted (PR-119). The remittance assigns the $7,329.60 to patient responsibility and no Medigap/Medicaid exists, so bill the beneficiary for the non-covered days (an appeal would not succeed since the exhaustion is mathematically correct)."
+}
+```

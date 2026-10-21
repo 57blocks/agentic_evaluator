@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Because the beneficiary never had a 60-consecutive-day break from inpatient/SNF care between the prior SNF stay (ending 2025-03-08, 91 days used) and this admission, the same benefit period continued; only 9 days remained and were paid through 2025-04-05. Days after 4/05 are correctly denied as PR-119 (benefit maximum reached), so bill the beneficiary directly since there is no secondary payer on file."
+}

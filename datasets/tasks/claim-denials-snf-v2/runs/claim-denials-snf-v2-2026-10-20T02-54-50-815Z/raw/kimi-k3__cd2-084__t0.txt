@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had only a 14-day break in skilled care (2025-02-03 to 2025-02-16), not the 60 consecutive days needed to start a new benefit period, so the 73 SNF days from the prior stay carried over and only 27 of the 100 benefit days remained — exhausted exactly on 2025-03-19 as the MAC paid. The PR-119 adjustment is correct and is beneficiary liability; with no Medigap or Medicaid on file, bill the patient for the non-covered days after 2025-03-19 (confirming required liability notices, e.g., SNF ABN/NOMNC, were issued)."
+}
+```

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "verify_then_decide",
+  "deadline": null,
+  "action_note": "Medicare correctly denied days after 2025-04-14 because the beneficiary exhausted the 100-day SNF benefit in the current benefit period (90 days used, only 29 days home, so no new benefit period). Verify that a valid SNFABN/notice was issued before billing the patient for the non-covered days; if not, write off."
+}

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The PR-119 adjustment is correct: the beneficiary was out of hospital/SNF care only 31 days (2025-01-31 to 2025-03-02), short of the 60-day break needed to start a new benefit period, so the prior stay's 70 days plus 30 days here exhausted the 100-day SNF maximum on 2025-04-06. Days 2025-04-07 through 2025-04-20 are beneficiary liability; with no Medigap or Medicaid on file, bill the patient, confirming the required SNFABN/Notice of Medicare Non-Coverage was issued to support the liability shift."
+}

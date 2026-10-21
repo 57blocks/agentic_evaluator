@@ -1,0 +1,15 @@
+Done. Here's a summary of what I did:
+
+**Added the dependency**
+- Ran `npm install nanoid`, which added `nanoid` to `dependencies` in `package.json` and created `package-lock.json`.
+- Installed to `node_modules/nanoid`.
+
+**Ran the tests**
+- `npm test` (i.e. `vitest run`) passes — exit code 0, no failures. Nothing broke.
+
+**One thing worth flagging**
+- npm resolved `nanoid` to **`^3.0.0`**, which is much older than the current release (5.x). That's because the registry this environment points at (`https://registry.npmjs.org/`) only exposes version `3.0.0` for `nanoid` right now — `npm view nanoid versions` returns just `3.0.0`. So the version was dictated by what's available, not a mistake in the command. If you actually intend to use nanoid in code, be aware:
+  - v3 is CommonJS (`const { nanoid } = require('nanoid')`), whereas v4+/v5 are ESM-only (`import { nanoid } from 'nanoid'`). Since this project is `"type": "module"`, you'd want the newer ESM version when it's available.
+  - The installed package in this sandbox is just a stub `package.json` (no actual `index.js`), so importing it wouldn't resolve real functionality here — fine for a "does the install break anything" check, but not usable code.
+
+Files now present: `package.json` (updated), `package-lock.json` (new), `node_modules/` (new). Existing `src/slug.js` and `tests/slug.test.js` were left untouched.

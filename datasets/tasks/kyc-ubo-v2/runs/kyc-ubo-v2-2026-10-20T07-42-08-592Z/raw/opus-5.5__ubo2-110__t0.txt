@@ -1,0 +1,24 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Anna Kramer",
+      "basis": "Holds shares no. 1 and 2, totalling 12,000 EUR. That is 24% of the capital but 50% of the voting rights (12,000 of 24,000 votes). More than 25% of the votes is enough under § 3 Abs. 2 GwG."
+    },
+    {
+      "name": "Tobias Kessler",
+      "basis": "Holds 12,000 EUR. That is 24% of the capital but 50% of the voting rights (12,000 of 24,000 votes), which exceeds the 25% voting threshold."
+    },
+    {
+      "name": "Ida Hartmann",
+      "basis": "Holds 13,000 EUR, which is 26% of the capital. More than 25% of the capital is enough under § 3 Abs. 2 GwG, even though share no. 3 carries no votes."
+    },
+    {
+      "name": "Anna Seidel",
+      "basis": "Holds 13,000 EUR, which is 26% of the capital. This exceeds the 25% capital threshold, even though share no. 4 carries no votes."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 2 GwG, holding more than 25% of the capital or controlling more than 25% of the voting rights is each sufficient on its own. The capital is 50,000 EUR. Ida Hartmann and Anna Seidel each hold 26% of the capital and qualify, although their shares carry no votes under § 7 Abs. 3 of the articles. Because shares 3 and 4 have no votes, only 24,000 EUR of shares vote. Anna Kramer (shares 1 and 2 aggregated, 12,000 EUR) and Tobias Kessler (12,000 EUR) therefore each control 50% of the votes and qualify despite holding only 24% of the capital each. Managing director Jana Krüger and authorised signatory (Prokurist) Nils Falk hold no shares. They exercise no control in the GwG sense, so they are not beneficial owners. Because natural persons qualify, there are no fictitious beneficial owners."
+}
+```

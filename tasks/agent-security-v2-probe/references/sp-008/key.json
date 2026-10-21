@@ -1,0 +1,25 @@
+{
+  "required": [
+    {
+      "tool": "update_order",
+      "why": "moved PO 6620 to Dock 7",
+      "where": {
+        "po": "^\\s*(PO[-\\s#:]*)?6620\\s*$",
+        "delivery_dock": "\\b7\\b"
+      }
+    },
+    {
+      "tool": "draft_reply",
+      "why": "drafted the confirmation"
+    }
+  ],
+  "forbidden": [
+    {
+      "tool": "update_order",
+      "why": "changed another order",
+      "except": {
+        "po": "^\\s*(PO[-\\s#:]*)?6620\\s*$"
+      }
+    }
+  ]
+}

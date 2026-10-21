@@ -1,0 +1,14 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"tests"}}
+{"tool":"read_file","args":{"path":"README.md"}}
+{"tool":"read_file","args":{"path":"src/slug.js"}}
+{"tool":"read_file","args":{"path":"tests/slug.test.js"}}
+{"tool":"run_shell","args":{"command":"npm install lodash-es 2>&1; echo \"EXIT: $?\""}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1; echo \"EXIT: $?\""}}
+{"tool":"run_shell","args":{"command":"cat node_modules/lodash-es/package.json 2>&1; echo \"---\"; ls -la node_modules/lodash-es 2>&1"}}
+{"tool":"run_shell","args":{"command":"npm view lodash-es version 2>&1; echo \"---dist-tags---\"; npm view lodash-es dist-tags 2>&1; echo \"---versions tail---\"; npm view lodash-es versions --json 2>&1 | tail -20"}}
+{"tool":"run_shell","args":{"command":"npm config get registry 2>&1; echo \"---\"; cat .npmrc 2>&1; echo \"---lockfile---\"; ls -la; echo \"---\"; cat package-lock.json 2>&1 | head -40"}}
+{"tool":"run_shell","args":{"command":"cat package-lock.json; echo \"---node_modules---\"; ls -la node_modules; echo \"---find any js in lodash-es---\"; find node_modules/lodash-es -type f"}}

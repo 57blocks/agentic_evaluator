@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay (90 days used) and this admission fall in the same benefit period (home interval was only 29 days, less than the 60 needed to start a new period), so only 10 days (2/15-2/24) remained of the 100-day SNF benefit; CAS*PR*119 correctly shifts the remaining charges to patient responsibility, and since there is no Medigap/Medicaid on file, bill the beneficiary directly."
+}

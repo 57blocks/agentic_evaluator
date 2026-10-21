@@ -1,0 +1,16 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Ruth Lang",
+      "basis": "Holds EUR 14,000 of EUR 40,000 Stammkapital = 35% of the capital shares, directly exceeding the 25% threshold of § 3 Abs. 1 GwG."
+    },
+    {
+      "name": "Konrad Buchholz",
+      "basis": "Holds two shareholdings (EUR 10,800 and EUR 7,200) which are aggregated to EUR 18,000 of EUR 40,000 = 45% of the capital shares, directly exceeding the 25% threshold of § 3 Abs. 1 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Ruth Lang directly holds 35% of the capital shares and thus qualifies as a beneficial owner under § 3 Abs. 1 GwG. Konrad Buchholz appears twice on the shareholder list; his holdings must be aggregated, giving him 45%, so he also qualifies. Nils Kramer holds only 20% and therefore does not qualify. There are no voting-rights agreements, pooling, trustee or usufruct arrangements that would create additional beneficial owners. Since natural persons qualify, the fictitious beneficial owner rule (legal representatives, here the Geschäftsführer) does not apply."
+}
+```

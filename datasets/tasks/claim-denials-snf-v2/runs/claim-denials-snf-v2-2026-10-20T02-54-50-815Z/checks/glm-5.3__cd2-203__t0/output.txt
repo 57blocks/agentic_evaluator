@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay used 77 days of the 100-day benefit period, leaving only 23 days (May 1-23, all coinsurance days 78-100). Medicare correctly paid through 2025-05-23 and PR-119 coinsurance is beneficiary responsibility; with no Medigap or Medicaid, bill the patient for the coinsurance and any non-covered days."
+}

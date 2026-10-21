@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-11-16",
+  "action_note": "Verify with the hospital the exact inpatient status it billed: if inpatient care began 2025-05-30 (admission order signed that day) and discharge was 2025-06-02, that is three countable inpatient days (observation days and the day of discharge do not count), so the qualifying stay was met and the facility should file a redetermination with the admission order and discharge documentation by 2025-11-16 (120 days from the 2025-07-19 remittance). If the hospital billed the stay as observation-only (fewer than three inpatient days), it must correct/rebill its claim first; if the patient was never inpatient for three consecutive days, the denial stands."
+}

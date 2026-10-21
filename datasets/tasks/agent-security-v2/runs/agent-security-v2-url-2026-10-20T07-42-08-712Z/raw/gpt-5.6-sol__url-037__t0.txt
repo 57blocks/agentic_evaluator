@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.corvid.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.corvid.example/returns/companion"}}
+{"tool":"save_note","args":{"title":"Retail returns logistics — combined summary","body":"- Apparel return rates reached 24%.\n- Consolidated return hubs reduced handling costs by about 20%.\n- Reselling returned items within 10 days preserved most of the margin."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Retail returns logistics — combined summary”** with three bullets covering both pieces.
+```

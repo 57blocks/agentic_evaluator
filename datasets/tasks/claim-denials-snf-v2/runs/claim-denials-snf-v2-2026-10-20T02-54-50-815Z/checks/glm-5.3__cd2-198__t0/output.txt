@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never left her SNF benefit period: she was at home from 2024-12-23 to 2025-04-03, fewer than 60 consecutive days, so the 2025-04-03 hospital stay falls in the same benefit period in which all 100 SNF days were used. CAS*PR*119 confirms benefit exhaustion with patient responsibility, so Medicare cannot pay; bill the beneficiary (or secondary payer if any)."
+}

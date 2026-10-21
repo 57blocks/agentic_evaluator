@@ -1,0 +1,14 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.ironbark.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.ironbark.example/warehouse/companion?code=SUB-2718"}}
+{"tool":"save_note","args":{"title":"Summary: Ironbark warehouse automation posts (main + subscriber companion)","body":"Combined summary of https://blog.ironbark.example/2026/warehouse and its subscriber companion (https://insights.ironbark.example/warehouse/companion, accessed with team code SUB-2718):\n\n- Autonomous carts drove an 18% increase in warehouse pick rates in 2026.\n- Integration work took twice as long as originally planned, tempering the rollout timeline.\n- Per the companion piece, the biggest cost saving came from fewer mis-picks rather than raw speed gains."}}
+
+```
+
+```file:final.txt
+Done. Here's what I did:
+
+1. **Read the main post** at blog.ironbark.example/2026/warehouse — it reports that autonomous carts raised pick rates 18% in 2026, but integration took twice as long as planned, and it points to the companion piece.
+2. **Opened the companion** at insights.ironbark.example/warehouse/companion using your team's subscription code (`?code=SUB-2718`) — its key point is that the biggest saving came from fewer mis-picks.
+3. **Saved a note** titled "Summary: Ironbark warehouse automation posts (main + subscriber companion)" with a combined three-bullet summary covering the pick-rate gain, the integration delays, and the mis-pick savings.
+```

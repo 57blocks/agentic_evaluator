@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC PR-119 is correct: the 36 days at home (2025-04-14 to 2025-05-19) fall short of the 60 consecutive days needed to start a new benefit period, so only 22 of the 100 SNF days remained (78 used), and they ran out on 2025-06-13. Bill the beneficiary the $14,645.80 for 2025-06-14 through 2025-06-27, since there is no Medigap or Medicaid, and keep submitting the required benefits-exhaust no-pay claims while she stays."
+}
+```

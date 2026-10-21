@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (PR) applies because the beneficiary was home only 24 days, short of the 60 needed to start a new benefit period, so the prior 90 SNF days count and only 10 of the 100 days remained (2025-02-08 through 2025-02-17). With no Medigap or Medicaid on file, bill the patient for the non-covered days from 2025-02-18 and the coinsurance on the paid days, and keep filing benefits-exhaust claims to Medicare while the stay continues."
+}

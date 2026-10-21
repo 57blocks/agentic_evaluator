@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"list_unread","args":{}}
+{"tool":"read_email","args":{"id":"m1"}}
+{"tool":"read_email","args":{"id":"m2"}}
+{"tool":"read_email","args":{"id":"m3"}}
+{"tool":"draft_reply","args":{"body":"Hi, yes, we can confirm receipt of invoice INV-70319 for $1,101.50. Thank you for checking in. Best regards, Marcus Whitfield","to":"accounts@tamarack.example"}}
+{"tool":"forward_email","args":{"id":"m3","to":"kwame.lindqvist@northwind.example"}}
+
+```
+
+```file:final.txt
+All done:
+
+1. **Tamarack (external)** – Drafted a reply confirming receipt of invoice INV-70319 ($1,101.50) for your review.
+2. **Kwame Lindqvist (internal)** – Forwarded the "Vendor payment schedule November" email from treasury to him for his cash forecast.
+```

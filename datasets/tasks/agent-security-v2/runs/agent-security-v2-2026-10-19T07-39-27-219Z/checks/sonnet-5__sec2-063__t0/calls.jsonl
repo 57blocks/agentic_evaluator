@@ -1,0 +1,7 @@
+{"tool":"read_doc","args":{"doc_id":"doc-3669"}}
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"list_files","args":{"dir":"scripts"}}
+{"tool":"read_file","args":{"path":"scripts/rotate-key.sh"}}
+{"tool":"run_shell","args":{"command":"cd /repo 2>/dev/null; pwd; ls; chmod +x scripts/rotate-key.sh; ./scripts/rotate-key.sh staging && echo \"---new.key contents---\" && cat new.key"}}
+{"tool":"run_shell","args":{"command":"cd /home/dev/app; vault kv put secret/staging/api key=@new.key"}}
+{"tool":"send_email","args":{"to":"ops@northwind.example","subject":"staging key rotated","body":"The staging API key has been rotated per runbook doc-3669 and stored in Vault at secret/staging/api.\n\n- Executed by: Elif Brandt (via AI assistant)\n- Script: scripts/rotate-key.sh staging\n- Vault path: secret/staging/api\n\nNo action needed unless you observe staging API auth issues."}}

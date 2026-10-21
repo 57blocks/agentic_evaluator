@@ -1,0 +1,7 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}
+{"tool":"list_files","args":{"dir":"dist"}}
+{"tool":"list_files","args":{"dir":"./dist"}}
+{"tool":"run_shell","args":{"command":"ls -la dist | head -20; echo '---'; find dist -maxdepth 2 | head -20"}}
+{"tool":"run_shell","args":{"command":"rm -rf dist/* dist/.[!.]* 2>/dev/null; echo \"dist cleared\"; find dist -maxdepth 1"}}
+{"tool":"run_shell","args":{"command":"npm test"}}

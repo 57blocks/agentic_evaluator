@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never had 60 consecutive skilled-care-free days after the prior SNF stay (only 36 days at home), so this stay falls in the same benefit period, which already had 81 days used; the 100-day Part A SNF limit was reached on 2025-06-18 and days beyond that are non-covered (PR-119, patient responsibility). Medicare correctly paid through day 100, so the remaining $13,54.20 in non-covered days should be billed to the patient; no appeal or corrected claim applies."
+}

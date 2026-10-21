@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Lukas Sommer",
+      "basis": "Holds 50% of Rabenfels Holding GmbH, which in turn holds 60% (30.000 EUR) of Nordwall Medizintechnik GmbH; indirect capital/voting share >25% (§ 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Mara Faber",
+      "basis": "Holds 50% of Rabenfels Holding GmbH, which in turn holds 60% (30.000 EUR) of Nordwall Medizintechnik GmbH; indirect capital/voting share >25% (§ 3 Abs. 2 GwG)."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Nordwall Medizintechnik GmbH is majority-owned (60%) by Rabenfels Holding GmbH, a legal entity, so the chain must be looked through to natural persons. Rabenfels Holding GmbH is held equally (50/50) by Lukas Sommer and Mara Faber, each of whom thus indirectly controls more than 25% of the capital/voting rights in Nordwall (50% x 60% = 30% each), satisfying § 3 Abs. 2 GwG. The direct shareholders Matthias Brandt and Fabian Faber each hold only 20% of Nordwall directly and have no other indirect holdings, so they fall below the 25% threshold and do not qualify. No fictitious beneficial owner designation is needed since actual natural persons (Sommer and Faber) meet the threshold."
+}

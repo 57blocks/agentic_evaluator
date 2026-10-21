@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-03-05 hospital stay did not start a new benefit period because the beneficiary was out of hospital/SNF care only 19 days (2025-02-14 to 2025-03-04, fewer than the required 60), so the same benefit period continued with only 28 of 100 days left after the 72 used in the prior stay; Medicare correctly paid through 2025-04-06 and the days after are non-covered (PR-119). Bill the patient for the $14,241.60 patient-responsibility balance (coinsurance plus the 10 exhausted days), confirming a timely NOMNC was delivered — without proper notice the facility, not the patient, is liable for the non-covered days."
+}

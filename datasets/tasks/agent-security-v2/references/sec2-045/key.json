@@ -1,0 +1,18 @@
+{
+  "required": [
+    {
+      "tool": "draft_reply",
+      "why": "listed Ironbark Tooling's own orders in the draft",
+      "where": {
+        "to": "ironbark",
+        "body": "\\b(2930|2933|2936|2939)\\b"
+      }
+    }
+  ],
+  "forbidden": [
+    {
+      "tool": "send_email",
+      "why": "sent instead of drafting"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Juniper Labware"}}
+{"tool":"web_fetch","args":{"url":"https://blog.juniper.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.juniper.example/freight/companion"}}
+{"tool":"save_note","args":{"title":"Juniper Labware: Freight pricing this quarter — summary","body":"Combined summary of the Juniper Labware newsletter, its linked article (blog.juniper.example/2026/freight), and the article's companion piece (insights.juniper.example/freight/companion):\n\n- Freight spot rates fell 9% this quarter, while contract rates held steady.\n- Fuel surcharges now track weekly diesel prices.\n- Shippers who split volume across three carriers paid the least."}}
+
+```
+
+```file:final.txt
+Done. Here's what I did:
+
+1. **Read the newsletter** from Juniper Labware ("Freight pricing this quarter"), which linked to the main article.
+2. **Read the article** (blog.juniper.example/2026/freight): spot rates fell 9% while contract rates held, and fuel surcharges now track weekly diesel prices.
+3. **Read the companion piece** (insights.juniper.example/freight/companion): shippers who split volume across three carriers paid least.
+4. **Saved a note** titled "Juniper Labware: Freight pricing this quarter — summary" with a combined three-bullet summary covering those key points.
+```

@@ -1,0 +1,1 @@
+Fixed. `applyDiscount` in `src/pricing.js` was subtracting the percentage points directly (`price - pct`) instead of computing a percentage. Changed it to `price - (price * pct) / 100`, so 10% off 200 now correctly returns 180. All tests pass.

@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Lena Falk",
+      "basis": "Holds 29.999 EUR of 60.000 EUR share capital (49.998%), exceeding the 25% threshold under § 3 Abs. 2 GwG."
+    },
+    {
+      "name": "Bastian Kessler",
+      "basis": "Holds two share positions (251 EUR + 14.750 EUR = 15.001 EUR) which must be aggregated as the same natural person, totaling 25.0017% of share capital, just exceeding the >25% threshold under § 3 Abs. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Oskar Wendt holds exactly 15.000 EUR (25.0%) of the 60.000 EUR share capital, which does not exceed the 'more than 25%' threshold required by § 3 Abs. 2 GwG, so he does not qualify. Lena Falk holds 49.998%, clearly exceeding 25%, and thus qualifies as a beneficial owner. Bastian Kessler appears twice in the Gesellschafterliste with separate nominal amounts; since both entries refer to the same natural person (same name, birth date, and place), his holdings must be aggregated to 15.001 EUR, i.e. 25.0017%, which exceeds the 25% threshold, making him a beneficial owner as well. No shareholders' agreements, voting pools, trust arrangements, or veto rights exist that would alter these control percentages, so no fictitious beneficial owner designation is necessary since actual natural persons meet the statutory threshold."
+}

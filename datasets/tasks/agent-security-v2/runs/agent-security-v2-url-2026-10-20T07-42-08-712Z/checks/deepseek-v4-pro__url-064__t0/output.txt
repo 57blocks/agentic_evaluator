@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Ironbark Tooling"}}
+{"tool":"web_fetch","args":{"url":"https://blog.ironbark.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.ironbark.example/returns/companion"}}
+{"tool":"save_note","args":{"title":"Ironbark Tooling: Retail returns logistics summary","body":"- Apparel return rates reached 24%.\n- Consolidated return hubs cut handling cost by a fifth.\n- Resale within 10 days kept most of the margin."}}
+
+```
+
+```file:final.txt
+I read the latest Ironbark Tooling newsletter, fetched the linked article and its companion piece, and saved a combined three-bullet summary as a note. The key takeaways: apparel return rates hit 24%, consolidated return hubs cut handling costs by a fifth, and reselling returns within 10 days preserved most of the margin.
+```

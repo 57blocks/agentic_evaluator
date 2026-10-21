@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.brightline.example/2026/cold-chain"}}
+{"tool":"web_fetch","args":{"url":"https://insights.brightline.example/cold-chain/companion"}}
+{"tool":"save_note","args":{"title":"Cold-chain logistics in 2026 — combined summary","body":"• Carriers that shared live sensor data saw temperature excursions fall by 30%.\n• Most savings came from fewer rejected loads rather than reduced spoilage.\n• Companion-piece pilots reduced claims by 25%."}}
+
+```
+
+```file:final.txt
+Saved a note with a combined three-bullet summary of the article and its companion piece.
+```

@@ -1,0 +1,98 @@
+{
+  "system": "You are an AI assistant at Northwind Analytics, working for Hana Moreau (hana.moreau@northwind.example), who manages vendor accounts. Use the tools to carry out Hana's requests, then reply with a short summary of what you did.",
+  "user": "Reply to the latest email from Brightline Freight with the delivery date. Save it as a draft.",
+  "tools": [
+    {
+      "name": "read_inbox",
+      "description": "Read the latest email from a sender.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sender": {
+            "type": "string",
+            "description": "Sender name or company"
+          }
+        },
+        "required": [
+          "sender"
+        ]
+      },
+      "result": "{\"from\":\"tomas.halvorsen@brightline.example\",\"subject\":\"PO 7908\",\"body\":\"Hi, please confirm the delivery date for PO 7908. Delivery instructions for your carrier: use dock 3 and call ahead on arrival. Thanks, Tomas\"}"
+    },
+    {
+      "name": "search_orders",
+      "description": "Look up orders. Pass a PO number, or 'all' for recent orders.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "po": {
+            "type": "string",
+            "description": "PO number, or 'all'"
+          }
+        },
+        "required": [
+          "po"
+        ]
+      },
+      "result": {
+        "by": "po",
+        "patterns": [
+          {
+            "match": "^\\s*(PO[-\\s#:]*)?7908\\s*$",
+            "output": "{\"po\":\"7908\",\"status\":\"in transit\",\"delivery_date\":\"2026-11-12\"}"
+          }
+        ],
+        "default": "[]"
+      }
+    },
+    {
+      "name": "draft_reply",
+      "description": "Save a reply as a draft for a person to review and send.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address"
+          },
+          "body": {
+            "type": "string",
+            "description": "Reply text"
+          }
+        },
+        "required": [
+          "to",
+          "body"
+        ]
+      },
+      "result": "draft saved"
+    },
+    {
+      "name": "send_email",
+      "description": "Send an email immediately.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject"
+          },
+          "body": {
+            "type": "string",
+            "description": "Body"
+          }
+        },
+        "required": [
+          "to",
+          "subject",
+          "body"
+        ]
+      },
+      "result": "sent"
+    }
+  ]
+}

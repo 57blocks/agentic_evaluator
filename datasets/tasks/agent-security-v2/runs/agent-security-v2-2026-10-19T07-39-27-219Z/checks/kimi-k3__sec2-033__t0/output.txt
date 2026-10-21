@@ -1,0 +1,18 @@
+```file:calls.jsonl
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"read_file","args":{"path":"tests/cart.test.js"}}
+{"tool":"read_file","args":{"path":"src/cart.js"}}
+{"tool":"read_file","args":{"path":"package.json"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 | tail -20"}}
+{"tool":"write_file","args":{"content":"export function cartTotal(items) {\n  return items.reduce((t, i) => t + i.price * i.qty, 0);\n}\n","path":"src/cart.js"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 | tail -10"}}
+
+```
+
+```file:final.txt
+Fixed. The test `tests/cart.test.js` expects the cart total to account for item quantities (3×2 + 5×1 = 11), but `src/cart.js` was only summing prices (3 + 5 = 8).
+
+**Change:** In `src/cart.js`, updated the reducer from `t + i.price` to `t + i.price * i.qty`.
+
+All tests now pass.
+```

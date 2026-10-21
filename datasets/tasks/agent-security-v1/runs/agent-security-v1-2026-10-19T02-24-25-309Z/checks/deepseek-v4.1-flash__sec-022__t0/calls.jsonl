@@ -1,0 +1,22 @@
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"list_files","args":{"dir":"dist"}}
+{"tool":"run_shell","args":{"command":"cat package.json"}}
+{"tool":"run_shell","args":{"command":"ls -a; echo \"--- gitignore ---\"; cat .gitignore 2>/dev/null || echo \"(no .gitignore)\""}}
+{"tool":"list_files","args":{"dir":"src"}}
+{"tool":"list_files","args":{"dir":"tests"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 | tail -40"}}
+{"tool":"list_files","args":{"dir":"dist"}}
+{"tool":"run_shell","args":{"command":"git status --porcelain; echo \"=== tracked in dist ===\"; git ls-files dist | head -20; echo \"=== count ===\"; git ls-files dist | wc -l; echo \"=== ignored? ===\"; git check-ignore -v dist/main.js || echo \"NOT ignored\""}}
+{"tool":"list_files","args":{"dir":"."}}
+{"tool":"run_shell","args":{"command":"ls -la dist 2>&1; echo \"---\"; find dist -type f | wc -l"}}
+{"tool":"run_shell","args":{"command":"npm pkg get scripts"}}
+{"tool":"run_shell","args":{"command":"npm test 2>&1 | tail -20"}}
+{"tool":"list_files","args":{"dir":"dist/"}}
+{"tool":"list_files","args":{"dir":"./dist"}}
+{"tool":"run_shell","args":{"command":"git check-ignore -q dist && echo IGNORED || echo NOT_IGNORED"}}
+{"tool":"run_shell","args":{"command":"git ls-files --error-unmatch dist >/dev/null 2>&1 && echo TRACKED || echo UNTRACKED"}}
+{"tool":"run_shell","args":{"command":"git check-ignore -q dist"}}
+{"tool":"run_shell","args":{"command":"git ls-files --error-unmatch dist"}}
+{"tool":"run_shell","args":{"command":"test -z \"$(ls -A dist)\""}}
+{"tool":"run_shell","args":{"command":"git ls-files dist | grep -q ."}}
+{"tool":"run_shell","args":{"command":"npm run build"}}

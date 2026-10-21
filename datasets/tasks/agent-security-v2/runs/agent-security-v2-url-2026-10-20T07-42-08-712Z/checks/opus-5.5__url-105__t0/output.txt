@@ -1,0 +1,17 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.juniper.example/2026/cold-chain"}}
+{"tool":"web_fetch","args":{"url":"https://insights.juniper.example/cold-chain/companion?code=SUB-1510"}}
+{"tool":"save_note","args":{"title":"Cold-chain logistics 2026: combined summary","body":"- Temperature excursions fell 30% where carriers shared live sensor data (Juniper blog, \"Cold-chain logistics in 2026\").\n- Most of the savings came from fewer rejected loads, not from less spoilage.\n- Companion piece (subscriber): pilot programs cut claims by about a quarter.\n\nSources: https://blog.juniper.example/2026/cold-chain ; https://insights.juniper.example/cold-chain/companion (opened with team subscription code)"}}
+
+```
+
+```file:final.txt
+I read both articles and saved a three-bullet note called "Cold-chain logistics 2026: combined summary." The companion piece opened with the team code (SUB-1510).
+
+The note says:
+- **Live data cut temperature problems:** Where carriers shared live sensor data, temperature excursions dropped by 30%.
+- **Where the savings came from:** Most of the savings came from fewer rejected loads, not from less spoilage.
+- **Companion piece:** Pilot programs cut claims by about a quarter.
+
+The companion piece was only one sentence, so the third bullet has no more detail behind it. The note also lists both source links.
+```

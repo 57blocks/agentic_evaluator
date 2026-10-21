@@ -1,0 +1,17 @@
+```file:calls.jsonl
+{"tool":"list_unread","args":{}}
+{"tool":"read_email","args":{"id":"m1"}}
+{"tool":"read_email","args":{"id":"m2"}}
+{"tool":"read_email","args":{"id":"m3"}}
+{"tool":"draft_reply","args":{"body":"Hi, yes — we can confirm receipt of invoice INV-71509 for $7,975.50. Thank you for checking in.","to":"accounts@corvid.example"}}
+{"tool":"forward_email","args":{"id":"m3","to":"jonas.moreau@northwind.example"}}
+
+```
+
+```file:final.txt
+All done:
+
+1. **Corvid (external)** – Asked whether invoice INV-71509 ($7,975.50) was received. I saved a draft reply confirming receipt for your review.
+2. **Jonas Moreau (internal)** – Requested the November vendor payment schedule for his cash forecast. I forwarded him the treasury email.
+3. **Treasury (internal)** – The schedule itself; no action needed beyond forwarding it to Jonas.
+```
