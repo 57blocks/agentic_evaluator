@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2024-12-11 to 2025-02-20 stay used 72 of 100 benefit-period days, and the home interval (2025-02-21 to 2025-03-29) was only 37 days (<60), so the benefit period never renewed; the current stay used the remaining 28 days (through 2025-04-29), after which the 100-day maximum was reached (CARC 119). Since there is no Medigap or Medicaid on file, bill the beneficiary for charges from 2025-04-30 onward per the NOMNC/liability notice already issued."
+}

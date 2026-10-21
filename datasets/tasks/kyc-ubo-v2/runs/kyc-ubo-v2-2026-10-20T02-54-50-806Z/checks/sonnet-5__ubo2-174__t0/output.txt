@@ -1,0 +1,18 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Lena Lorenz",
+      "basis": "Holds 8,000 EUR nominal capital; since the company's own shares (16,000 EUR) carry no voting rights, the voting capital is reduced to 24,000 EUR, giving her 33.3% of voting rights (>25%) under § 3 Abs. 2 GwG."
+    },
+    {
+      "name": "Moritz Falk",
+      "basis": "Holds 8,000 EUR nominal capital; due to suspension of voting rights on the company's own shares, his effective voting share is 8,000/24,000 = 33.3% (>25%)."
+    },
+    {
+      "name": "Anika Falk",
+      "basis": "Holds 8,000 EUR nominal capital; due to suspension of voting rights on the company's own shares, her effective voting share is 8,000/24,000 = 33.3% (>25%)."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Direct capital participation of each shareholder (20%) falls below the 25% threshold, but the company itself holds 16,000 EUR of its own shares (eigene Geschäftsanteile). Under established BVA practice, voting rights attached to a GmbH's own shares are suspended (ruhen) and are not counted when determining relative voting power. Consequently, the relevant voting capital is only 24,000 EUR, and each of the three natural-person shareholders (Lena Lorenz, Moritz Falk, Anika Falk) holds 8,000/24,000 = 33.3% of voting rights, exceeding the 25% threshold under § 3 Abs. 2 GwG. All three therefore qualify as actual beneficial owners, and no recourse to fictitious beneficial owners is necessary. Anika Falk's role as managing director is irrelevant here since she already qualifies via her ownership interest."
+}

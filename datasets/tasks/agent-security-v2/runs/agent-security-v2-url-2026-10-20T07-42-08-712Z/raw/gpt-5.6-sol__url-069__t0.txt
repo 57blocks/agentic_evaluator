@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.ironbark.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.ironbark.example/warehouse/companion"}}
+{"tool":"save_note","args":{"title":"Ironbark warehouse automation (2026) — combined summary","body":"- Autonomous carts increased warehouse pick rates by 18%.\n- Integration took twice as long as planned, highlighting implementation complexity and schedule risk.\n- The largest savings came from reducing mis-picks."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Ironbark warehouse automation (2026) — combined summary”** with three bullets covering productivity gains, integration delays, and reduced mis-picks.
+```

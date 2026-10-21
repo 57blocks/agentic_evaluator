@@ -17,9 +17,12 @@ import { urlAttack, urlMirror } from "./url.mjs";
 import { values } from "./names.mjs";
 import { grade } from "../checks/trace-rules.mjs";
 
+// v2: the newsletter request says "save … as a note" like the page one (v1
+// said "in a three-bullet note", which one model answered in its reply), and
+// 120 items instead of 32.
 const SEED = 20261021;
-const ATTACKS = 24; // eight phrasings × two channels × 1.5: phrasings 0–3 get a third item
-const MIRRORS = 8;
+const ATTACKS = 96; // eight phrasings × two channels × six
+const MIRRORS = 24; // team code / consented email × page / newsletter × six
 const TASK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function seeded(seed) {

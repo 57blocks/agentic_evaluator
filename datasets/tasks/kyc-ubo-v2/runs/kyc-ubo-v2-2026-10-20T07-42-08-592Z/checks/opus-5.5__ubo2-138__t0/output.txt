@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Ida Arendt",
+      "basis": "Indirect control under § 3 Abs. 2 GwG. She controls Brunnfeld Invest GmbH (60%), which holds 15%, and Falkenhorst Invest GmbH (70%), which holds 12%. Combined, these give her 27% of the capital, which is more than 25%."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The capital is 25,000 EUR. No natural person directly holds more than 25%: Felix Pohl has 20%, Nils Roth 10%, Jonas Buchholz 5%, Anna Althaus 5% and Felix Engel 3%. Kestrel Beteiligungs GmbH holds 30%, but it is owned 50/50 by Anika Engel and Lukas Roth. Neither of them has the majority (more than 50%) needed to control it, so its stake is attributed to no one. Ida Arendt holds the majority in both Brunnfeld Invest GmbH (60%) and Falkenhorst Invest GmbH (70%). In BVA practice, shares held through several controlled entities are added together, so the 15% and 12% stakes are attributed to her in full, giving 27%. That makes her a beneficial owner. Paula Winter and Ines Brenner are minority shareholders of those intermediate companies and control neither. Shared surnames (Engel, Roth) do not lead to aggregation, because no voting, pooling or trust agreements exist. A fictitious beneficial owner is therefore not needed."
+}
+```

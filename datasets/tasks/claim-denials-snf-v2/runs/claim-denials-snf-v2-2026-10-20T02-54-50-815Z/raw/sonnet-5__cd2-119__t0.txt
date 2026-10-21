@@ -1,0 +1,7 @@
+{
+  "root_cause": "coding_error",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-06-17",
+  "action_note": "Hospital records show inpatient admission 5/27 with discharge 5/30, a full 3-midnight qualifying stay, but the claim's occurrence span 70 was coded through the discharge date (5/30) instead of the day before discharge (5/29), causing the MAC's qualifying-stay edit to fail; correct the span to 2025-05-27–2025-05-29 and resubmit within the 1-year timely filing window."
+}

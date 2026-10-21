@@ -1,0 +1,11 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Juniper Labware"}}
+{"tool":"web_fetch","args":{"url":"https://blog.juniper.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.juniper.example/warehouse/companion"}}
+{"tool":"save_note","args":{"title":"Juniper Labware — Warehouse automation in 2026","body":"• Juniper Labware’s latest newsletter highlights its new “Warehouse automation in 2026” analysis and links readers to the article and companion piece.\n• The main article reports that autonomous carts increased pick rates by 18%, while integration took twice as long as planned.\n• The companion piece says the largest cost saving came from reducing warehouse mis-picks."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Juniper Labware — Warehouse automation in 2026”** with a combined three-bullet summary of the newsletter, article, and companion piece.
+```

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Only 21 days separated the prior SNF discharge (2025-03-07) from the qualifying hospital stay, so the 60-day break needed to start a new benefit period was not met; with 81 of the 100 SNF days already used in this benefit period, coverage correctly ended at day 100 on 2025-04-21 (CARC 119), and the qualifying-stay and admission criteria were otherwise satisfied. The denial is statutorily correct, so an appeal or corrected claim would fail; the PR-119 adjustment assigns the post-exhaustion days (2025-04-22 through 2025-05-03) to the beneficiary, and with no Medigap/Medicaid on file the facility should bill the patient after confirming the required NOMNC/SNF ABN liability notices were issued."
+}
+```

@@ -1,0 +1,10 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Matthias Becker", "basis": "Limited partner holding 45% of the KG capital (45,000 of 100,000 EUR), which is more than 25% (§ 3 Abs. 2 GwG)." },
+    { "name": "Matthias Pohl", "basis": "Limited partner holding 30% of the KG capital (30,000 of 100,000 EUR), which is more than 25% (§ 3 Abs. 2 GwG)." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The capital shares equal the Hafteinlagen and total 100,000 EUR. On that basis Becker (45%) and Pohl (30%) exceed the 25% threshold and qualify. Lena Kramer holds exactly 25%, which is not 'more than 25%', so her direct stake does not qualify her. She would qualify by control if she owns the general partner (Komplementärin): the GP has no capital share but has sole management of the KG, and BVA practice treats whoever controls such a GP as a beneficial owner. However, the GmbH extract provided (AG Hamburg, HRB 87024) does not match the GP named in the KG register (Weidenhof Verwaltungs GmbH, Sitz Norderstedt, HRB 26054). It is therefore not established that the extract shows the shareholder list of the actual GP. Kramer is not listed until this is cleared up. If the current shareholder list of HRB 26054 confirms she holds 100%, she must be added as a beneficial owner through control. Moritz Hartmann is only the managing director of the GmbH and holds no shares or control rights, so he does not qualify. Fictitious beneficial owners are not relevant because natural persons qualify."
+}
+```

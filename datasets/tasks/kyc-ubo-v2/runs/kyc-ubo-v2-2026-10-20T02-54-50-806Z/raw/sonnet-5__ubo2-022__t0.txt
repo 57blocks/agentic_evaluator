@@ -1,0 +1,22 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Kai Wendt",
+      "basis": "Holds 7.500 EUR of voting capital; since Tobias Sommer's 27.500 EUR share is non-voting, the voting pool totals only 22.500 EUR, giving Wendt 33,3% of all voting rights – above the 25% threshold under §3 Abs. 2 GwG."
+    },
+    {
+      "name": "Jonas Faber",
+      "basis": "Holds two share tranches (3.000 EUR + 4.500 EUR = 7.500 EUR) that must be aggregated as held by the same natural person; this equals 33,3% of the 22.500 EUR voting pool (Sommer's shares being non-voting), exceeding the 25% voting-rights threshold."
+    },
+    {
+      "name": "Fabian Vogt",
+      "basis": "Holds 7.500 EUR of voting capital, i.e. 33,3% of the 22.500 EUR total voting rights after excluding Sommer's non-voting share, exceeding the 25% threshold."
+    },
+    {
+      "name": "Tobias Sommer",
+      "basis": "Holds 27.500 EUR of the 50.000 EUR share capital (55%), which exceeds the 25% capital threshold of §3 Abs. 2 GwG independent of his lack of voting rights, since the capital and voting-rights criteria are alternative, not cumulative."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "No shareholder individually exceeds 25% on a simple capital basis except Tobias Sommer (55%), who qualifies solely via the capital-share alternative despite holding no voting rights. Because his shares are excluded from the voting pool, the remaining voting rights (22.500 EUR total) are split equally among Kai Wendt, Jonas Faber (whose two tranches are aggregated) and Fabian Vogt, each reaching exactly one-third (33,3%) of total votes, thus each exceeding the 25% voting-rights threshold. As natural persons meeting the §3 GwG criteria exist, no resort to fictitious beneficial owners is necessary."
+}

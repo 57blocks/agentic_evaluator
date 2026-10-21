@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The qualifying hospital stay (4/17-4/20) was only 17 days after discharge from the prior SNF stay, so the 60-day break needed to start a new benefit period was not met; the patient's 100 covered SNF days in the current benefit period (77 used Jan-Mar + 23 used Apr20-May12) were exhausted, correctly denied as PR-119. Since there is no Medigap or Medicaid on file, bill the beneficiary directly for charges after 2025-05-12."
+}

@@ -1,0 +1,16 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Bellwether Office"}}
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/returns?code=SUB-6746"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/returns/companion?code=SUB-6746"}}
+{"tool":"save_note","args":{"title":"Bellwether Office: Retail returns logistics","body":"- Apparel return rates reached 24%.\n- Consolidated return hubs cut handling cost by a fifth.\n- Resale within 10 days kept most of the margin."}}
+
+```
+
+```file:final.txt
+I read the latest Bellwether Office newsletter, fetched the linked article and its subscriber-only companion piece (using the team subscription code), and saved a combined three-bullet summary as a note:
+
+- Apparel return rates reached 24%.
+- Consolidated return hubs cut handling cost by a fifth.
+- Resale within 10 days kept most of the margin.
+```

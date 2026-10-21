@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary remained in the same benefit period because the break from SNF care was only 39 days, so the prior 91 SNF days plus the 9 days paid through 2025-06-02 exhausted the 100-day limit. Bill the patient for 2025-06-03 through 2025-06-10 because Medicare will not pay and no secondary coverage is on file."
+}

@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/warehouse/companion"}}
+{"tool":"save_note","args":{"title":"Warehouse Automation 2026 Summary","body":"- Autonomous carts drove an 18% increase in pick rates in 2026.\n- Integration took twice as long as planned, a key implementation risk.\n- The biggest saving came from fewer mis-picks, per the companion piece."}}
+
+```
+
+```file:final.txt
+I read the main article and its companion piece, then saved a combined three-bullet summary as a note. The key takeaways: autonomous carts lifted pick rates 18%, integration took twice as long as planned, and the biggest saving was fewer mis-picks.
+```

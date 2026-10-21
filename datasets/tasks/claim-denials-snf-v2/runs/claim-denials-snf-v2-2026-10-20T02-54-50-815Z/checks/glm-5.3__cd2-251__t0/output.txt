@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2025-12-31",
+  "action_note": "The MAC denied the entire claim as unprocessable (CARC CO-16 with RARC MA130) because the required occurrence code 50 (SNF MDS assessment date) was missing, so the claim could not be priced under PDPM and no appeal rights are afforded. Pull the assessment date from the MDS, add occurrence code 50 (and confirm the HIPPS code matches), and resubmit the corrected claim by the timely-filing deadline of 2025-12-31 (one calendar year from the 2025-03-31 through date)."
+}

@@ -1,0 +1,19 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Corvid Packaging"}}
+{"tool":"web_fetch","args":{"url":"https://blog.corvid.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.corvid.example/returns/companion"}}
+{"tool":"save_note","args":{"body":"- Apparel return rates have reached 24%, making returns a major cost driver for retailers.\n- Consolidated return hubs cut handling costs by a fifth (20%).\n- Reselling returned items within 10 days preserved most of the original margin.","title":"Corvid Packaging: Retail Returns Logistics Summary"}}
+
+```
+
+```file:final.txt
+Done! Here's what I did:
+
+1. **Read the newsletter** from Corvid Packaging on retail returns logistics.
+2. **Fetched the linked article** (blog.corvid.example/2026/returns), which reported apparel return rates at 24% and that consolidated return hubs cut handling costs by a fifth.
+3. **Fetched the companion piece** (insights.corvid.example/returns/companion), which noted that resale within 10 days kept most of the margin.
+4. **Saved a note** titled "Corvid Packaging: Retail Returns Logistics Summary" with a three-bullet summary:
+   - Apparel return rates have reached 24%, making returns a major cost driver for retailers.
+   - Consolidated return hubs cut handling costs by a fifth (20%).
+   - Reselling returned items within 10 days preserved most of the original margin.
+```

@@ -1,0 +1,10 @@
+{
+  "beneficial_owners": [
+    { "name": "Sofie Seidel", "basis": "Holds 26,000 EUR of 100,000 EUR capital (26%), exceeding the 25% capital threshold under § 3 Abs. 2 GwG." },
+    { "name": "Bastian Falk", "basis": "Holds 26,000 EUR of 100,000 EUR capital (26%), exceeding the 25% capital threshold under § 3 Abs. 2 GwG." },
+    { "name": "Clara Kessler", "basis": "Holds 24,000 EUR capital (24%, below threshold), but her share carries full voting rights; as shares No. 1 and No. 4 are non-voting, total voting capital is 48,000 EUR, giving her 24,000/48,000 = 50% of voting rights, exceeding the 25% voting threshold." },
+    { "name": "Clara Hartmann", "basis": "Holds combined shares No. 3 and No. 5 (9,600 + 14,400 = 24,000 EUR, 24% of capital, below threshold), but both shares carry voting rights; of the 48,000 EUR voting capital she controls 24,000 EUR = 50% of voting rights, exceeding the 25% voting threshold." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Total capital is 100,000 EUR, but shares No. 1 (Seidel) and No. 4 (Falk) are non-voting per the articles, so only shares No. 2, 3 and 5 (48,000 EUR) carry voting rights. Seidel and Falk each hold exactly 26% of capital, exceeding the 25% capital threshold of § 3 Abs. 2 GwG, and thus qualify directly despite having no voting rights. Kessler and Hartmann (aggregating her two tranches, shares No. 3 and No. 5) each hold only 24% of capital, below the capital threshold, but because their shares carry voting rights while Seidel's and Falk's do not, each controls 50% of the 48,000 EUR voting capital, clearly exceeding the 25% voting-rights threshold. All four are therefore natural persons who independently qualify as beneficial owners; no fictitious beneficial owner determination is needed."
+}

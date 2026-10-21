@@ -1,0 +1,11 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Fabian Arendt", "basis": "Holds two shares (lfd. Nr. 2 and 5) totalling 10.000,00 EUR, which is 20% of the capital. Because the company's own shares carry no votes, this equals about 33.3% of the voting rights, above the 25% threshold (§ 3 Abs. 2 GwG)." },
+    { "name": "Bastian Krüger", "basis": "Holds 10.000,00 EUR, which is 20% of the capital. Excluding the company's own shares, this equals about 33.3% of the voting rights, above 25% (§ 3 Abs. 2 GwG)." },
+    { "name": "Greta Lindqvist", "basis": "Holds 10.000,00 EUR, which is 20% of the capital. Excluding the company's own shares, this equals about 33.3% of the voting rights, above 25% (§ 3 Abs. 2 GwG). Her Prokura is irrelevant to this." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Measured against the full capital of 50.000 EUR, no shareholder exceeds 25%: each holds 20%, including Fabian Arendt once his two shares are added together. However, Feldkamp Verpackung GmbH itself holds 20.000 EUR as its own shares (eigene Geschäftsanteile). Voting rights attached to own shares are suspended. Under BVA practice they are therefore left out when calculating voting rights. The voting capital is thus 30.000 EUR, and Fabian Arendt, Bastian Krüger and Greta Lindqvist each hold about 33.3% of the votes. Each therefore qualifies as a beneficial owner through more than 25% of the voting rights. The company cannot be its own beneficial owner. No other control arrangements exist. The managing directors Henrik Engel and Kai Haas are not considered, because natural persons do qualify, so no fictitious beneficial owners apply."
+}
+```

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (benefit maximum reached) is correct. Ms. Lindgren was out of a facility for only 18 days (2025-05-01 to 05-18) before her hospital stay, short of the 60 consecutive days needed to start a new benefit period, so her 77 prior days count against this admission. That left 23 SNF days (2025-05-23 through 06-14), and the days after 06-14 are her liability; with no Medigap or Medicaid on file, bill her for those days plus the daily coinsurance on the covered days, and keep filing benefits-exhaust claims while she stays."
+}
+```

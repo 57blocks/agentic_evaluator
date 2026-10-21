@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 24 days (2025-04-20 to 2025-05-13) before the new hospital stay, short of the 60 days needed to end the benefit period, so the 87 days already used left 13 SNF days (2025-05-17 through 2025-05-29), exactly what Medicare paid; the CARC 119 denial for 2025-05-30 through 2025-06-08 is correct. With no Medigap or Medicaid on file, bill the beneficiary the $11,130.30 patient-responsibility amount plus any day-88-to-100 coinsurance, and keep sending benefits-exhaust claims for any continued stay."
+}
+```

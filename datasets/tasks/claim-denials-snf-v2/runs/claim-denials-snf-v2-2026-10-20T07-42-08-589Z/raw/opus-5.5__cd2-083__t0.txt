@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 34 days (2025-02-27 to 2025-04-01) before the qualifying hospital stay, short of the 60 days needed to end a benefit period. That left 28 of 100 SNF days, which Medicare correctly paid from 2025-04-07 through 2025-05-04 (CARC 119, PR). With no secondary coverage on file, bill the beneficiary for the days after 2025-05-04 and keep filing required benefits-exhaust claims for any continuing stay."
+}
+```

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 38-day gap at home (2025-02-04 to 2025-03-13) never reached the 60-day break needed to start a new benefit period, so the 74 SNF days already used carried over and Medicare correctly paid only the remaining 26 days, through day 100 on 2025-04-13 (reason code 119). Days 2025-04-14 through 2025-04-23 are statutorily non-covered and cannot be paid by Medicare or appealed successfully; with no Medigap/Medicaid on file and the adjustment coded PR (patient responsibility), bill the beneficiary for the non-covered days."
+}

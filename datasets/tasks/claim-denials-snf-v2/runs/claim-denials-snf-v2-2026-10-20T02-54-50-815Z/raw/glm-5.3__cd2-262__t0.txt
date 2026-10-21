@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of hospital/SNF for only 18 days (2025-05-01 to 2025-05-18), so the benefit period that began 2025-02-13 never ended; the 77 days used in the prior stay plus the 23 days paid through 2025-06-14 exhausted the 100-day SNF limit, making 2025-06-15 through 06-19 non-covered (CARC 119, benefit maximum reached). The adjustment is correct and no Medigap or Medicaid exists, so bill the patient/responsible party the $8,999.70 balance for the non-covered days (confirming a NOMNC was delivered); no corrected claim or appeal is warranted."
+}

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of a hospital/SNF for only 24 days (2025-01-11 to 2025-02-03), so the 60 consecutive-day break needed to start a new benefit period never occurred; with 90 days already used in the same benefit period, only 10 SNF days remained, and Medicare correctly paid 2025-02-08 through 2025-02-17 and denied 2025-02-18 through 2025-02-25 under CARC 119 (benefit maximum reached). With no Medigap or Medicaid on file, the $8,791.00 patient-responsibility balance should be billed to the beneficiary, after confirming a NOMNC was delivered before coverage ended."
+}

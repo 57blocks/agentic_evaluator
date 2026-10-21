@@ -1,0 +1,10 @@
+{
+  "beneficial_owners": [
+    { "name": "Ruth Lindqvist", "basis": "Holds 33.000 EUR of 60.000 EUR share capital (55%), exceeding the 25% capital threshold under § 3 Abs. 2 GwG, even though her share carries no voting rights." },
+    { "name": "Matthias Falk", "basis": "Holds combined nominal shares of 9.000 EUR (3.600 + 5.400 EUR); since his shares carry voting rights and the total voting capital is only 27.000 EUR (60.000 EUR minus the non-voting 33.000 EUR share), his voting share equals 9.000/27.000 = 33,3%, exceeding the 25% voting-rights threshold." },
+    { "name": "Theresa Seidel", "basis": "Holds 9.000 EUR nominal share with voting rights; voting share = 9.000/27.000 = 33,3% of total voting capital, exceeding the 25% voting-rights threshold." },
+    { "name": "Greta Sommer", "basis": "Holds 9.000 EUR nominal share with voting rights; voting share = 9.000/27.000 = 33,3% of total voting capital, exceeding the 25% voting-rights threshold." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 2 GwG, a natural person qualifies as beneficial owner if they hold more than 25% of capital shares OR more than 25% of voting rights (the two criteria are alternative, not cumulative). Ruth Lindqvist holds 55% of the nominal capital, satisfying the capital-share alternative despite her share being deprived of voting rights by § 7 Abs. 3 of the articles. Because her 33.000 EUR share carries no vote, the total voting capital is reduced to 27.000 EUR, giving each of Matthias Falk, Theresa Seidel, and Greta Sommer a 33,3% voting share, which exceeds the 25% voting-rights threshold even though their nominal capital shares are only 15% each. No trust, pooling, usufruct, or veto arrangements exist that would alter this analysis. Thus four natural persons qualify as actual beneficial owners, and reliance on fictitious beneficial owners is unnecessary."
+}

@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Henrik Lang",
+      "basis": "Directly holds 30,000 EUR of 100,000 EUR capital in Weidenhof Logistik GmbH (30%), exceeding the 25% threshold under § 3 Abs. 2 GwG."
+    },
+    {
+      "name": "Felix Haas",
+      "basis": "Directly holds 9,000 EUR + 6,000 EUR = 15,000 EUR (15%) in Weidenhof Logistik GmbH. He also holds 30,000 EUR of 50,000 EUR (60%) in Kestrel Vermögensverwaltung GmbH, giving him controlling (majority) influence over Kestrel. Kestrel in turn holds 12% of Weidenhof. Under the control-based look-through applied by the BVA, this 12% intermediate holding is attributed to Felix Haas in full (not pro-rated), as he controls the intermediate entity. Combined with his 15% direct stake, his total attributable interest is 27%, exceeding the 25% threshold."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Of the direct shareholders, only Henrik Lang exceeds 25% (30%) on his own. Felix Haas's two direct tranches (9% and 6%) must be aggregated to 15%, and because he also controls Kestrel Vermögensverwaltung GmbH with 60% of its capital/voting rights, Kestrel's 12% stake in Weidenhof is attributed to him in full under the control-based look-through rather than being multiplied through the chain; adding his direct 15% yields 27%, exceeding the statutory threshold. Emil Becker, holding only 40% of Kestrel (no control) and no direct stake in Weidenhof, does not reach 25% even under a multiplicative calculation (40% x 12% = 4.8%) and therefore does not qualify. Paula Sommer, Ida Hartmann, Greta Wendt, Lukas Wendt and Tobias Vogt each hold 15% or less directly with no further indirect interests, so none meet the threshold. Since two natural persons (Henrik Lang and Felix Haas) qualify as actual beneficial owners, no fictitious beneficial owners need to be named."
+}

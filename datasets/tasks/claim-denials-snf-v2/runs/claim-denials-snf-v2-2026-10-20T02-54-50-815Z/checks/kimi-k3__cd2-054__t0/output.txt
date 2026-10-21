@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Only 19 days passed between the prior SNF discharge (2025-03-24) and the hospital readmission (2025-04-13), far short of the 60 consecutive days without inpatient hospital/SNF care needed to start a new benefit period, so the 90 SNF days already used left only 10 days in this period — correctly paid through 2025-04-27 (day 100), with all later days statutorily non-covered (PR-119). No corrected claim or appeal can make Medicare pay exhausted days, and the remittance assigns the $11,468 to the beneficiary, so bill the patient after confirming the required liability notices (NOMNC/SNF ABN) were issued."
+}
+```

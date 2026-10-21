@@ -1,0 +1,9 @@
+{
+  "beneficial_owners": [
+    { "name": "Emil Arendt", "basis": "Kommanditist with 40% capital share (>25%)" },
+    { "name": "Lukas Althaus", "basis": "Kommanditist with 35% capital share (>25%)" },
+    { "name": "Anna Lindqvist", "basis": "100% shareholder of the general partner Ostmark Verwaltungs GmbH, which controls the KG; also Kommanditist with 25% (not >25% directly)" }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Emil Arendt and Lukas Althaus each hold more than 25% of the KG's capital shares. Anna Lindqvist holds exactly 25% as Kommanditist, so she does not meet the >25% threshold directly, but she owns 100% of the general partner Ostmark Verwaltungs GmbH, which has management control over the KG, making her a beneficial owner via control. Felix Haas is only managing director of the general partner and not a shareholder, so he does not qualify. Therefore, no fictitious beneficial owners are needed."
+}

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-10-10",
+  "action_note": "The hospital record shows inpatient admission on 2025-05-04 with discharge 2025-05-07 (three inpatient days, 5/4-5/6, excluding the discharge day), which satisfies the 3-day qualifying stay; the MAC may have keyed the span as observation-only. Verify the hospital's inpatient admission order/discharge summary supports 5/4-5/7, then request a redetermination (appeal) within 120 days of the 2025-06-12 remittance (last day 2025-10-10), attaching the hospital records proving the qualifying stay."
+}
+```

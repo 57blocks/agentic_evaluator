@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-29",
+  "action_note": "The MAC returned the claim as unprocessable (CARC 16 with RARC MA130) because the occurrence code 50 (assessment/MDS ARD) date was missing, matching the facility's own edit report. Unprocessable claims carry no appeal rights, so submit a new claim with the complete occurrence code 50 date within the 12-month timely-filing window, which runs one year from the statement through date (2025-04-29)."
+}

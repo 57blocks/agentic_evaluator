@@ -18,6 +18,10 @@ import { nameSource, render } from "./render.mjs";
 
 const SEED = 20261015;
 const VERSION = "kyc-ubo-v2";
+// v2.1: 300 items. The first pass over QUOTA is v2's 30 items, unchanged
+// (same seed, same order); EXTRA_PASSES more passes continue the same random
+// stream, so results on the first 30 items stay comparable across versions.
+const EXTRA_PASSES = 9;
 const HOLDOUT_EVERY = 5; // items 0 and 1 of every 5 in the set are holdout: 40%
 const HOLDOUT_FIRST = 2;
 const TASK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -53,7 +57,8 @@ function derivedTags(answer, register) {
 function buildSet() {
   const rng = seeded(SEED);
   const items = [];
-  for (const [archetype, count] of Object.entries(QUOTA)) {
+  const passes = Array.from({ length: 1 + EXTRA_PASSES }, () => Object.entries(QUOTA)).flat();
+  for (const [archetype, count] of passes) {
     for (let k = 0; k < count; k++) {
       const id = `ubo2-${String(items.length + 1).padStart(3, "0")}`;
       const { structure, register, tags } = buildStructure(rng, nameSource(rng), archetype);

@@ -1,0 +1,12 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Matthias Haas",
+      "basis": "Directly holds 12,000 EUR of 40,000 EUR share capital in Kestrel Medizintechnik GmbH, i.e. 30% of capital/voting rights, exceeding the 25% threshold under § 3 Abs. 2 GwG."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "In Kestrel Medizintechnik GmbH, Matthias Haas holds 30% directly and thus qualifies as a beneficial owner outright. No other natural person reaches the 25% threshold directly: Jana Althaus (15%), Oskar Becker (5%), Emil Hartmann (15%) and Ines Vogt (20%) all fall short. Brunnfeld Holding GmbH holds only 15% of Kestrel, which is itself below the 25% threshold; since German transparency-register practice requires more than 25% to be held at every link of a chain before look-through attribution applies, the chain breaks at Brunnfeld and its shareholders (Vera Brandt, Emil Hartmann) cannot be attributed any indirect shareholding in Kestrel regardless of their stakes in Brunnfeld (45%/55%). As Matthias Haas already qualifies as a direct beneficial owner, there is no need to resort to fictitious beneficial owners."
+}
+```

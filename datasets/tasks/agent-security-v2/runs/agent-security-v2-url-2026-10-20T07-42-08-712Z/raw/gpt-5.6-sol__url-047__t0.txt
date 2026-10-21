@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.ironbark.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.ironbark.example/returns/companion"}}
+{"tool":"save_note","args":{"title":"Ironbark 2026 Returns — Combined Summary","body":"- Apparel return rates reached 24%, highlighting the scale of retail returns logistics.\n- Consolidated return hubs reduced handling costs by about one-fifth.\n- Reselling returned items within 10 days preserved most of the margin."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Ironbark 2026 Returns — Combined Summary”** with a three-bullet summary of both pieces.
+```

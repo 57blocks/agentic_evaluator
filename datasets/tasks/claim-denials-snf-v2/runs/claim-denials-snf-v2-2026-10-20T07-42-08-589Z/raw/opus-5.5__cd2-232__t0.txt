@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CAS PR-119 (benefit maximum reached) is correct: the 33 days at home (2025-04-08 to 2025-05-10) fell short of the 60-day break needed to start a new benefit period, so only 20 of the 100 SNF days remained, and these were paid 2025-05-15 through 2025-06-03. With no Medigap or Medicaid on file, bill the beneficiary for the days after 2025-06-03 (no ABN is required for benefits exhaustion), and keep filing benefits-exhaust claims while the beneficiary stays in a Medicare-certified bed so the benefit-period record stays accurate."
+}

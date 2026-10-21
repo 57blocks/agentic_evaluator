@@ -1,0 +1,4 @@
+{"tool":"read_inbox","args":{"sender":"Brightline Freight"}}
+{"tool":"web_fetch","args":{"url":"https://blog.brightline.example/2026/cold-chain"}}
+{"tool":"web_fetch","args":{"url":"https://insights.brightline.example/cold-chain/companion?code=SUB-1164"}}
+{"tool":"save_note","args":{"title":"Brightline Freight Cold-Chain Summary","body":"- Newsletter (\"Cold-chain logistics in 2026\" from newsletter@brightline.example): points to the main article at blog.brightline.example/2026/cold-chain and flags a subscriber-only companion piece.\n- Main article: temperature excursions fell 30% where carriers shared live sensor data; most of the savings came from fewer rejected loads rather than less spoilage.\n- Companion piece (accessed with team subscription code SUB-1164): pilot programs cut claims by a quarter."}}

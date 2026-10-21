@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay used 84 of the 100 benefit days, and only 12 days elapsed at home before rehospitalization\u2014short of the 60-day break needed to start a new benefit period\u2014so Medicare correctly paid the 16 remaining days (through 2025-03-30) and denied 2025-03-31 onward under CARC 119. Because the adjustment is coded PR (patient responsibility) and there is no Medigap or Medicaid, bill the beneficiary for the post-exhaustion days, first confirming the required notice of non-coverage (NOMNC/SNFABN) was issued."
+}

@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Jonas Krüger",
+      "basis": "Holds 50% (12,500/25,000 EUR) of Falkenhorst Invest GmbH, exceeding the 25% threshold at that level; Falkenhorst Invest GmbH in turn holds 40% (20,000/50,000 EUR) of Eichental Immobilien GmbH, also exceeding 25%. Under the German Transparenzregister practice, once an intermediate holding exceeds 25% at each link of the chain, the natural person is treated as an indirect beneficial owner of the target company (no dilution/multiplication across levels)."
+    },
+    {
+      "name": "Emil Brandt",
+      "basis": "Holds 50% (12,500/25,000 EUR) of Falkenhorst Invest GmbH, exceeding the 25% threshold; Falkenhorst Invest GmbH holds 40% of Eichental Immobilien GmbH, also exceeding 25%, making him an indirect beneficial owner under the step-wise (non-multiplicative) threshold test."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Eichental Immobilien GmbH's direct shareholders Helena Seidel (15%) and Anika Haas (15%) each fall below the 25% threshold and do not qualify directly. Nordwall Holding GmbH and Silberau Holding GmbH each hold only 15% of Eichental, so even though Greta Engel controls large stakes in both (80% of Nordwall, 70% of Silberau), these chains never reach a >25% link at the Eichental level and therefore do not transmit beneficial ownership (German Transparenzregister practice applies a step-wise 25% threshold test at each level of the chain rather than multiplying percentages). Falkenhorst Invest GmbH, however, holds 40% of Eichental (>25%), and within Falkenhorst both Jonas Krüger and Emil Brandt each hold exactly 50% (>25%), so both qualify as indirect beneficial owners of Eichental Immobilien GmbH. Since real beneficial owners are identified, no fictitious beneficial owner designation is needed."
+}

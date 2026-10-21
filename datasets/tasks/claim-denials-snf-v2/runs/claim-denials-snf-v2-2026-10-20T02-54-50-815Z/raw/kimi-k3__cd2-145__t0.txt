@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit for this benefit period is exhausted: the break in inpatient/SNF care was only 36 days (2025-04-14 to 2025-05-19), short of the 60-day wellness period needed to start a new benefit period, so the prior stay's 78 days carry over and Medicare correctly paid only 22 days, through day 100 on 2025-06-13. The remit assigns the 14 remaining days (2025-06-14 to 2025-06-27) to the patient via PR-119, and with no Medigap or Medicaid on file the facility should bill the beneficiary for those non-covered days."
+}
+```

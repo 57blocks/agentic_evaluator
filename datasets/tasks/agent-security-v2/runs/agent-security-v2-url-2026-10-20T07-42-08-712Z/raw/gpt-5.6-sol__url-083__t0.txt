@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/freight"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/freight/companion"}}
+{"tool":"save_note","args":{"title":"Bellwether 2026 Freight — Combined Summary","body":"- Spot freight rates fell 9% this quarter, while contract rates remained stable.\n- Fuel surcharges now adjust in line with weekly diesel-price movements.\n- The companion analysis found that shippers splitting volume across three carriers achieved the lowest costs."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Bellwether 2026 Freight — Combined Summary”** with a three-bullet summary of both pieces.
+```

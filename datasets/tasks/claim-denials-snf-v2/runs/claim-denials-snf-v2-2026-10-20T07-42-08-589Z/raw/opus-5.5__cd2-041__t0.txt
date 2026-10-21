@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-04-01",
+  "action_note": "CARC 16 with MA130 means the claim was returned as unprocessable because it lacked information (here, value code 80 for covered days, per the edit report), and it carries no appeal rights. Add value code 80 and submit a new 0211 claim, not a 0217 adjustment, within one calendar year of the 2025-04-01 through date."
+}
+```

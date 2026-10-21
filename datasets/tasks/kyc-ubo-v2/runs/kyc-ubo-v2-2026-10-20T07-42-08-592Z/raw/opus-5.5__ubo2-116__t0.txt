@@ -1,0 +1,18 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Felix Lang",
+      "basis": "Holds 40% of the KG's capital (24,000 of 60,000 EUR), which is more than 25% directly (§ 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Greta Brenner",
+      "basis": "Holds 35% of the KG's capital (21,000 of 60,000 EUR), which is more than 25% directly (§ 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Theo Kuhn",
+      "basis": "Controls the KG by holding 60% of Eichental Verwaltungs GmbH, the general partner that alone runs the KG (BVA practice for GmbH & Co. KG). He also holds 25% of the KG directly, but that alone does not exceed the threshold."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The KG's capital totals 60,000 EUR. Felix Lang (40%) and Greta Brenner (35%) each exceed 25% and qualify directly. Theo Kuhn's direct 25% is exactly the threshold, not above it, so it does not qualify him on its own. The general partner, Eichental Verwaltungs GmbH, has no capital share, but it alone manages the KG. Under BVA practice, whoever controls the general partner therefore controls the KG. Theo Kuhn holds 60% of that GmbH, so he qualifies through control. Felix Haas holds only 40% of the GmbH, does not control it, and has no stake in the KG, so he does not qualify. The managing directors Bastian Wendt and Oskar Arendt hold no shares or control rights, and since natural persons qualify, fictitious beneficial owners are not needed. One discrepancy should be clarified: the KG extract lists the general partner as Sitz Bonn, HRB 12582, while the GmbH extract is HRB 161119 at Amtsgericht Köln. The entity was assumed to be the same based on its name."
+}

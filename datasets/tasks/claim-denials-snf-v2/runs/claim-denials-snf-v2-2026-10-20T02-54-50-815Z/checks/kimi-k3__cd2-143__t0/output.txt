@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit for this benefit period is exhausted: the prior stay used 89 days, and only 23 days passed at home before readmission, so the 60-consecutive-day break needed to start a new benefit period was never met. Medicare correctly paid the 11 remaining days through 2025-04-18 (day 100); the days after that are beneficiary liability per PR-119, and with no Medigap or Medicaid on file the facility should bill the patient for the non-covered days."
+}

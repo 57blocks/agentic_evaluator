@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had 77 SNF days in the continuing benefit period, leaving only 23 days for this stay, so Medicare correctly paid only through 2025-05-23 and exhausted the 100-day benefit. With no secondary coverage, bill the patient for the noncovered days after 2025-05-23, after confirming the required noncoverage notice was provided."
+}

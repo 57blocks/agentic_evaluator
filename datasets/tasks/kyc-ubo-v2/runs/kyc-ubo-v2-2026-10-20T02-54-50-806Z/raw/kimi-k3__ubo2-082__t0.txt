@@ -1,0 +1,10 @@
+{
+  "beneficial_owners": [
+    { "name": "Lena Kramer", "basis": "Holds more than 25% of the capital shares (EUR 10,400 of EUR 40,000 = 26%) under § 3 Abs. 1 GwG; the exclusion of voting rights on Geschäftsanteil Nr. 1 does not affect the capital-share threshold." },
+    { "name": "Vera Arendt", "basis": "Holds more than 25% of the capital shares (EUR 10,400 of EUR 40,000 = 26%) under § 3 Abs. 1 GwG; non-voting status of Geschäftsanteil Nr. 4 is irrelevant to the capital-share test." },
+    { "name": "Kai Lindqvist", "basis": "Controls more than 25% of the voting rights under § 3 Abs. 1 GwG: only Anteile Nr. 2, 3 and 5 carry votes (19,200 total), so his 9,600 votes equal 50%, even though his capital share is only 24%." },
+    { "name": "Tobias Buchholz", "basis": "Controls more than 25% of the voting rights under § 3 Abs. 1 GwG: his combined Anteile Nr. 3 and 5 give 9,600 of 19,200 votes = 50%, even though his combined capital share is only 24%." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 1 GwG, capital-share holdings and voting-right control are tested independently against the 'more than 25%' threshold. Because Anteile Nr. 1 and Nr. 4 are non-voting, total votes are 19,200: Kai Lindqvist (9,600) and Tobias Buchholz (3,800 + 5,800 = 9,600) each control 50% of the votes and qualify on the voting-rights limb. Lena Kramer and Vera Arendt hold no votes, but each holds EUR 10,400 of EUR 40,000 Stammkapital = 26% of the capital shares, which exceeds 25%, so they qualify on the capital-share limb. Since natural persons qualify, Geschäftsführerin Anika Brenner is not needed as a fictitious beneficial owner under § 3 Abs. 2 GwG."
+}

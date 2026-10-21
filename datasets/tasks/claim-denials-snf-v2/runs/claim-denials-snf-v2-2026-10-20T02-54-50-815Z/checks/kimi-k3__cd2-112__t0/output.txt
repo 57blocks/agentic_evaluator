@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The remittance is correct: the prior SNF stay used 76 of the 100 benefit-period days, and only 23 days elapsed between SNF discharge (2025-03-08) and rehospitalization (2025-04-01) — short of the 60-day wellness break needed to start a new benefit period — so Medicare paid through day 100 (2025-04-28) and denied 2025-04-29 through 2025-05-09 as PR-119 (patient responsibility). With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days and any applicable coinsurance."
+}
+```

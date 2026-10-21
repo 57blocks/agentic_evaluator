@@ -1,0 +1,11 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Felix Althaus", "basis": "Direct holding of 16.500,00 EUR of 50.000,00 EUR Stammkapital (33 %), more than 25 % of capital and voting rights (§ 3 Abs. 2 GwG)" },
+    { "name": "Matthias Seidel", "basis": "Direct holding of two shares (lfd. Nr. 2 and 3) of 8.500,00 EUR each, 17.000,00 EUR in total (34 %), more than 25 % of capital and voting rights (§ 3 Abs. 2 GwG)" },
+    { "name": "Bastian Falk", "basis": "Direct holding of 16.500,00 EUR of 50.000,00 EUR Stammkapital (33 %), more than 25 % of capital and voting rights (§ 3 Abs. 2 GwG)" }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The Stammkapital is 50.000,00 EUR. The articles contain no other voting arrangements, so voting rights follow capital. Felix Althaus holds 33 %. Matthias Seidel holds 34 %, because his two shares (lfd. Nr. 2 and 3), each 17 % on its own, must be added together since they belong to the same person (same name and date of birth). Bastian Falk holds 33 %. Each of the three therefore holds more than 25 % directly and is a beneficial owner. Bastian Falk qualifies through his shareholding; his Prokura does not matter for this. Managing director Lukas Vogt holds no shares and has no other means of control, so he does not qualify. No trust, pooling, veto or usufruct arrangements exist that would change this result. Because natural persons qualify, there are no fictitious beneficial owners."
+}
+```

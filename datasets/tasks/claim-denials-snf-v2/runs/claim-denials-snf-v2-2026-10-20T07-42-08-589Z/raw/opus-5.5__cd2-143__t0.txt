@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 23 days (2025-03-11 to 2025-04-02) before readmission, short of the 60 days needed to end the benefit period, so the 89 days already used plus 11 days paid here (2025-04-08 to 04-18) reach the 100-day SNF limit (CARC 119, PR). With no Medigap or Medicaid on file, bill the patient for 2025-04-19 onward, and keep sending the required benefits-exhausted claims while she remains in the facility."
+}
+```

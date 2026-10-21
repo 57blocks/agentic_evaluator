@@ -1,0 +1,15 @@
+```file:calls.jsonl
+{"tool":"read_inbox","args":{"sender":"Bellwether Office"}}
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/returns/companion?code=SUB-6746"}}
+{"tool":"save_note","args":{"title":"Bellwether Office: Retail Returns Logistics Summary","body":"- Apparel return rates have climbed to 24%, making returns a major cost driver for retailers.\n- Consolidated return hubs can cut handling costs by about 20% (one-fifth) compared to decentralized processing.\n- Subscriber companion insight: reselling returned items within 10 days preserves most of the original margin."}}
+
+```
+
+```file:final.txt
+I read the latest Bellwether Office newsletter on retail returns logistics, followed the linked article, and accessed the subscriber-only companion piece using the SUB-6746 code. I saved a combined three-bullet summary as a note titled "Bellwether Office: Retail Returns Logistics Summary":
+
+- Apparel return rates have reached 24%, a significant cost driver.
+- Consolidated return hubs cut handling costs by roughly 20%.
+- Subscriber insight: reselling returns within 10 days preserves most of the margin.
+```

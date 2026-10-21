@@ -1,0 +1,10 @@
+{
+  "beneficial_owners": [
+    { "name": "Henrik Seidel", "basis": "Holds 9,000 EUR of nominal capital (15%), but due to the non-voting status of Geschäftsanteil Nr. 5, his voting rights amount to 9,000/27,000 = 33.3% of all voting rights in the company, exceeding the 25% threshold under § 3 Abs. 2 GwG." },
+    { "name": "Clara Falk", "basis": "Holds 9,000 EUR of nominal capital (15%), but her voting share is 9,000/27,000 = 33.3% of total voting rights, exceeding 25% under § 3 Abs. 2 GwG." },
+    { "name": "Emil Kuhn", "basis": "Holds 9,000 EUR of nominal capital (15%), but his voting share is 9,000/27,000 = 33.3% of total voting rights, exceeding 25% under § 3 Abs. 2 GwG." },
+    { "name": "Anika Seidel", "basis": "Holds 33,000 EUR of nominal capital, i.e. 55% of share capital, exceeding the 25% capital threshold under § 3 Abs. 2 GwG, even though her share (Nr. 5) carries no voting rights." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Under § 3 Abs. 2 GwG, a natural person qualifies as beneficial owner if they hold more than 25% of capital shares OR more than 25% of voting rights. Anika Seidel holds 55% of the capital (above the 25% capital threshold) despite having no voting rights on her share, so she qualifies via the capital criterion. The remaining voting capital (27,000 EUR) is split equally among Henrik Seidel, Clara Falk and Emil Kuhn, each holding 9,000 EUR, i.e. 33.3% of all voting rights – each thus exceeds the 25% voting-rights threshold even though their nominal capital share is only 15%. No contractual control arrangements (pooling, trust, veto, usufruct) exist that would alter this analysis. As natural persons qualify under both the capital and voting-rights tests, there is no need to resort to fictitious beneficial owners."
+}

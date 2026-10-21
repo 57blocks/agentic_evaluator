@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.bellwether.example/2026/warehouse"}}
+{"tool":"web_fetch","args":{"url":"https://insights.bellwether.example/warehouse/companion"}}
+{"tool":"save_note","args":{"title":"Bellwether warehouse automation — combined summary","body":"- Autonomous carts increased warehouse pick rates by 18% in 2026.\n- Integration took twice as long as originally planned.\n- The largest cost saving came from reducing mis-picks."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Bellwether warehouse automation — combined summary”** with three bullets covering pick-rate gains, integration delays, and reduced mis-picks.
+```

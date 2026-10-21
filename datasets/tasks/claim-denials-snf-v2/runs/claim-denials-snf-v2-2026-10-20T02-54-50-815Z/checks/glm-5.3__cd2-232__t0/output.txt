@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of hospital/SNF care only 33 days (2025-04-08 to 2025-05-10) between the prior SNF discharge and the 5/11 hospital admission, so no new benefit period began and only 20 of the 100 SNF days remained; Medicare correctly paid 5/15 through 6/3 (days 81-100) and denied the balance under CARC 119, a hard statutory cap that no appeal or corrected claim can extend. With no Medigap or Medicaid, bill the patient the PR balance - the daily coinsurance for days 81-100 plus the full charges for 6/4 through 6/12 - after confirming a NOMNC was delivered before coverage ended."
+}

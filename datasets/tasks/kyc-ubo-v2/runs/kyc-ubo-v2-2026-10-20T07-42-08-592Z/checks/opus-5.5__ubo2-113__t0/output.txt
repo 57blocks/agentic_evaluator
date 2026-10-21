@@ -1,0 +1,11 @@
+```json
+{
+  "beneficial_owners": [
+    { "name": "Ines Winter", "basis": "Holds two shares totalling 8.000,00 EUR (4.800 + 3.200). That is 20% of the capital, but 33,33% of the voting rights because the company's own shares carry no votes. This exceeds 25% of voting rights (§ 3 Abs. 2 GwG)." },
+    { "name": "Theo Lindqvist", "basis": "Holds 8.000,00 EUR, which is 20% of the capital but 33,33% of the voting rights once the voteless own shares are excluded. This exceeds 25% of voting rights (§ 3 Abs. 2 GwG)." },
+    { "name": "Felix Brenner", "basis": "Holds 8.000,00 EUR, which is 20% of the capital but 33,33% of the voting rights once the voteless own shares are excluded. This exceeds 25% of voting rights (§ 3 Abs. 2 GwG)." }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The share capital is 40.000 EUR, of which 16.000 EUR (40%) are the company's own shares. Own shares carry no voting rights, so the voting capital is 24.000 EUR. Ines Winter's two entries add up to 8.000 EUR. She, Theo Lindqvist and Felix Brenner therefore each hold 20% of the capital, which is not above 25%. Each of them does, however, control 8.000/24.000 = 33,33% of the voting rights, which is above 25%. Each therefore qualifies as a beneficial owner through voting control. No pooling, trust, veto or usufruct arrangements exist. The managing directors Ines Winter and Ruth Wendt and the authorised signatory (Prokuristin) Mara Ziegler gain no beneficial ownership from their roles alone. Ruth Wendt and Mara Ziegler hold no shares and do not qualify. Because natural persons qualify, there is no fictitious beneficial owner."
+}
+```

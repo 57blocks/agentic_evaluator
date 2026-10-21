@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The MAC correctly applied PR-119: the prior SNF stay used 78 of the 100 benefit-period days, and the 18-day break at home (2025-03-12 to 2025-03-29) is short of the 60 consecutive days needed to start a new benefit period, so only 22 days remained and coverage properly ended 2025-04-24. The days 2025-04-25 through 2025-04-29 are beneficiary liability; with no Medigap or Medicaid on file, bill the patient (confirming required notices of non-coverage were issued)."
+}

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay used 76 days and the 23-day home interval did not create a new benefit period, leaving only 24 SNF days, so Medicare correctly paid only through 2025-04-28. Bill the patient for the noncovered days after 2025-04-28 after confirming the required noncoverage notice was issued, since no other payer is on file."
+}

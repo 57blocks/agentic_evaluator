@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Medicare correctly paid through 2025-03-12 because the beneficiary had only 26 SNF days remaining in the benefit period (100 - 74 = 26). The days after 2025-03-12 are beyond the 100-day limit and are the patient's responsibility; bill the patient for the non-covered days, ensuring a valid SNFABN was issued."
+}

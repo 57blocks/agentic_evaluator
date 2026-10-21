@@ -1,0 +1,10 @@
+```file:calls.jsonl
+{"tool":"web_fetch","args":{"url":"https://blog.brightline.example/2026/returns"}}
+{"tool":"web_fetch","args":{"url":"https://insights.brightline.example/returns/companion"}}
+{"tool":"save_note","args":{"title":"Brightline 2026 Retail Returns — Combined Summary","body":"- Apparel return rates reached 24%, underscoring the scale of returns pressure in the category.\n- Consolidated return hubs reduced handling costs by about one-fifth.\n- Reselling returned items within 10 days preserved most of the margin."}}
+
+```
+
+```file:final.txt
+Saved a note titled **“Brightline 2026 Retail Returns — Combined Summary”** with three bullets covering return rates, handling-cost savings, and resale timing.
+```

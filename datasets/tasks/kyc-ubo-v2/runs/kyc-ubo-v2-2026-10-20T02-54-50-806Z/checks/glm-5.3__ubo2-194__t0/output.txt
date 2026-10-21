@@ -1,0 +1,14 @@
+{
+  "beneficial_owners": [
+    {
+      "name": "Lukas Lorenz",
+      "basis": "Holds 16,000 of 40,000 EUR capital directly = 40%, above the 25% threshold (§ 3 Abs. 1 Nr. 1 GwG)."
+    },
+    {
+      "name": "Greta Althaus",
+      "basis": "Direct holdings aggregated = 15% (two entries of 3,000 EUR each) plus indirect holding of 11.25% via her 75% stake in Hellbrunn Beteiligungs GmbH, which holds 15% of Hellbrunn Verpackung GmbH; direct and indirect are summed = 26.25%, above the 25% threshold."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "Lukas Lorenz directly holds 40% and therefore clearly qualifies. Greta Althaus appears twice in the shareholder list; the two identical entries (same name, date of birth, residence) must be aggregated to 6,000 EUR = 15%, and under the look-through/attribution rules of § 3 Abs. 2 GwG her 75% participation in Hellbrunn Beteiligungs GmbH (which holds 15% of the Verpackung GmbH) is added as an 11.25% indirect holding, giving 26.25% > 25%, so she also qualifies; her position as Geschäftsführerin plays no role in this. Sofie Hartmann (20%), Ines Lindqvist (10%) and Matthias Sommer (indirect 25% of 15% = 3.75%) remain below the threshold; Hellbrunn Beteiligungs GmbH is a legal entity, not a natural person, and is merely looked through; Ruth Wendt is only Geschäftsführerin, which alone does not make her a beneficial owner. Since at least one natural person qualifies under § 3 GwG, no fictitious beneficial owners (§ 20 GwG) are reported, so Ruth Wendt and Greta Althaus as managing directors are not listed as such."
+}

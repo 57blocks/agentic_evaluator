@@ -1,0 +1,16 @@
+```json
+{
+  "beneficial_owners": [
+    {
+      "name": "Clara Kramer",
+      "basis": "Limited partner with 35,000.00 EUR of 80,000.00 EUR capital, i.e. 43.75%. That is more than 25% of capital and voting rights (§ 3 Abs. 2 GwG)."
+    },
+    {
+      "name": "Oskar Haas",
+      "basis": "Limited partner with 25,000.00 EUR of 80,000.00 EUR capital, i.e. 31.25%. That is more than 25% of capital and voting rights (§ 3 Abs. 2 GwG)."
+    }
+  ],
+  "fictitious_beneficial_owners": [],
+  "reasoning": "The general partner, Hellbrunn Verwaltungs GmbH, holds no capital share. Capital therefore rests entirely with the limited partners. Helena Ziegler is listed twice with identical name, birth date, place and 20,000.00 EUR. A partner can hold only one uniform partnership interest, so I treat this as a duplicate entry. Total capital is then 80,000.00 EUR. Clara Kramer (43.75%) and Oskar Haas (31.25%) exceed the 25% threshold. Helena Ziegler holds exactly 25%, which is not 'more than 25%', so she does not qualify. The statutes contain no special voting rules, and there are no trust, pooling, veto or usufruct arrangements. Nils Brenner owns 100% of the general partner. However, the general partner has no capital share, and its sole management authority does not amount to control of the KG under BVA practice. Neither Nils Brenner nor the managing directors Moritz Kuhn and Clara Arendt qualify. Two points need clarification before onboarding. First, the duplicate Ziegler entry: if she actually holds 40,000.00 EUR out of 100,000.00 EUR, she would be at 40%, Clara Kramer at 35% and Oskar Haas at exactly 25%. Oskar Haas would then drop out and Helena Ziegler would qualify instead. Second, the register details for the general partner do not match: the KG extract says Sitz Wiesbaden, HRB 18564, but the GmbH extract is from AG Frankfurt, HRB 195352. Because the Ziegler question changes the result, it should be resolved and reported as a discrepancy if necessary (§ 23a GwG)."
+}
+```

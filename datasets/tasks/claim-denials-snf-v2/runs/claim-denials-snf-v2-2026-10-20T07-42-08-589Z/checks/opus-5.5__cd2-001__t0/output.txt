@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CARC 18 correctly denied the 2025-03-26 resubmission as an exact duplicate of the original claim, which was paid on 2025-03-21. Close the duplicate with a zero-balance adjustment (no real revenue is lost and the patient must not be billed), keep the original payment, and do not appeal. If the paid claim ever needs a change, send an adjustment claim (bill type 0217) rather than a new 0211."
+}
+```
