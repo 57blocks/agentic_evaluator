@@ -1,5 +1,5 @@
 {
-  "rule_version": "select-v3",
+  "rule_version": "select-v4",
   "operating_mode": "lowest-cost",
   "control_candidate": "sonnet-5",
   "eligibility": {
@@ -241,6 +241,30 @@
     "reason": "chosen $0.009959 vs control $0.019408 per successful task"
   },
   "firmness": "directional",
+  "firmness_reasons": [
+    "no minimum meaningful difference declared"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 0.9,
+        "successes": 291,
+        "n": 300,
+        "low": 0.9439774605957181,
+        "high": 0.9841381462680938
+      },
+      {
+        "gate": "reliability",
+        "threshold": 0.9,
+        "successes": 291,
+        "n": 300,
+        "low": 0.9439774605957181,
+        "high": 0.9841381462680938
+      }
+    ],
+    "versus_runner_up": null
+  },
   "reasons": [
     "lowest generation cost per successful task among eligible: $0.009959",
     "no minimum meaningful difference declared"

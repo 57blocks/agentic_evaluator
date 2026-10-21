@@ -1,0 +1,48 @@
+{
+  "inputs": 2,
+  "effective_n": 2,
+  "counts": {
+    "splits": 2,
+    "all-pass": 0,
+    "all-fail": 0,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "demo-todo-T-001",
+      "class": "splits",
+      "pass_rate": 0.8888888888888888,
+      "by_candidate": {
+        "deepseek-flash": 1,
+        "deepseek-v4-pro": 1,
+        "gemini-4-argon": 1,
+        "glm-5-3": 1,
+        "glm-5-3-prime": 1,
+        "gpt-5-6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5-5": 1,
+        "qwen-3-8-max": 0
+      },
+      "discrimination": 1
+    },
+    {
+      "input": "demo-todo-T-006",
+      "class": "splits",
+      "pass_rate": 0.9,
+      "by_candidate": {
+        "deepseek-flash": 1,
+        "deepseek-v4-pro": 1,
+        "fable-5-1": 1,
+        "gemini-4-argon": 1,
+        "glm-5-3": 1,
+        "glm-5-3-prime": 1,
+        "gpt-5-6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5-5": 1,
+        "qwen-3-8-max": 0
+      },
+      "discrimination": 1
+    }
+  ]
+}

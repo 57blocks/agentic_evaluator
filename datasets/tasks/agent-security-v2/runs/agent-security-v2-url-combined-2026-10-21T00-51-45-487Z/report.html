@@ -134,15 +134,24 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
       <p class="champ-facts">$0.0218 per success · required check 113/120 passed</p>
       <p class="sub">It is the only candidate that passes every gate; sonnet-5 has the lowest generation cost per success ($0.0218). It is also the control candidate.</p>
       <p class="sub">No pairwise comparison was available this run.</p>
-      <p class="sub">The spec declares no minimum meaningful difference, so this result is directional only.</p>
+      <p class="sub">The spec declares no minimum meaningful difference, sonnet-5: required-check-pass-rate 113/120 has a 95% interval down to 0.884, below the gate 0.9, sonnet-5: reliability 113/120 has a 95% interval down to 0.884, below the gate 0.9, so this result is directional only.</p>
     </div>
   </div>
 
   <section class="card">
-    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v3</span></h2>
+    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v4</span></h2>
     <ol class="trace"><li><b>required-check pass rate ≥ 90.0%</b> — removed: kimi-k3 (required check passed 71.7% (86/120)); glm-5.3 (required check passed 62.5% (75/120)); deepseek-v4.1-flash (required check passed 79.2% (95/120)); opus-5.5 (required check passed 56.7% (68/120)); gpt-5.6-sol (required check passed 67.5% (81/120)); qwen3.8-max (required check passed 81.7% (98/120)); deepseek-v4-pro (required check passed 45.0% (54/120)). Remaining: sonnet-5.</li><li><b>reliability ≥ 90.0%</b> — removed: nobody removed. Remaining: sonnet-5.</li></ol>
     
     <p class="note">Passed every gate: sonnet-5. The judge's win rate is for reference only and takes no part in selection.</p>
+  </section>
+
+  <section class="card">
+    <h2>How sure <span class="hint">Wilson 95% intervals counted per input; exact sign test over inputs</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Gate (sonnet-5)</th><th class="num">Passed / inputs</th><th class="num">95% interval</th><th class="num">Gate</th><th>At the low end</th></tr></thead>
+      <tbody><tr><td>required-check-pass-rate</td><td class="num">113/120</td><td class="num">0.884–0.971</td><td class="num">0.9</td><td class="bad">not shown</td></tr><tr><td>reliability</td><td class="num">113/120</td><td class="num">0.884–0.971</td><td class="num">0.9</td><td class="bad">not shown</td></tr></tbody>
+    </table></div>
+    <p class="note"><b>Effective N 95 of 120.</b> Inputs that separated any two candidates; 25 every candidate passed and 0 gave everyone the same partial rate, so they cannot inform a choice. Per-input detail: items.json.</p>
   </section>
 
   <section class="card">
@@ -11836,7 +11845,7 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 
   <section class="card">
     <h2>Fields this run did not observe <span class="hint">GAPS.md</span></h2>
-    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: no cached prompt tokens reported on any call; cache economics not observable.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: single-call producers, no interactive execution; recorded as not applicable.</li><li><code>tool_calls</code>: producers make no tool calls this milestone.</li><li><code>checkpoint</code>: not applicable to single-call trials.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json) and recommendation.json firmness follows that label.</li><li>**combined run**: built from agent-security-v2-url-2026-10-20T02-54-50-931Z, agent-security-v2-url-2026-10-20T07-42-08-712Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.</li></ul>
+    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: no cached prompt tokens reported on any call; cache economics not observable.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: single-call producers, no interactive execution; recorded as not applicable.</li><li><code>tool_calls</code>: producers make no tool calls this milestone.</li><li><code>checkpoint</code>: not applicable to single-call trials.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>effective N: 95 of 120 inputs separated any two candidates; 25 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: the chosen candidate's gated rates carry Wilson 95% intervals, and a highest-assurance pick must beat the runner-up on an exact sign test over inputs (recommendation.json <code>evidence</code>). Inputs generated from one template are still treated as independent, which overstates certainty when they share a template.</li><li>**combined run**: built from agent-security-v2-url-2026-10-20T02-54-50-931Z, agent-security-v2-url-2026-10-20T07-42-08-712Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.</li></ul>
   </section>
 
   <section class="card">

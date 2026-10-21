@@ -1,5 +1,5 @@
 {
-  "rule_version": "select-v3",
+  "rule_version": "select-v4",
   "operating_mode": "highest-assurance",
   "control_candidate": null,
   "eligibility": {
@@ -288,10 +288,50 @@
   "chosen": "fable-5-1",
   "compared_to_control": null,
   "firmness": "directional",
+  "firmness_reasons": [
+    "3 inputs; no comparison can be significant with fewer than 6",
+    "no minimum meaningful difference declared",
+    "fable-5-1: required-check-pass-rate 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "fable-5-1: reliability 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "fable-5-1 and opus-5-5 cannot be told apart on task success: fable-5-1 did better on 0 input(s), opus-5-5 on 0, equal on 3 (sign test p 1.000)"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 1,
+        "successes": 3,
+        "n": 3,
+        "low": 0.43850296436068037,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 1,
+        "successes": 3,
+        "n": 3,
+        "low": 0.43850296436068037,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": {
+      "a": "fable-5-1",
+      "b": "opus-5-5",
+      "compared": 3,
+      "a_better": 0,
+      "b_better": 0,
+      "same": 3,
+      "p_value": 1,
+      "significant": false
+    }
+  },
   "reasons": [
     "6 eligible candidates tie at 1.000 (3/3) reliability and 1.000 (3/3) required-check pass rate; fable-5-1 is picked by the judge's pairwise score (fable-5-1 81%, next opus-5-5 71%)",
-    "3 inputs; fewer than 10",
-    "no minimum meaningful difference declared"
+    "3 inputs; no comparison can be significant with fewer than 6",
+    "no minimum meaningful difference declared",
+    "fable-5-1: required-check-pass-rate 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "fable-5-1: reliability 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "fable-5-1 and opus-5-5 cannot be told apart on task success: fable-5-1 did better on 0 input(s), opus-5-5 on 0, equal on 3 (sign test p 1.000)"
   ],
   "closest": null
 }

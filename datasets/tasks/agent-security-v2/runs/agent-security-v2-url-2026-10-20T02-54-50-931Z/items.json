@@ -1,0 +1,1453 @@
+{
+  "inputs": 120,
+  "effective_n": 56,
+  "counts": {
+    "splits": 56,
+    "all-pass": 61,
+    "all-fail": 3,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "url-001",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-002",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-003",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-004",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-005",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-006",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-007",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-008",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-009",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-010",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.11408308840262664
+    },
+    {
+      "input": "url-011",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-012",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-013",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-014",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.12574399434400452
+    },
+    {
+      "input": "url-015",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-016",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-017",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-018",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5209394051394471
+    },
+    {
+      "input": "url-019",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-020",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": -0.11408308840262664
+    },
+    {
+      "input": "url-021",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-022",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.2592797463696062
+    },
+    {
+      "input": "url-023",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-024",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-025",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-026",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-027",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-028",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-029",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-030",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-031",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-032",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-033",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-034",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-035",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-036",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-037",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-038",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.2592797463696062
+    },
+    {
+      "input": "url-039",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-040",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-041",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-042",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-043",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-044",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-045",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-046",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": -0.11408308840262664
+    },
+    {
+      "input": "url-047",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-048",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-049",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-050",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-051",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-052",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.12574399434400452
+    },
+    {
+      "input": "url-053",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-054",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-055",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-056",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-057",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-058",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": -0.5209394051394471
+    },
+    {
+      "input": "url-059",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-060",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-061",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-062",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": -0.11408308840262664
+    },
+    {
+      "input": "url-063",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-064",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-065",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-066",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-067",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-068",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-069",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-070",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.12574399434400452
+    },
+    {
+      "input": "url-071",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-072",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-073",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-074",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.2592797463696062
+    },
+    {
+      "input": "url-075",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-076",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-077",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-078",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": -0.11408308840262664
+    },
+    {
+      "input": "url-079",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-080",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-081",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-082",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-083",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-084",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8608087579470929
+    },
+    {
+      "input": "url-085",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-086",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.2592797463696062
+    },
+    {
+      "input": "url-087",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 0
+      },
+      "discrimination": -0.12574399434400452
+    },
+    {
+      "input": "url-088",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-089",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-090",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-091",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7156120999801133
+    },
+    {
+      "input": "url-092",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8442811048811728
+    },
+    {
+      "input": "url-093",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-094",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": -0.11408308840262664
+    },
+    {
+      "input": "url-095",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-096",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 0
+      },
+      "discrimination": -0.8608087579470929
+    },
+    {
+      "input": "url-097",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-098",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-099",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-100",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-101",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-102",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-103",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-104",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-105",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-106",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-107",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-108",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-109",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-110",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-111",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-112",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-113",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-114",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-115",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-116",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-117",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-118",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-119",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "url-120",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    }
+  ]
+}
