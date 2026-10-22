@@ -1,0 +1,11 @@
+# pnpm 9 and early pnpm 10 refuse a pnpm-workspace.yaml without `packages`.
+packages:
+  - .
+
+# Which dependencies may run install scripts. pnpm 11+ reads `allowBuilds`;
+# pnpm 10 reads `onlyBuiltDependencies`. Keep the two lists in step.
+allowBuilds:
+  esbuild: true
+
+onlyBuiltDependencies:
+  - esbuild
