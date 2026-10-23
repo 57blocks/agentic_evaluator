@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { dimensionKeys, profiles, rampStep, renderHeatmap, renderRadar, renderTrialStrip } from "../src/report-charts.js";
+import { dimensionKeys, profiles, renderScoreDistribution, renderScoreSummary, scoreDistribution } from "../src/report-charts.js";
 import type { TrialRow } from "../src/canon/rows.js";
 
 const DIMS = ["a", "b", "c"];
@@ -46,73 +46,104 @@ test("a dimension nobody scored stays null, never zero", () => {
   assert.equal(q.overall, null);
 });
 
-test("the ramp spans the 1-5 domain and refuses a missing score", () => {
-  assert.equal(rampStep(null), null);
-  assert.notEqual(rampStep(1), rampStep(5));
-  assert.equal(rampStep(0), rampStep(1), "below the domain clamps instead of falling off the ramp");
-});
-
-test("the radar plots at most three profiles and says what it dropped", () => {
-  // Scores differ per candidate: an all-equal grader draws no radar at all.
-  const many = ["a1", "a2", "a3", "a4"].map((c, i) => trial(c, 0, { a: 2 + i, b: 4, c: 5 - i }, 4));
-  const html = renderRadar(many);
-  assert.match(html, /1 more candidate\(s\) not drawn/);
-  assert.equal((html.match(/viz-poly/g) ?? []).length, 3);
-});
-
-test("the radar skips a candidate with an incomplete profile", () => {
-  const html = renderRadar([...ROWS, trial("gamma", 0, { a: 4 }, 4)]);
-  assert.doesNotMatch(html, /gamma/);
-});
-
-test("fewer than three dimensions has no shape to draw", () => {
-  assert.equal(renderRadar([trial("alpha", 0, { a: 4, b: 4 }, 4)]), "");
-});
-
-test("the heatmap prints every value, so colour is never the only channel", () => {
-  const html = renderHeatmap(ROWS);
-  assert.match(html, />4\.5</);
-  assert.match(html, />2\.0</);
-});
-
-test("the trial strip marks a truncated or failed trial as not normal", () => {
-  const html = renderTrialStrip([
-    trial("alpha", 0, { a: 4 }, 4),
-    trial("alpha", 1, { a: 4 }, 4, { truncated: true }),
-    trial("beta", 0, null, null, { completion_state: "timeout" }),
-  ]);
-  assert.match(html, /viz-bad/);
-  assert.match(html, /timeout \(not scored\)/);
-});
-
-test("candidate names are escaped", () => {
-  const html = renderHeatmap([trial("<script>", 0, { a: 4, b: 4, c: 4 }, 4)]);
-  assert.doesNotMatch(html, /<script>/);
-  assert.match(html, /&lt;script&gt;/);
-});
-
-test("a saturated grader gets no radar, only a statement of what happened", () => {
-  // Arrange — two candidates, identical scores on every dimension.
+test("the distribution counts each score per dimension and keeps unscored trials apart", () => {
+  // Arrange: a bimodal candidate — the mean (3.0) hides that it is all 1s and 5s.
   const trials = [
-    trial("sonnet-5", 0, { completeness: 5, testability: 5, structure: 5 }, 5),
-    trial("deepseek-v4-pro", 0, { completeness: 5, testability: 5, structure: 5 }, 5),
+    trial("split", 0, { basis: 5 }, 5),
+    trial("split", 1, { basis: 1 }, 1),
+    trial("split", 2, null, null, { completion_state: "timeout" }),
   ];
 
   // Act
-  const svg = renderRadar(trials);
+  const [basis] = scoreDistribution(trials);
 
   // Assert
-  assert.doesNotMatch(svg, /<polygon class="viz-poly/, "no outline is drawn");
-  assert.match(svg, /no discrimination/);
+  assert.equal(basis.dim, "basis");
+  const [row] = basis.rows;
+  assert.deepEqual(row.counts, [1, 0, 0, 0, 1]);
+  assert.equal(row.unscored, 1);
+  assert.equal(row.n, 3);
+  assert.equal(row.mean, 3);
 });
 
-test("the heatmap flags the columns where every candidate scored alike", () => {
+test("every dimension lists candidates in one order: most right answers first, not best-written", () => {
+  // Arrange: "fluent" writes better notes, "right" gets more answers right.
+  const trials = [
+    trial("fluent", 0, { x: 5, y: 5 }, 5),
+    trial("right", 0, { x: 3, y: 4 }, 3.5),
+    trial("unchecked", 0, { x: 5, y: 5 }, 5),
+  ];
+  const checks = new Map([["fluent", { pass: 5, executed: 10 }], ["right", { pass: 9, executed: 10 }]]);
+
+  // Act
+  const blocks = scoreDistribution(trials, checks);
+
+  // Assert: a candidate the check never ran on goes last.
+  assert.deepEqual(blocks.map((b) => b.rows.map((r) => r.candidate)), [["right", "fluent", "unchecked"], ["right", "fluent", "unchecked"]]);
+});
+
+test("without check results, the judge's mean orders the rows", () => {
+  const blocks = scoreDistribution([trial("low", 0, { x: 2 }, 2), trial("high", 0, { x: 5 }, 5)]);
+  assert.deepEqual(blocks[0].rows.map((r) => r.candidate), ["high", "low"]);
+});
+
+test("a dimension where every candidate scored alike is flagged as saturated", () => {
   const trials = [
     trial("a", 0, { completeness: 5, testability: 3 }, 4),
     trial("b", 0, { completeness: 5, testability: 4 }, 4),
   ];
 
-  const html = renderHeatmap(trials);
+  const [completeness, testability] = scoreDistribution(trials);
+
+  assert.equal(completeness.saturated, true);
+  assert.equal(testability.saturated, false);
+});
+
+test("the chart puts the required-check pass rate on the same row as the judge score", () => {
+  const html = renderScoreDistribution(ROWS, new Map([["alpha", { pass: 1, executed: 2 }]]));
+
+  assert.match(html, /alpha[\s\S]*?4\.5[\s\S]*?1 \/ 2/);
+  assert.match(html, /beta[\s\S]*?—/, "a candidate with no check numbers shows a dash, not 0");
+});
+
+test("every segment says what it is on hover, and a table carries the exact counts", () => {
+  const html = renderScoreDistribution(ROWS, new Map());
+
+  assert.match(html, /title="alpha · a = 5: 1 of 2 trials \(50%\)"/);
+  assert.match(html, /<details>[\s\S]*<table/);
+});
+
+test("candidate names are escaped", () => {
+  const html = renderScoreDistribution([trial("<script>", 0, { a: 4 }, 4)], new Map());
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /&lt;script&gt;/);
+});
+
+test("nothing scored draws nothing", () => {
+  assert.equal(renderScoreDistribution([trial("alpha", 0, null, null)], new Map()), "");
+});
+
+test("the summary prints every mean in the distribution's row order, with the required check", () => {
+  // Arrange: beta writes worse notes but gets more answers right.
+  const checks = new Map([["alpha", { pass: 1, executed: 2 }], ["beta", { pass: 2, executed: 2 }]]);
+
+  // Act
+  const html = renderScoreSummary(ROWS, checks);
+
+  // Assert
+  assert.ok(html.indexOf(">beta<") < html.indexOf(">alpha<"), "rows follow the required check, as the bars do");
+  assert.match(html, />4\.5</);
+  assert.match(html, />2\.0</);
+  assert.match(html, /2 \/ 2/);
+});
+
+test("the summary flags a dimension where every candidate scored alike", () => {
+  const trials = [
+    trial("a", 0, { completeness: 5, testability: 3 }, 4),
+    trial("b", 0, { completeness: 5, testability: 4 }, 4),
+  ];
+
+  const html = renderScoreSummary(trials, new Map());
 
   assert.match(html, /completeness <span class="viz-flag">no spread<\/span>/);
   assert.doesNotMatch(html, /testability <span class="viz-flag">/);
