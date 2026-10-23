@@ -110,6 +110,7 @@ function gateFindings(suite: Suite, n: number): Finding[] {
   const gates: Array<[string, number | null]> = [
     ["minimum_required_check_pass_rate", e.minimum_required_check_pass_rate],
     ["minimum_reliability", e.minimum_reliability],
+    ["minimum_all_trials_pass_rate", e.minimum_all_trials_pass_rate],
   ];
   return gates
     .filter((g): g is [string, number] => g[1] !== null && low + 1e-12 < g[1])

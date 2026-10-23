@@ -473,8 +473,14 @@ gate: `lowest-cost` (cheapest per success), `fastest-within-cost-ceiling`
 favourite).
 
 **Eligibility gates** — `minimum_reliability` (share of trials that succeeded),
-`minimum_required_check_pass_rate`, `maximum_p95_ms`. A candidate below any gate
-is removed, and the report says which gate and by how much.
+`minimum_required_check_pass_rate`, `minimum_all_trials_pass_rate`,
+`maximum_p95_ms`. A candidate below any gate is removed, and the report says
+which gate and by how much.
+
+`minimum_all_trials_pass_rate` is pass^k: the share of inputs on which *every*
+trial succeeded. Use it with `trials` above 1 when one wrong answer in k is a
+wrong answer (security, compliance): a candidate right 9 times in 10 on every
+input has reliability 0.9 but pass^2 near 0.8. Off unless declared.
 
 ### Judge-only grading
 
@@ -721,7 +727,9 @@ Every verdict carries a confidence:
   - the mode is not `judge-preference`.
 - **directional** — otherwise: enough to look at the evidence, not to decide.
   Most small runs are directional, and `judge-preference` always is; the report
-  lists why, and its "How sure" section shows the intervals.
+  lists why, and its "How sure" section shows the intervals. `run` prints the
+  same evidence under each step's table, and `agenteval report <run>` prints
+  it for a finished run.
 - **needs review** — no candidate passed the gates, so nothing was recommended.
 
 Raise `trials_per_case` to see how stable a candidate is; add inputs to see how
@@ -811,6 +819,13 @@ it; the four datasets come to about 12 MB.
   bill you.
 - `budget_usd` is enforced: once spend reaches it, the run stops starting new
   work, records what it skipped, and exits `3`.
+- `execution.early_stop: true` (or `run --early-stop`) stops running a
+  candidate once a gate is out of its reach even if every remaining trial
+  passed: with a 0.9 gate over 300 trials, at the 31st failure; with 1.0, at
+  the first. It would be gated out anyway, so the pick does not change. On the
+  kyc and claim datasets this would have saved about 40% of generation spend.
+  The stopped candidate's rates cover only what it ran, and `GAPS.md` lists
+  who stopped where. `plan` then shows generations as an upper bound.
 - `methods: []` plus command-only candidates make a task free.
 - `agenteval models <task> --catalog-only` catches a mistyped model id for free.
 - On macOS, run billed tasks under `caffeinate -i`. If the machine sleeps, the

@@ -104,6 +104,8 @@ export interface EvalSpec {
     benchmark_mode?: "capability-neutral" | "production-realistic";
     cache_mode?: "cold" | "warm" | "both";
     minimum_meaningful_difference?: number | null;
+    /** Stop a candidate once a declared gate is out of its reach (canon/early-stop.ts). */
+    early_stop?: boolean;
   };
   "x-harness"?: {
     producer: "prompt" | "codegen";
@@ -436,6 +438,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     operatingMode: step.operating_mode,
     eligibility: step.eligibility,
     mmd: spec.execution.minimum_meaningful_difference ?? null,
+    ...(spec.execution.early_stop ? { earlyStop: true } : {}),
     controlCandidate: spec.workflow.control_candidate,
     benchmarkMode: spec.execution.benchmark_mode ?? "capability-neutral",
     cacheMode: spec.execution.cache_mode ?? "cold",

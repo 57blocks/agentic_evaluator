@@ -22,6 +22,7 @@ import { INFRA_COMPLETION_STATES } from "./states.js";
 import { budgetGap, type BudgetState } from "./budget.js";
 import { judgeDiscrimination, saturationGap, type JudgeDiscrimination } from "./discrimination.js";
 import { itemGaps, itemStats } from "./item-stats.js";
+import { earlyStopGaps, type EarlyStopRecord } from "./early-stop.js";
 import type { TraceIntegrity } from "./trace.js";
 
 export interface CanonSummary {
@@ -35,6 +36,8 @@ export interface CanonSummary {
   judge_discrimination?: JudgeDiscrimination;
   /** Spend against the declared ceiling, and what the ceiling stopped. */
   budget?: BudgetState;
+  /** Candidates stopped once a gate was out of reach (early-stop.ts). Absent before it existed. */
+  early_stop?: EarlyStopRecord;
   evaluation_coverage: {
     evaluator: string;
     version: string;
@@ -100,6 +103,7 @@ export function buildGaps(
   judgeMethods?: readonly string[],
   /** Candidates whose spec lets them report their own spend (`cli.reports_usage`). */
   selfReporting: readonly string[] = [],
+  earlyStop?: EarlyStopRecord,
 ): string {
   const lines: string[] = [
     "# GAPS — fields the protocol wants that this run did not observe",
@@ -109,6 +113,7 @@ export function buildGaps(
   ];
   const overBudget = budget ? budgetGap(budget) : null;
   if (overBudget !== null) lines.push(overBudget);
+  lines.push(...earlyStopGaps(earlyStop));
   if (integrity && integrity.gaps_over_threshold > 0) {
     lines.push(
       `- **wall-clock integrity**: ${integrity.gaps_over_threshold} gap(s) with nothing in flight, longer than ${Math.round(integrity.threshold_ms / 60000)} min between consecutive trace events (longest ${(integrity.longest_gap_ms / 60000).toFixed(1)} min). The host likely suspended the process; durations, timeouts and p50/p95 in this run are unreliable.`,
@@ -173,6 +178,7 @@ export function gapsFor(bundle: { manifest: RunManifest; trials: readonly TrialR
     Object.entries(bundle.manifest.candidates)
       .filter(([, def]) => def.cli?.reports_usage === true)
       .map(([id]) => id),
+    bundle.summary.early_stop,
   );
 }
 

@@ -42,6 +42,7 @@ test("resolveEligibility defaults to 1.0 gates when required checks exist", () =
   assert.deepEqual(resolveEligibility(["tsc-noemit"]), {
     minimum_reliability: 1,
     minimum_required_check_pass_rate: 1,
+    minimum_all_trials_pass_rate: null,
     maximum_p95_ms: null,
     cost_ceiling_per_success_usd: null,
   });
@@ -56,6 +57,7 @@ test("frozen null stays not-applied even when checks exist", () => {
   const frozen = resolveEligibility(["tsc-noemit"], {
     minimum_reliability: null,
     minimum_required_check_pass_rate: 1,
+    minimum_all_trials_pass_rate: null,
     maximum_p95_ms: null,
     cost_ceiling_per_success_usd: null,
   });
