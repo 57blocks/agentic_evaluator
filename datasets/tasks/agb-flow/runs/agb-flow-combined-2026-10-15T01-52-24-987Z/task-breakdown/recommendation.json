@@ -5,6 +5,7 @@
   "eligibility": {
     "minimum_reliability": 1,
     "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
     "maximum_p95_ms": null,
     "cost_ceiling_per_success_usd": null
   },
@@ -84,6 +85,11 @@
         "value": 1,
         "numerator": 3,
         "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
       }
     },
     {
@@ -103,6 +109,11 @@
         "denominator": 3
       },
       "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
         "value": 1,
         "numerator": 3,
         "denominator": 3
@@ -128,6 +139,11 @@
         "value": 1,
         "numerator": 3,
         "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
       }
     },
     {
@@ -147,6 +163,11 @@
         "denominator": 3
       },
       "task_success_rate": {
+        "value": 0.3333333333333333,
+        "numerator": 1,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
         "value": 0.3333333333333333,
         "numerator": 1,
         "denominator": 3
@@ -172,6 +193,11 @@
         "value": 1,
         "numerator": 3,
         "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
       }
     },
     {
@@ -191,6 +217,11 @@
         "denominator": 3
       },
       "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
         "value": 1,
         "numerator": 3,
         "denominator": 3
@@ -216,6 +247,11 @@
         "value": 0.6666666666666666,
         "numerator": 2,
         "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 0.6666666666666666,
+        "numerator": 2,
+        "denominator": 3
       }
     },
     {
@@ -235,6 +271,11 @@
         "denominator": 3
       },
       "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
         "value": 1,
         "numerator": 3,
         "denominator": 3
@@ -260,6 +301,11 @@
         "value": 0.6666666666666666,
         "numerator": 2,
         "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 0.6666666666666666,
+        "numerator": 2,
+        "denominator": 3
       }
     },
     {
@@ -279,6 +325,11 @@
         "denominator": 0
       },
       "task_success_rate": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
         "value": 0,
         "numerator": 0,
         "denominator": 3
