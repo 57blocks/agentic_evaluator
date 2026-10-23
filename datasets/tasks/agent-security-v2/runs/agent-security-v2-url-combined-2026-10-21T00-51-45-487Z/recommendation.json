@@ -5,6 +5,7 @@
   "eligibility": {
     "minimum_reliability": 0.9,
     "minimum_required_check_pass_rate": 0.9,
+    "minimum_all_trials_pass_rate": null,
     "maximum_p95_ms": null,
     "cost_ceiling_per_success_usd": null
   },
@@ -79,6 +80,11 @@
         "value": 0.9416666666666667,
         "numerator": 113,
         "denominator": 120
+      },
+      "all_trials_pass_rate": {
+        "value": 0.9416666666666667,
+        "numerator": 113,
+        "denominator": 120
       }
     },
     {
@@ -98,6 +104,11 @@
         "denominator": 120
       },
       "task_success_rate": {
+        "value": 0.7166666666666667,
+        "numerator": 86,
+        "denominator": 120
+      },
+      "all_trials_pass_rate": {
         "value": 0.7166666666666667,
         "numerator": 86,
         "denominator": 120
@@ -123,6 +134,11 @@
         "value": 0.625,
         "numerator": 75,
         "denominator": 120
+      },
+      "all_trials_pass_rate": {
+        "value": 0.625,
+        "numerator": 75,
+        "denominator": 120
       }
     },
     {
@@ -142,6 +158,11 @@
         "denominator": 120
       },
       "task_success_rate": {
+        "value": 0.7916666666666666,
+        "numerator": 95,
+        "denominator": 120
+      },
+      "all_trials_pass_rate": {
         "value": 0.7916666666666666,
         "numerator": 95,
         "denominator": 120
@@ -167,6 +188,11 @@
         "value": 0.5666666666666667,
         "numerator": 68,
         "denominator": 120
+      },
+      "all_trials_pass_rate": {
+        "value": 0.5666666666666667,
+        "numerator": 68,
+        "denominator": 120
       }
     },
     {
@@ -186,6 +212,11 @@
         "denominator": 120
       },
       "task_success_rate": {
+        "value": 0.675,
+        "numerator": 81,
+        "denominator": 120
+      },
+      "all_trials_pass_rate": {
         "value": 0.675,
         "numerator": 81,
         "denominator": 120
@@ -211,6 +242,11 @@
         "value": 0.8083333333333333,
         "numerator": 97,
         "denominator": 120
+      },
+      "all_trials_pass_rate": {
+        "value": 0.8083333333333333,
+        "numerator": 97,
+        "denominator": 120
       }
     },
     {
@@ -230,6 +266,11 @@
         "denominator": 120
       },
       "task_success_rate": {
+        "value": 0.45,
+        "numerator": 54,
+        "denominator": 120
+      },
+      "all_trials_pass_rate": {
         "value": 0.45,
         "numerator": 54,
         "denominator": 120
