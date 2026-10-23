@@ -123,6 +123,11 @@ export type OperatingMode =
 export interface EligibilityThresholds {
   minimum_reliability: number | null;
   minimum_required_check_pass_rate: number | null;
+  /**
+   * pass^k: share of inputs on which every trial succeeded. For tasks where
+   * one wrong answer in k is a wrong answer. Null (the default) = not applied.
+   */
+  minimum_all_trials_pass_rate: number | null;
   maximum_p95_ms: number | null;
   cost_ceiling_per_success_usd: number | null;
 }

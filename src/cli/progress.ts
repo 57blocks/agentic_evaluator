@@ -79,7 +79,7 @@ function withLines(p: Progress, event: RunEvent): Progress {
 
 function reduceTrial(p: Progress, e: Extract<RunEvent, { type: "trial" }>): Progress {
   const key = p.arm ?? e.step;
-  const isFailure = e.state === "skipped" || e.error !== undefined;
+  const isFailure = (e.state === "skipped" && e.skipReason !== "early-stop") || e.error !== undefined;
   const counted = bump(p, key, "generations", { done: 1, failed: isFailure ? 1 : 0 });
   const spent = { ...counted, spentUsd: counted.spentUsd + (e.costUsd ?? 0) };
   return isFailure ? withLines(spent, e) : spent;

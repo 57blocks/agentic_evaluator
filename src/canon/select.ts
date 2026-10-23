@@ -9,7 +9,7 @@
 import { judgeStandings, type JudgeStanding } from "./judge-standings.js";
 import { judgeDiscrimination } from "./discrimination.js";
 import type { TrialRow } from "./rows.js";
-import { directionality, type CandidateRates, type Directionality, type Rate } from "./rates.js";
+import { allTrialsPassRate, directionality, type CandidateRates, type Directionality, type Rate } from "./rates.js";
 import { clearsGate, fmtP, pairByInput, wilson, type PairedComparison } from "./stats.js";
 import type { EligibilityDecl, EligibilityThresholds, OperatingMode } from "./types.js";
 
@@ -52,6 +52,7 @@ export interface CandidateTradeoff {
   reliability: Rate;
   required_check_pass_rate: Rate;
   task_success_rate: Rate;
+  all_trials_pass_rate: Rate;
 }
 
 export type RecommendationFirmness = "firm" | "directional" | "needs-review";
@@ -92,7 +93,7 @@ export interface Recommendation {
 
 /** A gated rate of the chosen candidate with its Wilson 95% interval. */
 export interface GateInterval {
-  gate: "required-check-pass-rate" | "reliability";
+  gate: "required-check-pass-rate" | "reliability" | "all-trials-pass-rate";
   threshold: number;
   /** Counted per input when trials repeat inputs (see gateInterval). */
   successes: number;
@@ -141,6 +142,7 @@ export function resolveEligibility(
       declared?.minimum_required_check_pass_rate,
       hasChecks ? 1 : null,
     ),
+    minimum_all_trials_pass_rate: declaredOr(declared?.minimum_all_trials_pass_rate, null),
     maximum_p95_ms: declaredOr(declared?.maximum_p95_ms, null),
     cost_ceiling_per_success_usd: declaredOr(declared?.cost_ceiling_per_success_usd, null),
   };
@@ -551,6 +553,18 @@ export function recommend(input: RecommendInput): Recommendation {
     );
   }
 
+  if (eligibility.minimum_all_trials_pass_rate !== null) {
+    const min = eligibility.minimum_all_trials_pass_rate;
+    runFilter(
+      "all-trials-pass-rate",
+      `pass^k (every trial of an input succeeds) ≥ ${min}`,
+      (c) => {
+        const r = passAllOf(c);
+        return meetsMin(r, min) ? null : infraOnly(c, r) ?? `pass^k ${fmtRate(r)} < ${min}`;
+      },
+    );
+  }
+
   if (eligibility.maximum_p95_ms !== null) {
     const max = eligibility.maximum_p95_ms;
     runFilter("p95-ceiling", `p95 completion time ≤ ${max} ms`, (c) => {
@@ -651,6 +665,7 @@ export function recommend(input: RecommendInput): Recommendation {
     reliability: c.reliability,
     required_check_pass_rate: c.required_check_pass_rate,
     task_success_rate: c.task_success_rate,
+    all_trials_pass_rate: passAllOf(c),
   }));
 
   return {
@@ -669,6 +684,11 @@ export function recommend(input: RecommendInput): Recommendation {
     reasons,
     closest: mode && eligibleRates.length === 0 ? closestOf(candidates, filters) : null,
   };
+}
+
+/** pass^k; a summary written before the field existed reads as undefined, never as a pass. */
+function passAllOf(c: CandidateRates): Rate {
+  return c.all_trials_pass_rate ?? { value: null, numerator: 0, denominator: 0 };
 }
 
 /** Distinct inputs a candidate has classified trials on. */
@@ -724,6 +744,9 @@ function judgeFirmness(
     eligibility.minimum_reliability === null
       ? null
       : gateInterval("reliability", chosen.reliability, eligibility.minimum_reliability, inputs),
+    eligibility.minimum_all_trials_pass_rate === null
+      ? null
+      : gateInterval("all-trials-pass-rate", passAllOf(chosen), eligibility.minimum_all_trials_pass_rate, inputs),
   ].filter((g): g is GateInterval => g !== null);
   for (const g of gates) {
     if (clearsGate(g.low, g.threshold)) continue;
@@ -781,6 +804,12 @@ export function recommendFromCanon(
   // Firmness is a select-time rule: recompute it so a summary written under an
   // older rule cannot carry a stale label.
   const inputs = new Set(trials.map((t) => t.input)).size;
+  // Summaries written before pass^k existed lack it; the rows still have it.
+  const candidates = summary.candidates.map((c) =>
+    c.all_trials_pass_rate !== undefined || trials.length === 0
+      ? c
+      : { ...c, all_trials_pass_rate: allTrialsPassRate(trials.filter((t) => t.candidate === c.candidate)) },
+  );
   return recommend({
     trials,
     judge: judgeStandings(trials),
@@ -791,6 +820,6 @@ export function recommendFromCanon(
     eligibility: manifest.eligibility,
     mmd: manifest.minimum_meaningful_difference,
     directionality: inputs > 0 ? directionality(inputs, manifest.minimum_meaningful_difference) : summary.directionality,
-    candidates: summary.candidates,
+    candidates,
   });
 }

@@ -9,6 +9,12 @@
  *                         and cancelled are not the candidate's, so they leave)
  *   evaluation coverage   classified / valid attempts — infra failures show here
  *   required-check pass   pass / (pass + fail) — executed checks only
+ *   pass^k                inputs where every trial succeeded / inputs with a
+ *                         failed trial or all trials succeeded (an input with
+ *                         no failure but an undetermined trial is left out).
+ *                         Counted per input, so a
+ *                         candidate that is right 9 times in 10 on every input
+ *                         scores 0.9 on reliability and far less here
  *
  * A result is `directional` unless the sample, a predeclared minimum
  * meaningful difference and the statistics (stats.ts) all support a firm claim.
@@ -33,6 +39,8 @@ export interface CandidateRates {
   reliability: Rate;
   evaluation_coverage: Rate;
   required_check_pass_rate: Rate;
+  /** pass^k over inputs (see the header). Absent in summaries written before it existed. */
+  all_trials_pass_rate?: Rate;
   completion_states: Record<CompletionState, number>;
   outcomes: { success: number; failure: number; undetermined: number };
   check_states: Record<EvaluationState, number>;
@@ -97,6 +105,7 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
     reliability: rate(successes, own.length - infra),
     evaluation_coverage: rate(classified, own.length),
     required_check_pass_rate: rate(checkStates.pass, checkStates.pass + checkStates.fail),
+    all_trials_pass_rate: allTrialsPassRate(own),
     completion_states: completion,
     outcomes: { success: successes, failure: failures, undetermined },
     check_states: checkStates,
@@ -105,6 +114,20 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
     p50_ms: percentile(durations, 0.5),
     p95_ms: percentile(durations, 0.95),
   };
+}
+
+/**
+ * pass^k over one candidate's rows. One failed trial settles an input as a
+ * fail whatever its other trials were; it is unknown only when nothing failed
+ * and some trial is undetermined.
+ */
+export function allTrialsPassRate(own: readonly TrialRow[]): Rate {
+  const byInput = new Map<string, TrialRow[]>();
+  for (const r of own) byInput.set(r.input, [...(byInput.get(r.input) ?? []), r]);
+  const groups = [...byInput.values()];
+  const passed = groups.filter((rows) => rows.every((r) => r.task_outcome === "success")).length;
+  const failed = groups.filter((rows) => rows.some((r) => r.task_outcome === "failure")).length;
+  return rate(passed, passed + failed);
 }
 
 /**

@@ -63,6 +63,7 @@ export function planStep(suite: Suite, opts: { reuse?: boolean } = {}): StepPlan
     benchmarkMode: suite.benchmarkMode ?? "capability-neutral",
     cacheMode: suite.cacheMode ?? "cold",
     directional: directionality(inputs, suite.mmd).directional,
+    ...(suite.earlyStop ? { earlyStop: true } : {}),
   };
 }
 
