@@ -104,3 +104,45 @@ test("candidate ids with a slash map to the sanitised raw filename", async () =>
   assert.equal(outputs[0].text, "legacy");
   await fs.rm(dir, { recursive: true, force: true });
 });
+
+/** A run dir under `runs/` holding `raw/<file>` with `text`. */
+async function runWithRaw(runs: string, rel: string, file: string, text: string): Promise<void> {
+  await fs.mkdir(path.join(runs, rel, "raw"), { recursive: true });
+  await fs.writeFile(path.join(runs, rel, "raw", file), text, "utf-8");
+}
+
+async function combinedFrom(dir: string, trials: Array<{ trial: string; from: string }>): Promise<void> {
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(dir, "combined-from.json"), JSON.stringify({ runs: [...new Set(trials.map((t) => t.from))], trials }), "utf-8");
+}
+
+test("a combined run reads each output from the run its trial came from", async () => {
+  // Arrange: a combined run keeps no raw/; its two trials came from two source runs.
+  const runs = await fs.mkdtemp(path.join(os.tmpdir(), "eval-runs-"));
+  await runWithRaw(runs, "run-a", "alpha__case-1__t0.txt", "from a");
+  await runWithRaw(runs, "run-b", "beta__case-1__t0.txt", "from b");
+  const combined = path.join(runs, "run-combined");
+  await combinedFrom(combined, [
+    { trial: "alpha · case-1 · 0", from: "run-a" },
+    { trial: "beta · case-1 · 0", from: "run-b" },
+  ]);
+
+  // Act
+  const outputs = await loadRawOutputs(combined, [trial(), trial({ candidate: "beta" })]);
+
+  // Assert
+  assert.deepEqual(outputs.map((o) => o.text), ["from a", "from b"]);
+  await fs.rm(runs, { recursive: true, force: true });
+});
+
+test("a combined workflow step reads from the same step of its source run", async () => {
+  const runs = await fs.mkdtemp(path.join(os.tmpdir(), "eval-runs-"));
+  await runWithRaw(runs, "wf-a/triage", "alpha__case-1__t0.txt", "step output");
+  const step = path.join(runs, "wf-combined", "triage");
+  await combinedFrom(step, [{ trial: "alpha · case-1 · 0", from: "wf-a" }]);
+
+  const [out] = await loadRawOutputs(step, [trial()]);
+
+  assert.equal(out.text, "step output");
+  await fs.rm(runs, { recursive: true, force: true });
+});

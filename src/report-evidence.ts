@@ -23,7 +23,7 @@ export interface RawOutput {
   candidate: string;
   input: string;
   trial: number;
-  /** Absent when the run has no raw/ directory (older or partial runs). */
+  /** Absent when neither the run nor, for a combined run, its source has the raw/ file. */
   text: string | null;
   /** Characters before display truncation. */
   totalChars: number;
@@ -34,15 +34,50 @@ function safeName(candidate: string): string {
   return candidate.replace(/[/:]/g, "_");
 }
 
-/** Reads `raw/<candidate>__<input>__t<n>.txt` for every trial row. */
+/**
+ * Which run each trial came from, when `dir` is a combined run: combine.ts
+ * writes no raw/ of its own, only `combined-from.json` beside the rows.
+ */
+async function sourcesOf(dir: string): Promise<Map<string, string>> {
+  const file = path.join(dir, "combined-from.json");
+  const parsed = await fs.readFile(file, "utf-8").then(
+    (t) => JSON.parse(t) as { trials?: Array<{ trial: string; from: string }> },
+    () => ({ trials: [] }),
+  );
+  return new Map((parsed.trials ?? []).map((x) => [x.trial, x.from]));
+}
+
+/**
+ * Where a trial's raw/ may be: the run itself, then — for a combined run —
+ * its source run, as a run (`runs/<from>`) or as the same workflow step
+ * (`runs/<from>/<step>`), the way judge-run finds a trial's files.
+ */
+function rawDirs(dir: string, from: string | undefined): string[] {
+  const own = path.join(dir, "raw");
+  if (!from) return [own];
+  const runs = path.dirname(dir);
+  return [own, path.join(runs, from, "raw"), path.join(path.dirname(runs), from, path.basename(dir), "raw")];
+}
+
+async function readFirst(files: readonly string[]): Promise<string | null> {
+  for (const f of files) {
+    const text = await fs.readFile(f, "utf-8").catch(() => null);
+    if (text !== null) return text;
+  }
+  return null;
+}
+
+/** Reads `raw/<candidate>__<input>__t<n>.txt` for every trial row, following a combined run to its sources. */
 export async function loadRawOutputs(
   dir: string,
   trials: readonly TrialRow[],
 ): Promise<RawOutput[]> {
+  const sources = await sourcesOf(dir);
   return Promise.all(
     trials.map(async (t) => {
-      const file = path.join(dir, "raw", `${safeName(t.candidate)}__${t.input}__t${t.trial}.txt`);
-      const text = await fs.readFile(file, "utf-8").catch(() => null);
+      const name = `${safeName(t.candidate)}__${t.input}__t${t.trial}.txt`;
+      const from = sources.get(`${t.candidate} · ${t.input} · ${t.trial}`);
+      const text = await readFirst(rawDirs(dir, from).map((d) => path.join(d, name)));
       return {
         candidate: t.candidate,
         input: t.input,
