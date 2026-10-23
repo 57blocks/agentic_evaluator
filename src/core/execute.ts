@@ -29,6 +29,8 @@ import { buildLedger, type CostLedger } from "../canon/cost.js";
 import { BudgetGuard } from "../canon/budget.js";
 import { buildWorkflowRecord, workflowGaps, type WorkflowStepInput } from "../canon/workflow.js";
 import { directionality, ratesFor } from "../canon/rates.js";
+import { resolveEligibility } from "../canon/select.js";
+import { earlyStop } from "./early-stop.js";
 import { judgeDiscrimination } from "../canon/discrimination.js";
 import { evaluationCoverage, writeCanonBundle, writeManifest } from "../canon/write.js";
 import type { Recommendation } from "../canon/select.js";
@@ -120,7 +122,31 @@ async function executeSuite(params: {
   await writeManifest(outDir, manifest);
 
   const budget = params.budget ?? new BudgetGuard(suite.budgetUsd);
-  const records = await runAll({ suite, ws: params.ws, emit: params.emit, signal: params.signal, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget });
+  const adaptBase = {
+    runId,
+    step: suite.step,
+    requiredChecks: suite.requiredChecks ?? [],
+    successCriteria: suite.successCriteria,
+    checkId: suite.check?.id ?? TSC_CHECK_ID,
+    pairwiseId: PAIRWISE_EVALUATOR_ID,
+    absoluteId: ABSOLUTE_EVALUATOR_ID,
+    versions: {
+      check: checkVersion,
+      pairwise: `${suite.judge}+rubric-${short(rubricSha)}+tpl-${short(judgeTplSha)}`,
+      absolute: `${suite.judge}+rubric-${short(rubricSha)}+tpl-${short(scoreTplSha)}`,
+    },
+  };
+  const stopper = suite.earlyStop
+    ? earlyStop({
+        trialsPerCandidate: suite.inputs.length * (suite.trials ?? 2),
+        inputs: suite.inputs.length,
+        eligibility: resolveEligibility(suite.requiredChecks ?? [], suite.eligibility),
+        // The rows the run will write, so a stop agrees with the final rates.
+        classify: (record) =>
+          toTrialRows({ ...adaptBase, records: [record], judgements: [], judgeFailures: [], skippedPairs: [], scores: [], scoreFailures: [] })[0],
+      })
+    : undefined;
+  const records = await runAll({ suite, ws: params.ws, emit: params.emit, signal: params.signal, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget, stopper });
   const methods = methodsOf(suite);
   params.emit({ type: "phase", step: suite.step, phase: "judging", declared: methods.pairwise });
   const judged = methods.pairwise
@@ -154,18 +180,7 @@ async function executeSuite(params: {
   );
 
   const adaptInput = {
-    runId,
-    step: suite.step,
-    requiredChecks: suite.requiredChecks ?? [],
-    successCriteria: suite.successCriteria,
-    checkId: suite.check?.id ?? TSC_CHECK_ID,
-    pairwiseId: PAIRWISE_EVALUATOR_ID,
-    absoluteId: ABSOLUTE_EVALUATOR_ID,
-    versions: {
-      check: checkVersion,
-      pairwise: `${suite.judge}+rubric-${short(rubricSha)}+tpl-${short(judgeTplSha)}`,
-      absolute: `${suite.judge}+rubric-${short(rubricSha)}+tpl-${short(scoreTplSha)}`,
-    },
+    ...adaptBase,
     records,
     judgements: judged.judgements,
     judgeFailures: judged.failures,
@@ -186,6 +201,7 @@ async function executeSuite(params: {
     directionality: directionality(suite.inputs.length, suite.mmd),
     integrity,
     budget: budget.state(),
+    early_stop: stopper?.result() ?? { enabled: false, stopped: [] },
     judge_discrimination: judgeDiscrimination(trials),
     evaluation_coverage: evaluationCoverage(evaluations),
   };
@@ -217,6 +233,9 @@ async function executeSuite(params: {
     chosen: recommendation.chosen,
     closest: recommendation.closest?.candidate ?? null,
     firmness: recommendation.firmness,
+    firmnessReasons: recommendation.firmness_reasons,
+    evidence: recommendation.evidence,
+    earlyStopped: summary.early_stop.stopped,
     html,
     gated: recommendation.filters.flatMap((f) => f.removed),
     rows: trials,
@@ -262,6 +281,8 @@ export interface RunOptions {
   steps?: string[];
   /** Run only these candidates (`--candidate`); the end-to-end arms then do not run. */
   candidates?: string[];
+  /** Turn early stop on for every step, whatever the spec says (`--early-stop`). */
+  earlyStop?: boolean;
 }
 
 export async function runSuite(suitePath: string, html: boolean, opts: RunOptions = {}): Promise<StepResult | null> {
@@ -272,11 +293,12 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
   const chosenSteps = opts.steps ? all.filter((s) => opts.steps!.includes(s.step)) : all;
   const strangers = (opts.candidates ?? []).filter((c) => !chosenSteps.some((s) => s.candidates.includes(c)));
   if (strangers.length > 0) throw new Error(`no candidate ${strangers.join(", ")} in the steps run`);
-  const suites = opts.candidates
+  const picked = opts.candidates
     ? chosenSteps
         .map((s) => ({ ...s, candidates: s.candidates.filter((c) => opts.candidates!.includes(c)) }))
         .filter((s) => s.candidates.length > 0)
     : chosenSteps;
+  const suites = opts.earlyStop ? picked.map((s) => ({ ...s, earlyStop: true })) : picked;
   if (opts.steps || opts.candidates) opts = { ...opts, skipE2e: true };
   const isSpec = /\.ya?ml$/i.test(suitePath);
   const reuse = process.env.EVAL_REUSE === "1";

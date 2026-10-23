@@ -10,6 +10,7 @@ import { ReportHeader, RunFacts } from "./sections/Header";
 import { Verdict } from "./sections/Verdict";
 import { Candidates } from "./sections/Candidates";
 import { Gates } from "./sections/Gates";
+import { Certainty } from "./sections/Certainty";
 import { Slices } from "./sections/Slices";
 import { CoverageAndLedger } from "./sections/CoverageAndLedger";
 import { Profile } from "./sections/Profile";
@@ -41,6 +42,7 @@ export function StepReport({ report: r }: { report: Model }) {
       <Candidates candidates={r.candidates} control={r.control} />
       <Slices slices={r.slices} candidates={r.candidates.map((c) => c.id)} />
       <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />
+      <Certainty certainty={r.certainty} />
       <Profile
         absoluteRan={r.absoluteRan}
         saturated={r.saturated}

@@ -27,7 +27,7 @@ const VALIDATION: E2eValidation = {
     control: 0.18,
     improvement: -0.02,
     mmd: 0.05,
-    paired: { compared: 3, both_success: 2, proposed_only: 0, control_only: 1, neither: 0 },
+    paired: { compared: 3, both_success: 2, proposed_only: 0, control_only: 1, neither: 0, inputs_proposed_better: 0, inputs_control_better: 1, inputs_same: 2, p_value: 1 },
   },
   not_compared: ["every single-configuration workflow", "the current production workflow"],
   reasons: ["improvement -0.02 does not clear the declared minimum meaningful difference 0.05"],

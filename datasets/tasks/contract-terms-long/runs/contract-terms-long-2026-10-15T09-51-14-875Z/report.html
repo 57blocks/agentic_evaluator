@@ -122,6 +122,7 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
   <section class="card">
     <h2>What this evaluates</h2>
     <p>Does contract-term extraction hold up on long, scanned document packets? Six synthetic packets of about 9,000 words (an agreement with the graded articles in its back half, five schedules, six SOWs with their own terms, caps and laws as distractors) at three scan-noise levels; character damage never touches a graded value. Extract eight terms as they stand on the status date.</p>
+    
     <p class="note"><b>A pass of terms-check</b> means: All eight extracted fields match the key the generator computed (amendments applied by effective date and signature).</p>
     <p class="note">This run predates these descriptions; they are read from the task's spec as it is now.</p>
   </section>
@@ -133,15 +134,24 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
       <p class="champ-facts">$0.0065 per success · required check 6/6 passed</p>
       <p class="sub">Of the 4 candidates that pass every gate, deepseek-v4.1-flash has the lowest generation cost per success ($0.0065). It beats the control sonnet-5.</p>
       <p class="sub">No pairwise comparison was available this run.</p>
-      <p class="sub">Only 6 input(s) (fewer than 10), the spec declares no minimum meaningful difference, so this result is directional only.</p>
+      <p class="sub">The spec declares no minimum meaningful difference, deepseek-v4.1-flash: required-check-pass-rate 6/6 has a 95% interval down to 0.610, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95, deepseek-v4.1-flash: reliability 6/6 has a 95% interval down to 0.610, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95, so this result is directional only.</p>
     </div>
   </div>
 
   <section class="card">
-    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v3</span></h2>
+    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v4</span></h2>
     <ol class="trace"><li><b>required-check pass rate ≥ 100%</b> — removed: nobody removed. Remaining: sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash.</li><li><b>reliability ≥ 100%</b> — removed: nobody removed. Remaining: sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash.</li></ol>
     
     <p class="note">Passed every gate: sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash. The judge's win rate is for reference only and takes no part in selection.</p>
+  </section>
+
+  <section class="card">
+    <h2>How sure <span class="hint">Wilson 95% intervals counted per input; exact sign test over inputs</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Gate (deepseek-v4.1-flash)</th><th class="num">Passed / inputs</th><th class="num">95% interval</th><th class="num">Gate</th><th>At the low end</th></tr></thead>
+      <tbody><tr><td>required-check-pass-rate</td><td class="num">6/6</td><td class="num">0.610–1.000</td><td class="num">1</td><td class="bad">not shown</td></tr><tr><td>reliability</td><td class="num">6/6</td><td class="num">0.610–1.000</td><td class="num">1</td><td class="bad">not shown</td></tr></tbody>
+    </table></div>
+    <p class="note"><b>Effective N 0 of 6.</b> Inputs that separated any two candidates; 6 every candidate passed and 0 gave everyone the same partial rate, so they cannot inform a choice. Per-input detail: items.json.</p>
   </section>
 
   <section class="card">
@@ -853,7 +863,7 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 
   <section class="card">
     <h2>Fields this run did not observe <span class="hint">GAPS.md</span></h2>
-    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: OpenRouter reported cached prompt tokens on some calls; recorded under <code>tokens.cached</code>, no cache cost breakdown.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: single-call producers, no interactive execution; recorded as not applicable.</li><li><code>tool_calls</code>: producers make no tool calls this milestone.</li><li><code>checkpoint</code>: not applicable to single-call trials.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector does not use pairwise win rate.</li><li>statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json) and recommendation.json firmness follows that label.</li></ul>
+    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: OpenRouter reported cached prompt tokens on some calls; recorded under <code>tokens.cached</code>, no cache cost breakdown.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: single-call producers, no interactive execution; recorded as not applicable.</li><li><code>tool_calls</code>: producers make no tool calls this milestone.</li><li><code>checkpoint</code>: not applicable to single-call trials.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>effective N: 0 of 6 inputs separated any two candidates; 6 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: the chosen candidate's gated rates carry Wilson 95% intervals, and a highest-assurance pick must beat the runner-up on an exact sign test over inputs (recommendation.json <code>evidence</code>). Inputs generated from one template are still treated as independent, which overstates certainty when they share a template.</li></ul>
   </section>
 
   <section class="card">

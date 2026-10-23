@@ -139,10 +139,15 @@ td.viz-none{background:var(--surface-2);color:var(--ink-3)}
   </div>
 
   <section class="card">
-    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v3</span></h2>
+    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v4</span></h2>
     <ol class="trace"><li><b>required-check pass rate ≥ 100%</b> — removed: sonnet-5 (required check passed 94.2% (113/120)); kimi-k3 (required check passed 71.7% (86/120)); glm-5.3 (required check passed 62.5% (75/120)); deepseek-v4.1-flash (required check passed 79.2% (95/120)). Remaining: none.</li><li><b>reliability ≥ 100%</b> — removed: nobody removed. Remaining: none.</li></ol>
     
     <p class="note">Passed every gate: none. The judge's win rate is for reference only and takes no part in selection.</p>
+  </section>
+
+  <section class="card">
+    <h2>How sure <span class="hint">Wilson 95% intervals counted per input; exact sign test over inputs</span></h2>
+    <p class="note"><b>Effective N 56 of 120.</b> Inputs that separated any two candidates; 61 every candidate passed and 0 gave everyone the same partial rate, so they cannot inform a choice. Every candidate failed 3: url-012, url-026, url-090 — check those for a harness or check bug first. Per-input detail: items.json.</p>
   </section>
 
   <section class="card">
@@ -15103,7 +15108,7 @@ Done. Here's what I did:
 
   <section class="card">
     <h2>Fields this run did not observe <span class="hint">GAPS.md</span></h2>
-    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: no cached prompt tokens reported on any call; cache economics not observable.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: single-call producers, no interactive execution; recorded as not applicable.</li><li><code>tool_calls</code>: producers make no tool calls this milestone.</li><li><code>checkpoint</code>: not applicable to single-call trials.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: no interval estimates yet; results are labeled directional (see summary.json) and recommendation.json firmness follows that label.</li></ul>
+    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: no cached prompt tokens reported on any call; cache economics not observable.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: single-call producers, no interactive execution; recorded as not applicable.</li><li><code>tool_calls</code>: producers make no tool calls this milestone.</li><li><code>checkpoint</code>: not applicable to single-call trials.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>effective N: 56 of 120 inputs separated any two candidates; 61 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).</li><li>every candidate failed 3 input(s): url-012, url-026, url-090. Check those traces for a harness or check bug before counting them as model failures.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: the chosen candidate's gated rates carry Wilson 95% intervals, and a highest-assurance pick must beat the runner-up on an exact sign test over inputs (recommendation.json <code>evidence</code>). Inputs generated from one template are still treated as independent, which overstates certainty when they share a template.</li></ul>
   </section>
 
   <section class="card">

@@ -96,6 +96,8 @@ function gateLabel(id: string, e: EligibilityThresholds, fallback: string): stri
       return e.minimum_required_check_pass_rate === null ? fallback : `required-check pass rate ≥ ${pct(e.minimum_required_check_pass_rate)}`;
     case "reliability":
       return e.minimum_reliability === null ? fallback : `reliability ≥ ${pct(e.minimum_reliability)}`;
+    case "all-trials-pass-rate":
+      return e.minimum_all_trials_pass_rate === null ? fallback : `pass^k (every trial of an input succeeds) ≥ ${pct(e.minimum_all_trials_pass_rate)}`;
     case "p95-ceiling":
       return e.maximum_p95_ms === null ? fallback : `p95 duration ≤ ${e.maximum_p95_ms} ms`;
     case "cost-ceiling":
@@ -114,6 +116,7 @@ export function gateLabels(e: EligibilityThresholds, requiredChecks: readonly st
   if (requiredChecks.length === 0 && mode !== "judge-preference") ids.push("qualifying-success-criteria");
   if (e.minimum_required_check_pass_rate !== null) ids.push("required-check-pass-rate");
   if (e.minimum_reliability !== null) ids.push("reliability");
+  if (e.minimum_all_trials_pass_rate !== null) ids.push("all-trials-pass-rate");
   if (e.maximum_p95_ms !== null) ids.push("p95-ceiling");
   if (mode === "fastest-within-cost-ceiling" && e.cost_ceiling_per_success_usd !== null) ids.push("cost-ceiling");
   return ids.map((id) => gateLabel(id, e, id));
@@ -131,6 +134,8 @@ function removedDetail(gate: string, candidate: string, rec: Recommendation, fal
       return `required check passed ${rateText(t.required_check_pass_rate)}`;
     case "reliability":
       return `reliability ${rateText(t.reliability)}`;
+    case "all-trials-pass-rate":
+      return t.all_trials_pass_rate ? `pass^k ${rateText(t.all_trials_pass_rate)}` : fallback;
     case "p95-ceiling":
       return t.p95_ms === null ? "p95 duration not measured" : `p95 ${t.p95_ms} ms`;
     case "cost-ceiling":

@@ -17,7 +17,7 @@ import { pathToFileURL } from "node:url";
 import type { CostLedger } from "./canon/cost.js";
 import type { RunManifest } from "./canon/manifest.js";
 import type { EvaluationRow, TrialRow } from "./canon/rows.js";
-import type { CanonSummary } from "./canon/write.js";
+import { gapsFor, type CanonSummary } from "./canon/write.js";
 import { recommendFromCanon, type Recommendation } from "./canon/select.js";
 import { FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel } from "./report-copy.js";
 import { NO_PICK, plural } from "./report-format.js";
@@ -34,6 +34,8 @@ import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
 import { CHART_STYLES, renderHeatmap, renderRadar, renderTrialStrip } from "./report-charts.js";
 import { aboutOfRun, type RunAbout } from "./canon/about.js";
 import { sliceRows } from "./report-slices.js";
+import { renderCertainty } from "./report-certainty.js";
+import { itemStats } from "./canon/item-stats.js";
 import {
   EVIDENCE_STYLES,
   loadRawOutputs,
@@ -294,6 +296,8 @@ export function renderRunReport(b: RunBundle): string {
     <p class="note">Passed every gate: ${rec.eligible.length ? rec.eligible.map(escapeHtml).join(", ") : "none"}. The judge's win rate is for reference only and takes no part in selection.</p>
   </section>
 
+  ${renderCertainty(rec, itemStats(b.trials))}
+
   <section class="card">
     <h2>Candidates <span class="hint">the same inputs, paired by candidate; ${trialsPer} trial(s) per cell</span></h2>
     <div class="table-wrap"><table>
@@ -376,9 +380,25 @@ export function renderRunReport(b: RunBundle): string {
 }
 
 
+/**
+ * GAPS.md as the current rules derive it, keeping the bold notes later
+ * commands appended (`- **combined run**`, `- **judged after the run**`).
+ */
+function refreshedGaps(bundle: RunBundle): string {
+  const fresh = gapsFor(bundle);
+  const kept = bundle.gaps.split("\n").filter((l) => l.startsWith("- **") && !fresh.includes(l));
+  return kept.length === 0 ? fresh : `${fresh}\n${kept.join("\n")}\n`;
+}
+
+/** Re-derive everything a rule change can move — never a number from the rows. */
 export async function writeRunReport(runDir: string): Promise<string> {
-  const bundle = await loadBundle(runDir);
-  await fs.writeFile(path.join(runDir, "recommendation.json"), JSON.stringify(bundle.recommendation, null, 2), "utf-8");
+  const loaded = await loadBundle(runDir);
+  const bundle = { ...loaded, gaps: refreshedGaps(loaded) };
+  await Promise.all([
+    fs.writeFile(path.join(runDir, "recommendation.json"), JSON.stringify(bundle.recommendation, null, 2), "utf-8"),
+    fs.writeFile(path.join(runDir, "items.json"), JSON.stringify(itemStats(bundle.trials), null, 2), "utf-8"),
+    fs.writeFile(path.join(runDir, "GAPS.md"), bundle.gaps, "utf-8"),
+  ]);
   const out = path.join(runDir, "report.html");
   await fs.writeFile(out, renderRunReport(bundle), "utf-8");
   return out;

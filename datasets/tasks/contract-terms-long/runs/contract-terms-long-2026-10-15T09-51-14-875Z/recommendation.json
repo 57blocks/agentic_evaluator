@@ -1,5 +1,5 @@
 {
-  "rule_version": "select-v3",
+  "rule_version": "select-v4",
   "operating_mode": "lowest-cost",
   "control_candidate": "sonnet-5",
   "eligibility": {
@@ -134,10 +134,37 @@
     "reason": "chosen $0.006463 vs control $0.045 per successful task"
   },
   "firmness": "directional",
+  "firmness_reasons": [
+    "no minimum meaningful difference declared",
+    "deepseek-v4.1-flash: required-check-pass-rate 6/6 has a 95% interval down to 0.610, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "deepseek-v4.1-flash: reliability 6/6 has a 95% interval down to 0.610, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 1,
+        "successes": 6,
+        "n": 6,
+        "low": 0.6096657083436265,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 1,
+        "successes": 6,
+        "n": 6,
+        "low": 0.6096657083436265,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": null
+  },
   "reasons": [
     "lowest generation cost per successful task among eligible: $0.006463",
-    "6 inputs; fewer than 10",
-    "no minimum meaningful difference declared"
+    "no minimum meaningful difference declared",
+    "deepseek-v4.1-flash: required-check-pass-rate 6/6 has a 95% interval down to 0.610, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "deepseek-v4.1-flash: reliability 6/6 has a 95% interval down to 0.610, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95"
   ],
   "closest": null
 }

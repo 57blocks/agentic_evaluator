@@ -1,0 +1,4813 @@
+{
+  "inputs": 300,
+  "effective_n": 249,
+  "counts": {
+    "splits": 249,
+    "all-pass": 50,
+    "all-fail": 1,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "cd2-001",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-002",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-003",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-004",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-005",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.20223580365796465
+    },
+    {
+      "input": "cd2-006",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-007",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.2511879179633255
+    },
+    {
+      "input": "cd2-008",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-009",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-010",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-011",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.2511879179633255
+    },
+    {
+      "input": "cd2-012",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-013",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-014",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-015",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-016",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-017",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-018",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-019",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-020",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-021",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-022",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5441209703272415
+    },
+    {
+      "input": "cd2-023",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-024",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-025",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-026",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-027",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-028",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.45503055823042043
+    },
+    {
+      "input": "cd2-029",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-030",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-031",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-032",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-033",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-034",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-035",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-036",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-037",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-038",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-039",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-040",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-041",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-042",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-043",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-044",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-045",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.4803968931048601
+    },
+    {
+      "input": "cd2-046",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-047",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-048",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-049",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-050",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7022736560073427
+    },
+    {
+      "input": "cd2-051",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-052",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-053",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-054",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6530885867046463
+    },
+    {
+      "input": "cd2-055",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-056",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-057",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-058",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-059",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-060",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-061",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-062",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-063",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-064",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.20223580365796465
+    },
+    {
+      "input": "cd2-065",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-066",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-067",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-068",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-069",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7190254151700194
+    },
+    {
+      "input": "cd2-070",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-071",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-072",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-073",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-074",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-075",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-076",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-077",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-078",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-079",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-080",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-081",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-082",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-083",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5441209703272415
+    },
+    {
+      "input": "cd2-084",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-085",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-086",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-087",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-088",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-089",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-090",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-091",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-092",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-093",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-094",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.10571417009393601
+    },
+    {
+      "input": "cd2-095",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-096",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-097",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.2511879179633255
+    },
+    {
+      "input": "cd2-098",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-099",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7190254151700194
+    },
+    {
+      "input": "cd2-100",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-101",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-102",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-103",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-104",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-105",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-106",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-107",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-108",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-109",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-110",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.45503055823042043
+    },
+    {
+      "input": "cd2-111",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-112",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-113",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.5871517582392735
+    },
+    {
+      "input": "cd2-114",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5757150911849523
+    },
+    {
+      "input": "cd2-115",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-116",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-117",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-118",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-119",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-120",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-121",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": -0.46422309476032786
+    },
+    {
+      "input": "cd2-122",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-123",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-124",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-125",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-126",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.20223580365796465
+    },
+    {
+      "input": "cd2-127",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-128",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-129",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5757150911849523
+    },
+    {
+      "input": "cd2-130",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.6530885867046464
+    },
+    {
+      "input": "cd2-131",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-132",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-133",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-134",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-135",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-136",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.46422309476032786
+    },
+    {
+      "input": "cd2-137",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-138",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-139",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-140",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-141",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-142",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-143",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.5871517582392735
+    },
+    {
+      "input": "cd2-144",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-145",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-146",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-147",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-148",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-149",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-150",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-151",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-152",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-153",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-154",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.2436022180425483
+    },
+    {
+      "input": "cd2-155",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-156",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.41423402902331935
+    },
+    {
+      "input": "cd2-157",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-158",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-159",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-160",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-161",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-162",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.4803968931048601
+    },
+    {
+      "input": "cd2-163",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-164",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-165",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-166",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-167",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-168",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-169",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-170",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-171",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-172",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-173",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5757150911849523
+    },
+    {
+      "input": "cd2-174",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-175",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6530885867046463
+    },
+    {
+      "input": "cd2-176",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.47411719515577705
+    },
+    {
+      "input": "cd2-177",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-178",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-179",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-180",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-181",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-182",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-183",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-184",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-185",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-186",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-187",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-188",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7190254151700194
+    },
+    {
+      "input": "cd2-189",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-190",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-191",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.40433937770119727
+    },
+    {
+      "input": "cd2-192",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.4803968931048601
+    },
+    {
+      "input": "cd2-193",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7661167156443738
+    },
+    {
+      "input": "cd2-194",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-195",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-196",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-197",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7022736560073427
+    },
+    {
+      "input": "cd2-198",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.4803968931048601
+    },
+    {
+      "input": "cd2-199",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-200",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-201",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-202",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-203",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-204",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-205",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-206",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-207",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-208",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-209",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-210",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-211",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-212",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-213",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-214",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-215",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.34012385160657693
+    },
+    {
+      "input": "cd2-216",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-217",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-218",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-219",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-220",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-221",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7190254151700194
+    },
+    {
+      "input": "cd2-222",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.46422309476032786
+    },
+    {
+      "input": "cd2-223",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-224",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-225",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-226",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-227",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-228",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-229",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.45503055823042043
+    },
+    {
+      "input": "cd2-230",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-231",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-232",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-233",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-234",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-235",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-236",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-237",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-238",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-239",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-240",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-241",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-242",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-243",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-244",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-245",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-246",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-247",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.4225802518832062
+    },
+    {
+      "input": "cd2-248",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5441209703272415
+    },
+    {
+      "input": "cd2-249",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-250",
+      "class": "splits",
+      "pass_rate": 0.625,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.7472840559408935
+    },
+    {
+      "input": "cd2-251",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-252",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-253",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7020915746157955
+    },
+    {
+      "input": "cd2-254",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-255",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-256",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7231543218542695
+    },
+    {
+      "input": "cd2-257",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.46422309476032786
+    },
+    {
+      "input": "cd2-258",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-259",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-260",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-261",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.45503055823042043
+    },
+    {
+      "input": "cd2-262",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-263",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-264",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-265",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5757150911849523
+    },
+    {
+      "input": "cd2-266",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-267",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-268",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-269",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-270",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-271",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-272",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-273",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": -0.46422309476032786
+    },
+    {
+      "input": "cd2-274",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-275",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.20223580365796465
+    },
+    {
+      "input": "cd2-276",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-277",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-278",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-279",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6494347065196109
+    },
+    {
+      "input": "cd2-280",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-281",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7934780269173872
+    },
+    {
+      "input": "cd2-282",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 0,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-283",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 1,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.46422309476032786
+    },
+    {
+      "input": "cd2-284",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 0,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.482608167820143
+    },
+    {
+      "input": "cd2-285",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-286",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-287",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-288",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-289",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-290",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-291",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-292",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-293",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-294",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-295",
+      "class": "splits",
+      "pass_rate": 0.875,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.5101857774098654
+    },
+    {
+      "input": "cd2-296",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8573210865544183
+    },
+    {
+      "input": "cd2-297",
+      "class": "splits",
+      "pass_rate": 0.25,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.7161334061081116
+    },
+    {
+      "input": "cd2-298",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-299",
+      "class": "splits",
+      "pass_rate": 0.375,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9576539372351788
+    },
+    {
+      "input": "cd2-300",
+      "class": "splits",
+      "pass_rate": 0.125,
+      "by_candidate": {
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.45503055823042043
+    }
+  ]
+}

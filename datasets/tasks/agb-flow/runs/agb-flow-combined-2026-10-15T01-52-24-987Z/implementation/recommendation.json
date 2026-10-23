@@ -1,5 +1,5 @@
 {
-  "rule_version": "select-v3",
+  "rule_version": "select-v4",
   "operating_mode": "highest-assurance",
   "control_candidate": null,
   "eligibility": {
@@ -286,10 +286,50 @@
   "chosen": "deepseek-flash",
   "compared_to_control": null,
   "firmness": "directional",
+  "firmness_reasons": [
+    "2 inputs; no comparison can be significant with fewer than 6",
+    "no minimum meaningful difference declared",
+    "deepseek-flash: required-check-pass-rate 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "deepseek-flash: reliability 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "deepseek-flash and kimi-k3 cannot be told apart on task success: deepseek-flash did better on 0 input(s), kimi-k3 on 0, equal on 2 (sign test p 1.000)"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 1,
+        "successes": 2,
+        "n": 2,
+        "low": 0.3423802239546494,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 1,
+        "successes": 2,
+        "n": 2,
+        "low": 0.3423802239546494,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": {
+      "a": "deepseek-flash",
+      "b": "kimi-k3",
+      "compared": 2,
+      "a_better": 0,
+      "b_better": 0,
+      "same": 2,
+      "p_value": 1,
+      "significant": false
+    }
+  },
   "reasons": [
     "8 eligible candidates tie at 1.000 (2/2) reliability and 1.000 (2/2) required-check pass rate; deepseek-flash is picked by generation cost per success, the judge not separating them",
-    "2 inputs; fewer than 10",
-    "no minimum meaningful difference declared"
+    "2 inputs; no comparison can be significant with fewer than 6",
+    "no minimum meaningful difference declared",
+    "deepseek-flash: required-check-pass-rate 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "deepseek-flash: reliability 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "deepseek-flash and kimi-k3 cannot be told apart on task success: deepseek-flash did better on 0 input(s), kimi-k3 on 0, equal on 2 (sign test p 1.000)"
   ],
   "closest": null
 }

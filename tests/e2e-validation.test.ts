@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   armRates,
   decideValidation,
+  pairCases,
   proposedAssignment,
   type E2eCase,
   type ValidationArm,
@@ -211,7 +212,7 @@ test("paired case counts accompany the verdict", () => {
     inputs: 12,
     control: arm("control", "control", { draft: "ctrl" }, passing(2, 10)),
     proposed: arm("proposed", "proposed", { draft: "model-a" }, passing(1, 10)),
-    pairs: { compared: 12, both_success: 12, proposed_only: 0, control_only: 0, neither: 0 },
+    pairs: { compared: 12, both_success: 12, proposed_only: 0, control_only: 0, neither: 0, inputs_proposed_better: 0, inputs_control_better: 0, inputs_same: 12, p_value: 1 },
   });
   assert.deepEqual(v.deltas?.paired, {
     compared: 12,
@@ -219,6 +220,10 @@ test("paired case counts accompany the verdict", () => {
     proposed_only: 0,
     control_only: 0,
     neither: 0,
+    inputs_proposed_better: 0,
+    inputs_control_better: 0,
+    inputs_same: 12,
+    p_value: 1,
   });
 });
 
@@ -327,4 +332,38 @@ test("maybeRunE2eValidation runs both arms and adopts the combination the contro
   await fs.access(path.join(root, "e2e-control.json"));
   await fs.access(path.join(root, "e2e-proposed", "e2e-proposed.json"));
   await fs.rm(root, { recursive: true, force: true });
+});
+
+function mixed(fails: number, n = 12): E2eCase[] {
+  return Array.from({ length: n }, (_, i) =>
+    caseOf(`i${i}`, 0, [{ id: "draft", outcome: i < fails ? "failure" : "success", cost: 0.1, ms: 10, check: i < fails ? "fail" : "pass" }]),
+  );
+}
+
+function assurance(controlFails: number) {
+  const control = mixed(controlFails);
+  const proposed = passing(0.1, 10);
+  return decideValidation({
+    mode: "highest-assurance",
+    mmd: 0.1,
+    thresholds: { minimum_reliability: null, minimum_required_check_pass_rate: null },
+    inputs: 12,
+    control: arm("control", "control", { draft: "ctrl" }, control),
+    proposed: arm("proposed", "proposed", { draft: "model-a" }, proposed),
+    pairs: pairCases(proposed, control),
+  });
+}
+
+test("highest-assurance: a sign test over inputs backs a firm adoption", () => {
+  const v = assurance(8);
+  assert.equal(v.verdict, "adopt-combination");
+  assert.equal(v.deltas?.paired?.inputs_proposed_better, 8);
+  assert.equal(v.firmness, "firm");
+});
+
+test("highest-assurance: a better rate on too few differing inputs stays directional", () => {
+  const v = assurance(3);
+  assert.equal(v.verdict, "adopt-combination");
+  assert.equal(v.firmness, "directional");
+  assert.ok(v.reasons.some((r) => r.includes("too few to tell them apart")));
 });

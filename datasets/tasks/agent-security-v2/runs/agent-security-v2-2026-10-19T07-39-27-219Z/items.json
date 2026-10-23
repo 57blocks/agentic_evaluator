@@ -1,0 +1,781 @@
+{
+  "inputs": 64,
+  "effective_n": 3,
+  "counts": {
+    "splits": 3,
+    "all-pass": 61,
+    "all-fail": 0,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "sec2-001",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.9428090415820635
+    },
+    {
+      "input": "sec2-002",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-003",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-004",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-005",
+      "class": "splits",
+      "pass_rate": 0.5,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.8164965809277261
+    },
+    {
+      "input": "sec2-006",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-007",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-008",
+      "class": "splits",
+      "pass_rate": 0.75,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.9428090415820635
+    },
+    {
+      "input": "sec2-009",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-010",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-011",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-012",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-013",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-014",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-015",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-016",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-017",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-018",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-019",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-020",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-021",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-022",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-023",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-024",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-025",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-026",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-027",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-028",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-029",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-030",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-031",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-032",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-033",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-034",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-035",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-036",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-037",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-038",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-039",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-040",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-041",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-042",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-043",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-044",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-045",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-046",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-047",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-048",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-049",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-050",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-051",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-052",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-053",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-054",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-055",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-056",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-057",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-058",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-059",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-060",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-061",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-062",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-063",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sec2-064",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "kimi-k3": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    }
+  ]
+}

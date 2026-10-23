@@ -21,6 +21,7 @@ import { deliverableText, parsedUnitsFor } from "../adapters/deliverable.js";
 import { displayPath, taskInputPath, resolveTaskAsset } from "../paths.js";
 import { listRunDirs, type Workspace } from "./workspace.js";
 import type { RunEventSink } from "./events.js";
+import type { EarlyStop } from "./early-stop.js";
 import { CODEGEN_PRODUCER_VERSION } from "../producers/code-gen.js";
 import { sha256, trialHash } from "../canon/hash.js";
 import { classifyCompletion } from "../canon/states.js";
@@ -508,6 +509,8 @@ export async function runAll(params: {
   reuse: boolean;
   trace: LlmTrace;
   budget: BudgetGuard;
+  /** Early stop, when the spec turns it on (src/core/early-stop.ts). */
+  stopper?: EarlyStop;
 }): Promise<RunRecord[]> {
   const { suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace, budget } = params;
   const trials = suite.trials ?? 2;
@@ -547,6 +550,11 @@ export async function runAll(params: {
 
   let dispatched = 0;
   let cancelled = 0;
+  const finish = (record: RunRecord): RunRecord => {
+    const stop = params.stopper?.record(record);
+    if (stop) params.emit({ type: "candidate.stopped", step: suite.step, candidate: stop.candidate, afterTrials: stop.after_trials, reason: stop.reason });
+    return record;
+  };
   const done = await mapWithConcurrency(tasks, limit, async (task): Promise<RunRecord | null> => {
     const { inputSlug, inputText, candidate, def, trial } = task;
     if (params.signal?.aborted) {
@@ -561,8 +569,17 @@ export async function runAll(params: {
       if (reused) {
         const regraded = await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir });
         params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
-        return { ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from };
+        return finish({ ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from });
       }
+    }
+
+    // A gate this candidate can no longer reach: the rest of its trials would
+    // change nothing. Counted as not run, like a budget stop, and checked only
+    // here — a reused trial above costs nothing, so it is kept.
+    if (params.stopper?.isStopped(candidate)) {
+      params.stopper.skip(candidate);
+      params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "skipped", skipReason: "early-stop" });
+      return null;
     }
 
     // Protocol §7: stop cleanly on the limit. The unit is counted as not run,
@@ -634,7 +651,7 @@ export async function runAll(params: {
         isolation: g.isolation,
       };
       await journal(outDir, record);
-      return record;
+      return finish(record);
     } catch (err) {
       const rec = errorRecord(task, err);
       budget.add(rec.costUsd + (rec.retryCostUsd ?? 0));
@@ -647,7 +664,7 @@ export async function runAll(params: {
         state: rec.completionState ?? "error",
         error: rec.error,
       });
-      return rec;
+      return finish(rec);
     }
   });
 

@@ -18,6 +18,8 @@
 
 import type { CompletionState } from "../canon/types.js";
 import type { TrialRow } from "../canon/rows.js";
+import type { FirmnessEvidence } from "../canon/select.js";
+import type { StoppedCandidate } from "../canon/early-stop.js";
 
 /** Counts a step will incur — what `plan()` returns, and what a preview prints. */
 export interface StepPlan {
@@ -42,6 +44,8 @@ export interface StepPlan {
   cacheMode: string;
   /** True when this step can only report a direction, not a magnitude. */
   directional: boolean;
+  /** Early stop is on: `generations` is then an upper bound. */
+  earlyStop?: boolean;
 }
 
 /** The end-to-end arms a chained workflow would add on top of the step plans. */
@@ -80,6 +84,8 @@ export type RunEvent =
       check?: string;
       /** Run directory a prior identical generation came from. */
       reusedFrom?: string;
+      /** Why a skipped trial was skipped; budget when absent. */
+      skipReason?: "budget" | "early-stop";
       error?: string;
     }
   | { type: "judge"; step: string; a: string; b: string; input: string; ok: boolean; error?: string }
@@ -90,6 +96,8 @@ export type RunEvent =
       spentUsd: number;
       skipped: { generation: number; judging: number; scoring: number };
     }
+  /** A gate went out of the candidate's reach; its remaining trials are not run. */
+  | { type: "candidate.stopped"; step: string; candidate: string; afterTrials: number; reason: string }
   /** Wall-clock gaps that make every duration in this run unreliable. */
   | { type: "integrity.gaps"; gaps: number; thresholdMs: number }
   /**
@@ -112,6 +120,12 @@ export type RunEvent =
       /** Nearest gated-out candidate when nobody qualified; never adopted. */
       closest?: string | null;
       firmness: string;
+      /** Why it is not firm; empty when it is. */
+      firmnessReasons: readonly string[];
+      /** Gate intervals and the runner-up contest firmness was decided on. */
+      evidence: FirmnessEvidence | null;
+      /** Candidates early stop took out of the run (canon/early-stop.ts). */
+      earlyStopped?: readonly StoppedCandidate[];
       html: boolean;
       /** Candidates the eligibility gate removed, and why. */
       gated: ReadonlyArray<{ candidate: string; reason: string }>;

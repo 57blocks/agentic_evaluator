@@ -71,7 +71,7 @@ footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
   </header>
   <section class="card">
     <h2>What this evaluates</h2>
-    <p>Which model should run each step of agb's flow (task breakdown, test design, code), and does the per-step best combination beat one model end to end? Each input is a real agb project at the moment that step began (demo-todo, chessicle and invoice for breakdown and test design; demo-todo tasks for code). Every candidate runs the step through the same wrapper; a check grades the work itself, and a judge compares candidates pairwise.</p>
+    <p>Which model should run each step of agb's flow (task breakdown, test design, implementation), and does the per-step best combination beat one model end to end? Each input is a real agb project at the moment that step began (demo-todo, chessicle and invoice for task breakdown and test design; demo-todo tasks for implementation). Every candidate runs the step through the same wrapper; a check grades the work itself, and a judge compares candidates pairwise.</p>
     <ul><li><b>task-breakdown</b>: Task breakdown: turn the PRD, design and API contracts into a task plan (.ab/tasks.json) and a UI contract.</li><li><b>test-design</b>: Test design: write a test plan (.ab/test-plan.json) that covers every acceptance criterion of the adopted task plan.</li><li><b>implementation</b>: Implementation: build one task of the plan with agb run, so the task's own acceptance tests pass.</li></ul>
     <p class="note">This run predates the description; it is read from the task's spec as it is now.</p>
   </section>

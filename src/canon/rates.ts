@@ -9,13 +9,20 @@
  *                         and cancelled are not the candidate's, so they leave)
  *   evaluation coverage   classified / valid attempts — infra failures show here
  *   required-check pass   pass / (pass + fail) — executed checks only
+ *   pass^k                inputs where every trial succeeded / inputs with a
+ *                         failed trial or all trials succeeded (an input with
+ *                         no failure but an undetermined trial is left out).
+ *                         Counted per input, so a
+ *                         candidate that is right 9 times in 10 on every input
+ *                         scores 0.9 on reliability and far less here
  *
- * A result is `directional` unless the sample and a predeclared minimum
- * meaningful difference both support a firm claim.
+ * A result is `directional` unless the sample, a predeclared minimum
+ * meaningful difference and the statistics (stats.ts) all support a firm claim.
  */
 
 import type { TrialRow } from "./rows.js";
 import { INFRA_COMPLETION_STATES } from "./states.js";
+import { MIN_DIFFERING_INPUTS } from "./stats.js";
 import type { CompletionState, EvaluationState } from "./types.js";
 
 export interface Rate {
@@ -32,6 +39,8 @@ export interface CandidateRates {
   reliability: Rate;
   evaluation_coverage: Rate;
   required_check_pass_rate: Rate;
+  /** pass^k over inputs (see the header). Absent in summaries written before it existed. */
+  all_trials_pass_rate?: Rate;
   completion_states: Record<CompletionState, number>;
   outcomes: { success: number; failure: number; undetermined: number };
   check_states: Record<EvaluationState, number>;
@@ -45,8 +54,6 @@ export interface Directionality {
   directional: boolean;
   reasons: string[];
 }
-
-export const FIRM_MIN_INPUTS = 10;
 
 export const rate = (numerator: number, denominator: number): Rate => ({
   value: denominator > 0 ? numerator / denominator : null,
@@ -98,6 +105,7 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
     reliability: rate(successes, own.length - infra),
     evaluation_coverage: rate(classified, own.length),
     required_check_pass_rate: rate(checkStates.pass, checkStates.pass + checkStates.fail),
+    all_trials_pass_rate: allTrialsPassRate(own),
     completion_states: completion,
     outcomes: { success: successes, failure: failures, undetermined },
     check_states: checkStates,
@@ -108,9 +116,29 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
   };
 }
 
+/**
+ * pass^k over one candidate's rows. One failed trial settles an input as a
+ * fail whatever its other trials were; it is unknown only when nothing failed
+ * and some trial is undetermined.
+ */
+export function allTrialsPassRate(own: readonly TrialRow[]): Rate {
+  const byInput = new Map<string, TrialRow[]>();
+  for (const r of own) byInput.set(r.input, [...(byInput.get(r.input) ?? []), r]);
+  const groups = [...byInput.values()];
+  const passed = groups.filter((rows) => rows.every((r) => r.task_outcome === "success")).length;
+  const failed = groups.filter((rows) => rows.some((r) => r.task_outcome === "failure")).length;
+  return rate(passed, passed + failed);
+}
+
+/**
+ * What the sample and the spec allow before any result is in. The selector
+ * adds the statistical reasons (stats.ts) once it has the rows.
+ */
 export function directionality(inputCount: number, mmd: number | null | undefined): Directionality {
   const reasons: string[] = [];
-  if (inputCount < FIRM_MIN_INPUTS) reasons.push(`${inputCount} inputs; fewer than ${FIRM_MIN_INPUTS}`);
+  if (inputCount < MIN_DIFFERING_INPUTS) {
+    reasons.push(`${inputCount} input${inputCount === 1 ? "" : "s"}; no comparison can be significant with fewer than ${MIN_DIFFERING_INPUTS}`);
+  }
   if (mmd === null || mmd === undefined) reasons.push("no minimum meaningful difference declared");
   return { directional: reasons.length > 0, reasons };
 }

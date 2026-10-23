@@ -55,6 +55,8 @@ export interface RunManifest {
     timeout_ms: number;
     benchmark_mode: string;
     cache_mode: string;
+    /** Absent in manifests written before early stop existed: it was off. */
+    early_stop?: boolean;
   };
   harness: { name: string; version: string; git_sha: string | null; node: string };
   started_at: string;
@@ -136,6 +138,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
       timeout_ms: suite.timeoutMs ?? 120_000,
       benchmark_mode: suite.benchmarkMode ?? "capability-neutral",
       cache_mode: suite.cacheMode ?? "cold",
+      early_stop: suite.earlyStop === true,
     },
     harness: { ...harness, node: process.version },
     started_at: m.startedAt,

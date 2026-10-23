@@ -1,5 +1,5 @@
 {
-  "rule_version": "select-v3",
+  "rule_version": "select-v4",
   "operating_mode": "lowest-cost",
   "control_candidate": "sonnet-5",
   "eligibility": {
@@ -136,6 +136,8 @@
     "reason": "no chosen candidate to compare with control sonnet-5"
   },
   "firmness": "needs-review",
+  "firmness_reasons": [],
+  "evidence": null,
   "reasons": [
     "no candidate passed eligibility gates"
   ],

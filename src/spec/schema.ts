@@ -110,6 +110,7 @@ export const SPEC_SCHEMA = {
                 properties: {
                   minimum_reliability: { type: "number", minimum: 0, maximum: 1 },
                   minimum_required_check_pass_rate: { type: "number", minimum: 0, maximum: 1 },
+                  minimum_all_trials_pass_rate: { type: "number", minimum: 0, maximum: 1 },
                   maximum_p95_ms: { type: "number", exclusiveMinimum: 0 },
                   cost_ceiling_per_success_usd: { type: "number", exclusiveMinimum: 0 },
                 },
@@ -253,6 +254,7 @@ export const SPEC_SCHEMA = {
         benchmark_mode: { type: "string", enum: ["capability-neutral", "production-realistic"] },
         cache_mode: { type: "string", enum: ["cold", "warm", "both"] },
         minimum_meaningful_difference: { type: ["number", "null"] },
+        early_stop: { type: "boolean" },
       },
     },
     "x-harness": {

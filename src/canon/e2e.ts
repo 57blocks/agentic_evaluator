@@ -10,7 +10,8 @@
  * Pure. Never calls a model; re-running on the same arms is idempotent.
  */
 
-import { FIRM_MIN_INPUTS, percentile, rate, type Rate } from "./rates.js";
+import { directionality, percentile, rate, type Rate } from "./rates.js";
+import { fmtP, signTestP, SIGNIFICANCE } from "./stats.js";
 import type { EvaluationResult, EvaluationState, OperatingMode, TaskOutcome } from "./types.js";
 
 export const VALIDATE_RULE_VERSION = "e2e-validate-v1" as const;
@@ -175,6 +176,15 @@ export interface PairedCounts {
   proposed_only: number;
   control_only: number;
   neither: number;
+  /**
+   * The same cases collapsed per input (trials averaged), which is what the
+   * sign test reads: trials of one input are not independent evidence.
+   */
+  inputs_proposed_better: number;
+  inputs_control_better: number;
+  inputs_same: number;
+  /** Exact two-sided sign test over the inputs that differ. */
+  p_value: number;
 }
 
 /** Same input and trial index in both arms; unmatched cases are not compared. */
@@ -184,13 +194,15 @@ export function pairCases(
 ): PairedCounts {
   const key = (c: E2eCase): string => `${c.input}#${c.trial}`;
   const byKey = new Map(control.map((c) => [key(c), c]));
-  const counts: PairedCounts = {
+  const counts = {
     compared: 0,
     both_success: 0,
     proposed_only: 0,
     control_only: 0,
     neither: 0,
   };
+  // Per input: proposed successes minus control successes over matched trials.
+  const margin = new Map<string, number>();
   for (const p of proposed) {
     const c = byKey.get(key(p));
     if (!c) continue;
@@ -201,8 +213,18 @@ export function pairCases(
     else if (pOk) counts.proposed_only += 1;
     else if (cOk) counts.control_only += 1;
     else counts.neither += 1;
+    margin.set(p.input, (margin.get(p.input) ?? 0) + Number(pOk) - Number(cOk));
   }
-  return counts;
+  const margins = [...margin.values()];
+  const better = margins.filter((m) => m > 0).length;
+  const worse = margins.filter((m) => m < 0).length;
+  return {
+    ...counts,
+    inputs_proposed_better: better,
+    inputs_control_better: worse,
+    inputs_same: margins.length - better - worse,
+    p_value: signTestP(better, worse),
+  };
 }
 
 export interface ValidationThresholds {
@@ -241,7 +263,7 @@ export interface DecideValidationInput {
   mode: OperatingMode | string | null;
   mmd: number | null;
   thresholds: ValidationThresholds;
-  /** Root test-set size; fewer than ten inputs can only support a directional claim. */
+  /** Root test-set size; too few inputs can only support a directional claim (rates.directionality). */
   inputs: number;
   control: ValidationArm | null;
   proposed: ValidationArm | null;
@@ -302,6 +324,18 @@ function shell(input: DecideValidationInput, mode: OperatingMode | null): Omit<E
   };
 }
 
+/** Does a sign test over inputs back the verdict's direction? */
+function backedByInputs(paired: PairedCounts | null, proposedBetter: boolean): { firm: boolean; reason: string } {
+  if (paired === null) return { firm: false, reason: "no paired cases, so no sign test over inputs" };
+  const forVerdict = proposedBetter ? paired.inputs_proposed_better : paired.inputs_control_better;
+  const against = proposedBetter ? paired.inputs_control_better : paired.inputs_proposed_better;
+  const firm = paired.p_value < SIGNIFICANCE && forVerdict > against;
+  return {
+    firm,
+    reason: `the arms differ on ${paired.inputs_proposed_better + paired.inputs_control_better} input(s) (${paired.inputs_proposed_better} favour the combination, ${paired.inputs_control_better} the control; sign test p ${fmtP(paired.p_value)}), too few to tell them apart`,
+  };
+}
+
 /**
  * Protocol §8: a combination is superior only when the end-to-end evidence
  * shows an improvement at least as large as the predeclared minimum meaningful
@@ -341,8 +375,8 @@ export function decideValidation(input: DecideValidationInput): E2eValidation {
   const paired = input.pairs ?? null;
   const deltas: ValidationDeltas = { metric, proposed: p, control: c, improvement, mmd: input.mmd, paired };
 
-  const directional = input.inputs < FIRM_MIN_INPUTS || input.mmd === null;
-  const firmness: ValidationFirmness = directional ? "directional" : "firm";
+  const sample = directionality(input.inputs, input.mmd);
+  const firmness: ValidationFirmness = sample.directional ? "directional" : "firm";
 
   if (proposedFails.length > 0 && controlFails.length > 0) {
     reasons.push(`neither arm passes the workflow eligibility gates (proposed: ${proposedFails.join("; ")}; control: ${controlFails.join("; ")})`);
@@ -363,13 +397,23 @@ export function decideValidation(input: DecideValidationInput): E2eValidation {
   }
 
   if (metric === "reliability") {
-    // Mirrors select.ts: highest-assurance ranks on reliability and does not apply the MMD.
-    if (improvement > 0) {
-      reasons.push(`the combination reaches reliability ${p} versus ${c} for the control`);
-      return { ...base, verdict: "adopt-combination", firmness, deltas, reasons };
-    }
-    reasons.push(`the combination does not exceed the control on reliability (${p} versus ${c})`);
-    return { ...base, verdict: "keep-control", firmness, deltas, reasons };
+    // Mirrors select.ts: highest-assurance ranks on reliability and does not
+    // apply the MMD, but is firm only when a sign test over inputs backs it.
+    const adopt = improvement > 0;
+    const backed = backedByInputs(paired, adopt);
+    reasons.push(
+      adopt
+        ? `the combination reaches reliability ${p} versus ${c} for the control`
+        : `the combination does not exceed the control on reliability (${p} versus ${c})`,
+    );
+    if (!backed.firm) reasons.push(backed.reason);
+    return {
+      ...base,
+      verdict: adopt ? "adopt-combination" : "keep-control",
+      firmness: backed.firm ? firmness : "directional",
+      deltas,
+      reasons,
+    };
   }
 
   if (input.mmd === null) {

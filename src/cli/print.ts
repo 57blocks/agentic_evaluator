@@ -18,7 +18,7 @@ function planLines(p: StepPlan): string[] {
   const absolute = p.scoreCalls > 0 ? `${p.scoreCalls} calls` : "off";
   return [
     `\n▶ ${p.suiteId} / ${p.step} [${p.producer}] — ${p.candidates} candidates × ${p.inputs} inputs × ${p.trials} trials`,
-    `  generations ${p.generations} · pairwise ${pairwise} · absolute ${absolute}`,
+    `  generations ${p.earlyStop ? `up to ${p.generations} (early stop on)` : p.generations} · pairwise ${pairwise} · absolute ${absolute}`,
     `  judge ${p.judge} · concurrency ${p.concurrency}${p.reuse ? " · reuse ON" : ""}${
       p.budgetUsd === null ? "" : ` · budget $${p.budgetUsd}`
     }`,
@@ -48,6 +48,8 @@ export function formatEvent(e: RunEvent): string[] {
     case "trial": {
       const who = `${e.candidate} · ${e.input} · t${e.trial}`;
       if (e.reusedFrom) return [`  reuse  ${who}  ← ${e.reusedFrom}`];
+      // One line says a candidate was stopped (candidate.stopped), not one per trial.
+      if (e.state === "skipped" && e.skipReason === "early-stop") return [];
       if (e.state === "skipped") return [`  skip   ${who} — budget limit reached`];
       if (e.error) return [`  ${e.state.padEnd(8)} ${who}: ${e.error}`];
       const cost = e.costUsd === undefined ? "" : `, ${usd(e.costUsd)} ${e.costSource ?? ""}`;
@@ -71,6 +73,8 @@ export function formatEvent(e: RunEvent): string[] {
       return [
         `⚠ cancelled after ${e.dispatched} generation(s) in ${e.step}; ${e.skipped} never got a turn — this run is partial (see GAPS.md)`,
       ];
+    case "candidate.stopped":
+      return [`  stop   ${e.candidate} after ${e.afterTrials} trial(s): ${e.reason}; its remaining trials are not run (early stop)`];
     case "integrity.gaps":
       return [
         `⚠ ${e.gaps} wall-clock gap(s) > ${e.thresholdMs / 60000} min in the trace — host suspended? durations unreliable (see GAPS.md)`,
@@ -84,6 +88,9 @@ export function formatEvent(e: RunEvent): string[] {
           chosen: e.chosen,
           closest: e.closest,
           firmness: e.firmness,
+          firmnessReasons: e.firmnessReasons,
+          evidence: e.evidence,
+          earlyStopped: e.earlyStopped,
           gated: e.gated,
           ledgerTotal: e.ledgerTotal,
           ledgerSource: e.ledgerSource,

@@ -25,6 +25,8 @@ export function eventLine(event: RunEvent): string {
       return `⚠ Budget reached at $${event.spentUsd.toFixed(4)}; this run is incomplete`;
     case "run.cancelled":
       return `⚠ Cancelled: ${event.step} dispatched ${event.dispatched}, ${event.skipped} never started`;
+    case "candidate.stopped":
+      return `⚠ Stopped ${event.candidate} after ${event.afterTrials} trial(s): ${event.reason}`;
     case "integrity.gaps":
       return `⚠ The trace has ${event.gaps} long gap(s); this run's durations are unreliable`;
     case "step.done":
@@ -47,7 +49,7 @@ export function eventLine(event: RunEvent): string {
 function trialLine(event: Extract<RunEvent, { type: "trial" }>): string {
   const who = `${event.candidate} · ${event.input} · t${event.trial}`;
   if (event.reusedFrom) return `  reused ${who}`;
-  if (event.state === "skipped") return `  skipped ${who} — budget reached`;
+  if (event.state === "skipped") return `  skipped ${who} — ${event.skipReason === "early-stop" ? "early stop" : "budget reached"}`;
   const check = event.check ? ` · check ${event.check}` : "";
   const error = event.error ? `: ${event.error}` : "";
   return `  ${event.state} ${who}${check}${error}`;

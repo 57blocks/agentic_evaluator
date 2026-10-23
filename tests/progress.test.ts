@@ -120,6 +120,8 @@ test("a finished step clears the live block and keeps its summary", () => {
       ledgerSource: "none",
       chosen: "a",
       firmness: "directional",
+      firmnessReasons: [],
+      evidence: null,
       html: false,
       gated: [],
       rows: [],

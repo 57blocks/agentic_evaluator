@@ -22,6 +22,8 @@ import path from "node:path";
 import { adapterIdOf } from "../adapters/types.js";
 import { sha256 } from "../canon/hash.js";
 import { directionality } from "../canon/rates.js";
+import { resolveEligibility } from "../canon/select.js";
+import { inputsToClearGate, minDetectableGap, wilson } from "../canon/stats.js";
 import { matchesShow } from "../canon/review.js";
 import { fixturePath, isDir } from "./fixture.js";
 import { restoreAnswerKey } from "./answer-key.js";
@@ -82,15 +84,48 @@ function inputFindings(suite: Suite, inputs: readonly LoadedInput[]): Finding[] 
 
   const n = inputs.length;
   const trials = suite.trials ?? DEFAULT_TRIALS;
-  const noise = Math.round(100 / Math.sqrt(Math.max(1, n * trials)));
   const dir = directionality(n, suite.mmd);
-  const size = `${n} input${n === 1 ? "" : "s"} × ${trials} trial${trials === 1 ? "" : "s"}: a pass rate moves about ±${noise} points by chance`;
+  const gap = minDetectableGap(n);
+  const size =
+    `${n} input${n === 1 ? "" : "s"} × ${trials} trial${trials === 1 ? "" : "s"}` +
+    (gap === null
+      ? ""
+      : `: the smallest gap between two candidates that can come out firm is ${Math.round(gap * 100)} points, and only if every input that differs goes the same way; real gaps need more`);
   out.push(
     dir.directional
       ? { severity: "warning", code: "inputs.count", message: `${size}; results will be directional (${dir.reasons.join("; ")})` }
       : { severity: "ok", code: "inputs.count", message: size },
+    ...gateFindings(suite, n),
   );
   return out;
+}
+
+/**
+ * A gate the set is too small to back: even a candidate that passes every
+ * input has a 95% interval reaching below it, so the pick can never be firm.
+ */
+function gateFindings(suite: Suite, n: number): Finding[] {
+  const e = resolveEligibility(suite.requiredChecks ?? [], suite.eligibility);
+  const low = wilson(n, n)?.low ?? 0;
+  const gates: Array<[string, number | null]> = [
+    ["minimum_required_check_pass_rate", e.minimum_required_check_pass_rate],
+    ["minimum_reliability", e.minimum_reliability],
+    ["minimum_all_trials_pass_rate", e.minimum_all_trials_pass_rate],
+  ];
+  return gates
+    .filter((g): g is [string, number] => g[1] !== null && low + 1e-12 < g[1])
+    .map(([name, gate]) => {
+      const need = inputsToClearGate(gate);
+      const fix =
+        need === null
+          ? "a gate of 1 can never be firm; declare one such as 0.95 (needs 73 inputs) or 0.9 (needs 35)"
+          : `it needs at least ${need} inputs, or a lower gate`;
+      return {
+        severity: "warning",
+        code: "eligibility.unreachable",
+        message: `${name} ${gate}: a candidate passing ${n === 1 ? "its one input" : `all ${n} inputs`} still has a 95% interval down to ${low.toFixed(3)}, so the pick cannot be firm; ${fix}`,
+      };
+    });
 }
 
 /** `${NAME}` in cli.env that this environment (with .env.local) does not set. */

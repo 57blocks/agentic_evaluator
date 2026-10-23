@@ -149,6 +149,8 @@ export interface Suite {
   eligibility?: EligibilityDecl;
   /** Predeclared minimum meaningful difference; null/undefined → directional only. */
   mmd?: number | null;
+  /** Stop a candidate once a declared gate is out of its reach (canon/early-stop.ts). */
+  earlyStop?: boolean;
   controlCandidate?: string;
   benchmarkMode?: "capability-neutral" | "production-realistic";
   cacheMode?: "cold" | "warm" | "both";

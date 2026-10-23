@@ -9,7 +9,12 @@
  * not run leaves a column out rather than a zero in it.
  */
 
+import { itemStats } from "../canon/item-stats.js";
+import { allTrialsPassRate, type Rate } from "../canon/rates.js";
 import type { TrialRow } from "../canon/rows.js";
+import type { FirmnessEvidence } from "../canon/select.js";
+import type { StoppedCandidate } from "../canon/early-stop.js";
+import { certaintyLines } from "./certainty-lines.js";
 
 export interface SummaryInput {
   step: string;
@@ -19,6 +24,12 @@ export interface SummaryInput {
   /** Named when nobody qualified (Recommendation.closest); never adopted. */
   closest?: string | null;
   firmness: string;
+  /** Why the recommendation is not firm (Recommendation.firmness_reasons). */
+  firmnessReasons?: readonly string[];
+  /** The statistics firmness was decided on (Recommendation.evidence). */
+  evidence?: FirmnessEvidence | null;
+  /** Candidates early stop took out of the run. */
+  earlyStopped?: readonly StoppedCandidate[];
   /** Candidates the eligibility gate removed, and why. */
   gated: ReadonlyArray<{ candidate: string; reason: string }>;
   ledgerTotal: number;
@@ -33,6 +44,8 @@ interface Row {
   undetermined: number;
   checkPass: number;
   checkTotal: number;
+  /** pass^k: inputs where every trial succeeded. */
+  passAll: Rate;
   wins: number;
   duels: number;
   absolute: number | null;
@@ -63,6 +76,7 @@ function rowFor(candidate: string, trials: readonly TrialRow[]): Row {
     undetermined: mine.filter((t) => t.task_outcome === "undetermined").length,
     checkPass: checked.filter((t) => Object.values(t.checks).every((c) => c.state === "pass")).length,
     checkTotal: checked.length,
+    passAll: allTrialsPassRate(mine),
     wins: duels.filter((d) => d.resolved === "win").length,
     duels: duels.length,
     absolute: scores.length === 0 ? null : scores.reduce((a, b) => a + b, 0) / scores.length,
@@ -99,11 +113,14 @@ export function summaryLines(input: SummaryInput): string[] {
   const showDuels = rows.some((r) => r.duels > 0);
   const showScore = rows.some((r) => r.absolute !== null);
   const showCheck = rows.some((r) => r.checkTotal > 0);
+  // With one trial per input pass^k is just success per input: no column then.
+  const showPassAll = input.trials.some((t) => t.trial > 0);
 
   const header = [
     "candidate",
     "success",
     ...(showCheck ? ["check"] : []),
+    ...(showPassAll ? ["pass^k"] : []),
     ...(showDuels ? ["duels"] : []),
     ...(showScore ? ["score"] : []),
     "cost",
@@ -113,6 +130,7 @@ export function summaryLines(input: SummaryInput): string[] {
     r.candidate,
     successCell(r),
     ...(showCheck ? [r.checkTotal === 0 ? "—" : `${r.checkPass}/${r.checkTotal}`] : []),
+    ...(showPassAll ? [r.passAll.denominator === 0 ? "—" : `${r.passAll.numerator}/${r.passAll.denominator}`] : []),
     ...(showDuels ? [r.duels === 0 ? "—" : `${r.wins}/${r.duels}`] : []),
     ...(showScore ? [r.absolute === null ? "—" : r.absolute.toFixed(1)] : []),
     costCell(r),
@@ -125,6 +143,9 @@ export function summaryLines(input: SummaryInput): string[] {
 
   const lowerBound = rows.every((r) => r.costObserved) ? "" : ", lower bound";
   const gated = input.gated.map((g) => `  gated  ${g.candidate} — ${g.reason}`);
+  const stopped = (input.earlyStopped ?? []).map(
+    (s) => `  stopped ${s.candidate} after ${s.after_trials} trial(s), ${s.skipped} not run — ${s.reason}`,
+  );
 
   return [
     "",
@@ -133,7 +154,15 @@ export function summaryLines(input: SummaryInput): string[] {
     ...body.map((b) => `  ${line(b)}`),
     "",
     ...gated,
+    ...stopped,
     `  → ${input.chosen ?? `no candidate qualified${input.closest ? ` · closest ${input.closest}` : ""}`} (${input.firmness}) · total $${input.ledgerTotal.toFixed(4)} (${input.ledgerSource}${lowerBound})`,
+    ...certaintyLines({
+      chosen: input.chosen,
+      firmness: input.firmness,
+      firmnessReasons: input.firmnessReasons ?? [],
+      evidence: input.evidence ?? null,
+      items: itemStats(input.trials),
+    }),
     "",
   ];
 }

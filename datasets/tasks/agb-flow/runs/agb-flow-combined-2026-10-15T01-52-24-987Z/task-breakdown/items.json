@@ -1,0 +1,67 @@
+{
+  "inputs": 3,
+  "effective_n": 3,
+  "counts": {
+    "splits": 3,
+    "all-pass": 0,
+    "all-fail": 0,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "chessicle",
+      "class": "splits",
+      "pass_rate": 0.7,
+      "by_candidate": {
+        "deepseek-flash": 1,
+        "deepseek-v4-pro": 1,
+        "fable-5-1": 1,
+        "gemini-4-argon": 1,
+        "glm-5-3": 1,
+        "glm-5-3-prime": 0,
+        "gpt-5-6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5-5": 1,
+        "qwen-3-8-max": 0
+      },
+      "discrimination": 0.6296912574265237
+    },
+    {
+      "input": "demo-todo",
+      "class": "splits",
+      "pass_rate": 0.8,
+      "by_candidate": {
+        "deepseek-flash": 1,
+        "deepseek-v4-pro": 1,
+        "fable-5-1": 1,
+        "gemini-4-argon": 0,
+        "glm-5-3": 1,
+        "glm-5-3-prime": 1,
+        "gpt-5-6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5-5": 1,
+        "qwen-3-8-max": 0
+      },
+      "discrimination": 0.8955334711889903
+    },
+    {
+      "input": "invoice",
+      "class": "splits",
+      "pass_rate": 0.8,
+      "by_candidate": {
+        "deepseek-flash": 1,
+        "deepseek-v4-pro": 1,
+        "fable-5-1": 1,
+        "gemini-4-argon": 0,
+        "glm-5-3": 1,
+        "glm-5-3-prime": 1,
+        "gpt-5-6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5-5": 1,
+        "qwen-3-8-max": 0
+      },
+      "discrimination": 0.8955334711889903
+    }
+  ]
+}

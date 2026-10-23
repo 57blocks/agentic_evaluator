@@ -57,6 +57,9 @@ workflow:
       success_criteria:
         mandatory_checks: all
       operating_mode: lowest-cost
+      # 1.0 admits only candidates that never failed, but no sample can show a
+      # true rate of 1.0, so the pick stays directional. To get a firm pick,
+      # declare e.g. 0.95 (needs 73 inputs) or 0.9 (35); see check-task.
       eligibility:
         minimum_reliability: 1.0
         minimum_required_check_pass_rate: 1.0

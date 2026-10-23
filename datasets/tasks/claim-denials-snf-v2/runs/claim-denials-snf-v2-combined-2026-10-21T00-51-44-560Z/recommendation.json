@@ -1,5 +1,5 @@
 {
-  "rule_version": "select-v3",
+  "rule_version": "select-v4",
   "operating_mode": "lowest-cost",
   "control_candidate": "sonnet-5",
   "eligibility": {
@@ -240,9 +240,37 @@
     "reason": "chosen $0.016571 vs control $0.025427 per successful task"
   },
   "firmness": "directional",
+  "firmness_reasons": [
+    "no minimum meaningful difference declared",
+    "gpt-5.6-sol: required-check-pass-rate 276/300 has a 95% interval down to 0.884, below the gate 0.9",
+    "gpt-5.6-sol: reliability 276/300 has a 95% interval down to 0.884, below the gate 0.9"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 0.9,
+        "successes": 276,
+        "n": 300,
+        "low": 0.8837267592355772,
+        "high": 0.9456531447703825
+      },
+      {
+        "gate": "reliability",
+        "threshold": 0.9,
+        "successes": 276,
+        "n": 300,
+        "low": 0.8837267592355772,
+        "high": 0.9456531447703825
+      }
+    ],
+    "versus_runner_up": null
+  },
   "reasons": [
     "lowest generation cost per successful task among eligible: $0.016571",
-    "no minimum meaningful difference declared"
+    "no minimum meaningful difference declared",
+    "gpt-5.6-sol: required-check-pass-rate 276/300 has a 95% interval down to 0.884, below the gate 0.9",
+    "gpt-5.6-sol: reliability 276/300 has a 95% interval down to 0.884, below the gate 0.9"
   ],
   "closest": null
 }
