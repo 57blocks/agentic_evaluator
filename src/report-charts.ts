@@ -3,12 +3,19 @@
  *
  * Every chart reads the canonical trial rows — the same file the tables and the
  * recommendation read — so a picture can never disagree with the numbers beside
- * it. Pure string rendering, inline SVG, no runtime dependency.
+ * it. Pure string rendering, no runtime dependency.
  *
- * Palette: validated categorical slots 1–3 (blue / orange / aqua) and the blue
- * sequential ramp, both checked with the dataviz validator in light and dark.
- * Aqua sits below 3:1 on the light surface, so identity is never colour-alone:
- * the radar direct-labels every vertex and the heatmap prints its values.
+ * The judge's 1–5 scores are drawn as a distribution, one bar per candidate:
+ * how many trials got each score. A mean hides the shape that matters (a
+ * candidate scoring 1 or 5 and nothing between averages 3), and the required
+ * check sits on the same row, because a well-written note on a wrong answer
+ * is the misreading this chart exists to prevent.
+ *
+ * Palette: a red ← gray → blue diverging ramp (1 red, 3 neutral, 5 blue),
+ * validated with the dataviz validator in light and dark against the page
+ * surfaces. Some steps sit below 3:1 on the surface, so values are never
+ * colour-alone: the dominant segments are labelled, every segment has a hover
+ * title, and a table carries the exact counts.
  */
 
 import { judgeDiscrimination } from "./canon/discrimination.js";
@@ -18,11 +25,11 @@ import { SCORE_MAX, SCORE_MIN, heatTint } from "./report-format.js";
 
 export { heatTint };
 
-/** All-pairs forms (radar) cap at three series; past that the shape is noise. */
-const RADAR_MAX_SERIES = 3;
+/** The scores a judge can give, low to high. */
+const STEPS = [1, 2, 3, 4, 5] as const;
 
-/** Sequential blue ramp, 100 → 700, light means "near zero". */
-const RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#2a78d6", "#1c5cab", "#104281"];
+/** A segment narrower than this share of its bar gets no printed label (it would not fit). */
+const LABEL_MIN_SHARE = 0.12;
 
 export interface CandidateProfile {
   candidate: string;
@@ -64,223 +71,193 @@ export function profiles(trials: readonly TrialRow[]): CandidateProfile[] {
   });
 }
 
-/** Score 1–5 → ramp step. Below 1 or missing is not a colour, it is an absence. */
-export function rampStep(score: number | null): string | null {
-  if (score === null) return null;
-  const clamped = Math.max(SCORE_MIN, Math.min(SCORE_MAX, score));
-  const idx = Math.round(((clamped - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * (RAMP.length - 1));
-  return RAMP[idx];
+export interface ScoreRow {
+  candidate: string;
+  /** Trials per score, index 0 = score 1 … index 4 = score 5. */
+  counts: number[];
+  /** Trials this dimension has no score for: did not complete, or the judge skipped it. */
+  unscored: number;
+  /** All the candidate's trials. */
+  n: number;
+  /** Mean over scored trials; null when none was scored. */
+  mean: number | null;
 }
 
-function swatch(index: number): string {
-  return `<span class="viz-sw viz-s${index}"></span>`;
+export interface ScoreBlock {
+  dim: string;
+  /** Every candidate got the same scores: the judge did not tell them apart here. */
+  saturated: boolean;
+  rows: ScoreRow[];
 }
+
+export interface CheckTally {
+  pass: number;
+  executed: number;
+}
+
+/** Share of executed checks that passed; -1 sorts a candidate the check never ran on last. */
+const passRate = (c: CheckTally | undefined): number => (c && c.executed > 0 ? c.pass / c.executed : -1);
 
 /**
- * Dimension profile. A radar answers "what shape is this candidate" — which
- * dimension it wins on relative to its own other dimensions — at a glance.
- * The heatmap below it carries the precise values.
+ * How many trials got each score, per dimension and candidate. Candidates are
+ * in one order for every dimension so blocks can be read across: most answers
+ * right first (the required check), the judge's mean only breaking ties —
+ * ordering by how well a note reads would put a fluent wrong answer on top.
  */
-export function renderRadar(trials: readonly TrialRow[]): string {
+export function scoreDistribution(trials: readonly TrialRow[], checks: ReadonlyMap<string, CheckTally> = new Map()): ScoreBlock[] {
   const dims = dimensionKeys(trials);
-  const all = profiles(trials);
-  const drawable = all.filter((p) => dims.every((d) => p.scores[d] !== null));
-  if (dims.length < 3 || drawable.length === 0) return "";
-
-  // Every dimension saturated: the outlines are one shape on top of another.
-  // Drawing it invites reading a profile out of a grader that never varied.
-  const spread = judgeDiscrimination(trials);
-  if (dims.every((d) => spread.saturated.includes(d))) {
-    return `<figure class="viz viz-void">
-    <figcaption>Dimension profile <span class="hint">not drawn</span></figcaption>
-    <p class="viz-note">Every candidate scored the same on every dimension, so the outlines would overlap exactly. Absolute scoring had no discrimination in this run; no shape is drawn so it is not read as "evenly matched". See the matrix below and GAPS.md.</p>
-  </figure>`;
-  }
-  const series = drawable.slice(0, RADAR_MAX_SERIES);
-  const dropped = drawable.length - series.length;
-
-  const W = 560;
-  const H = 400;
-  const cx = W / 2;
-  const cy = 196;
-  const R = 128;
-  const N = dims.length;
-  const ang = (i: number): number => -Math.PI / 2 + (i * 2 * Math.PI) / N;
-  const rad = (v: number): number =>
-    ((Math.max(SCORE_MIN, Math.min(SCORE_MAX, v)) - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * R;
-  const x = (i: number, r: number): string => (cx + r * Math.cos(ang(i))).toFixed(1);
-  const y = (i: number, r: number): string => (cy + r * Math.sin(ang(i))).toFixed(1);
-
-  let grid = "";
-  for (let v = 2; v <= SCORE_MAX; v++) {
-    grid += `<polygon class="viz-grid" points="${dims.map((_, i) => `${x(i, rad(v))},${y(i, rad(v))}`).join(" ")}"/>`;
-    grid += `<text class="viz-tick" x="${(cx + 4).toFixed(1)}" y="${(cy - rad(v) + 3).toFixed(1)}">${v}</text>`;
-  }
-
-  let axes = "";
-  dims.forEach((dim, i) => {
-    axes += `<line class="viz-grid" x1="${cx}" y1="${cy}" x2="${x(i, R)}" y2="${y(i, R)}"/>`;
-    const c = Math.cos(ang(i));
-    const anchor = c > 0.3 ? "start" : c < -0.3 ? "end" : "middle";
-    axes += `<text class="viz-axis" x="${x(i, R + 22)}" y="${(Number(y(i, R + 22)) + 4).toFixed(1)}" text-anchor="${anchor}">${escapeHtml(dim)}</text>`;
-  });
-
-  let marks = "";
-  series.forEach((p, si) => {
-    const pts = dims.map((d, i) => `${x(i, rad(p.scores[d] as number))},${y(i, rad(p.scores[d] as number))}`).join(" ");
-    marks += `<polygon class="viz-poly viz-f${si}" points="${pts}"/>`;
-    dims.forEach((d, i) => {
-      const v = p.scores[d] as number;
-      marks += `<circle class="viz-dot viz-c${si}" cx="${x(i, rad(v))}" cy="${y(i, rad(v))}" r="4.5"><title>${escapeHtml(p.candidate)} · ${escapeHtml(d)}: ${v.toFixed(1)}/5</title></circle>`;
-    });
-  });
-
-  const legend = series
-    .map((p, si) => `<span class="viz-lg">${swatch(si)}${escapeHtml(p.candidate)} · ${p.overall === null ? "—" : p.overall.toFixed(1)}/5</span>`)
-    .join("");
-  const note = dropped > 0 ? `<p class="viz-note">${dropped} more candidate(s) not drawn: at most three outlines at once, more would be unreadable. Exact values are in the matrix below.</p>` : "";
-
-  return `<figure class="viz">
-    <figcaption>Dimension profile <span class="hint">mean absolute score, 1 at the centre, 5 at the rim</span></figcaption>
-    <div class="viz-legend">${legend}</div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Each candidate's dimension score profile">
-      ${grid}${axes}${marks}
-    </svg>${note}
-  </figure>`;
-}
-
-/** Precise per-dimension magnitude: one hue, light → dark, values printed. */
-export function renderHeatmap(trials: readonly TrialRow[]): string {
-  const dims = dimensionKeys(trials);
-  const rows = profiles(trials);
-  if (dims.length === 0 || rows.length === 0) return "";
-
-  const spread = judgeDiscrimination(trials);
-  const flat = new Set(spread.saturated);
-  const head = dims
-    .map((d) =>
-      flat.has(d)
-        ? `<th class="num viz-flat" title="Every candidate scored the same; no discrimination">${escapeHtml(d)} <span class="viz-flag">no spread</span></th>`
-        : `<th class="num">${escapeHtml(d)}</th>`,
-    )
-    .join("");
-  const body = rows
-    .map((p) => {
-      const cells = dims
-        .map((d) => {
-          const v = p.scores[d];
-          if (v === null) {
-            return `<td class="viz-cell viz-none" title="${escapeHtml(d)}: not scored">—</td>`;
-          }
-          return `<td class="viz-cell" style="${heatTint(v, SCORE_MIN, SCORE_MAX)}" title="${escapeHtml(p.candidate)} · ${escapeHtml(d)}: ${v.toFixed(1)}/5">${v.toFixed(1)}</td>`;
-        })
-        .join("");
-      return `<tr><th>${escapeHtml(p.candidate)}</th>${cells}<td class="num">${p.overall === null ? "—" : p.overall.toFixed(1)}</td></tr>`;
-    })
-    .join("");
-
-  const scale = [1, 2, 3, 4, 5]
-    .map((v) => `<span class="viz-step" style="${heatTint(v, SCORE_MIN, SCORE_MAX)}"></span>`)
-    .join("");
-
-  return `<figure class="viz">
-    <figcaption>Magnitude · absolute score 1–5 <span class="hint">above 3 leans green, below 3 leans red, stronger the further away</span></figcaption>
-    <div class="table-wrap"><table class="viz-heat"><thead><tr><th>Candidate</th>${head}<th class="num">Overall</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="viz-scale"><span>1</span>${scale}<span>5</span></div>
-    ${
-      flat.size > 0
-        ? `<p class="viz-note">On dimensions marked "no spread", every candidate got exactly the same score: the scorer did not tell them apart, which is not the same as the candidates being equal. These columns do not count toward the recommendation.</p>`
-        : ""
-    }
-  </figure>`;
-}
-
-/**
- * One mark per trial, not an average. With two or three repeats an average
- * hides the thing that matters most — whether the candidate is consistent —
- * and a mean over a timeout is a lie.
- */
-export function renderTrialStrip(trials: readonly TrialRow[]): string {
-  if (trials.length === 0) return "";
-  const order = [...new Set(trials.map((t) => t.candidate))];
-  const W = 560;
-  const rowH = 38;
-  const left = 132;
-  const plot = W - left - 28;
-  const pos = (score: number): number =>
-    left + ((Math.max(SCORE_MIN, Math.min(SCORE_MAX, score)) - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * plot;
-
-  const ticks = [1, 2, 3, 4, 5]
-    .map(
-      (v) =>
-        `<line class="viz-grid" x1="${pos(v)}" y1="18" x2="${pos(v)}" y2="${order.length * rowH + 16}"/>` +
-        `<text class="viz-tick" x="${pos(v)}" y="12" text-anchor="middle">${v}</text>`,
-    )
-    .join("");
-
-  const rows = order
-    .map((candidate, ri) => {
+  const order = profiles(trials)
+    .map((p, i) => ({ p, i, rate: passRate(checks.get(p.candidate)) }))
+    .sort((x, y) => y.rate - x.rate || (y.p.overall ?? -1) - (x.p.overall ?? -1) || x.i - y.i)
+    .map(({ p }) => p.candidate);
+  const saturated = new Set(judgeDiscrimination(trials).saturated);
+  return dims.map((dim) => ({
+    dim,
+    saturated: saturated.has(dim),
+    rows: order.map((candidate) => {
       const own = trials.filter((t) => t.candidate === candidate);
-      const cy = 30 + ri * rowH;
-      const label = `<text class="viz-axis" x="${left - 10}" y="${cy + 4}" text-anchor="end">${escapeHtml(candidate)}</text>`;
-      // Two trials that scored the same would sit on top of each other; nudge
-      // them apart so the eye counts the right number of runs.
-      const seen = new Map<number, number>();
-      const marks = own
-        .map((t) => {
-          const score = t.judge?.absolute_overall;
-          const state = `${escapeHtml(t.completion_state)}${t.truncated ? " · truncated" : ""}`;
-          if (typeof score !== "number") {
-            return `<text class="viz-miss" x="${left + 6}" y="${cy + 4}">${state} (not scored)</text>`;
-          }
-          const stack = seen.get(score) ?? 0;
-          seen.set(score, stack + 1);
-          const dy = stack === 0 ? 0 : stack % 2 === 1 ? 7 : -7;
-          const bad = t.completion_state !== "success" || t.truncated;
-          return `<circle class="viz-dot viz-c${ri % RADAR_MAX_SERIES}${bad ? " viz-bad" : ""}" cx="${pos(score)}" cy="${cy + dy}" r="6"><title>${escapeHtml(candidate)} · t${t.trial} · ${state} · ${score}/5</title></circle>`;
-        })
+      const scores = own
+        .map((t) => t.judge?.absolute_dimensions?.[dim])
+        .filter((v): v is number => typeof v === "number");
+      const counts = STEPS.map((s) => scores.filter((v) => Math.round(v) === s).length);
+      return { candidate, counts, unscored: own.length - scores.length, n: own.length, mean: mean(scores) };
+    }),
+  }));
+}
+
+const pct = (part: number, whole: number): string => `${Math.round((part / whole) * 100)}%`;
+
+function segment(cls: string, share: number, label: string, title: string): string {
+  const text = share >= LABEL_MIN_SHARE ? label : "";
+  return `<span class="sd-seg ${cls}" style="flex-grow:${share.toFixed(4)}" title="${escapeHtml(title)}">${text}</span>`;
+}
+
+function scoreRow(dim: string, r: ScoreRow, check: CheckTally | undefined): string {
+  const segs = STEPS.map((s, i) =>
+    r.counts[i] === 0 ? "" : segment(`sd-${s}`, r.counts[i] / r.n, pct(r.counts[i], r.n), `${r.candidate} · ${dim} = ${s}: ${r.counts[i]} of ${r.n} trials (${pct(r.counts[i], r.n)})`),
+  ).join("");
+  const missing = r.unscored === 0 ? "" : segment("sd-u", r.unscored / r.n, pct(r.unscored, r.n), `${r.candidate} · not scored: ${r.unscored} of ${r.n} trials (${pct(r.unscored, r.n)})`);
+  return `<div class="sd-row">
+      <span class="sd-name">${escapeHtml(r.candidate)}</span>
+      <span class="sd-bar">${segs}${missing}</span>
+      <span class="sd-mean">${r.mean === null ? "—" : r.mean.toFixed(1)}</span>
+      <span class="sd-check">${checkCell(check)}</span>
+    </div>`;
+}
+
+function countsTable(blocks: readonly ScoreBlock[]): string {
+  const rows = blocks
+    .flatMap((b) =>
+      b.rows.map((r) => `<tr><td>${escapeHtml(r.candidate)}</td><td>${escapeHtml(b.dim)}</td>${r.counts.map((c) => `<td class="num">${c}</td>`).join("")}<td class="num">${r.unscored}</td><td class="num">${r.mean === null ? "—" : r.mean.toFixed(2)}</td></tr>`),
+    )
+    .join("");
+  return `<details><summary>Exact counts</summary><div class="table-wrap"><table>
+      <thead><tr><th>Candidate</th><th>Dimension</th>${STEPS.map((s) => `<th class="num">${s}</th>`).join("")}<th class="num">Not scored</th><th class="num">Mean</th></tr></thead>
+      <tbody>${rows}</tbody></table></div></details>`;
+}
+
+export interface SummaryRow {
+  candidate: string;
+  /** Mean per dimension, in the blocks' order; null when that dimension was never scored. */
+  means: Array<number | null>;
+  overall: number | null;
+}
+
+/** One row per candidate in the distribution's order: its mean on every dimension, and overall. */
+export function scoreSummary(trials: readonly TrialRow[], blocks: readonly ScoreBlock[]): SummaryRow[] {
+  const overall = new Map(profiles(trials).map((p) => [p.candidate, p.overall]));
+  return (blocks[0]?.rows ?? []).map(({ candidate }) => ({
+    candidate,
+    means: blocks.map((b) => b.rows.find((r) => r.candidate === candidate)?.mean ?? null),
+    overall: overall.get(candidate) ?? null,
+  }));
+}
+
+const fmtMean = (v: number | null): string => (v === null ? "—" : v.toFixed(1));
+
+function checkCell(check: CheckTally | undefined): string {
+  return check && check.executed > 0 ? `${check.pass} / ${check.executed} <span class="sd-sub">${pct(check.pass, check.executed)}</span>` : "—";
+}
+
+/**
+ * Every candidate's mean on every dimension in one table, tinted red below 3
+ * and blue above, values always printed. Rows in the same order as the bars
+ * below it; the required check closes each row.
+ */
+export function renderScoreSummary(trials: readonly TrialRow[], checks: ReadonlyMap<string, CheckTally>): string {
+  const blocks = scoreDistribution(trials, checks);
+  if (blocks.length === 0) return "";
+  const head = blocks
+    .map((b) => `<th class="num">${escapeHtml(b.dim)}${b.saturated ? ` <span class="viz-flag">no spread</span>` : ""}</th>`)
+    .join("");
+  const body = scoreSummary(trials, blocks)
+    .map((r) => {
+      const cells = r.means
+        .map((v, i) =>
+          v === null
+            ? `<td class="viz-cell viz-none" title="${escapeHtml(blocks[i].dim)}: not scored">—</td>`
+            : `<td class="viz-cell" style="${heatTint(v, SCORE_MIN, SCORE_MAX)}" title="${escapeHtml(r.candidate)} · ${escapeHtml(blocks[i].dim)}: ${v.toFixed(1)}/5">${v.toFixed(1)}</td>`,
+        )
         .join("");
-      return label + marks;
+      return `<tr><td class="sd-name">${escapeHtml(r.candidate)}</td>${cells}<td class="viz-cell"${r.overall === null ? "" : ` style="${heatTint(r.overall, SCORE_MIN, SCORE_MAX)}"`}>${fmtMean(r.overall)}</td><td class="num">${checkCell(checks.get(r.candidate))}</td></tr>`;
     })
     .join("");
-
+  const scale = STEPS.map((v) => `<span class="viz-step" style="${heatTint(v, SCORE_MIN, SCORE_MAX)}"></span>`).join("");
   return `<figure class="viz">
-    <figcaption>Overall score per trial <span class="hint">one dot per trial, no averaging; hollow dots are trials that did not complete</span></figcaption>
-    <svg viewBox="0 0 ${W} ${order.length * rowH + 28}" width="100%" role="img" aria-label="Absolute overall score for each candidate's each trial">
-      ${ticks}${rows}
-    </svg>
+    <figcaption>Mean score per dimension <span class="hint">above 3 leans blue, below 3 leans red, stronger the further away</span></figcaption>
+    <div class="table-wrap"><table class="viz-heat"><thead><tr><th>Candidate</th>${head}<th class="num">Overall</th><th class="num" title="Whether the answer itself was right: a different measure, so not on the 1–5 colour scale">Required check ↓</th></tr></thead><tbody>${body}</tbody></table></div>
+    <div class="viz-scale"><span>1</span>${scale}<span>5</span></div>
   </figure>`;
+}
+
+/**
+ * One bar per candidate per dimension: the share of its trials at each score,
+ * red (1) to blue (5), with the mean and the required check beside it.
+ */
+export function renderScoreDistribution(trials: readonly TrialRow[], checks: ReadonlyMap<string, CheckTally>): string {
+  const blocks = scoreDistribution(trials, checks);
+  if (blocks.length === 0) return "";
+  const legend = STEPS.map((s) => `<span class="viz-lg"><span class="sd-key sd-${s}"></span>${s}</span>`).join("") +
+    `<span class="viz-lg"><span class="sd-key sd-u"></span>not scored</span>`;
+  const figures = blocks
+    .map((b) => `<figure class="viz">
+    <figcaption>${escapeHtml(b.dim)} <span class="hint">share of each candidate's trials at each score</span>${b.saturated ? ` <span class="viz-flag">no spread</span>` : ""}</figcaption>
+    <div class="sd-row sd-head"><span></span><span>1 (red) → 5 (blue)</span><span class="sd-mean">mean</span><span class="sd-check">required check ↓</span></div>
+    ${b.rows.map((r) => scoreRow(b.dim, r, checks.get(r.candidate))).join("")}
+    ${b.saturated ? `<p class="viz-note">Every candidate got the same scores here: the judge did not tell them apart, which is not the same as them being equal.</p>` : ""}
+  </figure>`)
+    .join("");
+  return `<div class="viz-legend sd-legend">${legend}</div>${figures}${countsTable(blocks)}`;
 }
 
 export const CHART_STYLES = `
-.viz-flat{color:var(--warn-fg)}
-.viz-flag{font-size:10px;font-weight:600;background:var(--warn-bg);color:var(--warn-fg);padding:0 5px;border-radius:3px;white-space:nowrap}
-.viz-void .viz-note{margin-top:8px}
 .viz{margin:14px 0 0;padding:0}
-.viz-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;align-items:start}
-.viz figcaption{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:baseline}
-.viz-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4px;font-size:12px;color:var(--ink-2)}
+.viz figcaption{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.viz-legend{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0;font-size:12px;color:var(--ink-2)}
 .viz-lg{display:inline-flex;gap:6px;align-items:center}
-.viz-sw{width:10px;height:10px;border-radius:2px;display:inline-block}
-.viz-s0,.viz-c0{--viz:#2a78d6}.viz-s1,.viz-c1{--viz:#eb6834}.viz-s2,.viz-c2{--viz:#1baf7a}
-.viz-sw{background:var(--viz)}
-.viz-grid{fill:none;stroke:var(--rule);stroke-width:1}
-.viz-axis{font-size:11px;fill:var(--ink-2)}
-.viz-tick{font-size:10px;fill:var(--ink-3)}
-.viz-poly{fill:var(--viz);fill-opacity:.1;stroke:var(--viz);stroke-width:2}
-.viz-f0{--viz:#2a78d6}.viz-f1{--viz:#eb6834}.viz-f2{--viz:#1baf7a}
-.viz-dot{fill:var(--viz);stroke:var(--surface);stroke-width:2}
-.viz-bad{fill:var(--surface);stroke:var(--viz);stroke-width:2;stroke-dasharray:3 2}
-.viz-miss{font-size:11px;fill:var(--ink-3)}
+.viz-flag{font-size:10px;font-weight:600;background:var(--warn-bg);color:var(--warn-fg);padding:0 5px;border-radius:3px;white-space:nowrap}
 .viz-note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
 table.viz-heat{width:100%;border-collapse:separate;border-spacing:2px}
 table.viz-heat th{font-size:12px;font-weight:500;color:var(--ink-2);text-align:left;white-space:nowrap}
-td.viz-cell{text-align:center;border-radius:4px;padding:8px 6px;font-variant-numeric:tabular-nums;color:#0d366b}
-td.viz-on-dark{color:#fff}
+table.viz-heat th.num,table.viz-heat td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.viz-cell{text-align:center;border-radius:4px;padding:8px 6px;font-variant-numeric:tabular-nums;color:var(--ink)}
 td.viz-none{background:var(--surface-2);color:var(--ink-3)}
 .viz-scale{display:flex;gap:2px;align-items:center;margin-top:8px;font-size:11px;color:var(--ink-3)}
 .viz-step{width:26px;height:8px;border-radius:2px;display:inline-block}
+.sd-1{--sd:#c93a39;--sd-fg:#fff}.sd-2{--sd:#f0a3a0;--sd-fg:#2B3038}.sd-3{--sd:#e2e1dd;--sd-fg:#2B3038}.sd-4{--sd:#8dbbf1;--sd-fg:#2B3038}.sd-5{--sd:#1c5cab;--sd-fg:#fff}
+.sd-row{display:grid;grid-template-columns:minmax(90px,160px) 1fr 44px 96px;gap:10px;align-items:center;margin:3px 0;font-size:12px}
+.sd-head{color:var(--ink-3);font-size:11px;margin-bottom:2px}
+.sd-name{font-family:var(--mono);font-size:11px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-bar{display:flex;gap:2px;height:20px;min-width:0}
+.sd-seg{flex-basis:0;min-width:2px;background:var(--sd);color:var(--sd-fg);font-size:10px;line-height:20px;text-align:center;overflow:hidden;white-space:nowrap}
+.sd-seg:first-child{border-radius:4px 0 0 4px}.sd-seg:last-child{border-radius:0 4px 4px 0}.sd-seg:only-child{border-radius:4px}
+.sd-u{background:var(--surface);color:var(--ink-3);box-shadow:inset 0 0 0 1px var(--ink-3)}
+.sd-seg.sd-u{background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 3px,var(--rule) 3px,var(--rule) 5px)}
+.sd-mean,.sd-check{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sd-sub{color:var(--ink-3)}
+.sd-key{width:12px;height:12px;border-radius:2px;display:inline-block;background:var(--sd)}
+.sd-legend{margin-top:10px}
 @media(prefers-color-scheme:dark){
-  .viz-s0,.viz-c0,.viz-f0{--viz:#3987e5}.viz-s1,.viz-c1,.viz-f1{--viz:#d95926}.viz-s2,.viz-c2,.viz-f2{--viz:#199e70}
+  .sd-1{--sd:#f29a97;--sd-fg:#1F2329}.sd-2{--sd:#a13b39;--sd-fg:#fff}.sd-3{--sd:#93938d;--sd-fg:#1F2329}.sd-4{--sd:#3470c4;--sd-fg:#fff}.sd-5{--sd:#a8cdf5;--sd-fg:#1F2329}
 }
 `;

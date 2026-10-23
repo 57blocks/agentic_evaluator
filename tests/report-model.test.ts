@@ -102,9 +102,9 @@ test("loadReportModel picks the step report for a step directory", async () => {
   assert.equal(model.kind, "step");
 });
 
-test("heatTint is green above the midpoint and red below it", () => {
-  assert.match(heatTint(5, 1, 5), /34,197,94/);
-  assert.match(heatTint(1, 1, 5), /239,68,68/);
+test("heatTint is blue above the midpoint and red below it, like the score bars", () => {
+  assert.match(heatTint(5, 1, 5), /42,120,214/);
+  assert.match(heatTint(1, 1, 5), /201,58,57/);
   assert.equal(heatTint(null, 1, 5), "");
 });
 

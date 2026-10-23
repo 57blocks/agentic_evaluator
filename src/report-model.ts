@@ -24,7 +24,7 @@ import { judgeStandings } from "./canon/judge-standings.js";
 import { itemStats } from "./canon/item-stats.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
 import { humanRecord, judgeAgreement, reviewQueue, type Agreement, type HumanRecord } from "./canon/review.js";
-import { dimensionKeys, profiles, type CandidateProfile } from "./report-charts.js";
+import { dimensionKeys, profiles, scoreDistribution, scoreSummary, type CandidateProfile, type ScoreBlock, type SummaryRow } from "./report-charts.js";
 import type { RawOutput } from "./report-evidence.js";
 import type { RunBundle } from "./report-v2.js";
 import type { WorkflowRecord } from "./canon/workflow.js";
@@ -404,6 +404,10 @@ export interface StepReport {
   saturated: string[];
   dims: string[];
   profiles: CandidateProfile[];
+  /** The judge's 1–5 scores as counts per dimension and candidate. */
+  distribution: ScoreBlock[];
+  /** Each candidate's mean per dimension, in the distribution's row order. */
+  scoreSummary: SummaryRow[];
   preference: PreferenceTable | null;
   duels: EvaluationRow[];
   trials: TrialRow[];
@@ -423,6 +427,7 @@ export function buildStepReport(b: RunBundle): StepReport {
   const support = subtitleReasons(rec, b.summary.directionality);
   const chosenView = views.find((v) => v.id === rec.chosen);
   const judge = judgeFavourite(b);
+  const distribution = scoreDistribution(b.trials, new Map(views.map((v) => [v.id, { pass: v.checkPass, executed: v.checkExecuted }])));
 
   return {
     kind: "step",
@@ -487,6 +492,8 @@ export function buildStepReport(b: RunBundle): StepReport {
     saturated: judgeDiscrimination(b.trials).saturated,
     dims: dimensionKeys(b.trials),
     profiles: profiles(b.trials),
+    distribution,
+    scoreSummary: scoreSummary(b.trials, distribution),
     preference: dimensionPreference(b.evaluations),
     duels: b.evaluations.filter((r) => r.subject.kind === "pair"),
     trials: b.trials,
