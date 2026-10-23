@@ -26,12 +26,11 @@ import {
   ledgerNote, reviewGapLines, reviewSummary, sha8, stateTone, subtitleReasons, verdictFacts, verdictText,
   type CandidateView,
 } from "./report-model.js";
-import { judgeDiscrimination } from "./canon/discrimination.js";
 import { latestVerdicts, type ReviewEntry, type ReviewRow } from "./canon/review.js";
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
 import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
-import { CHART_STYLES, renderHeatmap, renderRadar, renderTrialStrip } from "./report-charts.js";
+import { CHART_STYLES, renderScoreDistribution, renderScoreSummary } from "./report-charts.js";
 import { aboutOfRun, type RunAbout } from "./canon/about.js";
 import { sliceRows } from "./report-slices.js";
 import { renderCertainty } from "./report-certainty.js";
@@ -202,6 +201,29 @@ function winBar(winRate: number | null): string {
   return `<span class="bar"><span style="width:${Math.max(0, Math.min(100, winRate)).toFixed(0)}%"></span></span>`;
 }
 
+/**
+ * What the judge said, in plain terms: a distribution of its 1–5 scores per
+ * candidate, beside the required check, and — only when pairwise judging ran —
+ * who it preferred head to head. Neither feeds the recommendation.
+ */
+function renderJudgeScores(b: RunBundle, absoluteRan: boolean, views: readonly CandidateView[]): string {
+  const pairwise = renderDimensionPreference(b.evaluations);
+  if (!absoluteRan && pairwise === "") return "";
+  const checks = new Map(views.map((v) => [v.id, { pass: v.checkPass, executed: v.checkExecuted }]));
+  const intro = absoluteRan
+    ? `<p class="note">The judge read the free-text part of each answer against the rubric and gave it 1–5. Each bar is one candidate: how many of its trials got each score, red (1) to blue (5). Rows are ordered by <b>required check</b>, most answers right first. Read it beside <b>required check</b>, which says whether the answer itself was right: a well-written note on a wrong answer still scores high here. These scores do not affect the recommendation.</p>`
+    : `<p class="note"><b>No 1–5 scores:</b> this step's <code>methods</code> does not declare <code>absolute-1-5</code>. That was declared, not missed.</p>`;
+  const pairwiseNote = pairwise
+    ? `<p class="note"><b>Pairwise win rate</b> (the table above) is a separate question: shown two outputs side by side, which did the judge prefer, 0–100, a tie counting 0.5. It only counts the matches each candidate took part in, so <code>0</code> means "lost every match", not "bad output".</p>`
+    : "";
+  return `<section class="card">
+    <h2>Judge scores <span class="hint">${absoluteRan ? "1–5 per trial" : ""}${absoluteRan && pairwise ? " · " : ""}${pairwise ? "pairwise win rate" : ""} · not used by the recommendation</span></h2>
+    ${intro}
+    ${absoluteRan ? renderScoreSummary(b.trials, checks) + renderScoreDistribution(b.trials, checks) : ""}
+    ${pairwise}${pairwiseNote}
+  </section>`;
+}
+
 export function renderRunReport(b: RunBundle): string {
   const m = b.manifest;
   const rec = b.recommendation;
@@ -333,30 +355,7 @@ export function renderRunReport(b: RunBundle): string {
     </section>
   </div>
 
-  <section class="card">
-    <h2>Scoring profile <span class="hint">${absoluteRan ? "two lenses: magnitude from absolute scores, direction from pairwise win rate" : "direction only: absolute scoring was not run, as the spec declares"}</span></h2>
-    ${
-      absoluteRan && judgeDiscrimination(b.trials).saturated.length > 0
-        ? `<p class="note"><b>Note:</b> absolute scoring gave every candidate the same score on ${escapeHtml(judgeDiscrimination(b.trials).saturated.join(", "))}. Those scores measured no difference, and the recommendation does not use them.</p>`
-        : ""
-    }
-    ${
-      absoluteRan
-        ? ""
-        : `<p class="note"><b>Absolute scoring was not run.</b> This step's <code>methods</code> does not declare <code>absolute-1-5</code>, so this run has no "magnitude" ruler. The empty score columns are what was declared, not a skipped or failed run.</p>`
-    }
-    ${
-      absoluteRan
-        ? `<div class="viz-grid2">${renderRadar(b.trials)}${renderTrialStrip(b.trials)}</div>${renderHeatmap(b.trials)}`
-        : ""
-    }
-    ${renderDimensionPreference(b.evaluations)}
-    ${
-      absoluteRan
-        ? `<p class="note"><b>Two scales, two questions.</b> The upper table is <b>magnitude</b>: a 1–5 score given to each output on its own, showing how big the gap is. The lower table is <b>direction</b>: who was preferred in head-to-head comparisons, 0–100. Pairwise is zero-sum and its denominator is only the matches each candidate took part in. <code>0</code> means "lost every match", not "bad output", and likewise <code>100</code>. Both can be true at once: a candidate can narrowly lose every match (direction 0) while trailing by only 1 point on absolute score (magnitude 4.0 vs 5.0).</p>`
-        : `<p class="note">Pairwise is zero-sum and its denominator is only the matches each candidate took part in. <code>0</code> means "lost every match", not "bad output".</p>`
-    }
-  </section>
+  ${renderJudgeScores(b, absoluteRan, views)}
 
   ${renderDuels(b.evaluations)}
 

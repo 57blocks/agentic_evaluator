@@ -21,7 +21,6 @@ import { PlanStepCard } from "@/features/test-plan/TestPlan";
 
 export function StepReport({ report: r }: { report: Model }) {
   // Colour follows the candidate everywhere on the page, by its row in the table.
-  const colorOf = new Map(r.candidates.map((c) => [c.id, c.colorIndex]));
   const { plan } = r;
   // The judge's reasons are the evidence a reader checks the recommendation
   // against, so the judged duels are on the page, not behind a click.
@@ -43,15 +42,7 @@ export function StepReport({ report: r }: { report: Model }) {
       <Slices slices={r.slices} candidates={r.candidates.map((c) => c.id)} />
       <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />
       <Certainty certainty={r.certainty} />
-      <Profile
-        absoluteRan={r.absoluteRan}
-        saturated={r.saturated}
-        dims={r.dims}
-        profiles={r.profiles}
-        preference={r.preference}
-        trials={r.trials}
-        colorOf={colorOf}
-      />
+      <Profile absoluteRan={r.absoluteRan} distribution={r.distribution} scoreSummary={r.scoreSummary} preference={r.preference} candidates={r.candidates} />
       <CoverageAndLedger
         coverage={r.coverage}
         evaluatorErrors={r.evaluatorErrors}

@@ -15,7 +15,7 @@ const overQuarter = (part, base) => base > 0 && part * 4 > base;
 const overHalf = (part, base) => base > 0 && part * 2 > base;
 
 /** Does `person` control `entity`: more than 50% of its votes, own or through controlled entities (R3–R5), or its general partner (R7)? */
-function controls(person, entityName, entities, seen = new Set()) {
+export function controls(person, entityName, entities, seen = new Set()) {
   const entity = entities[entityName];
   if (entity === undefined || seen.has(entityName)) return false;
   const nextSeen = new Set([...seen, entityName]);
@@ -25,11 +25,11 @@ function controls(person, entityName, entities, seen = new Set()) {
 }
 
 /** A holding counts as the person's if they hold it themselves or control the entity holding it, in full (R3). */
-function attributable(person, h, entities, seen) {
+export function attributable(person, h, entities, seen) {
   return h.person ? h.holder === person : controls(person, h.holder, entities, seen);
 }
 
-function naturalPersons(entities) {
+export function naturalPersons(entities) {
   const all = Object.values(entities).flatMap((e) => e.holders.filter((h) => h.person).map((h) => h.holder));
   return [...new Set(all)];
 }

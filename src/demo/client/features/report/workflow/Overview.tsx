@@ -1,7 +1,7 @@
 /**
  * Candidates × steps. Every cell says how often the candidate succeeded on the
  * step and what a success cost. On a step a judge compared, the pairwise win
- * rate leads (tinted: green above 50, red below); on a step with no judge, the
+ * rate leads (tinted: blue above 50, red below); on a step with no judge, the
  * success rate does — a dash there would hide that the step was decided on
  * its checks. ⬢ marks the judge's favourite; "Recommended" the selector's
  * choice — not the same thing, and the grid shows both.

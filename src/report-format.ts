@@ -23,16 +23,21 @@ export function stateTone(state: string): "ok" | "warn" | "bad" {
 }
 
 /**
- * Diverging tint around a midpoint: green above, red below, stronger the
- * further from the middle. A solid ramp says "big number"; this says "better
+ * Diverging tint around a midpoint: blue above, red below, stronger the
+ * further from the middle — the same poles as the score bars. A solid ramp says "big number"; this says "better
  * or worse than the middle", which is what a grade or a win rate means.
  */
+const TINT_MIN_ALPHA = 0.08;
+const TINT_MAX_ALPHA = 0.7;
+
 export function heatTint(value: number | null, min: number, max: number): string {
   if (value === null) return "";
   const mid = (min + max) / 2;
   const dist = Math.min(1, Math.abs(value - mid) / ((max - min) / 2));
-  const alpha = (0.1 + dist * 0.3).toFixed(3);
-  return `background:rgba(${value >= mid ? "34,197,94" : "239,68,68"},${alpha})`;
+  // 0.08 at the midpoint up to 0.7 at the ends: strong enough that 4.0 and 4.9
+  // read as different, light enough that ink text keeps ≥ 4.5:1 in both themes.
+  const alpha = (TINT_MIN_ALPHA + dist * (TINT_MAX_ALPHA - TINT_MIN_ALPHA)).toFixed(3);
+  return `background:rgba(${value >= mid ? "42,120,214" : "201,58,57"},${alpha})`;
 }
 
 /** Absolute scores run 1–5 on both pages. */
