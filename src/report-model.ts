@@ -21,6 +21,7 @@ import type { CanonSummary } from "./canon/write.js";
 import type { Recommendation } from "./canon/select.js";
 import type { E2eValidation } from "./canon/e2e.js";
 import { judgeStandings } from "./canon/judge-standings.js";
+import { itemStats } from "./canon/item-stats.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
 import { humanRecord, judgeAgreement, reviewQueue, type Agreement, type HumanRecord } from "./canon/review.js";
 import { dimensionKeys, profiles, type CandidateProfile } from "./report-charts.js";
@@ -128,7 +129,8 @@ export function verdictText(b: RunBundle): string {
 
 /** Why the recommendation is as firm as it is. */
 export function subtitleReasons(rec: Recommendation, directionality: { reasons: string[] }): string[] {
-  return rec.firmness === "directional" ? directionality.reasons : rec.reasons;
+  // A recommendation.json written before select-v4 has no firmness_reasons.
+  return rec.firmness === "directional" ? rec.firmness_reasons ?? directionality.reasons : rec.reasons;
 }
 
 export interface JudgeFavourite {
@@ -325,6 +327,30 @@ export interface CandidateRow extends CandidateView {
   colorIndex: number;
 }
 
+export interface Certainty {
+  chosen: string | null;
+  evidence: Recommendation["evidence"];
+  inputs: number;
+  effectiveN: number;
+  allPass: number;
+  flat: number;
+  /** Inputs every candidate failed: harness or check suspects. */
+  allFail: string[];
+}
+
+export function certaintyOf(rec: Recommendation, trials: readonly TrialRow[]): Certainty {
+  const s = itemStats(trials);
+  return {
+    chosen: rec.chosen,
+    evidence: rec.evidence ?? null,
+    inputs: s.inputs,
+    effectiveN: s.effective_n,
+    allPass: s.counts["all-pass"],
+    flat: s.counts.flat,
+    allFail: s.items.filter((i) => i.class === "all-fail").map((i) => i.input),
+  };
+}
+
 export interface StepReport {
   kind: "step";
   dirName: string;
@@ -361,6 +387,8 @@ export interface StepReport {
     spend: number;
   };
   gates: GateRow[];
+  /** The statistics behind the firmness label, and how much of the set carried evidence. */
+  certainty: Certainty;
   filters: Recommendation["filters"];
   eligible: string[];
   candidates: CandidateRow[];
@@ -436,6 +464,7 @@ export function buildStepReport(b: RunBundle): StepReport {
       spend: b.ledger.total,
     },
     gates: gateRows(rec),
+    certainty: certaintyOf(rec, b.trials),
     filters: rec.filters,
     eligible: rec.eligible,
     candidates: views.map((v, i) => ({

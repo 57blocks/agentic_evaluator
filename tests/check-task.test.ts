@@ -47,6 +47,8 @@ test("the free sample: the check fails an empty answer, and what is missing is a
   assert.equal(byCode(report, "check.no-reference")?.severity, "warning");
   assert.match(byCode(report, "inputs.count")?.message ?? "", /1 input/);
   assert.equal(byCode(report, "inputs.count")?.severity, "warning");
+  // The default gate of 1.0 can never be backed by a finite sample.
+  assert.match(byCode(report, "eligibility.unreachable")?.message ?? "", /can never be firm/);
 });
 
 test("a check that passes an empty answer blocks", async () => {

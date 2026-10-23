@@ -1,5 +1,5 @@
 {
-  "rule_version": "select-v3",
+  "rule_version": "select-v4",
   "operating_mode": "lowest-cost",
   "control_candidate": "sonnet-5",
   "eligibility": {
@@ -242,9 +242,37 @@
     "reason": "chosen candidate is the control (sonnet-5)"
   },
   "firmness": "directional",
+  "firmness_reasons": [
+    "no minimum meaningful difference declared",
+    "sonnet-5: required-check-pass-rate 113/120 has a 95% interval down to 0.884, below the gate 0.9",
+    "sonnet-5: reliability 113/120 has a 95% interval down to 0.884, below the gate 0.9"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 0.9,
+        "successes": 113,
+        "n": 120,
+        "low": 0.8844740790888672,
+        "high": 0.97145899015576
+      },
+      {
+        "gate": "reliability",
+        "threshold": 0.9,
+        "successes": 113,
+        "n": 120,
+        "low": 0.8844740790888672,
+        "high": 0.97145899015576
+      }
+    ],
+    "versus_runner_up": null
+  },
   "reasons": [
     "lowest generation cost per successful task among eligible: $0.021816",
-    "no minimum meaningful difference declared"
+    "no minimum meaningful difference declared",
+    "sonnet-5: required-check-pass-rate 113/120 has a 95% interval down to 0.884, below the gate 0.9",
+    "sonnet-5: reliability 113/120 has a 95% interval down to 0.884, below the gate 0.9"
   ],
   "closest": null
 }

@@ -20,7 +20,7 @@ import { processIo, type Io } from "../io.js";
 import { liveView, type LiveView } from "../live.js";
 import type { RunEvent } from "../../core/events.js";
 
-const KNOWN = ["yes", "html", "json", "plain", "reuse", "concurrency", "workspace", "no-e2e", "step", "candidate"];
+const KNOWN = ["yes", "html", "json", "plain", "reuse", "concurrency", "workspace", "no-e2e", "step", "candidate", "early-stop"];
 
 export const RUN_HELP = `agenteval run <task> [options]
 
@@ -39,6 +39,10 @@ export const RUN_HELP = `agenteval run <task> [options]
                       re-run one step, or re-grade it with --reuse
   --candidate ID[,ID] run only these candidates (no end-to-end validation
                       then): re-run the ones a fix concerns
+  --early-stop        stop running a candidate once a declared gate is out of
+                      its reach even if every remaining trial passed (the
+                      spec's execution.early_stop); it would be gated out
+                      anyway, so the pick is unchanged
   --no-e2e            evaluate each step only: skip a chained workflow's
                       end-to-end validation (GAPS.md says it was skipped)
   --workspace DIR     workspace to resolve <task> and write runs under
@@ -108,6 +112,7 @@ export async function cmdRun(args: ParsedArgs, io: Io): Promise<ExitCode> {
       yes: args.flags.yes === true,
       onEvent,
       skipE2e: args.flags["no-e2e"] === true,
+      earlyStop: args.flags["early-stop"] === true,
       ...(stringFlag(args.flags, "step") ? { steps: stringFlag(args.flags, "step")!.split(",").map((s) => s.trim()).filter(Boolean) } : {}),
       ...(stringFlag(args.flags, "candidate") ? { candidates: stringFlag(args.flags, "candidate")!.split(",").map((s) => s.trim()).filter(Boolean) } : {}),
     }),

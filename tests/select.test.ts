@@ -42,6 +42,7 @@ test("resolveEligibility defaults to 1.0 gates when required checks exist", () =
   assert.deepEqual(resolveEligibility(["tsc-noemit"]), {
     minimum_reliability: 1,
     minimum_required_check_pass_rate: 1,
+    minimum_all_trials_pass_rate: null,
     maximum_p95_ms: null,
     cost_ceiling_per_success_usd: null,
   });
@@ -56,6 +57,7 @@ test("frozen null stays not-applied even when checks exist", () => {
   const frozen = resolveEligibility(["tsc-noemit"], {
     minimum_reliability: null,
     minimum_required_check_pass_rate: 1,
+    minimum_all_trials_pass_rate: null,
     maximum_p95_ms: null,
     cost_ceiling_per_success_usd: null,
   });
@@ -143,7 +145,9 @@ test("fastest-within-cost-ceiling picks lowest p50 under the ceiling", () => {
     ],
   });
   assert.equal(rec.chosen, "fast");
-  assert.equal(rec.firmness, "firm");
+  // The default 1.0 gate: 9/9 is consistent with a true rate well below 1.
+  assert.equal(rec.firmness, "directional");
+  assert.ok(rec.firmness_reasons.some((r) => r.includes("can never be firm")));
   assert.ok(!rec.eligible.includes("cheap-but-over-ceiling"));
 });
 
@@ -228,7 +232,7 @@ test("prd-w38 fixture: no required checks → no recommendation", async () => {
 test("canonical report for codegen fixture names the recommendation, not pairwise champion", async () => {
   const html = renderRunReport(await loadBundle(path.join(FIXTURES, "codegen-w38")));
   assert.match(html, /sonnet-5/);
-  assert.match(html, /select-v3/);
+  assert.match(html, /select-v4/);
   assert.doesNotMatch(html, /makes no recommendation/);
 });
 

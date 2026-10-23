@@ -8,14 +8,12 @@
  */
 
 import { orderControlChain } from "../canon/e2e.js";
+import { directionality } from "../canon/rates.js";
 import type { JudgeMethod, Suite } from "../types.js";
 import type { E2ePlan, StepPlan } from "./events.js";
 
 /** Fallback max concurrent LLM calls when neither the spec nor EVAL_CONCURRENCY says. */
 const DEFAULT_CONCURRENCY = 5;
-
-/** Below this many inputs a comparison can only report a direction. */
-const MIN_INPUTS_FOR_MAGNITUDE = 10;
 
 /** The spec wins over the environment: a step that declares a limit means it. */
 /**
@@ -64,7 +62,8 @@ export function planStep(suite: Suite, opts: { reuse?: boolean } = {}): StepPlan
     budgetUsd: suite.budgetUsd ?? null,
     benchmarkMode: suite.benchmarkMode ?? "capability-neutral",
     cacheMode: suite.cacheMode ?? "cold",
-    directional: inputs < MIN_INPUTS_FOR_MAGNITUDE || suite.mmd == null,
+    directional: directionality(inputs, suite.mmd).directional,
+    ...(suite.earlyStop ? { earlyStop: true } : {}),
   };
 }
 
