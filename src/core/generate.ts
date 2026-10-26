@@ -21,7 +21,7 @@ import { finishForCompletion } from "./exit-policy.js";
 import { priceFromSpec } from "../pricing.js";
 import { deliverableText, parsedUnitsFor } from "../adapters/deliverable.js";
 import { displayPath, taskInputPath, resolveTaskAsset } from "../paths.js";
-import { listRunDirs, type Workspace } from "./workspace.js";
+import { reusableRunDirs, type Workspace } from "./workspace.js";
 import type { RunEventSink } from "./events.js";
 import type { EarlyStop } from "./early-stop.js";
 import { CODEGEN_PRODUCER_VERSION } from "../producers/code-gen.js";
@@ -318,6 +318,7 @@ async function loadReusable(
   hash: string,
   currentRunId: string,
   ws: Workspace,
+  taskRoot: string,
 ): Promise<{ record: RunRecord; from: string; dir: string } | null> {
   // Every task's runs, not just this one's: `trialHash` is content-addressed,
   // so a generation produced under another task is the same generation.
@@ -329,7 +330,7 @@ async function loadReusable(
   // is only true when a task's run_name happens to begin with its step id —
   // `codegen-w38/codegen` matched, `smoke-local/codegen` never did, and reuse
   // silently did nothing there.
-  const candidates = (await listRunDirs(ws))
+  const candidates = (await reusableRunDirs(ws, taskRoot))
     .filter((e) => e.name !== currentRunId)
     .sort((a, b) => b.name.localeCompare(a.name));
 
@@ -576,7 +577,7 @@ export async function runAll(params: {
     const checkWorkDir = path.join(outDir, "checks", `${safeName(candidate)}__${inputSlug}__t${trial}`);
 
     if (reuse) {
-      const reused = await loadReusable(suite.step, task.hash, runId, params.ws);
+      const reused = await loadReusable(suite.step, task.hash, runId, params.ws, suite.taskRoot);
       if (reused) {
         const regraded = await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir });
         params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });

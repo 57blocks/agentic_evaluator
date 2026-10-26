@@ -125,6 +125,18 @@ export async function listRunDirs(ws: Workspace): Promise<RunDirEntry[]> {
 }
 
 /**
+ * The run directories reuse scans for one task: the workspace's, plus the
+ * task's own `runs/`. A task outside the workspace's `tasks/` writes its runs
+ * beside itself all the same, and the workspace scan alone never sees them.
+ */
+export async function reusableRunDirs(ws: Workspace, taskRoot: string): Promise<RunDirEntry[]> {
+  const all = await listRunDirs(ws);
+  const seen = new Set(all.map((e) => e.dir));
+  const own = (await readRunDirs(runsRootFor(taskRoot), path.basename(taskRoot))).filter((e) => !seen.has(e.dir));
+  return [...own, ...all];
+}
+
+/**
  * Turn what a user typed into a spec file path.
  *
  * Accepts a task name (`smoke-local`), a directory (with `spec.yaml` inside),
