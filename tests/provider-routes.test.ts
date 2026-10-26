@@ -154,3 +154,21 @@ test("a candidate's own prompt_file is loaded over the step's, with its own hash
   assert.match(prompts.get(first)!.promptTpl, /one-page PRD/);
   assert.notEqual(prompts.get(first)!.promptTemplateSha, promptTemplateSha);
 });
+
+test("a vendor's default key is not sent to another host, nor over plain http", async () => {
+  const direct = (extra: string) => SONNET.replace("openrouter", `anthropic\n    ${PRICE}\n    ${extra}`);
+  rejects(await codegenWith(direct("base_url: https://proxy.example/v1")), /needs api_key_env/);
+  rejects(await codegenWith(direct("base_url: http://proxy.example/v1\n    api_key_env: PROXY_KEY")), /must use https/);
+  const compatible = (extra: string) => SONNET.replace("openrouter", `openai-compatible\n    ${PRICE}\n    ${extra}`);
+  rejects(await codegenWith(compatible("base_url: http://gpu-box:8000/v1\n    api_key_env: VLLM_KEY")), /must use https/);
+
+  // Keyless local servers, loopback, and an explicitly keyed proxy all compile.
+  for (const ok of [
+    direct("base_url: https://proxy.example/v1\n    api_key_env: PROXY_KEY"),
+    compatible("base_url: http://gpu-box:8000/v1"),
+    compatible("base_url: http://localhost:11434/v1\n    api_key_env: OLLAMA_KEY"),
+  ]) {
+    const text = await codegenWith(ok);
+    assert.doesNotThrow(() => compileSpec(parseSpec(text, "x.yaml"), "x.yaml", "sha", TASK_ROOT));
+  }
+});

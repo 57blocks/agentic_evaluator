@@ -44,7 +44,28 @@ export function endpointProblem(decl: EndpointDecl): string | null {
   const route = decl.provider_route ?? DEFAULT_ROUTE;
   if (!isModelRoute(route)) return `provider_route "${route}" is not one of ${MODEL_ROUTES.join(", ")}`;
   if (route === "openai-compatible" && !decl.base_url) return "provider_route openai-compatible needs base_url";
+  // A vendor's default key goes only to that vendor: pointing anthropic or
+  // openai at another host must name the key it sends there.
+  if (decl.base_url && (route === "anthropic" || route === "openai") && !decl.api_key_env) {
+    return `provider_route ${route} with base_url needs api_key_env, so ${providerFor(route).defaultKeyEnv} is not sent to another host by default`;
+  }
+  const sendsKey = decl.api_key_env !== undefined || providerFor(route).defaultKeyEnv !== undefined;
+  if (decl.base_url && sendsKey && !isSecureOrLocal(decl.base_url)) {
+    return `base_url ${decl.base_url} must use https to be sent a key, unless it is a loopback host`;
+  }
   // A direct API reports no cost: without a price every trial would read as free.
   if (route !== "openrouter" && !decl.price) return `provider_route ${route} needs a price (USD per million tokens), since ${route} reports no cost`;
   return null;
+}
+
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/** https anywhere, plain http only to this machine: a key never crosses the network in the clear. */
+function isSecureOrLocal(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" || (u.protocol === "http:" && LOOPBACK_HOSTS.has(u.hostname));
+  } catch {
+    return false;
+  }
 }

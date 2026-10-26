@@ -527,6 +527,9 @@ candidates:
   never serves one variant's output to another.
 - The judge takes the same `provider_route`, `base_url`, `api_key_env` and
   `price`, and the cross-vendor rule reads the vendor from a direct route.
+- A key is never sent where the spec did not say: `base_url` on the
+  `anthropic` or `openai` route (a gateway) needs an explicit `api_key_env`,
+  and a `base_url` that is sent a key must be https unless it is loopback.
 - `check-task` blocks when a direct route's key is not set.
   `agenteval models` checks only the models called through OpenRouter.
 
