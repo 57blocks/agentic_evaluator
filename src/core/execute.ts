@@ -18,7 +18,7 @@ import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
 import { silentSink, type RunEventSink } from "./events.js";
 import { methodsOf, planE2e, planStep, resolveConcurrency } from "./plan.js";
 import { hideAnswerKey } from "./answer-key.js";
-import { readInput, runAll, safeName } from "./generate.js";
+import { readInput, runAll, safeName, type PromptTemplate } from "./generate.js";
 import { judgeAll, scoreAll } from "./evaluate.js";
 import { maybeRunE2eValidation } from "./e2e-arms.js";
 import { CODEGEN_PREAMBLE } from "../producers/code-gen.js";
@@ -58,6 +58,18 @@ export async function loadPromptTemplate(
   return { promptTpl, promptTemplateSha: sha256(promptTpl) };
 }
 
+/** Templates of candidates that declare their own `prompt_file` (a prompt variant). */
+export async function loadCandidatePrompts(suite: Suite): Promise<Map<string, PromptTemplate>> {
+  const out = new Map<string, PromptTemplate>();
+  for (const id of suite.candidates) {
+    const file = suite.candidateDefs?.[id]?.prompt_file;
+    if (!file) continue;
+    const promptTpl = await fs.readFile(await resolveTaskAsset(suite.taskRoot, file), "utf-8");
+    out.set(id, { promptTpl, promptTemplateSha: sha256(promptTpl) });
+  }
+  return out;
+}
+
 /** What one step produced. The canonical files on disk are the record; this is the handle. */
 export interface StepResult {
   step: string;
@@ -86,6 +98,7 @@ async function executeSuite(params: {
   const producer: ProducerKind = suite.producer ?? "prompt";
   const rubric = await fs.readFile(await resolveTaskAsset(suite.taskRoot, suite.rubricFile), "utf-8");
   const { promptTpl, promptTemplateSha } = await loadPromptTemplate(suite, producer);
+  const candidatePrompts = await loadCandidatePrompts(suite);
 
   const inputTextBySlug = new Map<string, string>();
   const inputShas: Record<string, string> = {};
@@ -146,7 +159,7 @@ async function executeSuite(params: {
           toTrialRows({ ...adaptBase, records: [record], judgements: [], judgeFailures: [], skippedPairs: [], scores: [], scoreFailures: [] })[0],
       })
     : undefined;
-  const records = await runAll({ suite, ws: params.ws, emit: params.emit, signal: params.signal, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget, stopper });
+  const records = await runAll({ suite, ws: params.ws, emit: params.emit, signal: params.signal, producer, promptTpl, promptTemplateSha, candidatePrompts, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget, stopper });
   const methods = methodsOf(suite);
   params.emit({ type: "phase", step: suite.step, phase: "judging", declared: methods.pairwise });
   const judged = methods.pairwise

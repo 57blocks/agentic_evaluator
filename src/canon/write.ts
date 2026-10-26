@@ -130,13 +130,13 @@ export function buildGaps(
   lines.push("- `ttft_ms`: non-streaming calls; no time to first token.");
   lines.push(
     sawCache
-      ? "- `cache`: OpenRouter reported cached prompt tokens on some calls; recorded under `tokens.cached`, no cache cost breakdown."
+      ? "- `cache`: the provider reported cached prompt tokens on some calls; recorded under `tokens.cached`, no cache cost breakdown."
       : "- `cache`: no cached prompt tokens reported on any call; cache economics not observable.",
   );
   lines.push(
     sawProvider
-      ? "- `deployment_ref.region / tier`: provider name observed via OpenRouter; region and service tier are not exposed."
-      : "- `deployment_ref`: OpenRouter did not return a provider on these calls.",
+      ? "- `deployment_ref.region / tier`: route plus who served the call (OpenRouter's upstream provider, or the model id a direct API answered with); region and service tier are not exposed."
+      : "- `deployment_ref`: no route reported who served these calls.",
   );
   lines.push("- `human_intervention`: single-call producers, no interactive execution; recorded as not applicable.");
   lines.push("- `tool_calls`: producers make no tool calls this milestone.");

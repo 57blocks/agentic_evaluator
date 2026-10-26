@@ -16,6 +16,8 @@ export const codegenAdapter: CandidateAdapter = {
     const { files, ...usage } = await produceCode(request.inputText, requireModel(request, "codegen"), {
       temperature: request.temperature,
       timeoutMs: request.timeoutMs,
+      sampling: request.sampling,
+      endpoint: request.endpoint,
       trace: context.emit,
       traceContext: context.traceContext,
     });

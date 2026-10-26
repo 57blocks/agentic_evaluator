@@ -49,9 +49,11 @@ install again; to remove it, `npm uninstall -g 57b-agenteval`.
 
 ### API key
 
-Models are called through [OpenRouter](https://openrouter.ai), with one key:
-`OPENROUTER_API_KEY`. You only need it for tasks that call models; `plan`,
-`init` and offline tasks never do.
+Models are called through [OpenRouter](https://openrouter.ai) by default, with
+one key: `OPENROUTER_API_KEY`. You only need it for tasks that call models;
+`plan`, `init` and offline tasks never do. A candidate can also call Anthropic,
+OpenAI or an OpenAI-compatible server directly, with that provider's key (see
+[Calling a provider directly](#calling-a-provider-directly)).
 
 ```bash
 export OPENROUTER_API_KEY=sk-or-...                   # this shell
@@ -481,6 +483,52 @@ which gate and by how much.
 trial succeeded. Use it with `trials` above 1 when one wrong answer in k is a
 wrong answer (security, compliance): a candidate right 9 times in 10 on every
 input has reliability 0.9 but pass^2 near 0.8. Off unless declared.
+
+### Calling a provider directly
+
+A candidate is more than a model id: its route, settings and prompt are part
+of it. The same model through OpenRouter and through its own API are two
+candidates, so their cost and latency can be compared.
+
+```yaml
+candidates:
+  - id: sonnet-or                       # through OpenRouter (the default)
+    model: anthropic/claude-sonnet-5-5
+  - id: sonnet-direct                   # Anthropic's API; reads ANTHROPIC_API_KEY
+    model: claude-sonnet-5-5
+    provider_route: anthropic
+    price: { input: 2, output: 10, cache_read: 0.2, cache_write: 2.5 }
+    generation_settings: { reasoning_effort: low }
+  - id: gpt-direct                      # OpenAI's API; reads OPENAI_API_KEY
+    model: gpt-5.5
+    provider_route: openai
+    price: { input: 5, output: 30 }
+  - id: deepseek-direct                 # any Chat Completions server
+    model: deepseek-v4-pro
+    provider_route: openai-compatible
+    base_url: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY       # omit for a local server with no key
+    price: { input: 1.6, output: 3.2 }
+  - id: sonnet-terse                    # a prompt variant of the same model
+    model: anthropic/claude-sonnet-5-5
+    prompt_file: prompts/summary-terse.md
+    system: Answer in at most three sentences.
+```
+
+- **`price`** (USD per million tokens) is required on a direct route: those
+  APIs report tokens, not cost. The cost is recorded as `estimated`.
+- **`generation_settings`** — `temperature`, `max_tokens`, `top_p`, `seed`,
+  `stop`, `reasoning_effort` (`low` … `max`). A setting is sent only when
+  declared. The Anthropic API accepts no sampling settings, so `temperature`
+  and `top_p` are not sent there (`check-task` warns); use `reasoning_effort`.
+  OpenAI gets a temperature only when the candidate declares one.
+- **`prompt_file` / `system`** — this candidate's template over the step's,
+  and a system prompt. Both are part of each trial's identity, so `--reuse`
+  never serves one variant's output to another.
+- The judge takes the same `provider_route`, `base_url`, `api_key_env` and
+  `price`, and the cross-vendor rule reads the vendor from a direct route.
+- `check-task` blocks when a direct route's key is not set.
+  `agenteval models` checks only the models called through OpenRouter.
 
 ### Judge-only grading
 

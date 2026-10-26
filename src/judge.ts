@@ -9,6 +9,7 @@
  */
 
 import { complete, LlmError, type LlmTrace } from "./llm.js";
+import type { ModelEndpoint } from "./providers/types.js";
 import { sha256 } from "./canon/hash.js";
 import {
   attemptFrom,
@@ -151,6 +152,7 @@ async function judgeOnce(
   timeoutMs?: number,
   trace?: LlmTrace,
   context?: Record<string, unknown>,
+  endpoint?: ModelEndpoint,
 ): Promise<{ verdict: RoundVerdict; attempts: AttemptUsage[] }> {
   const prompt = buildPrompt(rubric, dimensions, first, second);
   const attempts: AttemptUsage[] = [];
@@ -159,6 +161,7 @@ async function judgeOnce(
     try {
       const r = await complete({
         model: judgeModel,
+        ...(endpoint ? { endpoint } : {}),
         prompt,
         temperature: attempt === 0 ? 0 : 0.4,
         timeoutMs,
@@ -218,6 +221,8 @@ function resolveAxis(fwd: RawAxis, rev: RawAxis): DimensionVerdict {
  */
 export async function judgePair(params: {
   judgeModel: string;
+  /** Where the judge is called; OpenRouter when absent. */
+  judgeEndpoint?: ModelEndpoint;
   rubric: string;
   /** Rubric dimension keys to score. May be empty (overall only). */
   dimensions: readonly string[];
@@ -242,6 +247,7 @@ export async function judgePair(params: {
     params.timeoutMs,
     params.trace,
     { ...ctx, round: "forward" },
+    params.judgeEndpoint,
   );
   let rev: { verdict: RoundVerdict; attempts: AttemptUsage[] };
   try {
@@ -254,6 +260,7 @@ export async function judgePair(params: {
       params.timeoutMs,
       params.trace,
       { ...ctx, round: "reverse" },
+      params.judgeEndpoint,
     );
   } catch (err) {
     // The forward round was paid for; surface its attempts with the failure.

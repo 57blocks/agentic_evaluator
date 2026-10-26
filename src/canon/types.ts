@@ -28,6 +28,11 @@ export type CostSource = "provider-reported" | "estimated" | "none";
 export interface GenerationSettings {
   temperature?: number;
   max_tokens?: number;
+  top_p?: number;
+  seed?: number;
+  stop?: string[];
+  /** Reasoning depth: `output_config.effort` on Anthropic, `reasoning_effort` on OpenAI. */
+  reasoning_effort?: "low" | "medium" | "high" | "xhigh" | "max";
 }
 
 /** One testable option: model + route + settings, or a CLI agent. */
@@ -91,10 +96,23 @@ export interface CandidateDef {
   /** Defaults from the spec producer: codegen → "codegen", else "model-api". */
   adapter?: CandidateAdapterId;
   model?: string;
+  /**
+   * model-api / codegen: where the model is called — openrouter (default),
+   * anthropic, openai or openai-compatible (src/providers/). For a command
+   * candidate it is only a label.
+   */
   provider_route?: string;
-  /** USD per million tokens, when the catalog does not list `model` (a direct provider). */
+  /** openai-compatible: the API base (…/v1); other direct routes: an override. */
+  base_url?: string;
+  /** Env var holding the route's key, over its default (ANTHROPIC_API_KEY, OPENAI_API_KEY, …). */
+  api_key_env?: string;
+  /** USD per million tokens. Required on a direct route; else the catalog price of `model`. */
   price?: { input: number; output: number; cache_read?: number; cache_write?: number };
   generation_settings?: GenerationSettings;
+  /** model-api: this candidate's prompt template, over the step's (a prompt variant). */
+  prompt_file?: string;
+  /** model-api / codegen: a system prompt sent with every call. */
+  system?: string;
   cli?: AgentCliConfig;
 }
 

@@ -6,6 +6,7 @@
 import type { AgentCliConfig, CandidateAdapterId, CandidateDef, CostSource, Isolation } from "../canon/types.js";
 import type { LlmTrace } from "../llm.js";
 import type { ModelPrice } from "../pricing.js";
+import type { ModelEndpoint, SamplingOptions } from "../providers/types.js";
 import type { ProducerKind } from "../types.js";
 
 export type { CandidateAdapterId };
@@ -26,6 +27,10 @@ export interface CandidateRequest {
   timeoutMs: number;
   model?: string;
   maxTokens?: number;
+  /** model-api / codegen: where the model is called; OpenRouter when absent. */
+  endpoint?: ModelEndpoint;
+  /** model-api / codegen: the candidate's declared settings beyond temperature and max_tokens. */
+  sampling?: CandidateSampling;
   /** Required when the adapter is agent-cli. */
   cli?: AgentCliConfig;
   /** agent-cli: a directory copied into the work dir before the command starts (`fixture_dir`). */
@@ -36,6 +41,21 @@ export interface CandidateRequest {
   price?: ModelPrice;
   /** agent-cli: the step's spend cap per trial (`max_cost_per_trial_usd`). */
   maxCostUsd?: number;
+}
+
+export type CandidateSampling = Pick<SamplingOptions, "system" | "temperatureDeclared" | "topP" | "seed" | "stop" | "reasoningEffort">;
+
+/** A candidate's declared settings, each only when set (an unset one is never sent). */
+export function samplingOf(def: CandidateDef): CandidateSampling {
+  const g = def.generation_settings ?? {};
+  return {
+    ...(def.system ? { system: def.system } : {}),
+    ...(g.temperature !== undefined ? { temperatureDeclared: true } : {}),
+    ...(g.top_p !== undefined ? { topP: g.top_p } : {}),
+    ...(g.seed !== undefined ? { seed: g.seed } : {}),
+    ...(g.stop?.length ? { stop: g.stop } : {}),
+    ...(g.reasoning_effort ? { reasoningEffort: g.reasoning_effort } : {}),
+  };
 }
 
 export interface ExecutionContext {

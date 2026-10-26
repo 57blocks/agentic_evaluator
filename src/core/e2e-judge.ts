@@ -82,6 +82,7 @@ export async function judgeDeliveries(params: {
     try {
       const judged = await judge({
         judgeModel: root.judge,
+        judgeEndpoint: root.judgeEndpoint,
         rubric,
         dimensions: config.dimensions,
         inputSlug: input,

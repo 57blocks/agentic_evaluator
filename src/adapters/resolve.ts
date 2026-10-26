@@ -16,13 +16,32 @@ export function adapterFor(def: CandidateDef, producer: ProducerKind): Candidate
   return ADAPTERS[adapterIdOf(def, producer)];
 }
 
-/** Only agent-cli enters trial identity, so omitted-adapter model trials keep their hash. */
+/**
+ * Adapter fields of the trial identity. agent-cli always enters it. A model
+ * candidate enters it only when it declares something beyond model,
+ * temperature and max_tokens (a direct route, a system prompt, a sampling
+ * setting), so a plain OpenRouter candidate keeps the hash its old trials
+ * carry and `--reuse` still finds them. Price and key are left out: they
+ * change what a trial costs or how it is called, not what it produces.
+ */
 export function trialAdapterFields(
   def: CandidateDef,
   producer: ProducerKind,
 ): { adapter?: string; adapterConfigSha?: string } {
-  if (adapterIdOf(def, producer) !== "agent-cli") return {};
-  return { adapter: "agent-cli", adapterConfigSha: sha256(JSON.stringify(def.cli ?? {})) };
+  const adapter = adapterIdOf(def, producer);
+  if (adapter === "agent-cli") return { adapter: "agent-cli", adapterConfigSha: sha256(JSON.stringify(def.cli ?? {})) };
+  const g = def.generation_settings ?? {};
+  const config = {
+    ...(def.provider_route && def.provider_route !== "openrouter" ? { route: def.provider_route } : {}),
+    ...(def.base_url ? { base_url: def.base_url } : {}),
+    ...(def.system ? { system: def.system } : {}),
+    ...(g.top_p !== undefined ? { top_p: g.top_p } : {}),
+    ...(g.seed !== undefined ? { seed: g.seed } : {}),
+    ...(g.stop?.length ? { stop: g.stop } : {}),
+    ...(g.reasoning_effort ? { reasoning_effort: g.reasoning_effort } : {}),
+  };
+  if (Object.keys(config).length === 0) return {};
+  return { adapter, adapterConfigSha: sha256(JSON.stringify(config)) };
 }
 
 export { AdapterError, adapterIdOf, modelRefOf } from "./types.js";

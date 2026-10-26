@@ -15,6 +15,7 @@ import type {
   Isolation,
   SuccessCriteria,
 } from "./canon/types.js";
+import type { ModelEndpoint } from "./providers/types.js";
 
 /** Project tier passed to the real doc agents (PM / TRD). */
 export type EvalTier = "S" | "M" | "L";
@@ -98,6 +99,8 @@ export interface Suite {
   candidates: string[];
   /** Judge model ID — MUST differ in family from the candidates. */
   judge: string;
+  /** Where the judge is called; OpenRouter when absent. */
+  judgeEndpoint?: ModelEndpoint;
   /**
    * Judging methods this step actually runs. Declared in the spec as
    * `evaluators.judge.methods`; both when omitted. Turning off
