@@ -482,6 +482,28 @@ trial succeeded. Use it with `trials` above 1 when one wrong answer in k is a
 wrong answer (security, compliance): a candidate right 9 times in 10 on every
 input has reliability 0.9 but pass^2 near 0.8. Off unless declared.
 
+### Importing a Harbor job
+
+A finished [Harbor](https://harborframework.com) job — one `result.json` and
+`agent/trajectory.json` per trial — can be read as an agenteval task with one
+run, nothing re-run:
+
+```bash
+agenteval import-harbor ~/harbor-jobs/2026-10-27__14-22-13 --into tasks/tb-agents --html
+agenteval report tasks/tb-agents <run>       # or open it in the dashboard
+```
+
+Each (agent, model) Harbor ran becomes a command candidate, each Harbor task
+an input, the verifier's reward the required check (`--threshold`, default
+1). A missing reward is an evaluator error, never the candidate's failure
+(Harbor's own mean counts it as 0); Harbor's own exceptions (environment,
+verifier) are infrastructure, the agent's (timeout, non-zero exit) are the
+candidate's. Cost is what the agent reported to Harbor, `estimated`; the
+trajectory feeds the agent-activity table. The pick uses the ordinary
+selection (`--mode`, default `highest-assurance`) and is written into the
+task's spec, which carries the Harbor wrapper `tasks/harbor-spike` uses, so
+the task can also be run afresh.
+
 ### Judge-only grading
 
 With no check, no trial can succeed or fail — the outcome is *undetermined* —
