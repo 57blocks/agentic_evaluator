@@ -501,8 +501,12 @@ verifier) are infrastructure, the agent's (timeout, non-zero exit) are the
 candidate's. Cost is what the agent reported to Harbor, `estimated`; the
 trajectory feeds the agent-activity table. The pick uses the ordinary
 selection (`--mode`, default `highest-assurance`) and is written into the
-task's spec, which carries the Harbor wrapper `tasks/harbor-spike` uses, so
-the task can also be run afresh.
+task's spec, which carries the Harbor wrapper `tasks/harbor-spike` uses. The
+task can be run afresh with `agenteval run` once one question is settled:
+`check-task` blocks it today, because `reward.mjs` treats a trial Harbor
+never started as an evaluator error (by design: a missing reward is never
+the candidate's failure), while the preflight expects an empty answer to
+fail.
 
 ### Judge-only grading
 

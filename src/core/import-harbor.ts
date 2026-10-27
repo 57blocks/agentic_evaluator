@@ -24,7 +24,10 @@
  *   trajectory.json     the trace, through the ATIF reader
  *
  * The trial hash carries producer version "harbor-import", so a later real
- * run of the generated task never serves an imported trial as its own.
+ * run of the generated task never serves an imported trial as its own. That
+ * version string is what keeps the two apart; the config sha below also
+ * differs from a real run's (it includes `trace`, which trialAdapterFields
+ * strips), but nothing should rely on that.
  */
 
 import fs from "node:fs/promises";
