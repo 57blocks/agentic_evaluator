@@ -184,7 +184,7 @@ export const SPEC_SCHEMA = {
               memory: { type: "string", minLength: 1 },
               cpus: { type: "string", minLength: 1 },
               reports_usage: { oneOf: [{ type: "boolean" }, { type: "string", enum: ["tokens"] }] },
-              trace: { type: "string", enum: ["atif"] },
+              trace: { type: "string", enum: ["atif", "claude-code"] },
               version_files: { type: "array", items: { type: "string", minLength: 1 } },
               exit_code: { type: "string", enum: ["fail", "ignore"] },
             },

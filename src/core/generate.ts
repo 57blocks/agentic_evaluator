@@ -83,8 +83,14 @@ function slugify(name: string): string {
   return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-function deploymentRef(def: CandidateDef, provider: string | undefined): string | undefined {
-  const route = def.provider_route ?? "openrouter";
+/**
+ * "openrouter/anthropic" for a model call; "cli/anthropic-subscription" for a
+ * command whose trace named who served it. A command candidate declares no
+ * route, and defaulting it to openrouter labelled every agent run as if it
+ * had gone through OpenRouter.
+ */
+export function deploymentRef(def: CandidateDef, provider: string | undefined): string | undefined {
+  const route = def.provider_route ?? (def.adapter === "agent-cli" || def.cli ? "cli" : "openrouter");
   return provider ? `${route}/${slugify(provider)}` : route;
 }
 
