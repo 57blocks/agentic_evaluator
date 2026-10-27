@@ -17,7 +17,9 @@ export type WorkFileRead = { text: string } | { refused: string } | null;
 
 // O_NOFOLLOW is missing on Windows, where a symlink needs a privilege the
 // agent is unlikely to have; the open then follows nothing special.
-const NO_FOLLOW = fs.constants.O_NOFOLLOW ?? 0;
+// O_NONBLOCK keeps a FIFO left in the work dir from blocking the open for
+// ever; a regular file reads the same with or without it.
+const OPEN_FLAGS = fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0) | (fs.constants.O_NONBLOCK ?? 0);
 
 /**
  * The file's text, why it was refused, or null when there is no such entry.
@@ -31,7 +33,7 @@ export async function readWorkFile(workDir: string, name: string, maxBytes = MAX
   const file = path.join(workDir, name);
   let handle: fs.FileHandle;
   try {
-    handle = await fs.open(file, fs.constants.O_RDONLY | NO_FOLLOW);
+    handle = await fs.open(file, OPEN_FLAGS);
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
     if (code === "ENOENT") return null;

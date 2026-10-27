@@ -104,3 +104,12 @@ test("a trace's parse error names a field, never the file's contents", async () 
   const r = await agentCliAdapter.execute(request("require('fs').writeFileSync('.eval-trace.json', 'SECRET-TOKEN {')"), { workDir, taskRoot: workDir });
   assert.equal(r.traceError, ".eval-trace.json unreadable as atif: not JSON");
 });
+
+test("a FIFO left as the trace does not block the harness", { skip: process.platform === "win32" }, async () => {
+  const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "trace-"));
+  const code = "require('child_process').execFileSync('mkfifo', ['.eval-trace.json']); require('fs').writeFileSync('out.txt', 'x')";
+  const started = Date.now();
+  const r = await agentCliAdapter.execute(request(code), { workDir, taskRoot: workDir });
+  assert.ok(Date.now() - started < 5_000, "the open returned");
+  assert.match(r.traceError ?? "", /not a regular file/);
+});
