@@ -75,3 +75,32 @@ test("declaring a trace does not change the trial's identity", () => {
   assert.deepEqual(trialAdapterFields(traced, "agent"), trialAdapterFields(plain, "agent"));
   assert.notDeepEqual(trialAdapterFields({ ...plain, cli: { ...plain.cli!, argv: ["node", "other.mjs"] } }, "agent"), trialAdapterFields(plain, "agent"));
 });
+
+test("a trace that is a symlink, or over the size cap, is refused unread", async () => {
+  const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "trace-"));
+  const secret = path.join(workDir, "..", `secret-${path.basename(workDir)}.json`);
+  await fs.writeFile(secret, JSON.stringify({ schema_version: "ATIF-v1.8", steps: [{ step_id: 1, source: "user", message: "the answer key" }] }));
+  try {
+    const linked = await agentCliAdapter.execute(
+      request(`require('fs').symlinkSync(${JSON.stringify(secret)}, '.eval-trace.json'); require('fs').writeFileSync('out.txt', 'x')`),
+      { workDir, taskRoot: workDir },
+    );
+    assert.equal(linked.trace, undefined);
+    assert.match(linked.traceError ?? "", /not a regular file/);
+    assert.doesNotMatch(linked.traceError ?? "", /answer key/);
+
+    const big = await agentCliAdapter.execute(
+      request("require('fs').writeFileSync('.eval-trace.json', '[' + '1,'.repeat(1_100_000) + '1]'); require('fs').writeFileSync('out.txt', 'x')"),
+      { workDir: await fs.mkdtemp(path.join(os.tmpdir(), "trace-")), taskRoot: workDir },
+    );
+    assert.match(big.traceError ?? "", /over \d+/);
+  } finally {
+    await fs.rm(secret, { force: true });
+  }
+});
+
+test("a trace's parse error names a field, never the file's contents", async () => {
+  const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "trace-"));
+  const r = await agentCliAdapter.execute(request("require('fs').writeFileSync('.eval-trace.json', 'SECRET-TOKEN {')"), { workDir, taskRoot: workDir });
+  assert.equal(r.traceError, ".eval-trace.json unreadable as atif: not JSON");
+});
