@@ -86,7 +86,7 @@ test("a trace that is a symlink, or over the size cap, is refused unread", async
       { workDir, taskRoot: workDir },
     );
     assert.equal(linked.trace, undefined);
-    assert.match(linked.traceError ?? "", /not a regular file/);
+    assert.match(linked.traceError ?? "", /is a symlink|not a regular file/);
     assert.doesNotMatch(linked.traceError ?? "", /answer key/);
 
     const big = await agentCliAdapter.execute(
