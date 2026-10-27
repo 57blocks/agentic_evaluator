@@ -128,3 +128,15 @@ test("an existing task dir is refused without --force; an empty job dir is refus
   await assert.rejects(importHarborJob(jobs, { into }), /exists/);
   await assert.rejects(importHarborJob(await fs.mkdtemp(path.join(os.tmpdir(), "empty-")), { into: path.join(into, "x") }), /no Harbor trial/);
 });
+
+test("a job whose names could escape the task dir or break the spec is refused", async () => {
+  const into = () => path.join(os.tmpdir(), `import-${Math.random().toString(36).slice(2)}`);
+  await assert.rejects(importHarborJob(await jobDir([trial({ agent: "oracle", task: "../evil" })]), { into: into() }), /task_name "\.\.\/evil" is not a plain name/);
+  await assert.rejects(importHarborJob(await jobDir([trial({ agent: "x; rm -rf /", task: "t" })]), { into: into() }), /agent name .* is not a plain name/);
+  await assert.rejects(importHarborJob(await jobDir([trial({ agent: "a", model: 'm"]\n  - id: injected', task: "t" })]), { into: into() }), /model name .* is not a plain name/);
+  // Names with the characters Harbor really uses round-trip through the spec.
+  const ok = await importHarborJob(await jobDir([trial({ agent: "claude-code", model: "openrouter/anthropic/claude-sonnet-5:beta", task: "fix-git.v2" })]), { into: into() });
+  const suite = await loadSpec(path.join(ok.taskDir, "spec.yaml"));
+  assert.deepEqual(suite.inputs, ["fix-git.v2"]);
+  assert.deepEqual(suite.candidateDefs?.[suite.candidates[0]!]?.cli?.argv.slice(2, 4), ["claude-code", "openrouter/anthropic/claude-sonnet-5:beta"]);
+});

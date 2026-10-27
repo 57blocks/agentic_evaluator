@@ -100,6 +100,22 @@ export interface ImportResult {
 
 const slug = (s: string): string => s.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-|-$/g, "");
 
+// A job dir is untrusted input: its task names become file names and its
+// agent and model names go into the generated spec. Anything outside these
+// shapes is refused rather than written.
+const TASK_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+const AGENT_OR_MODEL = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
+
+function checkedNames(t: HarborTrial, dir: string): { task: string; agent: string; model: string | null } {
+  const task = t.task_name ?? "";
+  const agent = t.config?.agent?.name ?? t.agent_info?.name ?? "";
+  const model = t.config?.agent?.model_name ?? t.agent_info?.model_info?.name ?? null;
+  if (!TASK_NAME.test(task) || task.includes("..")) throw new Error(`${dir}: task_name ${JSON.stringify(task)} is not a plain name`);
+  if (!AGENT_OR_MODEL.test(agent)) throw new Error(`${dir}: agent name ${JSON.stringify(agent)} is not a plain name`);
+  if (model !== null && (!AGENT_OR_MODEL.test(model) || model.includes(".."))) throw new Error(`${dir}: model name ${JSON.stringify(model)} is not a plain name`);
+  return { task, agent, model };
+}
+
 /** `terminus-2` + `openrouter/anthropic/claude-sonnet-5` → `terminus-2--anthropic-claude-sonnet-5`. */
 export function candidateIdOf(t: HarborTrial): string {
   const agent = t.config?.agent?.name ?? t.agent_info?.name ?? "agent";
@@ -191,10 +207,10 @@ async function traceOf(dir: string): Promise<{ trace?: AgentTrace; error?: strin
 function specText(name: string, candidates: ReadonlyMap<string, { agent: string; model: string | null }>, inputs: readonly string[], mode: string, threshold: number): string {
   const cands = [...candidates]
     .map(
-      ([id, c]) => `  - id: ${id}
+      ([id, c]) => `  - id: ${JSON.stringify(id)}
     adapter: agent-cli
     cli:
-      argv: [bash, agents/harbor-run.sh, ${c.agent}, ${JSON.stringify(c.model ?? "")}, "{{input}}"]
+      argv: [bash, agents/harbor-run.sh, ${JSON.stringify(c.agent)}, ${JSON.stringify(c.model ?? "")}, "{{input}}"]
       reports_usage: true
       trace: atif`,
     )
@@ -208,7 +224,7 @@ function specText(name: string, candidates: ReadonlyMap<string, { agent: string;
 # tasks/harbor-spike does.
 
 protocol_version: "0.3"
-run_name: ${name}
+run_name: ${JSON.stringify(name)}
 budget_usd: 1
 
 workflow:
@@ -216,9 +232,9 @@ workflow:
     - id: harbor
       version: "1"
       test_set:
-        id: ${name}-v1
-        inputs: [${inputs.join(", ")}]
-      candidate_ids: [${[...candidates.keys()].join(", ")}]
+        id: ${JSON.stringify(`${name}-v1`)}
+        inputs: [${inputs.map((i) => JSON.stringify(i)).join(", ")}]
+      candidate_ids: [${[...candidates.keys()].map((c) => JSON.stringify(c)).join(", ")}]
       required_checks: [${CHECK_ID}]
       judged_dimensions: []
       success_criteria:
@@ -284,10 +300,11 @@ export async function importHarborJob(jobDir: string, opts: ImportOptions): Prom
 
   const candidates = new Map<string, { agent: string; model: string | null }>();
   const inputs: string[] = [];
-  for (const { trial } of found) {
+  for (const { dir, trial } of found) {
+    const { task, agent, model } = checkedNames(trial, dir);
     const id = candidateIdOf(trial);
-    if (!candidates.has(id)) candidates.set(id, { agent: trial.config?.agent?.name ?? trial.agent_info?.name ?? "agent", model: trial.config?.agent?.model_name ?? trial.agent_info?.model_info?.name ?? null });
-    if (!inputs.includes(trial.task_name!)) inputs.push(trial.task_name!);
+    if (!candidates.has(id)) candidates.set(id, { agent, model });
+    if (!inputs.includes(task)) inputs.push(task);
   }
 
   await fs.mkdir(taskDir, { recursive: true });
