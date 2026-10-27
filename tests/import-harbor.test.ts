@@ -113,9 +113,9 @@ test("a job imports as a runnable task with one run; states, costs and traces ca
   assert.equal(timedOut.completion_state, "timeout");
   assert.equal(timedOut.task_outcome, "failure");
 
-  // Assert - the pick came out of the ordinary selection: terminus failed
-  // hello-world, so the 1.0 gates remove it; oracle's lost reward is Harbor's
-  // error, not oracle's, so oracle stands on fix-git alone.
+  // Assert - the pick came out of the ordinary selection: highest assurance
+  // ranks oracle (1/1; its lost reward is Harbor's error, not oracle's) over
+  // terminus (1/2, hello-world failed). The imported spec gates nothing.
   assert.equal(result.chosen, "oracle");
   assert.match(await fs.readFile(path.join(result.runDir, "GAPS.md"), "utf-8"), /imported from Harbor/);
   // An imported trial is never served to a real run of the task as its own.

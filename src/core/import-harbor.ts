@@ -240,9 +240,12 @@ workflow:
       success_criteria:
         mandatory_checks: all
       operating_mode: ${mode}
+      # An imported run has the trials Harbor ran, no more: gates of 1.0 would
+      # leave almost any comparison with no recommendation. Rank instead, and
+      # let the firmness label say how much the sample supports it.
       eligibility:
-        minimum_reliability: 1.0
-        minimum_required_check_pass_rate: 1.0
+        minimum_reliability: 0
+        minimum_required_check_pass_rate: 0
       maximum_completion_time_seconds: 3000
       exit_code: ignore
 
