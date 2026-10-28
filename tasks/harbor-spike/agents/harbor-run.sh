@@ -10,7 +10,15 @@
 #
 # HARBOR_VIA_OPENROUTER=1 points Claude Code inside the container at
 # OpenRouter's Anthropic-compatible endpoint with OPENROUTER_API_KEY, so a
-# claude-code candidate needs no Anthropic key.
+# claude-code candidate needs no Anthropic key. Harbor forwards only
+# ANTHROPIC_API_KEY and ANTHROPIC_BASE_URL into the container (an empty
+# ANTHROPIC_API_KEY counts as set and blocks the key), and OpenRouter takes
+# the key as x-api-key.
+#
+# HARBOR_CLAUDE_CODE_BINARY=<linux binary> installs Claude Code from that
+# file instead of downloading ~290 MB inside every container (see
+# cached_claude_code.py); on a slow link the download outlasts any setup
+# timeout. Harbor still records the agent as claude-code.
 #
 # HARBOR_SPIKE_DROP_RESULT=1 discards the result, to show that a missing
 # reward is recorded as an evaluator error, not the candidate's failure.
@@ -27,8 +35,14 @@ SETUP_TIMEOUT_MULTIPLIER="${HARBOR_SETUP_TIMEOUT_MULTIPLIER:-3}"
 
 if [ "${HARBOR_VIA_OPENROUTER:-0}" = "1" ]; then
   export ANTHROPIC_BASE_URL="https://openrouter.ai/api"
-  export ANTHROPIC_AUTH_TOKEN="${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is not set}"
-  export ANTHROPIC_API_KEY=""
+  export ANTHROPIC_API_KEY="${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is not set}"
+  unset ANTHROPIC_AUTH_TOKEN
+fi
+
+if [ "$AGENT" = "claude-code" ] && [ -n "${HARBOR_CLAUDE_CODE_BINARY:-}" ]; then
+  export PYTHONPATH="$(cd "$(dirname "$0")" && pwd)${PYTHONPATH:+:$PYTHONPATH}"
+  export CLAUDE_CODE_BINARY="$HARBOR_CLAUDE_CODE_BINARY"
+  AGENT="cached_claude_code:CachedClaudeCode"
 fi
 
 JOBS="$(mktemp -d)"
@@ -44,6 +58,10 @@ STATUS=$?
 TRIAL_RESULT="$(find "$JOBS" -mindepth 3 -maxdepth 3 -name result.json | head -1)"
 if [ -n "$TRIAL_RESULT" ] && [ "${HARBOR_SPIKE_DROP_RESULT:-0}" != "1" ]; then
   cp "$TRIAL_RESULT" harbor-trial.json
+  # Harbor's ATIF trajectory of the agent's run, when the agent wrote one
+  # (oracle and nop do not). Kept as the trace the harness will read.
+  TRAJECTORY="$(dirname "$TRIAL_RESULT")/agent/trajectory.json"
+  [ -f "$TRAJECTORY" ] && cp "$TRAJECTORY" .eval-trace.json
   # Hand Harbor's own spend figure to the harness (read because the spec
   # declares reports_usage; recorded as an estimate). The agent ran inside
   # Harbor's container and cannot write this work dir. An agent that reports

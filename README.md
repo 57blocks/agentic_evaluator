@@ -533,6 +533,34 @@ candidates:
 - `check-task` blocks when a direct route's key is not set.
   `agenteval models` checks only the models called through OpenRouter.
 
+### Importing a Harbor job
+
+A finished [Harbor](https://harborframework.com) job — one `result.json` and
+`agent/trajectory.json` per trial — can be read as an agenteval task with one
+run, nothing re-run:
+
+```bash
+agenteval import-harbor ~/harbor-jobs/2026-10-27__14-22-13 --into tasks/tb-agents --html
+agenteval report tasks/tb-agents <run>       # or open it in the dashboard
+```
+
+Each (agent, model) Harbor ran becomes a command candidate, each Harbor task
+an input, the verifier's reward the required check (`--threshold`, default
+1). A missing reward is an evaluator error, never the candidate's failure
+(Harbor's own mean counts it as 0); Harbor's own exceptions (environment,
+verifier) are infrastructure, the agent's (timeout, non-zero exit) are the
+candidate's. Cost is what the agent reported to Harbor, `estimated`; the
+trajectory feeds the agent-activity table. The pick uses the ordinary
+selection (`--mode`, default `highest-assurance`) and is written into the
+task's spec, which carries the Harbor wrapper `tasks/harbor-spike` uses. A
+custom Harbor agent is named by what it calls itself (`agent_info.name`), not
+by its import path. The
+task can be run afresh with `agenteval run` once one question is settled:
+`check-task` blocks it today, because `reward.mjs` treats a trial Harbor
+never started as an evaluator error (by design: a missing reward is never
+the candidate's failure), while the preflight expects an empty answer to
+fail.
+
 ### Judge-only grading
 
 With no check, no trial can succeed or fail — the outcome is *undetermined* —
@@ -656,6 +684,29 @@ the command is a harness with verdicts of its own (its gates, its verifier),
 declare `exit_code: ignore` on the step (or on the candidate's `cli`): the
 exit code is kept as evidence and the check decides. `combine` and `judge`
 apply it to runs recorded before it was declared.
+
+A command can also leave its **trace**: how the agent worked between input
+and output. Declare `trace: atif` under `cli:` and have the command leave
+`.eval-trace.json`, an ATIF document (Harbor's Agent Trajectory Interchange
+Format, which Harbor writes for every trial as `agent/trajectory.json`;
+`tasks/harbor-spike` copies it). agenteval reads it into turns, tool calls
+and per-turn tokens: counts on each row of `scores.jsonl` (`agent`), the
+turn list under `traces/`, and an "Agent activity" table in the report. A
+field the format has no notion of (ATIF records no retries) is null, never
+0; a trace that cannot be read is named on the row (`agent_error`); a
+command stopped on its time limit still has its trace read, marked
+`killed`. Declaring `trace` does not change a trial's identity, so `--reuse`
+still serves earlier runs. Without it, `GAPS.md` says the agent's activity
+was not observed.
+
+A command that runs `claude -p` directly declares `trace: claude-code` and
+tees `--output-format stream-json --verbose` into `.eval-trace.jsonl`
+(`tasks/agb-flow/agents/agb-step.mjs` does). That stream also carries retries,
+permission denials, context compactions and each tool call's verdict, and
+its closing totals serve as the usage report, so `reports_usage` is not
+needed; its cost is claude's own estimate, recorded as `estimated`. The
+deployment label comes from the stream too: `cli/anthropic-subscription`
+for a subscription login, `cli/anthropic` for an API key.
 
 `prompt_tokens` is input not read from or written to a cache. A step's
 `max_cost_per_trial_usd` is handed to the command as `{{max_cost_usd}}` and

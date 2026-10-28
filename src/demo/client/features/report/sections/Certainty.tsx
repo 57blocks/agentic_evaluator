@@ -49,7 +49,14 @@ export function Certainty({ certainty: c }: Props) {
           </table>
         </div>
       )}
-      {versus && (
+      {versus && versus.basis === "judge" && (
+        <p className="text-sm text-muted-foreground">
+          Against the runner-up, input by input, by the judge: preferred <span className="font-mono">{versus.a}</span> on {versus.a_better},{" "}
+          <span className="font-mono">{versus.b}</span> on {versus.b_better}, tied on {versus.same} (exact sign test p {fmtP(versus.p_value)}
+          {versus.significant ? "" : ", not significant"}).
+        </p>
+      )}
+      {versus && versus.basis !== "judge" && (
         <p className="text-sm text-muted-foreground">
           Against the runner-up, input by input: <span className="font-mono">{versus.a}</span> did better on {versus.a_better},{" "}
           <span className="font-mono">{versus.b}</span> on {versus.b_better}, equal on {versus.same} (exact sign test p {fmtP(versus.p_value)}
@@ -58,8 +65,9 @@ export function Certainty({ certainty: c }: Props) {
       )}
       {c.inputs > 0 && (
         <p className="text-sm text-muted-foreground">
-          <b className="text-foreground">Effective N {c.effectiveN} of {c.inputs}.</b> Inputs that separated any two candidates;{" "}
+          <b className="text-foreground">Effective N {c.effectiveN} of {c.inputs}.</b> Inputs that separated any two candidates on the required check;{" "}
           {c.allPass} every candidate passed and {c.flat} gave everyone the same partial rate, so they cannot inform a choice.
+          {c.judgeEffectiveN !== null && c.judgeEffectiveN !== undefined && <> The judge preferred one candidate over another on {c.judgeEffectiveN}.</>}
           {c.allFail.length > 0 && <> Every candidate failed {c.allFail.length}: <span className="font-mono">{listed}</span> — check those for a harness or check bug first.</>}
         </p>
       )}

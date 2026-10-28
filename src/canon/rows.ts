@@ -9,6 +9,7 @@
  */
 
 import type { Winner } from "../types.js";
+import type { AgentActivity } from "./agent-trace.js";
 import type {
   CompletionState,
   CostSource,
@@ -64,6 +65,14 @@ export interface TrialRow {
    * that are an API call rather than a command.
    */
   isolation: Isolation | null;
+  /**
+   * What the command's trace showed the agent doing — turns, tool calls, how
+   * it ended. Null when the candidate declared no `cli.trace`, or left none;
+   * `agent_error` says when it left one agenteval could not read. Absent on
+   * rows written before the field existed, which reads as null.
+   */
+  agent?: AgentActivity | null;
+  agent_error?: string;
   error: string | null;
   /** Legacy fields kept so the parity test can rebuild the old aggregate. */
   legacy_status: "ok" | "error";

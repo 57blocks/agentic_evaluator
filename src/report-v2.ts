@@ -34,6 +34,7 @@ import { CHART_STYLES, renderScoreDistribution, renderScoreSummary } from "./rep
 import { aboutOfRun, type RunAbout } from "./canon/about.js";
 import { sliceRows } from "./report-slices.js";
 import { renderCertainty } from "./report-certainty.js";
+import { agentActivityRows, type AgentActivityRow } from "./report-model.js";
 import { itemStats } from "./canon/item-stats.js";
 import {
   EVIDENCE_STYLES,
@@ -224,6 +225,29 @@ function renderJudgeScores(b: RunBundle, absoluteRan: boolean, views: readonly C
   </section>`;
 }
 
+/** One row per command candidate whose trace was read; nothing when none was. */
+function renderAgentActivity(rows: readonly AgentActivityRow[]): string {
+  if (rows.length === 0) return "";
+  const fmtN = (v: number | null): string => (v === null ? "—" : String(v));
+  const body = rows
+    .map(
+      (r) => `<tr><td class="cand">${escapeHtml(r.id)}<span class="model">${r.traced} of ${r.trials} trial(s) traced${r.unreadable > 0 ? ` · ${r.unreadable} unreadable` : ""}</span></td>
+        <td class="num">${fmtN(r.turnsP50)}</td><td class="num">${fmtN(r.toolCallsP50)}</td>
+        <td>${r.topTools.map(([name, n]) => `<code>${escapeHtml(name)}</code> ×${n}`).join(", ") || "—"}</td>
+        <td class="num">${fmtN(r.retries)}</td><td class="num">${fmtN(r.denials)}</td>
+        <td>${r.ended.map(([e, n]) => `${n} ${escapeHtml(e)}`).join(", ")}</td></tr>`,
+    )
+    .join("");
+  return `<section class="card">
+      <h2>Agent activity <span class="hint">from the trace each command left (cli.trace); medians over traced trials; — where the format records nothing</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Candidate</th><th class="num">Turns p50</th><th class="num">Tool calls p50</th><th>Most-called tools</th><th class="num">Retries</th><th class="num">Denials</th><th>Ended</th></tr></thead>
+        <tbody>${body}</tbody>
+      </table></div>
+      <p class="note">Counts per trial are in <code>agent</code> on each row of scores.jsonl; the turn list is in traces/. Nothing here enters the selection.</p>
+    </section>`;
+}
+
 export function renderRunReport(b: RunBundle): string {
   const m = b.manifest;
   const rec = b.recommendation;
@@ -332,6 +356,7 @@ export function renderRunReport(b: RunBundle): string {
   ${renderSlices(b, views.map((v) => v.id))}
 
   <div class="two-col">
+    ${renderAgentActivity(agentActivityRows(b.trials, views.map((v) => v.id)))}
     <section class="card">
       <h2>Evaluation coverage <span class="hint">the evaluators' own state, before any pass rate</span></h2>
       <div class="table-wrap"><table>

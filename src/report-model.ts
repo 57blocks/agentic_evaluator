@@ -22,6 +22,7 @@ import type { Recommendation } from "./canon/select.js";
 import type { E2eValidation } from "./canon/e2e.js";
 import { judgeStandings } from "./canon/judge-standings.js";
 import { itemStats } from "./canon/item-stats.js";
+import { percentile } from "./canon/rates.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
 import { humanRecord, judgeAgreement, reviewQueue, type Agreement, type HumanRecord } from "./canon/review.js";
 import { dimensionKeys, profiles, scoreDistribution, scoreSummary, type CandidateProfile, type ScoreBlock, type SummaryRow } from "./report-charts.js";
@@ -332,6 +333,8 @@ export interface Certainty {
   evidence: Recommendation["evidence"];
   inputs: number;
   effectiveN: number;
+  /** Inputs the judge separated in some pairwise duel; null when no pairwise judging ran. */
+  judgeEffectiveN: number | null;
   allPass: number;
   flat: number;
   /** Inputs every candidate failed: harness or check suspects. */
@@ -345,10 +348,64 @@ export function certaintyOf(rec: Recommendation, trials: readonly TrialRow[]): C
     evidence: rec.evidence ?? null,
     inputs: s.inputs,
     effectiveN: s.effective_n,
+    judgeEffectiveN: s.judge_effective_n,
     allPass: s.counts["all-pass"],
     flat: s.counts.flat,
     allFail: s.items.filter((i) => i.class === "all-fail").map((i) => i.input),
   };
+}
+
+/**
+ * What the traces showed each command candidate doing (`cli.trace`): one row
+ * per candidate with at least one traced trial. Medians over traced trials;
+ * a count the format has no notion of is null, and shown as "—".
+ */
+export interface AgentActivityRow {
+  id: string;
+  /** Trials with a readable trace, of all the candidate's trials. */
+  traced: number;
+  trials: number;
+  /** Traces left but unreadable (`agent_error`). */
+  unreadable: number;
+  turnsP50: number | null;
+  toolCallsP50: number | null;
+  /** The most-called tools, by total calls, most first. */
+  topTools: Array<[string, number]>;
+  retries: number | null;
+  denials: number | null;
+  /** How the traced runs ended, counted; "—" when the trace did not say. */
+  ended: Array<[string, number]>;
+}
+
+const MAX_TOP_TOOLS = 5;
+
+export function agentActivityRows(trials: readonly TrialRow[], ids: readonly string[]): AgentActivityRow[] {
+  return ids.flatMap((id) => {
+    const own = trials.filter((t) => t.candidate === id);
+    const traced = own.map((t) => t.agent).filter((a): a is NonNullable<TrialRow["agent"]> => a != null);
+    if (traced.length === 0) return [];
+    const sorted = (xs: number[]) => [...xs].sort((a, b) => a - b);
+    const sumOrNull = (xs: Array<number | null>) => (xs.every((x) => x === null) ? null : xs.reduce<number>((s, x) => s + (x ?? 0), 0));
+    const tools = new Map<string, number>();
+    const ended = new Map<string, number>();
+    for (const a of traced) {
+      for (const [name, n] of Object.entries(a.tools)) tools.set(name, (tools.get(name) ?? 0) + n);
+      const end = a.ended ?? "—";
+      ended.set(end, (ended.get(end) ?? 0) + 1);
+    }
+    return [{
+      id,
+      traced: traced.length,
+      trials: own.length,
+      unreadable: own.filter((t) => t.agent_error).length,
+      turnsP50: percentile(sorted(traced.map((a) => a.turns)), 0.5),
+      toolCallsP50: percentile(sorted(traced.map((a) => a.tool_calls)), 0.5),
+      topTools: [...tools].sort((a, b) => b[1] - a[1]).slice(0, MAX_TOP_TOOLS),
+      retries: sumOrNull(traced.map((a) => a.retries)),
+      denials: sumOrNull(traced.map((a) => a.denials)),
+      ended: [...ended].sort((a, b) => b[1] - a[1]),
+    }];
+  });
 }
 
 export interface StepReport {
@@ -389,6 +446,8 @@ export interface StepReport {
   gates: GateRow[];
   /** The statistics behind the firmness label, and how much of the set carried evidence. */
   certainty: Certainty;
+  /** What the traces showed the command candidates doing; empty when no trial carried one. */
+  agentActivity: AgentActivityRow[];
   filters: Recommendation["filters"];
   eligible: string[];
   candidates: CandidateRow[];
@@ -496,6 +555,7 @@ export function buildStepReport(b: RunBundle): StepReport {
     scoreSummary: scoreSummary(b.trials, distribution),
     preference: dimensionPreference(b.evaluations),
     duels: b.evaluations.filter((r) => r.subject.kind === "pair"),
+    agentActivity: agentActivityRows(b.trials, views.map((v) => v.id)),
     trials: b.trials,
     outputs: b.outputs,
     gaps: [...gapLines(b.gaps, false), ...reviewGapLines(reviewSummary(b))],

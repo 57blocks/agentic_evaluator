@@ -76,6 +76,25 @@ function unobservedCostGap(trials: readonly TrialRow[]): string | null {
 }
 
 /** Trials the provider, transport or harness lost: undetermined, never the candidate's failure. */
+/**
+ * Tool calls and turns are observed only for command candidates whose trace
+ * was read (`cli.trace`); the line names who was and who was not, so a
+ * reader never takes a missing count for zero activity.
+ */
+export function agentActivityGap(trials: readonly TrialRow[], declared: readonly string[] = []): string {
+  const traced = new Set(trials.filter((t) => t.agent).map((t) => t.candidate));
+  const untraced = [...new Set(trials.filter((t) => !t.agent).map((t) => t.candidate))];
+  const unreadable = trials.filter((t) => t.agent_error).length;
+  if (traced.size === 0) {
+    return declared.length === 0
+      ? "- `tool_calls`, turns: not observed; no candidate declared `cli.trace`, so what the agents did between input and output is not recorded."
+      : `- \`tool_calls\`, turns: not observed; ${declared.join(", ")} declare \`cli.trace\` but no trial left a trace${unreadable > 0 ? ` (${unreadable} left one that could not be read, \`agent_error\`)` : ""}.`;
+  }
+  const who = untraced.length === 0 ? "every trial" : `${[...traced].join(", ")} (not ${untraced.join(", ")}: no \`cli.trace\`, or none left)`;
+  const bad = unreadable > 0 ? ` ${unreadable} trace(s) were left but could not be read (\`agent_error\`).` : "";
+  return `- \`tool_calls\`, turns: observed for ${who} from the trace the command left; counts in \`agent\` per row, the turn list in traces/.${bad}`;
+}
+
 function infraGap(trials: readonly TrialRow[]): string | null {
   const lost = trials.filter((t) => INFRA_COMPLETION_STATES.has(t.completion_state));
   if (lost.length === 0) return null;
@@ -104,6 +123,8 @@ export function buildGaps(
   /** Candidates whose spec lets them report their own spend (`cli.reports_usage`). */
   selfReporting: readonly string[] = [],
   earlyStop?: EarlyStopRecord,
+  /** Candidates whose spec says their command leaves a trace (`cli.trace`). */
+  tracing: readonly string[] = [],
 ): string {
   const lines: string[] = [
     "# GAPS — fields the protocol wants that this run did not observe",
@@ -133,14 +154,17 @@ export function buildGaps(
       ? "- `cache`: the provider reported cached prompt tokens on some calls; recorded under `tokens.cached`, no cache cost breakdown."
       : "- `cache`: no cached prompt tokens reported on any call; cache economics not observable.",
   );
+  const sawCli = trials.some((t) => t.deployment_ref?.startsWith("cli/"));
   lines.push(
     sawProvider
-      ? "- `deployment_ref.region / tier`: route plus who served the call (OpenRouter's upstream provider, or the model id a direct API answered with); region and service tier are not exposed."
+      ? sawCli
+        ? "- `deployment_ref.region / tier`: who served the model is read from the command's trace (`cli/…`), from OpenRouter's upstream provider, or from the model id a direct API answered with; region and service tier are not exposed."
+        : "- `deployment_ref.region / tier`: route plus who served the call (OpenRouter's upstream provider, or the model id a direct API answered with); region and service tier are not exposed."
       : "- `deployment_ref`: no route reported who served these calls.",
   );
-  lines.push("- `human_intervention`: single-call producers, no interactive execution; recorded as not applicable.");
-  lines.push("- `tool_calls`: producers make no tool calls this milestone.");
-  lines.push("- `checkpoint`: not applicable to single-call trials.");
+  lines.push("- `human_intervention`: not observed; no trace format read here says whether the agent waited on a person.");
+  lines.push(agentActivityGap(trials, tracing));
+  lines.push("- `checkpoint`: not observed; no trace format read here says whether the agent resumed from one.");
   lines.push(
     "- transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.",
   );
@@ -179,6 +203,9 @@ export function gapsFor(bundle: { manifest: RunManifest; trials: readonly TrialR
       .filter(([, def]) => def.cli?.reports_usage === true)
       .map(([id]) => id),
     bundle.summary.early_stop,
+    Object.entries(bundle.manifest.candidates)
+      .filter(([, def]) => def.cli?.trace !== undefined)
+      .map(([id]) => id),
   );
 }
 

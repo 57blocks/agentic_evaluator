@@ -17,6 +17,8 @@ import { runProcess, type SpawnError } from "../proc.js";
 import { looksLikePath } from "../script-path.js";
 import { CONTAINER_WORKDIR, runInDocker, TASK_MOUNT, type Mount } from "./docker.js";
 import { readReportedTokens, readReportedUsage, UNOBSERVED, USAGE_FILE, type ReportedUsage } from "./reported-usage.js";
+import { readTraceFile, TRACE_FILES } from "../traces/index.js";
+import type { AgentTrace } from "../canon/agent-trace.js";
 import { catalogPrice, costOf } from "../pricing.js";
 import type { AgentCliConfig } from "../canon/types.js";
 import {
@@ -32,7 +34,7 @@ const INPUT_FILE = ".eval-input.txt";
 // Not the deliverable: installs, version control (an agent that commits leaves
 // text objects in .git that would read back, and hand on, as a broken repo),
 // and agenteval's own files.
-const SKIP_NAMES = new Set(["node_modules", ".git", INPUT_FILE, USAGE_FILE]);
+const SKIP_NAMES = new Set(["node_modules", ".git", INPUT_FILE, USAGE_FILE, ...Object.values(TRACE_FILES)]);
 
 const ENV_REF = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
 
@@ -134,6 +136,29 @@ async function layStartingState(workDir: string, request: CandidateRequest): Pro
     return;
   }
   if (request.fixtureDir) await fs.cp(request.fixtureDir, workDir, { recursive: true });
+}
+
+/**
+ * The trace the command left, when the spec says it leaves one. A killed
+ * command's trace ends where it was stopped, and says so.
+ */
+async function traceOf(cli: AgentCliConfig, workDir: string, killed: boolean): Promise<{ trace?: AgentTrace; traceError?: string }> {
+  if (!cli.trace) return {};
+  const read = await readTraceFile(workDir, cli.trace);
+  if (read === null) return {};
+  if ("error" in read) return { traceError: read.error };
+  return { trace: killed ? { ...read.trace, ended: "killed" } : read.trace };
+}
+
+/**
+ * A trace that totals the run's tokens and cost (claude's stream) is the
+ * usage report, unless the spec declared one: `reports_usage` stays the
+ * explicit word, and a declared file wins over the trace's totals.
+ */
+function usageFromTrace(cli: AgentCliConfig, reported: ReportedUsage & { cachedTokens?: number }, trace: AgentTrace | undefined): ReportedUsage & { cachedTokens?: number } {
+  if (cli.reports_usage !== undefined || !trace?.usage) return reported;
+  const u = trace.usage;
+  return { promptTokens: u.prompt + u.cached, completionTokens: u.completion, cachedTokens: u.cached, costUsd: u.costUsd, costSource: "estimated" };
 }
 
 /** Past this a file is not read back: a deliverable is source and docs, not logs or dumps. */
@@ -283,21 +308,32 @@ export const agentCliAdapter: CandidateAdapter = {
 
     const t0 = Date.now();
     try {
-      const ran = inDocker
-        ? await runInDocker({ ...cli, env }, [cmd, ...args], {
-            workDir: context.workDir,
-            timeoutMs: request.timeoutMs,
-            mounts: contained?.mounts,
-          })
-        : await runCommand(cmd, args, {
-            cwd: context.workDir,
-            timeoutMs: request.timeoutMs,
-            env,
-          });
-      const [{ files: artifacts, skipped }, usage] = await Promise.all([
+      let ran;
+      try {
+        ran = inDocker
+          ? await runInDocker({ ...cli, env }, [cmd, ...args], {
+              workDir: context.workDir,
+              timeoutMs: request.timeoutMs,
+              mounts: contained?.mounts,
+            })
+          : await runCommand(cmd, args, {
+              cwd: context.workDir,
+              timeoutMs: request.timeoutMs,
+              env,
+            });
+      } catch (err) {
+        // A stopped command keeps what it had written: its usage file and
+        // its trace are evidence of where it got to, read after the kill.
+        if (!(err instanceof AdapterError) || err.kind !== "timeout") throw err;
+        const [reported, traced] = await Promise.all([usageOf(cli, request, context.workDir), traceOf(cli, context.workDir, true)]);
+        throw new AdapterError(err.message, { kind: err.kind, ms: err.ms, log: err.log, partial: { ...usageFromTrace(cli, reported, traced.trace), ...traced } });
+      }
+      const [{ files: artifacts, skipped }, reported, traced] = await Promise.all([
         collectFiles(context.workDir),
         usageOf(cli, request, context.workDir),
+        traceOf(cli, context.workDir, false),
       ]);
+      const usage = usageFromTrace(cli, reported, traced.trace);
       const ms = Date.now() - t0;
       context.emit?.({ type: "model.response", ...base, ms, ...(skipped.length > 0 ? { skippedFiles: skipped } : {}) });
       return {
@@ -311,8 +347,10 @@ export const agentCliAdapter: CandidateAdapter = {
         costSource: usage.costSource,
         ms,
         isolation: inDocker ? "docker" : "none",
-        provider: inDocker ? `docker:${cli.image}` : "local-cli",
+        // Who served the model, when the trace says; else how the command ran.
+        provider: traced.trace?.provider ?? (inDocker ? `docker:${cli.image}` : "local-cli"),
         finishReason: ran.exitCode === 0 ? "stop" : `exit ${ran.exitCode}`,
+        ...traced,
       };
     } catch (err) {
       const ms = err instanceof AdapterError ? err.ms : Date.now() - t0;

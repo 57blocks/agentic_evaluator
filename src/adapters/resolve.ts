@@ -29,7 +29,12 @@ export function trialAdapterFields(
   producer: ProducerKind,
 ): { adapter?: string; adapterConfigSha?: string } {
   const adapter = adapterIdOf(def, producer);
-  if (adapter === "agent-cli") return { adapter: "agent-cli", adapterConfigSha: sha256(JSON.stringify(def.cli ?? {})) };
+  if (adapter === "agent-cli") {
+    // What the command reports about itself is not what it does: `trace`
+    // stays out, so declaring it on a candidate keeps its trials reusable.
+    const { trace: _trace, ...identity } = def.cli ?? {};
+    return { adapter: "agent-cli", adapterConfigSha: sha256(JSON.stringify(identity)) };
+  }
   const g = def.generation_settings ?? {};
   const config = {
     ...(def.provider_route && def.provider_route !== "openrouter" ? { route: def.provider_route } : {}),
