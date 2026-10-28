@@ -22,7 +22,10 @@ export function trialAdapterFields(
   producer: ProducerKind,
 ): { adapter?: string; adapterConfigSha?: string } {
   if (adapterIdOf(def, producer) !== "agent-cli") return {};
-  return { adapter: "agent-cli", adapterConfigSha: sha256(JSON.stringify(def.cli ?? {})) };
+  // What the command reports about itself is not what it does: `trace`
+  // stays out, so declaring it on a candidate keeps its trials reusable.
+  const { trace: _trace, ...identity } = def.cli ?? {};
+  return { adapter: "agent-cli", adapterConfigSha: sha256(JSON.stringify(identity)) };
 }
 
 export { AdapterError, adapterIdOf, modelRefOf } from "./types.js";

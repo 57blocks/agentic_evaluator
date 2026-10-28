@@ -44,6 +44,10 @@ STATUS=$?
 TRIAL_RESULT="$(find "$JOBS" -mindepth 3 -maxdepth 3 -name result.json | head -1)"
 if [ -n "$TRIAL_RESULT" ] && [ "${HARBOR_SPIKE_DROP_RESULT:-0}" != "1" ]; then
   cp "$TRIAL_RESULT" harbor-trial.json
+  # Harbor's ATIF trajectory of the agent's run, when the agent wrote one
+  # (oracle and nop do not). Kept as the trace the harness will read.
+  TRAJECTORY="$(dirname "$TRIAL_RESULT")/agent/trajectory.json"
+  [ -f "$TRAJECTORY" ] && cp "$TRAJECTORY" .eval-trace.json
   # Hand Harbor's own spend figure to the harness (read because the spec
   # declares reports_usage; recorded as an estimate). The agent ran inside
   # Harbor's container and cannot write this work dir. An agent that reports

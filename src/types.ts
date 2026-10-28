@@ -6,6 +6,7 @@
  * outputs.
  */
 
+import type { AgentActivity } from "./canon/agent-trace.js";
 import type {
   CandidateDef,
   CompletionState,
@@ -255,6 +256,10 @@ export interface RunRecord {
   checkVersion?: string;
   /** runId this record's output was reused from (EVAL_REUSE), if any. */
   reusedFrom?: string;
+  /** agent-cli with `cli.trace`: what the trace showed the agent doing. */
+  agent?: AgentActivity;
+  /** agent-cli with `cli.trace`: the trace was left but could not be read. */
+  traceError?: string;
 }
 
 /** Which side of a pairwise comparison won, in candidate (a/b) space. */

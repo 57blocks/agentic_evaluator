@@ -12,6 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { LlmError, type LlmTrace } from "../llm.js";
 import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "../adapters/resolve.js";
+import { activityOf, type AgentActivity, type AgentTrace } from "../canon/agent-trace.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import { fixturePath, inputIdentity } from "./fixture.js";
 import { killProcessesUnder } from "../proc.js";
@@ -107,6 +108,9 @@ export interface GenOutput {
   refusal?: string;
   /** codegen: number of files parsed from the output. */
   parsedUnits?: number;
+  /** agent-cli with `cli.trace`: the trace read from the work dir, and why it could not be. */
+  trace?: AgentTrace;
+  traceError?: string;
   artifacts: ArtifactFile[];
   checkPassed?: boolean;
   checkOutput?: string;
@@ -435,7 +439,30 @@ function recordFromRow(row: TrialRow, text: string): RunRecord {
     // one directory over, and "ran on the host" is precisely what a reader of
     // the evidence is entitled to see.
     isolation: row.isolation ?? undefined,
+    agent: row.agent ?? undefined,
+    traceError: row.agent_error,
   };
+}
+
+/** The turn list, beside the row's counts: traces/<candidate>__<input>__tN.json. */
+async function keepTrace(outDir: string, t: { candidate: string; inputSlug: string; trial: number }, trace: AgentTrace | undefined): Promise<void> {
+  if (!trace) return;
+  const dir = path.join(outDir, "traces");
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(dir, `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}.json`), JSON.stringify(trace, null, 2), "utf-8");
+}
+
+/** A reused trial's turn list travels with it, like its check evidence does. */
+async function copyTrace(fromDir: string, outDir: string, t: { candidate: string; inputSlug: string; trial: number }): Promise<void> {
+  const name = `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}.json`;
+  const src = path.join(fromDir, "traces", name);
+  try {
+    await fs.access(src);
+  } catch {
+    return;
+  }
+  await fs.mkdir(path.join(outDir, "traces"), { recursive: true });
+  await fs.copyFile(src, path.join(outDir, "traces", name));
 }
 
 export function errorRecord(task: GenTask, err: unknown): RunRecord {
@@ -472,12 +499,16 @@ export function errorRecord(task: GenTask, err: unknown): RunRecord {
   }
   const kind = err instanceof AdapterError ? err.kind : "unknown";
   const verdict = classifyCompletion({ error: { kind } });
+  const partial = err instanceof AdapterError ? err.partial : undefined;
   return {
     ...shared,
-    promptTokens: 0,
-    completionTokens: 0,
-    costUsd: 0,
-    costSource: "none",
+    promptTokens: partial?.promptTokens ?? 0,
+    completionTokens: partial?.completionTokens ?? 0,
+    cachedTokens: partial?.cachedTokens,
+    ...(partial?.trace ? { agent: activityOf(partial.trace) } : {}),
+    ...(partial?.traceError !== undefined ? { traceError: partial.traceError } : {}),
+    costUsd: partial?.costUsd ?? 0,
+    costSource: partial?.costSource ?? "none",
     ms: err instanceof AdapterError ? err.ms : 0,
     deploymentRef: deploymentRef(task.def, undefined),
     completionState: verdict.state,
@@ -568,6 +599,7 @@ export async function runAll(params: {
       const reused = await loadReusable(suite.step, task.hash, runId, params.ws);
       if (reused) {
         const regraded = await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir });
+        await copyTrace(reused.dir, outDir, { candidate, inputSlug, trial });
         params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
         return finish({ ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from });
       }
@@ -649,10 +681,14 @@ export async function runAll(params: {
         // leaving it out wrote `isolation: null` on every trial — "not
         // observed" for the one thing the sandbox exists to make visible.
         isolation: g.isolation,
+        ...(g.trace ? { agent: activityOf(g.trace) } : {}),
+        ...(g.traceError !== undefined ? { traceError: g.traceError } : {}),
       };
+      await keepTrace(outDir, task, g.trace);
       await journal(outDir, record);
       return finish(record);
     } catch (err) {
+      if (err instanceof AdapterError) await keepTrace(outDir, task, err.partial?.trace);
       const rec = errorRecord(task, err);
       budget.add(rec.costUsd + (rec.retryCostUsd ?? 0));
       params.emit({

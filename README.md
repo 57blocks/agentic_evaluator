@@ -606,6 +606,20 @@ declare `exit_code: ignore` on the step (or on the candidate's `cli`): the
 exit code is kept as evidence and the check decides. `combine` and `judge`
 apply it to runs recorded before it was declared.
 
+A command can also leave its **trace**: how the agent worked between input
+and output. Declare `trace: atif` under `cli:` and have the command leave
+`.eval-trace.json`, an ATIF document (Harbor's Agent Trajectory Interchange
+Format, which Harbor writes for every trial as `agent/trajectory.json`;
+`tasks/harbor-spike` copies it). agenteval reads it into turns, tool calls
+and per-turn tokens: counts on each row of `scores.jsonl` (`agent`), the
+turn list under `traces/`, and an "Agent activity" table in the report. A
+field the format has no notion of (ATIF records no retries) is null, never
+0; a trace that cannot be read is named on the row (`agent_error`); a
+command stopped on its time limit still has its trace read, marked
+`killed`. Declaring `trace` does not change a trial's identity, so `--reuse`
+still serves earlier runs. Without it, `GAPS.md` says the agent's activity
+was not observed.
+
 `prompt_tokens` is input not read from or written to a cache. A step's
 `max_cost_per_trial_usd` is handed to the command as `{{max_cost_usd}}` and
 `EVAL_MAX_COST_USD`, with the model's price as `EVAL_MODEL_PRICE` (JSON, per

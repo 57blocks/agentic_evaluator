@@ -4,6 +4,7 @@
  */
 
 import type { AgentCliConfig, CandidateAdapterId, CandidateDef, CostSource, Isolation } from "../canon/types.js";
+import type { AgentTrace } from "../canon/agent-trace.js";
 import type { LlmTrace } from "../llm.js";
 import type { ModelPrice } from "../pricing.js";
 import type { ProducerKind } from "../types.js";
@@ -75,6 +76,21 @@ export interface CandidateResult {
   provider?: string;
   finishReason?: string;
   refusal?: string;
+  /** agent-cli with `cli.trace`: the trace the command left, read (src/traces/). */
+  trace?: AgentTrace;
+  /** agent-cli with `cli.trace`: the trace was there but could not be read. */
+  traceError?: string;
+}
+
+/** What a stopped command had already written: read after the kill, never lost with it. */
+export interface PartialResult {
+  promptTokens: number;
+  completionTokens: number;
+  cachedTokens?: number;
+  costUsd: number;
+  costSource: CostSource;
+  trace?: AgentTrace;
+  traceError?: string;
 }
 
 export interface CandidateAdapter {
@@ -90,13 +106,16 @@ export class AdapterError extends Error {
   readonly ms: number;
   /** What the command printed before it was stopped (a timeout), when there was a command. */
   readonly log?: string;
+  /** What it had reported and traced before it was stopped. */
+  readonly partial?: PartialResult;
 
-  constructor(message: string, fields: { kind: AdapterErrorKind; ms: number; log?: string }) {
+  constructor(message: string, fields: { kind: AdapterErrorKind; ms: number; log?: string; partial?: PartialResult }) {
     super(message);
     this.name = "AdapterError";
     this.kind = fields.kind;
     this.ms = fields.ms;
     if (fields.log !== undefined) this.log = fields.log;
+    if (fields.partial !== undefined) this.partial = fields.partial;
   }
 }
 
