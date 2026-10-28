@@ -12,11 +12,11 @@
  * price itself. Even then the figure is recorded as "estimated" — the harness
  * did not observe it — and GAPS.md names the candidates that self-reported.
  * `cost_usd` is required, tokens optional. A missing or malformed file reads
- * as unobserved ("none"), never as a measured $0.
+ * as unobserved ("none"), never as a measured $0; so does a symlink or a file
+ * over the size cap (work-file.ts), since the agent owns that directory.
  */
 
-import fs from "node:fs/promises";
-import path from "node:path";
+import { readWorkFile } from "./work-file.js";
 import type { CostSource } from "../canon/types.js";
 import type { TokenUsage } from "../pricing.js";
 
@@ -53,12 +53,9 @@ export function parseReportedUsage(raw: unknown): ReportedUsage | null {
 
 /** Read the candidate's usage file from its work dir; unobserved when absent or malformed. */
 export async function readReportedUsage(workDir: string): Promise<ReportedUsage> {
-  let text: string;
-  try {
-    text = await fs.readFile(path.join(workDir, USAGE_FILE), "utf-8");
-  } catch {
-    return UNOBSERVED;
-  }
+  const read = await readWorkFile(workDir, USAGE_FILE);
+  if (read === null || "refused" in read) return UNOBSERVED;
+  const { text } = read;
   try {
     return parseReportedUsage(JSON.parse(text)) ?? UNOBSERVED;
   } catch {
@@ -90,7 +87,9 @@ export function parseReportedTokens(raw: unknown): TokenUsage | null {
 /** The tokens a candidate reported, or null when absent or malformed. */
 export async function readReportedTokens(workDir: string): Promise<TokenUsage | null> {
   try {
-    return parseReportedTokens(JSON.parse(await fs.readFile(path.join(workDir, USAGE_FILE), "utf-8")));
+    const read = await readWorkFile(workDir, USAGE_FILE);
+    if (read === null || "refused" in read) return null;
+    return parseReportedTokens(JSON.parse(read.text));
   } catch {
     return null;
   }

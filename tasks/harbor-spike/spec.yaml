@@ -70,6 +70,7 @@ candidates:
       # BILLED through OpenRouter; spend is unobserved by the harness.
       argv: [bash, agents/harbor-run.sh, claude-code, anthropic/claude-sonnet-5, "{{input}}"]
       reports_usage: true
+      trace: atif
       env: { HARBOR_VIA_OPENROUTER: "1" }
   - id: terminus-sonnet
     adapter: agent-cli
@@ -79,6 +80,7 @@ candidates:
       # OpenRouter (OPENROUTER_API_KEY).
       argv: [bash, agents/harbor-run.sh, terminus-2, openrouter/anthropic/claude-sonnet-5, "{{input}}"]
       reports_usage: true
+      trace: atif
 
 evaluators:
   required_checks:

@@ -7,6 +7,8 @@
  * An evaluator error must never be recorded as a candidate failure.
  */
 
+import type { TraceFormat } from "./agent-trace.js";
+
 /** Protocol §5 candidate-adapter completion states. */
 export type CompletionState =
   | "success"
@@ -68,6 +70,14 @@ export interface AgentCliConfig {
    * an agent tool's own figure assumes its own vendor's prices.
    */
   reports_usage?: boolean | "tokens";
+  /**
+   * The trace the command leaves in its work dir, read into turns and tool
+   * calls (src/traces/). `atif`: Harbor's trajectory format, at
+   * `.eval-trace.json`. Undeclared, the agent's activity is not observed.
+   * Not part of the trial's identity: declaring it on a candidate does not
+   * regenerate its trials.
+   */
+  trace?: TraceFormat;
   /**
    * Files whose content is part of the trial's identity (the wrapper script
    * the command runs), relative to the task. Edit one and the next `--reuse`

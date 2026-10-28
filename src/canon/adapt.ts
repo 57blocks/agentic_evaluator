@@ -136,6 +136,8 @@ export function toTrialRows(input: AdaptInput): TrialRow[] {
       tokens: { prompt: r.promptTokens, completion: r.completionTokens, cached: r.cachedTokens ?? null },
       ms: r.ms,
       isolation: r.isolation ?? null,
+      agent: r.agent ?? null,
+      ...(r.traceError !== undefined ? { agent_error: r.traceError } : {}),
       ttft_ms: null,
       cache: null,
       finish_reason: r.finishReason ?? null,

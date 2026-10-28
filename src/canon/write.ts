@@ -76,6 +76,21 @@ function unobservedCostGap(trials: readonly TrialRow[]): string | null {
 }
 
 /** Trials the provider, transport or harness lost: undetermined, never the candidate's failure. */
+/**
+ * Tool calls and turns are observed only for command candidates whose trace
+ * was read (`cli.trace`); the line names who was and who was not, so a
+ * reader never takes a missing count for zero activity.
+ */
+export function agentActivityGap(trials: readonly TrialRow[]): string {
+  const traced = new Set(trials.filter((t) => t.agent).map((t) => t.candidate));
+  const untraced = [...new Set(trials.filter((t) => !t.agent).map((t) => t.candidate))];
+  const unreadable = trials.filter((t) => t.agent_error).length;
+  if (traced.size === 0) return "- `tool_calls`, turns: not observed; no candidate declared `cli.trace`, so what the agents did between input and output is not recorded.";
+  const who = untraced.length === 0 ? "every trial" : `${[...traced].join(", ")} (not ${untraced.join(", ")}: no \`cli.trace\`, or none left)`;
+  const bad = unreadable > 0 ? ` ${unreadable} trace(s) were left but could not be read (\`agent_error\`).` : "";
+  return `- \`tool_calls\`, turns: observed for ${who} from the trace the command left; counts in \`agent\` per row, the turn list in traces/.${bad}`;
+}
+
 function infraGap(trials: readonly TrialRow[]): string | null {
   const lost = trials.filter((t) => INFRA_COMPLETION_STATES.has(t.completion_state));
   if (lost.length === 0) return null;
@@ -138,9 +153,9 @@ export function buildGaps(
       ? "- `deployment_ref.region / tier`: provider name observed via OpenRouter; region and service tier are not exposed."
       : "- `deployment_ref`: OpenRouter did not return a provider on these calls.",
   );
-  lines.push("- `human_intervention`: single-call producers, no interactive execution; recorded as not applicable.");
-  lines.push("- `tool_calls`: producers make no tool calls this milestone.");
-  lines.push("- `checkpoint`: not applicable to single-call trials.");
+  lines.push("- `human_intervention`: not observed; no trace format read here says whether the agent waited on a person.");
+  lines.push(agentActivityGap(trials));
+  lines.push("- `checkpoint`: not observed; no trace format read here says whether the agent resumed from one.");
   lines.push(
     "- transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.",
   );

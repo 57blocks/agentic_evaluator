@@ -9,6 +9,7 @@ import { plural } from "../../../../report-format.js";
 import { ReportHeader, RunFacts } from "./sections/Header";
 import { Verdict } from "./sections/Verdict";
 import { Candidates } from "./sections/Candidates";
+import { AgentActivity } from "./sections/AgentActivity";
 import { Gates } from "./sections/Gates";
 import { Certainty } from "./sections/Certainty";
 import { Slices } from "./sections/Slices";
@@ -39,6 +40,7 @@ export function StepReport({ report: r }: { report: Model }) {
       <PlanStepCard step={r.tested} title="What was tested" />
       <Verdict verdict={r.verdict} eligible={r.eligible} total={r.candidates.length} />
       <Candidates candidates={r.candidates} control={r.control} />
+      <AgentActivity agentActivity={r.agentActivity} />
       <Slices slices={r.slices} candidates={r.candidates.map((c) => c.id)} />
       <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />
       <Certainty certainty={r.certainty} />
