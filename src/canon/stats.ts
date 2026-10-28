@@ -10,6 +10,8 @@
  *                 repeated trials of one input cannot pose as independent
  *                 evidence. Inputs where both did equally well say nothing and
  *                 drop out; precision comes from the inputs that differ.
+ *                 Under judge-preference the same test runs on the judge's
+ *                 pairwise verdicts per input instead of task success.
  *
  * Pure functions; nothing here reads a spec or calls a model.
  */
@@ -69,9 +71,14 @@ export function signTestP(wins: number, losses: number): number {
   return Math.min(1, 2 * binomialHalfCdf(Math.min(wins, losses), n));
 }
 
+/** What a paired comparison counted: task success, or the judge's pairwise verdicts. */
+export type ComparisonBasis = "task-success" | "judge";
+
 export interface PairedComparison {
   a: string;
   b: string;
+  /** Absent in recommendations written before the judge basis existed: task success. */
+  basis?: ComparisonBasis;
   /** Inputs where both have at least one classified trial. */
   compared: number;
   a_better: number;
@@ -106,10 +113,36 @@ export function pairByInput(rows: readonly TrialRow[], a: string, b: string): Pa
     else if (vb > va) bBetter += 1;
     else same += 1;
   }
+  return paired(a, b, "task-success", aBetter, bBetter, same);
+}
+
+/**
+ * The judge's verdicts between a and b, input by input. A verdict is recorded
+ * on both sides' rows, so only a's rows are read; several verdicts on one
+ * input (repeated trials) net out to one vote for that input.
+ */
+export function judgePairByInput(rows: readonly TrialRow[], a: string, b: string): PairedComparison {
+  const net = new Map<string, number>();
+  for (const r of rows) {
+    if (r.candidate !== a) continue;
+    for (const d of r.judge.pairwise ?? []) {
+      if (d.vs !== b) continue;
+      const vote = d.resolved === "win" ? 1 : d.resolved === "loss" ? -1 : 0;
+      net.set(r.input, (net.get(r.input) ?? 0) + vote);
+    }
+  }
+  const votes = [...net.values()];
+  const aBetter = votes.filter((v) => v > 0).length;
+  const bBetter = votes.filter((v) => v < 0).length;
+  return paired(a, b, "judge", aBetter, bBetter, votes.length - aBetter - bBetter);
+}
+
+function paired(a: string, b: string, basis: ComparisonBasis, aBetter: number, bBetter: number, same: number): PairedComparison {
   const p = signTestP(aBetter, bBetter);
   return {
     a,
     b,
+    basis,
     compared: aBetter + bBetter + same,
     a_better: aBetter,
     b_better: bBetter,

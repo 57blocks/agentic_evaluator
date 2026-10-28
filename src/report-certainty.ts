@@ -28,7 +28,11 @@ function gateRows(rec: Recommendation): string {
 function versusLine(rec: Recommendation): string {
   const v = rec.evidence?.versus_runner_up;
   if (!v) return "";
-  return `<p class="note">Against the runner-up, input by input: ${escapeHtml(v.a)} did better on ${v.a_better}, ${escapeHtml(v.b)} on ${v.b_better}, equal on ${v.same} (exact sign test p ${fmtP(v.p_value)}${v.significant ? "" : ", not significant"}).</p>`;
+  const p = `exact sign test p ${fmtP(v.p_value)}${v.significant ? "" : ", not significant"}`;
+  if (v.basis === "judge") {
+    return `<p class="note">Against the runner-up, input by input, by the judge: preferred ${escapeHtml(v.a)} on ${v.a_better}, ${escapeHtml(v.b)} on ${v.b_better}, tied on ${v.same} (${p}).</p>`;
+  }
+  return `<p class="note">Against the runner-up, input by input: ${escapeHtml(v.a)} did better on ${v.a_better}, ${escapeHtml(v.b)} on ${v.b_better}, equal on ${v.same} (${p}).</p>`;
 }
 
 function itemsLine(items: ItemStats): string {
@@ -38,7 +42,8 @@ function itemsLine(items: ItemStats): string {
     allFail.length === 0
       ? ""
       : ` Every candidate failed ${allFail.length}: ${allFail.slice(0, MAX_LISTED).map(escapeHtml).join(", ")}${allFail.length > MAX_LISTED ? " …" : ""} — check those for a harness or check bug first.`;
-  return `<p class="note"><b>Effective N ${items.effective_n} of ${items.inputs}.</b> Inputs that separated any two candidates; ${items.counts["all-pass"]} every candidate passed and ${items.counts.flat} gave everyone the same partial rate, so they cannot inform a choice.${failNote} Per-input detail: items.json.</p>`;
+  const judge = items.judge_effective_n == null ? "" : ` The judge preferred one candidate over another on ${items.judge_effective_n}.`;
+  return `<p class="note"><b>Effective N ${items.effective_n} of ${items.inputs}.</b> Inputs that separated any two candidates on the required check; ${items.counts["all-pass"]} every candidate passed and ${items.counts.flat} gave everyone the same partial rate, so they cannot inform a choice.${judge}${failNote} Per-input detail: items.json.</p>`;
 }
 
 export function renderCertainty(rec: Recommendation, items: ItemStats): string {

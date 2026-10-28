@@ -14,6 +14,10 @@
  *             trial noise, no separation
  *   unscored  fewer than two candidates have a classified trial on it
  *
+ * The classes are over task success. Beside them, `judge_effective_n` counts
+ * the inputs where the judge preferred one candidate over another in some
+ * pairwise duel: under judge-preference that is the evidence the pick rests on.
+ *
  * This is not the judge's score spread; that is discrimination.ts.
  */
 
@@ -38,8 +42,10 @@ export interface ItemStat {
 
 export interface ItemStats {
   inputs: number;
-  /** Inputs that separated at least two candidates. */
+  /** Inputs that separated at least two candidates on task success. */
   effective_n: number;
+  /** Inputs where some pairwise verdict was not a tie; null when no pairwise judging ran. */
+  judge_effective_n: number | null;
   counts: Record<ItemClass, number>;
   items: ItemStat[];
 }
@@ -107,10 +113,21 @@ export function itemStats(trials: readonly TrialRow[]): ItemStats {
 
   const counts: Record<ItemClass, number> = { splits: 0, "all-pass": 0, "all-fail": 0, flat: 0, unscored: 0 };
   for (const it of items) counts[it.class] += 1;
-  return { inputs: items.length, effective_n: counts.splits, counts, items };
+  return { inputs: items.length, effective_n: counts.splits, judge_effective_n: judgeSeparated(trials), counts, items };
+}
+
+function judgeSeparated(trials: readonly TrialRow[]): number | null {
+  const duels = trials.flatMap((t) => (t.judge.pairwise ?? []).map((d) => ({ input: t.input, resolved: d.resolved })));
+  if (duels.length === 0) return null;
+  return new Set(duels.filter((d) => d.resolved !== "tie").map((d) => d.input)).size;
 }
 
 const MAX_LISTED = 10;
+
+const judgeClause = (s: ItemStats): string =>
+  s.judge_effective_n === null || s.judge_effective_n === undefined
+    ? ""
+    : ` The judge preferred one candidate over another on ${s.judge_effective_n} of ${s.inputs}.`;
 
 const listed = (ids: readonly string[]): string =>
   ids.length <= MAX_LISTED ? ids.join(", ") : `${ids.slice(0, MAX_LISTED).join(", ")} and ${ids.length - MAX_LISTED} more`;
@@ -119,7 +136,7 @@ const listed = (ids: readonly string[]): string =>
 export function itemGaps(s: ItemStats): string[] {
   if (s.inputs === 0) return [];
   const lines = [
-    `- effective N: ${s.effective_n} of ${s.inputs} inputs separated any two candidates; ${s.counts["all-pass"]} every candidate passed, ${s.counts.flat} gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).`,
+    `- effective N: ${s.effective_n} of ${s.inputs} inputs separated any two candidates on task success; ${s.counts["all-pass"]} every candidate passed, ${s.counts.flat} gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).${judgeClause(s)}`,
   ];
   const allFail = s.items.filter((i) => i.class === "all-fail").map((i) => i.input);
   if (allFail.length > 0) {

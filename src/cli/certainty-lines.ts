@@ -20,7 +20,7 @@ export interface CertaintyInput {
 
 function gateLines(chosen: string, evidence: FirmnessEvidence | null): string[] {
   const gates = evidence?.gates ?? [];
-  if (gates.length === 0) return [];
+  if (gates.length === 0) return evidence?.versus_runner_up ? [`  how sure ${chosen} is:`] : [];
   return [
     `  how sure ${chosen} is:`,
     ...gates.map((g) => {
@@ -34,8 +34,11 @@ function gateLines(chosen: string, evidence: FirmnessEvidence | null): string[] 
 function versusLine(evidence: FirmnessEvidence | null): string[] {
   const v = evidence?.versus_runner_up;
   if (!v) return [];
+  const p = `sign test p ${fmtP(v.p_value)}${v.significant ? "" : ", not significant"}`;
   return [
-    `    vs runner-up ${v.b}: better on ${v.a_better} input(s), worse on ${v.b_better}, equal on ${v.same} — sign test p ${fmtP(v.p_value)}${v.significant ? "" : ", not significant"}`,
+    v.basis === "judge"
+      ? `    vs runner-up ${v.b}, by the judge: preferred on ${v.a_better} input(s), dispreferred on ${v.b_better}, tied on ${v.same} — ${p}`
+      : `    vs runner-up ${v.b}: better on ${v.a_better} input(s), worse on ${v.b_better}, equal on ${v.same} — ${p}`,
   ];
 }
 
@@ -44,7 +47,8 @@ function itemsLine(items: ItemStats): string[] {
   const allFail = items.items.filter((i) => i.class === "all-fail").map((i) => i.input);
   const listed = allFail.slice(0, MAX_LISTED).join(", ") + (allFail.length > MAX_LISTED ? ", …" : "");
   const fail = allFail.length === 0 ? "" : ` · every candidate failed ${allFail.length} (check those for a harness bug): ${listed}`;
-  return [`  effective N ${items.effective_n} of ${items.inputs} inputs separated the candidates${fail}`];
+  const judge = items.judge_effective_n == null ? "" : `; the judge separated ${items.judge_effective_n}`;
+  return [`  effective N ${items.effective_n} of ${items.inputs} inputs separated the candidates on the required check${judge}${fail}`];
 }
 
 /**
