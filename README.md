@@ -482,6 +482,34 @@ trial succeeded. Use it with `trials` above 1 when one wrong answer in k is a
 wrong answer (security, compliance): a candidate right 9 times in 10 on every
 input has reliability 0.9 but pass^2 near 0.8. Off unless declared.
 
+### Importing a Harbor job
+
+A finished [Harbor](https://harborframework.com) job — one `result.json` and
+`agent/trajectory.json` per trial — can be read as an agenteval task with one
+run, nothing re-run:
+
+```bash
+agenteval import-harbor ~/harbor-jobs/2026-10-27__14-22-13 --into tasks/tb-agents --html
+agenteval report tasks/tb-agents <run>       # or open it in the dashboard
+```
+
+Each (agent, model) Harbor ran becomes a command candidate, each Harbor task
+an input, the verifier's reward the required check (`--threshold`, default
+1). A missing reward is an evaluator error, never the candidate's failure
+(Harbor's own mean counts it as 0); Harbor's own exceptions (environment,
+verifier) are infrastructure, the agent's (timeout, non-zero exit) are the
+candidate's. Cost is what the agent reported to Harbor, `estimated`; the
+trajectory feeds the agent-activity table. The pick uses the ordinary
+selection (`--mode`, default `highest-assurance`) and is written into the
+task's spec, which carries the Harbor wrapper `tasks/harbor-spike` uses. A
+custom Harbor agent is named by what it calls itself (`agent_info.name`), not
+by its import path. The
+task can be run afresh with `agenteval run` once one question is settled:
+`check-task` blocks it today, because `reward.mjs` treats a trial Harbor
+never started as an evaluator error (by design: a missing reward is never
+the candidate's failure), while the preflight expects an empty answer to
+fail.
+
 ### Judge-only grading
 
 With no check, no trial can succeed or fail — the outcome is *undetermined* —

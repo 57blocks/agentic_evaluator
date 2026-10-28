@@ -20,7 +20,9 @@
 #   oracle-lost-result  runs oracle, then discards Harbor's result, to show
 #                       a missing reward becomes an evaluator error
 #   claude-code-sonnet  Claude Code inside the task container; it downloads a
-#                       ~250 MB binary per trial, which timed out on a slow link
+#                       ~290 MB binary per trial, which times out on a slow
+#                       link: set HARBOR_CLAUDE_CODE_BINARY to a binary
+#                       downloaded once (agents/cached_claude_code.py)
 #
 # Needs Docker running, uv on PATH, and OPENROUTER_API_KEY for terminus.
 

@@ -1,6 +1,6 @@
 # Black-box agents: read the trace the command leaves
 
-Status: 2026-10-27. **Step 1 built** (ATIF reader, `cli.trace`, rows, traces/, GAPS, report; PR #21) and **step 2 built** (Claude Code reader, usage and deployment label from the stream, agb-step on stream-json) on `feat/claude-code-trace`; step 3 is a proposal.
+Status: 2026-10-27. **Step 1 built** (ATIF reader, `cli.trace`, rows, traces/, GAPS, report; PR #21) and **step 2 built** (Claude Code reader, usage and deployment label from the stream, agb-step on stream-json) on `feat/claude-code-trace`; **step 3 built** (`import-harbor`) on `feat/import-harbor`.
 
 ## Why
 
@@ -221,7 +221,7 @@ The spike's `harbor-run.sh` also changes to copy `agent/trajectory.json` to
    plugins and MCP servers in `system/init`.
 2. Reuse: declare `trace` on the spike's candidates and run `--reuse`; every
    trial must hit. **Done** (2026-10-27).
-3. `import-harbor` on the spike's job dir, then `agenteval report`.
+3. `import-harbor` on a real job dir (oracle on fix-git), then `agenteval report`. **Done** (2026-10-27).
 4. agb's test-design step with one Claude candidate on one input through
    stream-json: **done** (2026-10-27, opus on demo-todo, $0.84 estimated):
    11 turns, 12 tool calls (Bash ×10, Skill, Write), deployment

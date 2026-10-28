@@ -27,6 +27,7 @@ import { cmdDash, DASH_HELP } from "./commands/dash.js";
 import { cmdCheckTask, CHECK_TASK_HELP } from "./commands/check-task.js";
 import { cmdInstallSkill, INSTALL_SKILL_HELP } from "./commands/install-skill.js";
 import { cmdReview, REVIEW_HELP } from "./commands/review.js";
+import { cmdImportHarbor, IMPORT_HARBOR_HELP } from "./commands/import-harbor.js";
 
 interface Command {
   summary: string;
@@ -51,6 +52,7 @@ export const COMMANDS: Record<string, Command> = {
   review: { summary: "review a run blind, in the dashboard", help: REVIEW_HELP, valued: [...VALUED, "reviewer"], run: cmdReview },
   dash: { summary: "serve the dashboard, or export it as files", help: DASH_HELP, valued: [...VALUED, "export"], run: cmdDash },
   "install-skill": { summary: "add the /agenteval-new-task skill for Claude Code", help: INSTALL_SKILL_HELP, valued: VALUED, run: cmdInstallSkill },
+  "import-harbor": { summary: "a finished Harbor job as a task with one run, nothing re-run", help: IMPORT_HARBOR_HELP, valued: [...VALUED, "into", "mode", "threshold"], run: cmdImportHarbor },
 };
 
 function usage(): string {
