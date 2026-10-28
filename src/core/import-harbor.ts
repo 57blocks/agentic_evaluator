@@ -106,9 +106,19 @@ const slug = (s: string): string => s.toLowerCase().replace(/[^a-z0-9.]+/g, "-")
 const TASK_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const AGENT_OR_MODEL = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
 
+/**
+ * The agent's own name (`agent_info.name`, e.g. `claude-code`) over the name
+ * it was asked for by (`config.agent.name`), which for a custom agent is an
+ * import path such as `cached_claude_code:CachedClaudeCode`. The model stays
+ * what Harbor was asked for: agents rewrite it (`claude-sonnet-5`).
+ */
+function agentNameOf(t: HarborTrial): string | undefined {
+  return t.agent_info?.name ?? t.config?.agent?.name ?? undefined;
+}
+
 function checkedNames(t: HarborTrial, dir: string): { task: string; agent: string; model: string | null } {
   const task = t.task_name ?? "";
-  const agent = t.config?.agent?.name ?? t.agent_info?.name ?? "";
+  const agent = agentNameOf(t) ?? "";
   const model = t.config?.agent?.model_name ?? t.agent_info?.model_info?.name ?? null;
   if (!TASK_NAME.test(task) || task.includes("..")) throw new Error(`${dir}: task_name ${JSON.stringify(task)} is not a plain name`);
   if (!AGENT_OR_MODEL.test(agent)) throw new Error(`${dir}: agent name ${JSON.stringify(agent)} is not a plain name`);
@@ -118,7 +128,7 @@ function checkedNames(t: HarborTrial, dir: string): { task: string; agent: strin
 
 /** `terminus-2` + `openrouter/anthropic/claude-sonnet-5` → `terminus-2--anthropic-claude-sonnet-5`. */
 export function candidateIdOf(t: HarborTrial): string {
-  const agent = t.config?.agent?.name ?? t.agent_info?.name ?? "agent";
+  const agent = agentNameOf(t) ?? "agent";
   const model = t.config?.agent?.model_name ?? t.agent_info?.model_info?.name ?? null;
   return model ? `${slug(agent)}--${slug(model.replace(/^openrouter\//, ""))}` : slug(agent);
 }
@@ -280,7 +290,7 @@ x-harness:
 /** The spike's wrapper, check and rubric, shipped with the harness as the Harbor fixture. */
 async function layTaskFiles(taskDir: string, inputs: readonly string[]): Promise<void> {
   const spike = path.join(fixturesDir(), "harbor-spike");
-  for (const rel of ["agents/harbor-run.sh", "checks/reward.mjs", "rubrics/harbor.md"]) {
+  for (const rel of ["agents/harbor-run.sh", "agents/cached_claude_code.py", "checks/reward.mjs", "rubrics/harbor.md"]) {
     const dest = path.join(taskDir, rel);
     await fs.mkdir(path.dirname(dest), { recursive: true });
     await fs.copyFile(path.join(spike, rel), dest);

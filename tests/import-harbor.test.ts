@@ -53,6 +53,9 @@ const rows = async (runDir: string): Promise<TrialRow[]> =>
 test("candidate ids name the agent and its model; the reward rule matches the spike's check", () => {
   assert.equal(candidateIdOf(trial({ agent: "terminus-2", model: "openrouter/anthropic/claude-sonnet-5", task: "fix-git" })), "terminus-2--anthropic-claude-sonnet-5");
   assert.equal(candidateIdOf(trial({ agent: "oracle", task: "fix-git" })), "oracle");
+  // A custom agent is asked for by import path; it names itself in agent_info.
+  const custom = trial({ agent: "claude-code", model: "anthropic/claude-sonnet-5", task: "fix-git", config: { agent: { name: "cached_claude_code:CachedClaudeCode", model_name: "anthropic/claude-sonnet-5" }, environment: { type: "docker" } } });
+  assert.equal(candidateIdOf(custom), "claude-code--anthropic-claude-sonnet-5");
   assert.equal(rewardVerdict(trial({ agent: "a", task: "t" }), 1).state, "pass");
   assert.equal(rewardVerdict(trial({ agent: "a", task: "t", verifier_result: { rewards: { reward: 0.5 } } }), 1).state, "fail");
   assert.equal(rewardVerdict(trial({ agent: "a", task: "t", verifier_result: { rewards: { reward: 0.5 } } }), 0.5).state, "pass");
