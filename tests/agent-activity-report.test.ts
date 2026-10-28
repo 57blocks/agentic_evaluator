@@ -57,6 +57,7 @@ test("activity rows: a count one trace records is summed, not nulled by the othe
 
 test("GAPS names who was traced, who was not, and what could not be read", () => {
   assert.match(agentActivityGap([row("a", "x", null)]), /not observed; no candidate declared `cli.trace`/);
+  assert.match(agentActivityGap([row("a", "x", null)], ["a"]), /a declare `cli.trace` but no trial left a trace/);
   assert.match(agentActivityGap([row("a", "x", atif(1, {}))]), /observed for every trial/);
   const partial = agentActivityGap([row("a", "x", atif(1, {})), row("b", "x", null), row("a", "y", null, "unreadable")]);
   assert.match(partial, /observed for a \(not b, a: no `cli.trace`, or none left\)/);

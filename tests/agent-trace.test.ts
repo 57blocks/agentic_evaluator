@@ -71,5 +71,5 @@ test("ATIF: a file that is not a trajectory is a TraceError", () => {
 });
 
 test("each format has a fixed file name the command writes", () => {
-  assert.deepEqual(TRACE_FILES, { atif: ".eval-trace.json" });
+  assert.deepEqual(TRACE_FILES, { atif: ".eval-trace.json", "claude-code": ".eval-trace.jsonl" });
 });

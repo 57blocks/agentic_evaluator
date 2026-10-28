@@ -11,9 +11,9 @@
  * retries, so an ATIF trace says nothing about them.
  */
 
-export type TraceFormat = "atif";
+export type TraceFormat = "atif" | "claude-code";
 
-export const TRACE_FORMATS: readonly TraceFormat[] = ["atif"];
+export const TRACE_FORMATS: readonly TraceFormat[] = ["atif", "claude-code"];
 
 /** How the agent's run ended, as its trace or the harness saw it. */
 export type AgentEnd = "finished" | "max_turns" | "max_budget" | "error" | "killed";
@@ -54,6 +54,17 @@ export interface AgentTrace {
   /** The trace's own cost figure, an estimate by the agent, not a bill. */
   cost_usd: number | null;
   ended: AgentEnd | null;
+  /**
+   * Who served the model, as the trace names it (`anthropic`,
+   * `anthropic-subscription`); null when the format does not say.
+   */
+  provider?: string | null;
+  /**
+   * Whole-run tokens and cost as the trace totals them, when it does: a
+   * command that leaves such a trace need not also write `.eval-usage.json`.
+   * Still the agent's own figure, recorded as "estimated".
+   */
+  usage?: { prompt: number; completion: number; cached: number; costUsd: number } | null;
 }
 
 /** What the trial row carries: counts, not the turn list (that is in traces/). */

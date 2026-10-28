@@ -73,7 +73,9 @@ export interface AgentCliConfig {
   /**
    * The trace the command leaves in its work dir, read into turns and tool
    * calls (src/traces/). `atif`: Harbor's trajectory format, at
-   * `.eval-trace.json`. Undeclared, the agent's activity is not observed.
+   * `.eval-trace.json`. `claude-code`: claude's own `--output-format
+   * stream-json` events, teed to `.eval-trace.jsonl`; its totals also serve
+   * as the usage report. Undeclared, the agent's activity is not observed.
    * Not part of the trial's identity: declaring it on a candidate does not
    * regenerate its trials.
    */
