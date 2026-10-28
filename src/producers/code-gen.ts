@@ -13,6 +13,8 @@
 
 import { complete, type LlmTrace } from "../llm.js";
 import type { CostSource } from "../canon/types.js";
+import type { CandidateSampling } from "../adapters/types.js";
+import type { ModelEndpoint } from "../providers/types.js";
 
 /** One parsed source file from a model's output. */
 export interface CodeFile {
@@ -23,6 +25,10 @@ export interface CodeFile {
 export interface CodeGenOptions {
   temperature?: number;
   timeoutMs?: number;
+  /** Where the model is called; OpenRouter when absent. */
+  endpoint?: ModelEndpoint;
+  /** The candidate's declared settings beyond temperature. */
+  sampling?: CandidateSampling;
   trace?: LlmTrace;
   traceContext?: Record<string, unknown>;
   /**
@@ -133,6 +139,8 @@ export async function produceCode(
     prompt,
     temperature: opts.temperature ?? 0.2,
     timeoutMs: opts.timeoutMs,
+    ...opts.sampling,
+    ...(opts.endpoint ? { endpoint: opts.endpoint } : {}),
     trace: opts.trace,
     traceContext: opts.traceContext,
   });

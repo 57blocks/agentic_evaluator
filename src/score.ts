@@ -13,6 +13,7 @@
  */
 
 import { complete, LlmError, type LlmTrace } from "./llm.js";
+import type { ModelEndpoint } from "./providers/types.js";
 import { sha256 } from "./canon/hash.js";
 import {
   attemptFrom,
@@ -166,6 +167,8 @@ const MAX_ATTEMPTS = 3;
  */
 export async function scoreOne(params: {
   judgeModel: string;
+  /** Where the judge is called; OpenRouter when absent. */
+  judgeEndpoint?: ModelEndpoint;
   rubric: string;
   dimensions: readonly string[];
   text: string;
@@ -180,6 +183,7 @@ export async function scoreOne(params: {
     try {
       const r = await complete({
         model: params.judgeModel,
+        ...(params.judgeEndpoint ? { endpoint: params.judgeEndpoint } : {}),
         prompt,
         temperature: attempt === 0 ? 0 : 0.3,
         timeoutMs: params.timeoutMs,

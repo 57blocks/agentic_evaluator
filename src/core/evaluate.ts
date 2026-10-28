@@ -83,6 +83,7 @@ export async function judgeAll(
     try {
       const judged = await judgePair({
         judgeModel: suite.judge,
+        judgeEndpoint: suite.judgeEndpoint,
         timeoutMs: suite.timeoutMs ?? 240_000,
         rubric,
         dimensions: suite.dimensions ?? [],
@@ -138,6 +139,7 @@ export async function scoreAll(
     try {
       const s = await scoreOne({
         judgeModel: suite.judge,
+        judgeEndpoint: suite.judgeEndpoint,
         rubric,
         dimensions,
         text: r.text,

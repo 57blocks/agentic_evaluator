@@ -12,6 +12,8 @@ import os from "node:os";
 import path from "node:path";
 import { LlmError, type LlmTrace } from "../llm.js";
 import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "../adapters/resolve.js";
+import { samplingOf } from "../adapters/types.js";
+import { endpointOf } from "../providers/index.js";
 import { activityOf, type AgentActivity, type AgentTrace } from "../canon/agent-trace.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import { fixturePath, inputIdentity } from "./fixture.js";
@@ -20,7 +22,7 @@ import { finishForCompletion } from "./exit-policy.js";
 import { priceFromSpec } from "../pricing.js";
 import { deliverableText, parsedUnitsFor } from "../adapters/deliverable.js";
 import { displayPath, taskInputPath, resolveTaskAsset } from "../paths.js";
-import { listRunDirs, type Workspace } from "./workspace.js";
+import { reusableRunDirs, type Workspace } from "./workspace.js";
 import type { RunEventSink } from "./events.js";
 import type { EarlyStop } from "./early-stop.js";
 import { CODEGEN_PRODUCER_VERSION } from "../producers/code-gen.js";
@@ -241,6 +243,7 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
       timeoutMs,
       model: def.model,
       maxTokens: def.generation_settings?.max_tokens,
+      ...(adapter.id === "agent-cli" ? {} : { endpoint: endpointOf(def), sampling: samplingOf(def) }),
       cli: def.cli,
       ...(def.price ? { price: priceFromSpec(def.price) } : {}),
       ...(suite.maxCostPerTrialUsd !== undefined ? { maxCostUsd: suite.maxCostPerTrialUsd } : {}),
@@ -293,6 +296,12 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
   };
 }
 
+/** A prompt template and its hash (part of every trial's identity). */
+export interface PromptTemplate {
+  promptTpl: string;
+  promptTemplateSha: string;
+}
+
 /** One unit of generation work in the input × candidate × trial grid. */
 export interface GenTask {
   inputSlug: string;
@@ -319,6 +328,7 @@ async function loadReusable(
   hash: string,
   currentRunId: string,
   ws: Workspace,
+  taskRoot: string,
 ): Promise<{ record: RunRecord; from: string; dir: string } | null> {
   // Every task's runs, not just this one's: `trialHash` is content-addressed,
   // so a generation produced under another task is the same generation.
@@ -330,7 +340,7 @@ async function loadReusable(
   // is only true when a task's run_name happens to begin with its step id —
   // `codegen-w38/codegen` matched, `smoke-local/codegen` never did, and reuse
   // silently did nothing there.
-  const candidates = (await listRunDirs(ws))
+  const candidates = (await reusableRunDirs(ws, taskRoot))
     .filter((e) => e.name !== currentRunId)
     .sort((a, b) => b.name.localeCompare(a.name));
 
@@ -539,6 +549,8 @@ export async function runAll(params: {
   producer: ProducerKind;
   promptTpl: string;
   promptTemplateSha: string;
+  /** Candidates with their own `prompt_file`: their template, over the step's. */
+  candidatePrompts?: ReadonlyMap<string, PromptTemplate>;
   inputTextBySlug: ReadonlyMap<string, string>;
   outDir: string;
   limit: number;
@@ -572,7 +584,7 @@ export async function runAll(params: {
           hash: trialHash({
             producer,
             producerVersion: producer === "codegen" ? CODEGEN_PRODUCER_VERSION : "1",
-            promptTemplateSha,
+            promptTemplateSha: params.candidatePrompts?.get(candidate)?.promptTemplateSha ?? promptTemplateSha,
             inputSha: sha256(identity),
             model: modelRefOf(def),
             temperature,
@@ -602,7 +614,7 @@ export async function runAll(params: {
     const checkWorkDir = path.join(outDir, "checks", `${safeName(candidate)}__${inputSlug}__t${trial}`);
 
     if (reuse) {
-      const reused = await loadReusable(suite.step, task.hash, runId, params.ws);
+      const reused = await loadReusable(suite.step, task.hash, runId, params.ws, suite.taskRoot);
       if (reused) {
         const regraded = await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir });
         await copyTrace(reused.dir, outDir, { candidate, inputSlug, trial });
@@ -632,7 +644,7 @@ export async function runAll(params: {
       const g = await generateOne({
         suite,
         producer,
-        promptTpl,
+        promptTpl: params.candidatePrompts?.get(candidate)?.promptTpl ?? promptTpl,
         inputSlug,
         inputText,
         def,

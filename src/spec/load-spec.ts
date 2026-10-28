@@ -18,6 +18,7 @@ import { parse as parseYaml } from "yaml";
 import { adapterIdOf } from "../adapters/types.js";
 import { orderControlChain } from "../canon/e2e.js";
 import { sha256 } from "../canon/hash.js";
+import { endpointOf, endpointProblem, type EndpointDecl } from "../providers/index.js";
 import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
 import type { CheckConfig, JudgeMethod } from "../types.js";
 import { workspaceForSpec, type Workspace } from "../core/workspace.js";
@@ -95,7 +96,7 @@ export interface EvalSpec {
         description?: string;
       }
     >;
-    judge: { model: string; provider_route?: string; rubric_file: string; methods?: string[]; show?: string[] };
+    judge: EndpointDecl & { model: string; rubric_file: string; methods?: string[]; show?: string[] };
     human?: { rubric_file: string; method?: "pairwise"; show?: string[]; dimensions?: string[] };
   };
   execution: {
@@ -129,7 +130,9 @@ const { $schema: _dropped, ...schemaBody } = SPEC_SCHEMA as unknown as Record<st
 const validateSpec = ajv.compile(schemaBody);
 
 /** Vendor prefix of an OpenRouter model id ("anthropic/claude-x" → "anthropic"). */
-function vendorOf(modelId: string): string {
+/** A direct route's ids are bare ("claude-sonnet-5-5"); a gateway's carry the vendor ("anthropic/…"). */
+function vendorOf(modelId: string, route: string | undefined): string {
+  if (route === "anthropic" || route === "openai") return route;
   return modelId.split("/")[0] ?? modelId;
 }
 
@@ -186,7 +189,10 @@ function checkSemantics(spec: EvalSpec, specPath: string): void {
   if (!harness) throw specError(specPath, "x-harness.producer is required this milestone");
 
   const declaredChecks = new Set(Object.keys(spec.evaluators.required_checks ?? {}));
-  const judgeVendor = vendorOf(spec.evaluators.judge.model);
+  const judge = spec.evaluators.judge;
+  const judgeProblem = endpointProblem(judge);
+  if (judgeProblem) throw specError(specPath, `evaluators.judge: ${judgeProblem}`);
+  const judgeVendor = vendorOf(judge.model, judge.provider_route);
 
   for (const step of steps) {
     const missing = step.candidate_ids.filter((id) => !byId.has(id));
@@ -208,11 +214,17 @@ function checkSemantics(spec: EvalSpec, specPath: string): void {
       if (adapter !== "agent-cli" && !c.model) {
         throw specError(specPath, `candidate "${c.id}" adapter ${adapter} needs a model`);
       }
+      // A command candidate's route is a label; any other is where agenteval calls the model.
+      const problem = adapter === "agent-cli" ? null : endpointProblem(c);
+      if (problem) throw specError(specPath, `candidate "${c.id}": ${problem}`);
+      if (c.prompt_file && adapter !== "model-api") {
+        throw specError(specPath, `candidate "${c.id}": prompt_file needs adapter model-api (step "${step.id}" uses ${adapter})`);
+      }
     }
 
     const sameVendor = step.candidate_ids.filter((id) => {
-      const model = byId.get(id)!.model;
-      return model !== undefined && vendorOf(model) === judgeVendor;
+      const c = byId.get(id)!;
+      return c.model !== undefined && vendorOf(c.model, c.provider_route) === judgeVendor;
     });
     if (sameVendor.length > 0 && !harness.allow_same_vendor_judge) {
       throw specError(
@@ -407,6 +419,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     rubricFile,
     candidates: [...step.candidate_ids],
     judge: spec.evaluators.judge.model,
+    judgeEndpoint: endpointOf(spec.evaluators.judge),
     judgeMethods: judgeMethodsOf(spec, step.judge),
     ...((step.judge?.show ?? spec.evaluators.judge.show)?.length ? { judgeShow: step.judge?.show ?? spec.evaluators.judge.show } : {}),
     inputs: [...step.test_set.inputs],

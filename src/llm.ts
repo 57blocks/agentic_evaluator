@@ -1,11 +1,13 @@
 /**
- * Minimal, self-contained OpenRouter client.
+ * One model call over any supported route (src/providers/): OpenRouter by
+ * default, or Anthropic, OpenAI or an OpenAI-compatible server directly.
  *
  * One fetch call, no fallback (evaluation needs single-model attribution).
- * Reads only OPENROUTER_API_KEY. Prefers provider-reported exact cost
- * (`usage.cost` via `usage:{include:true}`); falls back to a small private
- * pricing table and LABELS the result `estimated` — estimated and reported
- * costs are never mixed silently (protocol §3, cost accounting).
+ * OpenRouter reports exact cost (`usage.cost` via `usage:{include:true}`);
+ * when it does not, a small private pricing table is used and the result is
+ * LABELLED `estimated`. Direct routes report no cost: their tokens are
+ * priced with the endpoint's declared price, also `estimated` — estimated and
+ * reported costs are never mixed silently (protocol §3, cost accounting).
  *
  * Every call can emit trace events (request, response or error) through an
  * optional callback so the run's trace.jsonl sees judge and scorer calls too.
@@ -15,8 +17,9 @@
 
 import { sha256 } from "./canon/hash.js";
 import type { CostSource } from "./canon/types.js";
+import { costOf } from "./pricing.js";
+import { apiKeyEnvOf, DEFAULT_ROUTE, providerFor, type ModelEndpoint, type ProviderReply, type SamplingOptions } from "./providers/index.js";
 
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_TIMEOUT_MS = 120_000;
 
 /** Private pricing fallback ($/1M tokens). Used only when usage.cost is missing. */
@@ -46,7 +49,7 @@ export interface LlmResult extends LlmUsage {
   transportRetries?: number;
   /** Anything the abandoned transport attempts were billed. */
   retryCostUsd?: number;
-  /** Upstream provider that served the request, as reported by OpenRouter. */
+  /** Who served the request: OpenRouter's upstream, or the model id a direct API answered with. */
   provider?: string;
   finishReason?: string;
   /** Provider-supplied refusal text, when the model declined. */
@@ -116,56 +119,43 @@ export interface LlmCallEvent {
 
 export type LlmTrace = (event: LlmCallEvent) => void;
 
-interface RawUsage {
-  prompt_tokens?: number;
-  completion_tokens?: number;
-  cost?: number;
-  prompt_tokens_details?: { cached_tokens?: number };
-}
+const OPENROUTER: ModelEndpoint = { route: DEFAULT_ROUTE };
 
-interface CompletionResponse {
-  provider?: string;
-  choices?: Array<{
-    finish_reason?: string;
-    native_finish_reason?: string;
-    message?: { content?: string | null; refusal?: string | null };
-  }>;
-  usage?: RawUsage;
-}
-
-function normaliseUsage(model: string, usage: RawUsage | undefined): LlmUsage {
-  const promptTokens = usage?.prompt_tokens ?? 0;
-  const completionTokens = usage?.completion_tokens ?? 0;
-  const cachedTokens = usage?.prompt_tokens_details?.cached_tokens;
-  if (usage && typeof usage.cost === "number" && usage.cost > 0) {
-    return { promptTokens, completionTokens, cachedTokens, costUsd: usage.cost, costSource: "provider-reported" };
+function normaliseUsage(model: string, reply: ProviderReply, endpoint: ModelEndpoint): LlmUsage {
+  const { tokens } = reply;
+  const promptTokens = tokens.input + tokens.cacheRead + tokens.cacheWrite;
+  const completionTokens = tokens.output;
+  const cachedTokens = reply.cachedTokens;
+  if (reply.reportedCostUsd !== undefined && reply.reportedCostUsd > 0) {
+    return { promptTokens, completionTokens, cachedTokens, costUsd: reply.reportedCostUsd, costSource: "provider-reported" };
   }
-  const price = PRICING[model];
-  if (usage && price) {
-    const costUsd = (promptTokens / 1_000_000) * price.input + (completionTokens / 1_000_000) * price.output;
-    return { promptTokens, completionTokens, cachedTokens, costUsd, costSource: "estimated" };
+  const listed = PRICING[model];
+  const price = endpoint.price ?? (endpoint.route === "openrouter" && listed ? { input: listed.input, output: listed.output } : undefined);
+  if (reply.usageReported && price) {
+    return { promptTokens, completionTokens, cachedTokens, costUsd: costOf(tokens, price), costSource: "estimated" };
   }
   return { promptTokens, completionTokens, cachedTokens, costUsd: 0, costSource: "none" };
 }
 
-export interface CompleteParams {
+export interface CompleteParams extends SamplingOptions {
   model: string;
   prompt: string;
-  temperature: number;
+  /** Where to call the model; OpenRouter when omitted. */
+  endpoint?: ModelEndpoint;
   timeoutMs?: number;
-  /** Cap the completion so long structured replies aren't truncated mid-JSON. */
-  maxTokens?: number;
-  /** Ask the provider for a strict JSON object (used by the judge and scorer). */
-  jsonMode?: boolean;
   trace?: LlmTrace;
   traceContext?: Record<string, unknown>;
 }
 
 async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not set (put it in .env.local)");
+  const endpoint = params.endpoint ?? OPENROUTER;
+  const provider = providerFor(endpoint.route);
+  const keyEnv = apiKeyEnvOf(endpoint);
+  const apiKey = keyEnv ? process.env[keyEnv] : undefined;
+  if (keyEnv && !apiKey) {
+    throw new Error(`${keyEnv} is not set (put it in .env.local)`);
   }
+  const request = provider.build(params, endpoint, apiKey);
 
   const promptSha = sha256(params.prompt);
   const base = {
@@ -197,22 +187,10 @@ async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmR
   try {
     let res: Response;
     try {
-      res = await fetch(OPENROUTER_URL, {
+      res = await fetch(request.url, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://57blocks.com/agentic-evaluator",
-          "X-OpenRouter-Title": "Agentic Evaluator",
-        },
-        body: JSON.stringify({
-          model: params.model,
-          messages: [{ role: "user", content: params.prompt }],
-          temperature: params.temperature,
-          ...(params.maxTokens ? { max_tokens: params.maxTokens } : {}),
-          ...(params.jsonMode ? { response_format: { type: "json_object" } } : {}),
-          usage: { include: true },
-        }),
+        headers: request.headers,
+        body: JSON.stringify(request.body),
         signal: controller.signal,
       });
     } catch (err) {
@@ -228,7 +206,7 @@ async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmR
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       return fail(
-        new LlmError(`OpenRouter ${res.status}: ${body.slice(0, 300)}`, {
+        new LlmError(`${provider.label} ${res.status}: ${body.slice(0, 300)}`, {
           kind: "http",
           httpStatus: res.status,
           ms: elapsed(),
@@ -239,9 +217,9 @@ async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmR
     // Reading the body is also governed by the abort signal: a slow judge that
     // starts replying but does not finish before the timeout aborts HERE, not
     // in fetch(). Classify it as a timeout too, never as an unknown error.
-    let json: CompletionResponse;
+    let json: unknown;
     try {
-      json = (await res.json()) as CompletionResponse;
+      json = await res.json();
     } catch (err) {
       const isAbort = err instanceof Error && err.name === "AbortError";
       return fail(
@@ -251,22 +229,21 @@ async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmR
         ),
       );
     }
-    const choice = json.choices?.[0];
-    const text = choice?.message?.content ?? "";
-    const usage = normaliseUsage(params.model, json.usage);
-    const provider = json.provider;
-    const finishReason = choice?.finish_reason ?? choice?.native_finish_reason;
-    const refusal = choice?.message?.refusal ?? undefined;
+    const reply = provider.parse(json);
+    const text = reply.text;
+    const usage = normaliseUsage(params.model, reply, endpoint);
+    const servedBy = reply.provider;
+    const { finishReason, refusal } = reply;
     const ms = elapsed();
 
     if (!text.trim()) {
       return fail(
-        new LlmError("empty completion", { kind: "empty", ms, usage, provider, finishReason, refusal }),
+        new LlmError("empty completion", { kind: "empty", ms, usage, provider: servedBy, finishReason, refusal }),
       );
     }
 
-    params.trace?.({ type: "model.response", ...base, ms, usage, provider, finishReason });
-    return { text, ms, provider, finishReason, refusal, ...usage };
+    params.trace?.({ type: "model.response", ...base, ms, usage, provider: servedBy, finishReason });
+    return { text, ms, provider: servedBy, finishReason, refusal, ...usage };
   } finally {
     clearTimeout(timeout);
   }

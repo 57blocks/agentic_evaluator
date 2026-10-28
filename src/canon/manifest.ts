@@ -116,7 +116,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     control_candidate: suite.controlCandidate ?? null,
     judge: {
       model: suite.judge,
-      provider_route: "openrouter",
+      provider_route: suite.judgeEndpoint?.route ?? "openrouter",
       methods: suite.judgeMethods ?? ["pairwise-swap", "absolute-1-5"],
     },
     evaluators: {

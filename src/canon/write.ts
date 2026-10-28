@@ -151,16 +151,16 @@ export function buildGaps(
   lines.push("- `ttft_ms`: non-streaming calls; no time to first token.");
   lines.push(
     sawCache
-      ? "- `cache`: OpenRouter reported cached prompt tokens on some calls; recorded under `tokens.cached`, no cache cost breakdown."
+      ? "- `cache`: the provider reported cached prompt tokens on some calls; recorded under `tokens.cached`, no cache cost breakdown."
       : "- `cache`: no cached prompt tokens reported on any call; cache economics not observable.",
   );
   const sawCli = trials.some((t) => t.deployment_ref?.startsWith("cli/"));
   lines.push(
     sawProvider
       ? sawCli
-        ? "- `deployment_ref.region / tier`: who served the model is read from the command's trace (`cli/…`) or from OpenRouter; region and service tier are not exposed."
-        : "- `deployment_ref.region / tier`: provider name observed via OpenRouter; region and service tier are not exposed."
-      : "- `deployment_ref`: OpenRouter did not return a provider on these calls.",
+        ? "- `deployment_ref.region / tier`: who served the model is read from the command's trace (`cli/…`), from OpenRouter's upstream provider, or from the model id a direct API answered with; region and service tier are not exposed."
+        : "- `deployment_ref.region / tier`: route plus who served the call (OpenRouter's upstream provider, or the model id a direct API answered with); region and service tier are not exposed."
+      : "- `deployment_ref`: no route reported who served these calls.",
   );
   lines.push("- `human_intervention`: not observed; no trace format read here says whether the agent waited on a person.");
   lines.push(agentActivityGap(trials, tracing));

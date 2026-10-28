@@ -139,6 +139,7 @@ export async function judgeRun(
       try {
         const j = await judge({
           judgeModel: suite.judge,
+          judgeEndpoint: suite.judgeEndpoint,
           rubric,
           dimensions: dims,
           inputSlug: p.input,

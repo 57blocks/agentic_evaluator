@@ -20,6 +20,7 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { adapterIdOf } from "../adapters/types.js";
+import { apiKeyEnvOf, endpointOf, type ModelEndpoint } from "../providers/index.js";
 import { sha256 } from "../canon/hash.js";
 import { directionality } from "../canon/rates.js";
 import { resolveEligibility } from "../canon/select.js";
@@ -173,6 +174,33 @@ function candidateFindings(suite: Suite): Finding[] {
   return out;
 }
 
+/**
+ * A direct route's key, which this environment must set before a run can
+ * call it (OpenRouter's is left to the run, as before), and settings a
+ * route does not send.
+ */
+function endpointFindings(suite: Suite): Finding[] {
+  const out: Finding[] = [];
+  const keyMissing = (who: string, endpoint: ModelEndpoint): void => {
+    if (endpoint.route === "openrouter") return;
+    const env = apiKeyEnvOf(endpoint);
+    if (env && process.env[env] === undefined) {
+      out.push({ severity: "blocking", code: "endpoint.key-missing", message: `${who}: provider_route ${endpoint.route} needs ${env}, which is not set (export it, or put it in .env.local)` });
+    }
+  };
+  for (const [id, def] of Object.entries(suite.candidateDefs ?? {})) {
+    if (adapterIdOf(def, suite.producer ?? "prompt") === "agent-cli") continue;
+    keyMissing(id, endpointOf(def));
+    const g = def.generation_settings ?? {};
+    const unsent = def.provider_route === "anthropic" ? (["temperature", "top_p"] as const).filter((k) => g[k] !== undefined) : [];
+    if (unsent.length > 0) {
+      out.push({ severity: "warning", code: "endpoint.setting-not-sent", message: `${id}: ${unsent.join(", ")} declared but not sent; the Anthropic API rejects sampling settings, use reasoning_effort instead` });
+    }
+  }
+  if (suite.judgeEndpoint) keyMissing(`judge ${suite.judge}`, suite.judgeEndpoint);
+  return out;
+}
+
 function stepFindings(suite: Suite): Finding[] {
   const checks = suite.requiredChecks ?? [];
   if (checks.length === 0 && suite.operatingMode !== "judge-preference") {
@@ -266,6 +294,7 @@ async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Fi
   const findings: Finding[] = [
     ...stepFindings(suite),
     ...candidateFindings(suite),
+    ...endpointFindings(suite),
     ...(await reviewFindings(suite)),
     ...(await judgeShowFindings(suite)),
     ...(await fixtureFindings(suite)),
