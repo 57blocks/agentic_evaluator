@@ -10,6 +10,19 @@
 /** The protocol version a spec must declare; the dashboard shows the same value. */
 export const PROTOCOL_VERSION = "0.3";
 
+/** USD per million tokens, on a candidate or the judge. */
+const PRICE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["input", "output"],
+  properties: {
+    input: { type: "number", minimum: 0 },
+    output: { type: "number", minimum: 0 },
+    cache_read: { type: "number", minimum: 0 },
+    cache_write: { type: "number", minimum: 0 },
+  },
+} as const;
+
 export const SPEC_SCHEMA = {
   $schema: "http://json-schema.org/draft-07/schema#",
   $id: "https://57blocks.com/agentic-evaluator/spec-v0.4.schema.json",
@@ -153,23 +166,21 @@ export const SPEC_SCHEMA = {
           adapter: { type: "string", enum: ["model-api", "codegen", "agent-cli"] },
           model: { type: "string" },
           provider_route: { type: "string" },
-          price: {
-            type: "object",
-            additionalProperties: false,
-            required: ["input", "output"],
-            properties: {
-              input: { type: "number", minimum: 0 },
-              output: { type: "number", minimum: 0 },
-              cache_read: { type: "number", minimum: 0 },
-              cache_write: { type: "number", minimum: 0 },
-            },
-          },
+          base_url: { type: "string", pattern: "^https?://" },
+          api_key_env: { type: "string", pattern: "^[A-Za-z_][A-Za-z0-9_]*$" },
+          prompt_file: { type: "string", minLength: 1 },
+          system: { type: "string", minLength: 1 },
+          price: PRICE_SCHEMA,
           generation_settings: {
             type: "object",
             additionalProperties: false,
             properties: {
               temperature: { type: "number", minimum: 0, maximum: 2 },
               max_tokens: { type: "integer", minimum: 1 },
+              top_p: { type: "number", exclusiveMinimum: 0, maximum: 1 },
+              seed: { type: "integer" },
+              stop: { type: "array", minItems: 1, items: { type: "string", minLength: 1 } },
+              reasoning_effort: { type: "string", enum: ["low", "medium", "high", "xhigh", "max"] },
             },
           },
           cli: {
@@ -234,7 +245,10 @@ export const SPEC_SCHEMA = {
           required: ["model", "rubric_file"],
           properties: {
             model: { type: "string" },
-            provider_route: { type: "string" },
+            provider_route: { type: "string", enum: ["openrouter", "anthropic", "openai", "openai-compatible"] },
+            base_url: { type: "string", pattern: "^https?://" },
+            api_key_env: { type: "string", pattern: "^[A-Za-z_][A-Za-z0-9_]*$" },
+            price: PRICE_SCHEMA,
             rubric_file: { type: "string" },
             methods: {
               type: "array",

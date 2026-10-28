@@ -8,7 +8,7 @@ import {
   type ExecutionContext,
 } from "./types.js";
 
-/** One OpenRouter completion. Same behaviour as the original prompt producer. */
+/** One completion on the candidate's route (OpenRouter unless it declares another). */
 export const modelApiAdapter: CandidateAdapter = {
   id: "model-api",
 
@@ -21,6 +21,8 @@ export const modelApiAdapter: CandidateAdapter = {
         temperature: request.temperature,
         timeoutMs: request.timeoutMs,
         maxTokens: request.maxTokens,
+        ...request.sampling,
+        ...(request.endpoint ? { endpoint: request.endpoint } : {}),
         trace: context.emit,
         traceContext: context.traceContext,
       }),

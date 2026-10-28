@@ -15,6 +15,7 @@
  * questions, same probe, same states.
  */
 
+import { endpointOf } from "../../providers/index.js";
 import { loadWorkflow } from "../../spec/load-spec.js";
 import { findWorkspace, resolveSpecPath, workspaceAt } from "../../core/workspace.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
@@ -66,14 +67,18 @@ async function fetchCatalog(): Promise<Map<string, CatalogModel>> {
   return new Map((json.data ?? []).map((m) => [m.id, m]));
 }
 
-/** OpenRouter ids actually used by any step. CLI-only candidates have no model. */
+/**
+ * OpenRouter ids actually used by any step. CLI-only candidates have no
+ * model; a model called on a direct route is not in the OpenRouter catalog.
+ */
 function modelsToCheck(suites: readonly Suite[]): Map<string, string> {
   const models = new Map<string, string>();
   for (const suite of suites) {
     for (const [id, def] of Object.entries(suite.candidateDefs ?? {})) {
-      if (def.model) models.set(def.model, `candidate ${id}`);
+      const direct = def.adapter !== "agent-cli" && endpointOf(def).route !== "openrouter";
+      if (def.model && !direct) models.set(def.model, `candidate ${id}`);
     }
-    models.set(suite.judge, "judge");
+    if ((suite.judgeEndpoint?.route ?? "openrouter") === "openrouter") models.set(suite.judge, "judge");
   }
   return models;
 }

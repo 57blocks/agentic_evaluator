@@ -113,3 +113,33 @@ test("reuse matches on the step recorded in the rows, not on the run directory's
 
   await fs.rm(ws, { recursive: true, force: true });
 });
+
+test("reuse finds the task's own runs when an unrelated tasks/ sits above it", async () => {
+  // Arrange - a task outside any workspace's tasks/, under a directory whose
+  // ancestor holds some other tasks/. The workspace resolves to that
+  // ancestor, whose scan never reached the runs written beside this task.
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "eval-reuse-"));
+  await fs.mkdir(path.join(root, "tasks"));
+  const dest = path.join(root, "other", "smoke-local");
+  await fs.cp(path.join(INSTALL_ROOT, "tasks", "smoke-local"), dest, {
+    recursive: true,
+    filter: (s) => !s.includes(`${path.sep}runs`),
+  });
+  const spec = path.join(dest, "spec.yaml");
+  await runSuite(spec, false, { yes: true });
+
+  // Act
+  process.env.EVAL_REUSE = "1";
+  const events: RunEvent[] = [];
+  try {
+    await runSuite(spec, false, { yes: true, onEvent: (e) => events.push(e) });
+  } finally {
+    delete process.env.EVAL_REUSE;
+  }
+
+  // Assert
+  const trials = events.filter((e): e is Extract<RunEvent, { type: "trial" }> => e.type === "trial");
+  assert.ok(trials.length > 0 && trials.every((t) => t.reusedFrom), `not reused: ${JSON.stringify(trials)}`);
+
+  await fs.rm(root, { recursive: true, force: true });
+});
