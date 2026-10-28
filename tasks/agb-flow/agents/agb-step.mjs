@@ -155,19 +155,28 @@ const PROMPTS = {
     "遇到需要问人的地方，按最合理的假设继续，并把假设写进产物。",
 };
 
+/**
+ * claude's event stream is the trace: every model call, tool call and the
+ * closing result, kept as .eval-trace.jsonl (cli.trace: claude-code), from
+ * which agenteval also reads the run's tokens and cost. The result line is
+ * the last one; what runClaude needs from it is read back from the file.
+ */
 function runClaude(prompt) {
   const r = spawnSync("claude", [
     "-p", prompt,
-    "--output-format", "json",
+    "--output-format", "stream-json", "--verbose",
     "--model", model,
     "--max-budget-usd", String(claudeCap),
     "--plugin-dir", PLUGIN,
     "--permission-mode", "acceptEdits",
     "--allowedTools", "Read", "Edit", "Write", "Glob", "Grep", "Skill", "Bash(ls:*)",
   ], { cwd, env, encoding: "utf-8", stdio: ["ignore", "pipe", "inherit"], maxBuffer: 16 * 1024 * 1024 });
+  writeFileSync(path.join(cwd, ".eval-trace.jsonl"), r.stdout ?? "");
+  const lines = (r.stdout ?? "").split("\n").filter(Boolean);
   let out;
   try {
-    out = JSON.parse(r.stdout);
+    out = JSON.parse(lines[lines.length - 1] ?? "");
+    if (out.type !== "result") throw new Error("last line is not the result");
   } catch {
     console.error(`claude printed no result: ${(r.stdout ?? "").slice(-1000)}`);
     return 1;

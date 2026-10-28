@@ -620,6 +620,15 @@ command stopped on its time limit still has its trace read, marked
 still serves earlier runs. Without it, `GAPS.md` says the agent's activity
 was not observed.
 
+A command that runs `claude -p` directly declares `trace: claude-code` and
+tees `--output-format stream-json --verbose` into `.eval-trace.jsonl`
+(`tasks/agb-flow/agents/agb-step.mjs` does). That stream also carries retries,
+permission denials, context compactions and each tool call's verdict, and
+its closing totals serve as the usage report, so `reports_usage` is not
+needed; its cost is claude's own estimate, recorded as `estimated`. The
+deployment label comes from the stream too: `cli/anthropic-subscription`
+for a subscription login, `cli/anthropic` for an API key.
+
 `prompt_tokens` is input not read from or written to a cache. A step's
 `max_cost_per_trial_usd` is handed to the command as `{{max_cost_usd}}` and
 `EVAL_MAX_COST_USD`, with the model's price as `EVAL_MODEL_PRICE` (JSON, per

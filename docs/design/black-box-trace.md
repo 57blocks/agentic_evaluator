@@ -1,6 +1,6 @@
 # Black-box agents: read the trace the command leaves
 
-Status: 2026-10-27. **Step 1 built** (ATIF reader, `cli.trace`, rows, traces/, GAPS, report) on `feat/agent-trace`; steps 2 and 3 are proposals.
+Status: 2026-10-27. **Step 1 built** (ATIF reader, `cli.trace`, rows, traces/, GAPS, report; PR #21) and **step 2 built** (Claude Code reader, usage and deployment label from the stream, agb-step on stream-json) on `feat/claude-code-trace`; step 3 is a proposal.
 
 ## Why
 
@@ -27,14 +27,13 @@ candidates:
     cli:
       argv: [bash, agents/harbor-run.sh, terminus-2, anthropic/claude-sonnet-5, "{{input}}"]
       reports_usage: true
-      trace: atif            # omitted → not observed; claude-code comes with step 2
+      trace: atif            # or claude-code; omitted → not observed
 ```
 
 - `trace: atif` — the command leaves `.eval-trace.json`, an ATIF document
   (Harbor's Agent Trajectory Interchange Format, versions 1.0–1.7).
-- `trace: claude-code` (step 2, not yet accepted by the schema) — the command
-  leaves `.eval-trace.jsonl`, the newline-delimited stream of
-  `claude -p --output-format stream-json --verbose`.
+- `trace: claude-code` — the command leaves `.eval-trace.jsonl`, the
+  newline-delimited stream of `claude -p --output-format stream-json --verbose`.
 - Omitted — nothing is read; GAPS keeps saying not observed.
 
 The file names are fixed, like `.eval-usage.json`; the wrapper copies or tees
@@ -224,8 +223,9 @@ The spike's `harbor-run.sh` also changes to copy `agent/trajectory.json` to
    trial must hit. **Done** (2026-10-27).
 3. `import-harbor` on the spike's job dir, then `agenteval report`.
 4. agb's test-design step with one Claude candidate on one input through
-   stream-json (about $1), to see turns and tool calls on a real agb run.
-   The code-step rerun stays a separate, paid job.
+   stream-json: **done** (2026-10-27, opus on demo-todo, $0.84 estimated):
+   11 turns, 12 tool calls (Bash ×10, Skill, Write), deployment
+   `cli/anthropic-subscription`. The code-step rerun stays a separate, paid job.
 
 ## Order
 

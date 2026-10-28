@@ -12,10 +12,20 @@
 import { TraceError, type AgentTrace, type TraceFormat } from "../canon/agent-trace.js";
 import { readWorkFile } from "../adapters/work-file.js";
 import { parseAtif } from "./atif.js";
+import { parseClaudeCodeStream } from "./claude-code.js";
 
-export const TRACE_FILES: Readonly<Record<TraceFormat, string>> = { atif: ".eval-trace.json" };
+export const TRACE_FILES: Readonly<Record<TraceFormat, string>> = { atif: ".eval-trace.json", "claude-code": ".eval-trace.jsonl" };
 
 export type TraceRead = { trace: AgentTrace } | { error: string } | null;
+
+function parse(format: TraceFormat, text: string): AgentTrace {
+  switch (format) {
+    case "atif":
+      return parseAtif(JSON.parse(text));
+    case "claude-code":
+      return parseClaudeCodeStream(text);
+  }
+}
 
 /**
  * The trace in a work dir, or why it could not be read; null when the
@@ -26,15 +36,10 @@ export async function readTraceFile(workDir: string, format: TraceFormat): Promi
   const read = await readWorkFile(workDir, TRACE_FILES[format]);
   if (read === null) return null;
   if ("refused" in read) return { error: `${read.refused}; not read as ${format}` };
-  let parsed: unknown;
   try {
-    parsed = JSON.parse(read.text);
-  } catch {
-    return { error: `${TRACE_FILES[format]} unreadable as ${format}: not JSON` };
-  }
-  try {
-    return { trace: parseAtif(parsed) };
+    return { trace: parse(format, read.text) };
   } catch (err) {
+    if (err instanceof SyntaxError) return { error: `${TRACE_FILES[format]} unreadable as ${format}: not JSON` };
     // TraceError messages name a field, never the file's contents.
     const why = err instanceof TraceError ? err.message : "unexpected shape";
     return { error: `${TRACE_FILES[format]} unreadable as ${format}: ${why}` };
