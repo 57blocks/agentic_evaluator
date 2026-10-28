@@ -333,6 +333,8 @@ export interface Certainty {
   evidence: Recommendation["evidence"];
   inputs: number;
   effectiveN: number;
+  /** Inputs the judge separated in some pairwise duel; null when no pairwise judging ran. */
+  judgeEffectiveN: number | null;
   allPass: number;
   flat: number;
   /** Inputs every candidate failed: harness or check suspects. */
@@ -346,6 +348,7 @@ export function certaintyOf(rec: Recommendation, trials: readonly TrialRow[]): C
     evidence: rec.evidence ?? null,
     inputs: s.inputs,
     effectiveN: s.effective_n,
+    judgeEffectiveN: s.judge_effective_n,
     allPass: s.counts["all-pass"],
     flat: s.counts.flat,
     allFail: s.items.filter((i) => i.class === "all-fail").map((i) => i.input),

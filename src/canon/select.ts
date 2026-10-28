@@ -10,7 +10,7 @@ import { judgeStandings, type JudgeStanding } from "./judge-standings.js";
 import { judgeDiscrimination } from "./discrimination.js";
 import type { TrialRow } from "./rows.js";
 import { allTrialsPassRate, directionality, type CandidateRates, type Directionality, type Rate } from "./rates.js";
-import { clearsGate, fmtP, pairByInput, wilson, type PairedComparison } from "./stats.js";
+import { clearsGate, fmtP, judgePairByInput, pairByInput, wilson, type PairedComparison } from "./stats.js";
 import type { EligibilityDecl, EligibilityThresholds, OperatingMode } from "./types.js";
 
 export const SELECT_RULE_VERSION = "select-v4" as const;
@@ -104,7 +104,10 @@ export interface GateInterval {
 
 export interface FirmnessEvidence {
   gates: GateInterval[];
-  /** highest-assurance only: the chosen candidate against the runner-up, by input. */
+  /**
+   * The chosen candidate against the runner-up, by input: on task success in
+   * highest-assurance, on the judge's pairwise verdicts in judge-preference.
+   */
   versus_runner_up: PairedComparison | null;
 }
 
@@ -311,7 +314,7 @@ const pct = (x: number): string => `${Math.round(x * 100)}%`;
 interface Pick {
   chosen: string | null;
   reason: string;
-  /** highest-assurance: the next candidate in its ranking, whom the chosen must beat. */
+  /** highest-assurance and judge-preference: the next candidate in the ranking, whom the chosen must beat. */
   runnerUp?: string;
 }
 
@@ -424,6 +427,7 @@ function pickJudgePreference(
 
   return {
     chosen: best.candidate,
+    runnerUp: ranked[1]?.candidate,
     reason: `highest judge preference: ${s.wins}–${s.losses}–${s.ties} over ${s.comparisons} comparison(s), ${absolute}. This ranks one model's opinion, not measured task success.`,
   };
 }
@@ -631,11 +635,20 @@ export function recommend(input: RecommendInput): Recommendation {
   else if (mode === JUDGE_MODE) {
     // Capped on purpose: no deterministic check ran, so nothing here is firm.
     firmness = "directional";
+    // No duel between the two (absolute scoring only): nothing to compare.
+    const duel = runnerUp === undefined ? null : judgePairByInput(input.trials ?? [], chosen, runnerUp);
+    const versus = duel !== null && duel.compared > 0 ? duel : null;
+    evidence = { gates: [], versus_runner_up: versus };
     firmnessReasons = [
       input.requiredChecks.length === 0
         ? "judge-preference: this step declares no required check, so task success is undetermined for every candidate and this ranking rests entirely on the judge model"
         : "judge-preference: the ranking rests on the judge model, not on the required checks",
       ...input.directionality.reasons,
+      ...(versus === null || (versus.significant && versus.a_better > versus.b_better)
+        ? []
+        : [
+            `${chosen} and ${runnerUp} cannot be told apart by the judge: preferred ${chosen} on ${versus.a_better} input(s), ${runnerUp} on ${versus.b_better}, tied on ${versus.same} (sign test p ${fmtP(versus.p_value)})`,
+          ]),
     ];
   } else {
     const judged = judgeFirmness(byId(candidates, chosen)!, runnerUp, mode, eligibility, input.trials ?? []);
