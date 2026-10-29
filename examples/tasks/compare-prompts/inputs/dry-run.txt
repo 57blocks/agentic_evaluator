@@ -1,0 +1,8 @@
+Write release notes for v2.4.0 from the merged pull requests below.
+Group them under "## Features", "## Fixes" and "## Breaking changes", and cite
+every PR by its number (#123). Leave nothing out.
+
+#490 feat: a `--dry-run` flag for `agenteval run`; prints what would be billed and exits
+#491 fix: `agenteval models` hung when OpenRouter returned a 5xx; it now fails fast with the status
+#492 fix: the dashboard dark mode lost the chart colours
+#493 feat!: `budget_usd` is required; a spec without one is refused

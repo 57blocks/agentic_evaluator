@@ -322,7 +322,7 @@ Copying keeps their runs in your workspace instead of in the global install.
 | `chain-offline` | a two-step workflow and its end-to-end validation | nothing | free |
 | `docker-sandbox` | the same agent run in a Docker container and on the host; each trial records which | Docker running | free |
 | `compare-models` | two real models, a deterministic gate plus a pairwise judge | `OPENROUTER_API_KEY` | capped at $0.50 |
-| `compare-prompts` | one model with three prompts (the step's, its own `prompt_file`, a `system`), picked by judge preference | `OPENROUTER_API_KEY` | capped at $0.50 |
+| `compare-prompts` | one model with three prompts (the step's, its own `prompt_file`, a `system`) on eight changelogs, picked by judge preference | `OPENROUTER_API_KEY` | capped at $3 |
 | `compare-agents` | Claude Code, OpenCode and pi on the same coding job, graded by behavioural tests | the three agents and their keys; `OPENROUTER_API_KEY` for the judge | agents bill their own providers; judge capped at $1 |
 | `compare-agent-models` | one agent (OpenCode) with three models — the model's effect, agent held fixed | OpenCode; `OPENROUTER_API_KEY` | billed by OpenRouter; judge capped at $1 |
 | `compare-setups` | concrete agent + model combinations head to head | the three agents and their keys; `OPENROUTER_API_KEY` | agents bill their own providers; judge capped at $1 |
@@ -542,7 +542,8 @@ candidates:
 A prompt is part of a candidate, so two prompts on the same model are two
 candidates, and a run picks between them the way it picks between models:
 the required check gates, the judge compares. The sample `compare-prompts`
-([Samples](#samples)) is this on the release-notes task, capped at $0.50.
+([Samples](#samples)) is this on the release-notes task: eight changelogs,
+two trials each, capped at $3.
 
 ```yaml
 workflow:

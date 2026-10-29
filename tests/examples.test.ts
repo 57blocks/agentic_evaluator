@@ -130,16 +130,16 @@ test("compare-models: loads, and plans 2 generations and 2 judge calls under a $
   assert.equal(plan.steps[0].budgetUsd, 0.5);
 });
 
-test("compare-prompts: one model three ways, 3 generations and 6 judge calls, picked by judge preference", async () => {
+test("compare-prompts: one model three ways on eight inputs, 48 generations and 48 judge calls, picked by judge preference", async () => {
   // Act
   const suites = await loadWorkflow(path.join(EXAMPLES, "compare-prompts", "spec.yaml"));
   const plan = planWorkflow(suites);
 
-  // Assert - 3 prompt variants -> 3 pairs, each judged in both orders.
-  assert.equal(plan.steps[0].generations, 3);
-  assert.equal(plan.steps[0].pairs, 3);
-  assert.equal(plan.steps[0].judgeCalls, 6);
-  assert.equal(plan.steps[0].budgetUsd, 0.5);
+  // Assert - 3 variants × 8 inputs × 2 trials; 3 pairs per input, each judged in both orders.
+  assert.equal(plan.steps[0].generations, 48);
+  assert.equal(plan.steps[0].pairs, 24);
+  assert.equal(plan.steps[0].judgeCalls, 48);
+  assert.equal(plan.steps[0].budgetUsd, 3);
   const defs = Object.values(suites[0].candidateDefs ?? {});
   assert.equal(defs.length, 3);
   assert.equal(new Set(defs.map((d) => d.model)).size, 1, "the candidates differ in their prompts, not their model");

@@ -1,0 +1,9 @@
+Write release notes for v2.4.0 from the merged pull requests below.
+Group them under "## Features", "## Fixes" and "## Breaking changes", and cite
+every PR by its number (#123). Leave nothing out.
+
+#480 feat: handle a Windows path in `prompt_file` (the template was not found on Windows)
+#481 fix: add `--concurrency` to `agenteval run`
+#482 feat: stop counting infra failures against the candidate
+#483 fix!: `trials_per_case` now defaults to 2, not 1; runs declaring nothing get twice the trials
+#484 feat: `check-task` warns when a direct Anthropic route declares a temperature

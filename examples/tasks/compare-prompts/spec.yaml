@@ -4,8 +4,9 @@
 #   agenteval plan examples/tasks/compare-prompts                   # free: call counts
 #   caffeinate -i agenteval run examples/tasks/compare-prompts --yes --html
 #
-# Expected size: 3 generations + 6 judge calls (three pairs, both orders), on
-# a ~300-token prompt. budget_usd is the hard ceiling.
+# Expected size: 8 inputs × 2 trials × 3 candidates = 48 generations, and
+# 48 judge calls (three pairs per input, both orders), on ~300-token prompts:
+# about $1.50. budget_usd is the hard ceiling.
 #
 # What it shows:
 #   - A prompt is part of a candidate. The same model appears three times:
@@ -19,9 +20,12 @@
 #     `operating_mode: judge-preference` picks the one the judge prefers.
 #     Cost cannot separate these candidates — they are one model — so
 #     `lowest-cost` would be the wrong mode here.
-#   - With one input and one trial, every result is directional: good for
-#     seeing the evidence, not for a decision. Add inputs and raise
-#     `trials_per_case` before trusting a ranking.
+#   - Eight changelogs of different shapes (mostly fixes, two breaking changes,
+#     twelve PRs, prefixes that contradict their descriptions, security fixes)
+#     and two trials each. The result is still directional: the step has no
+#     deterministic check that separates the variants, and no minimum
+#     meaningful difference is declared; the sign test over inputs says how
+#     far apart they are.
 #
 # A candidate-level `prompt_file` works on `producer: prompt` steps only; a
 # codegen or agent-cli candidate varies its instructions by being a different
@@ -29,7 +33,7 @@
 
 protocol_version: "0.3"
 run_name: compare-prompts
-budget_usd: 0.5
+budget_usd: 3
 
 workflow:
   control_candidate: notes-original
@@ -41,7 +45,7 @@ workflow:
       rubric_file: rubrics/notes.md
       test_set:
         id: changelog-v1
-        inputs: [changelog]
+        inputs: [changelog, mostly-fixes, two-breaking, prompt-routes, long-release, mislabelled, dry-run, security]
       candidate_ids: [notes-original, notes-checklist, notes-system]
       required_checks: [release-notes]
       judged_dimensions: [faithfulness, grouping, clarity]
@@ -80,8 +84,8 @@ evaluators:
     methods: [pairwise-swap]
 
 execution:
-  trials_per_case: 1
-  concurrency: 3
+  trials_per_case: 2
+  concurrency: 4
   benchmark_mode: capability-neutral
   cache_mode: cold
 
