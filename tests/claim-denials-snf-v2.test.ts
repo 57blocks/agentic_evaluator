@@ -23,6 +23,11 @@ test("R1: the From date does not start the clock", async () => {
   assert.equal(isTimely("2025-10-05", "2024-10-10"), true, "a stay from 2024-09-20 through 2024-10-10, filed 2025-10-05");
 });
 
+test("R1: a wrongful timely-filing denial is reopened within a year of the remittance, not appealed", async () => {
+  const { reopeningDeadline } = await rules();
+  assert.equal(reopeningDeadline("2025-10-05"), "2026-10-05");
+});
+
 test("R2: redetermination is due 125 days after the remittance (120 from presumed receipt 5 days later)", async () => {
   const { redeterminationDeadline } = await rules();
   assert.equal(redeterminationDeadline("2025-08-28"), "2025-12-31");
@@ -68,6 +73,13 @@ test("check: an appeal dated 120 days after the remittance, not 125, fails", () 
   const r = runCheck(id, JSON.stringify({ ...ref, deadline: fiveEarlier }));
   assert.equal(r.code, 1);
   assert.match(r.out, /deadline/);
+});
+
+test("check: appealing a timely claim denied as late fails; the key is a reopening", () => {
+  const id = ids().find((i) => reference(i).root_cause === "timely_filing" && reference(i).correctable === "yes")!;
+  const ref = reference(id);
+  assert.equal(ref.next_action, "reopening");
+  assert.equal(runCheck(id, JSON.stringify({ ...ref, next_action: "appeal" })).code, 1);
 });
 
 test("check: appealing an unprocessable claim fails", () => {

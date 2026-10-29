@@ -16,6 +16,7 @@ import { ARCHETYPES, QUOTA } from "./structures.mjs";
 import { render } from "./render.mjs";
 
 const SEED = 20261016; // v2.1: same seed; reworded the qualifying-stay narrative and dropped an edit message that read as a coding error
+// v2.3: same seed and inputs; R1's remedy is a reopening (CFR 405.926(n)), so only the filing-through-date keys changed.
 const VERSION = "claim-denials-snf-v2";
 const TASK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // v2.2: 300 items. The first pass over QUOTA is v2.1's 30 items, unchanged

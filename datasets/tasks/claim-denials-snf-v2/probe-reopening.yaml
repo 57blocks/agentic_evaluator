@@ -1,0 +1,78 @@
+# claim-denials-reopening-probe — the 50 filing-through-date items of
+# claim-denials-snf-v2 after the v2.3 key change (appeal → reopening), run on
+# the three models that led the v2.2 run. Same prompt, checks and references
+# as spec.yaml; only the input list, the candidates and the budget differ.
+#
+#   agenteval check-task datasets/tasks/claim-denials-snf-v2/probe-reopening.yaml
+#   agenteval run datasets/tasks/claim-denials-snf-v2/probe-reopening.yaml --yes --html   # billed, ~$3
+
+protocol_version: "0.3"
+run_name: claim-denials-reopening-probe
+description: "Probe after the v2.3 key change: the 50 filing-through-date items only, three strongest models. Does any model know a wrongful timely-filing denial is reopened (42 CFR 405.926(n)), not appealed? Not comparable with the v2.2 runs: the prompt gained the reopening option."
+budget_usd: 10
+
+workflow:
+  control_candidate: gpt-5.6-sol
+  steps:
+    - id: triage
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/triage.md
+      rubric_file: rubrics/triage.md
+      test_set:
+        id: claim-denials-snf-v2
+        labels_file: checks/manifest.json
+        inputs: [cd2-012, cd2-013, cd2-014, cd2-015, cd2-016, cd2-042, cd2-043, cd2-044, cd2-045, cd2-046, cd2-072, cd2-073, cd2-074, cd2-075, cd2-076, cd2-102, cd2-103, cd2-104, cd2-105, cd2-106, cd2-132, cd2-133, cd2-134, cd2-135, cd2-136, cd2-162, cd2-163, cd2-164, cd2-165, cd2-166, cd2-192, cd2-193, cd2-194, cd2-195, cd2-196, cd2-222, cd2-223, cd2-224, cd2-225, cd2-226, cd2-252, cd2-253, cd2-254, cd2-255, cd2-256, cd2-282, cd2-283, cd2-284, cd2-285, cd2-286]
+      candidate_ids: [gpt-5.6-sol, kimi-k3, opus-5.5]
+      required_checks: [triage-check]
+      judged_dimensions: [sound-action]
+      success_criteria:
+        mandatory_checks: all
+      # Traps are the point of this set; no model gets all of them. A candidate
+      # qualifies at 90% of its answers passing the check and 90% of trials
+      # completing (a 300 s timeout is a trial that did not complete).
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+
+candidates:
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: opus-5.5
+    model: anthropic/claude-opus-5.5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: gpt-5.6-sol
+    model: openai/gpt-5.6-sol
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    triage-check:
+      kind: command
+      description: "Root cause, correctability, next action and deadline match the key computed from RULES.md; the deadline must be the last day the rules allow."
+      argv: ["node", "checks/triage-check.mjs"]
+      version_files: [checks/triage-check.mjs, checks/manifest.json]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/triage.md
+    methods: [absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/triage.md
+  default_temperature: 0

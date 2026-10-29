@@ -1,0 +1,160 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "lowest-cost",
+  "control_candidate": "gpt-5.6-sol",
+  "eligibility": {
+    "minimum_reliability": 0.9,
+    "minimum_required_check_pass_rate": 0.9,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 0.9",
+      "removed": [
+        {
+          "candidate": "gpt-5.6-sol",
+          "reason": "required-check pass rate 0.000 (0/50) < 0.9"
+        },
+        {
+          "candidate": "kimi-k3",
+          "reason": "required-check pass rate 0.041 (2/49) < 0.9"
+        }
+      ],
+      "remaining": [
+        "opus-5.5"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 0.9",
+      "removed": [],
+      "remaining": [
+        "opus-5.5"
+      ]
+    }
+  ],
+  "eligible": [
+    "opus-5.5"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "gpt-5.6-sol",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 21693,
+      "p95_ms": 50119,
+      "reliability": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 50
+      },
+      "required_check_pass_rate": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 50
+      },
+      "task_success_rate": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 50
+      },
+      "all_trials_pass_rate": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 50
+      }
+    },
+    {
+      "candidate": "kimi-k3",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 31931,
+      "p95_ms": 84826,
+      "reliability": {
+        "value": 0.04,
+        "numerator": 2,
+        "denominator": 50
+      },
+      "required_check_pass_rate": {
+        "value": 0.04081632653061224,
+        "numerator": 2,
+        "denominator": 49
+      },
+      "task_success_rate": {
+        "value": 0.04,
+        "numerator": 2,
+        "denominator": 50
+      },
+      "all_trials_pass_rate": {
+        "value": 0.04,
+        "numerator": 2,
+        "denominator": 50
+      }
+    },
+    {
+      "candidate": "opus-5.5",
+      "eligible": true,
+      "generation_cost_per_success": 0.017495,
+      "p50_ms": 8290,
+      "p95_ms": 10155,
+      "reliability": {
+        "value": 1,
+        "numerator": 50,
+        "denominator": 50
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 50,
+        "denominator": 50
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 50,
+        "denominator": 50
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 50,
+        "denominator": 50
+      }
+    }
+  ],
+  "chosen": "opus-5.5",
+  "compared_to_control": {
+    "beats_control": null,
+    "reason": "cost per success is undefined for chosen or control"
+  },
+  "firmness": "directional",
+  "firmness_reasons": [
+    "no minimum meaningful difference declared"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 0.9,
+        "successes": 50,
+        "n": 50,
+        "low": 0.9286523998213857,
+        "high": 0.9999999999999999
+      },
+      {
+        "gate": "reliability",
+        "threshold": 0.9,
+        "successes": 50,
+        "n": 50,
+        "low": 0.9286523998213857,
+        "high": 0.9999999999999999
+      }
+    ],
+    "versus_runner_up": null
+  },
+  "reasons": [
+    "lowest generation cost per successful task among eligible: $0.017495",
+    "no minimum meaningful difference declared"
+  ],
+  "closest": null
+}

@@ -1,0 +1,2338 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "claim-denials-reopening-probe-2026-10-28T09-25-07-531Z",
+  "run_name": "claim-denials-reopening-probe",
+  "step": {
+    "id": "triage",
+    "version": "1",
+    "description": null
+  },
+  "spec": {
+    "path": "tasks/claim-denials-snf-v2/probe-reopening.yaml",
+    "sha256": "bdcb16d884df98cbbbf9a97821dd9d9eebb8f2e3ca287dfd62a513f313dd5562"
+  },
+  "description": "Probe after the v2.3 key change: the 50 filing-through-date items only, three strongest models. Does any model know a wrongful timely-filing denial is reopened (42 CFR 405.926(n)), not appealed? Not comparable with the v2.2 runs: the prompt gained the reopening option.",
+  "test_set": {
+    "id": "claim-denials-snf-v2",
+    "inputs": {
+      "cd2-012": "eba2dab7b04eb0acfd218b21c65c1e5ce38e7e7c5af35c53a34523603866405f",
+      "cd2-013": "bc9c48cb972972872516e0f6d79c079230449ba256106088aaf9ad5fb84fdecf",
+      "cd2-014": "007952f2ab6eddff0c0c81165564f8c6e4b79d51e5a9fad6739981269981ffb7",
+      "cd2-015": "34c2c3df72fd11413313f8a29059437c1ed7c57bef4b8e82d679ababfe751004",
+      "cd2-016": "e4ea17ff6077e6074fe8b803e1b2ee0d4d27d3124249e5fc5362b719e092627e",
+      "cd2-042": "78919fafdb498e675e054a7ba1ac087168e7be28c3e08838b800be0763e671c0",
+      "cd2-043": "17ecfe822e263d7333edd54b1f66517008943bc1c1a7f0eab6580f7055d50cd1",
+      "cd2-044": "d8d0c024c925145dbc0700dd1c161b7936b47b4643453a84bd6501ba086e0e86",
+      "cd2-045": "fdf080d2ff50519cea5350a34e70a6bffd27968fcba76a896b89dec74047ffec",
+      "cd2-046": "33d0afc223492dacbb8fcc433ad991f9d7b397ef0223fc21605e8a6f2abfebc0",
+      "cd2-072": "95bb9f1185205a5b2fb33fa9be0f0d0461bd1a0089f22fe62674d57ac8919c16",
+      "cd2-073": "dad0a8173b930b2b3cd6ea5b9587c2fbbf9f0feabdba0a20d1663487968c381f",
+      "cd2-074": "be7cac8bb8415657933b31a76c5990a661efc03bd29af2702008c5a73dcea0fd",
+      "cd2-075": "0fbf307ca932e52e28d693e42712ef80722d6eeda473d93a73ea758f0636dac6",
+      "cd2-076": "cc85d667cc9c974f55efcb968c6453a53ec63720f9bc89d3296745192cb32160",
+      "cd2-102": "89a058b4aacc2e4c60d6799735eeb91300e11ca56219f8b76dc3a145edd8204f",
+      "cd2-103": "ed83aab0ff24b5c916261ac26db59e60d09f8f94f8ef3ab1bb4e040bdf13f5ce",
+      "cd2-104": "c7c3dabbbebcf004f5783e391de50df7d7386c162ee5c090639c838f306684ca",
+      "cd2-105": "fa3d37334ba4b83e7b1cea8a3eeb61bce39e5661a1079b8c4bfee67bdefaba82",
+      "cd2-106": "ac6a16fda90b203fdb607beb0974955aa196cc5323307be07bb1dfca05a7aaea",
+      "cd2-132": "2ddc8f728f11d9cb6624d247d7d528694db20b320f0e80745b38fecd3222e9cb",
+      "cd2-133": "7b0222b691f1b4a44833a4bec4941ae81bd8e56e8144696f63da5c84f95b8622",
+      "cd2-134": "4fedd2aa1a19c5f89fb3e7e15d3bce450f8a8f02149fd59a2eeb8120d9cbc0c4",
+      "cd2-135": "13213dbc2f2e571ac323f2508cf71987a9b39e432ee2b779b0052af055203ebf",
+      "cd2-136": "13f61273995d0c3412e064dffa930a2fcfa20f2b723fd3ed80a72674c301c281",
+      "cd2-162": "fcfd6e42726aa666888e00484859c71d751e8f009c77c6c42e0db13ca978858c",
+      "cd2-163": "f03e5e29b031c766db9982168a86e1565ef6001c84c8f7fea14a198e512caac4",
+      "cd2-164": "456650ff8196f07bdb8b1b229ae3680979a844c50a7832643edca4ebc67605fd",
+      "cd2-165": "14d5da929e84e39dfffcba7b0d0a110c9ad5fe340bc7a260340cb328349ccde3",
+      "cd2-166": "c394f9f25e18ab087eab7a0a4297affbd6f321f8abfa48ad1bf502b18a587d63",
+      "cd2-192": "b7c13948e4562148e8976f642f997f4c90cbe9ec3e9f6e26295beabf8ddb5e1f",
+      "cd2-193": "93cdf9cf68bda339430b2fd7be352b79883b93479b42df2bcc33f3bc532085a4",
+      "cd2-194": "1e52abfa9e146065dcbcd8447f2f2f27a8d5298e8f42639c7569f035bfd8ce83",
+      "cd2-195": "60b35649c22c321a95cdd54be3584645d6e64e2e000737f314bd31843d1b71a8",
+      "cd2-196": "776e2e899c1d1d385279cdc8ac85e34118a130f1f999715b6f180cadf31c77cc",
+      "cd2-222": "262086f2295468567f41da520a6a8c811df1b13135f0307a0170c79255207e55",
+      "cd2-223": "9a992b74494cfb216b58d7854d86c043e96eb68144769fd3f95546ec257fa9b0",
+      "cd2-224": "3ed023a2ae042b67ac7af71e68153827758342172082414c10cb6cf3d4dc5526",
+      "cd2-225": "50c0f8761f4ae5c031f7a48b4829c6e02c6b332537a4096927ad1f589d7567c9",
+      "cd2-226": "f13decd8ed7604bd10dbb573b7b8d3967534bac3ccb19dfc91f67c3631a10d52",
+      "cd2-252": "09cb866ddf26bf86c820244bd1fdae248f5ceacc801d31ed587e0361a09b566e",
+      "cd2-253": "9bbe1688eee95edf341e8627e9bb77b7e8099adb5790af125dd81976df6b85d9",
+      "cd2-254": "296a0b3b81ed11e9da8e8e8e6edad2dd8dc5db7705632e78e5b4743e64fcf07d",
+      "cd2-255": "c26100bef1afb358a6be4dfaec94e210cf62403d1a99116e7f3c3ba0bfe5486a",
+      "cd2-256": "5749da86627187db690c0d0cfcc14b5c669911e618a5c38d0e2f6bcc55d4e8cf",
+      "cd2-282": "1e8819e01ec26827d2fafa2e220fea6a2449c9f7ef29ce5d9f634b81278f446e",
+      "cd2-283": "60f98e5b2e51ebd7447d128e4f159f505dac4102e39a2238bc3cd134b17c0999",
+      "cd2-284": "dca6f2ec5746a60c38ea267245198a5e65b525ca7c607cc641dd80367de1b15f",
+      "cd2-285": "437ac8e939287d1a166654e85cde88586dcc5327a28634a08bf51e933704c68c",
+      "cd2-286": "2ba0acede11fab8f312ea275cdca64cca44a1fc9de610712f2c7c3268a1b4f9b"
+    },
+    "labels": {
+      "cd2-001": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-002": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-003": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-004": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-005": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-006": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-007": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-008": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-009": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-010": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-011": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-012": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-013": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-014": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-015": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-016": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-017": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-018": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-019": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-020": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-021": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-022": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-023": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-024": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-025": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-026": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-027": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-028": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-029": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-030": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-031": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-032": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-033": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-034": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-035": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-036": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-037": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-038": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-039": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-040": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-041": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-042": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-043": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-044": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-045": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-046": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-047": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-048": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-049": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-050": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-051": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-052": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-053": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-054": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-055": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-056": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-057": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-058": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-059": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-060": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-061": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-062": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-063": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-064": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-065": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-066": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-067": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-068": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-069": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-070": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-071": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-072": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-073": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-074": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-075": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-076": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-077": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-078": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-079": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-080": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-081": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-082": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-083": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-084": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-085": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-086": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-087": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-088": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-089": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-090": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-091": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-092": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-093": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-094": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-095": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-096": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-097": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-098": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-099": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-100": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-101": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-102": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-103": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-104": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-105": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-106": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-107": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-108": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-109": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-110": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-111": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-112": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-113": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-114": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-115": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-116": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-117": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-118": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-119": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-120": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-121": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-122": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-123": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-124": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-125": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-126": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-127": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-128": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-129": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-130": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-131": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-132": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-133": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-134": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-135": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-136": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-137": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-138": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-139": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-140": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-141": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-142": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-143": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-144": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-145": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-146": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-147": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-148": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-149": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-150": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-151": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-152": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-153": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-154": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-155": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-156": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-157": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-158": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-159": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-160": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-161": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-162": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-163": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-164": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-165": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-166": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-167": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-168": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-169": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-170": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-171": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-172": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-173": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-174": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-175": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-176": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-177": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-178": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-179": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-180": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-181": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-182": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-183": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-184": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-185": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-186": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-187": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-188": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-189": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-190": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-191": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-192": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-193": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-194": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-195": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-196": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-197": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-198": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-199": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-200": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-201": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-202": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-203": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-204": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-205": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-206": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-207": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-208": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-209": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-210": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-211": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-212": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-213": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-214": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-215": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-216": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-217": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-218": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-219": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-220": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-221": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-222": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-223": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-224": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-225": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-226": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-227": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-228": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-229": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-230": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-231": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-232": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-233": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-234": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-235": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-236": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-237": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-238": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-239": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-240": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-241": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-242": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-243": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-244": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-245": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-246": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-247": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-248": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-249": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-250": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-251": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-252": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-253": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-254": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-255": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-256": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-257": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-258": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-259": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-260": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-261": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-262": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-263": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-264": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-265": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-266": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-267": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-268": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-269": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-270": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-271": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-272": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-273": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-274": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-275": {
+        "tags": [
+          "normal"
+        ],
+        "split": "dev"
+      },
+      "cd2-276": {
+        "tags": [
+          "normal"
+        ],
+        "split": "holdout"
+      },
+      "cd2-277": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-278": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-279": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-280": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "dev"
+      },
+      "cd2-281": {
+        "tags": [
+          "normal",
+          "ma130"
+        ],
+        "split": "holdout"
+      },
+      "cd2-282": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-283": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-284": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-285": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "dev"
+      },
+      "cd2-286": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "span-dates"
+        ],
+        "split": "holdout"
+      },
+      "cd2-287": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-288": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-289": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-290": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-291": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-292": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "holdout"
+      },
+      "cd2-293": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-294": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-295": {
+        "tags": [
+          "hard",
+          "benefit-period"
+        ],
+        "split": "dev"
+      },
+      "cd2-296": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-297": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "holdout"
+      },
+      "cd2-298": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-299": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      },
+      "cd2-300": {
+        "tags": [
+          "hard",
+          "contractor-error",
+          "three-day-stay"
+        ],
+        "split": "dev"
+      }
+    }
+  },
+  "candidates": {
+    "kimi-k3": {
+      "id": "kimi-k3",
+      "model": "moonshotai/kimi-k3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "opus-5.5": {
+      "id": "opus-5.5",
+      "model": "anthropic/claude-opus-5.5",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "gpt-5.6-sol": {
+      "id": "gpt-5.6-sol",
+      "model": "openai/gpt-5.6-sol",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    }
+  },
+  "control_candidate": "gpt-5.6-sol",
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter",
+    "methods": [
+      "absolute-1-5"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "triage-check"
+    ],
+    "check_version": "cmd-4244fef4+files-081a9977",
+    "rubric_sha256": "47e46fbc1e738ee8c24a25712fc18b6458735193ddc34a5d6749918853963c03",
+    "check_description": "Root cause, correctability, next action and deadline match the key computed from RULES.md; the deadline must be the last day the rules allow.",
+    "producer_template_sha256": "0aab8fabcf45523640c370bdf7352f123289d9f6c57b30253f4dbf70a60aa600",
+    "judge_template_sha256": "361514431ec0db6002b4ad8e718c72e8f010c24f558bf662b15fc6fb4a9e09ac",
+    "score_template_sha256": "0e67506ecb8ad2a54729bf91fe60962838862f01f666d9ea41f6d74cd5b3724f"
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "lowest-cost",
+  "eligibility": {
+    "minimum_reliability": 0.9,
+    "minimum_required_check_pass_rate": 0.9,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 4,
+    "timeout_ms": 300000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold",
+    "early_stop": false
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.3.0",
+    "git_sha": "d67ff7e3",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-10-28T09:25:07.531Z",
+  "finished_at": "2026-10-28T09:48:12.252Z"
+}
