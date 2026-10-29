@@ -220,20 +220,46 @@ export function recommendationSentence(rec: Recommendation): string {
 // ── how firm, and what the judge thought ─────────────────────────────────────
 
 function directionalReason(reason: string): string {
-  const inputs = reason.match(/^(\d+) inputs?; fewer than (\d+)/) ?? reason.match(/^fewer than (\d+) inputs/);
+  const inputs =
+    reason.match(/^(\d+) inputs?; fewer than (\d+)/) ??
+    reason.match(/^(\d+) inputs?; no comparison can be significant with fewer than (\d+)/) ??
+    reason.match(/^fewer than (\d+) inputs/);
   if (inputs && inputs.length === 3) return `only ${inputs[1]} input(s) (fewer than ${inputs[2]})`;
   if (inputs) return `fewer than ${inputs[1]} inputs`;
   if (/no minimum meaningful difference/.test(reason)) return "the spec declares no minimum meaningful difference";
   if (/^judge-preference/.test(reason)) return "the ranking rests entirely on the judge model";
+  const apart = reason.match(/^(\S+) and (\S+) cannot be told apart/);
+  if (apart) return `${apart[1]} and ${apart[2]} cannot be told apart (the counts are under How sure)`;
   return reason;
 }
 
-/** Why the recommendation is as firm as it is, in words a reader can act on. */
+const TOO_FEW_INPUTS = /input/;
+const TOLD_APART = /cannot be told apart/;
+
+/**
+ * Why the recommendation is as firm as it is, in words a reader can act on.
+ * Too few inputs leads when it is among the reasons (nothing else can be fixed
+ * before that is); otherwise the first reason does, and the rest follow as
+ * "also". The runner-up sign test is left to "How sure", which prints it in
+ * full, unless it is the only reason there is.
+ */
 export function firmnessNote(firmness: Recommendation["firmness"], directionalReasons: readonly string[]): string {
   if (firmness === "firm") return "Sample size and thresholds both meet the bar for a decision.";
   if (firmness === "needs-review") return "This step has no recommendation to adopt; someone needs to review the evidence below and decide.";
-  const why = directionalReasons.map(directionalReason);
-  return why.length > 0 ? `${capitalize(why.join(", "))}, so this result is directional only.` : "This result is directional only.";
+  const all = directionalReasons.map(directionalReason);
+  const why = all.length > 1 ? all.filter((w) => !TOLD_APART.test(w)) : all;
+  const lead = why.find((w) => TOO_FEW_INPUTS.test(w) && !TOLD_APART.test(w)) ?? why[0];
+  if (!lead) return "This result is directional only.";
+  const rest = why.filter((w) => w !== lead);
+  return `Directional only: ${lead}.${rest.length > 0 ? ` Also ${rest.join("; ")}.` : ""}`;
+}
+
+/**
+ * The judge sees "Output A" and "Output B"; a reader sees candidate ids. Only
+ * the labelled forms are replaced — a bare "A" may be an article.
+ */
+export function nameOutputs(text: string, a: string, b: string): string {
+  return text.replace(/\b(?:Output|Response|Candidate|Answer)\s+([AB])\b/g, (_m, side: string) => (side === "A" ? a : b));
 }
 
 export interface JudgePick {
@@ -255,4 +281,17 @@ export function judgeNote(j: JudgePick | null, chosen: string | null): string {
   if (j.disagrees) return `${head}, which differs from the recommendation — the recommendation compares only candidates that pass the required checks, by operating mode, and does not use judge preference.`;
   if (chosen === j.candidate) return `${head}, which matches the recommendation.`;
   return `${head}.`;
+}
+
+/** How long of a system prompt the candidate row shows before the full text moves to a tooltip. */
+const SYSTEM_PREVIEW_CHARS = 80;
+
+/** Which prompt a candidate ran, shown only when the candidates differ in it. */
+export function promptLabel(
+  v: { promptFile: string | null; system: string | null },
+  stepFile: string | null = null,
+): { prompt: string; system: string | null } {
+  const preview = v.system === null ? null : v.system.length > SYSTEM_PREVIEW_CHARS ? `${v.system.slice(0, SYSTEM_PREVIEW_CHARS - 1)}…` : v.system;
+  const prompt = v.promptFile ? `prompt ${v.promptFile} (its own)` : stepFile ? `prompt ${stepFile} (the step's)` : "prompt the step's";
+  return { prompt, system: preview };
 }

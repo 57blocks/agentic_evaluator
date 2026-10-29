@@ -9,6 +9,8 @@ import { plural } from "../../../../report-format.js";
 import { ReportHeader, RunFacts } from "./sections/Header";
 import { Verdict } from "./sections/Verdict";
 import { Candidates } from "./sections/Candidates";
+import { PromptComparison } from "./sections/PromptComparison";
+import { SideBySide } from "./sections/SideBySide";
 import { AgentActivity } from "./sections/AgentActivity";
 import { Gates } from "./sections/Gates";
 import { Certainty } from "./sections/Certainty";
@@ -37,9 +39,11 @@ export function StepReport({ report: r }: { report: Model }) {
         subtitle={`${r.startedAt} · ${plural(plan.candidates, "candidate")} × ${plural(plan.inputs, "input")} × ${plural(plan.trialsPer, "trial")} each = ${plural(plan.trials, "trial")}`}
       />
 
-      <PlanStepCard step={r.tested} title="What was tested" />
+      {r.promptComparison && <PromptComparison comparison={r.promptComparison} />}
+      <PlanStepCard step={r.tested} title="What was tested" sharedModel={r.promptComparison ? { model: r.promptComparison.model, via: r.promptComparison.via } : undefined} />
       <Verdict verdict={r.verdict} eligible={r.eligible} total={r.candidates.length} />
-      <Candidates candidates={r.candidates} control={r.control} />
+      <Candidates candidates={r.candidates} control={r.control} promptVariants={r.promptVariants} stepPromptFile={r.stepPromptFile} />
+      <SideBySide outputs={r.outputs} candidates={r.candidates} open={r.promptComparison !== null} />
       <AgentActivity agentActivity={r.agentActivity} />
       <Slices slices={r.slices} candidates={r.candidates.map((c) => c.id)} />
       <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />

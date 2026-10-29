@@ -47,6 +47,11 @@ export function Verdict({ verdict: v, eligible, total }: Props) {
           {v.chosen ? <>Recommended: <span className="font-mono font-bold text-brand">{v.chosen}</span></> : "No candidate to recommend"}
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">{v.text}</p>
+        {v.why && (
+          <p className="text-sm leading-relaxed">
+            <span className="font-medium">Why, in the judge's words: </span>{v.why}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">

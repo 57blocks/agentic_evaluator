@@ -11,6 +11,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { parseSpec } from "../spec/load-spec.js";
 import type { RunManifest } from "./manifest.js";
+import type { CandidateDef } from "./types.js";
 
 export interface InputLabel {
   tags: string[];
@@ -87,6 +88,49 @@ export async function stepDescriptionsOf(root: string, stepIds: readonly string[
     if (about.stepDescription) out.push({ id, description: about.stepDescription });
   }
   return out;
+}
+
+export interface RunPromptsAbout {
+  /** The step's template file; null when the step sends none. */
+  stepFile: string | null;
+  /** Template text by file: the step's and each candidate's own. */
+  files: Record<string, string>;
+  /** "frozen": from this run's manifest. "current-spec": read from the task's files as they are now. */
+  source: "frozen" | "current-spec" | "none";
+}
+
+/**
+ * The templates a run sent. A run made before the manifest froze them is
+ * described from the task's files as they are now, and the report says so.
+ */
+export async function promptsOfRun(dir: string, m: RunManifest): Promise<RunPromptsAbout> {
+  if (m.prompts !== undefined) {
+    return m.prompts === null
+      ? { stepFile: null, files: {}, source: "frozen" }
+      : { stepFile: m.prompts.step_file, files: m.prompts.files, source: "frozen" };
+  }
+  const none: RunPromptsAbout = { stepFile: null, files: {}, source: "none" };
+  if (!m.spec.path) return none;
+  const taskRoot = await taskRootOf(dir, path.basename(m.spec.path));
+  if (!taskRoot) return none;
+  try {
+    const specFile = path.join(taskRoot, path.basename(m.spec.path));
+    const spec = parseSpec(await fs.readFile(specFile, "utf-8"), specFile);
+    const step = spec.workflow.steps.find((s) => s.id === m.step.id);
+    const harness = spec["x-harness"];
+    const producer = step?.producer ?? harness?.producer ?? "prompt";
+    const stepFile = producer === "prompt" ? (step?.prompt_file ?? harness?.prompt_file ?? null) : null;
+    const own = Object.values(m.candidates as Record<string, CandidateDef>).map((c) => c.prompt_file);
+    const files: Record<string, string> = {};
+    for (const file of [stepFile, ...own]) {
+      if (!file || file in files) continue;
+      const text = await fs.readFile(path.join(taskRoot, file), "utf-8").catch(() => null);
+      if (text !== null) files[file] = text;
+    }
+    return Object.keys(files).length > 0 ? { stepFile, files, source: "current-spec" } : none;
+  } catch {
+    return none;
+  }
 }
 
 /** The run's own record when it has one; otherwise the task's current spec. */
