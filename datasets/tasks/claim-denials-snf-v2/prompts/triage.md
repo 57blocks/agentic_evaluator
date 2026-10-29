@@ -9,7 +9,7 @@ Answer with one JSON object and nothing else, in exactly this shape:
 {
   "root_cause": "<one of the categories below>",
   "correctable": "yes" | "no" | "conditional",
-  "next_action": "corrected_claim" | "appeal" | "submit_to_other_payer" | "verify_then_decide" | "write_off" | "bill_patient",
+  "next_action": "corrected_claim" | "appeal" | "reopening" | "submit_to_other_payer" | "verify_then_decide" | "write_off" | "bill_patient",
   "deadline": "YYYY-MM-DD" | null,
   "action_note": "<one or two sentences: what to do and why>"
 }
@@ -22,8 +22,9 @@ non_covered_service, coding_error.
 - "root_cause": the reason the contractor gave for the denial.
 - "correctable": can the denial be reversed or the claim be paid by Medicare?
   "conditional" when it depends on a fact the facility must still check.
-- "next_action": "appeal" means a redetermination request; "corrected_claim"
-  means submitting a new or corrected claim.
+- "next_action": "appeal" means a redetermination request; "reopening" means
+  asking the contractor to reopen and revise its determination;
+  "corrected_claim" means submitting a new or corrected claim.
 - "deadline": the last day to take next_action; null for write_off and
   bill_patient.
 

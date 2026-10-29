@@ -7,12 +7,23 @@ const fromMs = (ms) => new Date(ms).toISOString().slice(0, 10);
 export const addDays = (iso, days) => fromMs(toMs(iso) + days * DAY);
 export const daysBetween = (from, to) => Math.round((toMs(to) - toMs(from)) / DAY);
 
-/** R1: the anniversary of the Through date (the set never uses February 29). */
-export function filingDeadline(through) {
-  const [y, m, d] = through.split("-");
+/** One calendar year on: the same month and day next year (the set never uses February 29). */
+function anniversary(iso) {
+  const [y, m, d] = iso.split("-");
   return `${Number(y) + 1}-${m}-${d}`;
 }
+
+/** R1: the anniversary of the Through date. */
+export const filingDeadline = (through) => anniversary(through);
 export const isTimely = (filed, through) => filed <= filingDeadline(through);
+
+/**
+ * R1: a timely-filing determination has no appeal rights (CFR 405.926(n)); the
+ * remedy is a reopening, which a party may request "within 1 year from the date
+ * of the initial determination … for any reason" (CFR 405.980(c)(1)). The
+ * remittance carries the initial determination, so the deadline is its anniversary.
+ */
+export const reopeningDeadline = (remittance) => anniversary(remittance);
 
 /** R2: 120 days from receipt, receipt presumed 5 days after the notice. */
 export const REDETERMINATION_DAYS = 120;

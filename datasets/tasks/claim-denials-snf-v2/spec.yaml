@@ -18,13 +18,20 @@
 # benefit period; days past day 100 of the same period; and a three-day stay
 # that was met when counted from the inpatient admission order.
 #
+# v2.3 (2026-10-28): the 2026-10-22 human review of the answer key found R1
+# wrong on its remedy: a timely-filing determination has no appeal rights
+# (42 CFR 405.926(n)); the contractor reopens it (405.980(c)(1), one year
+# from the remittance). `reopening` was added to next_action and the 50
+# filing-through-date keys changed; every input is unchanged. Runs before
+# v2.3 graded those 50 items against the old `appeal` key.
+#
 #   node datasets/tasks/claim-denials-snf-v2/gen/generate.mjs     # rebuild (same seed, same set)
 #   agenteval check-task datasets/tasks/claim-denials-snf-v2            # free
 #   agenteval run datasets/tasks/claim-denials-snf-v2 --yes --html      # billed
 
 protocol_version: "0.3"
 run_name: claim-denials-snf-v2
-description: "Which model knows Medicare's rules well enough to triage a denied skilled-nursing claim? 300 synthetic Medicare fee-for-service Part A claims with raw 835 remittance codes and the facility's records, and no payer manual: the rules (42 CFR, the CMS manuals, the X12 code list) are in RULES.md and the model must know them. 110 ordinary items; 190 where the rule changes the answer: filing limits from the Through date, the redetermination deadline (125 days after the remittance), new benefit periods, days past day 100, and a three-day stay counted from the admission order."
+description: "Which model knows Medicare's rules well enough to triage a denied skilled-nursing claim? 300 synthetic Medicare fee-for-service Part A claims with raw 835 remittance codes and the facility's records, and no payer manual: the rules (42 CFR, the CMS manuals, the X12 code list) are in RULES.md and the model must know them. 110 ordinary items; 190 where the rule changes the answer: filing limits from the Through date (and a reopening, not an appeal, when the contractor gets it wrong), the redetermination deadline (125 days after the remittance), new benefit periods, days past day 100, and a three-day stay counted from the admission order."
 budget_usd: 70
 
 workflow:

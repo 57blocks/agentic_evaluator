@@ -24,8 +24,23 @@ Sources:
 
 A claim filed on or before the anniversary of its Through date is timely. A
 timely-filing denial (reason 29) of a claim filed within that limit is a
-contractor error and is appealed. Exceptions to the limit (administrative
-error, retroactive entitlement) are out of scope; no item raises one.
+contractor error, but it is not appealed: a timely-filing determination is not
+an initial determination and carries no appeal rights, so the facility asks
+the contractor to reopen it.
+
+> Actions that are not initial determinations … (n) Determinations that a
+> provider or supplier failed to submit a claim timely or failed to submit a
+> timely claim … — CFR 405.926
+
+> A party may request that a contractor reopen its initial determination or
+> redetermination within 1 year from the date of the initial determination or
+> redetermination for any reason. — CFR 405.980(c)(1)
+
+The deadline for `reopening` is the anniversary of the remittance date, which
+carries the initial determination. Exceptions to the filing limit
+(administrative error, retroactive entitlement) are out of scope; no item
+raises one. (Until v2.3 this rule said "appealed"; the 2026-10-22 answer-key
+review caught it.)
 
 ## R2 · Redetermination: 120 days from receipt, receipt presumed 5 days after the notice
 
@@ -71,8 +86,19 @@ counted from the inpatient admission order, so the denial is appealed.
 A benefit-limit denial (reason 119) of days in a new benefit period is a
 contractor error and is appealed. Days genuinely past day 100 of one benefit
 period are not covered; with no other coverage on file they are billed to the
-beneficiary. Gaps in this set are either at least 75 days or at most 40 days,
-never near the 60-day boundary.
+beneficiary. Whether the beneficiary can be billed does not turn on an advance
+notice (SNFABN): the notice-and-knowledge regime of 42 CFR part 411 subpart K
+("Payment for Certain Excluded Services") reaches only custodial care and
+services not reasonable and necessary, not a benefit limit.
+
+> Medicare pays for "custodial care" and "services not reasonable and necessary"
+> if the following conditions are met: … (2) Neither the beneficiary nor the
+> provider, practitioner, or supplier knew, or could reasonably have been
+> expected to know, that the services were excluded from coverage under
+> § 411.15 (g) or (k). — CFR 411.400(a)
+
+Gaps in this set are either at least 75 days or at most 40 days, never near
+the 60-day boundary.
 
 ## R6 · Duplicate of a paid claim
 
