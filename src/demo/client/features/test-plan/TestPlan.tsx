@@ -39,17 +39,29 @@ function Inputs({ step }: { step: PlanStep }) {
   );
 }
 
-function Candidates({ step }: { step: PlanStep }) {
+/** The step's candidates all run one model, called one way: say it once, then only what differs. */
+export interface SharedModel {
+  model: string;
+  via: string;
+}
+
+function Candidates({ step, sharedModel }: { step: PlanStep; sharedModel?: SharedModel }) {
+  const onlyDifference = (via: string): string => (sharedModel ? via.replace(`${sharedModel.via}, `, "").replace(sharedModel.via, "") : via);
   return (
     <ul className="flex flex-col gap-1.5">
+      {sharedModel && (
+        <li className="text-muted-foreground">
+          All {step.candidates.length} run <span className="font-mono">{sharedModel.model}</span>, {sharedModel.via}; they differ in their prompt (see Prompts compared).
+        </li>
+      )}
       {step.candidates.map((c) => (
         <li key={c.id} className="flex min-w-0 flex-col">
           <span className="flex flex-wrap items-center gap-1.5">
             <span className="font-mono font-medium">{c.id}</span>
             {c.isControl && <Tag tone="neutral">control</Tag>}
-            <span className="font-mono text-muted-foreground">{c.model}</span>
+            {!sharedModel && <span className="font-mono text-muted-foreground">{c.model}</span>}
           </span>
-          <span className="text-[11px] break-all text-muted-foreground">{c.via}</span>
+          <span className="text-[11px] break-all text-muted-foreground">{onlyDifference(c.via)}</span>
         </li>
       ))}
     </ul>
@@ -95,7 +107,7 @@ function Scale({ step }: { step: PlanStep }) {
   );
 }
 
-export function PlanStepCard({ step, title }: { step: PlanStep; title?: string }) {
+export function PlanStepCard({ step, title, sharedModel }: { step: PlanStep; title?: string; sharedModel?: SharedModel }) {
   return (
     <Card className={SECTION_CARD}>
       <CardHeader>
@@ -118,7 +130,7 @@ export function PlanStepCard({ step, title }: { step: PlanStep; title?: string }
           </Row>
         )}
         <Row label="Test inputs" hint={`${step.inputs.length}`}><Inputs step={step} /></Row>
-        <Row label="Candidates" hint={`${step.candidates.length}`}><Candidates step={step} /></Row>
+        <Row label="Candidates" hint={`${step.candidates.length}`}><Candidates step={step} sharedModel={sharedModel} /></Row>
         <Row label="How success is decided" hint="required check"><Checks step={step} /></Row>
         <Row label="Eligibility gates" hint="fail one and you are out">
           {step.gates.length === 0 ? (

@@ -6,6 +6,7 @@
 
 import type { EvaluationRow } from "../../../../../canon/rows.js";
 import type { Winner } from "../../../../../types.js";
+import { nameOutputs } from "../../../../../report-copy.js";
 import { Tag } from "../Section";
 
 function Pick({ winner, a, b }: { winner: Winner; a: string; b: string }) {
@@ -35,7 +36,7 @@ function Dimensions({ row, a, b }: { row: EvaluationRow; a: string; b: string })
               <Pick winner={d.resolved} a={a} b={b} />
               {d.forward !== d.reverse && <Tag tone="warn" className="ml-1">Orderings disagree</Tag>}
             </td>
-            <td className="py-1.5 align-top text-xs">{d.reason || <span className="text-muted-foreground">No reason given</span>}</td>
+            <td className="py-1.5 align-top text-xs">{d.reason ? nameOutputs(d.reason, a, b) : <span className="text-muted-foreground">No reason given</span>}</td>
           </tr>
         ))}
       </tbody>
@@ -58,7 +59,7 @@ function Duel({ row }: { row: EvaluationRow }) {
         {row.state !== "pass" && <Tag tone="warn">{row.state === "evaluator_error" ? "Judge error" : "Not evaluated"}</Tag>}
         {calls > 2 && <Tag tone="neutral">{calls} calls (incl. retries)</Tag>}
       </header>
-      {row.evidence && <p className="text-sm text-muted-foreground">{row.evidence}</p>}
+      {row.evidence && <p className="text-sm text-muted-foreground">{nameOutputs(row.evidence, a, b)}</p>}
       <Dimensions row={row} a={a} b={b} />
     </article>
   );

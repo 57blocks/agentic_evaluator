@@ -81,14 +81,27 @@ const METHOD: Record<string, string> = {
 };
 
 /** How a candidate is called. */
-export function candidateVia(def: CandidateDef | undefined): string {
+/** How a model candidate is called: route and temperature, without its prompt. */
+export function routeVia(def: CandidateDef): string {
+  const route = def.provider_route ? `called via ${def.provider_route}` : "calls the model API";
+  const temp = def.generation_settings?.temperature;
+  return temp === undefined ? route : `${route}, temperature ${temp}`;
+}
+
+/** Which prompt a model candidate sends: its own file, else the step's; plus a system prompt when it has one. */
+export function promptVia(def: CandidateDef, stepPromptFile: string | null): string[] {
+  return [
+    ...(def.prompt_file ? [`its own prompt ${def.prompt_file}`] : stepPromptFile ? [`the step's prompt ${stepPromptFile}`] : []),
+    ...(def.system ? ["with a system prompt"] : []),
+  ];
+}
+
+export function candidateVia(def: CandidateDef | undefined, stepPromptFile: string | null = null): string {
   if (!def) return "—";
   if (def.adapter === "agent-cli" || def.cli) {
     return def.cli?.image ? `command-line agent, isolated in docker (${def.cli.image})` : "command-line agent, run directly on this machine";
   }
-  const route = def.provider_route ? `called via ${def.provider_route}` : "calls the model API";
-  const temp = def.generation_settings?.temperature;
-  return temp === undefined ? route : `${route}, temperature ${temp}`;
+  return [routeVia(def), ...promptVia(def, stepPromptFile)].join(", ");
 }
 
 function candidateModel(def: CandidateDef | undefined, id: string): string {
@@ -139,7 +152,7 @@ async function stepFromSuite(suite: Suite): Promise<PlanStep> {
     candidates: suite.candidates.map((id) => ({
       id,
       model: candidateModel(defs[id], id),
-      via: candidateVia(defs[id]),
+      via: candidateVia(defs[id], (suite.producer ?? "prompt") === "prompt" ? suite.promptFile ?? null : null),
       isControl: suite.controlCandidate === id,
     })),
     trials: scale.trials,
@@ -196,7 +209,7 @@ export function planFromRun(b: RunBundle): PlanStep {
     candidates: candidates.map((id) => ({
       id,
       model: candidateModel(m.candidates[id], id),
-      via: candidateVia(m.candidates[id]),
+      via: candidateVia(m.candidates[id], b.prompts?.stepFile ?? null),
       isControl: m.control_candidate === id,
     })),
     trials,

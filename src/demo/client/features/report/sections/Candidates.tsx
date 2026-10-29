@@ -6,7 +6,7 @@
 
 import type { CandidateRow, StepReport } from "../../../../../report-model.js";
 import { fmtCost, fmtPct, fmtScore, fmtSec } from "../../../../../report-format.js";
-import { completionLabel } from "../../../../../report-copy.js";
+import { completionLabel, promptLabel } from "../../../../../report-copy.js";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -14,7 +14,20 @@ import { cn } from "@/lib/utils";
 import { seriesColor } from "../tone";
 import { Note, Section, Tag } from "../Section";
 
-function Name({ c }: { c: CandidateRow }) {
+/** Which prompt this candidate ran: shown only on a prompt comparison, where the model alone cannot tell the rows apart. */
+function Prompt({ c, stepPromptFile }: { c: CandidateRow; stepPromptFile: string | null }) {
+  const { prompt, system } = promptLabel(c, stepPromptFile);
+  return (
+    <span className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+      <Tag tone="neutral" className="font-mono">{prompt}</Tag>
+      {system !== null && (
+        <span title={c.system ?? undefined} className="min-w-0 truncate">system "{system}"</span>
+      )}
+    </span>
+  );
+}
+
+function Name({ c, promptVariants, stepPromptFile }: { c: CandidateRow; promptVariants: boolean; stepPromptFile: string | null }) {
   return (
     <div className="flex flex-col gap-1">
       <span className="flex flex-wrap items-center gap-1.5">
@@ -25,6 +38,7 @@ function Name({ c }: { c: CandidateRow }) {
         {c.isControl && <Tag tone="neutral">Control</Tag>}
       </span>
       <span className="font-mono text-[11px] text-muted-foreground">{c.model} · {c.deployment}</span>
+      {promptVariants && <Prompt c={c} stepPromptFile={stepPromptFile} />}
     </div>
   );
 }
@@ -82,10 +96,13 @@ function RateBar({ rate }: { rate: number | null }) {
   );
 }
 
-export function Candidates({ candidates, control }: Pick<StepReport, "candidates" | "control">) {
+export function Candidates({ candidates, control, promptVariants, stepPromptFile }: Pick<StepReport, "candidates" | "control" | "promptVariants" | "stepPromptFile">) {
   const reviewed = candidates.some((c) => c.human !== null);
+  const hint = promptVariants
+    ? "Results on the same inputs. These candidates differ in their prompt, so each row says which prompt it ran. Gated-out candidates stay in the table for comparison."
+    : "Results on the same inputs. Gated-out candidates stay in the table for comparison.";
   return (
-    <Section title="Candidates" hint="Results on the same inputs. Gated-out candidates stay in the table for comparison.">
+    <Section title="Candidates" hint={hint}>
       <Table>
         <TableHeader>
           <TableRow>
@@ -105,7 +122,7 @@ export function Candidates({ candidates, control }: Pick<StepReport, "candidates
               key={c.id}
               className={cn(c.chosen && "bg-champ shadow-[inset_3px_0_0_var(--brand)] hover:bg-champ", c.gated && "text-muted-foreground")}
             >
-              <TableCell className="align-top"><Name c={c} /></TableCell>
+              <TableCell className="align-top"><Name c={c} promptVariants={promptVariants} stepPromptFile={stepPromptFile} /></TableCell>
               <TableCell className="align-top"><Success c={c} /></TableCell>
               <TableCell className="text-right align-top"><Checks c={c} /></TableCell>
               <TableCell className="text-right align-top"><WinRate c={c} /></TableCell>

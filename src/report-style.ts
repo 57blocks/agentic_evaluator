@@ -31,7 +31,7 @@ section.card h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;co
 th{text-align:left;font-weight:600;color:var(--ink-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:8px 13px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--surface-2)}
 th.num,td.num{text-align:right;white-space:nowrap}
 td.num .bar{margin-right:8px}td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}tr:last-child td{border-bottom:none}
-td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:var(--mono)}
+td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:var(--mono)}td.cand .prompt{display:block;font-weight:400;font-size:12px;color:var(--ink-3)}
 td .sub{display:block;font-size:11px;color:var(--ink-3)}
 tr.control td.cand::after{content:"control";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
 tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}tr.gated td{color:var(--ink-3)}

@@ -15,6 +15,7 @@ import type { Winner } from "./types.js";
 import { escapeHtml } from "./html.js";
 import { heatTint } from "./report-charts.js";
 import { dimensionPreference } from "./report-model.js";
+import { nameOutputs } from "./report-copy.js";
 
 /** Longer outputs are cut for display only; the file on disk stays whole. */
 const MAX_OUTPUT_CHARS = 30_000;
@@ -105,7 +106,7 @@ function detailRow(
   const rounds = disagreed
     ? `<span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: ${escapeHtml(detail.forward)} / ${escapeHtml(detail.reverse)}</span>`
     : "";
-  const reason = detail.reason ? escapeHtml(detail.reason) : `<span class="muted">the judge gave no reason</span>`;
+  const reason = detail.reason ? escapeHtml(nameOutputs(detail.reason, a, b)) : `<span class="muted">the judge gave no reason</span>`;
   return `<tr><th>${escapeHtml(key)}</th><td>${winnerChip(detail.resolved, a, b)} ${rounds}</td><td>${reason}</td></tr>`;
 }
 
@@ -137,7 +138,7 @@ export function renderDuels(rows: readonly EvaluationRow[]): string {
           <span class="muted">${escapeHtml(subject.input)}</span>
           ${overall} ${retries}
         </header>
-        <p class="evidence">${row.evidence ? escapeHtml(row.evidence) : '<span class="muted">the judge gave no overall reason</span>'}</p>
+        <p class="evidence">${row.evidence ? escapeHtml(nameOutputs(row.evidence, a, b)) : '<span class="muted">the judge gave no overall reason</span>'}</p>
         <table class="dims"><tbody>${body}</tbody></table>
       </article>`;
     })
@@ -240,6 +241,9 @@ export const EVIDENCE_STYLES = `
 .chip.win{background:var(--ok-bg);color:var(--ok-fg);border-color:transparent}
 .chip.tie{background:var(--surface-2);color:var(--ink-2);border-color:transparent}
 .chip.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:transparent}
+pre.diff span{display:block}pre.diff .add{background:var(--ok-bg);color:var(--ok-fg)}pre.diff .del{background:var(--bad-bg);color:var(--bad-fg);text-decoration:line-through}pre.diff .same{color:var(--ink-3)}
+blockquote.system{margin:8px 0 0;padding:4px 12px;border-left:3px solid var(--ok-fg);font-size:13px}blockquote.system p{margin:2px 0 0;white-space:pre-wrap}
+.sbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:8px}.sbs article{min-width:0;border:1px solid var(--rule);border-radius:8px;padding:8px 10px}.sbs header{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.sbs pre{max-height:520px;white-space:pre-wrap;word-break:break-word}
 table.dims{width:100%}table.dims th{text-align:left;font-weight:500;white-space:nowrap;width:1%;padding-right:14px}
 details>summary{cursor:pointer;padding:6px 0;color:var(--ink-2)}
 pre.raw{max-height:460px;overflow:auto;background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-word;font-size:12px}

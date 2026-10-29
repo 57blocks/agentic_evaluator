@@ -66,6 +66,8 @@ function referencesOf(suite: Suite, files: readonly string[], known: ReadonlySet
   }
 
   for (const def of Object.values(suite.candidateDefs ?? {})) {
+    // A prompt variant: the candidate's own template, read on a prompt step only.
+    if ((suite.producer ?? "prompt") === "prompt") add("prompt", def.prompt_file);
     for (const p of filesIn(def.cli?.argv, known)) add("agent", p);
   }
   return refs;

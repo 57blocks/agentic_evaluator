@@ -66,6 +66,25 @@ test("a codegen step does not claim the prompt it inherits but never reads", asy
   ]);
 });
 
+test("a candidate's own prompt template is listed under its step as a prompt, not left under other", async () => {
+  // Arrange
+  const task = path.join(INSTALL_ROOT, "examples", "tasks", "compare-prompts");
+  const suites = await loadWorkflow(path.join(task, "spec.yaml"));
+
+  // Act
+  const groups = attributeFiles(suites, ["checks/release-notes.mjs", "inputs/changelog.txt", "prompts/notes-checklist.md", "prompts/notes.md", "rubrics/notes.md", "spec.yaml"]);
+
+  // Assert - the step's template first, then the variant's, in reading order.
+  assert.deepEqual(filesOf(groups, "notes"), [
+    ["inputs/changelog.txt", "input"],
+    ["prompts/notes.md", "prompt"],
+    ["prompts/notes-checklist.md", "prompt"],
+    ["rubrics/notes.md", "rubric"],
+    ["checks/release-notes.mjs", "check"],
+  ]);
+  assert.deepEqual(groups.other, []);
+});
+
 test("files no step references are kept, under other, and the spec is not one of them", async () => {
   // Act
   const groups = await prdChain();

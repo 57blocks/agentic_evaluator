@@ -24,7 +24,7 @@ import { maybeRunE2eValidation } from "./e2e-arms.js";
 import { CODEGEN_PREAMBLE } from "../producers/code-gen.js";
 import { sha256, short } from "../canon/hash.js";
 import { openTrace, traceIntegrity } from "../canon/trace.js";
-import { buildManifest } from "../canon/manifest.js";
+import { buildManifest, type RunPrompts } from "../canon/manifest.js";
 import { buildLedger, type CostLedger } from "../canon/cost.js";
 import { BudgetGuard } from "../canon/budget.js";
 import { buildWorkflowRecord, workflowGaps, type WorkflowStepInput } from "../canon/workflow.js";
@@ -68,6 +68,23 @@ export async function loadCandidatePrompts(suite: Suite): Promise<Map<string, Pr
     out.set(id, { promptTpl, promptTemplateSha: sha256(promptTpl) });
   }
   return out;
+}
+
+/** The templates this step sends, frozen into the manifest: the step's and each candidate's own. */
+export function frozenPrompts(
+  suite: Suite,
+  producer: ProducerKind,
+  promptTpl: string,
+  candidatePrompts: ReadonlyMap<string, PromptTemplate>,
+): RunPrompts | null {
+  if (producer !== "prompt") return null;
+  const files: Record<string, string> = {};
+  if (suite.promptFile) files[suite.promptFile] = promptTpl;
+  for (const [id, tpl] of candidatePrompts) {
+    const file = suite.candidateDefs?.[id]?.prompt_file;
+    if (file) files[file] = tpl.promptTpl;
+  }
+  return { step_file: suite.promptFile ?? null, files };
 }
 
 /** What one step produced. The canonical files on disk are the record; this is the handle. */
@@ -131,6 +148,7 @@ async function executeSuite(params: {
     judgeTemplateSha: judgeTplSha,
     scoreTemplateSha: scoreTplSha,
     checkVersion,
+    prompts: frozenPrompts(suite, producer, promptTpl, candidatePrompts),
   });
   await writeManifest(outDir, manifest);
 

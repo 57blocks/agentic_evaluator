@@ -45,3 +45,14 @@ test("an agent candidate says whether it ran isolated", () => {
   assert.match(candidateVia({ id: "b", adapter: "agent-cli", cli: { argv: ["x"], image: "node:22" } }), /docker \(node:22\)/);
   assert.match(candidateVia({ id: "c", model: "m", provider_route: "openrouter" }), /called via openrouter/);
 });
+
+test("a prompt variant's route names its own template and whether it carries a system prompt", async () => {
+  // Arrange
+  const suites = await loadWorkflow(path.join(INSTALL_ROOT, "examples", "tasks", "compare-prompts", "spec.yaml"));
+  const defs = suites[0].candidateDefs ?? {};
+
+  // Act / Assert
+  assert.equal(candidateVia(defs["notes-original"]), "called via openrouter, temperature 0.3");
+  assert.equal(candidateVia(defs["notes-checklist"]), "called via openrouter, temperature 0.3, its own prompt prompts/notes-checklist.md");
+  assert.equal(candidateVia(defs["notes-system"]), "called via openrouter, temperature 0.3, with a system prompt");
+});

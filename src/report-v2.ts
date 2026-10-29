@@ -19,19 +19,27 @@ import type { RunManifest } from "./canon/manifest.js";
 import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import { gapsFor, type CanonSummary } from "./canon/write.js";
 import { recommendFromCanon, type Recommendation } from "./canon/select.js";
-import { FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel } from "./report-copy.js";
+import { FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, promptLabel } from "./report-copy.js";
 import { NO_PICK, plural } from "./report-format.js";
 import {
   candidateViews, evaluatorErrorSubject, fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, judgeFavourite,
   ledgerNote, reviewGapLines, reviewSummary, sha8, stateTone, subtitleReasons, verdictFacts, verdictText,
   type CandidateView,
+  type PromptComparison,
+  type SideBySideRow,
+  promptComparisonOf,
+  promptVariantsOf,
+  sideBySideOf,
+  SIDE_BY_SIDE_MAX_INPUTS,
+  verdictWhy,
 } from "./report-model.js";
+import { diffCounts } from "./report-diff.js";
 import { latestVerdicts, type ReviewEntry, type ReviewRow } from "./canon/review.js";
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
 import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
 import { CHART_STYLES, renderScoreDistribution, renderScoreSummary } from "./report-charts.js";
-import { aboutOfRun, type RunAbout } from "./canon/about.js";
+import { aboutOfRun, promptsOfRun, type RunAbout, type RunPromptsAbout } from "./canon/about.js";
 import { sliceRows } from "./report-slices.js";
 import { renderCertainty } from "./report-certainty.js";
 import { agentActivityRows, type AgentActivityRow } from "./report-model.js";
@@ -63,6 +71,8 @@ export interface RunBundle {
   reviews?: ReviewRow[];
   /** What the run evaluated, in words (canon/about.ts); absent on bundles built in memory. */
   about?: RunAbout;
+  /** The templates the run sent (canon/about.ts); absent on bundles built in memory. */
+  prompts?: RunPromptsAbout;
 }
 
 async function loadReviews(dir: string): Promise<ReviewRow[]> {
@@ -95,6 +105,7 @@ export async function loadBundle(dir: string): Promise<RunBundle> {
     gaps: await fs.readFile(path.join(dir, "GAPS.md"), "utf-8").catch(() => ""),
     reviews: await loadReviews(dir),
     about: await aboutOfRun(dir, manifest),
+    prompts: await promptsOfRun(dir, manifest),
   };
 }
 
@@ -175,6 +186,7 @@ function renderHero(b: RunBundle, views: readonly CandidateView[], support: read
   const facts = verdictFacts(rec, views.find((v) => v.id === rec.chosen));
 
   const judgeLine = escapeHtml(judgeNote(best, rec.chosen));
+  const why = verdictWhy(b);
 
   return `<div class="verdict ${escapeHtml(rec.firmness)}">
     <span class="tag">${escapeHtml(FIRMNESS_LABEL[rec.firmness])}</span>
@@ -182,6 +194,7 @@ function renderHero(b: RunBundle, views: readonly CandidateView[], support: read
       <p class="champ-line">${headline}</p>
       <p class="champ-facts">${facts.map(escapeHtml).join(" · ")}</p>
       <p class="sub">${escapeHtml(verdictText(b))}</p>
+      ${why ? `<p class="sub"><b>Why, in the judge's words:</b> ${escapeHtml(why)}</p>` : ""}
       <p class="sub">${judgeLine}</p>
       <p class="sub">${escapeHtml(firmnessNote(rec.firmness, support))}</p>
     </div>
@@ -226,6 +239,81 @@ function renderJudgeScores(b: RunBundle, absoluteRan: boolean, views: readonly C
 }
 
 /** One row per command candidate whose trace was read; nothing when none was. */
+function promptLine(v: CandidateView, stepFile: string | null): string {
+  const { prompt, system } = promptLabel(v, stepFile);
+  const sys = system === null ? "" : ` · <span title="${escapeHtml(v.system ?? "")}">system "${escapeHtml(system)}"</span>`;
+  return `<span class="prompt">${escapeHtml(prompt)}${sys}</span>`;
+}
+
+/**
+ * A prompt comparison leads with the prompts: the step's template in full,
+ * then each candidate's departure from it (a line diff) and its system prompt.
+ */
+function renderPromptComparison(c: PromptComparison | null): string {
+  if (c === null) return "";
+  const provenance =
+    c.source === "current-spec"
+      ? " The texts are read from the task's files as they are now: this run predates the manifest freezing them."
+      : c.source === "none"
+        ? " This run did not record the texts, and the task's files could not be read."
+        : "";
+  const step = c.step.file
+    ? `<p class="note"><b>Step template</b> <code>${escapeHtml(c.step.file)}</code> — what a candidate without its own template is sent; a variant below shows its changes against this.</p>
+    ${c.step.text !== null ? `<pre class="raw">${escapeHtml(c.step.text)}</pre>` : `<p class="muted">Text not on file.</p>`}`
+    : "";
+  const variants = c.variants
+    .map((v) => {
+      const which = v.own
+        ? `<span class="chip win">own template ${escapeHtml(v.file ?? "")}</span>`
+        : `<span class="chip tie">step template${c.step.file ? ` ${escapeHtml(c.step.file)}` : ""}</span>`;
+      const counts = v.diff ? diffCounts(v.diff) : null;
+      const delta = counts ? `<span class="chip tie">+${counts.added} / −${counts.removed} lines against the step's</span>` : "";
+      const sys = v.system !== null ? `<span class="chip win">system prompt</span>` : "";
+      const body = v.diff
+        ? `<pre class="raw diff">${v.diff.map((l) => `<span class="${l.kind}">${l.kind === "add" ? "+ " : l.kind === "del" ? "− " : "  "}${escapeHtml(l.text)}</span>`).join("\n")}</pre>`
+        : v.own && v.text !== null
+          ? `<pre class="raw">${escapeHtml(v.text)}</pre>`
+          : "";
+      const system = v.system !== null ? `<blockquote class="system"><span class="muted">system prompt, sent with every call</span><p>${escapeHtml(v.system)}</p></blockquote>` : "";
+      const request = v.request
+        ? `<details><summary>The full request, for input ${escapeHtml(v.request.input)} <span class="muted">${v.request.messages.length} message(s) · ${v.request.exact ? "exactly as sent" : "reconstructed from the task's files as they are now"}</span></summary>${v.request.messages
+            .map((msg) => `<p class="note"><span class="chip ${msg.role === "system" ? "win" : "tie"}">role: ${msg.role}</span></p><pre class="raw">${escapeHtml(msg.content)}</pre>`)
+            .join("")}</details>`
+        : "";
+      return `<article class="duel"><header><strong>${escapeHtml(v.id)}</strong> ${which} ${delta} ${sys}</header>${body}${system}${request}</article>`;
+    })
+    .join("");
+  return `<section class="card">
+    <h2>Prompts compared <span class="hint">${c.variants.length} candidates, one model (${escapeHtml(c.model)}, ${escapeHtml(c.via)}); what differs is the prompt each one was sent.${escapeHtml(provenance)}</span></h2>
+    ${step}
+    ${variants}
+  </section>`;
+}
+
+/** The same input, every candidate's answer beside the others; capped, the rest stay in the output list. */
+function renderSideBySide(rows: readonly SideBySideRow[], open: boolean): string {
+  if (rows.length === 0) return "";
+  const shown = rows.slice(0, SIDE_BY_SIDE_MAX_INPUTS);
+  const omitted = rows.length - shown.length;
+  const grid = (row: SideBySideRow): string =>
+    `<div class="sbs">${row.cells
+      .map((cell) => {
+        const o = cell.output;
+        const meta = o === null || o.text === null ? `<span class="muted">no raw output saved</span>` : `<span class="muted">${o.totalChars.toLocaleString()} characters</span>`;
+        const text = o !== null && o.text !== null ? `<pre class="raw">${escapeHtml(o.text)}</pre>` : "";
+        return `<article><header><strong>${escapeHtml(cell.candidate)}</strong> ${meta}</header>${text}</article>`;
+      })
+      .join("")}</div>`;
+  const body =
+    shown.length === 1
+      ? grid(shown[0])
+      : shown.map((row, i) => `<details${open && i === 0 ? " open" : ""}><summary>${escapeHtml(row.input)}</summary>${grid(row)}</details>`).join("");
+  return `<section class="card">
+    <h2>Outputs side by side <span class="hint">every candidate's answer to the same input, first trial, exactly the text the judge saw${omitted > 0 ? ` · the first ${shown.length} inputs; the other ${omitted} are under Candidate outputs` : ""}</span></h2>
+    ${body}
+  </section>`;
+}
+
 function renderAgentActivity(rows: readonly AgentActivityRow[]): string {
   if (rows.length === 0) return "";
   const fmtN = (v: number | null): string => (v === null ? "—" : String(v));
@@ -266,6 +354,8 @@ export function renderRunReport(b: RunBundle): string {
     .join("");
 
   const colorOf = new Map(views.map((v, i) => [v.id, i % 4]));
+  const promptVariants = promptVariantsOf(views);
+  const promptComparison = promptComparisonOf(b, views);
   const candidateRows = views
     .map((v) => {
       const isControl = m.control_candidate === v.id;
@@ -279,7 +369,7 @@ export function renderRunReport(b: RunBundle): string {
         .join("");
       const outcomes = `<span class="ok">${v.outcomes.success} success</span><span class="bad">${v.outcomes.failure} failure</span><span class="warn">${v.outcomes.undetermined} undetermined</span>`;
       return `<tr${rowClass ? ` class="${rowClass}"` : ""}>
-        <td class="cand"><span class="sw sw${colorOf.get(v.id) ?? 0}"></span>${escapeHtml(v.id)}${candidateMark(gated, chosen)}<span class="model">${escapeHtml(v.model)} · ${escapeHtml(v.deployment)}</span></td>
+        <td class="cand"><span class="sw sw${colorOf.get(v.id) ?? 0}"></span>${escapeHtml(v.id)}${candidateMark(gated, chosen)}<span class="model">${escapeHtml(v.model)} · ${escapeHtml(v.deployment)}</span>${promptVariants ? promptLine(v, b.prompts?.stepFile ?? null) : ""}</td>
         <td><div class="state-list">${outcomes}</div></td>
         <td class="num">${checkPill(v)}</td>
         <td class="num">${winBar(v.winRate)}${fmtPct(v.winRate)}<span class="sub">${v.comparisons} matches</span></td>
@@ -333,6 +423,8 @@ export function renderRunReport(b: RunBundle): string {
 
   ${renderAbout(b)}
 
+  ${renderPromptComparison(promptComparison)}
+
   ${renderHero(b, views, support)}
 
   <section class="card">
@@ -381,6 +473,8 @@ export function renderRunReport(b: RunBundle): string {
   </div>
 
   ${renderJudgeScores(b, absoluteRan, views)}
+
+  ${renderSideBySide(sideBySideOf(b.outputs, views.map((v) => v.id)), promptComparison !== null)}
 
   ${renderDuels(b.evaluations)}
 
