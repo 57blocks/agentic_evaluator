@@ -153,6 +153,25 @@ test("the why line is withheld when the judge's favourite is not the recommendat
   assert.ok(whys.some((w) => w === null), "at most one of two different picks can be the judge's favourite");
 });
 
+test("a quote in a system prompt cannot end the title attribute it is shown in", async () => {
+  // Arrange - a system prompt that tries to close the attribute and add a handler.
+  const bundle = await loadBundle(path.join(fixturesDir(), "codegen-w38"));
+  const [first, second] = Object.keys(bundle.manifest.candidates);
+  const hostile = `be terse" onmouseover="alert(1)`;
+  const candidates = {
+    ...bundle.manifest.candidates,
+    [first]: { ...bundle.manifest.candidates[first], system: hostile },
+    [second]: { ...bundle.manifest.candidates[second], prompt_file: "prompts/alt.md" },
+  };
+
+  // Act
+  const page = renderRunReport({ ...bundle, manifest: { ...bundle.manifest, candidates } });
+
+  // Assert
+  assert.ok(!page.includes(`onmouseover="alert`), "the handler never becomes an attribute");
+  assert.ok(page.includes("be terse&quot; onmouseover=&quot;alert(1)"), "the text is shown, escaped");
+});
+
 test("a model comparison is not a prompt comparison, and shows no prompt sections", async () => {
   const bundle = await loadBundle(path.join(fixturesDir(), "codegen-w38"));
   assert.equal(promptComparisonOf(bundle, candidateViews(bundle)), null);
