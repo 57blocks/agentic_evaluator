@@ -140,8 +140,8 @@ test("a prompt comparison: one model, the prompts and their diffs, the why in ca
   assert.ok(page.includes("The full request, for input changelog"));
   assert.equal(r.stepPromptFile, "prompts/notes.md");
   const rows = sideBySideOf(r.outputs, r.candidates.map((c) => c.id));
-  assert.equal(rows.length, 1);
-  assert.equal(rows[0].cells.length, 3);
+  assert.equal(rows.length, Object.keys(bundle.manifest.test_set.inputs ?? {}).length, "one row per input the run had");
+  assert.ok(rows.every((row) => row.cells.length === 3), "one cell per candidate");
 
   // Assert - the why names candidates, never the judge's labels
   const why = verdictWhy(bundle);
