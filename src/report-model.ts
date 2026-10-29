@@ -21,6 +21,9 @@ import type { CanonSummary } from "./canon/write.js";
 import type { Recommendation } from "./canon/select.js";
 import type { E2eValidation } from "./canon/e2e.js";
 import { judgeStandings } from "./canon/judge-standings.js";
+import { lineDiff, type DiffLine } from "./report-diff.js";
+export { SIDE_BY_SIDE_MAX_INPUTS, sideBySideOf, type SideBySideRow } from "./report-side-by-side.js";
+import type { RunPromptsAbout } from "./canon/about.js";
 import { itemStats } from "./canon/item-stats.js";
 import { percentile } from "./canon/rates.js";
 import { judgeDiscrimination } from "./canon/discrimination.js";
@@ -29,13 +32,14 @@ import { dimensionKeys, profiles, scoreDistribution, scoreSummary, type Candidat
 import type { RawOutput } from "./report-evidence.js";
 import type { RunBundle } from "./report-v2.js";
 import type { WorkflowRecord } from "./canon/workflow.js";
-import { planFromRun, type PlanStep } from "./test-plan.js";
+import { planFromRun, routeVia, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
 import { NO_PICK, plural, sha8 } from "./report-format.js";
 import { sliceRows, type SliceRow } from "./report-slices.js";
 import type { RunAbout } from "./canon/about.js";
+import type { CandidateDef } from "./canon/types.js";
 import {
-  FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, recommendationSentence, type GateRow,
+  FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, nameOutputs, recommendationSentence, type GateRow,
 } from "./report-copy.js";
 
 export { fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, sha8, stateTone } from "./report-format.js";
@@ -64,6 +68,125 @@ export interface CandidateView {
   completed: { ok: number; total: number };
   /** Blind human review record; null when nobody reviewed this run. */
   human: HumanRecord | null;
+  /** The candidate's own prompt template, when it declares one; null means the step's. */
+  promptFile: string | null;
+  /** The candidate's system prompt, when it declares one. */
+  system: string | null;
+}
+
+/**
+ * Candidates that differ in prompt template or system prompt are a prompt
+ * comparison: the model is the same on every row, so each row must say which
+ * prompt it ran. One model-only row is not a comparison; neither are rows
+ * that all declare the same prompt.
+ */
+export function promptVariantsOf(views: readonly CandidateView[]): boolean {
+  const prompts = new Set(views.map((v) => `${v.promptFile ?? ""}\u0000${v.system ?? ""}`));
+  return prompts.size > 1;
+}
+
+/** One prompt variant of the shared model: what it sends, and how that departs from the step's template. */
+export interface PromptVariant {
+  id: string;
+  /** The template file this candidate sends: its own, else the step's. */
+  file: string | null;
+  own: boolean;
+  text: string | null;
+  /** Against the step's template; null when the candidate sends the step's, or a text is missing. */
+  diff: DiffLine[] | null;
+  system: string | null;
+  /** The request this candidate's prompt became on the run's first input; null when the input or template is not at hand. */
+  request: PromptRequest | null;
+}
+
+/** One call, as the provider saw it: a system message when the candidate has one, then the filled template. */
+export interface PromptRequest {
+  input: string;
+  messages: Array<{ role: "system" | "user"; content: string }>;
+  /** True when the template was frozen by this run and the input file still hashes as the run recorded: exactly what was sent. */
+  exact: boolean;
+}
+
+/** The chat-completions message list a model candidate is sent: `{{input}}` filled once, as adapters/model-api does. */
+export function promptRequestOf(
+  template: string | null,
+  system: string | null,
+  prompts: Pick<RunPromptsAbout, "sampleInput" | "source">,
+): PromptRequest | null {
+  const sample = prompts.sampleInput;
+  if (template === null || sample === null) return null;
+  return {
+    input: sample.id,
+    messages: [...(system !== null ? [{ role: "system" as const, content: system }] : []), { role: "user" as const, content: template.replace("{{input}}", sample.text) }],
+    exact: prompts.source === "frozen" && sample.matchesRun,
+  };
+}
+
+/**
+ * A prompt comparison: every candidate is the same model, called the same way,
+ * and what differs is the prompt. The report then leads with the prompts —
+ * the model line would say the same thing three times.
+ */
+export interface PromptComparison {
+  model: string;
+  /** Route and settings, shared by every candidate. */
+  via: string;
+  step: { file: string | null; text: string | null };
+  variants: PromptVariant[];
+  /** Where the texts came from: this run's manifest, or the task's files as they are now. */
+  source: RunPromptsAbout["source"];
+}
+
+export function promptComparisonOf(b: RunBundle, views: readonly CandidateView[]): PromptComparison | null {
+  if (views.length < 2 || !promptVariantsOf(views)) return null;
+  const defs = views.map((v) => b.manifest.candidates[v.id]);
+  if (defs.some((d) => d === undefined || d.cli || d.adapter === "agent-cli")) return null;
+  const sameCall = (d: CandidateDef): string =>
+    JSON.stringify([modelRefOf(d), d.provider_route ?? null, d.base_url ?? null, d.generation_settings ?? null]);
+  if (new Set(defs.map((d) => sameCall(d!))).size > 1) return null;
+  const prompts: RunPromptsAbout = b.prompts ?? { stepFile: null, files: {}, source: "none", sampleInput: null };
+  const stepText = prompts.stepFile ? prompts.files[prompts.stepFile] ?? null : null;
+  return {
+    model: modelRefOf(defs[0]!),
+    via: routeVia(defs[0]!),
+    step: { file: prompts.stepFile, text: stepText },
+    variants: views.map((v) => {
+      const own = v.promptFile !== null;
+      const file = v.promptFile ?? prompts.stepFile;
+      const text = file ? prompts.files[file] ?? null : null;
+      const diff = own && text !== null && stepText !== null && text !== stepText ? lineDiff(stepText, text) : null;
+      return { id: v.id, file, own, text, diff, system: v.system, request: promptRequestOf(text, v.system, prompts) };
+    }),
+    source: prompts.source,
+  };
+}
+
+/**
+ * Why the recommendation won, in the judge's words: its overall reason on a
+ * duel the chosen candidate won — against the runner-up when there is one —
+ * with the judge's "Output A/B" replaced by the candidates' names. Null when
+ * no judged duel says so, and null whenever the judge's favourite is not the
+ * recommendation: the recommendation is made by gates and operating mode, and
+ * a judge's reason under a pick the judge did not make would read as its cause.
+ */
+export function verdictWhy(b: RunBundle): string | null {
+  const chosen = b.recommendation.chosen;
+  if (!chosen) return null;
+  const favourite = judgeFavourite(b);
+  if (favourite === null || !favourite.sole || favourite.candidate !== chosen) return null;
+  const ranked = [...judgeStandings(b.trials)].filter((s) => s.comparisons > 0).sort((x, y) => (y.win_rate ?? -1) - (x.win_rate ?? -1));
+  const runnerUp = b.recommendation.evidence?.versus_runner_up?.b ?? ranked.find((s) => s.candidate !== chosen)?.candidate ?? null;
+  const won = b.evaluations.filter((e) => {
+    if (e.subject.kind !== "pair" || e.state !== "pass" || !e.evidence) return false;
+    const winner = e.overall === "a" ? e.subject.a : e.overall === "b" ? e.subject.b : null;
+    return winner === chosen;
+  });
+  const other = (e: EvaluationRow): string | null => (e.subject.kind === "pair" ? (e.subject.a === chosen ? e.subject.b : e.subject.a) : null);
+  const pick = won.find((e) => other(e) === runnerUp) ?? won[0];
+  if (!pick || pick.subject.kind !== "pair") return null;
+  const text = nameOutputs(pick.evidence ?? "", pick.subject.a, pick.subject.b);
+  const inputs = Object.keys(b.manifest.test_set.inputs ?? {}).length;
+  return inputs > 1 ? `On ${pick.subject.input}, against ${other(pick)}: ${text}` : `Against ${other(pick)}: ${text}`;
 }
 
 /**
@@ -117,6 +240,8 @@ export function candidateViews(b: RunBundle): CandidateView[] {
       record: { wins: duel.wins, losses: duel.losses, ties: duel.ties },
       completed: { ok: c.completion_states.success ?? 0, total: attempts },
       human: b.reviews && b.reviews.length > 0 ? humanRecord(c.candidate, b.reviews) : null,
+      promptFile: def?.prompt_file ?? null,
+      system: def?.system ?? null,
     };
   });
 }
@@ -436,6 +561,8 @@ export interface StepReport {
     facts: string[];
     /** What is recommended and why, or why nothing is. */
     text: string;
+    /** Why it won, in the judge's words on a duel it won; null when no judged duel says. */
+    why: string | null;
     judge: JudgeFavourite | null;
     judgeNote: string;
     /** The chosen candidate's headline numbers; null when nobody was chosen. */
@@ -451,6 +578,12 @@ export interface StepReport {
   filters: Recommendation["filters"];
   eligible: string[];
   candidates: CandidateRow[];
+  /** True when the candidates differ in prompt template or system prompt, so each row says which prompt it ran. */
+  promptVariants: boolean;
+  /** The step's template file; null when the run did not record it or the step sends none. */
+  stepPromptFile: string | null;
+  /** Set when every candidate is one model and the prompts are what differ: the report leads with them. */
+  promptComparison: PromptComparison | null;
   trialsPer: number;
   control: string | null;
   coverage: CanonSummary["evaluation_coverage"];
@@ -520,6 +653,7 @@ export function buildStepReport(b: RunBundle): StepReport {
       modeLabel: modeLabel(rec.operating_mode),
       facts: verdictFacts(rec, chosenView),
       text: verdictText(b),
+      why: verdictWhy(b),
       judge,
       judgeNote: judgeNote(judge, rec.chosen),
       headline: chosenView
@@ -531,6 +665,9 @@ export function buildStepReport(b: RunBundle): StepReport {
     certainty: certaintyOf(rec, b.trials),
     filters: rec.filters,
     eligible: rec.eligible,
+    promptVariants: promptVariantsOf(views),
+    stepPromptFile: b.prompts?.stepFile ?? null,
+    promptComparison: promptComparisonOf(b, views),
     candidates: views.map((v, i) => ({
       ...v,
       isControl: m.control_candidate === v.id,

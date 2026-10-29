@@ -16,6 +16,17 @@ import { readLabels, type InputLabels } from "./about.js";
 
 const execFileAsync = promisify(execFile);
 
+/**
+ * The prompt templates a run sent, frozen at its start: the step's file and
+ * the text of every template — the step's and each candidate's own — keyed
+ * by file. What a report shows as "the prompt" is then what the model saw,
+ * not the file as it is now.
+ */
+export interface RunPrompts {
+  step_file: string | null;
+  files: Record<string, string>;
+}
+
 export interface RunManifest {
   protocol_version: string;
   run_id: string;
@@ -44,6 +55,8 @@ export interface RunManifest {
     judge_template_sha256: string;
     score_template_sha256: string;
   };
+  /** Absent on runs made before it existed; null when the step sends no template (codegen, agent-cli). */
+  prompts?: RunPrompts | null;
   success_criteria: { mandatory_checks: "all" } | null;
   operating_mode: string | null;
   /** Resolved gates actually used; frozen so a later default change cannot rewrite this run. */
@@ -73,6 +86,7 @@ export interface ManifestInputs {
   judgeTemplateSha: string;
   scoreTemplateSha: string;
   checkVersion: string | null;
+  prompts?: RunPrompts | null;
 }
 
 async function harnessVersion(): Promise<{ name: string; version: string; git_sha: string | null }> {
@@ -128,6 +142,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
       judge_template_sha256: m.judgeTemplateSha,
       score_template_sha256: m.scoreTemplateSha,
     },
+    prompts: m.prompts ?? null,
     success_criteria: suite.successCriteria ?? null,
     operating_mode: suite.operatingMode ?? null,
     eligibility: resolveEligibility(suite.requiredChecks ?? [], suite.eligibility),

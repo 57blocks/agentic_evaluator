@@ -31,6 +31,34 @@ test("every number the model derives is the number report.html prints", async ()
   for (const f of model.facts) assert.ok(page.includes(f.value.split(" · ")[0]), `fact ${f.label}`);
 });
 
+test("a prompt comparison says which prompt each candidate ran; a model comparison says nothing", async () => {
+  // Arrange - the same run, with one candidate given its own template and another a system prompt.
+  const bundle = await loadBundle(FIXTURE);
+  const ids = Object.keys(bundle.manifest.candidates);
+  assert.ok(ids.length >= 2);
+  const system = "Answer in at most three sentences, and never invent a PR.".repeat(3);
+  const candidates = Object.fromEntries(
+    ids.map((id, i) => [id, i === 0 ? { ...bundle.manifest.candidates[id], prompt_file: "prompts/alt.md" } : i === 1 ? { ...bundle.manifest.candidates[id], system } : bundle.manifest.candidates[id]]),
+  );
+  const variants = { ...bundle, manifest: { ...bundle.manifest, candidates } };
+
+  // Act
+  const plain = buildStepReport(bundle);
+  const compared = buildStepReport(variants);
+  const page = renderRunReport(variants);
+
+  // Assert
+  assert.equal(plain.promptVariants, false);
+  assert.ok(!renderRunReport(bundle).includes('class="prompt"'), "a model comparison shows no prompt line");
+  assert.equal(compared.promptVariants, true);
+  assert.equal(compared.candidates[0].promptFile, "prompts/alt.md");
+  assert.equal(compared.candidates[1].system, system);
+  assert.ok(page.includes("prompt prompts/alt.md"), "the variant's template is named");
+  assert.ok(page.includes("prompt the step&#39;s") || page.includes("prompt the step's"), "the others say they ran the step's");
+  assert.ok(page.includes(`title="${system}"`), "the full system prompt is in the tooltip");
+  assert.ok(!page.includes(`system "${system}"`), "the row shows a preview, not the whole system prompt");
+});
+
 test("the verdict names the recommendation and marks everyone else it gated", async () => {
   const model = buildStepReport(await loadBundle(FIXTURE));
   assert.equal(model.verdict.chosen, "sonnet-5");
