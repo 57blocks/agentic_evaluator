@@ -22,7 +22,8 @@ holder of fewer shares can qualify on votes. Exactly 25% is not more than 25%
 
 ## R2 · Shares a person holds are added up
 
-A person listed with several shares (several laufende Nummern) holds their sum.
+A person listed with several shares (several laufende Nummern in a GmbH list,
+several numbered Einlagen in a KG extract) holds their sum.
 
 ## R3 · Direct and controlled-entity holdings are added, in full
 
