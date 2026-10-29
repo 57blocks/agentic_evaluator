@@ -113,6 +113,23 @@ test("R8: the fallback lists the legal representatives only", async () => {
   assert.deepEqual(a.beneficial_owners, []);
 });
 
+test("inputs: a KG partner's split stake is numbered, never two identical lines", () => {
+  // Arrange - every KG extract in the set.
+  const extracts = fs.readdirSync(path.join(TASK, "inputs")).map((f) => fs.readFileSync(path.join(TASK, "inputs", f), "utf-8")).filter((t) => t.includes("Kommanditisten:"));
+  assert.ok(extracts.length > 0);
+
+  // Assert - no partner line repeats verbatim; a repeated partner carries an entry number.
+  for (const text of extracts) {
+    const lines = text.split("\n").filter((l) => l.startsWith("- ") && l.includes("Hafteinlage"));
+    assert.equal(new Set(lines).size, lines.length, "two identical partner lines");
+    const persons = lines.map((l) => l.replace(/, Hafteinlage.*$/, ""));
+    for (const line of lines) {
+      const person = line.replace(/, Hafteinlage.*$/, "");
+      if (persons.filter((x) => x === person).length > 1) assert.match(line, /\(\d\. Einlage\)$/, line);
+    }
+  }
+});
+
 function runCheck(input: string, output: string) {
   const work = fs.mkdtempSync(path.join(os.tmpdir(), "ubo-v2-check-"));
   fs.writeFileSync(path.join(work, "output.txt"), output);
