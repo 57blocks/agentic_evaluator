@@ -7,7 +7,7 @@
 import type { PromptComparison as Model, PromptVariant } from "../../../../../report-model.js";
 import { diffCounts } from "../../../../../report-diff.js";
 import { cn } from "@/lib/utils";
-import { Section, Tag } from "../Section";
+import { Fold, Section, Tag } from "../Section";
 
 const PRE = "max-h-[420px] overflow-auto bg-muted p-3 font-mono text-xs whitespace-pre-wrap break-words";
 
@@ -27,6 +27,23 @@ function Diff({ variant: v }: { variant: PromptVariant }) {
         <span key={i} className={cn("block", DIFF_TONE[line.kind])}>{DIFF_MARK[line.kind]}{line.text}</span>
       ))}
     </pre>
+  );
+}
+
+/** The call itself: each message with its role, the template filled with the run's first input. */
+function Request({ request: r }: { request: NonNullable<PromptVariant["request"]> }) {
+  return (
+    <Fold
+      title={`The full request, for input ${r.input}`}
+      count={`${r.messages.length} message${r.messages.length === 1 ? "" : "s"} · ${r.exact ? "exactly as sent" : "reconstructed from the task's files as they are now"}`}
+    >
+      {r.messages.map((m, i) => (
+        <div key={i} className="flex flex-col gap-1">
+          <Tag tone={m.role === "system" ? "ok" : "neutral"} className="font-mono">role: {m.role}</Tag>
+          <pre className={PRE}>{m.content}</pre>
+        </div>
+      ))}
+    </Fold>
   );
 }
 
@@ -52,6 +69,7 @@ function Variant({ variant: v, stepFile }: { variant: PromptVariant; stepFile: s
           <p className="whitespace-pre-wrap">{v.system}</p>
         </blockquote>
       )}
+      {v.request && <Request request={v.request} />}
     </article>
   );
 }

@@ -12,6 +12,8 @@ import path from "node:path";
 import { parseSpec } from "../spec/load-spec.js";
 import type { RunManifest } from "./manifest.js";
 import type { CandidateDef } from "./types.js";
+import { sha256 } from "./hash.js";
+import { taskInputPath } from "../paths.js";
 
 export interface InputLabel {
   tags: string[];
@@ -97,6 +99,22 @@ export interface RunPromptsAbout {
   files: Record<string, string>;
   /** "frozen": from this run's manifest. "current-spec": read from the task's files as they are now. */
   source: "frozen" | "current-spec" | "none";
+  /**
+   * The run's first input, read from the task, so a report can show the
+   * request a template became. `matchesRun` says the file still hashes to
+   * what the manifest froze; null when the task's files are not at hand.
+   */
+  sampleInput: { id: string; text: string; matchesRun: boolean } | null;
+}
+
+/** The first input of the run as the task holds it now, checked against the hash the manifest froze. */
+async function sampleInputOf(dir: string, m: RunManifest): Promise<RunPromptsAbout["sampleInput"]> {
+  const [id, sha] = Object.entries(m.test_set?.inputs ?? {})[0] ?? [];
+  if (!id || !m.spec.path) return null;
+  const taskRoot = await taskRootOf(dir, path.basename(m.spec.path));
+  if (!taskRoot) return null;
+  const text = await fs.readFile(taskInputPath(taskRoot, id), "utf-8").catch(() => null);
+  return text === null ? null : { id, text, matchesRun: sha256(text) === sha };
 }
 
 /**
@@ -104,12 +122,13 @@ export interface RunPromptsAbout {
  * described from the task's files as they are now, and the report says so.
  */
 export async function promptsOfRun(dir: string, m: RunManifest): Promise<RunPromptsAbout> {
+  const sampleInput = await sampleInputOf(dir, m);
   if (m.prompts !== undefined) {
     return m.prompts === null
-      ? { stepFile: null, files: {}, source: "frozen" }
-      : { stepFile: m.prompts.step_file, files: m.prompts.files, source: "frozen" };
+      ? { stepFile: null, files: {}, source: "frozen", sampleInput }
+      : { stepFile: m.prompts.step_file, files: m.prompts.files, source: "frozen", sampleInput };
   }
-  const none: RunPromptsAbout = { stepFile: null, files: {}, source: "none" };
+  const none: RunPromptsAbout = { stepFile: null, files: {}, source: "none", sampleInput };
   if (!m.spec.path) return none;
   const taskRoot = await taskRootOf(dir, path.basename(m.spec.path));
   if (!taskRoot) return none;
@@ -127,7 +146,7 @@ export async function promptsOfRun(dir: string, m: RunManifest): Promise<RunProm
       const text = await fs.readFile(path.join(taskRoot, file), "utf-8").catch(() => null);
       if (text !== null) files[file] = text;
     }
-    return Object.keys(files).length > 0 ? { stepFile, files, source: "current-spec" } : none;
+    return Object.keys(files).length > 0 ? { stepFile, files, source: "current-spec", sampleInput } : none;
   } catch {
     return none;
   }

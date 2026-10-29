@@ -95,6 +95,31 @@ export interface PromptVariant {
   /** Against the step's template; null when the candidate sends the step's, or a text is missing. */
   diff: DiffLine[] | null;
   system: string | null;
+  /** The request this candidate's prompt became on the run's first input; null when the input or template is not at hand. */
+  request: PromptRequest | null;
+}
+
+/** One call, as the provider saw it: a system message when the candidate has one, then the filled template. */
+export interface PromptRequest {
+  input: string;
+  messages: Array<{ role: "system" | "user"; content: string }>;
+  /** True when the template was frozen by this run and the input file still hashes as the run recorded: exactly what was sent. */
+  exact: boolean;
+}
+
+/** The chat-completions message list a model candidate is sent: `{{input}}` filled once, as adapters/model-api does. */
+export function promptRequestOf(
+  template: string | null,
+  system: string | null,
+  prompts: Pick<RunPromptsAbout, "sampleInput" | "source">,
+): PromptRequest | null {
+  const sample = prompts.sampleInput;
+  if (template === null || sample === null) return null;
+  return {
+    input: sample.id,
+    messages: [...(system !== null ? [{ role: "system" as const, content: system }] : []), { role: "user" as const, content: template.replace("{{input}}", sample.text) }],
+    exact: prompts.source === "frozen" && sample.matchesRun,
+  };
 }
 
 /**
@@ -119,7 +144,7 @@ export function promptComparisonOf(b: RunBundle, views: readonly CandidateView[]
   const sameCall = (d: CandidateDef): string =>
     JSON.stringify([modelRefOf(d), d.provider_route ?? null, d.base_url ?? null, d.generation_settings ?? null]);
   if (new Set(defs.map((d) => sameCall(d!))).size > 1) return null;
-  const prompts = b.prompts ?? { stepFile: null, files: {}, source: "none" as const };
+  const prompts: RunPromptsAbout = b.prompts ?? { stepFile: null, files: {}, source: "none", sampleInput: null };
   const stepText = prompts.stepFile ? prompts.files[prompts.stepFile] ?? null : null;
   return {
     model: modelRefOf(defs[0]!),
@@ -130,7 +155,7 @@ export function promptComparisonOf(b: RunBundle, views: readonly CandidateView[]
       const file = v.promptFile ?? prompts.stepFile;
       const text = file ? prompts.files[file] ?? null : null;
       const diff = own && text !== null && stepText !== null && text !== stepText ? lineDiff(stepText, text) : null;
-      return { id: v.id, file, own, text, diff, system: v.system };
+      return { id: v.id, file, own, text, diff, system: v.system, request: promptRequestOf(text, v.system, prompts) };
     }),
     source: prompts.source,
   };

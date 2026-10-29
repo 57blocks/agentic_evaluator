@@ -275,7 +275,12 @@ function renderPromptComparison(c: PromptComparison | null): string {
           ? `<pre class="raw">${escapeHtml(v.text)}</pre>`
           : "";
       const system = v.system !== null ? `<blockquote class="system"><span class="muted">system prompt, sent with every call</span><p>${escapeHtml(v.system)}</p></blockquote>` : "";
-      return `<article class="duel"><header><strong>${escapeHtml(v.id)}</strong> ${which} ${delta} ${sys}</header>${body}${system}</article>`;
+      const request = v.request
+        ? `<details><summary>The full request, for input ${escapeHtml(v.request.input)} <span class="muted">${v.request.messages.length} message(s) · ${v.request.exact ? "exactly as sent" : "reconstructed from the task's files as they are now"}</span></summary>${v.request.messages
+            .map((msg) => `<p class="note"><span class="chip ${msg.role === "system" ? "win" : "tie"}">role: ${msg.role}</span></p><pre class="raw">${escapeHtml(msg.content)}</pre>`)
+            .join("")}</details>`
+        : "";
+      return `<article class="duel"><header><strong>${escapeHtml(v.id)}</strong> ${which} ${delta} ${sys}</header>${body}${system}${request}</article>`;
     })
     .join("");
   return `<section class="card">

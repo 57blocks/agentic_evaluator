@@ -88,8 +88,15 @@ test("promptsOfRun: a manifest without the field falls back to the task's files 
   assert.equal(current.stepFile, "prompts/notes.md");
   assert.match(current.files["prompts/notes.md"], /release manager/);
   assert.match(current.files["prompts/notes-checklist.md"], /list every PR number/);
-  assert.deepEqual(frozen, { stepFile: "prompts/notes.md", files: { "prompts/notes.md": "FROZEN" }, source: "frozen" });
-  assert.deepEqual(none, { stepFile: null, files: {}, source: "frozen" });
+  assert.equal(frozen.source, "frozen");
+  assert.deepEqual(frozen.files, { "prompts/notes.md": "FROZEN" });
+  assert.deepEqual({ ...none, sampleInput: null }, { stepFile: null, files: {}, source: "frozen", sampleInput: null });
+  // No inputs in this manifest, so no sample input; a manifest naming one reads it from the task.
+  assert.equal(current.sampleInput, null);
+  const withInput = await promptsOfRun(runDir, { ...manifest, test_set: { id: "t", inputs: { changelog: "not-the-real-hash" } } } as RunManifest);
+  assert.equal(withInput.sampleInput?.id, "changelog");
+  assert.match(withInput.sampleInput?.text ?? "", /Write release notes for v2\.4\.0/);
+  assert.equal(withInput.sampleInput?.matchesRun, false, "the file does not hash to what this manifest claims");
   await fs.rm(ws, { recursive: true, force: true });
 });
 
@@ -121,6 +128,16 @@ test("a prompt comparison: one model, the prompts and their diffs, the why in ca
   const system = c.variants.find((v) => v.id === "notes-system")!;
   assert.equal(system.own, false);
   assert.match(system.system ?? "", /busy users/);
+
+  // Assert - the request each prompt became: system message first when there is one, then the filled template.
+  const original = c.variants.find((v) => v.id === "notes-original")!;
+  assert.deepEqual(original.request?.messages.map((m) => m.role), ["user"]);
+  assert.match(original.request?.messages[0].content ?? "", /^You are the release manager[\s\S]*#412 feat: export runs as CSV/);
+  assert.ok(!original.request?.messages[0].content.includes("{{input}}"), "the placeholder is filled");
+  assert.deepEqual(system.request?.messages.map((m) => m.role), ["system", "user"]);
+  assert.equal(system.request?.messages[1].content, original.request?.messages[0].content, "same user message as the original; only the system message differs");
+  assert.equal(system.request?.exact, c.source === "frozen", "exact only when this run froze the template and the input still matches");
+  assert.ok(page.includes("The full request, for input changelog"));
   assert.equal(r.stepPromptFile, "prompts/notes.md");
   const rows = sideBySideOf(r.outputs, r.candidates.map((c) => c.id));
   assert.equal(rows.length, 1);
