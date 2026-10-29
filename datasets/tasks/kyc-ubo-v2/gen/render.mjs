@@ -94,7 +94,15 @@ function gmbhHeader(d, target, entity, register) {
 }
 
 function kgHeader(d, target, entity) {
-  const limited = entity.holders.map((h) => `- ${d.person(h.holder)}, Hafteinlage ${eur(h.nominal)}`);
+  // A partner entered more than once (R2: one stake as several Einlagen) gets
+  // each entry numbered, so two equal entries do not read as a duplicated line.
+  const entries = entity.holders.filter((h) => h.person).map((h) => h.holder);
+  const repeated = new Set(entries.filter((holder, i) => entries.indexOf(holder) !== i));
+  let seen = new Map();
+  const limited = entity.holders.map((h) => {
+    const nth = repeated.has(h.holder) ? (seen.set(h.holder, (seen.get(h.holder) ?? 0) + 1), ` (${seen.get(h.holder)}. Einlage)`) : "";
+    return `- ${d.person(h.holder)}, Hafteinlage ${eur(h.nominal)}${nth}`;
+  });
   return [
     `Handelsregister A des Amtsgerichts ${d.court}, HRA ${d.hrb()}`,
     `Firma: ${target}`,

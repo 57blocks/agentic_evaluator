@@ -17,6 +17,7 @@ import { QUOTA, buildStructure } from "./structures.mjs";
 import { nameSource, render } from "./render.mjs";
 
 const SEED = 20261015;
+// v2.2: same seed and answers; a KG partner entered more than once has each entry numbered (rendering only).
 const VERSION = "kyc-ubo-v2";
 // v2.1: 300 items. The first pass over QUOTA is v2's 30 items, unchanged
 // (same seed, same order); EXTRA_PASSES more passes continue the same random
