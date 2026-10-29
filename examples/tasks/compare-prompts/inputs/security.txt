@@ -1,0 +1,8 @@
+Write release notes for v2.4.0 from the merged pull requests below.
+Group them under "## Features", "## Fixes" and "## Breaking changes", and cite
+every PR by its number (#123). Leave nothing out.
+
+#500 fix(security): a spec could point `base_url` at an http:// host and send the key in clear; https is now required unless loopback
+#501 fix(security): `.env.local` was copied into the exported dashboard bundle
+#502 feat: redact API keys from trace.jsonl
+#503 feat!: the dashboard export no longer includes raw outputs by default; pass `--with-outputs`

@@ -1,7 +1,7 @@
 /**
  * The samples other people learn the tool on keep working.
  *
- * Only the free ones run here; `compare-models`, `compare-agents`,
+ * Only the free ones run here; `compare-models`, `compare-prompts`, `compare-agents`,
  * `compare-agent-models` and `compare-setups` are billed, so they are checked for what can be checked without spending: they
  * load, and their plans are the size their header comments promise.
  */
@@ -128,6 +128,24 @@ test("compare-models: loads, and plans 2 generations and 2 judge calls under a $
   assert.equal(plan.steps[0].judgeCalls, 2);
   assert.equal(plan.steps[0].scoreCalls, 0);
   assert.equal(plan.steps[0].budgetUsd, 0.5);
+});
+
+test("compare-prompts: one model three ways on eight inputs, 48 generations and 48 judge calls, picked by judge preference", async () => {
+  // Act
+  const suites = await loadWorkflow(path.join(EXAMPLES, "compare-prompts", "spec.yaml"));
+  const plan = planWorkflow(suites);
+
+  // Assert - 3 variants × 8 inputs × 2 trials; 3 pairs per input, each judged in both orders.
+  assert.equal(plan.steps[0].generations, 48);
+  assert.equal(plan.steps[0].pairs, 24);
+  assert.equal(plan.steps[0].judgeCalls, 48);
+  assert.equal(plan.steps[0].budgetUsd, 3);
+  const defs = Object.values(suites[0].candidateDefs ?? {});
+  assert.equal(defs.length, 3);
+  assert.equal(new Set(defs.map((d) => d.model)).size, 1, "the candidates differ in their prompts, not their model");
+  assert.equal(defs.filter((d) => d.prompt_file).length, 1);
+  assert.equal(defs.filter((d) => d.system).length, 1);
+  assert.equal(suites[0].operatingMode, "judge-preference", "cost cannot separate one model from itself");
 });
 
 test("compare-agents: three agents, two trials each, 6 judge calls, graded on behaviour", async () => {

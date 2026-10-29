@@ -1,0 +1,9 @@
+Write release notes for v2.4.0 from the merged pull requests below.
+Group them under "## Features", "## Fixes" and "## Breaking changes", and cite
+every PR by its number (#123). Leave nothing out.
+
+#430 fix: `agenteval ls` crashed on a workspace with no tasks/ directory
+#431 fix: judge retries were billed twice in ledger.json
+#433 fix: `--reuse` ignored trials whose candidate id contains a dot
+#434 feat: `agenteval plan` prints the judge call count per step
+#436 feat!: `agenteval run` without `--yes` no longer runs; it previews only
