@@ -1,0 +1,91 @@
+# Sample: pick between three prompts for ONE model. BILLED — needs
+# OPENROUTER_API_KEY (in .env.local or the environment).
+#
+#   agenteval plan examples/tasks/compare-prompts                   # free: call counts
+#   caffeinate -i agenteval run examples/tasks/compare-prompts --yes --html
+#
+# Expected size: 3 generations + 6 judge calls (three pairs, both orders), on
+# a ~300-token prompt. budget_usd is the hard ceiling.
+#
+# What it shows:
+#   - A prompt is part of a candidate. The same model appears three times:
+#     with the step's template (`notes-original`), with its own template
+#     (`notes-checklist`, `prompt_file`) and with the step's template plus a
+#     system prompt (`notes-system`, `system`). Each is its own candidate,
+#     with its own trial identity, so `--reuse` never hands one variant
+#     another's output.
+#   - The same gate as compare-models (every section, every PR cited) decides
+#     who qualifies; the pairwise judge ranks the variants that pass, and
+#     `operating_mode: judge-preference` picks the one the judge prefers.
+#     Cost cannot separate these candidates — they are one model — so
+#     `lowest-cost` would be the wrong mode here.
+#   - With one input and one trial, every result is directional: good for
+#     seeing the evidence, not for a decision. Add inputs and raise
+#     `trials_per_case` before trusting a ranking.
+#
+# A candidate-level `prompt_file` works on `producer: prompt` steps only; a
+# codegen or agent-cli candidate varies its instructions by being a different
+# command (see compare-agents).
+
+protocol_version: "0.3"
+run_name: compare-prompts
+budget_usd: 0.5
+
+workflow:
+  control_candidate: notes-original
+  steps:
+    - id: notes
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/notes.md
+      rubric_file: rubrics/notes.md
+      test_set:
+        id: changelog-v1
+        inputs: [changelog]
+      candidate_ids: [notes-original, notes-checklist, notes-system]
+      required_checks: [release-notes]
+      judged_dimensions: [faithfulness, grouping, clarity]
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: judge-preference
+      maximum_completion_time_seconds: 120
+
+candidates:
+  - id: notes-original                   # the step's template as written
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: notes-checklist                  # its own template: list and check the PRs first
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+    prompt_file: prompts/notes-checklist.md
+  - id: notes-system                     # the step's template plus a system prompt
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+    system: You write release notes for busy users. One line per change, leading with what the user sees; every breaking change says what the user must do.
+
+evaluators:
+  required_checks:
+    release-notes:
+      kind: command
+      argv: [node, checks/release-notes.mjs]
+      version_files: [checks/release-notes.mjs]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/notes.md
+    methods: [pairwise-swap]
+
+execution:
+  trials_per_case: 1
+  concurrency: 3
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/notes.md
+  default_temperature: 0.3

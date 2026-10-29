@@ -29,6 +29,7 @@ candidate to use, why, what it cost, and what it could not observe.
 | build an evaluation for a decision of your own | `agenteval install-skill`, then `/agenteval-new-task` in Claude Code ([Build a task with Claude Code](#build-a-task-with-claude-code)) | Claude Code; a key only when you choose to run |
 | try the tool in a minute | `agenteval init my-task && agenteval run my-task --yes --html` ([Quick start](#quick-start-free-offline)) | nothing: offline, free |
 | write a task by hand, file by file | [Tutorial](#tutorial-compare-two-models-on-your-own-prompt) | an OpenRouter key, under a cent |
+| pick between prompts, or providers, for one model | [Comparing prompts on one model](#comparing-prompts-on-one-model), [Calling a provider directly](#calling-a-provider-directly) | a key for each route |
 
 Whichever path: `agenteval plan <task>` and `agenteval check-task <task>` are
 free and say what a run would do before anything is billed, and
@@ -302,13 +303,13 @@ To put your own program in as a candidate, see
 
 ## Samples
 
-The package ships seven sample tasks. Copy one — or all of them — into your
+The package ships eight sample tasks. Copy one — or all of them — into your
 workspace and run it by name:
 
 ```bash
 mkdir -p tasks
 cp -R "$(npm root -g)/57b-agenteval/examples/tasks/custom-check" tasks/   # one
-cp -R "$(npm root -g)/57b-agenteval/examples/tasks/"* tasks/             # or all seven
+cp -R "$(npm root -g)/57b-agenteval/examples/tasks/"* tasks/             # or all eight
 agenteval ls                                                        # what you now have
 agenteval run custom-check --yes --html
 ```
@@ -321,6 +322,7 @@ Copying keeps their runs in your workspace instead of in the global install.
 | `chain-offline` | a two-step workflow and its end-to-end validation | nothing | free |
 | `docker-sandbox` | the same agent run in a Docker container and on the host; each trial records which | Docker running | free |
 | `compare-models` | two real models, a deterministic gate plus a pairwise judge | `OPENROUTER_API_KEY` | capped at $0.50 |
+| `compare-prompts` | one model with three prompts (the step's, its own `prompt_file`, a `system`), picked by judge preference | `OPENROUTER_API_KEY` | capped at $0.50 |
 | `compare-agents` | Claude Code, OpenCode and pi on the same coding job, graded by behavioural tests | the three agents and their keys; `OPENROUTER_API_KEY` for the judge | agents bill their own providers; judge capped at $1 |
 | `compare-agent-models` | one agent (OpenCode) with three models — the model's effect, agent held fixed | OpenCode; `OPENROUTER_API_KEY` | billed by OpenRouter; judge capped at $1 |
 | `compare-setups` | concrete agent + model combinations head to head | the three agents and their keys; `OPENROUTER_API_KEY` | agents bill their own providers; judge capped at $1 |
@@ -362,8 +364,10 @@ its answers come from, and what its run found.
   the directory anywhere and it still runs.
 - **Step** — one thing being evaluated, e.g. "write release notes". A task has
   one or more.
-- **Candidate** — what competes on a step: a model (`model: vendor/name`) or a
-  command (`adapter: agent-cli`), such as `claude -p` or your own script.
+- **Candidate** — what competes on a step: a model (`model: vendor/name`) with
+  its route, settings and, on a prompt step, its own prompt; or a command
+  (`adapter: agent-cli`), such as `claude -p` or your own script. Two prompts
+  on one model are two candidates.
 - **Input** — a test case, `inputs/<id>.txt`. Every candidate runs every input,
   `trials_per_case` times.
 - **Required check** — the deterministic gate that decides success or failure:
@@ -532,6 +536,52 @@ candidates:
   and a `base_url` that is sent a key must be https unless it is loopback.
 - `check-task` blocks when a direct route's key is not set.
   `agenteval models` checks only the models called through OpenRouter.
+
+### Comparing prompts on one model
+
+A prompt is part of a candidate, so two prompts on the same model are two
+candidates, and a run picks between them the way it picks between models:
+the required check gates, the judge compares. The sample `compare-prompts`
+([Samples](#samples)) is this on the release-notes task, capped at $0.50.
+
+```yaml
+workflow:
+  steps:
+    - id: prd
+      producer: prompt
+      prompt_file: prompts/prd.md             # the step's template, for any candidate without its own
+      candidate_ids: [prd-original, prd-flag-ambiguity, prd-system]
+      operating_mode: judge-preference
+
+candidates:
+  - id: prd-original
+    model: anthropic/claude-sonnet-5
+  - id: prd-flag-ambiguity                     # another template, same model
+    model: anthropic/claude-sonnet-5
+    prompt_file: prompts/prd-flag-ambiguity.md
+  - id: prd-system                             # the step's template plus a system prompt
+    model: anthropic/claude-sonnet-5
+    system: Before writing, list every ambiguity in the brief and say how you resolved it.
+```
+
+- A candidate's `prompt_file` replaces the step's template for that candidate;
+  `system` goes with every call. Both enter the trial's identity, so `--reuse`
+  never serves one variant's output to another, and a candidate that declares
+  neither keeps the hash its old trials carry.
+- Only a prompt step (`producer: prompt`) takes a candidate-level
+  `prompt_file`; `check-task` refuses it on a codegen or agent-cli step. To
+  vary what a command candidate is told, make the variant its own command
+  (a second `agents/` script, or `claude -p` with another system prompt) and
+  declare it as a second agent-cli candidate.
+- Prompt, route and settings can vary together: one candidate may set
+  `prompt_file`, `provider_route` and `generation_settings` at once, and a
+  run may mix such candidates with plain models.
+- What a run looks like: sonnet-5 with three prompts on the ten briefs of a
+  PRD task, a Gemini pairwise judge, $3.02. The template that asks for every
+  ambiguity to be flagged beat the original 8–0 (2 ties) and the system-prompt
+  variant 5–0 (5 ties); both variants passed the check 10/10, the original
+  9/10. The pick was directional: judge preference, no minimum meaningful
+  difference declared.
 
 ### Importing a Harbor job
 
