@@ -4,7 +4,7 @@
  * through rules.mjs, so an answer always follows from RULES.md.
  */
 
-import { addDays, filingDeadline, inpatientDays, newBenefitPeriod, qualifyingStayMet, redeterminationDeadline, SNF_DAYS_PER_PERIOD } from "./rules.mjs";
+import { addDays, filingDeadline, inpatientDays, newBenefitPeriod, qualifyingStayMet, redeterminationDeadline, reopeningDeadline, SNF_DAYS_PER_PERIOD } from "./rules.mjs";
 
 export const pick = (rng, list) => list[Math.floor(rng() * list.length)];
 const int = (rng, lo, hi) => lo + Math.floor(rng() * (hi - lo + 1));
@@ -76,7 +76,7 @@ export const ARCHETYPES = {
         claim: { ...s, filed },
         remit: { date: remitDate, group: "CO", carc: 29 },
         history: [`${addDays(s.through, 30)}  Claim held for therapy minutes reconciliation.`, `${filed}  Claim submitted.`, `${addDays(remitDate, 1)}  Staff note: "Denied as late. Admission was over a year before we billed, so we probably have to write it off."`],
-        expected: answer("timely_filing", "yes", "appeal", redeterminationDeadline(remitDate)),
+        expected: answer("timely_filing", "yes", "reopening", reopeningDeadline(remitDate)),
       };
     },
   },
