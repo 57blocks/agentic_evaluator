@@ -1,0 +1,16 @@
+Write release notes for v2.4.0 from the merged pull requests below.
+Group them under "## Features", "## Fixes" and "## Breaking changes", and cite
+every PR by its number (#123). Leave nothing out.
+
+#460 feat: keep the early-stop decision in GAPS.md
+#461 feat: `--step` runs only the named steps
+#462 fix: `--candidate` accepted an id the spec does not have and ran nothing
+#463 feat: `combine` builds one run from a full run and a later partial one
+#464 fix: a combined run read its outputs from the wrong directory
+#465 feat: `judge` re-grades a finished run without generating
+#466 fix: report.html showed "—" for a cost that was observed as $0
+#467 feat: `import-harbor` reads a finished Harbor job as a task with one run
+#468 fix: the imported candidate was named by its import path, not by what the agent calls itself
+#469 feat: `dash --workspace` serves any directory with a tasks/ folder
+#470 feat!: `agenteval report` takes a run directory, not a task; the task form is gone
+#471 fix: `--html` was accepted by `report` and ignored; it is now an error
