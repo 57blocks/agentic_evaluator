@@ -1,0 +1,10 @@
+Write release notes for v2.4.0 from the merged pull requests below.
+Group them under "## Features", "## Fixes" and "## Breaking changes", and cite
+every PR by its number (#123). Leave nothing out.
+
+#440 feat: pairwise judging in both orders (`pairwise-swap`)
+#441 feat: absolute 1-5 scoring with per-dimension reasons
+#442 feat: a `judge-preference` operating mode for steps with no deterministic check
+#443 fix: GAPS.md listed the judge model twice
+#444 feat!: `methods` is required under `evaluators.judge`; the old default of both methods is gone
+#445 feat!: `rubric_file` moved from the step to `evaluators.judge`

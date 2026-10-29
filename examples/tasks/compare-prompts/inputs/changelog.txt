@@ -1,0 +1,9 @@
+Write release notes for v2.4.0 from the merged pull requests below.
+Group them under "## Features", "## Fixes" and "## Breaking changes", and cite
+every PR by its number (#123). Leave nothing out.
+
+#412 feat: export runs as CSV from the dashboard
+#415 fix: budget guard counted retries twice
+#418 feat!: rename `budget` to `budget_usd` in spec files
+#421 fix: report.html broke on candidate ids containing a slash
+#423 feat: `agenteval models --catalog-only` works without an API key

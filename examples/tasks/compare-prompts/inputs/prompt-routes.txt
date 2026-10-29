@@ -1,0 +1,9 @@
+Write release notes for v2.4.0 from the merged pull requests below.
+Group them under "## Features", "## Fixes" and "## Breaking changes", and cite
+every PR by its number (#123). Leave nothing out.
+
+#450 feat: candidates may set `prompt_file` and `system`, so one model can be compared across prompts
+#451 fix: a candidate-level `prompt_file` on a codegen step was silently ignored; now refused by check-task
+#452 feat: `provider_route: anthropic` and `openai` call the vendor directly
+#453 fix: direct routes reported no cost; a declared `price` is now required and the cost recorded as estimated
+#454 feat!: a `base_url` on a vendor route needs an explicit `api_key_env`; the vendor key is never sent to another host
