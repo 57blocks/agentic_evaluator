@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 29 days (2025-02-13 to 2025-03-13), one day short of the 30 consecutive days out of a hospital/SNF required to start a new benefit period, so the 2025-03-17 admission continued the prior period, which had only 25 of its 100 days left; those ran out on 2025-04-10, making the final 9 days correctly non-covered. Medicare assigned the $12,117.50 as patient responsibility (PR) and there is no Medigap or Medicaid on file, so the facility should bill Mr. Moreau for those days, assuming a timely NOMNC was delivered before coverage ended."
+}

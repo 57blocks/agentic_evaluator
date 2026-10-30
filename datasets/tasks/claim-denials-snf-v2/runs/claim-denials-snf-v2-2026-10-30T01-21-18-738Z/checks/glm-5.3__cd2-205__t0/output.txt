@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Medicare correctly paid only the 11 days left in the benefit period: the 21 days at home (2025-04-11 to 2025-05-01) fall far short of the 60 consecutive days out of hospital/SNF care needed to start a new benefit period, so the 100-day limit carried over (89 prior days + 11 paid through 2025-05-16 = 100) and days 2025-05-17 through 2025-05-22 were denied under CARC 119 (benefit maximum reached) as patient responsibility. With no Medigap or Medicaid on file, the facility should bill the beneficiary for the non-covered days and daily coinsurance, confirming a timely notice of noncoverage was delivered."
+}

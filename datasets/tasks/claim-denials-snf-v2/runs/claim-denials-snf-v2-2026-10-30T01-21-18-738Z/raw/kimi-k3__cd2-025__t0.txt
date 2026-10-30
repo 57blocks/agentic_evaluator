@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had no 60-day break in inpatient care (only 13 days at home between the 4/19 SNF discharge and the 5/3-5/7 hospital stay), so this stay falls in the same benefit period; with 91 SNF days already used, only 9 of the 100 days remained and were correctly paid through 5/15, leaving 5/16-5/21 non-covered per CARC 119. Since the remit assigns the balance as patient responsibility (PR-119) and there is no Medigap or Medicaid, bill the beneficiary for the exhausted days, confirming a valid SNFABN was issued for the non-covered period."
+}

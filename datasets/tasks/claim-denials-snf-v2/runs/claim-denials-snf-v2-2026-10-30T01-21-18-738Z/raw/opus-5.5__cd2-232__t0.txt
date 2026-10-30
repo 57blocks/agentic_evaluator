@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 33 days (2025-04-08 to 2025-05-10), short of the 60 days needed to end a benefit period, so this stay falls in the same benefit period as the prior one. Only 20 of the 100 SNF days remained (80 already used), and the contractor correctly paid them through 2025-06-03. Because no Medigap or Medicaid is on file, bill the beneficiary for the days after 2025-06-03 (CARC 119, patient responsibility), along with any applicable daily coinsurance, and keep filing benefits-exhaust claims as required for the rest of the stay."
+}
+```

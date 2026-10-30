@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2026-02-04",
+  "action_note": "The MAC validates the qualifying stay against the hospital's claim in Medicare's records, not the SNF's occurrence span, and observation days never count toward the 3-day inpatient requirement — so the hospital likely billed the 7/20–7/25 encounter as observation despite the signed 7/22 inpatient order. Verify with the hospital how the stay was actually billed: if it was billed in error, have the hospital correct its claim and then reopen/resubmit the SNF claim; if the observation billing stands, the denial stands — but complete verification in time to file a redetermination by 2026-02-04 (120 days from the 10/07 remittance) if the facts support one."
+}

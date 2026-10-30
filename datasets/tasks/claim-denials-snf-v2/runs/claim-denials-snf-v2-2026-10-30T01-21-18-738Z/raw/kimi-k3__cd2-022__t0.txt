@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit for this benefit period is exhausted: the prior stay (2024-12-18 to 2025-02-26) used 71 days, and because the beneficiary was rehospitalized on 2025-04-05 — only 38 days after SNF discharge, short of the 60-day break needed to start a new benefit period — only 29 days remained, which Medicare correctly paid through 2025-05-07. Days 2025-05-08 through 2025-05-21 are statutorily non-covered and were adjudicated as patient responsibility (PR-119); with no Medigap or Medicaid on file, bill the beneficiary for those days, confirming the required notice of Medicare non-coverage/SNF ABN was issued."
+}

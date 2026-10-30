@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Only 20 days elapsed between the 2025-02-16 SNF discharge and the 2025-03-09 hospital admission, so the 60-day break needed to start a new benefit period was not met; the 100-day SNF maximum was reached after 10 covered days (90 prior + 10), leaving 2025-03-24 through 2025-04-06 non-covered (CARC 119). The denial is correct and cannot be reversed, so bill the beneficiary for the non-covered days per the PR-119 patient-responsibility adjustment, since no Medigap or Medicaid is on file."
+}
+```

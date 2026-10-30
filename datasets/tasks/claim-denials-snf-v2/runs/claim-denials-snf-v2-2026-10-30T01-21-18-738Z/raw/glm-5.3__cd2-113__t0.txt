@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The MAC's determination is correct: the benefit period that opened with the 2024-11-22 SNF admission never ended because the beneficiary was out of the hospital/SNF for only 31 days (2025-01-31 to 2025-03-02) rather than the 60 consecutive days required, so the March 3-8 qualifying stay did not start a new benefit period; with 70 days already used, Medicare properly paid days 71-100 (through 2025-04-06) and denied days 101-114 under CARC 119. No appeal, reopening, or corrected claim can make Medicare pay past day 100, and with no Medigap or Medicaid the beneficiary is liable for the non-covered days, so bill the patient (at the facility's private rate) — provided a timely NOMNC was delivered before coverage ended on 2025-04-06; if proper notice was not given, the facility is liable and should write the charges off instead."
+}

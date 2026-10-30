@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-11-11",
+  "action_note": "The hospital order was signed 2025-05-27 but the patient was under observation through 05-27, so only 05-28 and 05-29 count as inpatient days (discharge day 05-30 is excluded), leaving 2 of the required 3 consecutive inpatient days. If the hospital can document three countable inpatient days, request reopening; otherwise the stay is non-covered, so Medicare will not pay and the facility should consider an appeal by 120 days from the remittance date or issue liability to the beneficiary."
+}

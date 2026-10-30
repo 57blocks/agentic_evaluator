@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of a hospital/SNF only 13 days (2025-04-20 to 2025-05-02), far short of the 60 consecutive days needed to start a new benefit period, so the January benefit period continued; with 91 days already used, the last 9 Medicare days ran out on 2025-05-15 and days 05-16 through 05-21 were correctly adjusted as PR-119 (benefit maximum reached). Medicare cannot pay beyond 100 days per benefit period, so with no Medigap or Medicaid on file the resident is liable — bill the patient for the non-covered days, after confirming a timely NOMNC was issued before coverage ended."
+}

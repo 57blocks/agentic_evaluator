@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The denial is correct: the beneficiary was home only ~34 days between the prior SNF stay and the April hospitalization, so the 60-consecutive-day break needed to start a new benefit period never occurred, and only 28 of the 100 SNF days remained (100 − 72 used), which Medicare paid through 2025-05-04 before exhausting with reason code 119. Since there is no Medigap or Medicaid, bill the beneficiary for the 15 non-covered days (2025-05-05 through 2025-05-19, $18,460.80), confirming the required notice of Medicare non-coverage was delivered."
+}

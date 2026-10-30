@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CAS PR-119 (benefit maximum reached) is correct: the 39 days at home between stays were short of the 60 needed for a new benefit period, so only 24 of the 100 SNF days remained, and these were paid 2025-03-18 through 2025-04-10. Days 2025-04-11 to 2025-04-15 are the patient's responsibility and there is no secondary coverage, so bill the beneficiary and keep sending benefits-exhaust claims to Medicare while the stay continues."
+}
+```

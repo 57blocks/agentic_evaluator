@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The home interval (2025-01-31 to 2025-03-02) was only 30 days, short of the 60 consecutive days needed to start a new benefit period, so the prior 70 used days carried over; the 100-day SNF benefit was exhausted on 2025-04-06 (CARC 119), making the remaining charges the beneficiary's responsibility to bill directly since there is no supplemental payer on file."
+}
+```

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The denial is correct: the beneficiary was home only 31 days (2025-01-31 to 2025-03-02), short of the 60-day break required to start a new benefit period, so the prior stay's 70 SNF days count in the same benefit period and the 100-day maximum was reached on 2025-04-06 (day 30 of this stay). The PR-119 amount is beneficiary liability; with no Medigap or Medicaid on file, bill the patient for the 14 non-covered days (2025-04-07 through 2025-04-20), first confirming the required liability notices (SNF ABN/NOMNC) were issued."
+}

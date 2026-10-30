@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The patient was out of the hospital/SNF for only 33 days (Apr 8-May 10), so the benefit period that began with the January SNF stay never ended; with 80 days already used, Medicare correctly covered only days 81-100 (May 15-Jun 3) and denied days 101-109 under the 100-day Part A SNF limit (CARC 119, PR $11,454). Since there is no Medigap or Medicaid, the coinsurance on days 81-100 plus the full charges for Jun 4-12 are the patient's responsibility, so bill the patient (assuming a timely NOMNC was issued)."
+}

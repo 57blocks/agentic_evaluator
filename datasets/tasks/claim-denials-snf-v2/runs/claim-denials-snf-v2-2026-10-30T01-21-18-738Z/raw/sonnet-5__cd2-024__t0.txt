@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 18-day break between the prior SNF stay (which used 74 of 100 benefit days) and this admission was far short of the 60 consecutive days needed to start a new benefit period, so this stay is a continuation of the same period and the remaining 26 days ran out on 2025-03-12 (CARC 119, confirmed by PR group code). Since there is no secondary payer on file, bill the beneficiary directly for charges after 2025-03-12."
+}
+```

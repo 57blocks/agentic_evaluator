@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (benefit maximum reached, patient responsibility) is correct: the beneficiary was out of a hospital or SNF for only 36 days (2025-04-20 to 2025-05-25), short of the 60 consecutive days needed to start a new benefit period, so only 19 of the 100 SNF days remained and they ran out on 2025-06-18. With no Medigap or Medicaid on file, bill the beneficiary the $13,554.20 for 2025-06-19 through 2025-07-03, plus any coinsurance owed on the paid days."
+}
+```

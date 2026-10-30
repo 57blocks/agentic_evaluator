@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The SNF stay continues the benefit period that began on 2025-01-19, because she was home only 13 days (2025-04-20 to 2025-05-02), well short of the 60-day break needed to start a new one. With 91 of 100 SNF days already used, the 9 remaining days (2025-05-07 to 2025-05-15) were paid, and CARC 119 with group code PR leaves days 2025-05-16 to 2025-05-21 as the patient's responsibility. No Medigap or Medicaid is on file and no ABN is needed for benefits-exhausted days, so bill the beneficiary; first confirm from CWF/HETS that 91 days were used in this benefit period, since the 2025-01-19 to 2025-04-19 stay counts as 90 days by itself."
+}
+```

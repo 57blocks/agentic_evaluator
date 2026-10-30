@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 27 days (3/30–4/25) between the prior SNF discharge and the 4/26 hospital admission, so the 60-day break needed to start a new benefit period never occurred; this stay continued the same benefit period in which 92 of the 100 SNF days were already used, leaving only 8 days (5/1–5/8) payable and days 5/9–5/18 correctly denied as exhausted (CARC 119, patient responsibility). With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days, first confirming the required notice of Medicare non-coverage (NOMNC) was issued before covered days ended."
+}
+```

@@ -1,0 +1,7 @@
+{
+  "root_cause": "duplicate_claim",
+  "correctable": "no",
+  "next_action": "write_off",
+  "deadline": null,
+  "action_note": "CARC 18 confirms the claim was denied as an exact duplicate: the original claim was already paid on 2025-06-28, and the 2025-07-05 resubmission was a billing error with no changes, so no additional Medicare payment is due. Write off the duplicate as a contractual adjustment (group code CO means the beneficiary cannot be billed) and fix the internal workflow that caused the accidental resubmission."
+}

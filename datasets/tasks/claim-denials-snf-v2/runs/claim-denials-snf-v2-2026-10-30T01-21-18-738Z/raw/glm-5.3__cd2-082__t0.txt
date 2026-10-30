@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the hospital/SNF only 24 days (2025-04-20 to 2025-05-13), far short of the 60 consecutive days needed to end the prior benefit period, so the May hospital stay did not start a new one; with 87 days already used, Medicare correctly paid only the 13 remaining days (through 2025-05-29) and denied 2025-05-30 through 2025-06-08 under CARC 119 (benefit maximum reached). The denial is valid and no corrected claim, reopening, or appeal will make Medicare pay beyond the 100 days, so after confirming a NOMNC was delivered before coverage ended, bill the patient for the non-covered days and coinsurance since no Medigap or Medicaid exists."
+}

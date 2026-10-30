@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-12-31",
+  "action_note": "The MAC returned the claim as unprocessable (CARC 16 with remark MA130) because the patient discharge status code was missing, and unprocessable claims carry no appeal rights. Pull the discharge disposition from the medical record, enter the correct patient status code (UB-04 FL17), and resubmit as a new claim — not a replacement — no later than the timely filing deadline of 2026-12-31."
+}

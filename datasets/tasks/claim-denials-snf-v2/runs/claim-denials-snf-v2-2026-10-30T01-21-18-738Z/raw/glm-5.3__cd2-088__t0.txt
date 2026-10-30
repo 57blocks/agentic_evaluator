@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-10-10",
+  "action_note": "The hospital record shows an inpatient stay of 2025-05-04 through 2025-05-07 — three covered inpatient days once the discharge day is excluded — so the qualifying-stay requirement appears met, and the denial likely reflects the hospital having billed the encounter as observation, which does not count toward the 3-day rule. Verify with the hospital how the stay was actually billed: if it was billed (or is corrected) as inpatient, request a redetermination with the hospital records by 2025-10-10 (120 days from the 2025-06-12 remittance); if the stay was truly observation-only, the denial stands and, with group code CO, the charge cannot be shifted to the patient."
+}

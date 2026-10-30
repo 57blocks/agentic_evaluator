@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 22 days (2025-04-18 to 2025-05-09) before readmission, short of the 60 days needed to end a benefit period, so this stay shares the prior benefit period. Only 28 of the 100 SNF days remained, which Medicare paid for 2025-05-13 through 2025-06-09 (CAS PR-119, benefit maximum reached). With no Medigap or Medicaid on file, bill the beneficiary for the days after 2025-06-09, and keep sending benefit-exhaust claims to the MAC while the stay continues."
+}
+```

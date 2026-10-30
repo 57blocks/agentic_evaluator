@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-08-21",
+  "action_note": "The MAC denied the claim as benefit-maximum-reached (CARC 119) based on the 100 days used in the prior benefit period, but facility records show a 60+ day break in care (2024-12-11 to 2025-02-25), which should have ended that period and started a new one with a fresh 100 days at the 2025-02-25 hospital admission. Verify the benefit-period status in Medicare's own records (HETS 270/271 or a CWF inquiry through the MAC): if a new benefit period is confirmed, file a redetermination by 2025-08-21 with documentation of the break; if Medicare's records show intervening care, the exhaustion stands and any patient billing depends on whether a valid NOMNC was issued."
+}

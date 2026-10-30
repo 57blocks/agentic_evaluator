@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Only 19 days elapsed between the 2025-03-24 SNF discharge and the 2025-04-13 hospital readmission, so the required 60-day break never occurred, no new benefit period began, and the 100-day SNF benefit (90 days already used) was exhausted on 2025-04-27; days 2025-04-28 through 2025-05-12 are correctly non-covered (CARC 119). The remittance assigns liability to the beneficiary (PR-119) and there is no Medigap or Medicaid, so bill the patient for those days, provided the required notice of Medicare non-coverage was delivered."
+}
+```

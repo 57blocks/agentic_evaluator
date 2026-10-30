@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary remained in the same benefit period because only 15 days passed outside inpatient care, leaving 9 covered SNF days (2025-03-28 through 2025-04-05) after 91 days already used. Bill the patient for the noncovered 2025-04-06 through 2025-04-11 days because CAS PR-119 assigns patient responsibility and no supplemental coverage exists."
+}

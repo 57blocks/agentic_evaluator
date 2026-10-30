@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The gap between the prior SNF discharge (2025-02-18) and rehospitalization (2025-03-02) was only 11 days, well short of the 60-day break needed to start a new benefit period, so the 80 SNF days already used left only 20 days; the 100-day benefit was correctly exhausted on 2025-03-24 (day 100), matching the remittance. The PR-119 adjustment for 2025-03-25 through 2025-04-02 is correct and the beneficiary has no Medigap or Medicaid, so bill the patient for those non-covered days (confirming required liability notices, e.g., NOMNC, were issued)."
+}
+```

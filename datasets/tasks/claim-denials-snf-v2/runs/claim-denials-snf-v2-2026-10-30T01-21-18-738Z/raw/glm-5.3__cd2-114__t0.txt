@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had already used 92 SNF days in a benefit period that never ended (only 27 days at home, not the 60 consecutive days needed to start a new period, and the new 3-day hospital stay does not reset the period), so Medicare correctly paid the 8 remaining days (through 2025-05-08) and denied the rest with PR-119 (benefit maximum reached). With no Medigap or Medicaid on file, the resident is liable for the non-covered days, so bill the patient after confirming the required notice of Medicare non-coverage was delivered."
+}

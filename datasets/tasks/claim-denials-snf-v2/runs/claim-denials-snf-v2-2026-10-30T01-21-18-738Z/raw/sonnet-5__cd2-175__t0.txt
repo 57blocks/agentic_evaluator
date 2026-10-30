@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Beneficiary had only a 32-day break (2/20-3/23), under the 60-day threshold needed to start a new benefit period, so the prior 73 used days plus 27 days paid here (3/29-4/24) total the 100-day SNF maximum; days after 4/24 are correctly denied as patient responsibility (CARC 119) and should be billed to the beneficiary, since there is no secondary payer on file."
+}

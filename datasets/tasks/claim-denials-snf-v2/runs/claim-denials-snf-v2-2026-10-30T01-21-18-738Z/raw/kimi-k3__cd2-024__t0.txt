@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The denial is correct: only 18 days elapsed between the prior SNF discharge (2025-01-24) and rehospitalization (2025-02-12), so the 60-day wellness break was never met, the benefit period continued, and the 100-day SNF maximum (74 days already used + 26 remaining) was reached on 2025-03-12. With no secondary coverage and the MAC assigning liability via PR-119, bill the beneficiary the $16,296.40 for the non-covered days, first confirming the required notice of Medicare non-coverage (SNF ABN/NOMNC) was issued, since without it liability cannot be shifted to the patient."
+}

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the beneficiary is home only 29 days (2025-03-03 to 03-31), short of the 60-day break needed for a new benefit period, so the 90 days already used left 10 SNF days, paid 2025-04-05 to 04-14. With no Medigap or Medicaid on file, bill the patient for the PR-119 amount (the non-covered days from 2025-04-15 plus any applicable coinsurance), and keep submitting benefit-exhaust claims to Medicare while she remains in the facility."
+}
+```
