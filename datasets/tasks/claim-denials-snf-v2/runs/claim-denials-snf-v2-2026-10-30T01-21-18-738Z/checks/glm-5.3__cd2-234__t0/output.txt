@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of hospital/SNF care for only 29 days (2025-03-03 to 2025-03-31), so the prior benefit period never reset; with 90 days already used, days 91-100 (04-05 to 04-14) were paid as lifetime reserve days and days 101-106 (04-15 to 04-20) are correctly denied as exhausted, meaning no correction, reopening, or appeal can make Medicare pay them. With no Medigap or Medicaid on file, bill the resident for the patient-responsibility amounts (confirming a NOMNC was delivered before coverage ended)."
+}

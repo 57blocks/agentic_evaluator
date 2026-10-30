@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (benefit maximum reached) is correct. The 27 days at home between stays fall short of the 60 consecutive days needed to start a new benefit period, so only 8 of the 100 SNF days remained, and those covered 2025-05-01 through 2025-05-08. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days 2025-05-09 through 2025-05-18 and any applicable coinsurance, and continue submitting the required benefits-exhaust claims to Medicare while she stays."
+}
+```

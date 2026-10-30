@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the beneficiary had only 18 days at home after the 2025-03-11 discharge, so no new benefit period began, and the 22 SNF days left (100 minus 78) ran out on 2025-04-24. With no Medigap or Medicaid on file, bill the beneficiary for the post-exhaustion days shown as patient responsibility, and keep sending required benefits-exhaust claims to Medicare while he remains in the facility."
+}
+```

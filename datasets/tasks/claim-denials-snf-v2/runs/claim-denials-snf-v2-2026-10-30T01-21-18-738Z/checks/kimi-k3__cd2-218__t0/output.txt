@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-08-10",
+  "action_note": "The MAC returned the claim as unprocessable (CARC 16 with RARC MA130) because occurrence code 50 (the SNF PPS MDS assessment reference date) was present without its required date, as flagged on the facility's own 2025-09-11 edit report. Unprocessable claims carry no appeal rights, so the facility must add the occurrence code 50 date and resubmit a new/corrected claim within Medicare's 12-month timely-filing window, which runs from the 2025-08-10 through date and closes 2026-08-10."
+}

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 20 days (2025-02-17 to 2025-03-08) before rehospitalization, short of the 60 days needed to start a new benefit period, so the 90 SNF days already used left 10 days, which Medicare correctly paid for 2025-03-14 through 2025-03-23 (CARC 119, patient responsibility). With no secondary coverage on file, bill Ms. Halloran for the non-covered days from 2025-03-24 onward and for the coinsurance on the covered days, and keep submitting the required benefits-exhausted claims to Medicare while she remains in the facility."
+}
+```

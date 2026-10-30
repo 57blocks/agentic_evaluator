@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was readmitted only 28 days after the prior SNF discharge, so the 60-day break needed to start a new benefit period never occurred; with 77 of the 100 SNF days already used in this spell, coverage correctly ended on day 23 (2025-05-23) and the remaining days (PR-119) are statutorily non-covered, so Medicare cannot pay them. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days, provided the facility issued the required notice of non-coverage (SNF ABN, CMS-10055) before benefits exhausted; if no notice was given, the facility is liable and must write off instead."
+}
+```

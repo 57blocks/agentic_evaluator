@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 19 days (2025-03-25 to 2025-04-12), short of the 60 days needed to end the benefit period, so the 90 SNF days already used count against the same 100-day limit; the remaining 10 days (2025-04-18 to 2025-04-27) were paid and CARC 119 correctly denies the later days. With no Medigap or Medicaid on file, bill the beneficiary for the post-exhaustion days (and any days 91-100 coinsurance), and keep submitting the required benefits-exhaust (no-pay) claims to the MAC while she remains at a skilled level of care."
+}
+```

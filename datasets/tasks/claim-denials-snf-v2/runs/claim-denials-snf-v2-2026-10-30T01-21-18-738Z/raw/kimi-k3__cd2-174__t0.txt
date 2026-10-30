@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The denial is correct: the beneficiary was home only 39 days (2025-04-12 to 2025-05-20), under the 60-day break needed to start a new benefit period, so the 91 SNF days already used left only 9 days of the 100-day benefit, which Medicare paid through 2025-06-02. Days 2025-06-03 through 2025-06-10 are non-covered due to exhaustion (CARC 119) and were adjusted as patient responsibility (PR), so with no Medigap or Medicaid on file, bill the beneficiary for those days."
+}

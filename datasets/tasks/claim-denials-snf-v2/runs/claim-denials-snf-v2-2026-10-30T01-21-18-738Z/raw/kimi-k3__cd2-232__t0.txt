@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit was exhausted: 80 days were already used in the prior stay (1/18–4/7), and the break at home (4/8–5/10, ~33 days) was under 60 days, so no new benefit period began—leaving only 20 days, which Medicare correctly paid through 6/3. Days 6/4–6/12 are non-covered due to benefit exhaustion (PR-119 assigns liability to the beneficiary, no ABN needed for exhaustion), so the facility should bill the patient; an appeal would fail because the day count is correct."
+}
+```

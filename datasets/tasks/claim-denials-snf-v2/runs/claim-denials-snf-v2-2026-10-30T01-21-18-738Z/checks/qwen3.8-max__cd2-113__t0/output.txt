@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary remained in the same benefit period because the home interval was only 31 days, leaving only 30 SNF days after the prior 70 Medicare days; Medicare therefore paid through 2025-04-06. With no secondary coverage, bill the patient for the noncovered days after 2025-04-06."
+}

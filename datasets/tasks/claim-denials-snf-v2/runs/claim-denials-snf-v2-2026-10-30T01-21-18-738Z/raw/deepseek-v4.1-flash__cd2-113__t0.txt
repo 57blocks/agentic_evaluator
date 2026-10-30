@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay used 70 days and the new stay began within 60 days, so the same benefit period continued; Medicare paid the remaining 30 days through 2025-04-06. Days after that exceed the 100-day SNF limit and are beneficiary liability, so bill the patient after confirming any required exhaustion notice was issued."
+}

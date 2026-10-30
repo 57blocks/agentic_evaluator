@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-03-10 admission falls in the same benefit period as the prior stay because the beneficiary was out of a hospital or SNF only 19 days (2025-02-14 to 2025-03-04), short of the 60 days needed to start a new one. Only 28 of the 100 SNF days remained, so Medicare correctly paid through 2025-04-06 and denied the rest with CARC 119. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days 2025-04-07 to 2025-04-16 and for any applicable daily coinsurance on the covered days."
+}

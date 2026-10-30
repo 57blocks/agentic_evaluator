@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary did not begin a new benefit period because the break before hospitalization was under 60 days; after 72 prior SNF days, the 28 days through 2025-04-06 exhausted the 100-day limit. Bill the beneficiary for the exhausted days beginning 2025-04-07, consistent with the PR-119 assignment."
+}

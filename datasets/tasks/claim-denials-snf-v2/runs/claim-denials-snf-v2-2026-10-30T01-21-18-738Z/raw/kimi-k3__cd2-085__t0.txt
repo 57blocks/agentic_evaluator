@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Medicare correctly paid through 2025-04-21, which is day 100 of the current benefit period: the prior SNF stay used 81 days, and the 21 days at home (2025-03-08 to 2025-03-28) were short of the 60-consecutive-day break needed to start a new benefit period, so days 2025-04-22 through 2025-05-03 are non-covered due to exhaustion (CARC 119). The denial cannot be reversed, so bill the beneficiary for the PR-119 amount of $11,724.20 (no Medigap or Medicaid on file), confirming first that the required notice of non-coverage (SNFABN/NOMNC) was issued so liability validly shifts to the patient."
+}

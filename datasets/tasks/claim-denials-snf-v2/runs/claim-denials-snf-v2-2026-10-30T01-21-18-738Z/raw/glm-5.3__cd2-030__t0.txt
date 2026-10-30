@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-10-05",
+  "action_note": "The hospital record shows three inpatient days (5/3–5/5; the 5/6 discharge day doesn't count), so the denial likely reflects the hospital having billed the whole 5/1–5/6 encounter as observation, which doesn't count toward the 3-day rule. Verify the hospital's billing on CWF: if it billed observation, have it correct/rebill as inpatient and then ask the MAC to reopen this claim; if the hospital billed inpatient and the MAC still denied, file a redetermination by 2025-10-05."
+}

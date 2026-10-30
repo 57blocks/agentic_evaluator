@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 39 days (2025-04-12 to 2025-05-20) before the hospital admission, short of the 60 days needed to end a benefit period. So this stay falls in the same benefit period, where 91 of the 100 SNF days were already used, and Medicare correctly paid the remaining 9 days (2025-05-25 to 2025-06-02) and denied the rest under CARC 119 as patient responsibility. With no Medigap or Medicaid on file, bill the beneficiary for days from 2025-06-03 onward and keep submitting benefits-exhaust claims to Medicare while the patient stays in the facility."
+}
+```

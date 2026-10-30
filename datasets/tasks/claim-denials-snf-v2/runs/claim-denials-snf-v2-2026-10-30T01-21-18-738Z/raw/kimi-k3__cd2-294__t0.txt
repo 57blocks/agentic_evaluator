@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit for this benefit period is exhausted: the prior stay used 90 days, and the benefit period never ended because only 24 days (not the required 60) passed between the 2025-01-10 SNF discharge and the 2025-02-04 hospital readmission, leaving just 10 covered days, which Medicare correctly paid through 2025-02-17. The PR-119 denial of the remaining 8 days (2025-02-18 to 2025-02-25) is correct and not payable by Medicare, so with no Medigap/Medicaid on file, bill the beneficiary for those days, first confirming the required SNF notice of non-coverage (ABN, CMS-10055) was issued to support patient liability."
+}

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 37-day gap at home (2025-02-27 to 2025-04-04) is short of the 60 consecutive days needed to start a new benefit period, so only 29 of the 100 SNF days remained. Those 29 days ran 2025-04-09 through 2025-05-07, which is exactly what was paid, so CARC 119 (benefit maximum reached) is correct; with no Medigap or Medicaid on file, bill the patient for 2025-05-08 onward and keep submitting the required benefits-exhaust claims to Medicare."
+}
+```

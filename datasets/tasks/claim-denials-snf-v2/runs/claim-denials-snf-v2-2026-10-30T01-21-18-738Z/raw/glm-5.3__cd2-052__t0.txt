@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The denial is correct: only 22 days elapsed between the prior SNF stay and the 2025-05-10 hospital readmission, so no new benefit period began and the 100-day SNF benefit exhausted on 2025-06-09 (72 prior days + 28 current days), matching the remittance's reason code 119. With no Medigap or Medicaid on file, the 8 non-covered days (2025-06-10 through 2025-06-17, $13,886.80) are the resident's responsibility — confirm a timely NOMNC was delivered, then bill the resident."
+}

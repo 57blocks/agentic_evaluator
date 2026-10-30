@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2025-12-31",
+  "action_note": "The claim was denied CO-16/MA130 because the required occurrence code 50 (MDS assessment) date was omitted, so the MAC could not link the HIPPS code to an assessment and price the SNF PPS claim. Pull the assessment date from the MDS, add occurrence code 50 with that date, and resubmit the corrected claim before the timely filing deadline of 2025-12-31 (one year from the 2025-03-31 through date)."
+}

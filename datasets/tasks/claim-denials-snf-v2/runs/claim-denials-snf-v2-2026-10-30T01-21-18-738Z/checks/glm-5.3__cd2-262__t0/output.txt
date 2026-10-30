@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 18 days (5/1–5/18), short of the 60 consecutive days needed to end the benefit period, so the 5/19–5/23 qualifying hospital stay did not start a new one; with 77 days already used, only 23 Medicare days remained (paid through 6/14), and days 6/15–6/19 were correctly denied as benefit-exhausted (PR-119). Medicare cannot pay past the 100-day statutory cap, so with no Medigap or Medicaid the facility should bill the patient for the five non-covered days, provided a timely NOMNC was delivered — if not, the facility is liable and should write them off."
+}

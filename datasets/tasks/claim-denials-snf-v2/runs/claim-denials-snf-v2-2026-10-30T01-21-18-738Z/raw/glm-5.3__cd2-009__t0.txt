@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-07-29",
+  "action_note": "The MAC denied the full charge as CARC 16/MA130 because the required occurrence code 50 (MDS assessment) date was omitted, so the HIPPS code could not be validated for PDPM pricing. Retrieve the assessment date from the MDS/iQIES, add occurrence code 50, and resubmit as a corrected claim (bill type 0217) no later than 2026-07-29, the timely-filing deadline (12 months from the through date)."
+}

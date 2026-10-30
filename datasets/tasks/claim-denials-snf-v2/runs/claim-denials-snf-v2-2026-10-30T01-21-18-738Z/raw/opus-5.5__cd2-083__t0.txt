@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The home interval from 2025-02-27 to 2025-04-01 was only 34 days, short of the 60 consecutive days needed to start a new benefit period, so the prior 72 days count and only 28 SNF days remained; those covered 2025-04-07 through 2025-05-04, and CARC 119 correctly assigns the later days to the patient (PR). With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days from 2025-05-05 onward, and keep submitting required benefits-exhaust claims while she stays in a certified bed."
+}

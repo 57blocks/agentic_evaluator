@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary remained in the same benefit period and exhausted the 100 SNF days (71 prior days plus 29 current days), so Medicare correctly paid only through 2025-05-07. Bill the patient for the noncovered days after that date, after ensuring the required SNF noncoverage notice was given, since no other payer is on file."
+}

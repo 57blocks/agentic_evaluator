@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary never had 60 consecutive days free of hospital/skilled care (only 15 days at home before readmission), so the same benefit period continues; with 91 days already used, only 9 days (2025-03-28 to 2025-04-05) remained and were paid, and the remaining days were denied under PR-119. With no Medigap or Medicaid and no qualifying 3-day stay to start a new benefit period, the balance is beneficiary liability and should be billed to the patient."
+}

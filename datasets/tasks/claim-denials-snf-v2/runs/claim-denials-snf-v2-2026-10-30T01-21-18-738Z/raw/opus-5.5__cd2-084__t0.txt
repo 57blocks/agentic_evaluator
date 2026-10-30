@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 14 days at home (2025-02-03 to 2025-02-16) did not reach the 60-day break needed to start a new benefit period, so the 73 days already used left 27 SNF days. Those 27 days run 2025-02-21 through 2025-03-19, which matches CARC 119, and with no secondary coverage on file the PR-119 balance of $17,328.70 is properly billable to the beneficiary."
+}
+```
