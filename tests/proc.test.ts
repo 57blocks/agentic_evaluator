@@ -54,7 +54,9 @@ test("what a command leaves running is stopped when it exits", async () => {
 });
 
 test("a command that prints a lot keeps running, and its output's tail is kept", async () => {
-  const code = "for (let i = 0; i < 2000; i++) console.log('line ' + i + ' ' + 'x'.repeat(100)); console.log('THE END'); process.exit(3);";
+  // exitCode, not exit(): on Linux and macOS a pipe is written asynchronously,
+  // and process.exit() drops what is still queued, "THE END" included.
+  const code = "for (let i = 0; i < 2000; i++) console.log('line ' + i + ' ' + 'x'.repeat(100)); console.log('THE END'); process.exitCode = 3;";
 
   const r = await runProcess(process.execPath, ["-e", code], { cwd: os.tmpdir(), timeoutMs: 10_000, tailBytes: 4096 });
 
