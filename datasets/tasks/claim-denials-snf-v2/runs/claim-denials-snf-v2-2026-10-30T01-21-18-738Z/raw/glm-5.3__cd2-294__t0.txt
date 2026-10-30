@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-02-04 hospital stay was within 30 days of the 2025-01-10 SNF discharge, so it cannot start a new benefit period; the 90 SNF days in the 2024-10-13 benefit period were already exhausted, and the days after covered day 100 (2025-02-17) are non-covered (CAS*PR*119 = benefit maximum reached). With no Medigap or Medicaid on file, the non-covered coinsurance/amounts become patient responsibility, so issue a timely Notice of Non-coverage (SNF ABN) if not already given and bill the beneficiary."
+}

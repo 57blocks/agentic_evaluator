@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Beneficiary had already used 77 of 100 SNF benefit-period days (1/13–3/30); the 3/31–4/27 break at home was only 28 days (<60), so the benefit period never renewed despite the new qualifying hospital stay. The remaining 23 days were correctly paid through 5/23, and days after that are non-covered under the exhausted benefit max, making them the beneficiary's liability (bill patient, no secondary payer on file)."
+}

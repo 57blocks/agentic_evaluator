@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had only 19 SNF days remaining in the same benefit period, so Medicare correctly paid through 2025-04-21 and denied later days under CARC 119. With no secondary coverage, bill the patient for the noncovered days after 2025-04-21, ensuring any required advance notice or financial agreement is on file."
+}

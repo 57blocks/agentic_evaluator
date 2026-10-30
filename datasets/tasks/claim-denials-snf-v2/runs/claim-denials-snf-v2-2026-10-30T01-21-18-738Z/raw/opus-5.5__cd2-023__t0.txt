@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the hospital and SNF for only 38 days (2025-02-04 to 2025-03-13), short of the 60 needed to start a new benefit period, so the 74 days already used left 26 SNF days, which ran through 2025-04-13. CARC 119 under group PR correctly makes the beneficiary liable for 2025-04-14 onward, and with no Medigap or Medicaid on file, bill the patient for those days and keep sending the required benefits-exhaust claims to Medicare."
+}
+```

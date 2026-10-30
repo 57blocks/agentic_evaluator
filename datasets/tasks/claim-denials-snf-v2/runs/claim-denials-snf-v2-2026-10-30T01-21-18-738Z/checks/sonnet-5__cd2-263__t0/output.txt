@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Beneficiary had only a 29-day break (2025-02-13 to 2025-03-13) before the qualifying hospital stay, which is less than the 60 consecutive days needed to start a new benefit period; with 75 days already used in the prior stay, only 25 days remained, exhausting the 100-day SNF benefit on 2025-04-10 as paid. This is a correct exhaustion determination (CAS PR-119), so the facility should bill the beneficiary for the coinsurance/non-covered charges rather than appeal."
+}

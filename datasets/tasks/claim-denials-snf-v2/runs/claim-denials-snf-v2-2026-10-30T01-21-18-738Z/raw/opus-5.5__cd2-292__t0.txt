@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: she was home only 12 days (2025-02-26 to 2025-03-09) before readmission, short of the 60 days needed to end the benefit period, so her 16 remaining SNF days (84 of 100 used) ran 2025-03-15 through 2025-03-30. She has no Medigap or Medicaid, so bill her for the uncovered days from 2025-03-31 through 2025-04-12 plus the daily coinsurance on the paid days, and keep sending required no-pay benefits-exhaust claims while she remains a resident."
+}
+```

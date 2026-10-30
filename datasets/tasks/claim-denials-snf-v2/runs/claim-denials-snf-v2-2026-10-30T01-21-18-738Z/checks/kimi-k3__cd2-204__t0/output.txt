@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the 2025-04-27 admission falls in the same benefit period as the 2025-01-02 to 2025-03-30 SNF stay because the break at home (2025-03-31 to 2025-04-22) was only 23 days, short of the 60-day break needed to start a new benefit period. The 88 days already used plus 12 days on this claim (paid through 2025-05-08) exhaust the 100-day SNF benefit, so days 2025-05-09 through 2025-05-21 are non-covered and, per the PR group code, are the beneficiary's liability; with no Medigap or Medicaid on file, bill the patient directly."
+}
+```

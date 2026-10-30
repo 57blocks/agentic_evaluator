@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2025-10-10",
+  "action_note": "The hospital record shows an inpatient admission order on 2025-05-03 and discharge on 2025-05-06, which is three counted inpatient days (5/3, 5/4, 5/5; the discharge day does not count and the 5/1-5/3 observation days were correctly left out), matching occurrence span 70 on the claim. Request a redetermination with the signed inpatient order and the hospital discharge summary, within 120 days of the presumed receipt of the 2025-06-07 notice (2025-06-12 + 120 days = 2025-10-10)."
+}
+```

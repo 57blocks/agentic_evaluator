@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 12-day break (4/18-4/29) was under 60 days, so the prior SNF spell's benefit period never ended; the 74 days already used plus the 26 days paid here (5/3-5/28) exhaust the 100-day SNF benefit for this period, correctly triggering CARC 119. Since there is no secondary insurer, bill the beneficiary for the days after 5/28 (assuming proper SNFABN notice was given)."
+}

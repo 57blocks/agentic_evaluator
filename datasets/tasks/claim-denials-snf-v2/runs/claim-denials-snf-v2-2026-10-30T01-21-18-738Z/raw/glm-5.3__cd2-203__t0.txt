@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the hospital/SNF only 28 days (2025-03-31 to 2025-04-27), far short of the 60 consecutive days needed to start a new benefit period, so this stay continued the same period with only 23 of 100 SNF days remaining; Medicare correctly paid 2025-05-01 through 2025-05-23 and the $14,894.70 PR-119 balance is patient responsibility. With no Medigap or Medicaid on file, bill the patient for the exhausted days (2025-05-24 through 2025-06-06), assuming a valid NOMNC was delivered before coverage ended."
+}

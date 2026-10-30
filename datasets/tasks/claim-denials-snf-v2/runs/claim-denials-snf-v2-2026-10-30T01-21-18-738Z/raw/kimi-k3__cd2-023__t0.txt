@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The break in skilled care (2025-02-04 to 2025-03-13) was only 38 days, short of the 60 days needed to start a new benefit period, so the 3/19 admission continued the prior spell: 74 days already used + 26 days paid (3/19-4/13) exhausts the 100-day SNF maximum, and the PR-119 adjustment correctly shifts days 4/14-4/23 to the beneficiary. With no Medigap or Medicaid on file, bill the patient for the non-covered days, provided a valid SNFABN (CMS-10055) was issued before coverage ended; if proper notice was not given, the facility must absorb the cost instead."
+}

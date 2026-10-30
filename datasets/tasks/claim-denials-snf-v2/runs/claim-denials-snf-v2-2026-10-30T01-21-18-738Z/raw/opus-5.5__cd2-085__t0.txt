@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-03-07 discharge and the 2025-03-29 hospital admission were only 21 days apart, short of the 60 days needed to start a new benefit period, so the beneficiary had 19 of 100 SNF days left (81 already used). Medicare correctly paid 2025-04-03 through 2025-04-21, and the later days (CARC 119, patient responsibility) are the beneficiary's liability with no Medigap or Medicaid, so bill the patient and keep sending benefits-exhaust claims while the stay continues."
+}
+```

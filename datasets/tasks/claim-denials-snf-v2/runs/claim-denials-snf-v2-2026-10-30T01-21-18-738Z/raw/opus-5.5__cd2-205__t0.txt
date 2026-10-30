@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay ended 2025-04-10, and the patient was out of a hospital or SNF for only 21 days, short of the 60 days needed to start a new benefit period. That left 11 of the 100 SNF days, used 2025-05-06 through 2025-05-16, so CARC 119 is a correct benefit-exhaustion denial. With no Medigap or Medicaid on file, bill the beneficiary for the patient-responsibility (PR) days after 2025-05-16, according to the facility's private-pay arrangement."
+}
+```

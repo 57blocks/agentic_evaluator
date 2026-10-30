@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 18 days (2025-01-25 to 2025-02-11) before the 2025-02-12 hospital admission, so the required 60 consecutive days without inpatient/SNF care were never met and the original benefit period continued; with 74 days already used, the 100-day SNF benefit was exhausted on 2025-03-12 (74 + 26 days), making Medicare's partial payment and the PR/CARC 119 adjustment for days 101-115 correct and not appealable. With no Medigap or Medicaid on file, bill the patient for the $16,296.40 patient-responsibility balance, confirming first that a timely NOMNC was delivered before 2025-03-12 (if not, liability shifts to the facility)."
+}

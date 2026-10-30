@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary had only 23 SNF days remaining in the current benefit period, so Medicare correctly paid only through 2025-06-14 and applied PR-119 to the exhausted days. With no Medigap or Medicaid on file, bill the patient for the patient-responsibility amount."
+}

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-09-12",
+  "action_note": "Hospital records show an inpatient admission order signed 2025-04-05 with discharge 2025-04-08, i.e. three inpatient midnights (4/5-4/7), which should satisfy the 3-day rule; the denial likely stems from the hospital's inpatient stay not yet being reflected correctly in CWF when the SNF claim was processed. Verify the hospital's final claim/CWF posting for the correct admission date and inpatient status, then request a reopening (or file a redetermination appeal if the reopening is denied) with the hospital's itemized bill as proof of the qualifying stay."
+}
+```

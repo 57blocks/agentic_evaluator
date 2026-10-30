@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "yes",
+  "next_action": "corrected_claim",
+  "deadline": "2026-02-26",
+  "action_note": "The MAC denied the claim as unprocessable (CO-16 with MA130) because the required occurrence code 50 date — the date the patient was last seen or evaluated by a physician — was missing, as the facility's own 3/8 edit report flagged. Retrieve that date from the medical record, add occurrence code 50, and resubmit as a corrected replacement claim (bill type 0217, frequency code 7) referencing ICN 2554025803226 no later than 2026-02-26, the 1-year timely-filing deadline measured from the 2025-02-26 through date; the patient may not be billed for an unprocessable claim."
+}

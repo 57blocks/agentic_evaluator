@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Beneficiary's 60-day home period (2/19-3/1) was too short to start a new benefit period, so the prior stay's 80 used days carried forward; this admission exhausted the remaining 20 of the 100-day SNF benefit (paid through 3/24). CAS*PR*119 correctly assigns the remaining $11,454 to patient responsibility, so bill the beneficiary (or secondary coverage if later found) rather than appeal."
+}
+```

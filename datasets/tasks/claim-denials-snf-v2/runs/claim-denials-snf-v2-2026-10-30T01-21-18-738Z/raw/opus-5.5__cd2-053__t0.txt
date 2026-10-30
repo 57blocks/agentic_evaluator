@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC PR-119 is correct: the 2025-04-17 discharge and 2025-04-30 hospital readmission are only 13 days apart, not the 60 needed for a new benefit period, so only 26 of the 100 SNF days remained (74 already used), and they cover 2025-05-03 through 2025-05-28. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days from 2025-05-29 through 2025-06-09 plus any applicable coinsurance shown on the remittance."
+}
+```

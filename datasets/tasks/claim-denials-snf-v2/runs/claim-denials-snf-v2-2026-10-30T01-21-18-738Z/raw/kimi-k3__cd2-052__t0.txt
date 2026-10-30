@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The prior SNF stay (72 Medicare days, 2025-02-05 to 2025-04-17) and this admission fall in the same benefit period because the break in care was only 22 days (2025-04-18 to 2025-05-09), short of the 60 consecutive days without inpatient care needed to start a new benefit period; the 100-day SNF maximum was therefore reached on 2025-06-09 (day 100), and days 2025-06-10 through 2025-06-17 are correctly non-covered per PR-119. With no Medigap or Medicaid on file, bill the beneficiary for the 8 non-covered days, first confirming the required notice of Medicare non-coverage (NOMNC/SNF ABN) was timely delivered so liability validly shifted to the patient."
+}

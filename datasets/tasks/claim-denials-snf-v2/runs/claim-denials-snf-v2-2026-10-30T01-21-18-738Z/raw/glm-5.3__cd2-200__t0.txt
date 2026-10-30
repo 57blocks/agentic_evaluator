@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-10-18",
+  "action_note": "The MAC denied the full charge as benefit-exhausted (CARC 119/PR), but facility records show a 60+ day break in inpatient care (2025-01-04 to 2025-04-16), which should have ended the old benefit period and started a new one — with a fresh 100 SNF days — on the 2025-04-16 hospital admission. Verify the beneficiary's SNF benefit period status in CWF/HETS before acting: if Medicare's records confirm a new benefit period, request a redetermination by 2025-10-18 with documentation of the 60-day break; if the old period is still open (e.g., intervening inpatient care elsewhere), the denial stands and the days are the resident's liability."
+}

@@ -1,0 +1,10 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "yes",
+  "next_action": "appeal",
+  "deadline": "2026-01-17",
+  "action_note": "The MAC denied because the reported qualifying stay did not establish 3 consecutive inpatient days, but the hospital record shows an inpatient admission ordered 2025-07-30 through discharge 2025-08-02, and immediately preceding ED/observation time on 2025-07-29 to 07-30 counts toward the 3-day requirement. Request a redetermination within 120 days of the 2025-09-19 remittance (deadline 2026-01-17), submitting the hospital inpatient records and observation/ED documentation proving the qualifying stay; the SNF admission on 2025-08-22 is within 30 days of the 2025-08-02 discharge.",
+  "_scratch": {
+    "analysis": "CAS*CO*96 = noncovered charges because the 3-day qualifying hospital stay requirement was not met per the MAC. The occurrence span 70 shows 2025-07-30 to 2025-08-02, which is only 3 calendar dates if the MAC did not count the discharge date (and only 2 midnights if inpatient care began late on 07-30). However, Medicare counts time in observation/ED immediately preceding inpatient admission toward the 3-day count, so the 2025-07-29 ED visit plus observation through 2025-07-30 should satisfy the requirement with the 07-30 to 08-02 inpatient stay. The facility's own records support coverage, so the determination is correctable via redetermination (initial appeal, 120 days)."
+  }
+}

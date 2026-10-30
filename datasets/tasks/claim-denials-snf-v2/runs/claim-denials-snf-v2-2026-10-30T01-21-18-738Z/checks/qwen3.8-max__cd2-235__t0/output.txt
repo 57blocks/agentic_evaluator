@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary remained in the same benefit period because the gap was under 60 days, leaving only 28 SNF days after 72 used, so Medicare correctly paid only through 2025-04-29. With no secondary coverage, bill the patient for the noncovered days after 2025-04-29, subject to any required beneficiary notice."
+}
