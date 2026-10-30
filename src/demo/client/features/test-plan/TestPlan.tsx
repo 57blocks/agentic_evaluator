@@ -26,16 +26,33 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
   );
 }
 
-function Inputs({ step }: { step: PlanStep }) {
+/** Inputs listed before the rest fold away, so a 300-input set does not bury the rows below it. */
+const INPUTS_SHOWN = 8;
+
+function InputList({ inputs }: { inputs: PlanStep["inputs"] }) {
   return (
     <ul className="flex flex-col gap-1">
-      {step.inputs.map((i) => (
+      {inputs.map((i) => (
         <li key={i.id} className="flex min-w-0 flex-wrap gap-x-2">
           <span className="font-mono">{i.id}</span>
           {i.title && <span className="min-w-0 text-muted-foreground">{i.title}</span>}
         </li>
       ))}
     </ul>
+  );
+}
+
+function Inputs({ step }: { step: PlanStep }) {
+  if (step.inputs.length <= INPUTS_SHOWN) return <InputList inputs={step.inputs} />;
+  const rest = step.inputs.slice(INPUTS_SHOWN);
+  return (
+    <>
+      <InputList inputs={step.inputs.slice(0, INPUTS_SHOWN)} />
+      <details>
+        <summary className="cursor-pointer text-muted-foreground">Show the other {rest.length} inputs</summary>
+        <div className="mt-1"><InputList inputs={rest} /></div>
+      </details>
+    </>
   );
 }
 
@@ -171,7 +188,7 @@ export function TestPlan({ plan }: { plan: Plan }) {
         <p className="text-xs text-muted-foreground">
           {plan.chain && <>Chain: <span className="font-mono">{plan.chain.join(" → ")}</span>. Each step's output feeds the next, and the whole chain is also run end to end for validation.</>}
           {plan.chain && plan.budgetUsd !== null && " "}
-          {plan.budgetUsd !== null && <>Spend cap for the whole task: <b className="text-foreground">${plan.budgetUsd}</b>; the run stops when it is reached.</>}
+          {plan.budgetUsd !== null && <>Spend cap per run, across all its steps: <b className="text-foreground">${plan.budgetUsd}</b>; the run stops when it is reached.</>}
         </p>
       )}
       {plan.steps.map((s) => <PlanStepCard key={s.id} step={s} />)}

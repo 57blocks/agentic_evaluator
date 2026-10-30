@@ -199,16 +199,33 @@ test("a task row states its spend against budget and calls out an overrun", () =
     plan: { steps: [], budgetUsd: null, chain: null },
   };
 
-  const over = spendLabel({ ...base, budgetUsd: 3, spentUsd: 3.96 } as TaskView);
+  const over = spendLabel({ ...base, budgetUsd: 3, spentUsd: 3.96, runs: [{ totalUsd: 3.96 }] } as unknown as TaskView);
   assert.equal(over?.over, true);
   assert.match(over?.text ?? "", /over budget/);
 
-  const under = spendLabel({ ...base, budgetUsd: 3, spentUsd: 1.5 } as TaskView);
+  const under = spendLabel({ ...base, budgetUsd: 3, spentUsd: 1.5, runs: [{ totalUsd: 1.5 }] } as unknown as TaskView);
   assert.equal(under?.over, false);
   assert.doesNotMatch(under?.text ?? "", /over budget/);
 
   // Never run: no spend line at all, rather than a misleading $0.
   assert.equal(spendLabel({ ...base, budgetUsd: 3, spentUsd: null } as TaskView), null);
+});
+
+test("the budget is a cap per run, so runs that each stay under it are not an overrun together", () => {
+  // Arrange - three runs, each under the $70 cap, summing well past it.
+  const run = (totalUsd: number) => ({ totalUsd }) as RunView;
+  const task = {
+    name: "t", specPath: "tasks/t/spec.yaml", runName: "t", steps: [], files: [], definition: { spec: null, steps: [], other: [] },
+    plan: { steps: [], budgetUsd: 70, chain: null },
+    budgetUsd: 70, runs: [run(64.05), run(65.28), run(38.64)], spentUsd: 167.97,
+  } as unknown as TaskView;
+
+  // Act
+  const spend = spendLabel(task);
+
+  // Assert
+  assert.equal(spend?.over, false);
+  assert.equal(spend?.text, "$167.97 over 3 runs · cap $70 per run");
 });
 
 test("a task that has never run says so rather than rendering blank", () => {
