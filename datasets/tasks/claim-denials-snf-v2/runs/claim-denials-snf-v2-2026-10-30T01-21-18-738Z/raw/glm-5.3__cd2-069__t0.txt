@@ -1,0 +1,7 @@
+{
+  "root_cause": "missing_or_invalid_information",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2026-05-05",
+  "action_note": "The MAC denied the claim CO-16/MA130 because the occurrence code 50 date (start of the 3-day qualifying inpatient hospital stay) was missing, so Part A SNF coverage could not be established. Verify from hospital records/CWF whether the beneficiary had a 3-day inpatient stay within 30 days before the 2025-04-13 SNF admission; if yes, submit a corrected claim adding occurrence code 50 by 2026-05-05 (12-month timely filing from the 2025-05-05 discharge); if no, the stay is non-covered, so bill the patient only if proper notice was given, otherwise write off."
+}

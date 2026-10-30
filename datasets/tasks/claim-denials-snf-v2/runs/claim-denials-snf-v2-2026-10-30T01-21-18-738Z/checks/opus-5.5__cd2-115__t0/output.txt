@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 18 days (2025-02-28 to 2025-03-17) after the prior stay, short of the 60 consecutive days needed to end a benefit period. The 88 days already used left only 12 SNF days, which run 2025-03-21 through 2025-04-01. Medicare correctly applied CARC 119 as patient responsibility, so bill Ms. Ng for the 2025-04-02 to 2025-04-07 days (no secondary coverage on file, and no ABN is needed for a benefit-limit denial); if she remains in a Medicare-certified bed, keep submitting monthly benefit-exhaust claims so the contractor can track when her benefit period ends."
+}
+```

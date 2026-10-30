@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The denial is correct: the patient was home only 23 days (fewer than the 60 required to start a new benefit period), so the benefit period that began 2025-01-02 continued with only 12 of 100 SNF days left, which Medicare paid through 2025-05-08 before denying the remaining 13 days (CAS PR-119, benefit maximum reached). With no Medigap or Medicaid, the balance is patient responsibility — bill the beneficiary for the non-covered days, but only if a NOMNC was delivered at least two days before coverage ended (by 2025-05-06); if proper notice was not given, the facility, not the patient, is liable for those charges."
+}

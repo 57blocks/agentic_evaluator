@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit did not reset: a new benefit period requires 60 consecutive days out of the hospital/SNF, and the beneficiary was home only 29 days (2025-01-12 to 2025-02-09), so with 90 days already used in the same benefit period only 10 days (Feb 15-24) remained and the MAC correctly denied the remaining days under PR/119. With no Medigap or Medicaid on file, the $9,694 is beneficiary liability; confirm a timely NOMNC was delivered, then bill the patient."
+}

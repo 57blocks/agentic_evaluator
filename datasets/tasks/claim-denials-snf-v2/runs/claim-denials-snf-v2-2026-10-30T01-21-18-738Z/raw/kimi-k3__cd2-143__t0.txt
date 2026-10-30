@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The break at home (2025-03-11 to 2025-04-02) was only 23 days, under the 60-day threshold, so the prior stay's 89 days fall in the same benefit period; adding this stay's days exhausts the 100-day SNF benefit on 2025-04-18 (day 100), making days 2025-04-19 through 2025-05-03 correctly non-covered per CARC 119. Because the adjustment is coded PR (patient responsibility) and no Medigap/Medicaid is on file, bill the beneficiary for the post-exhaustion days, confirming the SNF ABN (CMS-10055) was issued to support liability."
+}

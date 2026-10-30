@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 under group PR means the 100-day SNF limit was reached. The beneficiary was home only 29 days (2025-01-12 to 2025-02-09), short of the 60 days needed to end the benefit period, so the 10 days paid (2025-02-15 to 2025-02-24) were the last available after 90 prior days, and the 2025-02-25 to 2025-03-07 days are the patient's liability. With no Medigap or Medicaid on file, bill Ms. Delaney for the non-covered days (plus any applicable days 21-100 coinsurance), after first reconciling the prior-stay day count against the CWF, since the 2024-10-14 to 2025-01-11 stay counts to 89 days if the discharge day is excluded."
+}
+```

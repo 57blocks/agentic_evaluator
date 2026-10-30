@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CAS PR-119 (benefit maximum reached) is correct. The 32 days at home (2025-02-20 to 2025-03-23) fall short of the 60 days needed to start a new benefit period, so the 73 days already used left 27 days, covered 2025-03-29 through 2025-04-24. With no Medigap or Medicaid on file, bill the beneficiary for 2025-04-25 through 2025-05-05 plus any applicable coinsurance; keep sending benefits-exhaust claims while she remains in the facility."
+}
+```

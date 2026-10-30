@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 23 days at home (2025-03-11 to 2025-04-02) did not reach the 60 days needed to end the benefit period. That left 11 of the 100 SNF days (100 minus 89 used), and Medicare correctly paid 2025-04-08 through 2025-04-18, so CARC 119 cannot be appealed. With no Medigap or Medicaid on file, bill the beneficiary for the patient-responsibility amount and keep sending benefits-exhaust claims as required. First confirm the prior stay's day count against the CWF/eligibility response, because the facility record's 89 days counts the 2025-03-10 discharge day, which Medicare normally excludes."
+}
+```

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 3-day hospital stay was qualifying, but the patient was out of the hospital and SNF for only 12 days (2025-04-18 to 2025-04-29) — not the 60 consecutive days required to end the prior benefit period — so this stay continued that period, which already had 74 days used, leaving only 26 covered days (2025-05-03 through 2025-05-28) before the 100-day SNF limit was exhausted (PR-119). The adjustment is correct and cannot be reversed by appeal or correction; with no Medigap or Medicaid, the facility should bill the patient for the non-covered days 2025-05-29 through 2025-06-09 (plus any coinsurance), provided a timely NOMNC/ABN was issued — otherwise those days must be written off."
+}

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Beneficiary's 100-day SNF benefit period never reset (only 18 days out of covered care between the two stays, far short of the required 60 consecutive days), so the 88 days already used in the 2024-12-02 stay carried over, leaving only 12 covered days (3/21-4/1) in this stay; the remaining 6 days (4/2-4/7) are correctly denied as PR-119 benefit maximum reached and must be billed to the patient since there is no Medigap or Medicaid on file."
+}

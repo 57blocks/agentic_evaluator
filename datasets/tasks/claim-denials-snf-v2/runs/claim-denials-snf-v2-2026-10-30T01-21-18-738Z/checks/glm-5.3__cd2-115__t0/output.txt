@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was at home fewer than 60 days (2025-02-28 to 2025-03-17), so no new benefit period began; with 88 days already used in that period, only 12 Medicare days remained. Days 1-12 (2025-03-21 through 2025-04-01) were paid and days 13-18 are correctly denied as benefit exhausted (PR-119, patient liability), so bill the patient for the noncovered days since no Medigap or Medicaid exists."
+}
+```

@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Medicare SNF benefit is exhausted for this benefit period; the 6 days after 2025-05-26 are non-covered. Bill the patient for the non-covered days only if a valid SNFABN was issued, as no other payer is available."
+}

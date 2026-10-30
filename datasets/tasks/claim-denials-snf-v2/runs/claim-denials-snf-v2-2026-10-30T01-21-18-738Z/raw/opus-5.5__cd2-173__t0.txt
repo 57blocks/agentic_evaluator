@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct: the beneficiary was at home only 17 days (2025-03-31 to 2025-04-16), so no 60-day break occurred and this stay falls in the same benefit period, where 77 of the 100 SNF days were already used. The remaining 23 days covered 2025-04-20 through 2025-05-12, so bill Ms. Halloran for the non-covered days 2025-05-13 through 2025-05-20 plus the daily coinsurance on the paid days (she has no Medigap or Medicaid), and keep sending monthly benefits-exhaust claims to Medicare while she remains in the facility."
+}
+```

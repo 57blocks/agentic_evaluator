@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CAS PR-119 (benefit maximum reached) is correct. The beneficiary was home only 25 days (2025-04-09 to 2025-05-03), short of the 60 needed to end the benefit period, so the 82 prior days count and only 18 SNF days remained, which were paid 2025-05-09 through 2025-05-26. With no Medigap or Medicaid on file, bill the beneficiary for the patient-responsibility amount (SNF coinsurance for the covered days plus the non-covered days from 2025-05-27 on)."
+}
+```

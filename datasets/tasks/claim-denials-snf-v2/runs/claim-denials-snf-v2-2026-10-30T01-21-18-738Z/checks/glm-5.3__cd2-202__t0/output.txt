@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was out of the hospital and SNF for only 36 days (2025-04-20 to 2025-05-25), so the 60 consecutive-day break needed to start a new benefit period never occurred; the stay falls in the same benefit period with only 19 of 100 days left, which Medicare correctly paid through 2025-06-18 (81 prior + 19 = 100). With no Medigap or Medicaid on file, the exhausted days (2025-06-19 through 2025-07-03) are the resident's responsibility, so bill the patient after confirming a timely NOMNC was delivered."
+}

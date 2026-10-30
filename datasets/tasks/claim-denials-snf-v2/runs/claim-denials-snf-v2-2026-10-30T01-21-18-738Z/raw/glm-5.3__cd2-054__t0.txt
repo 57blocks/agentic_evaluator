@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary's benefit period never ended (only 19 days at home, fewer than the 60 consecutive days required), so after the 90 days used in the prior SNF stay only days 91-100 (2025-04-18 through 2025-04-27) remained; the MAC correctly paid through 04-27 and assigned the remaining days to the patient (PR-119, benefit maximum reached). With no Medigap or Medicaid, the facility should bill the beneficiary for the non-covered days 2025-04-28 through 2025-05-12, after confirming a timely NOMNC was issued."
+}

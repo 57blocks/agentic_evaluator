@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 23 days (2025-03-31 to 2025-04-22), short of the 60 days needed to end a benefit period, so this stay falls in the same benefit period as her prior stay. She had 88 of 100 SNF days already used, leaving 12 days, which Medicare paid for 2025-04-27 through 2025-05-08. No other coverage is on file, so bill the patient for the days from 2025-05-09 onward (CARC 119, patient responsibility) plus the day-21-100 coinsurance on the covered days, and keep submitting benefits-exhaust claims to Medicare as required."
+}
+```

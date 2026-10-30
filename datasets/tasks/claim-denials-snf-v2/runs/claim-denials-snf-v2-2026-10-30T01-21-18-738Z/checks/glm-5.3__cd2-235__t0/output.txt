@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-04-02 SNF admission falls in the same benefit period as the 2024-12-11 stay because only 37 days elapsed without inpatient care (a new period requires 60), so with 72 days already used the 100-day Part A SNF benefit ran out on 2025-04-29 and the April 30–May 8 days were correctly denied under CAS PR-119 (benefit maximum reached) — the adjudication cannot be reversed and Medicare will not pay the remaining days. With no Medigap or Medicaid on file, bill the beneficiary the $12,864.20 patient-responsibility balance (coinsurance on days 73–100 plus the 9 exhausted days), but first confirm a NOMNC was delivered by 2025-04-27, since without timely notice the facility, not the patient, is liable for the post-exhaustion days."
+}

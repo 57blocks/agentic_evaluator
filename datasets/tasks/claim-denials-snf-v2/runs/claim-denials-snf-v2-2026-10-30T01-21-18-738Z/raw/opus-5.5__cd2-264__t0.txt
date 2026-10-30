@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (benefit maximum reached) is correct. The beneficiary was home only 11 days (2025-02-19 to 2025-03-01), short of the 60 days needed to end the benefit period, so the 80 SNF days already used left 20 days, which Medicare paid for 2025-03-05 through 2025-03-24. With no Medigap or Medicaid on file, bill the patient for the remaining patient-responsibility balance (the 2025-03-25 to 2025-04-02 non-covered days plus any coinsurance for the covered days), and keep submitting benefits-exhausted claims to the MAC while the stay continues."
+}
+```

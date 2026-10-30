@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 2025-05-17 admission fell in the same benefit period as the 2025-01-23 to 2025-04-19 SNF stay (only a 24-day break at home, not the required 60 days), so the 87 days already used left only 13 days; Medicare correctly paid through 2025-05-29 (day 100) and denied 2025-05-30 through 2025-06-08 as PR-119, benefit maximum reached. Bill the beneficiary for those 10 exhausted days, provided the required liability notices (NOMNC/SNF ABN) were issued; if they were not, limitation-on-liability rules may bar billing and the facility would have to write off."
+}
+```

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 is correct. The beneficiary was out of a facility for only 31 days (2025-01-31 to 2025-03-02), short of the 60 consecutive days needed to end a benefit period, so the 70 days already used plus 30 days paid (2025-03-08 to 2025-04-06) reach the 100-day SNF limit. With no Medigap or Medicaid on file, bill the beneficiary for the PR $16,637.00 for 2025-04-07 to 2025-04-20 (plus any day-71+ coinsurance on the paid days), and keep submitting benefits-exhaust claims as required."
+}
+```

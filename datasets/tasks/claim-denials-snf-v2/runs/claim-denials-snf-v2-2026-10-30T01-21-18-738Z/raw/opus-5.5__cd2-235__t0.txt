@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The beneficiary was home only 37 days (2025-02-21 to 2025-03-29), short of the 60 consecutive days needed to start a new benefit period, so the 72 days already used left 28 SNF days (2025-04-02 to 2025-04-29), which the contractor paid correctly; the CARC 119 patient-responsibility days from 2025-04-30 onward are not payable by Medicare. With no Medigap or Medicaid on file, bill the beneficiary for those days, and keep submitting the required benefits-exhaust claims to the contractor."
+}
+```

@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit was exhausted on 2025-05-26: the prior stay used 82 days, and because the beneficiary had only a 25-day break at home (not the 60 consecutive days needed to start a new benefit period), this stay's days 83-100 ran 2025-05-09 through 2025-05-26. The denial of 2025-05-27 through 2025-06-01 (CARC 119) is statutorily correct and Medicare cannot pay it; the PR group code assigns liability to the beneficiary, so bill the patient $8,859.60, confirming the required notice of Medicare non-coverage was issued."
+}
+```

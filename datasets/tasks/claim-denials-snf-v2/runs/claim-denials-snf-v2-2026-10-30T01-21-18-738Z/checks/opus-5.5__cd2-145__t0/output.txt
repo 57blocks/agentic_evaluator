@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "Only 36 days at home separated the prior SNF stay from the hospital admission, short of the 60 days needed to start a new benefit period, so the 22 SNF days left (100 - 78) correctly ran out on 2025-06-13 and CARC 119 is a valid denial. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days 2025-06-14 through 2025-06-27, plus the coinsurance on the covered days, after checking that any required beneficiary notice was given."
+}
+```

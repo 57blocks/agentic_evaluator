@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 100-day SNF benefit for this benefit period is exhausted: the prior stay used 84 days, and because the break at home (2025-02-26 to 2025-03-09) was only 12 days—short of the 60 consecutive days needed to start a new benefit period—this stay's days 85–100 (2025-03-15 through 2025-03-30) were correctly paid and days 2025-03-31 through 2025-04-12 are non-covered (CARC 119). Bill the beneficiary the $12,497.40 the remittance assigns as patient responsibility (PR-119), since no Medigap or Medicaid coverage exists."
+}
+```

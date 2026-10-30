@@ -1,0 +1,7 @@
+{
+  "root_cause": "qualifying_stay_not_met",
+  "correctable": "conditional",
+  "next_action": "verify_then_decide",
+  "deadline": "2025-10-05",
+  "action_note": "Hospital records show inpatient admission order 2025-05-03 with discharge 2025-05-06, which is a valid 3-day qualifying stay (observation 5/1-5/3 doesn't count); verify that the hospital's inpatient claim was actually submitted/finalized in CWF with these dates, since CWF mismatch is the likely cause of the system denial. If confirmed, request a reopening (or file a timely redetermination appeal by 2025-10-05) with the hospital UB-04 and order documentation attached."
+}

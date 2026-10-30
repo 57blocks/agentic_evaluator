@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The 04-20 to 05-02 break was only 13 days (not the 60 consecutive days needed to start a new benefit period), so the prior 91 SNF days carried over; the 100-day limit was reached on 05-15, correctly leaving 05-16 to 05-21 as patient responsibility (CAS*PR*119). With no Medigap/Medicaid on file, bill the beneficiary for the excess days."
+}

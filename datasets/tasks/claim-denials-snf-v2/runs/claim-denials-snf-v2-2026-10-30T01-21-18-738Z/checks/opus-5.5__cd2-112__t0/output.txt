@@ -1,0 +1,9 @@
+```json
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "CARC 119 (PR) is correct: the beneficiary was out of a hospital/SNF only 23 days (2025-03-09 to 2025-03-31), so no new benefit period began, and with 76 SNF days already used only 24 remained, which were paid 2025-04-05 through 2025-04-28. With no Medigap or Medicaid on file, bill the beneficiary for the non-covered days from 2025-04-29 onward (plus any applicable coinsurance), and keep submitting benefit-exhausted claims as Medicare requires."
+}
+```

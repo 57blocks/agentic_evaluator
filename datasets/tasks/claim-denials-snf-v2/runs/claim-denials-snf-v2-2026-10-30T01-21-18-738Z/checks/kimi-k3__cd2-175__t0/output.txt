@@ -1,0 +1,7 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "correctable": "no",
+  "next_action": "bill_patient",
+  "deadline": null,
+  "action_note": "The denial is correct: the beneficiary was out of institutional care only 32 days (2025-02-20 to 2025-03-23), so no new benefit period began, and the 73 SNF days already used left only 27 days, which paid through 2025-04-24 (day 100); days 2025-04-25 through 2025-05-05 exceed the 100-day SNF maximum. Bill the beneficiary for those non-covered days per the PR-119 patient-responsibility adjustment (confirming the required Notice of Medicare Non-Coverage was issued), since no Medigap or Medicaid is on file."
+}
