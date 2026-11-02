@@ -788,6 +788,38 @@ that cannot do without one blocks its own task. That the trace was missing
 is already on the trial's row. For the oracle probe, a reference dir may
 carry its own `trace.json`, which is copied in with the rest.
 
+The common rules need no script. A check of either kind can carry `trace:`
+rules, judged after the check itself on every candidate that declares
+`cli.trace`:
+
+```yaml
+evaluators:
+  required_checks:
+    task-tests:
+      kind: command
+      argv: [node, checks/task-tests.mjs]
+      trace:
+        tool_used:                     # per tool: at least min, at most max calls
+          - { name: Bash, min: 1 }     #   the agent actually ran something
+          - { name: WebFetch, max: 0 } #   and never went to the web
+        tool_order:                    # first call of one before first call of the other
+          - { first: Edit, then: Bash }
+        max_tool_calls: 60
+        max_turns: 40
+        max_repeated_failures: 3       # no tool failing more than 3 times in a row
+```
+
+A rule the trace breaks fails a passing check, and the evidence names it
+(`trace rule: Bash called 0 times, min 1`). A candidate without `cli.trace`
+is graded on the deliverable alone and its evidence says so; one that
+declared a trace and left none is `not_evaluated`, undetermined rather than
+failed. `max_repeated_failures` needs a format that records whether a call
+failed: Claude Code's stream does, ATIF does not, and `check-task` warns
+when a rule cannot be judged for a candidate, or when no candidate on the
+step declares a trace at all. The rules are part of the check's version, so
+editing them regrades reused trials on `--reuse` like editing the script
+does, without running the agents again.
+
 Exit `0` passes, exit `1` fails the candidate; anything else — a crash, a
 timeout — is recorded as an evaluator error, never blamed on the candidate.
 Print `{"evidence": "...", "reason": "..."}` and both are kept with the trial.

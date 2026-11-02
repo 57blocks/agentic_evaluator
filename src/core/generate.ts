@@ -17,6 +17,7 @@ import { endpointOf } from "../providers/index.js";
 import { activityOf, type AgentActivity, type AgentTrace } from "../canon/agent-trace.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import { fixturePath, inputIdentity } from "./fixture.js";
+import { applyTraceRules } from "./trace-check.js";
 import { killProcessesUnder } from "../proc.js";
 import { finishForCompletion } from "./exit-policy.js";
 import { priceFromSpec } from "../pricing.js";
@@ -180,8 +181,8 @@ async function regradeIfChanged(
 ): Promise<Partial<RunRecord> | null> {
   const check = suite.check;
   if (!check || check.kind !== "command") return null;
-  const { commandCheckVersion, runCommandCheck } = await import("../check.js");
-  const version = await commandCheckVersion(check.argv, check.versionFiles, suite.taskRoot);
+  const { requiredCheckVersion, runCommandCheck } = await import("../check.js");
+  const version = await requiredCheckVersion(check, suite.taskRoot);
   if (reused.record.checkVersion === version) return null;
   const kept = path.join(reused.dir, "checks", `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}`);
   if (!(await fs.stat(kept).then((s) => s.isDirectory(), () => false))) return null;
@@ -203,12 +204,17 @@ async function regradeIfChanged(
       workDir: scratch,
     });
     await keepEvidence(scratch, t.checkWorkDir);
+    const graded = applyTraceRules(result, check.trace, {
+      declaredTrace: suite.candidateDefs?.[t.candidate]?.cli?.trace !== undefined,
+      ...(trace ? { trace } : {}),
+      ...(reused.record.traceError !== undefined ? { traceError: reused.record.traceError } : {}),
+    });
     return {
-      checkPassed: result.passed,
-      checkOutput: result.output,
-      checkReason: result.reason,
-      checkState: result.state,
-      checkVersion: result.version,
+      checkPassed: graded.passed,
+      checkOutput: graded.output,
+      checkReason: graded.reason,
+      checkState: graded.state,
+      checkVersion: graded.version,
     };
   } finally {
     await fs.rm(scratch, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 }).catch(() => undefined);
@@ -289,13 +295,18 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
           ...(result.trace ? { trace: result.trace } : {}),
           workDir,
         });
+  const graded = applyTraceRules(check, suite.check.trace, {
+    declaredTrace: def.cli?.trace !== undefined,
+    ...(result.trace ? { trace: result.trace } : {}),
+    ...(result.traceError !== undefined ? { traceError: result.traceError } : {}),
+  });
   return {
     ...out,
-    checkPassed: check.passed,
-    checkOutput: check.output,
-    checkReason: check.reason,
-    checkState: check.state,
-    checkVersion: check.version,
+    checkPassed: graded.passed,
+    checkOutput: graded.output,
+    checkReason: graded.reason,
+    checkState: graded.state,
+    checkVersion: graded.version,
   };
 }
 
