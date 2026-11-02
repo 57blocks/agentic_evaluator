@@ -1,0 +1,148 @@
+# Sample: choose a model for each agent of a two-agent pipeline. Free; needs python3.
+#
+#   agenteval run examples/tasks/agent-pipeline --yes --html
+#
+# The app (app/) is a small Python research assistant: a search agent finds
+# the pages that answer a rider's question, and a summarizer agent writes the
+# answer from them. It stands in for yours: nothing in app/ knows about
+# agenteval. Its models are scripted fakes (app/models.py), each with a known
+# weakness, so the evaluation has something definite to find.
+#
+# What it shows:
+#   - One wrapper for every step. agents/run_stage.py runs the agent EVAL_STEP
+#     names, with the model named on its command line. Each candidate is that
+#     wrapper with a different model; app/ is unchanged.
+#   - Each agent graded on its own. Search is graded on recall against the
+#     sources labeled in checks/answer_key.json. Summarize starts from frozen
+#     findings (fixture/summarize/<input>/findings.json, recorded from a good
+#     search run), so a weak search cannot make a summarizer look bad.
+#   - A search tool that gives every candidate the same results: it reads a
+#     fixed corpus (app/corpus/), standing in for a replay of recorded web
+#     results.
+#   - Cost and activity from the agent itself. The wrapper reports tokens
+#     (`reports_usage: tokens`), which agenteval prices with each candidate's
+#     `price`, and leaves an ATIF trace (`trace: atif`), which fills the
+#     report's "Agent activity" table. It enforces `max_cost_per_trial_usd`.
+#   - The chain, end to end. `input_from: search` with `handoff: workdir` runs
+#     search then summarize twice: `large` on both (the control), and each
+#     step's pick. `minimum_meaningful_difference` is the saving per answered
+#     question, in USD, below which switching is not worth it.
+#
+# What to expect: search picks `mid` (`small` searches only the first half of
+# most questions; `mid` is cheaper than `large`), summarize picks `small`
+# (`mid` adds a claim no source supports), and `mid` then `small` answers
+# every question at a fraction of `large`'s cost: adopt-combination.
+# The costs in the report are what the fakes' tokens would cost at each
+# candidate's declared `price`; nothing is billed.
+#
+# For a real app: swap the fakes for your models and their prices, raise
+# `trials_per_case` to 3 or more (agents take different paths each run) and
+# consider `minimum_all_trials_pass_rate`, and add `methods: [pairwise-swap]`
+# to have a judge compare the summaries (billed). The walkthrough is
+# docs/evaluate-your-pipeline.md.
+
+protocol_version: "0.3"
+run_name: agent-pipeline
+budget_usd: 1
+description: >-
+  Which model should run each agent of a search-then-summarize research
+  assistant, and does the per-agent combination beat one model on both?
+  Five riders' questions about a fictional transit system, each in two parts.
+
+workflow:
+  control_candidate: large
+  steps:
+    - id: search
+      version: "1"
+      description: "Find the pages that answer every part of the question, and quote them."
+      test_set:
+        id: transit-questions
+        inputs: &questions [harbor-line-bikes, airport-at-night, pass-and-ferry, contactless-cap, northgate-parking]
+      candidate_ids: [large, mid, small]
+      required_checks: [search-recall]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 30
+      max_cost_per_trial_usd: 0.05
+    - id: summarize
+      version: "1"
+      description: "Answer the question from the findings, citing a source for every claim."
+      input_from: search
+      handoff: workdir
+      test_set:
+        id: transit-findings
+        inputs: *questions
+        fixture_dir: fixture/summarize
+      candidate_ids: [large, mid, small]
+      required_checks: [summary-supported]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: lowest-cost
+      eligibility:
+        minimum_reliability: 1.0
+        minimum_required_check_pass_rate: 1.0
+      maximum_completion_time_seconds: 30
+      max_cost_per_trial_usd: 0.05
+
+candidates:
+  - id: large
+    adapter: agent-cli
+    price: { input: 3, output: 15 }
+    cli:
+      argv: [python3, agents/run_stage.py, fake/large]
+      reports_usage: tokens
+      trace: atif
+      version_files: &code [agents/run_stage.py, agents/eval_trace.py, app/agents.py, app/models.py, app/search.py]
+  - id: mid
+    adapter: agent-cli
+    price: { input: 0.5, output: 2 }
+    cli:
+      argv: [python3, agents/run_stage.py, fake/mid]
+      reports_usage: tokens
+      trace: atif
+      version_files: *code
+  - id: small
+    adapter: agent-cli
+    price: { input: 0.15, output: 0.6 }
+    cli:
+      argv: [python3, agents/run_stage.py, fake/small]
+      reports_usage: tokens
+      trace: atif
+      version_files: *code
+
+evaluators:
+  required_checks:
+    search-recall:
+      kind: command
+      description: "Cites every source the answer key lists for the question, quoting only what the page says."
+      argv: [python3, checks/search_check.py]
+      version_files: [checks/search_check.py, checks/answer_key.json]
+      timeout_seconds: 30
+    summary-supported:
+      kind: command
+      description: "Every claim cites a source from the findings that supports it, and the required facts are stated."
+      argv: [python3, checks/summary_check.py]
+      version_files: [checks/summary_check.py, checks/answer_key.json]
+      timeout_seconds: 30
+  judge:
+    # Required by the schema, never called: no method is declared. Add
+    # `methods: [pairwise-swap]` to have a model compare the summaries (billed).
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/answer.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  minimum_meaningful_difference: 0.005
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2
