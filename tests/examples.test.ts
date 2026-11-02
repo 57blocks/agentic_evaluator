@@ -1,7 +1,7 @@
 /**
  * The samples other people learn the tool on keep working.
  *
- * Only the free ones run here (agent-pipeline needs python3, docker-sandbox Docker); `compare-models`, `compare-prompts`, `compare-agents`,
+ * Only the free ones run here (pipeline needs python3, docker-sandbox Docker); `compare-models`, `compare-prompts`, `compare-agents`,
  * `compare-agent-models` and `compare-setups` are billed, so they are checked for what can be checked without spending: they
  * load, and their plans are the size their header comments promise.
  */
@@ -42,7 +42,7 @@ async function runJson(task: string): Promise<Array<Record<string, unknown>>> {
 }
 
 test("every free sample declares no judging, so it cannot bill", async () => {
-  for (const task of ["custom-check", "chain-offline", "docker-sandbox", "agent-pipeline"]) {
+  for (const task of ["custom-check", "chain-offline", "docker-sandbox", "pipeline"]) {
     // Act
     const plan = planWorkflow(await loadWorkflow(path.join(EXAMPLES, task, "spec.yaml")));
 
@@ -95,13 +95,13 @@ test("chain-offline: both arms run and the combination beats the broken control"
   assert.equal(verdict.verdict, "adopt-combination");
 });
 
-test("agent-pipeline: each agent gets its own model, and the combination is adopted over one model on both", { timeout: 120_000 }, async (t) => {
+test("pipeline: each stage gets its own model, and the combination is adopted over one model on both", { timeout: 120_000 }, async (t) => {
   if (!hasPython) return t.skip("python3 not available");
 
   // Act
-  const events = await runJson("agent-pipeline");
+  const events = await runJson("pipeline");
 
-  // Assert - small misses half the question in search, mid invents a claim in summaries.
+  // Assert - small searches half the question, mid makes up a claim when it summarizes.
   const done = events.filter((e) => e.type === "step.done") as Array<{ chosen: string; gated: Array<{ candidate: string }> }>;
   assert.deepEqual(done.map((d) => d.chosen), ["mid", "small"]);
   assert.deepEqual(done.map((d) => d.gated.map((g) => g.candidate)), [["small"], ["mid"]]);
