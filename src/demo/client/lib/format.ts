@@ -36,17 +36,24 @@ export function runMeta(run: RunView): string {
 
 export interface Spend {
   text: string;
-  /** Spent more than the spec's declared budget. */
+  /** Some run spent more than the spec's declared budget. */
   over: boolean;
 }
 
-/** What a task has spent against what its spec allows. Null when nothing ran. */
+/**
+ * What a task has spent, against what its spec allows. The spec's budget caps
+ * each run, so the summed spend is never compared with it — only a single run
+ * that went past the cap is an overrun. Null when nothing ran.
+ */
 export function spendLabel(task: TaskView): Spend | null {
   if (task.spentUsd == null) return null;
-  const spent = `$${task.spentUsd.toFixed(2)}`;
+  const n = task.runs.length;
+  const spent = n > 1 ? `$${task.spentUsd.toFixed(2)} over ${n} runs` : `$${task.spentUsd.toFixed(2)}`;
   if (task.budgetUsd == null) return { text: spent, over: false };
-  const over = task.spentUsd > task.budgetUsd;
-  return { text: `${spent} / $${task.budgetUsd}${over ? " over budget" : ""}`, over };
+  const budget = task.budgetUsd;
+  const overruns = task.runs.filter((r) => r.totalUsd !== null && r.totalUsd > budget).length;
+  const flag = overruns === 0 ? "" : n > 1 ? ` · ${overruns} over budget` : " over budget";
+  return { text: `${spent} · cap $${budget} per run${flag}`, over: overruns > 0 };
 }
 
 /**
