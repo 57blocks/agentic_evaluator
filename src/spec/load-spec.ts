@@ -346,9 +346,15 @@ function compileCheck(
     throw specError(specPath, `required check "${id}" declares trace: {} with no rule in it`);
   }
   for (const r of def.trace?.tool_used ?? []) {
+    if (r.min === undefined && r.max === undefined) {
+      throw specError(specPath, `required check "${id}": trace rule for ${r.name} needs min, max or both`);
+    }
     if (r.min !== undefined && r.max !== undefined && r.min > r.max) {
       throw specError(specPath, `required check "${id}": trace rule for ${r.name} has min ${r.min} above max ${r.max}`);
     }
+  }
+  for (const r of def.trace?.tool_order ?? []) {
+    if (r.first === r.then) throw specError(specPath, `required check "${id}": trace rule orders ${r.first} before itself`);
   }
   const trace = def.trace ? { trace: def.trace } : {};
   if (def.kind === "tsc") {
