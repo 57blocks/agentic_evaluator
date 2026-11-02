@@ -44,7 +44,7 @@ runs/<runId>/
 ## Run
 
 **New here? Read the [README](README.md)** — install, the samples,
-writing a task, reading a run, cost control. `examples/` holds seven sample
+writing a task, reading a run, cost control. `examples/` holds nine sample
 tasks to start from ([examples/README.md](examples/README.md)); the offline ones are free.
 
 From a checkout of this repository:
