@@ -817,8 +817,8 @@ failed. `max_repeated_failures` needs a format that records whether a call
 failed: Claude Code's stream does, ATIF does not, and `check-task` warns
 when a rule cannot be judged for a candidate, or when no candidate on the
 step declares a trace at all. The rules are part of the check's version, so
-editing them regrades reused trials on `--reuse` like editing the script
-does, without running the agents again.
+editing them on a command check regrades reused trials on `--reuse` like
+editing the script does, without running the agents again.
 
 Exit `0` passes, exit `1` fails the candidate; anything else — a crash, a
 timeout — is recorded as an evaluator error, never blamed on the candidate.
