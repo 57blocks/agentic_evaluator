@@ -11,7 +11,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { judgePromptTemplateSha, PAIRWISE_EVALUATOR_ID } from "../judge.js";
 import { scorePromptTemplateSha, ABSOLUTE_EVALUATOR_ID } from "../score.js";
-import { checkVersion as tscCheckVersion, commandCheckVersion, TSC_CHECK_ID } from "../check.js";
+import { requiredCheckVersion, TSC_CHECK_ID } from "../check.js";
 import { loadWorkflow } from "../spec/load-spec.js";
 import { displayPath, resolveTaskAsset } from "../paths.js";
 import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
@@ -133,11 +133,7 @@ async function executeSuite(params: {
   const rubricSha = sha256(rubric);
   const judgeTplSha = judgePromptTemplateSha(rubric, dimensions);
   const scoreTplSha = scorePromptTemplateSha(rubric, dimensions);
-  const checkVersion = !suite.check
-    ? null
-    : suite.check.kind === "tsc"
-      ? await tscCheckVersion(await resolveTaskAsset(suite.taskRoot, suite.check.scaffoldDir))
-      : await commandCheckVersion(suite.check.argv, suite.check.versionFiles, suite.taskRoot);
+  const checkVersion = suite.check ? await requiredCheckVersion(suite.check, suite.taskRoot) : null;
   const manifest = await buildManifest(suite, {
     runId,
     startedAt: generatedAt,
