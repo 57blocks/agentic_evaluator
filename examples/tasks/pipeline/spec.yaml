@@ -1,0 +1,84 @@
+# Sample: pick a model for each stage of your own pipeline. Free; needs python3.
+#
+#   agenteval run examples/tasks/pipeline --yes --html
+#
+# Three files to read:
+#   my_pipeline.py  your app: a search stage and a summarize stage, each taking a model
+#   run_stage.py    the wrapper: runs the stage this step names, with one model
+#   check.py        decides whether a stage's output passes
+#
+# Each stage is a step, each model a candidate. The summarize step's inputs
+# are saved search results (inputs/*-passages.txt), so a weak search model
+# cannot make a summarizer look bad. Then `input_from: search` runs the two
+# stages end to end, `large` on both versus each step's pick.
+#
+# Expect: search picks mid (small searches only half the question), summarize
+# picks small (mid makes up a claim), and mid + small is adopted over large.
+# Walkthrough: docs/evaluate-your-pipeline.md
+
+protocol_version: "0.3"
+run_name: pipeline
+budget_usd: 1
+
+workflow:
+  control_candidate: large
+  steps:
+    - id: search
+      version: "1"
+      test_set:
+        id: questions
+        inputs: [bikes, ferry]
+      candidate_ids: [large, mid, small]
+      required_checks: [check]
+      judged_dimensions: []
+      success_criteria: { mandatory_checks: all }
+      operating_mode: lowest-cost
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 30
+    - id: summarize
+      version: "1"
+      input_from: search
+      test_set:
+        id: passages
+        inputs: [bikes-passages, ferry-passages]
+      candidate_ids: [large, mid, small]
+      required_checks: [check]
+      judged_dimensions: []
+      success_criteria: { mandatory_checks: all }
+      operating_mode: lowest-cost
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 30
+
+candidates:
+  - id: large
+    adapter: agent-cli
+    cli: { argv: [python3, run_stage.py, large], reports_usage: true }
+  - id: mid
+    adapter: agent-cli
+    cli: { argv: [python3, run_stage.py, mid], reports_usage: true }
+  - id: small
+    adapter: agent-cli
+    cli: { argv: [python3, run_stage.py, small], reports_usage: true }
+
+evaluators:
+  required_checks:
+    check:
+      kind: command
+      argv: [python3, check.py]
+      timeout_seconds: 30
+  judge:
+    # Required by the schema, but never called: no method is declared.
+    # `methods: [pairwise-swap]` would have this model compare outputs (billed).
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubric.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  # The saving per success (USD) below which switching models is not worth it.
+  minimum_meaningful_difference: 0.001
+
+x-harness:
+  producer: codegen   # required for command candidates

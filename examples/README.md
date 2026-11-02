@@ -8,7 +8,7 @@ to it, under `examples/tasks/<name>/runs/`.
 |---|---|---|
 | [`custom-check`](tasks/custom-check/spec.yaml) | a required check you write (`kind: command`); any command as a candidate (`adapter: agent-cli`) | free |
 | [`chain-offline`](tasks/chain-offline/spec.yaml) | two chained steps (`input_from`) and the end-to-end verdict against a single-model control | free |
-| [`agent-pipeline`](tasks/agent-pipeline/spec.yaml) | a Python app's search and summarizer agents: one wrapper for every step, a model picked per agent, frozen findings for the summarizer, tokens and traces reported by the agent, the mix tested end to end ([guide](../docs/evaluate-your-pipeline.md)) | free; needs `python3` |
+| [`pipeline`](tasks/pipeline/spec.yaml) | your own app's stages: one wrapper runs each stage with each model, a check per stage, then the per-stage picks tested end to end ([guide](../docs/evaluate-your-pipeline.md)) | free; needs `python3` |
 | [`docker-sandbox`](tasks/docker-sandbox/spec.yaml) | one agent script as two candidates, in a Docker container (`image:`) and on the host; each trial records `isolation: docker` or `none` | free; needs Docker |
 | [`compare-models`](tasks/compare-models/spec.yaml) | two OpenRouter models, a deterministic gate plus a pairwise judge | billed, capped at $0.50 |
 | [`compare-prompts`](tasks/compare-prompts/spec.yaml) | one model with three prompts on eight changelogs, picked by judge preference | billed, capped at $3 |
@@ -20,7 +20,7 @@ to it, under `examples/tasks/<name>/runs/`.
 agenteval run examples/tasks/custom-check --yes --html
 agenteval run examples/tasks/chain-offline --yes --html
 agenteval run examples/tasks/docker-sandbox --yes --html   # needs Docker
-agenteval run examples/tasks/agent-pipeline --yes --html   # needs python3
+agenteval run examples/tasks/pipeline --yes --html         # needs python3
 agenteval plan examples/tasks/compare-models        # free; then run it with --yes
 agenteval plan examples/tasks/compare-prompts       # free; then run it with --yes
 agenteval plan examples/tasks/compare-agents        # free; read the spec's warnings first
@@ -38,5 +38,5 @@ For evaluation datasets with answer keys and a finished run each
 
 To make your own, copy the closest task into your workspace's `tasks/` and
 edit it. The full walkthrough is the [README](../README.md); to evaluate an
-app you already have, start from `agent-pipeline` and
+app you already have, start from `pipeline` and
 [Evaluate your own pipeline](../docs/evaluate-your-pipeline.md).
