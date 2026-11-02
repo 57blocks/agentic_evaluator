@@ -244,6 +244,17 @@ export async function commandCheckVersion(
   return `cmd-${short(sha256(argv.join(" ")))}+files-${short(sha256(parts.join("\n")))}`;
 }
 
+/**
+ * The harness's own files go into a dir the candidate just wrote to. A
+ * symlink the candidate left under one of these names would send the write
+ * elsewhere on the host, so whatever is there is removed first (the link, not
+ * its target) and a fresh regular file written; the candidate has exited.
+ */
+async function writeFresh(file: string, content: string): Promise<void> {
+  await fs.rm(file, { force: true });
+  await fs.writeFile(file, content, { encoding: "utf-8", flag: "wx" });
+}
+
 /** Pull evidence out of the check's stdout, JSON or not. */
 function evidenceOf(stdout: string): { evidence: string; reason?: string } {
   const text = stdout.trim();
@@ -289,12 +300,12 @@ export async function runCommandCheck(params: {
         await fs.mkdir(path.dirname(dest), { recursive: true });
         await fs.writeFile(dest, f.content, "utf-8");
       }),
-      fs.writeFile(path.join(params.workDir, "output.txt"), params.output, "utf-8"),
-      fs.writeFile(path.join(params.workDir, "input.txt"), params.input, "utf-8"),
-      fs.writeFile(path.join(params.workDir, "meta.json"), JSON.stringify(params.meta, null, 2), "utf-8"),
+      writeFresh(path.join(params.workDir, "output.txt"), params.output),
+      writeFresh(path.join(params.workDir, "input.txt"), params.input),
+      writeFresh(path.join(params.workDir, "meta.json"), JSON.stringify(params.meta, null, 2)),
     ]);
     // After the files: a trace the run read wins over one a reference carried.
-    if (params.trace) await fs.writeFile(path.join(params.workDir, TRACE_FILE), JSON.stringify(params.trace, null, 2), "utf-8");
+    if (params.trace) await writeFresh(path.join(params.workDir, TRACE_FILE), JSON.stringify(params.trace, null, 2));
   } catch (err) {
     return {
       state: "evaluator_error",
