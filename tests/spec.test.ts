@@ -356,4 +356,10 @@ test("an empty trace block, an unknown rule, and min above max are rejected at l
 
   const inverted = await parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tool_used: [{ name: Bash, min: 3, max: 1 }]"]]);
   assert.throws(() => compileSpec(inverted.spec, "x.yaml", inverted.sha, TASK_ROOT), /min 3 above max 1/);
+
+  const unbounded = await parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tool_used: [{ name: Bash }]"]]);
+  assert.throws(() => compileSpec(unbounded.spec, "x.yaml", unbounded.sha, TASK_ROOT), /needs min, max or both/);
+
+  const self = await parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tool_order: [{ first: Bash, then: Bash }]"]]);
+  assert.throws(() => compileSpec(self.spec, "x.yaml", self.sha, TASK_ROOT), /orders Bash before itself/);
 });

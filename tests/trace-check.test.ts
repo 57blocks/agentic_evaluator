@@ -63,3 +63,11 @@ test("a rule the format cannot answer leaves a passing check undetermined", () =
   assert.equal(r.state, "not_evaluated");
   assert.match(r.reason ?? "", /not judgeable: atif trace records no verdict/);
 });
+
+test("the rules' version ignores how they were spelled: key order and undefined keys do not change it", () => {
+  const a = applyTraceRules(PASS, { tool_used: [{ name: "Bash", min: 1, max: undefined }], max_turns: 4 }, { declaredTrace: false });
+  const b = applyTraceRules(PASS, { max_turns: 4, tool_used: [{ name: "Bash", min: 1 }] }, { declaredTrace: false });
+  assert.equal(a.version, b.version);
+  const c = applyTraceRules(PASS, { max_turns: 5, tool_used: [{ name: "Bash", min: 1 }] }, { declaredTrace: false });
+  assert.notEqual(a.version, c.version);
+});

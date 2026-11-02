@@ -190,7 +190,9 @@ async function regradeIfChanged(
   try {
     await fs.cp(kept, scratch, { recursive: true });
     const fixture = fixturePath(suite, t.inputSlug);
-    const trace = await keptTrace(reused.dir, t);
+    const read = await keptTrace(reused.dir, t);
+    const trace = read && "trace" in read ? read.trace : undefined;
+    const traceError = read && "error" in read ? read.error : reused.record.traceError;
     const result = await runCommandCheck({
       argv: check.argv,
       versionFiles: check.versionFiles,
@@ -207,7 +209,7 @@ async function regradeIfChanged(
     const graded = applyTraceRules(result, check.trace, {
       declaredTrace: suite.candidateDefs?.[t.candidate]?.cli?.trace !== undefined,
       ...(trace ? { trace } : {}),
-      ...(reused.record.traceError !== undefined ? { traceError: reused.record.traceError } : {}),
+      ...(traceError !== undefined ? { traceError } : {}),
     });
     return {
       checkPassed: graded.passed,
@@ -489,15 +491,18 @@ async function keepTrace(outDir: string, t: { candidate: string; inputSlug: stri
 
 /**
  * A reused trial's trace, read back for a regrade so the check sees the same
- * trace.json it would have on the first run. Undefined when the run kept
- * none, or kept one that no longer parses: the regrade still happens, on the
- * files alone.
+ * trace.json it would have on the first run. Null when the run kept none;
+ * an error when it kept one that no longer parses, so the regrade says
+ * which it was. Either way the regrade happens, on the files alone.
  */
-async function keptTrace(runDir: string, t: { candidate: string; inputSlug: string; trial: number }): Promise<AgentTrace | undefined> {
+async function keptTrace(runDir: string, t: { candidate: string; inputSlug: string; trial: number }): Promise<{ trace: AgentTrace } | { error: string } | null> {
+  const file = tracePath(runDir, t);
+  const raw = await fs.readFile(file, "utf-8").catch(() => null);
+  if (raw === null) return null;
   try {
-    return JSON.parse(await fs.readFile(tracePath(runDir, t), "utf-8")) as AgentTrace;
-  } catch {
-    return undefined;
+    return { trace: JSON.parse(raw) as AgentTrace };
+  } catch (err) {
+    return { error: `the kept trace ${path.relative(runDir, file)} could not be read: ${err instanceof Error ? err.message : String(err)}` };
   }
 }
 
