@@ -280,3 +280,21 @@ test("a declared script that does not exist is an evaluator error, not a failed 
   assert.match(result.output, /not found under the repo/);
   await fs.rm(dir, { recursive: true, force: true });
 });
+
+test("a symlink the candidate left under a harness file name is replaced, never written through", async () => {
+  const dir = await workDir();
+  const elsewhere = path.join(dir, "..", `eval-cmd-check-target-${process.pid}`);
+  await fs.writeFile(elsewhere, "untouched");
+  await fs.mkdir(dir, { recursive: true });
+  for (const name of ["output.txt", "input.txt", "meta.json", "trace.json"]) await fs.symlink(elsewhere, path.join(dir, name));
+
+  const result = await run([NODE, "-e", "process.exit(0)"], dir, { trace: TRACE });
+
+  assert.equal(result.state, "pass");
+  assert.equal(await fs.readFile(elsewhere, "utf-8"), "untouched", "nothing was written through the link");
+  for (const name of ["output.txt", "input.txt", "meta.json", "trace.json"]) {
+    assert.ok(!(await fs.lstat(path.join(dir, name))).isSymbolicLink(), `${name} is a regular file now`);
+  }
+  await fs.rm(elsewhere, { force: true });
+  await fs.rm(dir, { recursive: true, force: true });
+});
