@@ -27,6 +27,7 @@ import { resolveTaskAssetSync } from "./paths.js";
 import { looksLikePath } from "./script-path.js";
 import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
+import type { AgentTrace } from "./canon/agent-trace.js";
 
 /** Truncate captured compiler output so records / reports stay small. */
 const MAX_OUTPUT_CHARS = 8_000;
@@ -182,6 +183,10 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
  *                  output.txt  the deliverable text
  *                  input.txt   this test case's input
  *                  meta.json   { step, candidate, input, trial }
+ *                  trace.json  how the agent worked (src/canon/agent-trace.ts),
+ *                              only when the candidate declared `cli.trace`
+ *                              and its trace was read; never written otherwise,
+ *                              so a reference dir may supply its own
  *   cwd          the work dir
  *   exit 0       pass
  *   exit 1       fail — the candidate did not satisfy the check
@@ -196,6 +201,8 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
 
 const COMMAND_EXIT_PASS = 0;
 const COMMAND_EXIT_FAIL = 1;
+/** The agent's trace in the check's work dir, as the canonical model. */
+export const TRACE_FILE = "trace.json";
 
 /**
  * argv is written relative to the repo (`["node", "checks/x.mjs"]`) but the
@@ -261,6 +268,13 @@ export async function runCommandCheck(params: {
   output: string;
   input: string;
   meta: { step: string; candidate: string; input: string; trial: number; fixture?: string; chained?: boolean };
+  /**
+   * The agent's trace, already read into the canonical model; written as
+   * `trace.json` so a check can grade the path taken (tests actually run, no
+   * tool off limits), not only the deliverable. Absent for model candidates
+   * and for a command that declared no trace.
+   */
+  trace?: AgentTrace;
   workDir: string;
   /** Task dir the check's argv and version files resolve against. */
   taskRoot: string;
@@ -279,6 +293,8 @@ export async function runCommandCheck(params: {
       fs.writeFile(path.join(params.workDir, "input.txt"), params.input, "utf-8"),
       fs.writeFile(path.join(params.workDir, "meta.json"), JSON.stringify(params.meta, null, 2), "utf-8"),
     ]);
+    // After the files: a trace the run read wins over one a reference carried.
+    if (params.trace) await fs.writeFile(path.join(params.workDir, TRACE_FILE), JSON.stringify(params.trace, null, 2), "utf-8");
   } catch (err) {
     return {
       state: "evaluator_error",
