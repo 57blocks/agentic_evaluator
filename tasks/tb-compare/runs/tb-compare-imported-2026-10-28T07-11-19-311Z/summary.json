@@ -1,0 +1,207 @@
+{
+  "run": "tb-compare-imported-2026-10-28T07-11-19-311Z",
+  "step": "harbor",
+  "inputs": [
+    "fix-git",
+    "git-multibranch",
+    "log-summary-date-ranges",
+    "openssl-selfsigned-cert",
+    "regex-log",
+    "sanitize-git-repo"
+  ],
+  "candidates": [
+    {
+      "candidate": "terminus-2--anthropic-claude-sonnet-5",
+      "valid_attempts": 10,
+      "classified": 6,
+      "task_success_rate": {
+        "value": 0.8333333333333334,
+        "numerator": 5,
+        "denominator": 6
+      },
+      "reliability": {
+        "value": 0.8333333333333334,
+        "numerator": 5,
+        "denominator": 6
+      },
+      "evaluation_coverage": {
+        "value": 0.6,
+        "numerator": 6,
+        "denominator": 10
+      },
+      "required_check_pass_rate": {
+        "value": 0.8333333333333334,
+        "numerator": 5,
+        "denominator": 6
+      },
+      "all_trials_pass_rate": {
+        "value": 0.5,
+        "numerator": 1,
+        "denominator": 2
+      },
+      "completion_states": {
+        "success": 6,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 4
+      },
+      "outcomes": {
+        "success": 5,
+        "failure": 1,
+        "undetermined": 4
+      },
+      "check_states": {
+        "pass": 5,
+        "fail": 1,
+        "not_evaluated": 0,
+        "evaluator_error": 4
+      },
+      "generation_cost_per_success": null,
+      "p50_ms": 53856,
+      "p95_ms": 165110
+    },
+    {
+      "candidate": "terminus-2--deepseek-deepseek-v4-flash",
+      "valid_attempts": 6,
+      "classified": 6,
+      "task_success_rate": {
+        "value": 0.6666666666666666,
+        "numerator": 4,
+        "denominator": 6
+      },
+      "reliability": {
+        "value": 0.6666666666666666,
+        "numerator": 4,
+        "denominator": 6
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 0.6666666666666666,
+        "numerator": 4,
+        "denominator": 6
+      },
+      "all_trials_pass_rate": {
+        "value": 0.6666666666666666,
+        "numerator": 4,
+        "denominator": 6
+      },
+      "completion_states": {
+        "success": 6,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 4,
+        "failure": 2,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 4,
+        "fail": 2,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.029533,
+      "p50_ms": 99926,
+      "p95_ms": 489434
+    },
+    {
+      "candidate": "claude-code--anthropic-claude-sonnet-5",
+      "valid_attempts": 6,
+      "classified": 6,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "completion_states": {
+        "success": 6,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 6,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 6,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.230682,
+      "p50_ms": 41945,
+      "p95_ms": 233153
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "no minimum meaningful difference declared"
+    ]
+  },
+  "integrity": {
+    "events": 0,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 0,
+    "threshold_ms": 0,
+    "wall_ms": 0,
+    "in_flight_gaps": 0
+  },
+  "judge_discrimination": {
+    "overall": {
+      "dimension": "overall",
+      "scored": 0,
+      "distinct": 0,
+      "min": null,
+      "max": null,
+      "saturated": false
+    },
+    "dimensions": [],
+    "saturated": [],
+    "discriminates": false
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "harbor-reward",
+      "version": "cmd-5367303d+files-d9f0757e",
+      "pass": 15,
+      "fail": 3,
+      "not_evaluated": 0,
+      "evaluator_error": 4
+    }
+  ]
+}

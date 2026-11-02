@@ -1,0 +1,99 @@
+{
+  "run": "tb-oracle-imported-2026-10-27T06-50-26-614Z",
+  "step": "harbor",
+  "inputs": [
+    "fix-git"
+  ],
+  "candidates": [
+    {
+      "candidate": "oracle",
+      "valid_attempts": 1,
+      "classified": 1,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "completion_states": {
+        "success": 1,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 1,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 1,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": null,
+      "p50_ms": 775,
+      "p95_ms": 775
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "1 input; no comparison can be significant with fewer than 6",
+      "no minimum meaningful difference declared"
+    ]
+  },
+  "integrity": {
+    "events": 0,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 0,
+    "threshold_ms": 0,
+    "wall_ms": 0,
+    "in_flight_gaps": 0
+  },
+  "judge_discrimination": {
+    "overall": {
+      "dimension": "overall",
+      "scored": 0,
+      "distinct": 0,
+      "min": null,
+      "max": null,
+      "saturated": false
+    },
+    "dimensions": [],
+    "saturated": [],
+    "discriminates": false
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "harbor-reward",
+      "version": "cmd-5367303d+files-23fd85d6",
+      "pass": 1,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}

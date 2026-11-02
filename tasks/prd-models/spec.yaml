@@ -1,0 +1,101 @@
+# prd-models — can a cheaper model draft our PRDs instead of sonnet-5?
+#
+# Ten synthetic feature briefs (inputs/), each built to probe one way PRDs go
+# wrong: vagueness, tiny scope, explicit exclusions, a contradiction,
+# non-functional constraints, an API-only brief. Synthetic, so the verdict is
+# about these shapes of brief, not our real traffic.
+#
+# The judge (a third vendor, pairwise) picks. checks/prd-check.mjs is
+# reported beside it: structure (PRD-n ids, acceptance criteria per
+# requirement, user story, out-of-scope, open questions) plus the per-brief
+# expectations in checks/expectations.json.
+#
+# opus-5.5 is a quality ceiling, not a contender for replacing sonnet.
+#
+#   agenteval check-task prd-models              # free
+#   agenteval plan prd-models                    # free
+#   agenteval run prd-models --yes --html        # billed
+
+protocol_version: "0.3"
+run_name: prd-models
+budget_usd: 8
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: prd
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/prd.md
+      rubric_file: rubrics/prd.md
+      test_set:
+        id: briefs-v2
+        inputs:
+          - todo-app
+          - chat-app
+          - habit-tracker-vague
+          - todo-csv-export
+          - chat-edit-delete
+          - recipe-site-non-goals
+          - clinic-booking-conflict
+          - expense-tool-nfr
+          - chat-notify-ambiguous
+          - url-shortener-api
+      candidate_ids: [sonnet-5, deepseek-v4-pro, kimi-k3, opus-5.5]
+      required_checks: [prd-check]
+      judged_dimensions: [completeness, testability, no-hallucination, structure, flags-ambiguity]
+      # The pick is the judge's: prd-check passes nearly every PRD (19-20/20 in
+      # the first run), so lowest-cost would pick the cheapest model the judge
+      # ranked last. The check stays as reported evidence of missed constraints;
+      # its gates are set to 0 explicitly, because with a required check they
+      # default to 1.0 even under judge-preference.
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: judge-preference
+      eligibility:
+        minimum_reliability: 0
+        minimum_required_check_pass_rate: 0
+      maximum_completion_time_seconds: 360
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+  - id: opus-5.5
+    model: anthropic/claude-opus-5.5
+    provider_route: openrouter
+    generation_settings: { temperature: 0.3 }
+
+evaluators:
+  required_checks:
+    prd-check:
+      kind: command
+      argv: ["node", "checks/prd-check.mjs"]
+      version_files: [checks/prd-check.mjs, checks/expectations.json]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/prd.md
+    methods: [pairwise-swap]
+
+execution:
+  trials_per_case: 2
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/prd.md
+  default_temperature: 0.3

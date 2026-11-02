@@ -1,0 +1,22 @@
+# PRD: Recipe sharing site (v1)
+
+## Problem and goal
+Let people publish recipes and let anyone find them.
+
+## User stories
+- As a signed-in user, I want to publish a recipe, so that others can cook it.
+- As a visitor, I want to search recipes by ingredient, so that I can cook with what I have.
+
+## Requirements
+- PRD-1: A signed-in user can publish a recipe with title, ingredient list, step-by-step instructions and one photo.
+  - Acceptance: publishing without a title or ingredients is rejected; a second photo cannot be attached.
+- PRD-2: Anyone, signed in or not, can browse recipes.
+  - Acceptance: a signed-out visitor can open the recipe list and any recipe.
+- PRD-3: Anyone can search recipes by title or ingredient.
+  - Acceptance: searching an ingredient returns every recipe listing it.
+
+## Out of scope
+- Comments, ratings, following other users, and any other social feature.
+
+## Open questions / assumptions
+- Whether authors can edit or delete recipes is not stated; assumed out of v1.

@@ -1,0 +1,232 @@
+{
+  "todo-app": {
+    "mentions": [
+      [
+        "optional due date",
+        "due date"
+      ],
+      [
+        "mark complete",
+        "complet"
+      ],
+      [
+        "edit",
+        "\\bedit"
+      ],
+      [
+        "delete",
+        "delet"
+      ],
+      [
+        "filter all/active/completed",
+        "filter"
+      ],
+      [
+        "persists across sessions",
+        "persist"
+      ]
+    ],
+    "outOfScope": [
+      [
+        "accounts / multi-user",
+        "account|multi-?user|login|auth"
+      ]
+    ]
+  },
+  "chat-app": {
+    "mentions": [
+      [
+        "create public channels",
+        "creat\\w*[^\\n]{0,40}channel|channel[^\\n]{0,40}creat"
+      ],
+      [
+        "join channels",
+        "\\bjoin"
+      ],
+      [
+        "messages appear instantly",
+        "real-?time|instant|immediate|live"
+      ],
+      [
+        "online presence per channel",
+        "online|presence"
+      ],
+      [
+        "message timestamps",
+        "timestamp"
+      ],
+      [
+        "history loads on open",
+        "history"
+      ]
+    ]
+  },
+  "habit-tracker-vague": {
+    "mentions": [
+      [
+        "streaks",
+        "streak"
+      ]
+    ],
+    "openQuestions": [
+      [
+        "the brief's vagueness is acknowledged",
+        "assum|unclear|ambigu|not specified|unspecified|\\?"
+      ]
+    ]
+  },
+  "todo-csv-export": {
+    "mentions": [
+      [
+        "CSV",
+        "\\bcsv\\b"
+      ],
+      [
+        "title column",
+        "title"
+      ],
+      [
+        "due date column",
+        "due date"
+      ],
+      [
+        "status column",
+        "status"
+      ]
+    ]
+  },
+  "chat-edit-delete": {
+    "mentions": [
+      [
+        "15-minute window",
+        "15[- ]?min|fifteen[- ]minute"
+      ],
+      [
+        "\"(edited)\" marker",
+        "\\(edited\\)"
+      ],
+      [
+        "\"message deleted\" placeholder",
+        "message deleted"
+      ],
+      [
+        "only own messages",
+        "own message|their own|other (people|users)|another user|someone else"
+      ]
+    ]
+  },
+  "recipe-site-non-goals": {
+    "mentions": [
+      [
+        "one photo",
+        "photo|image"
+      ],
+      [
+        "search by ingredient",
+        "ingredient"
+      ],
+      [
+        "browse without signing in",
+        "anonymous|unauthenticated|signed[- ]out|not signed in|without (signing|logging|an account)|guest|visitor|anyone"
+      ]
+    ],
+    "outOfScope": [
+      [
+        "comments",
+        "comment"
+      ],
+      [
+        "ratings",
+        "rating"
+      ],
+      [
+        "following users",
+        "follow"
+      ]
+    ]
+  },
+  "clinic-booking-conflict": {
+    "mentions": [
+      [
+        "30-minute slots",
+        "30[- ]?min|thirty[- ]minute"
+      ],
+      [
+        "receptionist approval",
+        "receptionist"
+      ]
+    ],
+    "openQuestions": [
+      [
+        "approval vs instant confirmation conflict",
+        "instant|immediate"
+      ]
+    ]
+  },
+  "expense-tool-nfr": {
+    "mentions": [
+      [
+        "receipt photo",
+        "receipt"
+      ],
+      [
+        "manager sees only direct reports",
+        "direct report"
+      ],
+      [
+        "monthly export for finance",
+        "export"
+      ],
+      [
+        "7-year receipt retention",
+        "7[- ]?years?|seven[- ]years?"
+      ],
+      [
+        "about 500 employees",
+        "500"
+      ]
+    ]
+  },
+  "chat-notify-ambiguous": {
+    "openQuestions": [
+      [
+        "what \"care about\" means",
+        "care|which messages|mention|assum|ambigu|\\?"
+      ]
+    ]
+  },
+  "url-shortener-api": {
+    "mentions": [
+      [
+        "POST returns a short code",
+        "\\bPOST\\b"
+      ],
+      [
+        "GET redirects",
+        "redirect"
+      ],
+      [
+        "same URL returns same code",
+        "same (short )?code|idempoten|existing code|already"
+      ],
+      [
+        "codes never expire",
+        "never expire|no expir|do not expire|don't expire|not expire|permanent"
+      ]
+    ],
+    "outOfScope": [
+      [
+        "user interface",
+        "\\bUI\\b|interface|front-?end|web page"
+      ],
+      [
+        "analytics",
+        "analytic"
+      ],
+      [
+        "accounts",
+        "account"
+      ]
+    ]
+  }
+}

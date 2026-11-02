@@ -1,0 +1,21 @@
+# PRD: Habit tracker (MVP)
+
+## Problem and goal
+People struggle to keep habits; a simple tracker with streaks should help.
+
+## User stories
+- As a user, I want to check off a habit each day, so that I see my streak grow.
+
+## Requirements
+- PRD-1: Create, rename and delete a habit.
+  - Acceptance: a created habit appears in the list; a deleted one does not.
+- PRD-2: Mark a habit done for today.
+  - Acceptance: marking it done once per day is recorded; a second mark that day has no effect.
+- PRD-3: Show the current streak per habit.
+  - Acceptance: the streak counts consecutive days done and resets to 0 after a missed day.
+
+## Out of scope
+- Reminders, social features, analytics, non-daily schedules.
+
+## Open questions / assumptions
+- The brief is vague: platform, accounts and habit frequency are unspecified. Assumed a single-user web app with daily habits.

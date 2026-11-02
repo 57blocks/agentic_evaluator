@@ -1,0 +1,230 @@
+{
+  "format": "atif",
+  "turns": 14,
+  "tool_calls": [
+    {
+      "name": "bash_command",
+      "ms": 4786,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": 10194,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": 4417,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": 6255,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": 6147,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": null,
+      "failed": null
+    }
+  ],
+  "retries": null,
+  "denials": null,
+  "compactions": null,
+  "turn_tokens": [
+    {
+      "prompt": 963,
+      "cached": 0,
+      "output": 557,
+      "costUsd": 0.0002988
+    },
+    {
+      "prompt": 1559,
+      "cached": 768,
+      "output": 300,
+      "costUsd": 0.00021295000000000005
+    },
+    {
+      "prompt": 5088,
+      "cached": 1536,
+      "output": 871,
+      "costUsd": 0.00064635
+    },
+    {
+      "prompt": 6210,
+      "cached": 4864,
+      "output": 1869,
+      "costUsd": 0.0011515499999999999
+    },
+    {
+      "prompt": 7870,
+      "cached": 6144,
+      "output": 382,
+      "costUsd": 0.0005653999999999998
+    },
+    {
+      "prompt": 8486,
+      "cached": 7680,
+      "output": 667,
+      "costUsd": 0.0007244499999999997
+    },
+    {
+      "prompt": 9810,
+      "cached": 8448,
+      "output": 334,
+      "costUsd": 0.0006407999999999995
+    },
+    {
+      "prompt": 10477,
+      "cached": 9728,
+      "output": 494,
+      "costUsd": 0.0007461500000000001
+    },
+    {
+      "prompt": 10715,
+      "cached": 10240,
+      "output": 345,
+      "costUsd": 0.0006909999999999998
+    },
+    {
+      "prompt": 11516,
+      "cached": 10496,
+      "output": 360,
+      "costUsd": 0.0007378000000000003
+    },
+    {
+      "prompt": 11940,
+      "cached": 11264,
+      "output": 325,
+      "costUsd": 0.00074325
+    },
+    {
+      "prompt": 12541,
+      "cached": 11776,
+      "output": 439,
+      "costUsd": 0.0008246000000000009
+    },
+    {
+      "prompt": 13473,
+      "cached": 12288,
+      "output": 464,
+      "costUsd": 0.0008824499999999999
+    },
+    {
+      "prompt": 13708,
+      "cached": 13312,
+      "output": 539,
+      "costUsd": 0.0009279500000000003
+    }
+  ],
+  "models": [
+    "deepseek/deepseek-v4-flash"
+  ],
+  "cost_usd": 0.0097935,
+  "ended": null
+}

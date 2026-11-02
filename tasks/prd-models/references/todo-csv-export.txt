@@ -1,0 +1,17 @@
+# PRD: Export tasks to CSV
+
+## Problem and goal
+Users want their tasks outside the to-do app.
+
+## User stories
+- As a user, I want to export my tasks to CSV, so that I can open them in a spreadsheet.
+
+## Requirements
+- PRD-1: An export button downloads all tasks as a CSV file with columns title, due date, status (active / completed).
+  - Acceptance: the file has a header row and one row per task; an empty due date is an empty cell; status is "active" or "completed".
+
+## Out of scope
+- Any other change to the app; other formats; import.
+
+## Open questions / assumptions
+- None.
