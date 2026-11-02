@@ -1,0 +1,28 @@
+# PRD: Internal expense tool
+
+## Problem and goal
+About 500 employees need to claim expenses, managers approve them, finance exports them.
+
+## User stories
+- As an employee, I want to submit an expense with a receipt photo, so that I get reimbursed.
+- As a manager, I want to approve my direct reports' expenses, so that spending is controlled.
+
+## Requirements
+- PRD-1: Employees submit an expense with amount, category, date and a receipt photo.
+  - Acceptance: submission without any of the four is rejected.
+- PRD-2: The direct manager approves or rejects it.
+  - Acceptance: the expense shows the decision to the employee.
+- PRD-3: A manager sees only expenses from their own direct reports.
+  - Acceptance: a manager requesting another team's expense is denied.
+- PRD-4: Finance exports all approved expenses for a month as a spreadsheet.
+  - Acceptance: the export contains every approved expense dated in that month and nothing else.
+- PRD-5: Receipts are kept for 7 years.
+  - Acceptance: a receipt cannot be deleted before 7 years from submission.
+- PRD-6: Supports about 500 employees.
+  - Acceptance: works with 500 users and their monthly volume without degradation.
+
+## Out of scope
+- Reimbursement payment, multi-level approval, currency conversion.
+
+## Open questions / assumptions
+- Where the org chart (who reports to whom) comes from is not stated.

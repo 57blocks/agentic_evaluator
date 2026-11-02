@@ -1,0 +1,21 @@
+# PRD: Edit and delete own chat messages
+
+## Problem and goal
+Users need to fix or retract their own messages shortly after posting.
+
+## User stories
+- As a member, I want to edit or delete my own message, so that I can correct mistakes.
+
+## Requirements
+- PRD-1: A user can edit their own message within 15 minutes of posting.
+  - Acceptance: edit is offered for 15 minutes after posting and not after; the edited message shows "(edited)" next to the timestamp for everyone.
+- PRD-2: A user can delete their own message within 15 minutes of posting.
+  - Acceptance: the message is replaced by "message deleted" for everyone in the channel.
+- PRD-3: Users can never edit or delete other people's messages.
+  - Acceptance: an edit or delete request for another user's message is rejected by the server.
+
+## Out of scope
+- Moderator or admin deletion; edit history.
+
+## Open questions / assumptions
+- None.

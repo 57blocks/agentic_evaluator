@@ -1,0 +1,79 @@
+{
+  "inputs": 6,
+  "effective_n": 2,
+  "counts": {
+    "splits": 2,
+    "all-pass": 4,
+    "all-fail": 0,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "fix-git",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "claude-code--anthropic-claude-sonnet-5": 1,
+        "terminus-2--anthropic-claude-sonnet-5": 1,
+        "terminus-2--deepseek-deepseek-v4-flash": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "git-multibranch",
+      "class": "splits",
+      "pass_rate": 0.6666666666666666,
+      "by_candidate": {
+        "claude-code--anthropic-claude-sonnet-5": 1,
+        "terminus-2--anthropic-claude-sonnet-5": 1,
+        "terminus-2--deepseek-deepseek-v4-flash": 0
+      },
+      "discrimination": 0.8660254037844387
+    },
+    {
+      "input": "log-summary-date-ranges",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "claude-code--anthropic-claude-sonnet-5": 1,
+        "terminus-2--anthropic-claude-sonnet-5": 1,
+        "terminus-2--deepseek-deepseek-v4-flash": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "openssl-selfsigned-cert",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "claude-code--anthropic-claude-sonnet-5": 1,
+        "terminus-2--anthropic-claude-sonnet-5": 1,
+        "terminus-2--deepseek-deepseek-v4-flash": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "regex-log",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "claude-code--anthropic-claude-sonnet-5": 1,
+        "terminus-2--anthropic-claude-sonnet-5": 1,
+        "terminus-2--deepseek-deepseek-v4-flash": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "sanitize-git-repo",
+      "class": "splits",
+      "pass_rate": 0.3333333333333333,
+      "by_candidate": {
+        "claude-code--anthropic-claude-sonnet-5": 1,
+        "terminus-2--anthropic-claude-sonnet-5": 0,
+        "terminus-2--deepseek-deepseek-v4-flash": 0
+      },
+      "discrimination": 0.8660254037844386
+    }
+  ]
+}
