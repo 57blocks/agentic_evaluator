@@ -11,6 +11,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { commandCheckVersion, runCommandCheck } from "../src/check.js";
+import type { AgentTrace } from "../src/canon/agent-trace.js";
 
 const NODE = process.execPath;
 
@@ -108,6 +109,63 @@ test("produced artifacts are materialized next to them", async () => {
 
   assert.equal(result.state, "pass");
   assert.match(result.output, /export const x = 1;/);
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+/* A command candidate's trace reaches the check as trace.json: a check can grade the path, not only the deliverable. */
+
+const TRACE: AgentTrace = {
+  format: "claude-code",
+  turns: 3,
+  tool_calls: [
+    { name: "Bash", ms: 120, failed: false },
+    { name: "Edit", ms: 8, failed: false },
+    { name: "Bash", ms: 2400, failed: true },
+  ],
+  retries: 1,
+  denials: 0,
+  compactions: null,
+  turn_tokens: null,
+  models: ["claude-sonnet-5"],
+  cost_usd: 0.04,
+  ended: "finished",
+};
+
+test("a trace is written as trace.json, and the check script can grade the path taken", async () => {
+  const dir = await workDir();
+  // Fail unless the agent actually ran a command (a Bash call) before finishing.
+  const script = `
+    const t = JSON.parse(require("node:fs").readFileSync("trace.json", "utf-8"));
+    const ran = t.tool_calls.filter((c) => c.name === "Bash").length;
+    console.log(JSON.stringify({ evidence: t.format + ": " + ran + " Bash calls in " + t.turns + " turns" }));
+    process.exit(ran > 0 ? 0 : 1);
+  `;
+  const result = await run([NODE, "-e", script], dir, { trace: TRACE });
+
+  assert.equal(result.state, "pass");
+  assert.equal(result.output, "claude-code: 2 Bash calls in 3 turns");
+  const written = JSON.parse(await fs.readFile(path.join(dir, "trace.json"), "utf-8")) as AgentTrace;
+  assert.deepEqual(written, TRACE);
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test("without a trace, nothing is written and a trace.json among the files is left alone", async () => {
+  // check-task's oracle probe copies references/<input>/ into the work dir:
+  // a reference may carry its own trace.json for a check that needs one.
+  const dir = await workDir();
+  const script = `console.log(require("node:fs").readFileSync("trace.json", "utf-8"))`;
+  const result = await run([NODE, "-e", script], dir, { files: [{ path: "trace.json", content: `{"from":"references"}` }] });
+
+  assert.equal(result.state, "pass");
+  assert.equal(result.output, `{"from":"references"}`);
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+test("without a trace, the work dir has no trace.json at all", async () => {
+  const dir = await workDir();
+  const result = await run([NODE, "-e", `process.exit(require("node:fs").existsSync("trace.json") ? 1 : 0)`], dir);
+
+  assert.equal(result.state, "pass");
   await fs.rm(dir, { recursive: true, force: true });
 });
 
