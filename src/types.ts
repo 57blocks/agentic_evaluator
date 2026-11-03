@@ -7,6 +7,7 @@
  */
 
 import type { AgentActivity } from "./canon/agent-trace.js";
+import type { TraceRules } from "./canon/trace-rules.js";
 import type {
   CandidateDef,
   CompletionState,
@@ -52,6 +53,8 @@ export type CheckConfig =
       kind: "tsc";
       /** Task-relative dir holding a `tsconfig.json` copied into each work dir. */
       scaffoldDir: string;
+      /** Rules over the trace a command candidate leaves, judged after the compile (src/canon/trace-rules.ts). */
+      trace?: TraceRules;
     }
   | {
       id: string;
@@ -61,6 +64,7 @@ export type CheckConfig =
       /** Task-relative files hashed into the evaluator version. */
       versionFiles: string[];
       timeoutMs: number;
+      trace?: TraceRules;
     };
 
 /** One eval suite = one pipeline step, several candidates, a few fixed inputs. */

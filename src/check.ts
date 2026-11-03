@@ -23,11 +23,13 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { resolveTaskAssetSync } from "./paths.js";
+import { resolveTaskAsset, resolveTaskAssetSync } from "./paths.js";
 import { looksLikePath } from "./script-path.js";
 import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
 import type { AgentTrace } from "./canon/agent-trace.js";
+import { hasTraceRules, type TraceRules } from "./canon/trace-rules.js";
+import type { CheckConfig } from "./types.js";
 
 /** Truncate captured compiler output so records / reports stay small. */
 const MAX_OUTPUT_CHARS = 8_000;
@@ -83,6 +85,37 @@ async function scaffoldSha(scaffoldDir: string): Promise<string> {
 export async function checkVersion(scaffoldDir: string): Promise<string> {
   const [ts, sc] = await Promise.all([tscVersion(), scaffoldSha(scaffoldDir)]);
   return `tsc-${ts}+scaffold-${short(sc)}`;
+}
+
+/**
+ * A check's version as the manifest and `--reuse` see it: the kind's own
+ * version, plus the trace rules when it has any, so editing a rule is a
+ * changed check (regraded on reuse, visible in the evidence) exactly like
+ * editing the script is.
+ */
+export async function requiredCheckVersion(check: CheckConfig, taskRoot: string): Promise<string> {
+  const base =
+    check.kind === "tsc"
+      ? await checkVersion(await resolveTaskAsset(taskRoot, check.scaffoldDir))
+      : await commandCheckVersion(check.argv, check.versionFiles, taskRoot);
+  return withTraceRules(base, check.trace);
+}
+
+/** `<version>+trace-<sha8 of the rules>`; unchanged when there are none. */
+export function withTraceRules(version: string, rules: TraceRules | undefined): string {
+  return hasTraceRules(rules) ? `${version}+trace-${short(sha256(canonicalJson(rules)))}` : version;
+}
+
+/** Keys sorted at every level, so the same rules written in another order hash alike. */
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    const o = value as Record<string, unknown>;
+    // An absent key and an undefined one are the same rule, as JSON.stringify would have it.
+    const keys = Object.keys(o).filter((k) => o[k] !== undefined).sort();
+    return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalJson(o[k])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
 }
 
 /** Run `tsc --noEmit` on `files`, using the scaffold's tsconfig. Never throws. */

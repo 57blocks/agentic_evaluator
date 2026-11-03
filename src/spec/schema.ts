@@ -225,6 +225,40 @@ export const SPEC_SCHEMA = {
               timeout_seconds: { type: "number", exclusiveMinimum: 0 },
               /** What a pass means, in one sentence; the report shows it beside the pass rate. */
               description: { type: "string", minLength: 1 },
+              /** Rules over the trace a command candidate leaves (`cli.trace`), judged after the check itself. */
+              trace: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  tool_used: {
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["name"],
+                      properties: {
+                        name: { type: "string", minLength: 1 },
+                        min: { type: "integer", minimum: 0 },
+                        max: { type: "integer", minimum: 0 },
+                      },
+                    },
+                  },
+                  tool_order: {
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["first", "then"],
+                      properties: { first: { type: "string", minLength: 1 }, then: { type: "string", minLength: 1 } },
+                    },
+                  },
+                  max_tool_calls: { type: "integer", minimum: 0 },
+                  max_turns: { type: "integer", minimum: 0 },
+                  max_repeated_failures: { type: "integer", minimum: 0 },
+                },
+              },
             },
           },
         },
