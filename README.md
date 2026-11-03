@@ -391,6 +391,7 @@ Every command takes `--help`.
 | `agenteval run <task> --yes` | execute (without `--yes` it only prints the plan) | if the task calls models |
 | `agenteval review <run>` | review a run blind in the dashboard; verdicts go to `runs/<run>/reviews/` | no |
 | `agenteval report <run>` | re-render a run's `report.html` (run id or path) | no |
+| `agenteval replay <run>...` | decide finished runs again under baseline rules (leaderboard, weighted cost, within q of best) and with grader errors blamed on the model; names the gate each pick fails | no |
 | `agenteval install-skill` | add the `/agenteval-new-task` skill for Claude Code to this workspace | no |
 | `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
 
