@@ -189,6 +189,7 @@ async function regradeIfChanged(
   try {
     await fs.cp(kept, scratch, { recursive: true });
     const fixture = fixturePath(suite, t.inputSlug);
+    const trace = await keptTrace(reused.dir, t);
     const result = await runCommandCheck({
       argv: check.argv,
       versionFiles: check.versionFiles,
@@ -198,6 +199,7 @@ async function regradeIfChanged(
       output: reused.record.text,
       input: t.inputText,
       meta: { step: suite.step, candidate: t.candidate, input: t.inputSlug, trial: t.trial, ...(fixture ? { fixture } : {}), chained: false },
+      ...(trace ? { trace } : {}),
       workDir: scratch,
     });
     await keepEvidence(scratch, t.checkWorkDir);
@@ -284,6 +286,7 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
             ...(params.fixtureDir ? { fixture: params.fixtureDir } : {}),
             chained: params.seedFiles !== undefined,
           },
+          ...(result.trace ? { trace: result.trace } : {}),
           workDir,
         });
   return {
@@ -460,25 +463,44 @@ function recordFromRow(row: TrialRow, text: string): RunRecord {
   };
 }
 
-/** The turn list, beside the row's counts: traces/<candidate>__<input>__tN.json. */
+/** Where a run keeps a trial's turn list: traces/<candidate>__<input>__tN.json. */
+function tracePath(runDir: string, t: { candidate: string; inputSlug: string; trial: number }): string {
+  return path.join(runDir, "traces", `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}.json`);
+}
+
+/** The turn list, beside the row's counts. */
 async function keepTrace(outDir: string, t: { candidate: string; inputSlug: string; trial: number }, trace: AgentTrace | undefined): Promise<void> {
   if (!trace) return;
-  const dir = path.join(outDir, "traces");
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(dir, `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}.json`), JSON.stringify(trace, null, 2), "utf-8");
+  const file = tracePath(outDir, t);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, JSON.stringify(trace, null, 2), "utf-8");
+}
+
+/**
+ * A reused trial's trace, read back for a regrade so the check sees the same
+ * trace.json it would have on the first run. Undefined when the run kept
+ * none, or kept one that no longer parses: the regrade still happens, on the
+ * files alone.
+ */
+async function keptTrace(runDir: string, t: { candidate: string; inputSlug: string; trial: number }): Promise<AgentTrace | undefined> {
+  try {
+    return JSON.parse(await fs.readFile(tracePath(runDir, t), "utf-8")) as AgentTrace;
+  } catch {
+    return undefined;
+  }
 }
 
 /** A reused trial's turn list travels with it, like its check evidence does. */
 async function copyTrace(fromDir: string, outDir: string, t: { candidate: string; inputSlug: string; trial: number }): Promise<void> {
-  const name = `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}.json`;
-  const src = path.join(fromDir, "traces", name);
+  const src = tracePath(fromDir, t);
   try {
     await fs.access(src);
   } catch {
     return;
   }
-  await fs.mkdir(path.join(outDir, "traces"), { recursive: true });
-  await fs.copyFile(src, path.join(outDir, "traces", name));
+  const dest = tracePath(outDir, t);
+  await fs.mkdir(path.dirname(dest), { recursive: true });
+  await fs.copyFile(src, dest);
 }
 
 export function errorRecord(task: GenTask, err: unknown): RunRecord {
