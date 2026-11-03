@@ -1,0 +1,165 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "highest-assurance",
+  "control_candidate": null,
+  "eligibility": {
+    "minimum_reliability": 0,
+    "minimum_required_check_pass_rate": 0,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 0",
+      "removed": [],
+      "remaining": [
+        "terminus-2--anthropic-claude-sonnet-5",
+        "terminus-2--deepseek-deepseek-v4-flash",
+        "claude-code--anthropic-claude-sonnet-5"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 0",
+      "removed": [],
+      "remaining": [
+        "terminus-2--anthropic-claude-sonnet-5",
+        "terminus-2--deepseek-deepseek-v4-flash",
+        "claude-code--anthropic-claude-sonnet-5"
+      ]
+    }
+  ],
+  "eligible": [
+    "terminus-2--anthropic-claude-sonnet-5",
+    "terminus-2--deepseek-deepseek-v4-flash",
+    "claude-code--anthropic-claude-sonnet-5"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "terminus-2--anthropic-claude-sonnet-5",
+      "eligible": true,
+      "generation_cost_per_success": null,
+      "p50_ms": 53856,
+      "p95_ms": 165110,
+      "reliability": {
+        "value": 0.8333333333333334,
+        "numerator": 5,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 0.8333333333333334,
+        "numerator": 5,
+        "denominator": 6
+      },
+      "task_success_rate": {
+        "value": 0.8333333333333334,
+        "numerator": 5,
+        "denominator": 6
+      },
+      "all_trials_pass_rate": {
+        "value": 0.5,
+        "numerator": 1,
+        "denominator": 2
+      }
+    },
+    {
+      "candidate": "terminus-2--deepseek-deepseek-v4-flash",
+      "eligible": true,
+      "generation_cost_per_success": 0.029533,
+      "p50_ms": 99926,
+      "p95_ms": 489434,
+      "reliability": {
+        "value": 0.6666666666666666,
+        "numerator": 4,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 0.6666666666666666,
+        "numerator": 4,
+        "denominator": 6
+      },
+      "task_success_rate": {
+        "value": 0.6666666666666666,
+        "numerator": 4,
+        "denominator": 6
+      },
+      "all_trials_pass_rate": {
+        "value": 0.6666666666666666,
+        "numerator": 4,
+        "denominator": 6
+      }
+    },
+    {
+      "candidate": "claude-code--anthropic-claude-sonnet-5",
+      "eligible": true,
+      "generation_cost_per_success": 0.230682,
+      "p50_ms": 41945,
+      "p95_ms": 233153,
+      "reliability": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 6,
+        "denominator": 6
+      }
+    }
+  ],
+  "chosen": "claude-code--anthropic-claude-sonnet-5",
+  "compared_to_control": null,
+  "firmness": "directional",
+  "firmness_reasons": [
+    "no minimum meaningful difference declared",
+    "claude-code--anthropic-claude-sonnet-5 and terminus-2--anthropic-claude-sonnet-5 cannot be told apart on task success: claude-code--anthropic-claude-sonnet-5 did better on 1 input(s), terminus-2--anthropic-claude-sonnet-5 on 0, equal on 5 (sign test p 1.000)"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 0,
+        "successes": 6,
+        "n": 6,
+        "low": 0.6096657083436265,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 0,
+        "successes": 6,
+        "n": 6,
+        "low": 0.6096657083436265,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": {
+      "a": "claude-code--anthropic-claude-sonnet-5",
+      "b": "terminus-2--anthropic-claude-sonnet-5",
+      "compared": 6,
+      "a_better": 1,
+      "b_better": 0,
+      "same": 5,
+      "p_value": 1,
+      "significant": false
+    }
+  },
+  "reasons": [
+    "highest assurance: claude-code--anthropic-claude-sonnet-5 alone has 1.000 (6/6) reliability and 1.000 (6/6) required-check pass rate",
+    "no minimum meaningful difference declared",
+    "claude-code--anthropic-claude-sonnet-5 and terminus-2--anthropic-claude-sonnet-5 cannot be told apart on task success: claude-code--anthropic-claude-sonnet-5 did better on 1 input(s), terminus-2--anthropic-claude-sonnet-5 on 0, equal on 5 (sign test p 1.000)"
+  ],
+  "closest": null
+}

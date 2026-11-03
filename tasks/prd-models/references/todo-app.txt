@@ -1,0 +1,29 @@
+# PRD: Personal to-do app
+
+## Problem and goal
+One person needs a simple place to track tasks across sessions.
+
+## User stories
+- As a user, I want to add a task with a title and optional due date, so that I remember it.
+- As a user, I want to filter my tasks, so that I see only what matters now.
+
+## Requirements
+- PRD-1: Add a task with a title and an optional due date.
+  - Acceptance: a task with a title and no due date can be saved; a task with an empty title cannot.
+- PRD-2: Mark a task complete (and back to active).
+  - Acceptance: toggling a task moves it between the active and completed filters.
+- PRD-3: Edit a task's title and due date.
+  - Acceptance: an edited value is shown after saving.
+- PRD-4: Delete a task.
+  - Acceptance: a deleted task no longer appears under any filter.
+- PRD-5: Filter by all / active / completed.
+  - Acceptance: each filter shows exactly the tasks in that state.
+- PRD-6: Tasks persist across sessions.
+  - Acceptance: tasks are unchanged after closing and reopening the app.
+
+## Out of scope
+- Accounts, login or multi-user use.
+- Reminders, sharing, sync across devices.
+
+## Open questions / assumptions
+- Persistence is local to the browser (assumed; the brief does not say where).

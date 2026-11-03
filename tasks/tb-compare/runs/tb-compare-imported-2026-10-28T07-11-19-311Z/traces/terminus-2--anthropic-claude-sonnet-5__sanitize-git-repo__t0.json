@@ -1,0 +1,268 @@
+{
+  "format": "atif",
+  "turns": 17,
+  "tool_calls": [
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": 8755,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": 13820,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": 3695,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": null,
+      "failed": null
+    }
+  ],
+  "retries": null,
+  "denials": null,
+  "compactions": null,
+  "turn_tokens": [
+    {
+      "prompt": 1275,
+      "cached": 0,
+      "output": 280,
+      "costUsd": 0.005987
+    },
+    {
+      "prompt": 2665,
+      "cached": 1274,
+      "output": 594,
+      "costUsd": 0.009671800000000001
+    },
+    {
+      "prompt": 8741,
+      "cached": 2664,
+      "output": 88,
+      "costUsd": 0.016604800000000003
+    },
+    {
+      "prompt": 8808,
+      "cached": 8740,
+      "output": 1198,
+      "costUsd": 0.013897
+    },
+    {
+      "prompt": 13084,
+      "cached": 8806,
+      "output": 351,
+      "costUsd": 0.0159657
+    },
+    {
+      "prompt": 13147,
+      "cached": 3208,
+      "output": 1925,
+      "costUsd": 0.044738099999999996
+    },
+    {
+      "prompt": 14875,
+      "cached": 13145,
+      "output": 520,
+      "costUsd": 0.012153499999999998
+    },
+    {
+      "prompt": 14938,
+      "cached": 9566,
+      "output": 987,
+      "costUsd": 0.025212200000000004
+    },
+    {
+      "prompt": 17166,
+      "cached": 14936,
+      "output": 591,
+      "costUsd": 0.014471700000000004
+    },
+    {
+      "prompt": 19192,
+      "cached": 14317,
+      "output": 347,
+      "costUsd": 0.018520399999999992
+    },
+    {
+      "prompt": 20674,
+      "cached": 19191,
+      "output": 384,
+      "costUsd": 0.011385200000000012
+    },
+    {
+      "prompt": 20741,
+      "cached": 20673,
+      "output": 569,
+      "costUsd": 0.009993599999999991
+    },
+    {
+      "prompt": 21896,
+      "cached": 20739,
+      "output": 760,
+      "costUsd": 0.014639800000000008
+    },
+    {
+      "prompt": 22716,
+      "cached": 19505,
+      "output": 678,
+      "costUsd": 0.018707499999999988
+    },
+    {
+      "prompt": 23493,
+      "cached": 22714,
+      "output": 791,
+      "costUsd": 0.014399300000000004
+    },
+    {
+      "prompt": 24532,
+      "cached": 23491,
+      "output": 537,
+      "costUsd": 0.01267020000000002
+    },
+    {
+      "prompt": 25168,
+      "cached": 24531,
+      "output": 250,
+      "costUsd": 0.008997699999999997
+    }
+  ],
+  "models": [
+    "anthropic/claude-sonnet-5"
+  ],
+  "cost_usd": 0.2680155,
+  "ended": null
+}

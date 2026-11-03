@@ -1,0 +1,76 @@
+# tb-compare — imported from a Harbor job by `agenteval import-harbor`.
+#
+# The run beside this spec was not produced by agenteval: its trials are
+# Harbor's, read from the job's result.json and agent/trajectory.json files
+# (see the run's GAPS.md). The spec is runnable all the same: each candidate
+# runs its Harbor agent on the task through agents/harbor-run.sh, as
+# tasks/harbor-spike does.
+
+protocol_version: "0.3"
+run_name: "tb-compare"
+budget_usd: 1
+
+workflow:
+  steps:
+    - id: harbor
+      version: "1"
+      test_set:
+        id: "tb-compare-v1"
+        inputs: ["fix-git", "git-multibranch", "log-summary-date-ranges", "openssl-selfsigned-cert", "regex-log", "sanitize-git-repo"]
+      candidate_ids: ["terminus-2--anthropic-claude-sonnet-5", "terminus-2--deepseek-deepseek-v4-flash", "claude-code--anthropic-claude-sonnet-5"]
+      required_checks: [harbor-reward]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      operating_mode: highest-assurance
+      # An imported run has the trials Harbor ran, no more: gates of 1.0 would
+      # leave almost any comparison with no recommendation. Rank instead, and
+      # let the firmness label say how much the sample supports it.
+      eligibility:
+        minimum_reliability: 0
+        minimum_required_check_pass_rate: 0
+      maximum_completion_time_seconds: 3000
+      exit_code: ignore
+
+candidates:
+  - id: "terminus-2--anthropic-claude-sonnet-5"
+    adapter: agent-cli
+    cli:
+      argv: [bash, agents/harbor-run.sh, "terminus-2", "openrouter/anthropic/claude-sonnet-5", "{{input}}"]
+      reports_usage: true
+      trace: atif
+  - id: "terminus-2--deepseek-deepseek-v4-flash"
+    adapter: agent-cli
+    cli:
+      argv: [bash, agents/harbor-run.sh, "terminus-2", "openrouter/deepseek/deepseek-v4-flash", "{{input}}"]
+      reports_usage: true
+      trace: atif
+  - id: "claude-code--anthropic-claude-sonnet-5"
+    adapter: agent-cli
+    cli:
+      argv: [bash, agents/harbor-run.sh, "claude-code", "anthropic/claude-sonnet-5", "{{input}}"]
+      reports_usage: true
+      trace: atif
+
+evaluators:
+  required_checks:
+    harbor-reward:
+      kind: command
+      argv: [node, checks/reward.mjs]
+      version_files: [checks/reward.mjs, agents/harbor-run.sh]
+      timeout_seconds: 30
+      description: "Harbor's verifier rewarded the trial at least 1; a missing reward is an evaluator error, not a failure."
+  judge:
+    # Declared because the schema requires one; never called: the verifier decides.
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/harbor.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 3
+
+x-harness:
+  producer: codegen
+  default_temperature: 0.2

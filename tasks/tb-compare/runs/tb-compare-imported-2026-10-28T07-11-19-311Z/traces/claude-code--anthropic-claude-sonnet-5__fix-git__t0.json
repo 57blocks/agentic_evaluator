@@ -1,0 +1,110 @@
+{
+  "format": "atif",
+  "turns": 9,
+  "tool_calls": [
+    {
+      "name": "Bash",
+      "ms": 8153,
+      "failed": null
+    },
+    {
+      "name": "Bash",
+      "ms": 5070,
+      "failed": null
+    },
+    {
+      "name": "Bash",
+      "ms": 2615,
+      "failed": null
+    },
+    {
+      "name": "Read",
+      "ms": 3455,
+      "failed": null
+    },
+    {
+      "name": "Edit",
+      "ms": 6354,
+      "failed": null
+    },
+    {
+      "name": "Bash",
+      "ms": 2744,
+      "failed": null
+    },
+    {
+      "name": "Bash",
+      "ms": 2675,
+      "failed": null
+    },
+    {
+      "name": "Bash",
+      "ms": 5426,
+      "failed": null
+    }
+  ],
+  "retries": null,
+  "denials": null,
+  "compactions": null,
+  "turn_tokens": [
+    {
+      "prompt": 28766,
+      "cached": 0,
+      "output": 172,
+      "costUsd": 0.073634
+    },
+    {
+      "prompt": 29217,
+      "cached": 28764,
+      "output": 642,
+      "costUsd": 0.0133043
+    },
+    {
+      "prompt": 32118,
+      "cached": 29215,
+      "output": 218,
+      "costUsd": 0.0152795
+    },
+    {
+      "prompt": 32570,
+      "cached": 32116,
+      "output": 109,
+      "costUsd": 0.008647199999999999
+    },
+    {
+      "prompt": 33129,
+      "cached": 32568,
+      "output": 738,
+      "costUsd": 0.015295099999999999
+    },
+    {
+      "prompt": 33978,
+      "cached": 33127,
+      "output": 128,
+      "costUsd": 0.0100319
+    },
+    {
+      "prompt": 34228,
+      "cached": 33976,
+      "output": 133,
+      "costUsd": 0.008754199999999998
+    },
+    {
+      "prompt": 34474,
+      "cached": 34226,
+      "output": 208,
+      "costUsd": 0.0095442
+    },
+    {
+      "prompt": 34974,
+      "cached": 34472,
+      "output": 222,
+      "costUsd": 0.010368399999999998
+    }
+  ],
+  "models": [
+    "anthropic/claude-sonnet-5"
+  ],
+  "cost_usd": 0.16485880000000003,
+  "ended": null
+}
