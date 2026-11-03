@@ -39,6 +39,13 @@ The reviewers' vocabulary, kept as written:
 The workbook set 95% as the bar for a set to be trusted. claim-denials missed
 it on two rule-level disputes, not on scattered mistakes: every one of its 54
 disagreements is one of the two items below.
+Each dispute is one reviewer's reading applied to their whole share, which
+the CSVs can no longer show without the name column: the 34 flagged
+filing-through-date items are every item of that type in one reviewer's 100,
+while the other two reviewers passed the 16 they had; the 20 flagged
+benefit-exhausted items are likewise one reviewer's entire share, and the
+other two passed the 20 they had. So 82% measures two rule readings, not a
+spread of key errors.
 
 **R1, timely filing: 34 `filing-through-date` items, 答案有误 (14 holdout).**
 The key said a wrongful timely-filing denial is appealed, with a deadline 125
