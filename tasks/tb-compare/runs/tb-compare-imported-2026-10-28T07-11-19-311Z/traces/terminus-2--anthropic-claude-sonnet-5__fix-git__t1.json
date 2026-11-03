@@ -1,0 +1,142 @@
+{
+  "format": "atif",
+  "turns": 6,
+  "tool_calls": [
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": 9053,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": null,
+      "failed": null
+    }
+  ],
+  "retries": null,
+  "denials": null,
+  "compactions": null,
+  "turn_tokens": [
+    {
+      "prompt": 1048,
+      "cached": 0,
+      "output": 332,
+      "costUsd": 0.0059395
+    },
+    {
+      "prompt": 2086,
+      "cached": 1047,
+      "output": 381,
+      "costUsd": 0.0066164
+    },
+    {
+      "prompt": 2706,
+      "cached": 2085,
+      "output": 227,
+      "costUsd": 0.0042390000000000014
+    },
+    {
+      "prompt": 3332,
+      "cached": 2705,
+      "output": 652,
+      "costUsd": 0.008628
+    },
+    {
+      "prompt": 4406,
+      "cached": 3331,
+      "output": 277,
+      "costUsd": 0.006123199999999999
+    },
+    {
+      "prompt": 5244,
+      "cached": 4405,
+      "output": 229,
+      "costUsd": 0.005267500000000001
+    }
+  ],
+  "models": [
+    "anthropic/claude-sonnet-5"
+  ],
+  "cost_usd": 0.0368136,
+  "ended": null
+}

@@ -1,0 +1,4 @@
+A URL shortener exposed only as an HTTP API, no user interface. POST a long
+URL and receive a short code; GET /<code> redirects to the original URL. The
+same long URL submitted twice returns the same code. Codes never expire. No
+accounts, no analytics.

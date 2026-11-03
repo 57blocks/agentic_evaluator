@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tb-compare run report</title>
+<style>
+:root{--ground:#F4F6F9;--surface:#fff;--surface-2:#FAFBFC;--ink:#2B3038;--ink-2:#6B7079;--ink-3:#919499;--rule:#E2E5EA;--accent:#1E78EE;--accent-2:#469BFF;--accent-soft:#EBF4FF;--champ:#F4F9FF;--ok-bg:#EBF9F2;--ok-fg:#1B9A6A;--bad-bg:#FFF0F0;--bad-fg:#F03B3B;--warn-bg:#FCF1D6;--warn-fg:#8A5A00;--shadow:0 2px 6px rgba(27,43,75,.08);--mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;--s1:#2A78D6;--s2:#EB6834;--s3:#1BAF7A;--s4:#EDA100}
+@media(prefers-color-scheme:dark){:root{--ground:#16191E;--surface:#1F2329;--surface-2:#272C33;--ink:#E6E8EC;--ink-2:#ABAEB2;--ink-3:#919499;--rule:#2E343C;--accent:#93C1FF;--accent-2:#469BFF;--accent-soft:rgba(70,155,255,.14);--champ:#1A2A3F;--ok-bg:#173A2C;--ok-fg:#8FE0BC;--bad-bg:#45211F;--bad-fg:#FFB9B9;--warn-bg:#3D3218;--warn-fg:#F6D58A;--shadow:0 2px 6px rgba(0,0,0,.3)}}
+body{margin:0;color:var(--ink);font:14px/1.55 "Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:44px 24px 80px;background:var(--ground)}
+.page{max-width:68rem;margin:0 auto;display:grid;gap:20px}
+.mono,td.num,code,pre,.kv dd{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.kv dd{font-size:13px}
+.small{font-size:12px}
+header.run{display:grid;gap:6px}.eyebrow{margin:0;font-size:13px;color:var(--accent);font-weight:600}
+h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.022em}h1 .id{font-family:var(--mono);font-weight:700;font-size:26px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:8px 0 0;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.kv div{display:grid;gap:2px}.kv dt{font-size:12px;color:var(--ink-3)}.kv dd{margin:0;font-size:13px;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--warn-fg);padding:16px 20px;border-radius:12px;box-shadow:var(--shadow)}
+.verdict.firm{border-left-color:var(--ok-fg)}.verdict.needs-review{border-left-color:var(--bad-fg)}
+.verdict .champ-line b{color:var(--accent)}
+.verdict .tag{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
+.verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
+.verdict p{margin:0}
+.champ-line{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}.champ-line b{font-weight:700}.champ-line .mode{color:var(--ink-2);font-weight:400}
+.trophy{font-size:18px}
+.champ-facts{margin:3px 0 6px;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+section.card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 24px 22px;display:grid;gap:12px;box-shadow:var(--shadow)}
+section.card h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--ink);display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-weight:600;color:var(--ink-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:8px 13px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--surface-2)}
+th.num,td.num{text-align:right;white-space:nowrap}
+td.num .bar{margin-right:8px}td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}tr:last-child td{border-bottom:none}
+td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:var(--mono)}
+td .sub{display:block;font-size:11px;color:var(--ink-3)}
+tr.control td.cand::after{content:"control";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
+tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}tr.gated td{color:var(--ink-3)}
+tbody tr{transition:background .12s ease}tbody tr:hover{background:var(--accent-soft)}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:baseline}
+.sw0{background:var(--s1)}.sw1{background:var(--s2)}.sw2{background:var(--s3)}.sw3{background:var(--s4)}
+.bar{display:inline-block;width:92px;height:9px;background:var(--surface-2);border-radius:99px;vertical-align:middle;margin-right:8px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--rule)}
+.bar span{display:block;height:100%;border-radius:99px;background:var(--accent-2)}
+.pill.pass{background:var(--ok-bg);color:var(--ok-fg)}.pill.miss{background:var(--bad-bg);color:var(--bad-fg)}
+ol.trace{margin:0;padding-left:1.2em;font-size:13px;color:var(--ink-2);display:grid;gap:8px}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
+td.ok{color:var(--ok-fg)}td.bad{color:var(--bad-fg)}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.two-col>*{min-width:0;overflow:hidden}
+.two-col .table-wrap{overflow-x:auto}
+.ledger td:first-child{color:var(--ink-2)}.ledger tr.total td{font-weight:600;border-top:2px solid var(--rule)}
+.note{font-size:12.5px;color:var(--ink-2);margin:0}code{background:var(--surface-2);padding:0 5px;border-radius:3px;font-size:12px}
+ul.gaps{margin:0;padding-left:1.1em;font-size:13px;color:var(--ink-2);display:grid;gap:4px}
+details{font-size:13px}summary{cursor:pointer;color:var(--accent);font-weight:500}
+pre{margin:8px 0 0;padding:12px;background:var(--surface-2);border-radius:6px;overflow-x:auto;font-size:12px;line-height:1.55;max-height:420px}
+.steps{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}.steps .arrow{align-self:center;color:var(--ink-3)}
+.step-card{flex:1 1 200px;min-width:0;display:grid;gap:6px;align-content:start;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.step-card.open{border-left:4px solid var(--bad-fg)}.step-card .idx{font-size:12px;color:var(--ink-2);font-weight:500}
+.step-card .pick{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);overflow-wrap:anywhere}.step-card.open .pick{font-family:inherit;color:var(--bad-fg)}
+.step-card .pill{justify-self:start}.step-card .small{color:var(--ink-2)}
+footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
+@media(max-width:480px){h1{font-size:20px}.verdict{grid-template-columns:1fr}section.card{padding:14px}}
+
+.pref-high{color:var(--ok-fg);font-weight:600}.pref-low{color:var(--ink-3)}
+
+.duel{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin:10px 0}
+.duel header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.duel .evidence{margin:6px 0 10px;color:var(--ink-2)}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid var(--rule)}
+.chip.win{background:var(--ok-bg);color:var(--ok-fg);border-color:transparent}
+.chip.tie{background:var(--surface-2);color:var(--ink-2);border-color:transparent}
+.chip.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:transparent}
+table.dims{width:100%}table.dims th{text-align:left;font-weight:500;white-space:nowrap;width:1%;padding-right:14px}
+details>summary{cursor:pointer;padding:6px 0;color:var(--ink-2)}
+pre.raw{max-height:460px;overflow:auto;background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-word;font-size:12px}
+.muted{color:var(--ink-3)}
+
+.viz{margin:14px 0 0;padding:0}
+.viz figcaption{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.viz-legend{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0;font-size:12px;color:var(--ink-2)}
+.viz-lg{display:inline-flex;gap:6px;align-items:center}
+.viz-flag{font-size:10px;font-weight:600;background:var(--warn-bg);color:var(--warn-fg);padding:0 5px;border-radius:3px;white-space:nowrap}
+.viz-note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+table.viz-heat{width:100%;border-collapse:separate;border-spacing:2px}
+table.viz-heat th{font-size:12px;font-weight:500;color:var(--ink-2);text-align:left;white-space:nowrap}
+table.viz-heat th.num,table.viz-heat td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.viz-cell{text-align:center;border-radius:4px;padding:8px 6px;font-variant-numeric:tabular-nums;color:var(--ink)}
+td.viz-none{background:var(--surface-2);color:var(--ink-3)}
+.viz-scale{display:flex;gap:2px;align-items:center;margin-top:8px;font-size:11px;color:var(--ink-3)}
+.viz-step{width:26px;height:8px;border-radius:2px;display:inline-block}
+.sd-1{--sd:#c93a39;--sd-fg:#fff}.sd-2{--sd:#f0a3a0;--sd-fg:#2B3038}.sd-3{--sd:#e2e1dd;--sd-fg:#2B3038}.sd-4{--sd:#8dbbf1;--sd-fg:#2B3038}.sd-5{--sd:#1c5cab;--sd-fg:#fff}
+.sd-row{display:grid;grid-template-columns:minmax(90px,160px) 1fr 44px 96px;gap:10px;align-items:center;margin:3px 0;font-size:12px}
+.sd-head{color:var(--ink-3);font-size:11px;margin-bottom:2px}
+.sd-name{font-family:var(--mono);font-size:11px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-bar{display:flex;gap:2px;height:20px;min-width:0}
+.sd-seg{flex-basis:0;min-width:2px;background:var(--sd);color:var(--sd-fg);font-size:10px;line-height:20px;text-align:center;overflow:hidden;white-space:nowrap}
+.sd-seg:first-child{border-radius:4px 0 0 4px}.sd-seg:last-child{border-radius:0 4px 4px 0}.sd-seg:only-child{border-radius:4px}
+.sd-u{background:var(--surface);color:var(--ink-3);box-shadow:inset 0 0 0 1px var(--ink-3)}
+.sd-seg.sd-u{background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 3px,var(--rule) 3px,var(--rule) 5px)}
+.sd-mean,.sd-check{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sd-sub{color:var(--ink-3)}
+.sd-key{width:12px;height:12px;border-radius:2px;display:inline-block;background:var(--sd)}
+.sd-legend{margin-top:10px}
+@media(prefers-color-scheme:dark){
+  .sd-1{--sd:#f29a97;--sd-fg:#1F2329}.sd-2{--sd:#a13b39;--sd-fg:#fff}.sd-3{--sd:#93938d;--sd-fg:#1F2329}.sd-4{--sd:#3470c4;--sd-fg:#fff}.sd-5{--sd:#a8cdf5;--sd-fg:#1F2329}
+}
+</style></head>
+<body><div class="page">
+  <header class="run">
+    <p class="eyebrow">Agentic Evaluator · run report · protocol 0.3</p>
+    <h1>Step harbor · <span class="id">tb-compare</span></h1>
+    <dl class="kv">
+      <div><dt>Spec</dt><dd>tasks/tb-compare/spec.yaml · sha256 6ee679eb</dd></div>
+      <div><dt>Test set</dt><dd>tb-compare-v1 · 6 input(s)</dd></div>
+      <div><dt>Trial plan</dt><dd>3 candidates × 6 inputs × 1 trial = 22</dd></div>
+      <div><dt>Judge</dt><dd>google/gemini-3.1-pro-preview · rubric c35b3cdb</dd></div>
+      <div><dt>Mode</dt><dd>capability-neutral · cold cache</dd></div>
+      <div><dt>Run time</dt><dd>2026-10-27 07:12 → 07:11</dd></div>
+      <div><dt>Operating mode</dt><dd>highest assurance · directional · recommend claude-code--anthropic-claude-sonnet-5</dd></div>
+      <div><dt>harness</dt><dd>0.3.0 · 5836dc12</dd></div>
+    </dl>
+  </header>
+
+  <section class="card">
+    <h2>What this evaluates</h2>
+    
+    
+    <p class="note"><b>A pass of harbor-reward</b> means: Harbor's verifier rewarded the trial at least 1; a missing reward is an evaluator error, not a failure.</p>
+    
+  </section>
+
+  <div class="verdict directional">
+    <span class="tag">directional</span>
+    <div>
+      <p class="champ-line">Recommend <b>claude-code--anthropic-claude-sonnet-5</b> <span class="mode">· highest assurance</span></p>
+      <p class="champ-facts">$0.2307 per success · required check 6/6 passed</p>
+      <p class="sub">Of the 3 candidates that pass every gate, claude-code--anthropic-claude-sonnet-5 has the highest reliability (100% (6/6)).</p>
+      <p class="sub">No pairwise comparison was available this run.</p>
+      <p class="sub">The spec declares no minimum meaningful difference, claude-code--anthropic-claude-sonnet-5 and terminus-2--anthropic-claude-sonnet-5 cannot be told apart on task success: claude-code--anthropic-claude-sonnet-5 did better on 1 input(s), terminus-2--anthropic-claude-sonnet-5 on 0, equal on 5 (sign test p 1.000), so this result is directional only.</p>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v4</span></h2>
+    <ol class="trace"><li><b>required-check pass rate ≥ 0%</b> — removed: nobody removed. Remaining: terminus-2--anthropic-claude-sonnet-5, terminus-2--deepseek-deepseek-v4-flash, claude-code--anthropic-claude-sonnet-5.</li><li><b>reliability ≥ 0%</b> — removed: nobody removed. Remaining: terminus-2--anthropic-claude-sonnet-5, terminus-2--deepseek-deepseek-v4-flash, claude-code--anthropic-claude-sonnet-5.</li></ol>
+    
+    <p class="note">Passed every gate: terminus-2--anthropic-claude-sonnet-5, terminus-2--deepseek-deepseek-v4-flash, claude-code--anthropic-claude-sonnet-5. The judge's win rate is for reference only and takes no part in selection.</p>
+  </section>
+
+  <section class="card">
+    <h2>How sure <span class="hint">Wilson 95% intervals counted per input; exact sign test over inputs</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Gate (claude-code--anthropic-claude-sonnet-5)</th><th class="num">Passed / inputs</th><th class="num">95% interval</th><th class="num">Gate</th><th>At the low end</th></tr></thead>
+      <tbody><tr><td>required-check-pass-rate</td><td class="num">6/6</td><td class="num">0.610–1.000</td><td class="num">0</td><td class="ok">holds</td></tr><tr><td>reliability</td><td class="num">6/6</td><td class="num">0.610–1.000</td><td class="num">0</td><td class="ok">holds</td></tr></tbody>
+    </table></div>
+    <p class="note">Against the runner-up, input by input: claude-code--anthropic-claude-sonnet-5 did better on 1, terminus-2--anthropic-claude-sonnet-5 on 0, equal on 5 (exact sign test p 1.000, not significant).</p>
+    <p class="note"><b>Effective N 2 of 6.</b> Inputs that separated any two candidates; 4 every candidate passed and 0 gave everyone the same partial rate, so they cannot inform a choice. Per-input detail: items.json.</p>
+  </section>
+
+  <section class="card">
+    <h2>Candidates <span class="hint">the same inputs, paired by candidate; 1 trial(s) per cell</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th><th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
+      <tbody><tr>
+        <td class="cand"><span class="sw sw0"></span>terminus-2--anthropic-claude-sonnet-5<span class="model">cli:bash · harbor/openrouter</span></td>
+        <td><div class="state-list"><span class="ok">5 success</span><span class="bad">1 failure</span><span class="warn">4 undetermined</span></div></td>
+        <td class="num"><span class="pill miss">5 / 6</span></td>
+        <td class="num">—<span class="sub">0 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">unobserved</td>
+        <td class="num">53.9 s</td>
+        <td><div class="state-list"><span class="ok">6 success</span><span class="bad">4 provider_error</span></div></td>
+      </tr><tr>
+        <td class="cand"><span class="sw sw1"></span>terminus-2--deepseek-deepseek-v4-flash<span class="model">cli:bash · harbor/openrouter</span></td>
+        <td><div class="state-list"><span class="ok">4 success</span><span class="bad">2 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill miss">4 / 6</span></td>
+        <td class="num">—<span class="sub">0 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">$0.0295</td>
+        <td class="num">99.9 s</td>
+        <td><div class="state-list"><span class="ok">6 success</span></div></td>
+      </tr><tr class="chosen">
+        <td class="cand"><span class="sw sw2"></span>claude-code--anthropic-claude-sonnet-5<span class="model">recommended</span><span class="model">cli:bash · harbor/anthropic</span></td>
+        <td><div class="state-list"><span class="ok">6 success</span><span class="bad">0 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill pass">6 / 6</span></td>
+        <td class="num">—<span class="sub">0 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">$0.2307</td>
+        <td class="num">41.9 s</td>
+        <td><div class="state-list"><span class="ok">6 success</span></div></td>
+      </tr></tbody>
+    </table></div>
+    <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.</p>
+  </section>
+
+  
+
+  <div class="two-col">
+    <section class="card">
+      <h2>Agent activity <span class="hint">from the trace each command left (cli.trace); medians over traced trials; — where the format records nothing</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Candidate</th><th class="num">Turns p50</th><th class="num">Tool calls p50</th><th>Most-called tools</th><th class="num">Retries</th><th class="num">Denials</th><th>Ended</th></tr></thead>
+        <tbody><tr><td class="cand">terminus-2--anthropic-claude-sonnet-5<span class="model">6 of 10 trial(s) traced</span></td>
+        <td class="num">4</td><td class="num">17</td>
+        <td><code>bash_command</code> ×97, <code>mark_task_complete</code> ×13</td>
+        <td class="num">—</td><td class="num">—</td>
+        <td>6 —</td></tr><tr><td class="cand">terminus-2--deepseek-deepseek-v4-flash<span class="model">6 of 6 trial(s) traced</span></td>
+        <td class="num">13</td><td class="num">20</td>
+        <td><code>bash_command</code> ×226, <code>mark_task_complete</code> ×13</td>
+        <td class="num">—</td><td class="num">—</td>
+        <td>6 —</td></tr><tr><td class="cand">claude-code--anthropic-claude-sonnet-5<span class="model">6 of 6 trial(s) traced</span></td>
+        <td class="num">9</td><td class="num">8</td>
+        <td><code>Bash</code> ×64, <code>Write</code> ×9, <code>Edit</code> ×4, <code>Read</code> ×3</td>
+        <td class="num">—</td><td class="num">—</td>
+        <td>6 —</td></tr></tbody>
+      </table></div>
+      <p class="note">Counts per trial are in <code>agent</code> on each row of scores.jsonl; the turn list is in traces/. Nothing here enters the selection.</p>
+    </section>
+    <section class="card">
+      <h2>Evaluation coverage <span class="hint">the evaluators' own state, before any pass rate</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Evaluator</th><th>Version</th><th class="num">Expected</th><th class="num">pass / fail</th><th class="num">Not evaluated</th><th class="num">Evaluator error</th></tr></thead>
+        <tbody><tr><td>harbor-reward</td><td class="mono small">cmd-5367303d+files-d9f0757e</td>
+        <td class="num">22</td>
+        <td class="num">15 / 3</td>
+        <td class="num">0</td>
+        <td class="num"><span class="pill warn">4</span></td></tr></tbody>
+      </table></div>
+      <ul class="gaps"><li><code>harbor-reward</code> terminus-2--anthropic-claude-sonnet-5 · fix-git · t0: no reward (RuntimeError)</li><li><code>harbor-reward</code> terminus-2--anthropic-claude-sonnet-5 · log-summary-date-ranges · t0: no reward (RuntimeError)</li><li><code>harbor-reward</code> terminus-2--anthropic-claude-sonnet-5 · openssl-selfsigned-cert · t0: no reward (RuntimeError)</li><li><code>harbor-reward</code> terminus-2--anthropic-claude-sonnet-5 · regex-log · t0: no reward (RuntimeError)</li></ul>
+    </section>
+    <section class="card">
+      <h2>Cost breakdown <span class="hint">source: estimated</span></h2>
+      <div class="table-wrap"><table class="ledger"><tbody>
+        <tr><td>Candidate generation · 22 trials</td><td class="num">$2.1820</td></tr>
+        <tr><td>Pairwise judging</td><td class="num">$0.0000</td></tr>
+        <tr><td>Absolute scoring</td><td class="num">$0.0000</td></tr>
+        <tr><td>Deterministic checks</td><td class="num">$0.0000</td></tr>
+        <tr><td>Retries and recovery</td><td class="num">$0.0000</td></tr>
+        <tr class="total"><td>Total</td><td class="num">$2.1820</td></tr>
+        <tr><td>Full cost per success</td><td class="num">—</td></tr>
+      </tbody></table></div>
+      <p class="note">Evaluation spend is 0.0× generation spend. Generation cost was not observed for terminus-2--anthropic-claude-sonnet-5, so the totals are a lower bound and cost per success is undefined.</p>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <section class="card">
+    <h2>Every trial <span class="hint">the averages in the standings are computed from these rows</span></h2>
+    <table>
+      <thead><tr>
+        <th>Candidate</th><th>Input</th><th class="num">#</th><th>Completion</th><th>Outcome</th>
+        <th class="num">Overall</th><th>Pairwise</th>
+        <th class="num">Output tokens</th><th class="num">Cost</th><th class="num">Duration</th>
+      </tr></thead>
+      <tbody><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>fix-git</td>
+        <td class="num">t0</td>
+        <td>provider_error </td>
+        <td>undetermined</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">0</td>
+        <td class="num">$0.0000</td>
+        <td class="num">133s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>git-multibranch</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">5818</td>
+        <td class="num">$0.1019</td>
+        <td class="num">148s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>log-summary-date-ranges</td>
+        <td class="num">t0</td>
+        <td>provider_error </td>
+        <td>undetermined</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">0</td>
+        <td class="num">$0.0000</td>
+        <td class="num">161s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>openssl-selfsigned-cert</td>
+        <td class="num">t0</td>
+        <td>provider_error </td>
+        <td>undetermined</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">0</td>
+        <td class="num">$0.0000</td>
+        <td class="num">139s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>regex-log</td>
+        <td class="num">t0</td>
+        <td>provider_error </td>
+        <td>undetermined</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">0</td>
+        <td class="num">$0.0000</td>
+        <td class="num">151s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>sanitize-git-repo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">10850</td>
+        <td class="num">$0.2680</td>
+        <td class="num">164s</td>
+      </tr><tr>
+        <td>terminus-2--deepseek-deepseek-v4-flash</td>
+        <td>fix-git</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">3429</td>
+        <td class="num">$0.0044</td>
+        <td class="num">62s</td>
+      </tr><tr>
+        <td>terminus-2--deepseek-deepseek-v4-flash</td>
+        <td>git-multibranch</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">29898</td>
+        <td class="num">$0.0673</td>
+        <td class="num">457s</td>
+      </tr><tr>
+        <td>terminus-2--deepseek-deepseek-v4-flash</td>
+        <td>log-summary-date-ranges</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">3854</td>
+        <td class="num">$0.0039</td>
+        <td class="num">57s</td>
+      </tr><tr>
+        <td>terminus-2--deepseek-deepseek-v4-flash</td>
+        <td>openssl-selfsigned-cert</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">20171</td>
+        <td class="num">$0.0098</td>
+        <td class="num">207s</td>
+      </tr><tr>
+        <td>terminus-2--deepseek-deepseek-v4-flash</td>
+        <td>regex-log</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">42617</td>
+        <td class="num">$0.0230</td>
+        <td class="num">489s</td>
+      </tr><tr>
+        <td>terminus-2--deepseek-deepseek-v4-flash</td>
+        <td>sanitize-git-repo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>failure</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">7946</td>
+        <td class="num">$0.0098</td>
+        <td class="num">100s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>fix-git</td>
+        <td class="num">t1</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">2098</td>
+        <td class="num">$0.0368</td>
+        <td class="num">40s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>log-summary-date-ranges</td>
+        <td class="num">t1</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">1853</td>
+        <td class="num">$0.0401</td>
+        <td class="num">31s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>openssl-selfsigned-cert</td>
+        <td class="num">t1</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">4275</td>
+        <td class="num">$0.0662</td>
+        <td class="num">54s</td>
+      </tr><tr>
+        <td>terminus-2--anthropic-claude-sonnet-5</td>
+        <td>regex-log</td>
+        <td class="num">t1</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">15110</td>
+        <td class="num">$0.1667</td>
+        <td class="num">165s</td>
+      </tr><tr>
+        <td>claude-code--anthropic-claude-sonnet-5</td>
+        <td>fix-git</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">2570</td>
+        <td class="num">$0.1649</td>
+        <td class="num">42s</td>
+      </tr><tr>
+        <td>claude-code--anthropic-claude-sonnet-5</td>
+        <td>git-multibranch</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">12106</td>
+        <td class="num">$0.4587</td>
+        <td class="num">233s</td>
+      </tr><tr>
+        <td>claude-code--anthropic-claude-sonnet-5</td>
+        <td>log-summary-date-ranges</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">2253</td>
+        <td class="num">$0.1095</td>
+        <td class="num">36s</td>
+      </tr><tr>
+        <td>claude-code--anthropic-claude-sonnet-5</td>
+        <td>openssl-selfsigned-cert</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">2429</td>
+        <td class="num">$0.1036</td>
+        <td class="num">33s</td>
+      </tr><tr>
+        <td>claude-code--anthropic-claude-sonnet-5</td>
+        <td>regex-log</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">12989</td>
+        <td class="num">$0.2396</td>
+        <td class="num">143s</td>
+      </tr><tr>
+        <td>claude-code--anthropic-claude-sonnet-5</td>
+        <td>sanitize-git-repo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>—</td>
+        <td class="num">7306</td>
+        <td class="num">$0.3078</td>
+        <td class="num">96s</td>
+      </tr></tbody>
+    </table>
+  </section>
+
+  
+  <section class="card">
+    <h2>Candidate outputs <span class="hint">exactly the text the judge saw</span></h2>
+    <details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · fix-git · t0 <span class="muted">151 characters</span></summary>
+        <pre class="raw">task=fix-git agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards=null
+exception=RuntimeError
+harbor-reported cost_usd=null tokens in/out=null/null</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · git-multibranch · t0 <span class="muted">165 characters</span></summary>
+        <pre class="raw">task=git-multibranch agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.1018931 tokens in/out=53190/5818</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · log-summary-date-ranges · t0 <span class="muted">167 characters</span></summary>
+        <pre class="raw">task=log-summary-date-ranges agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards=null
+exception=RuntimeError
+harbor-reported cost_usd=null tokens in/out=null/null</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · openssl-selfsigned-cert · t0 <span class="muted">167 characters</span></summary>
+        <pre class="raw">task=openssl-selfsigned-cert agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards=null
+exception=RuntimeError
+harbor-reported cost_usd=null tokens in/out=null/null</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · regex-log · t0 <span class="muted">153 characters</span></summary>
+        <pre class="raw">task=regex-log agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards=null
+exception=RuntimeError
+harbor-reported cost_usd=null tokens in/out=null/null</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · sanitize-git-repo · t0 <span class="muted">169 characters</span></summary>
+        <pre class="raw">task=sanitize-git-repo agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards={"reward":0}
+exception=none
+harbor-reported cost_usd=0.2680155 tokens in/out=273111/10850</pre>
+      </details><details>
+        <summary>terminus-2--deepseek-deepseek-v4-flash · fix-git · t0 <span class="muted">159 characters</span></summary>
+        <pre class="raw">task=fix-git agent=terminus-2 model=deepseek/deepseek-v4-flash
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.00441205 tokens in/out=57380/3429</pre>
+      </details><details>
+        <summary>terminus-2--deepseek-deepseek-v4-flash · git-multibranch · t0 <span class="muted">169 characters</span></summary>
+        <pre class="raw">task=git-multibranch agent=terminus-2 model=deepseek/deepseek-v4-flash
+rewards={"reward":0}
+exception=none
+harbor-reported cost_usd=0.0672601 tokens in/out=1076120/29898</pre>
+      </details><details>
+        <summary>terminus-2--deepseek-deepseek-v4-flash · log-summary-date-ranges · t0 <span class="muted">175 characters</span></summary>
+        <pre class="raw">task=log-summary-date-ranges agent=terminus-2 model=deepseek/deepseek-v4-flash
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.00393785 tokens in/out=44071/3854</pre>
+      </details><details>
+        <summary>terminus-2--deepseek-deepseek-v4-flash · openssl-selfsigned-cert · t0 <span class="muted">186 characters</span></summary>
+        <pre class="raw">task=openssl-selfsigned-cert agent=terminus-2 model=deepseek/deepseek-v4-flash
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.009764000000000002 tokens in/out=13741/20171</pre>
+      </details><details>
+        <summary>terminus-2--deepseek-deepseek-v4-flash · regex-log · t0 <span class="muted">162 characters</span></summary>
+        <pre class="raw">task=regex-log agent=terminus-2 model=deepseek/deepseek-v4-flash
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.02296415 tokens in/out=75730/42617</pre>
+      </details><details>
+        <summary>terminus-2--deepseek-deepseek-v4-flash · sanitize-git-repo · t0 <span class="muted">169 characters</span></summary>
+        <pre class="raw">task=sanitize-git-repo agent=terminus-2 model=deepseek/deepseek-v4-flash
+rewards={"reward":0}
+exception=none
+harbor-reported cost_usd=0.0097935 tokens in/out=124356/7946</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · fix-git · t1 <span class="muted">157 characters</span></summary>
+        <pre class="raw">task=fix-git agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.0368136 tokens in/out=18822/2098</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · log-summary-date-ranges · t1 <span class="muted">173 characters</span></summary>
+        <pre class="raw">task=log-summary-date-ranges agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.0401208 tokens in/out=21107/1853</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · openssl-selfsigned-cert · t1 <span class="muted">183 characters</span></summary>
+        <pre class="raw">task=openssl-selfsigned-cert agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.06623620000000001 tokens in/out=22925/4275</pre>
+      </details><details>
+        <summary>terminus-2--anthropic-claude-sonnet-5 · regex-log · t1 <span class="muted">170 characters</span></summary>
+        <pre class="raw">task=regex-log agent=terminus-2 model=anthropic/claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.16667930000000003 tokens in/out=14429/15110</pre>
+      </details><details>
+        <summary>claude-code--anthropic-claude-sonnet-5 · fix-git · t0 <span class="muted">159 characters</span></summary>
+        <pre class="raw">task=fix-git agent=claude-code model=claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.16485880000000003 tokens in/out=293454/2570</pre>
+      </details><details>
+        <summary>claude-code--anthropic-claude-sonnet-5 · git-multibranch · t0 <span class="muted">168 characters</span></summary>
+        <pre class="raw">task=git-multibranch agent=claude-code model=claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.4587277000000002 tokens in/out=1402400/12106</pre>
+      </details><details>
+        <summary>claude-code--anthropic-claude-sonnet-5 · log-summary-date-ranges · t0 <span class="muted">175 characters</span></summary>
+        <pre class="raw">task=log-summary-date-ranges agent=claude-code model=claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.10954880000000002 tokens in/out=247408/2253</pre>
+      </details><details>
+        <summary>claude-code--anthropic-claude-sonnet-5 · openssl-selfsigned-cert · t0 <span class="muted">175 characters</span></summary>
+        <pre class="raw">task=openssl-selfsigned-cert agent=claude-code model=claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.10357569999999999 tokens in/out=214568/2429</pre>
+      </details><details>
+        <summary>claude-code--anthropic-claude-sonnet-5 · regex-log · t0 <span class="muted">162 characters</span></summary>
+        <pre class="raw">task=regex-log agent=claude-code model=claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.23959239999999998 tokens in/out=344294/12989</pre>
+      </details><details>
+        <summary>claude-code--anthropic-claude-sonnet-5 · sanitize-git-repo · t0 <span class="muted">159 characters</span></summary>
+        <pre class="raw">task=sanitize-git-repo agent=claude-code model=claude-sonnet-5
+rewards={"reward":1}
+exception=none
+harbor-reported cost_usd=0.3077873 tokens in/out=612830/7306</pre>
+      </details>
+  </section>
+
+  <section class="card">
+    <h2>Fields this run did not observe <span class="hint">GAPS.md</span></h2>
+    <ul class="gaps"><li>generation cost: **not observed** for 4 trial(s) (terminus-2--anthropic-claude-sonnet-5). These candidates' spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger <code>generation</code> and <code>total</code> are lower bounds, and <code>cost_per_success</code> / <code>cost_per_attempt</code> are null.</li><li>generation cost: **self-reported** by claude-code--anthropic-claude-sonnet-5, terminus-2--anthropic-claude-sonnet-5, terminus-2--deepseek-deepseek-v4-flash through <code>.eval-usage.json</code> (the spec declares <code>cli.reports_usage</code>). Recorded as <code>estimated</code>; not verified by the harness, so it is only as trustworthy as the command that wrote it.</li><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: OpenRouter reported cached prompt tokens on some calls; recorded under <code>tokens.cached</code>, no cache cost breakdown.</li><li><code>deployment_ref.region / tier</code>: provider name observed via OpenRouter; region and service tier are not exposed.</li><li><code>human_intervention</code>: not observed; no trace format read here says whether the agent waited on a person.</li><li><code>tool_calls</code>, turns: observed for terminus-2--anthropic-claude-sonnet-5, terminus-2--deepseek-deepseek-v4-flash, claude-code--anthropic-claude-sonnet-5 (not terminus-2--anthropic-claude-sonnet-5: no <code>cli.trace</code>, or none left) from the trace the command left; counts in <code>agent</code> per row, the turn list in traces/.</li><li><code>checkpoint</code>: not observed; no trace format read here says whether the agent resumed from one.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>infra failures: 4 trial(s) ended in provider_error or cancelled (terminus-2--anthropic-claude-sonnet-5 4). They are undetermined: out of task-success and reliability denominators, and shown as lost evaluation coverage.</li><li>evaluator errors: 4 evaluator invocation(s) failed and are recorded as evaluator_error rows (excluded from candidate rates).</li><li>absolute 1–5 scoring: **not run** — the spec declares <code>methods</code> without <code>absolute-1-5</code>. Magnitude is therefore not observed at all in this run; the empty score columns are a declaration, not a failure.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>effective N: 2 of 6 inputs separated any two candidates; 4 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: the chosen candidate's gated rates carry Wilson 95% intervals, and a highest-assurance pick must beat the runner-up on an exact sign test over inputs (recommendation.json <code>evidence</code>). Inputs generated from one template are still treated as independent, which overstates certainty when they share a template.</li><li>**imported from Harbor**: 22 trial(s) read from /private/tmp/claude-502/-Users-liuxing-workspace-57b-agentic-evaluator/4c0e9420-d665-43a8-b752-a78f0eea8f9c/scratchpad/harbor-compare; nothing was generated, checked or judged by agenteval. Each trial's text is the verifier's verdict, not the agent's deliverable (Harbor keeps that in its sandbox); cost is what the agent reported to Harbor.</li></ul>
+  </section>
+
+  <section class="card">
+    <h2>Raw records</h2>
+    <details><summary>First line of scores.jsonl</summary><pre>{
+ "run": "tb-compare-imported-2026-10-28T07-11-19-311Z",
+ "step": "harbor",
+ "candidate": "terminus-2--anthropic-claude-sonnet-5",
+ "model_ref": "openrouter/anthropic/claude-sonnet-5",
+ "deployment_ref": "harbor/openrouter",
+ "input": "fix-git",
+ "trial": 0,
+ "trial_hash": "c0326ba3653f70ea1f33f73982377d976f44dcd2e04becdd902d8e09ad99f854",
+ "completion_state": "provider_error",
+ "truncated": false,
+ "task_outcome": "undetermined",
+ "outcome_reasons": [
+  "completion state provider_error is not the candidate's doing"
+ ],
+ "rule_version": "success-v2",
+ "checks": {
+  "harbor-reward": {
+   "state": "evaluator_error",
+   "version": "cmd-5367303d+files-d9f0757e",
+   "evidence": "task=fix-git agent=terminus-2 model=anthropic/claude-sonnet-5\nrewards=null\nexception=RuntimeError\nharbor-reported cost_usd=null tokens in/out=null/null",
+   "reason": "no reward (RuntimeError)"
+  }
+ },
+ "judge": {
+  "pairwise": null,
+  "absolute_overall": null,
+  "absolute_dimensions": null
+ },
+ "cost": {
+  "generation": 0,
+  "retry": 0,
+  "source": "none"
+ },
+ "tokens": {
+  "prompt": 0,
+  "completion": 0,
+  "cached": null
+ },
+ "ms": 133283,
+ "isolation": "docker",
+ "agent": null,
+ "ttft_ms": null,
+ "cache": null,
+ "finish_reason": "error",
+ "error": "harbor: RuntimeError: Command timed out after 120 seconds",
+ "legacy_status": "error",
+ "legacy_check_passed": false,
+ "reused_from": null
+}</pre></details>
+    <details><summary>manifest.json</summary><pre>{
+ "protocol_version": "0.3",
+ "run_id": "tb-compare-imported-2026-10-28T07-11-19-311Z",
+ "run_name": "tb-compare",
+ "step": {
+  "id": "harbor",
+  "version": "1",
+  "description": null
+ },
+ "spec": {
+  "path": "tasks/tb-compare/spec.yaml",
+  "sha256": "6ee679ebc2e7d3cda3270c5b2a69eeaeab18e9c159b6e36c19abbebac82e9da4"
+ },
+ "description": null,
+ "test_set": {
+  "id": "tb-compare-v1",
+  "inputs": {
+   "fix-git": "3225a7280bb650dcabcd5239fbb148a8f11516f7a5bf8267a3568cdefeee17ba",
+   "git-multibranch": "fbae623093de692d85ceb11db28f45b096a7ac8482957fe1aad49000895caeab",
+   "log-summary-date-ranges": "f53f38841cfac1264df978b5f1d6b71e23f2a0b9758c4c16d0cbec7501cfd73e",
+   "openssl-selfsigned-cert": "91a8c6394009fb67f627ed1262b1a8fcf7774017d9a999051c41162c457afaf7",
+   "regex-log": "038c4ae3993c466f2458cc0a8e264c35ec54989811043131f1546a412550a7e4",
+   "sanitize-git-repo": "c082b11792a047a126599bfb940f190c65933aac6a1386a35b2bb2b38244b6d6"
+  },
+  "labels": null
+ },
+ "candidates": {
+  "terminus-2--anthropic-claude-sonnet-5": {
+   "id": "terminus-2--anthropic-claude-sonnet-5",
+   "adapter": "agent-cli",
+   "cli": {
+    "argv": [
+     "bash",
+     "agents/harbor-run.sh",
+     "terminus-2",
+     "openrouter/anthropic/claude-sonnet-5",
+     "{{input}}"
+    ],
+    "reports_usage": true,
+    "trace": "atif"
+   }
+  },
+  "terminus-2--deepseek-deepseek-v4-flash": {
+   "id": "terminus-2--deepseek-deepseek-v4-flash",
+   "adapter": "agent-cli",
+   "cli": {
+    "argv": [
+     "bash",
+     "agents/harbor-run.sh",
+     "terminus-2",
+     "openrouter/deepseek/deepseek-v4-flash",
+     "{{input}}"
+    ],
+    "reports_usage": true,
+    "trace": "atif"
+   }
+  },
+  "claude-code--anthropic-claude-sonnet-5": {
+   "id": "claude-code--anthropic-claude-sonnet-5",
+   "adapter": "agent-cli",
+   "cli": {
+    "argv": [
+     "bash",
+     "agents/harbor-run.sh",
+     "claude-code",
+     "anthropic/claude-sonnet-5",
+     "{{input}}"
+    ],
+    "reports_usage": true,
+    "trace": "atif"
+   }
+  }
+ },
+ "control_candidate": null,
+ "judge": {
+  "model": "google/gemini-3.1-pro-preview",
+  "provider_route": "openrouter",
+  "methods": []
+ },
+ "evaluators": {
+  "required_checks": [
+   "harbor-reward"
+  ],
+  "check_version": "cmd-5367303d+files-d9f0757e",
+  "rubric_sha256": "c35b3cdbb4ce49005ece6794e195ad0f1edf397404977969be9fb7fd0fd47fcc",
+  "check_description": "Harbor's verifier rewarded the trial at least 1; a missing reward is an evaluator error, not a failure.",
+  "producer_template_sha256": "1f1cfea2033817b8c1697078026ffe2cc9625af567f5c45f315d8ed1cecb5f5f",
+  "judge_template_sha256": "313c5d1bb70ba91e2eb1ae84186759350363a84c79fe2fce669ec3e4903cf5b0",
+  "score_template_sha256": "25dae01d5424a453f31da00545d979eb492f7d9fc0c9e21d7681843b53d3b28a"
+ },
+ "success_criteria": {
+  "mandatory_checks": "all"
+ },
+ "operating_mode": "highest-assurance",
+ "eligibility": {
+  "minimum_reliability": 0,
+  "minimum_required_check_pass_rate": 0,
+  "minimum_all_trials_pass_rate": null,
+  "maximum_p95_ms": null,
+  "cost_ceiling_per_success_usd": null
+ },
+ "minimum_meaningful_difference": null,
+ "execution": {
+  "trials_per_case": 1,
+  "concurrency": 1,
+  "timeout_ms": 3000000,
+  "benchmark_mode": "capability-neutral",
+  "cache_mode": "cold",
+  "early_stop": false
+ },
+ "harness": {
+  "name": "57b-agenteval",
+  "version": "0.3.0",
+  "git_sha": "5836dc12",
+  "node": "v24.14.0"
+ },
+ "started_at": "2026-10-27T07:12:38.096682Z",
+ "finished_at": "2026-10-28T07:11:19.330Z"
+}</pre></details>
+  </section>
+
+  <footer><span>tb-compare-imported-2026-10-28T07-11-19-311Z/</span><span>opens offline, no external dependencies</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
+</div></body></html>

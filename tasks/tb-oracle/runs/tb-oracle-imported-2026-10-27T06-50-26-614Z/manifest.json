@@ -1,0 +1,84 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "tb-oracle-imported-2026-10-27T06-50-26-614Z",
+  "run_name": "tb-oracle",
+  "step": {
+    "id": "harbor",
+    "version": "1",
+    "description": null
+  },
+  "spec": {
+    "path": "tasks/tb-oracle/spec.yaml",
+    "sha256": "a3937a7363aeb9400a438232e35ae0d5fae0acd1912bad549d4240d95701d0a0"
+  },
+  "description": null,
+  "test_set": {
+    "id": "tb-oracle-v1",
+    "inputs": {
+      "fix-git": "3225a7280bb650dcabcd5239fbb148a8f11516f7a5bf8267a3568cdefeee17ba"
+    },
+    "labels": null
+  },
+  "candidates": {
+    "oracle": {
+      "id": "oracle",
+      "adapter": "agent-cli",
+      "cli": {
+        "argv": [
+          "bash",
+          "agents/harbor-run.sh",
+          "oracle",
+          "",
+          "{{input}}"
+        ],
+        "reports_usage": true,
+        "trace": "atif"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter",
+    "methods": []
+  },
+  "evaluators": {
+    "required_checks": [
+      "harbor-reward"
+    ],
+    "check_version": "cmd-5367303d+files-23fd85d6",
+    "rubric_sha256": "c35b3cdbb4ce49005ece6794e195ad0f1edf397404977969be9fb7fd0fd47fcc",
+    "check_description": "Harbor's verifier rewarded the trial at least 1; a missing reward is an evaluator error, not a failure.",
+    "producer_template_sha256": "1f1cfea2033817b8c1697078026ffe2cc9625af567f5c45f315d8ed1cecb5f5f",
+    "judge_template_sha256": "313c5d1bb70ba91e2eb1ae84186759350363a84c79fe2fce669ec3e4903cf5b0",
+    "score_template_sha256": "25dae01d5424a453f31da00545d979eb492f7d9fc0c9e21d7681843b53d3b28a"
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 1,
+    "timeout_ms": 3000000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold",
+    "early_stop": false
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.3.0",
+    "git_sha": "0a2b37a3",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-10-27T06:22:16.430756Z",
+  "finished_at": "2026-10-27T06:50:26.636Z"
+}

@@ -1,0 +1,20 @@
+# PRD: Chat notifications
+
+## Problem and goal
+Users miss messages that matter to them.
+
+## User stories
+- As a member, I want to be notified when I am mentioned, so that I don't miss what needs me.
+
+## Requirements
+- PRD-1: Notify a user when they are @mentioned in a channel they belong to.
+  - Acceptance: a mention produces one in-app notification for that user, and none for others.
+- PRD-2: A user can turn notifications off per channel.
+  - Acceptance: with notifications off, mentions in that channel produce no notification.
+
+## Out of scope
+- Email and push notifications; digests.
+
+## Open questions / assumptions
+- "Messages they care about" is ambiguous. Assumed it means @mentions; keywords, replies or whole channels are open questions.
+- Delivery channel (in-app, email, push) is unspecified; assumed in-app only.
