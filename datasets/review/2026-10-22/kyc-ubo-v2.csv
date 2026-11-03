@@ -1,0 +1,304 @@
+id,type,split,priority,verdict,beneficial_owners_ok,fictitious_owner_ok,missing,extra,should_be,reason,reviewed_on,gpt-5.6-sol_grading,gpt-5.6-sol_grading_stands,opus-5.5_grading,opus-5.5_grading_stands
+ubo2-024,own-shares,dev,高,正确,对,对,,,,,2026-10-26,"✘ owner missing: Fabian Arendt, Greta Lindqvist, Bastian Krüger",模型确实错,✔ 答对,—（答对）
+ubo2-026,kg,holdout,高,正确,对,对,,,,,2026-10-26,✘ owner not expected: Emil Reuter,模型确实错,✔ 答对,—（答对）
+ubo2-056,kg,holdout,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner missing: Matthias Althaus,模型确实错
+ubo2-078,two-vehicles,dev,高,正确,对,对,,,,,2026-10-26,✘ owner missing: Vera Falk,模型确实错,✔ 答对,—（答对）
+ubo2-080,voting-rights,dev,高,正确,对,对,,,,,2026-10-26,"✘ owner missing: Ruth Lang, Felix Althaus, Clara Krüger",模型确实错,✔ 答对,—（答对）
+ubo2-105,aggregation,dev,高,正确,对,对,,,,,2026-10-26,✘ owner missing: Nils Reuter,模型确实错,✔ 答对,—（答对）
+ubo2-115,kg,dev,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner missing: Oskar Faber,模型确实错
+ubo2-138,two-vehicles,dev,高,正确,对,对,,,,,2026-10-26,✘ owner missing: Ida Arendt,模型确实错,✔ 答对,—（答对）
+ubo2-146,kg,holdout,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner missing: Bastian Brenner,模型确实错
+ubo2-175,kg,dev,高,题目有歧义,错,对,,Helena Ziegler：40% of capital,"Clara Kramer：43.75% of capital
+Clara Kramer：31.25% of capital
+Nils Brenner：controls the general partner Hellbrunn Verwaltungs GmbH",Helena Ziegler 有两条一样的的记录，会被认为是重复，考虑去掉一条,2026-10-26,"✘ owner not expected: Helena Ziegler
+✘ owner missing: Oskar Haas",模型确实错,✘ owner missing: Nils Brenner,模型确实错
+ubo2-177,kg,holdout,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner missing: Anna Lindqvist,模型确实错
+ubo2-198,two-vehicles,dev,高,正确,对,对,,,,,2026-10-26,✘ owner missing: Kai Pohl,模型确实错,✔ 答对,—（答对）
+ubo2-207,kg,holdout,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner missing: Ines Lindqvist,模型确实错
+ubo2-217,normal,holdout,高,正确,对,对,,,,,2026-10-26,✘ owner missing: Ruth Falk,模型确实错,✔ 答对,—（答对）
+ubo2-237,kg,holdout,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner not expected: Anna Krüger,模型确实错
+ubo2-256,aggregation,holdout,高,正确,对,对,,,,,2026-10-26,✘ owner missing: Bastian Haas,模型确实错,✔ 答对,—（答对）
+ubo2-266,kg,holdout,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner missing: Lena Kramer,模型确实错
+ubo2-267,kg,holdout,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner missing: Lena Lang,模型确实错
+ubo2-296,kg,holdout,高,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✘ owner missing: Anna Haas,模型确实错
+ubo2-001,normal,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-002,normal,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-003,normal,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-004,normal,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-005,normal,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-006,normal,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-007,normal,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-008,normal,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-009,normal,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-010,normal,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-011,nominal-boundary,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-012,nominal-boundary,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-013,nominal-boundary,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-014,aggregation,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-015,aggregation,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-016,aggregation,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-017,two-vehicles,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-018,two-vehicles,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-019,two-vehicles,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-020,voting-rights,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-021,voting-rights,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-022,voting-rights,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-023,own-shares,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-025,kg,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-027,kg,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-028,no-control,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-029,no-control,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-030,no-control,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-031,normal,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-032,normal,holdout,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-033,normal,dev,,正确,对,对,,,,,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-034,normal,dev,,正确,对,对,,,,资本基数 40.000 €：Henrik Arendt 24.000 € = 60%、Konrad Engel 16.000 € = 40%，均超过 25%（R1）；两名总经理不持股，虚拟受益所有人空。推导与输入一致。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-035,normal,dev,,正确,对,对,,,,Mara Roth 两笔合计 12.500 € = 50%（R2），Jana Faber 7.500 € = 30%；Lukas Thiel 5.000 € = 20% 不算。推导无误。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-036,normal,holdout,,正确,对,对,,,,Moritz Pohl 两笔合计 20.000 € = 40%（R2），Theo Engel 20.000 € = 40%；Oskar Wendt 10.000 € = 20% 不算。推导无误。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-037,normal,holdout,,正确,对,对,,,,Theresa Arendt 34.000 € = 34%、Henrik Arendt 33.000 € = 33%、Matthias Sommer 33.000 € = 33%，三人都超过 25%（R1）；Theresa Arendt 的 Prokura 不影响其股东身份。推导无误。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-038,normal,dev,,正确,对,对,,,,Emil Vogt 22.000 € = 55%、Anna Reuter 18.000 € = 45%，都超过 25%；Emil Vogt 的 Prokura 与其股东身份无关。推导无误。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-039,normal,dev,,正确,对,对,,,,Paula Althaus 两笔合计 36.000 € = 60%（R2），Henrik Krüger 24.000 € = 40%。推导无误。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-040,normal,dev,,正确,对,对,,,,Konrad Arendt 45.000 € = 45%、Anna Ziegler 35.000 € = 35%；Clara Kessler 20.000 € = 20% 不算，其总经理身份不产生受益所有权。推导无误。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-041,nominal-boundary,holdout,,正确,对,对,,,,Ines Falk 251 + 14.750 = 15.001 € = 25.002%（R2），Moritz Roth 29.999 € = 49.998%；Ines Winter 15.000 € 正好 25%，不算。边界处理正确（R1 要求严格超过 25%）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-042,nominal-boundary,holdout,,正确,对,对,,,,Theresa Kramer 251 + 12.250 = 12.501 € = 25.002%（R2），Moritz Engel 24.999 € = 49.998%；Moritz Vogt 12.500 € 正好 25%，不算。边界正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-043,nominal-boundary,dev,,正确,对,对,,,,Helena Lindqvist 251 + 6.000 = 6.251 € = 25.004%（R2），Helena Brenner 12.499 € = 49.996%；Moritz Becker 6.250 € 正好 25%，不算。边界正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-044,aggregation,dev,,正确,对,对,,,,Theresa Brandt 直接 3.000 € + 其所控制的 Auental Holding 3.250 € 全额计入（R3）= 6.250 € = 25%，正好 25% 不算；Anna Lorenz 7.500 € = 30% 是唯一受益所有人。加总口径正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-045,aggregation,dev,,正确,对,对,,,,Greta Engel 直接 5.000 € + 其以 55% 控制的 Rabenfels 10.000 € 全额计入（R3）= 15.000 € = 30%；Felix Brandt 15.000 € = 30%；Fabian Winter 45% 不构成控制。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-046,aggregation,holdout,,正确,对,对,,,,Felix Haas 两笔 15.000 €（R2）+ 其以 60% 控制的 Kestrel 12.000 € 全额计入 = 27.000 € = 27%；Henrik Lang 30.000 € = 30%；Emil Becker 40% 不构成控制。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-047,two-vehicles,holdout,,正确,对,对,,,,Helena Faber 分别以 55%、80% 控制 Steinach、Feldkamp，两块 8.400 € 全额加总 = 16.800 € = 28%（R3、R4）；Rabenfels 50/50 无人控制，其 40% 不归属任何人（R5）。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-048,two-vehicles,dev,,正确,对,对,,,,Ida Lorenz 分别以 70%、80% 控制 Eichental、Feldkamp，4.800 + 6.000 = 10.800 € = 27%；Brunnfeld 50/50 无人控制，其 30% 不归属任何人。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-049,two-vehicles,dev,,正确,对,对,,,,Anna Brandt 分别以 100%、80% 控制 Ostmark Vermögensverwaltung、Tannberg Invest，15.000 + 15.000 = 30.000 € = 30%；Ostmark Invest 50/50 无人控制。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-050,voting-rights,dev,,正确,对,对,,,,股份 4 无表决权，表决权基数为有表决权出资 45.000 €；三名 15.000 € 股东表决权各 33.333%，Theresa Lindqvist 资本 55%，四人均达标（R1 资本或表决权任一超过 25%）。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-051,voting-rights,holdout,,正确,对,对,,,,股份 4（30.000 €）无表决权，表决权基数 20.000 €；Ines Sommer 10.000 € = 50% 表决权；Theresa Kuhn 资本 60%；Anika Roth、Tobias Lorenz 表决权正好 25%，不算。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-052,voting-rights,holdout,,正确,对,对,,,,股份 1（33.000 €）无表决权，表决权基数 27.000 €；Matthias Falk 两笔 9.000 € = 33.333%（R2）、Theresa Seidel 与 Greta Sommer 各 9.000 € = 33.333%；Ruth Lindqvist 资本 55%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-053,own-shares,dev,,正确,对,对,,,,自有股份 30.000 € 从基数中扣除，基数 30.000 €（R6）；Anna Kuhn、Jana Lorenz 各 15.000 € = 50%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-054,own-shares,dev,,正确,对,对,,,,自有股份 20.000 € 扣除后基数 30.000 €（R6）；Theresa Falk 两笔 10.000 €、Fabian Kuhn 10.000 €、Moritz Althaus 10.000 € 各 33.333%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-055,kg,dev,,正确,对,对,,,,KG 四名 Kommanditisten 各 10.000/40.000 = 25%，正好 25% 不算；Felix Buchholz 以 75%（22.500/30.000）控制普通合伙人 Auental Verwaltungs GmbH，按 R7 为受益所有人。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-057,kg,holdout,,正确,对,对,,,,Greta Krüger 持有普通合伙人 Grauwerk Verwaltungs GmbH 100%，按 R7 为受益所有人；Kommanditisten 各 10.000/50.000 = 20% 均不达标，她自己的 20% 也不影响结论。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-058,no-control,dev,,正确,对,对,,,,Feldkamp Holding 为 50/50，无人控制，其 40% 不归属任何人（R5）；其余自然人最高 15%，无人达标，虚拟受益所有人只有总经理 Kai Kessler，Prokuristin Theresa Reuter 不算（R8）。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-059,no-control,dev,,正确,对,对,,,,Weidenhof 为 50/50 无人控制，其 60% 不归属任何人；直接股东最高 20%，无人达标，虚拟受益所有人为两名总经理 Theo Reuter、Oskar Kuhn（R8）。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-060,no-control,dev,,正确,对,对,,,,Feldkamp 为 50/50 无人控制，其 60% 不归属任何人；直接股东最高 20%，无人达标，虚拟受益所有人为两名总经理 Mara Hartmann、Theresa Brandt（R8）。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-061,normal,holdout,,正确,对,对,,,,Moritz Haas 13.600 € = 34%、Anika Thiel 13.200 € = 33%、Theresa Kessler 13.200 € = 33%，均超过 25%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-062,normal,holdout,,正确,对,对,,,,Greta Faber 36.000 € = 60%、Theo Lang 24.000 € = 40%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-063,normal,dev,,正确,对,对,,,,Nils Arendt 两笔合计 20.000 € = 40%（R2）、Ida Haas 20.000 € = 40%；Lena Arendt 10.000 € = 20% 不算。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-064,normal,dev,,正确,对,对,,,,Ines Vogt 20.000 € = 50%、Kai Brandt 12.000 € = 30%；Anika Seidel 8.000 € = 20% 不算。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-065,normal,dev,,正确,对,对,,,,Tobias Seidel 40.000 € = 40%、Mara Thiel 40.000 € = 40%；Sofie Engel 20.000 € = 20% 不算。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-066,normal,holdout,,正确,对,对,,,,Helena Brenner 两笔合计 20.400 € = 34%（R2）、Emil Engel 19.800 € = 33%、Vera Winter 19.800 € = 33%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-067,normal,holdout,,正确,对,对,,,,Lukas Faber 22.000 € = 55%、Lena Lorenz 18.000 € = 45%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-068,normal,dev,,正确,对,对,,,,Ruth Falk 30.000 € = 60%、Theo Kramer 20.000 € = 40%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-069,normal,dev,,正确,对,对,,,,Moritz Kuhn 70.000 € = 70%、Ida Wendt 30.000 € = 30%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-070,normal,dev,,正确,对,对,,,,Mara Pohl 15.000 € = 60%、Mara Lindqvist 10.000 € = 40%；两人同姓不合并，各自单独计算。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-071,nominal-boundary,holdout,,正确,对,对,,,,Vera Reuter 6.000 + 251 = 6.251 € = 25.004%（R2）、Theresa Ziegler 12.499 € = 49.996%；Ida Buchholz 6.250 € 正好 25%，不算。边界正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-072,nominal-boundary,holdout,,正确,对,对,,,,Jana Haas 12.250 + 251 = 12.501 € = 25.002%（R2）、Anna Hartmann 24.999 € = 49.998%；Vera Kramer 12.500 € 正好 25%，不算。边界正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-073,nominal-boundary,dev,,正确,对,对,,,,Konrad Engel 9.750 + 251 = 10.001 € = 25.003%（R2）、Matthias Brenner 19.999 € = 49.998%；Bastian Ziegler 10.000 € 正好 25%，不算。边界正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-074,aggregation,dev,,正确,对,对,,,,Anika Becker 直接 3.000 € + 其以 55% 控制的 Weidenhof Beteiligungs 3.250 € 全额计入 = 6.250 € = 25%，正好 25% 不算；Konrad Seidel 8.750 € = 35% 是唯一受益所有人。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-075,aggregation,dev,,正确,对,对,,,,Paula Lang 直接 7.200 € + 其以 60% 控制的 Kestrel 7.800 € 全额计入 = 15.000 € = 25%，正好 25% 不算；Ida Thiel 24.000 € = 40% 是唯一受益所有人。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-076,aggregation,holdout,,正确,对,对,,,,Oskar Lindqvist 直接 2.500 € + 其 100% 控制的 Feldkamp 5.000 € 全额计入 = 7.500 € = 30%；Mara Seidel 8.750 € = 35%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-077,two-vehicles,holdout,,正确,对,对,,,,Theresa Althaus 分别以 70%、60% 控制 Ostmark Invest、Kestrel Holding，8.400 + 8.400 = 16.800 € = 28%；Weidenhof Invest 50/50 无人控制，其 40% 不归属任何人。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-079,two-vehicles,dev,,正确,对,对,,,,Jana Brenner 分别以 100%、60% 控制 Brunnfeld、Eichental，14.000 + 14.000 = 28.000 € = 28%；Steinach 50/50 无人控制，其 40% 不归属任何人。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-081,voting-rights,holdout,,正确,对,对,,,,股份 1（24.000 €）无表决权，表决权基数 16.000 €；Mara Kramer 两笔 8.000 € = 50% 表决权；Henrik Ziegler 资本 60%；Sofie Kramer、Anika Roth 表决权正好 25%，不算。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-082,voting-rights,holdout,,正确,对,对,,,,股份 1、4 无表决权（20.800 €），表决权基数 19.200 €；Tobias Buchholz 两笔 9.600 € = 50%（R2）、Kai Lindqvist 9.600 € = 50%；Lena Kramer、Vera Arendt 资本各 26%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-083,own-shares,dev,,正确,对,对,,,,自有股份 24.000 € 扣除后基数 36.000 €（R6）；Fabian Kessler、Felix Falk 各 14.400 € = 40%；Fabian Buchholz 7.200 € = 20% 不算。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-084,own-shares,dev,,正确,对,对,,,,自有股份 50.000 € 扣除后基数 50.000 €（R6）；Theresa Wendt、Kai Roth 各 25.000 € = 50%。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-085,kg,dev,,正确,对,对,,,,四名 Kommanditisten 各 12.500/50.000 = 25%，正好 25% 不算；Jana Falk 以 60% 控制普通合伙人 Feldkamp Verwaltungs GmbH，按 R7 为受益所有人。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-086,kg,holdout,,正确,对,对,,,,Konrad Kuhn 16.000 € = 40%、Clara Krüger 14.000 € = 35%，Nils Lindqvist 10.000 € 正好 25% 不算；Matthias Kuhn 以 75% 控制普通合伙人 Weidenhof Verwaltungs GmbH，按 R7 为受益所有人。正确。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-087,kg,holdout,,正确,对,对,,,,KG 资本按 Hafteinlage 合计 25.000 € 计算。受益所有人：Greta Krüger 资本 45%；Ruth Lindqvist 资本 30%；Kai Seidel 控制普通合伙人（R7，表决权超 50%）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-088,no-control,dev,,正确,对,对,,,,无人超过 25% 或形成控制。Grauwerk Vermögensverwaltung GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）。不达标：Paula Brenner 20%、Jonas Ziegler 20%、Matthias Althaus 5%、Henrik Pohl 5%。登记总经理为虚拟受益所有人：Paula Brenner、Paula Vogt。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-089,no-control,dev,,正确,对,对,,,,无人超过 25% 或形成控制。Auental Holding GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）。不达标：Clara Wendt 20%、Anika Pohl 20%、Clara Winter 10%、Theo Reuter 10%。登记总经理为虚拟受益所有人：Lena Lindqvist；Prokurist Clara Wendt 不算（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-090,no-control,dev,,正确,对,对,,,,无人超过 25% 或形成控制。Nordwall Invest GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）。不达标：Lukas Falk 15%、Helena Thiel 15%、Ida Kessler 10%、Moritz Vogt 10%、Lukas Kessler 5%、Emil Roth 5%。登记总经理为虚拟受益所有人：Henrik Sommer；Prokurist Helena Thiel 不算（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-091,normal,holdout,,正确,对,对,,,,受益所有人：Vera Vogt 资本 60%；Helena Roth 资本 40%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-092,normal,holdout,,正确,对,对,,,,受益所有人：Bastian Arendt 资本 50%；Ida Lindqvist 资本 30%。不达标：Clara Sommer 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-093,normal,dev,,正确,对,对,,,,受益所有人：Nils Kramer 资本 34%；Oskar Kessler 资本 33%；Jonas Reuter 资本 33%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-094,normal,dev,,正确,对,对,,,,受益所有人：Fabian Thiel 资本 55%；Ines Althaus 资本 45%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-095,normal,dev,,正确,对,对,,,,受益所有人：Greta Lorenz 资本 55%；Ruth Becker 资本 45%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-096,normal,holdout,,正确,对,对,,,,受益所有人：Greta Buchholz 资本 40%；Matthias Falk 资本 40%。不达标：Anna Brandt 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-097,normal,holdout,,正确,对,对,,,,受益所有人：Tobias Engel 资本 55%；Helena Winter 资本 45%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-098,normal,dev,,正确,对,对,,,,受益所有人：Bastian Arendt 资本 34%；Matthias Reuter 资本 33%；Henrik Seidel 资本 33%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-099,normal,dev,,正确,对,对,,,,受益所有人：Matthias Seidel 资本 34%；Bastian Falk 资本 33%；Felix Althaus 资本 33%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-100,normal,dev,,正确,对,对,,,,受益所有人：Ines Hartmann 资本 50%；Sofie Kessler 资本 30%。不达标：Nils Sommer 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-101,nominal-boundary,holdout,,正确,对,对,,,,受益所有人：Helena Seidel 资本 49.999%；Theo Wendt 资本 25.001%。不达标：Kai Buchholz 25%。恰为 25% 的不算（须严格超过）：Kai Buchholz。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-102,nominal-boundary,holdout,,正确,对,对,,,,受益所有人：Greta Lorenz 资本 49.998%；Ruth Kessler 资本 25.003%。不达标：Helena Brandt 25%。恰为 25% 的不算（须严格超过）：Helena Brandt。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-103,nominal-boundary,dev,,正确,对,对,,,,受益所有人：Anika Ziegler 资本 49.998%；Lena Kramer 资本 25.002%。不达标：Lena Brenner 25%。恰为 25% 的不算（须严格超过）：Lena Brenner。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-104,aggregation,dev,,正确,对,对,,,,受益所有人：Paula Engel 资本 40%；Greta Althaus 资本 30%（含其控制公司的全额持股）。Eichental Holding GmbH 由 Greta Althaus 控制（>50% 表决权）。不达标：Ines Krüger 15%、Lena Sommer 5%、Theresa Roth 5%、Konrad Faber 5%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-106,aggregation,holdout,,正确,对,对,,,,受益所有人：Clara Reuter 资本 40%；Anika Falk 资本 30%（含其控制公司的全额持股）。Auental Beteiligungs GmbH 由 Anika Falk 控制（>50% 表决权）。不达标：Ruth Falk 20%、Oskar Brenner 5%、Lukas Buchholz 5%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-107,two-vehicles,holdout,,正确,对,对,,,,受益所有人：Anika Seidel 资本 27%（含其控制公司的全额持股）。Silberau Beteiligungs GmbH 由 Anika Seidel 控制（>50% 表决权）；Kestrel Beteiligungs GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）；Nordwall Beteiligungs GmbH 由 Anika Seidel 控制（>50% 表决权）。不达标：Lukas Althaus 15%、Jana Haas 15%、Lukas Winter 3%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-108,two-vehicles,dev,,正确,对,对,,,,受益所有人：Emil Krüger 资本 27%（含其控制公司的全额持股）。Falkenhorst Beteiligungs GmbH 由 Emil Krüger 控制（>50% 表决权）；Weidenhof Vermögensverwaltung GmbH 由 Emil Krüger 控制（>50% 表决权）；Kestrel Holding GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）。不达标：Jana Falk 15%、Henrik Lang 10%、Theresa Haas 5%、Paula Lang 3%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-109,two-vehicles,dev,,正确,对,对,,,,受益所有人：Anika Kuhn 资本 27%（含其控制公司的全额持股）。Auental Invest GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）；Hellbrunn Beteiligungs GmbH 由 Anika Kuhn 控制（>50% 表决权）；Tannberg Invest GmbH 由 Anika Kuhn 控制（>50% 表决权）。不达标：Anika Brandt 10%、Ruth Engel 5%、Fabian Brenner 5%、Paula Ziegler 5%、Kai Kessler 5%、Matthias Falk 3%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-110,voting-rights,dev,,正确,对,对,,,,无表决权的份额为第 3、4 号，表决权基数 24.000 €（R1）。受益所有人：Tobias Kessler 表决权 50%（资本仅 24%）；Anna Kramer 表决权 50%（资本仅 24%）；Ida Hartmann 资本 26%；Anna Seidel 资本 26%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-111,voting-rights,holdout,,正确,对,对,,,,无表决权的份额为第 2 号，表决权基数 45.000 €（R1）。受益所有人：Jonas Sommer 资本 55%；Clara Ziegler 表决权 33.333%（资本仅 15%）；Emil Pohl 表决权 33.333%（资本仅 15%）；Anna Pohl 表决权 33.333%（资本仅 15%）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-112,voting-rights,holdout,,正确,对,对,,,,无表决权的份额为第 4 号，表决权基数 11.250 €（R1）。受益所有人：Fabian Pohl 资本 55%；Theresa Faber 表决权 33.333%（资本仅 15%）；Theo Thiel 表决权 33.333%（资本仅 15%）；Anika Falk 表决权 33.333%（资本仅 15%）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-113,own-shares,dev,,正确,对,对,,,,公司自有份额 16.000 € 不计入基数（R6），基数 24.000 €。受益所有人：Theo Lindqvist 资本 33.333%；Ines Winter 资本 33.333%；Felix Brenner 资本 33.333%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-114,own-shares,dev,,正确,对,对,,,,公司自有份额 50.000 € 不计入基数（R6），基数 50.000 €。受益所有人：Paula Engel 资本 50%；Felix Seidel 资本 50%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-116,kg,holdout,,正确,对,对,,,,KG 资本按 Hafteinlage 合计 60.000 € 计算。受益所有人：Felix Lang 资本 40%；Greta Brenner 资本 35%；Theo Kuhn 控制普通合伙人（R7，表决权超 50%）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-117,kg,holdout,,正确,对,对,,,,KG 资本按 Hafteinlage 合计 100.000 € 计算。受益所有人：Ida Haas 控制普通合伙人（R7，表决权超 50%）。不达标：Felix Sommer 20%、Fabian Krüger 20%、Helena Sommer 20%、Greta Engel 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-118,no-control,dev,,正确,对,对,,,,无人超过 25% 或形成控制。Tannberg Beteiligungs GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）。不达标：Konrad Vogt 20%、Moritz Falk 10%、Anna Hartmann 5%、Theresa Falk 5%、Jana Thiel 5%、Tobias Roth 5%。登记总经理为虚拟受益所有人：Paula Seidel、Theo Kuhn；Prokurist Jonas Faber 不算（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-119,no-control,dev,,正确,对,对,,,,无人超过 25% 或形成控制。Steinach Holding GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）。不达标：Lena Krüger 20%、Emil Roth 15%、Fabian Reuter 15%。登记总经理为虚拟受益所有人：Matthias Kramer。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-120,no-control,dev,,正确,对,对,,,,无人超过 25% 或形成控制。Steinach Beteiligungs GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）。不达标：Tobias Krüger 20%、Nils Thiel 10%、Tobias Arendt 10%。登记总经理为虚拟受益所有人：Ines Brandt。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-121,normal,holdout,,正确,对,对,,,,受益所有人：Theresa Lorenz 资本 45%；Anna Lang 资本 35%。不达标：Anna Lindqvist 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-122,normal,holdout,,正确,对,对,,,,受益所有人：Paula Lindqvist 资本 45%；Lena Seidel 资本 35%。不达标：Lena Sommer 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-123,normal,dev,,正确,对,对,,,,受益所有人：Vera Haas 资本 40%；Oskar Vogt 资本 40%。不达标：Emil Haas 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-124,normal,dev,,正确,对,对,,,,受益所有人：Lukas Kessler 资本 34%；Felix Haas 资本 33%；Clara Pohl 资本 33%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-125,normal,dev,,正确,对,对,,,,受益所有人：Lukas Falk 资本 40%；Jonas Krüger 资本 40%。不达标：Henrik Vogt 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-126,normal,holdout,,正确,对,对,,,,受益所有人：Paula Haas 资本 50%；Theo Lang 资本 30%。不达标：Greta Krüger 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-127,normal,holdout,,正确,对,对,,,,受益所有人：Oskar Pohl 资本 60%；Lena Thiel 资本 40%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-128,normal,dev,,正确,对,对,,,,受益所有人：Vera Lindqvist 资本 40%；Anika Pohl 资本 40%。不达标：Clara Haas 20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-129,normal,dev,,正确,对,对,,,,受益所有人：Bastian Becker 资本 34%；Konrad Kuhn 资本 33%；Theo Krüger 资本 33%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-130,normal,dev,,正确,对,对,,,,受益所有人：Konrad Becker 资本 60%；Felix Althaus 资本 40%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-131,nominal-boundary,holdout,,正确,对,对,,,,受益所有人：Theo Lang 资本 49.998%；Kai Roth 资本 25.002%。不达标：Anna Vogt 25%。恰为 25% 的不算（须严格超过）：Anna Vogt。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-132,nominal-boundary,holdout,,正确,对,对,,,,受益所有人：Jana Roth 资本 49.998%；Ida Brandt 资本 25.003%。不达标：Anna Haas 25%。恰为 25% 的不算（须严格超过）：Anna Haas。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-133,nominal-boundary,dev,,正确,对,对,,,,受益所有人：Ida Althaus 资本 49.998%；Vera Brenner 资本 25.002%。不达标：Theo Pohl 25%。恰为 25% 的不算（须严格超过）：Theo Pohl。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-134,aggregation,dev,,正确,对,对,,,,受益所有人：Fabian Althaus 资本 40%；Bastian Faber 资本 27%（含其控制公司的全额持股）。Ostmark Vermögensverwaltung GmbH 由 Bastian Faber 控制（>50% 表决权）。不达标：Ida Vogt 15%、Ida Seidel 10%、Ida Buchholz 5%、Lukas Kuhn 3%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-135,aggregation,dev,,正确,对,对,,,,受益所有人：Matthias Haas 资本 30%；Emil Hartmann 资本 30%（含其控制公司的全额持股）。Brunnfeld Holding GmbH 由 Emil Hartmann 控制（>50% 表决权）。不达标：Ines Vogt 20%、Jana Althaus 15%、Oskar Becker 5%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-136,aggregation,holdout,,正确,对,对,,,,受益所有人：Helena Lorenz 资本 30%；Bastian Winter 资本 30%（含其控制公司的全额持股）。Grauwerk Beteiligungs GmbH 由 Bastian Winter 控制（>50% 表决权）。不达标：Theo Falk 15%、Fabian Buchholz 15%、Clara Krüger 5%、Fabian Wendt 5%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-137,two-vehicles,holdout,,正确,对,对,,,,受益所有人：Bastian Faber 资本 28%（含其控制公司的全额持股）。Ostmark Holding GmbH 由 Bastian Faber 控制（>50% 表决权）；Eichental Invest GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）；Grauwerk Invest GmbH 由 Bastian Faber 控制（>50% 表决权）。不达标：Greta Kessler 15%、Mara Hartmann 15%、Fabian Ziegler 5%、Fabian Althaus 5%、Clara Haas 2%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-139,two-vehicles,dev,,正确,对,对,,,,受益所有人：Moritz Sommer 资本 30%（含其控制公司的全额持股）。Rabenfels Vermögensverwaltung GmbH 由 Moritz Sommer 控制（>50% 表决权）；Auental Beteiligungs GmbH 由 Moritz Sommer 控制（>50% 表决权）；Auental Vermögensverwaltung GmbH 无人控制（无人超过 50%），其份额不归任何人（R5）。不达标：Ida Wendt 20%、Ines Falk 10%、Anika Kessler 5%、Ruth Vogt 5%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-140,voting-rights,dev,,正确,对,对,,,,无表决权份额 26.000 €、26.000 €，表决权基数 48.000 €；Bastian Falk 资本 26%、表决权 0%；Sofie Seidel 资本 26%、表决权 0%；Clara Hartmann（2 笔合计） 资本 24%、表决权 50%；Clara Kessler 资本 24%、表决权 50%，任一超过 25% → 算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-141,voting-rights,holdout,,正确,对,对,,,,无表决权份额 30.000 €，表决权基数 20.000 €；Paula Kuhn 资本 60%、表决权 0%；Clara Reuter 资本 20%、表决权 50%，任一超过 25% → 算；Greta Wendt 表决权正好 25%，不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-142,voting-rights,holdout,,正确,对,对,,,,无表决权份额 15.000 €，表决权基数 10.000 €；Sofie Roth 资本 60%、表决权 0%；Lukas Lang 资本 20%、表决权 50%，任一超过 25% → 算；Tobias Buchholz 表决权正好 25%，不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-143,own-shares,dev,,正确,对,对,,,,【 ·口径R6】自有份额 16.000 € 从基数扣除，基数 24.000 €；Anika Lorenz 持 8.000 € = 33.333%、Jonas Brandt 持 8.000 € = 33.333%、Tobias Pohl 持 8.000 € = 33.333%，均严格超过 25%（R6、R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-144,own-shares,dev,,正确,对,对,,,,【 ·口径R6】自有份额 12.500 € 从基数扣除，基数 12.500 €；Greta Kramer（2 笔合计） 持 6.250 € = 50%、Ines Brenner 持 6.250 € = 50%，均严格超过 25%（R6、R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-145,kg,dev,,正确,对,对,,,,【 ·口径R7】Kommanditisten 出资基数 50.000 €：Theresa Arendt 45%、Anna Krüger 30%；Felix Buchholz 正好 25%，不作为 Kommanditist 计入；Felix Buchholz 持 30.000 € / 50.000 € = 60%，控制普通合伙人 Lindmoor Verwaltungs GmbH，按 R7 也算。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-147,kg,holdout,,正确,对,对,,,,【 ·口径R7】Kommanditisten 出资基数 50.000 €，各 Kommanditist 均未超过 25%（Ida Winter 正好 25%）；Kai Hartmann 持 25.000 € / 25.000 € = 100%，控制普通合伙人 Brunnfeld Verwaltungs GmbH，按 R7 也算。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-148,no-control,dev,,正确,对,对,,,,Grauwerk Vermögensverwaltung GmbH 持 16.000 €（40%），但其股东为 50/50，无人控制，份额不计；其余股东最高 6.000 € = 15%，均未超过 25% → 受益所有人为空；虚拟受益所有人 = 法定代表人 Emil Althaus（Prokurist Kai Ziegler 不算，R8）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-149,no-control,dev,,正确,对,对,,,,Ostmark Holding GmbH 持 25.000 €（50%），但其股东为 50/50，无人控制，份额不计；其余股东最高 10.000 € = 20%，均未超过 25% → 受益所有人为空；虚拟受益所有人 = 法定代表人 Ines Falk、Tobias Kuhn（Prokurist Bastian Brenner 不算，R8）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-150,no-control,dev,,正确,对,对,,,,Silberau Vermögensverwaltung GmbH 持 25.000 €（50%），但其股东为 50/50，无人控制，份额不计；其余股东最高 7.500 € = 15%，均未超过 25% → 受益所有人为空；虚拟受益所有人 = 法定代表人 Vera Lang、Oskar Arendt。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-151,normal,holdout,,正确,对,对,,,,直接持股：Konrad Buchholz（2 笔合计） 45%、Ruth Lang 35%，均严格超过 25%；Nils Kramer 20% 未超过 25%，不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-152,normal,holdout,,正确,对,对,,,,直接持股：Kai Wendt 70%、Bastian Seidel 30%，均严格超过 25%（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-153,normal,dev,,正确,对,对,,,,直接持股：Ruth Faber 55%、Ida Becker 45%，均严格超过 25%（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-154,normal,dev,,正确,对,对,,,,直接持股：Moritz Thiel 45%、Clara Lorenz 35%，均严格超过 25%；Helena Kramer 20% 未超过 25%，不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-155,normal,dev,,正确,对,对,,,,直接持股：Clara Winter 45%、Ruth Falk 35%，均严格超过 25%；Anna Ziegler 20% 未超过 25%，不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-156,normal,holdout,,正确,对,对,,,,直接持股：Anika Becker 70%、Felix Buchholz 30%，均严格超过 25%（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-157,normal,holdout,,正确,对,对,,,,直接持股：Paula Kramer 34%、Emil Hartmann 33%、Helena Thiel 33%，均严格超过 25%（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-158,normal,dev,,正确,对,对,,,,直接持股：Felix Haas（2 笔合计） 50%、Ida Lorenz 30%，均严格超过 25%；Anna Becker 20% 未超过 25%，不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-159,normal,dev,,正确,对,对,,,,直接持股：Moritz Becker（2 笔合计） 70%、Theo Althaus 30%，均严格超过 25%（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-160,normal,dev,,正确,对,对,,,,直接持股：Jonas Althaus 45%、Ida Kramer 35%，均严格超过 25%；Jonas Vogt 20% 未超过 25%，不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-161,nominal-boundary,holdout,,正确,对,对,,,,资本基数 50.000 €：Bastian Arendt 49.998%、Paula Arendt（2 笔合计） 25.002% 严格超过 25%，算；Bastian Lang 12.500 €（正好 25%） 不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-162,nominal-boundary,holdout,,正确,对,对,,,,资本基数 25.000 €：Theo Kuhn 49.996%、Jonas Becker（2 笔合计） 25.004% 严格超过 25%，算；Sofie Lindqvist 6.250 €（正好 25%） 不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-163,nominal-boundary,dev,,正确,对,对,,,,资本基数 50.000 €：Lukas Brenner 49.998%、Theresa Wendt（2 笔合计） 25.002% 严格超过 25%，算；Clara Ziegler 12.500 €（正好 25%） 不算（R1）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-164,aggregation,dev,,正确,对,对,,,,Nils Arendt 直接持 15.000 € / 50.000 € = 30%；Lena Thiel 直接 6.000 € + 受控 Kestrel Invest GmbH 持 6.500 € = 12.500 € = 正好 25%，不算（R2、R3）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-165,aggregation,dev,,正确,对,对,,,,Ines Lorenz 直接持 17.500 € / 50.000 € = 35%；Jonas Althaus 直接 10.000 € + 受控 Brunnfeld Holding GmbH 持 5.000 € = 15.000 € / 50.000 € = 30%，超过 25%（R2、R3）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-166,aggregation,holdout,,正确,对,对,,,,Anna Lang 直接持 35.000 € / 100.000 € = 35%；Nils Thiel 直接 12.000 € + 受控 Feldkamp Holding GmbH 持 13.000 € = 25.000 € = 正好 25%，不算（R2、R3）。,2026-10-26,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-167,two-vehicles,holdout,,正确,对,对,,,,Theo Wendt 经受控 Nordwall Beteiligungs GmbH 计 7.500 €、经受控 Falkenhorst Beteiligungs GmbH 计 7.500 €，合计 15.000 € / 50.000 € = 30%；Kestrel Beteiligungs GmbH 为 50/50 无人控制，其份额不计（R4、R5）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-168,two-vehicles,dev,,正确,对,对,,,,Bastian Sommer 经受控 Grauwerk Holding GmbH 计 6.000 €、经受控 Eichental Beteiligungs GmbH 计 7.500 €，合计 13.500 € / 50.000 € = 27%；Falkenhorst Holding GmbH 为 50/50 无人控制，其份额不计（R4、R5）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-169,two-vehicles,dev,,正确,对,对,,,,Anna Arendt 经受控 Eichental Vermögensverwaltung GmbH 计 9.000 €、经受控 Auental Invest GmbH 计 7.200 €，合计 16.200 € / 60.000 € = 27%；Auental Holding GmbH 为 50/50 无人控制，其份额不计（R4、R5）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-170,voting-rights,dev,,正确,对,对,,,,【 ·口径R1】无表决权份额 30.000 €，表决权基数 20.000 €；Matthias Reuter 资本 60%、表决权 0%；Ida Brandt 资本 20%、表决权 50%，任一超过 25% → 算；Jana Pohl 表决权正好 25%，不算（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-171,voting-rights,holdout,,正确,对,对,,,,【 ·口径R1】无表决权份额 10.400 €、10.400 €，表决权基数 19.200 €；Ruth Reuter 资本 26%、表决权 0%；Theresa Arendt 资本 26%、表决权 0%；Nils Lindqvist 资本 24%、表决权 50%；Paula Althaus 资本 24%、表决权 50%，任一超过 25% → 算（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-172,voting-rights,holdout,,正确,对,对,,,,【 ·口径R1】无表决权份额 13.750 €，表决权基数 11.250 €；Emil Kramer 资本 55%、表决权 0%；Henrik Faber 资本 15%、表决权 33.333%；Sofie Winter 资本 15%、表决权 33.333%；Tobias Kessler（2 笔合计） 资本 15%、表决权 33.333%，任一超过 25% → 算（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-173,own-shares,dev,,正确,对,对,,,,【 ·口径R6】自有份额 25.000 € 从基数扣除，基数 25.000 €；Fabian Seidel 持 12.500 € = 50%、Ines Hartmann 持 12.500 € = 50%，均严格超过 25%（R6、R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-174,own-shares,dev,,正确,对,对,,,,【 ·口径R6】自有份额 16.000 € 从基数扣除，基数 24.000 €；Anika Falk 持 8.000 € = 33.333%、Lena Lorenz 持 8.000 € = 33.333%、Moritz Falk 持 8.000 € = 33.333%，均严格超过 25%（R6、R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-176,kg,holdout,,正确,对,对,,,,【 ·口径R7】Kommanditisten 出资基数 40.000 €，各 Kommanditist 均未超过 25%（Helena Lindqvist 正好 25%）；Helena Lindqvist 持 30.000 € / 50.000 € = 60%，控制普通合伙人 Ostmark Verwaltungs GmbH，按 R7 也算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-178,no-control,dev,,正确,对,对,,,,Falkenhorst Vermögensverwaltung GmbH 持 60.000 €（60%），但其股东为 50/50，无人控制，份额不计；其余股东最高 20.000 € = 20%，均未超过 25% → 受益所有人为空；虚拟受益所有人 = 法定代表人 Fabian Pohl。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-179,no-control,dev,,正确,对,对,,,,Lindmoor Vermögensverwaltung GmbH 持 40.000 €（40%），但其股东为 50/50，无人控制，份额不计；其余股东最高 20.000 € = 20%，均未超过 25% → 受益所有人为空；虚拟受益所有人 = 法定代表人 Jana Arendt、Jana Thiel。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-180,no-control,dev,,正确,对,对,,,,Silberau Holding GmbH 持 20.000 €（50%），但其股东为 50/50，无人控制，份额不计；其余股东最高 8.000 € = 20%，均未超过 25% → 受益所有人为空；虚拟受益所有人 = 法定代表人 Theo Kramer、Theresa Althaus（Prokurist Anna Althaus 不算，R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-181,normal,holdout,,正确,对,对,,,,直接持股：Kai Kessler 70%、Konrad Vogt 30%，均严格超过 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-182,normal,holdout,,正确,对,对,,,,直接持股：Matthias Brenner（2 笔合计） 70%、Felix Becker 30%，均严格超过 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-183,normal,dev,,正确,对,对,,,,直接持股：Mara Wendt（2 笔合计） 60%、Anna Faber 40%，均严格超过 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-184,normal,dev,,正确,对,对,,,,直接持股：Felix Becker 40%、Helena Becker（2 笔合计） 40%，均严格超过 25%；Matthias Faber 20% 未超过 25%，不算（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-185,normal,dev,,正确,对,对,,,,直接持股：Vera Arendt 60%、Jana Engel 40%，均严格超过 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-186,normal,holdout,,正确,对,对,,,,直接持股：Clara Thiel 60%、Oskar Hartmann 40%，均严格超过 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-187,normal,holdout,,正确,对,对,,,,直接持股：Ruth Haas 50%、Fabian Wendt 30%，均严格超过 25%；Emil Winter 20% 未超过 25%，不算（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-188,normal,dev,,正确,对,对,,,,直接持股：Vera Kuhn（2 笔合计） 34%、Mara Brandt 33%、Oskar Brenner 33%，均严格超过 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-189,normal,dev,,正确,对,对,,,,直接持股：Theresa Ziegler（2 笔合计） 70%、Anika Kessler 30%，均严格超过 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-190,normal,dev,,正确,对,对,,,,直接持股：Anika Hartmann（2 笔合计） 50%、Paula Krüger 30%，均严格超过 25%；Clara Thiel 20% 未超过 25%，不算（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-191,nominal-boundary,holdout,,正确,对,对,,,,资本基数 60.000 €：Lena Falk 49.998%、Bastian Kessler（2 笔合计） 25.002% 严格超过 25%，算；Oskar Wendt 15.000 €（正好 25%） 不算（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-192,nominal-boundary,holdout,,正确,对,对,,,,资本基数 60.000 €：Oskar Kramer 49.998%、Felix Becker（2 笔合计） 25.002% 严格超过 25%，算；Tobias Ziegler 15.000 €（正好 25%） 不算（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-193,nominal-boundary,dev,,正确,对,对,,,,R2 同一人份额先相加：Konrad Krüger 24.750+251=25.001 €，占 100.000 € 的 25.001%＞25%；Sofie Kessler 49.999%＞25%；Ines Kuhn 恰为 25.000 €＝25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-194,aggregation,dev,,正确,对,对,,,,Greta Althaus 直接 3.000+3.000=6.000 €（R2），加上其 75% 控制的 Hellbrunn Beteiligungs 所持 6.000 €（R3/R5），合计 12.000/40.000=30%；Lukas Lorenz 16.000=40%；Matthias Sommer 仅持中间公司 25%，不构成控制。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-195,aggregation,dev,,正确,对,对,,,,Tobias Arendt 直接 3.600+2.400=6.000 €（R2），加上其 75% 控制的 Eichental 所持 4.800 €（R3/R5），合计 10.800/40.000=27%；Helena Faber 14.000=35%；Lena Arendt 25% 不控制。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-196,aggregation,holdout,,正确,对,对,,,,Oskar Haas 直接 4.000+4.000=8.000 €（R2），加上其 60% 控制的 Ostmark 所持 4.000 €（R3/R5），合计 12.000/40.000=30%（50.000 € 是 Ostmark 的资本）；Sofie Becker 35%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-197,two-vehicles,holdout,,正确,对,对,,,,Theo Reuter 控制 Kestrel 55%、Grauwerk 80%（R5），两家各持 7.500 € 全额计入并加总（R3/R4），15.000/50.000=30%；Feldkamp 两名股东各 50%，无人控制，其份额不计。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-199,two-vehicles,dev,,正确,对,对,,,,Sofie Kuhn 控制 Tannberg 55%、Ostmark 80%（R5），两家各持 14.000 € 全额计入（R3/R4），28.000/100.000=28%；Kestrel 50/50，无人控制。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-200,voting-rights,dev,,正确,对,对,,,,第 4 号份额无表决权（36.000 €），表决权基数 24.000 €；Anna Lorenz 12.000/24.000=50% 表决权；Vera Buchholz 36.000/60.000=60% 资本；Ruth Arendt、Lena Lindqvist 各 25% 表决权，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-201,voting-rights,holdout,,正确,对,对,,,,第 2 号份额无表决权（60.000 €），表决权基数 40.000 €；Clara Brandt 12.000+8.000=20.000/40.000=50%（R2）；Sofie Pohl 60.000/100.000=60% 资本；Kessler、Althaus 各 25% 表决权，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-202,voting-rights,holdout,,正确,对,对,,,,第 2 号份额无表决权（24.000 €），表决权基数 16.000 €；Anika Becker 8.000/16.000=50%；Matthias Wendt 24.000/40.000=60% 资本；Ziegler、Vogt 各 25% 表决权，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-203,own-shares,dev,,正确,对,对,,,,自有份额 12.500 € 从基数扣除（R6），基数 12.500 €；Paula Engel 3.100+3.150=6.250=50%（R2）；Konrad Kessler 6.250=50%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-204,own-shares,dev,,正确,对,对,,,,自有份额 16.000 € 扣除（R6），基数 24.000 €；Jana Engel 9.600=40%；Theo Brenner 5.800+3.800=9.600=40%（R2）；Fabian Kessler 4.800=20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-205,kg,dev,,正确,对,对,,,,KG 总出资 50.000 €；Konrad Kuhn 15.000=30%；Moritz Krüger 22.500=45%；Jonas Wendt 控制普通合伙人 75%（R7）；Anika Thiel 12.500=25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-206,kg,holdout,,正确,对,对,,,,KG 总出资 40.000 €，五名 Kommanditisten 各 8.000=20%，均不达标；Theo Arendt 持有普通合伙人 100%，依 R7 作为受益所有人。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-208,no-control,dev,,正确,对,对,,,,Brunnfeld Invest 持 60%，但两名股东各 50%，无人控制（R5），其份额不计；其余直接持股最高 20%；无人达标，虚拟受益所有人＝总经理 Clara Becker、Henrik Faber（R8，Prokurist 不算）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-209,no-control,dev,,正确,对,对,,,,Steinach Holding 持 40% 但 50/50 无控制；Ines Arendt 1.850+1.900=3.750=15%（R2），最高直接持股 20%；无人达标，虚拟受益所有人＝总经理 Nils Kuhn（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-210,no-control,dev,,正确,对,对,,,,Weidenhof Invest 持 40% 但 50/50 无控制；Greta Kessler 9.000+6.000=15.000=15%（R2），最高直接持股 15%；无人达标，虚拟受益所有人＝总经理 Oskar Vogt（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-211,normal,holdout,,正确,对,对,,,,Oskar Kessler 70.000/100.000=70%；Emil Hartmann 30.000=30%，均超过 25%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-212,normal,holdout,,正确,对,对,,,,Anna Krüger 6.800+6.800=13.600/40.000=34%（R2）；Matthias Kessler 13.200=33%；Fabian Brenner 13.200=33%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-213,normal,dev,,正确,对,对,,,,Helena Kramer 24.000+36.000=60.000/100.000=60%（R2）；Ida Kramer 40.000=40%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-214,normal,dev,,正确,对,对,,,,Greta Pohl 6.200+6.300=12.500/25.000=50%（R2）；Konrad Faber 7.500=30%；Ruth Roth 5.000=20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-215,normal,dev,,正确,对,对,,,,Anna Pohl 70.000/100.000=70%；Greta Kramer 30.000=30%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-216,normal,holdout,,正确,对,对,,,,Anna Arendt 27.000/60.000=45%；Oskar Haas 21.000=35%；Felix Thiel 12.000=20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-218,normal,dev,,正确,对,对,,,,Jana Brenner 16.000+24.000=40.000/100.000=40%（R2）；Mara Haas 40.000=40%；Theo Becker 20.000=20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-219,normal,dev,,正确,对,对,,,,Vera Krüger 28.000/40.000=70%；Emil Seidel 12.000=30%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-220,normal,dev,,正确,对,对,,,,Nils Kuhn 28.000+42.000=70.000/100.000=70%（R2）；Mara Engel 30.000=30%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-221,nominal-boundary,holdout,,正确,对,对,,,,Jonas Brenner 24.750+251=25.001/100.000=25.001%（R2）；Fabian Kramer 49.999%；Anika Krüger 恰为 25.000=25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-222,nominal-boundary,holdout,,正确,对,对,,,,Lena Roth 14.750+251=15.001/60.000=25.002%（R2）；Nils Kramer 29.999=49.998%；Vera Althaus 恰为 15.000=25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-223,nominal-boundary,dev,,正确,对,对,,,,Oskar Haas 12.250+251=12.501/50.000=25.002%（R2）；Paula Lang 24.999=49.998%；Theresa Althaus 恰为 12.500=25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-224,aggregation,dev,,正确,对,对,,,,Felix Haas 直接 7.200+4.800=12.000（R2），加其 100% 控制的 Falkenhorst 所持 13.000（R3/R5），合计 25.000/100.000=25%，恰为 25% 不算；Mara Thiel 35.000=35%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-225,aggregation,dev,,正确,对,对,,,,Emil Faber 直接 3.000，加其 55% 控制的 Rabenfels 所持 3.250（R3/R5），合计 6.250/25.000=25%，恰为 25% 不算；Oskar Vogt 10.000=40%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-226,aggregation,holdout,,正确,对,对,,,,Anika Buchholz 直接 5.400+3.600=9.000（R2），加其 100% 控制的 Tannberg 所持 9.000（R3/R5），合计 18.000/60.000=30%；Anika Lorenz 18.000=30%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-227,two-vehicles,holdout,,正确,对,对,,,,Jonas Althaus 控制 Nordwall 55%、Silberau 80%（R5），两家各持 8.400 全额计入（R3/R4），16.800/60.000=28%；Ostmark 50/50 不计。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-228,two-vehicles,dev,,正确,对,对,,,,Lena Winter 控制 Tannberg 70%、Rabenfels 80%（R5），两家各持 5.600 全额计入（R3/R4），11.200/40.000=28%；Feldkamp 50/50 不计。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-229,two-vehicles,dev,,正确,对,对,,,,Sofie Pohl 控制 Feldkamp Beteiligungs 55%、Feldkamp Vermögensverwaltung 60%（R5），两家各持 7.000 全额计入（R3/R4），14.000/50.000=28%；Hellbrunn 50/50 不计。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-230,voting-rights,dev,,正确,对,对,,,,第 4 号份额无表决权（55.000 €），表决权基数 45.000 €；Oskar Brandt、Greta Lindqvist、Helena Becker（6.000+9.000，R2）各 15.000/45.000=33.333%；Nils Brenner 55.000/100.000=55% 资本。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-231,voting-rights,holdout,,正确,对,对,,,,第 3、4 号份额无表决权（各 13.000 €），表决权基数 24.000 €；Ida Thiel、Clara Roth 各 12.000/24.000=50%；Moritz Ziegler、Lena Sommer 各 13.000/50.000=26% 资本。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-232,voting-rights,holdout,,正确,对,对,,,,第 1、3 号份额无表决权（各 15.600 €），表决权基数 28.800 €；Konrad Lorenz 7.200+7.200=14.400/28.800=50%（R2）；Konrad Seidel 14.400/28.800=50%；Konrad Reuter、Lena Kessler 各 15.600/60.000=26% 资本。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-233,own-shares,dev,,正确,对,对,,,,自有份额 16.000 € 扣除（R6），基数 24.000 €；Paula Becker 9.600=40%；Emil Ziegler 9.600=40%；Ines Sommer 4.800=20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-234,own-shares,dev,,正确,对,对,,,,自有份额 16.000 € 扣除（R6），基数 24.000 €；Theo Wendt、Vera Sommer、Emil Ziegler 各 8.000=33.333%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-235,kg,dev,,正确,对,对,,,,KG 总出资 50.000 €，四名 Kommanditisten 各 12.500=25%，均不超 25%（Tobias Althaus 7.500+5.000=12.500，R2）；Oskar Sommer 控制普通合伙人 60%（R7）→ 受益所有人。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-236,kg,holdout,,正确,对,对,,,,KG 总出资 60.000 €，四名 Kommanditisten 各 15.000=25%，均不超 25%；Vera Lorenz 控制普通合伙人 60%（R7）→ 受益所有人。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-238,no-control,dev,,正确,对,对,,,,Rabenfels Holding 持 60%，但两名股东各 50%，无人控制（R5），其份额不计；Matthias Brandt、Fabian Faber 各 20%；无人达标，虚拟受益所有人＝总经理 Ruth Kuhn、Sofie Seidel（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-239,no-control,dev,,正确,对,对,,,,Brunnfeld Invest 持 40%，但两名股东各 50%，无人控制（R5）；Tobias Thiel 7.200+4.800=12.000=20%（R2），Moritz Thiel 20%；无人达标，虚拟受益所有人＝总经理 Ruth Winter、Helena Engel（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-240,no-control,dev,,正确,对,对,,,,Tannberg Beteiligungs 持 40%，但两名股东各 50%，无人控制（R5）；Ida Haas、Henrik Krüger 各 20%；无人达标，虚拟受益所有人＝总经理 Theo Faber（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-241,normal,holdout,,正确,对,对,,,,Anna Kramer 12.000+8.000=20.000/50.000=40%（R2）；Tobias Kuhn 20.000=40%；Jana Lang 10.000=20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-242,normal,holdout,,正确,对,对,,,,Tobias Althaus 20.400+13.600=34.000/100.000=34%（R2）；Sofie Vogt 33%；Theresa Lindqvist 33%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-243,normal,dev,,正确,对,对,,,,Lukas Brenner 33.000/60.000=55%；Lukas Thiel 27.000=45%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-244,normal,dev,,正确,对,对,,,,Ruth Kramer 10.000+15.000=25.000/50.000=50%（R2）；Matthias Reuter 15.000=30%；Ruth Hartmann 10.000=20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-245,normal,dev,,正确,对,对,,,,Matthias Lorenz 6.200+6.300=12.500/25.000=50%（R2）；Anika Hartmann 7.500=30%；Anna Brenner 5.000=20%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-246,normal,holdout,,正确,对,对,,,,Henrik Vogt 60.000/100.000=60%；Anna Falk 40.000=40%。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-247,normal,holdout,,正确,对,对,,,,推导复核无误：资本基数 60.000 欧元；Bastian Kessler 30%；Clara Buchholz 70%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-248,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 40.000 欧元；Kai Reuter 30%；Fabian Kessler 50%，均 > 25%（R1）；Greta Faber 20% 未过 25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-249,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 60.000 欧元；Emil Lorenz 33%；Tobias Seidel 34%；Ines Krüger 33%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-250,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 40.000 欧元；Theo Lang 45%；Kai Becker 35%，均 > 25%（R1）；Lukas Kessler 20% 未过 25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-251,nominal-boundary,holdout,,正确,对,对,,,,推导复核无误：资本基数 100.000 欧元；Theresa Ziegler 49.999%；Ruth Krüger 25.001%，均 > 25%（R1）；Moritz Seidel 正好 25%（25.000 / 100.000），不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-252,nominal-boundary,holdout,,正确,对,对,,,,推导复核无误：资本基数 100.000 欧元；Sofie Brenner 25.001%；Moritz Brandt 49.999%，均 > 25%（R1）；Theresa Falk 正好 25%（25.000 / 100.000），不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-253,nominal-boundary,dev,,正确,对,对,,,,推导复核无误：资本基数 40.000 欧元；Clara Vogt 25.003%；Helena Kessler 49.998%，均 > 25%（R1）；Anna Wendt 正好 25%（10.000 / 40.000），不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-254,aggregation,dev,,正确,对,对,,,,推导复核无误：Weidenhof Beteiligungs GmbH（Oskar Vogt 100%）：由 Oskar Vogt 单独控制（> 50%，R5），全额计入；结果：Oskar Vogt 直接＋受控公司合计 30%、Tobias Arendt 35%（基数 60.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-255,aggregation,dev,,正确,对,对,,,,推导复核无误：Nordwall Holding GmbH（Anna Falk 100%）：由 Anna Falk 单独控制（> 50%，R5），全额计入；结果：Vera Arendt 35%、Anna Falk 直接＋受控公司合计 30%（基数 100.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-257,two-vehicles,holdout,,正确,对,对,,,,推导复核无误：Grauwerk Invest GmbH（Emil Kramer 60%、Nils Buchholz 40%）：由 Emil Kramer 单独控制（> 50%，R5），全额计入；Tannberg Holding GmbH（Emil Kramer 100%）：由 Emil Kramer 单独控制（> 50%，R5），全额计入；Auental Vermögensverwaltung GmbH（Felix Roth 50%、Theo Hartmann 50%）：无人 > 50%，份额不归属（R5）；结果：Emil Kramer 经受控公司合计 28%（基数 100.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-258,two-vehicles,dev,,正确,对,对,,,,推导复核无误：Eichental Beteiligungs GmbH（Oskar Krüger 50%、Anna Falk 50%）：无人 > 50%，份额不归属（R5）；Auental Holding GmbH（Ida Kuhn 60%、Anika Kramer 40%）：由 Ida Kuhn 单独控制（> 50%，R5），全额计入；Grauwerk Invest GmbH（Ida Kuhn 70%、Konrad Pohl 30%）：由 Ida Kuhn 单独控制（> 50%，R5），全额计入；结果：Ida Kuhn 经受控公司合计 27%（基数 25.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-259,two-vehicles,dev,,正确,对,对,,,,推导复核无误：Lindmoor Beteiligungs GmbH（Vera Falk 80%、Konrad Haas 20%）：由 Vera Falk 单独控制（> 50%，R5），全额计入；Weidenhof Holding GmbH（Lena Roth 50%、Felix Lindqvist 50%）：无人 > 50%，份额不归属（R5）；Kestrel Beteiligungs GmbH（Vera Falk 55%、Fabian Kuhn 45%）：由 Vera Falk 单独控制（> 50%，R5），全额计入；结果：Vera Falk 经受控公司合计 28%（基数 50.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-260,voting-rights,dev,,正确,对,对,,,,推导复核无误：无表决权份额 26.000 欧元剔除，表决权基数 24.000 欧元；Theresa Sommer 资本 24%、表决权 50%；Konrad Buchholz 资本 24%、表决权 50%；Henrik Ziegler 资本 26%、表决权 0%；Fabian Becker 资本 26%、表决权 0%（R1：资本或表决权任一 > 25% 即算）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-261,voting-rights,holdout,,正确,对,对,,,,推导复核无误：无表决权份额 60.000 欧元剔除，表决权基数 40.000 欧元；Greta Becker 资本 60%、表决权 0%；Moritz Sommer 资本 20%、表决权 50%（R1：资本或表决权任一 > 25% 即算）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-262,voting-rights,holdout,,正确,对,对,,,,推导复核无误：无表决权份额 26.000 欧元剔除，表决权基数 24.000 欧元；Bastian Arendt 资本 26%、表决权 0%；Fabian Krüger 资本 24%、表决权 50%；Lukas Krüger 资本 26%、表决权 0%；Anna Engel 资本 24%、表决权 50%（R1：资本或表决权任一 > 25% 即算）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-263,own-shares,dev,,正确,对,对,,,,推导复核无误：自有股份 20.000 欧元须从基数扣除（R6），资本基数 = 50.000 − 20.000 = 30.000；Ines Pohl 40%；Paula Hartmann 40%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-264,own-shares,dev,,正确,对,对,,,,推导复核无误：自有股份 10.000 欧元须从基数扣除（R6），资本基数 = 25.000 − 10.000 = 15.000；Theresa Krüger 33.333%；Henrik Vogt 33.333%；Theresa Buchholz 33.333%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-265,kg,dev,,正确,对,对,,,,推导复核无误：普通合伙人 Eichental Verwaltungs GmbH 的股东：Moritz Kessler 60%、Jonas Vogt 40% → Moritz Kessler 控制（R5），按 R7 计入；有限合伙人 Oskar Lindqvist 有限合伙出资 10.000 欧元 = 40%、Moritz Lorenz 有限合伙出资 8.750 欧元 = 35%（基数 25.000 欧元）；结果：Oskar Lindqvist、Moritz Lorenz、Moritz Kessler（控制普通合伙人）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-268,no-control,dev,,正确,对,对,,,,推导复核无误：Feldkamp Invest GmbH（Fabian Haas 50%、Helena Althaus 50%，各 50%，无人控制 → 不归属，R5）；直接持股最高为 Ida Lang 20%，未过 25% → 无人达标；虚拟受益所有人 = 全部 Geschäftsführer Mara Lorenz、Paula Althaus（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-269,no-control,dev,,正确,对,对,,,,推导复核无误：Grauwerk Holding GmbH（Theo Arendt 50%、Tobias Reuter 50%，各 50%，无人控制 → 不归属，R5）；直接持股最高为 Theo Falk 20%，未过 25% → 无人达标；虚拟受益所有人 = 全部 Geschäftsführer Anna Hartmann、Clara Brenner（R8），Prokurist Felix Seidel 不是法定代表人，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-270,no-control,dev,,正确,对,对,,,,推导复核无误：Silberau Invest GmbH（Greta Thiel 50%、Anna Arendt 50%，各 50%，无人控制 → 不归属，R5）；直接持股最高为 Theo Lang 20%，未过 25% → 无人达标；虚拟受益所有人 = 全部 Geschäftsführer Helena Sommer、Kai Kessler（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-271,normal,holdout,,正确,对,对,,,,推导复核无误：资本基数 40.000 欧元；Emil Lindqvist 35%；Ruth Pohl 45%，均 > 25%（R1）；Nils Winter 20% 未过 25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-272,normal,holdout,,正确,对,对,,,,推导复核无误：资本基数 100.000 欧元；Sofie Kuhn 45%；Ida Krüger 55%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-273,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 50.000 欧元；Theo Sommer 40%；Greta Lang 60%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-274,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 50.000 欧元；Matthias Thiel 40%；Oskar Lindqvist 40%，均 > 25%（R1）；Bastian Winter 20% 未过 25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-275,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 25.000 欧元；Jana Buchholz 33%；Jana Hartmann 33%；Kai Reuter 34%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-276,normal,holdout,,正确,对,对,,,,推导复核无误：资本基数 25.000 欧元；Ines Kessler 45%；Moritz Hartmann 55%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-277,normal,holdout,,正确,对,对,,,,推导复核无误：资本基数 50.000 欧元；Bastian Winter 30%；Anika Falk 70%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-278,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 100.000 欧元；Lena Arendt 50%；Helena Hartmann 30%，均 > 25%（R1）；Lena Thiel 20% 未过 25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-279,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 40.000 欧元；Ines Sommer 45%；Nils Kramer 35%，均 > 25%（R1）；Oskar Vogt 20% 未过 25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-280,normal,dev,,正确,对,对,,,,推导复核无误：资本基数 60.000 欧元；Bastian Roth 40%；Mara Lang 40%，均 > 25%（R1）；Anika Winter 20% 未过 25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-281,nominal-boundary,holdout,,正确,对,对,,,,推导复核无误：资本基数 50.000 欧元；Kai Reuter 25.002%；Helena Lang 49.998%，均 > 25%（R1）；Matthias Hartmann 正好 25%（12.500 / 50.000），不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-282,nominal-boundary,holdout,,正确,对,对,,,,推导复核无误：资本基数 60.000 欧元；Kai Vogt 49.998%；Vera Sommer 25.002%，均 > 25%（R1）；Lena Roth 正好 25%（15.000 / 60.000），不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-283,nominal-boundary,dev,,正确,对,对,,,,推导复核无误：资本基数 40.000 欧元；Anna Haas 49.998%；Ida Engel 25.003%，均 > 25%（R1）；Fabian Ziegler 正好 25%（10.000 / 40.000），不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-284,aggregation,dev,,正确,对,对,,,,推导复核无误：Eichental Beteiligungs GmbH（Ruth Hartmann 60%、Felix Althaus 40%）：由 Ruth Hartmann 单独控制（> 50%，R5），全额计入；结果：Ruth Hartmann 直接＋受控公司合计 30%、Anika Krüger 30%（基数 50.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-285,aggregation,dev,,正确,对,对,,,,推导复核无误：Grauwerk Beteiligungs GmbH（Vera Sommer 60%、Konrad Winter 40%）：由 Vera Sommer 单独控制（> 50%，R5），全额计入；结果：Vera Sommer 直接＋受控公司合计 27%、Ines Winter 30%（基数 25.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-286,aggregation,holdout,,正确,对,对,,,,推导复核无误：Auental Vermögensverwaltung GmbH（Theresa Seidel 60%、Helena Kramer 40%）：由 Theresa Seidel 单独控制（> 50%，R5），全额计入；结果：Konrad Winter 30%（基数 100.000 欧元）。另：Theresa Seidel 合计正好 25%，不超过 25%，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-287,two-vehicles,holdout,,正确,对,对,,,,推导复核无误：Tannberg Invest GmbH（Vera Pohl 100%）：由 Vera Pohl 单独控制（> 50%，R5），全额计入；Lindmoor Holding GmbH（Moritz Kessler 50%、Greta Sommer 50%）：无人 > 50%，份额不归属（R5）；Auental Invest GmbH（Vera Pohl 80%、Ruth Brandt 20%）：由 Vera Pohl 单独控制（> 50%，R5），全额计入；结果：Vera Pohl 经受控公司合计 30%（基数 60.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-288,two-vehicles,dev,,正确,对,对,,,,推导复核无误：Nordwall Holding GmbH（Greta Engel 80%、Tobias Lindqvist 20%）：由 Greta Engel 单独控制（> 50%，R5），全额计入；Falkenhorst Invest GmbH（Jonas Krüger 50%、Emil Brandt 50%）：无人 > 50%，份额不归属（R5）；Silberau Holding GmbH（Greta Engel 70%、Lena Thiel 30%）：由 Greta Engel 单独控制（> 50%，R5），全额计入；结果：Greta Engel 经受控公司合计 30%（基数 50.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-289,two-vehicles,dev,,正确,对,对,,,,推导复核无误：Ostmark Vermögensverwaltung GmbH（Matthias Kessler 50%、Anna Arendt 50%）：无人 > 50%，份额不归属（R5）；Hellbrunn Invest GmbH（Theo Seidel 60%、Ida Winter 40%）：由 Theo Seidel 单独控制（> 50%，R5），全额计入；Ostmark Invest GmbH（Theo Seidel 55%、Vera Becker 45%）：由 Theo Seidel 单独控制（> 50%，R5），全额计入；结果：Theo Seidel 经受控公司合计 28%（基数 100.000 欧元）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-290,voting-rights,dev,,正确,对,对,,,,推导复核无误：无表决权份额 33.000 欧元剔除，表决权基数 27.000 欧元；Anika Seidel 资本 55%、表决权 0%；Henrik Seidel 资本 15%、表决权 33.333%；Clara Falk 资本 15%、表决权 33.333%；Emil Kuhn 资本 15%、表决权 33.333%（R1：资本或表决权任一 > 25% 即算）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-291,voting-rights,holdout,,正确,对,对,,,,推导复核无误：无表决权份额 60.000 欧元剔除，表决权基数 40.000 欧元；Konrad Arendt 资本 20%、表决权 50%；Bastian Becker 资本 60%、表决权 0%（R1：资本或表决权任一 > 25% 即算）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-292,voting-rights,holdout,,正确,对,对,,,,推导复核无误：无表决权份额 30.000 欧元剔除，表决权基数 20.000 欧元；Lena Lorenz 资本 20%、表决权 50%；Mara Lorenz 资本 60%、表决权 0%（R1：资本或表决权任一 > 25% 即算）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-293,own-shares,dev,,正确,对,对,,,,推导复核无误：自有股份 10.000 欧元须从基数扣除（R6），资本基数 = 25.000 − 10.000 = 15.000；Kai Winter 33.333%；Ida Hartmann 33.333%；Anika Brenner 33.333%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-294,own-shares,dev,,正确,对,对,,,,推导复核无误：自有股份 16.000 欧元须从基数扣除（R6），资本基数 = 40.000 − 16.000 = 24.000；Theresa Thiel 33.333%；Vera Roth 33.333%；Konrad Falk 33.333%，均 > 25%（R1）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-295,kg,dev,,正确,对,对,,,,推导复核无误：普通合伙人 Tannberg Verwaltungs GmbH 的股东：Clara Ziegler 40%、Mara Becker 60% → Mara Becker 控制（R5），按 R7 计入；结果：Mara Becker（控制普通合伙人）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-297,kg,holdout,,正确,对,对,,,,推导复核无误：普通合伙人 Weidenhof Verwaltungs GmbH 的股东：Nils Lorenz 100% → Nils Lorenz 控制（R5），按 R7 计入；有限合伙人 Tobias Sommer 有限合伙出资 15.000 欧元 = 30%、Ruth Haas 有限合伙出资 22.500 欧元 = 45%（基数 50.000 欧元）；结果：Tobias Sommer、Ruth Haas、Nils Lorenz（控制普通合伙人）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-298,no-control,dev,,正确,对,对,,,,推导复核无误：Kestrel Holding GmbH（Paula Engel 50%、Bastian Lindqvist 50%，各 50%，无人控制 → 不归属，R5）；直接持股最高为 Oskar Pohl 15%，未过 25% → 无人达标；虚拟受益所有人 = 全部 Geschäftsführer Anika Engel（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-299,no-control,dev,,正确,对,对,,,,推导复核无误：Grauwerk Holding GmbH（Nils Haas 50%、Emil Roth 50%，各 50%，无人控制 → 不归属，R5）；直接持股最高为 Moritz Kessler 10%，未过 25% → 无人达标；虚拟受益所有人 = 全部 Geschäftsführer Jonas Arendt（R8），Prokurist Moritz Lorenz 不是法定代表人，不算。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
+ubo2-300,no-control,dev,,正确,对,对,,,,推导复核无误：Eichental Beteiligungs GmbH（Kai Falk 50%、Lukas Reuter 50%，各 50%，无人控制 → 不归属，R5）；直接持股最高为 Greta Roth 20%，未过 25% → 无人达标；虚拟受益所有人 = 全部 Geschäftsführer Greta Roth、Lukas Hartmann（R8）。,2026-10-27,✔ 答对,—（答对）,✔ 答对,—（答对）
