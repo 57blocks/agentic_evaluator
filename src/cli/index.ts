@@ -28,6 +28,7 @@ import { cmdCheckTask, CHECK_TASK_HELP } from "./commands/check-task.js";
 import { cmdInstallSkill, INSTALL_SKILL_HELP } from "./commands/install-skill.js";
 import { cmdReview, REVIEW_HELP } from "./commands/review.js";
 import { cmdImportHarbor, IMPORT_HARBOR_HELP } from "./commands/import-harbor.js";
+import { cmdReplay, REPLAY_HELP } from "./commands/replay.js";
 
 interface Command {
   summary: string;
@@ -49,6 +50,7 @@ export const COMMANDS: Record<string, Command> = {
   report: { summary: "re-render a run's report.html", help: REPORT_HELP, valued: VALUED, run: cmdReport },
   combine: { summary: "build one run from a run and its re-grades and re-runs", help: COMBINE_HELP, valued: VALUED, run: cmdCombine },
   judge: { summary: "judge a finished run again, without generating", help: JUDGE_HELP, valued: VALUED, run: cmdJudge },
+  replay: { summary: "decide finished runs again under baseline rules, and with grader errors blamed on the model", help: REPLAY_HELP, valued: VALUED, run: cmdReplay },
   review: { summary: "review a run blind, in the dashboard", help: REVIEW_HELP, valued: [...VALUED, "reviewer"], run: cmdReview },
   dash: { summary: "serve the dashboard, or export it as files", help: DASH_HELP, valued: [...VALUED, "export"], run: cmdDash },
   "install-skill": { summary: "add the /agenteval-new-task skill for Claude Code", help: INSTALL_SKILL_HELP, valued: VALUED, run: cmdInstallSkill },
