@@ -776,6 +776,18 @@ plus `output.txt` (the deliverable), `input.txt` (the test case) and
 `output.txt` is its answer as text; for code and command candidates it holds
 the files as ```` ```file: ```` blocks, so read the files themselves.
 
+When a command candidate declares `cli.trace` and finished, `trace.json` is
+there too: how the agent worked, in the same shape the report reads
+(`turns`, `tool_calls[{name, ms, failed}]`, `retries`, `ended`, …). A check
+can then grade the path as well as the result: that the tests were actually
+run, that no tool off limits was used, that the agent did not loop on one
+failing call. Apply such rules only when `trace.json` is there and grade the
+deliverable alone when it is not: a model candidate never has one, and
+`check-task` probes the check with an empty answer and no trace, so a check
+that cannot do without one blocks its own task. That the trace was missing
+is already on the trial's row. For the oracle probe, a reference dir may
+carry its own `trace.json`, which is copied in with the rest.
+
 Exit `0` passes, exit `1` fails the candidate; anything else — a crash, a
 timeout — is recorded as an evaluator error, never blamed on the candidate.
 Print `{"evidence": "...", "reason": "..."}` and both are kept with the trial.
