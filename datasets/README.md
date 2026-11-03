@@ -33,6 +33,11 @@ hand-written items).
 agb-flow's inputs are snapshots of real agb projects (demo-todo, chessicle,
 invoice); `tasks/agb-flow` at the repository root is its working copy.
 
+The claim-denials-snf-v2 and kyc-ubo-v2 keys were checked item by item by
+domain reviewers on 2026-10-22: [review/2026-10-22/REVIEW.md](review/2026-10-22/REVIEW.md)
+has the verdicts (82% and 99.7% agreement), the two rule disputes, and the
+dataset versions that came out of them.
+
 ## What the kept runs found
 
 Four candidates (sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash) for the
