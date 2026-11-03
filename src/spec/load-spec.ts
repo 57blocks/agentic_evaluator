@@ -20,6 +20,7 @@ import { orderControlChain } from "../canon/e2e.js";
 import { sha256 } from "../canon/hash.js";
 import { endpointOf, endpointProblem, type EndpointDecl } from "../providers/index.js";
 import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
+import { hasTraceRules, type TraceRules } from "../canon/trace-rules.js";
 import type { CheckConfig, JudgeMethod } from "../types.js";
 import { workspaceForSpec, type Workspace } from "../core/workspace.js";
 import type { Suite } from "../types.js";
@@ -94,6 +95,7 @@ export interface EvalSpec {
         version_files?: string[];
         timeout_seconds?: number;
         description?: string;
+        trace?: TraceRules;
       }
     >;
     judge: EndpointDecl & { model: string; rubric_file: string; methods?: string[]; show?: string[] };
@@ -340,8 +342,23 @@ function compileCheck(
   const id = requiredChecks[0];
   const def = spec.evaluators.required_checks?.[id];
   if (!def) throw specError(specPath, `step "${stepId}" required check "${id}" has no evaluator definition`);
+  if (def.trace !== undefined && !hasTraceRules(def.trace)) {
+    throw specError(specPath, `required check "${id}" declares trace: {} with no rule in it`);
+  }
+  for (const r of def.trace?.tool_used ?? []) {
+    if (r.min === undefined && r.max === undefined) {
+      throw specError(specPath, `required check "${id}": trace rule for ${r.name} needs min, max or both`);
+    }
+    if (r.min !== undefined && r.max !== undefined && r.min > r.max) {
+      throw specError(specPath, `required check "${id}": trace rule for ${r.name} has min ${r.min} above max ${r.max}`);
+    }
+  }
+  for (const r of def.trace?.tool_order ?? []) {
+    if (r.first === r.then) throw specError(specPath, `required check "${id}": trace rule orders ${r.first} before itself`);
+  }
+  const trace = def.trace ? { trace: def.trace } : {};
   if (def.kind === "tsc") {
-    return { id, kind: "tsc", scaffoldDir: def.scaffold_dir ?? "scaffold" };
+    return { id, kind: "tsc", scaffoldDir: def.scaffold_dir ?? "scaffold", ...trace };
   }
   if (!def.argv || def.argv.length === 0) {
     throw specError(specPath, `required check "${id}" is kind: command and must declare argv`);
@@ -352,6 +369,7 @@ function compileCheck(
     argv: [...def.argv],
     versionFiles: [...(def.version_files ?? [])],
     timeoutMs: (def.timeout_seconds ?? DEFAULT_CHECK_TIMEOUT_S) * 1000,
+    ...trace,
   };
 }
 

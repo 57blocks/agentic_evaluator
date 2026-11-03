@@ -26,6 +26,7 @@ import { directionality } from "../canon/rates.js";
 import { resolveEligibility } from "../canon/select.js";
 import { inputsToClearGate, minDetectableGap, wilson } from "../canon/stats.js";
 import { matchesShow } from "../canon/review.js";
+import { describeTraceRules, hasTraceRules } from "../canon/trace-rules.js";
 import { fixturePath, isDir } from "./fixture.js";
 import { restoreAnswerKey } from "./answer-key.js";
 import { e2eChain, e2eRootInputs } from "./plan.js";
@@ -214,6 +215,31 @@ function stepFindings(suite: Suite): Finding[] {
 }
 
 /**
+ * `trace:` rules on the check apply to candidates that declare `cli.trace`.
+ * Declared for a step where none does, they never run; a rule that counts
+ * failed calls cannot be judged on a format that records no verdict (ATIF),
+ * and would leave every such trial undetermined.
+ */
+function traceRuleFindings(suite: Suite): Finding[] {
+  const rules = suite.check?.trace;
+  if (!hasTraceRules(rules)) return [];
+  const id = suite.check!.id;
+  const defs = suite.candidateDefs ?? {};
+  const traced = suite.candidates.filter((c) => defs[c]?.cli?.trace !== undefined);
+  if (traced.length === 0) {
+    return [{ severity: "warning", code: "check.trace-unused", message: `${id} declares trace rules but no candidate on this step declares cli.trace: the rules never apply` }];
+  }
+  const out: Finding[] = [{ severity: "ok", code: "check.trace-rules", message: `${id} ${describeTraceRules(rules)}; applied to ${traced.join(", ")}` }];
+  if (rules.max_repeated_failures !== undefined) {
+    const atif = traced.filter((c) => defs[c]?.cli?.trace === "atif");
+    if (atif.length > 0) {
+      out.push({ severity: "warning", code: "check.trace-unjudgeable", message: `${id} max_repeated_failures cannot be judged for ${atif.join(", ")}: an ATIF trace records no verdict on tool calls, so every such trial would be undetermined` });
+    }
+  }
+  return out;
+}
+
+/**
  * A step's reference files, as (input, path within the answer, bytes):
  * references/<step>/<input>/... when that exists, else references/<input>/...
  * (the layout check-task's oracle probe reads).
@@ -293,6 +319,7 @@ async function fixtureFindings(suite: Suite): Promise<Finding[]> {
 async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Finding[]> {
   const findings: Finding[] = [
     ...stepFindings(suite),
+    ...traceRuleFindings(suite),
     ...candidateFindings(suite),
     ...endpointFindings(suite),
     ...(await reviewFindings(suite)),
