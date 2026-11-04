@@ -22,6 +22,8 @@ export interface ScatterCandidate {
   checkExecuted: number;
   costPerSuccess: number | null;
   costObserved: boolean;
+  /** Reported spend per success when the full figure is unknown: plotted as "at least this". */
+  costPerSuccessFloor?: number | null;
   gated: boolean;
   chosen: boolean;
   isControl: boolean;
@@ -36,6 +38,8 @@ export interface ScatterPoint {
   gated: boolean;
   chosen: boolean;
   isControl: boolean;
+  /** Placed at a cost floor: the true cost is this or more, drawn with an arrow pointing right. */
+  floor: boolean;
   /** One line for the hover title: the numbers the dot stands for. */
   title: string;
 }
@@ -53,6 +57,8 @@ export interface CostSuccessChart {
   frame: { left: number; right: number };
   xTicks: Tick[];
   yTicks: Tick[];
+  /** True when some point sits at a cost floor, so the legend explains the arrow. */
+  hasFloor: boolean;
   /** The $0 and "no cost per success" lanes, when a candidate sits in one. */
   lanes: Array<{ x: number; label: string }>;
   /** The required-check gate; null when the step declares none. */
@@ -69,6 +75,8 @@ const MARGIN = { left: 52, right: 24, top: 36, bottom: 40 };
 const LANE_GAP = 72;
 const LABEL_OFFSET = 9;
 const LABEL_LINE = 13;
+/** Length of the "or more" arrow on a point placed at its cost floor. */
+export const ARROW = 14;
 /** 11px text: a conservative width per character, so labels err towards not touching. */
 const CHAR_WIDTH = 6.4;
 
@@ -121,11 +129,11 @@ const overlaps = (a: Box, b: Box): boolean => a.x0 < b.x1 && b.x0 < a.x1 && a.y0
  * whatever happens to its label.
  */
 function placeLabels(
-  dots: ReadonlyArray<{ id: string; cx: number; cy: number }>,
+  dots: ReadonlyArray<{ id: string; cx: number; cy: number; floor: boolean }>,
   plot: CostSuccessChart["plot"],
   gateY: number | null,
 ): Map<string, ScatterPoint["label"]> {
-  const placed: Box[] = dots.map((d) => ({ x0: d.cx - 6, x1: d.cx + 6, y0: d.cy - 6, y1: d.cy + 6 }));
+  const placed: Box[] = dots.map((d) => ({ x0: d.cx - 6, x1: d.cx + (d.floor ? ARROW + 4 : 6), y0: d.cy - 6, y1: d.cy + 6 }));
   if (gateY !== null) placed.push({ x0: 0, x1: WIDTH, y0: gateY - 2, y1: gateY + 2 });
   const out = new Map<string, ScatterPoint["label"]>();
   const shifts = [0, -1, 1, -2, 2, -3, 3, -4, 4].map((n) => n * LABEL_LINE);
@@ -133,7 +141,7 @@ function placeLabels(
     const w = d.id.length * CHAR_WIDTH;
     const options = (["start", "end"] as const).flatMap((anchor) =>
       shifts.map((dy) => {
-        const x = anchor === "start" ? d.cx + LABEL_OFFSET : d.cx - LABEL_OFFSET;
+        const x = anchor === "start" ? d.cx + LABEL_OFFSET + (d.floor ? ARROW : 0) : d.cx - LABEL_OFFSET;
         const y = d.cy + 4 + dy;
         const box = { x0: anchor === "start" ? x : x - w, x1: anchor === "start" ? x + w : x, y0: y - 10, y1: y + 2 };
         return { label: { x, y, anchor, leader: dy !== 0 }, box };
@@ -147,9 +155,19 @@ function placeLabels(
   return out;
 }
 
+/** Where a candidate goes on the cost axis: its cost per success, else its floor, else the n/a lane (null). */
+function plottedCost(c: ScatterCandidate): number | null {
+  if (c.costPerSuccess !== null) return c.costPerSuccess;
+  return c.costPerSuccessFloor != null && c.costPerSuccessFloor > 0 ? c.costPerSuccessFloor : null;
+}
+
 function titleOf(c: ScatterCandidate, gateNote: string | undefined): string {
   const cost =
-    c.costPerSuccess !== null ? `${usdExact(c.costPerSuccess)} per success` : c.costObserved ? "no success to price" : "spend not reported";
+    c.costPerSuccess !== null
+      ? `${usdExact(c.costPerSuccess)} per success`
+      : c.costPerSuccessFloor != null && c.costPerSuccessFloor > 0
+        ? `at least ${usdExact(c.costPerSuccessFloor)} per success (some calls reported no spend; not ranked on cost)`
+        : c.costObserved ? "no success to price" : "spend not reported";
   const role = [c.chosen ? "recommended" : null, c.isControl ? "control" : null, c.gated ? `gated out${gateNote ? `: ${gateNote}` : ""}` : null]
     .filter(Boolean)
     .join(" · ");
@@ -168,9 +186,9 @@ export function costSuccessChart(
   const plotted = candidates.filter((c) => c.checkExecuted > 0);
   if (plotted.length < 2) return null;
 
-  const positive = plotted.map((c) => c.costPerSuccess).filter((v): v is number => v !== null && v > 0);
+  const positive = plotted.map(plottedCost).filter((v): v is number => v !== null && v > 0);
   const hasZero = plotted.some((c) => c.costPerSuccess === 0);
-  const hasNone = plotted.some((c) => c.costPerSuccess === null);
+  const hasNone = plotted.some((c) => plottedCost(c) === null);
 
   const left = MARGIN.left + (hasZero ? LANE_GAP : 0);
   const right = WIDTH - MARGIN.right - (hasNone ? LANE_GAP : 0);
@@ -186,7 +204,8 @@ export function costSuccessChart(
   const dots = plotted.map((c) => ({
     c,
     id: c.id,
-    cx: c.costPerSuccess === null ? noneX : c.costPerSuccess === 0 ? zeroX : xOf(c.costPerSuccess),
+    floor: c.costPerSuccess === null && plottedCost(c) !== null,
+    cx: ((v) => (v === null ? noneX : v === 0 ? zeroX : xOf(v)))(plottedCost(c)),
     cy: yOf(c.checkPass / c.checkExecuted),
   }));
   const labels = placeLabels(dots, plot, minCheckPassRate === null ? null : yOf(minCheckPassRate));
@@ -200,6 +219,7 @@ export function costSuccessChart(
     height: HEIGHT,
     plot,
     frame: { left: MARGIN.left, right: WIDTH - MARGIN.right },
+    hasFloor: plotted.some((c) => c.costPerSuccess === null && plottedCost(c) !== null),
     xTicks,
     yTicks: Array.from({ length: Math.round((1 - yLo) / yStep) + 1 }, (_, i) => yLo + i * yStep).map((r) => ({ at: yOf(r), label: pctText(r) })),
     lanes: [
@@ -215,6 +235,7 @@ export function costSuccessChart(
       gated: d.c.gated,
       chosen: d.c.chosen,
       isControl: d.c.isControl,
+      floor: d.c.costPerSuccess === null && plottedCost(d.c) !== null,
       title: titleOf(d.c, gateNotes.get(d.id)),
     })),
     unplotted: candidates.filter((c) => c.checkExecuted === 0).map((c) => c.id),
@@ -234,10 +255,13 @@ export const COST_SUCCESS_HINT = "one point per candidate · up passes the requi
 
 export function costSuccessNote(chart: CostSuccessChart): string {
   const unplotted = chart.unplotted.length ? ` Not plotted, no check ran: ${chart.unplotted.join(", ")}.` : "";
-  const na = chart.lanes.some((l) => l.label === "cost n/a")
-    ? ` "cost n/a" is not the most expensive: nothing passed to price, or some calls reported no spend (often a timeout).`
+  const floor = chart.hasFloor
+    ? ` A point with an arrow → had calls that reported no spend (often a timeout): it sits at what the reported spend alone comes to, and costs at least that. The selector does not rank it on cost.`
     : "";
-  return `The cost is the generation cost per success the operating mode ranks on: under "lowest cost" the recommendation is the leftmost filled point${chart.gate ? " above the gate" : ""}. A point can sit above the gate and still be hollow when another gate (reliability, pass^k) removed it; hover a point for its numbers and the gate that removed it.${na}${unplotted}`;
+  const na = chart.lanes.some((l) => l.label === "cost n/a")
+    ? ` "cost n/a" is not the most expensive: nothing passed to price, or no call reported its spend.`
+    : "";
+  return `The cost is the generation cost per success the operating mode ranks on: under "lowest cost" the recommendation is the leftmost filled point${chart.gate ? " above the gate" : ""}. A point can sit above the gate and still be hollow when another gate (reliability, pass^k) removed it; hover a point for its numbers and the gate that removed it.${floor}${na}${unplotted}`;
 }
 
 // ── report.html ──────────────────────────────────────────────────────────────
@@ -253,9 +277,12 @@ function markSvg(p: ScatterPoint): string {
   const leader = p.label.leader
     ? `<line class="cs-leader" x1="${f(p.cx)}" y1="${f(p.cy)}" x2="${f(p.label.anchor === "start" ? p.label.x - 2 : p.label.x + 2)}" y2="${f(p.label.y - 4)}"/>`
     : "";
+  const arrow = p.floor
+    ? `<path class="cs-floor" d="M${f(p.cx + 6)} ${f(p.cy)}h${ARROW - 4}m-4 -3.5l4 3.5l-4 3.5"/>`
+    : "";
   const label = `<text class="cs-label${p.gated ? " gated" : ""}${p.chosen ? " chosen" : ""}" x="${f(p.label.x)}" y="${f(p.label.y)}" text-anchor="${p.label.anchor}">${escapeHtml(p.candidate)}</text>`;
   // A wide transparent hit target, so the title shows without aiming at a 10px dot.
-  return `<g><title>${escapeHtml(p.title)}</title><circle class="cs-hit" cx="${f(p.cx)}" cy="${f(p.cy)}" r="12"/>${leader}${ring}${shape}${label}</g>`;
+  return `<g><title>${escapeHtml(p.title)}</title><circle class="cs-hit" cx="${f(p.cx)}" cy="${f(p.cy)}" r="12"/>${leader}${arrow}${ring}${shape}${label}</g>`;
 }
 
 export function renderCostSuccess(chart: CostSuccessChart | null): string {
@@ -281,7 +308,7 @@ export function renderCostSuccess(chart: CostSuccessChart | null): string {
   return `<section class="card">
     <h2>${COST_SUCCESS_TITLE} <span class="hint">${COST_SUCCESS_HINT}</span></h2>
     <figure class="cs-fig">${svg}
-      <figcaption class="cs-legend"><span><i class="k-dot"></i>passed every gate</span><span><i class="k-dot gated"></i>removed by a gate</span><span><i class="k-dot chosen"></i>recommended</span><span><i class="k-square"></i>control</span>${chart.gate ? `<span><i class="k-gate"></i>${escapeHtml(chart.gate.label)}</span>` : ""}</figcaption>
+      <figcaption class="cs-legend"><span><i class="k-dot"></i>passed every gate</span><span><i class="k-dot gated"></i>removed by a gate</span><span><i class="k-dot chosen"></i>recommended</span><span><i class="k-square"></i>control</span>${chart.hasFloor ? `<span><i class="k-floor">→</i>cost at least this</span>` : ""}${chart.gate ? `<span><i class="k-gate"></i>${escapeHtml(chart.gate.label)}</span>` : ""}</figcaption>
     </figure>
     <p class="note">${escapeHtml(costSuccessNote(chart))}</p>
   </section>`;
@@ -304,5 +331,7 @@ svg.cs{width:100%;height:auto;max-width:760px;overflow:visible;font-family:inher
 .k-dot{border-radius:50%;background:var(--accent-2)}.k-dot.gated{background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--ink-3)}
 .k-dot.chosen{background:var(--accent);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
 .k-square{border-radius:2px;background:var(--accent-2)}
+.k-floor{width:auto!important;height:auto!important;font-style:normal;color:var(--ink-3)}
+.cs-floor{fill:none;stroke:var(--ink-3);stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
 .k-gate{width:18px!important;height:0!important;border-top:1.5px dashed var(--bad-fg)}
 `;

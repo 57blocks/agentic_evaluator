@@ -77,3 +77,18 @@ test("the hover title says which gate removed a candidate, and report.html escap
   assert.doesNotMatch(html, /<b>/);
   assert.equal(renderCostSuccess(null), "");
 });
+
+test("a candidate with unreported spend sits at its reported-spend floor, marked, not in the n/a lane", () => {
+  const chart = costSuccessChart([
+    candidate("priced", 8, 8, 0.01),
+    candidate("timed-out-twice", 7, 8, null, { costObserved: false, costPerSuccessFloor: 0.002 }),
+  ], 0.9)!;
+  const floor = chart.points.find((p) => p.candidate === "timed-out-twice")!;
+  assert.equal(floor.floor, true);
+  assert.ok(chart.hasFloor);
+  assert.deepEqual(chart.lanes, []);
+  assert.ok(floor.cx < chart.points.find((p) => p.candidate === "priced")!.cx);
+  assert.match(floor.title, /at least \$0\.0020 per success .*not ranked on cost/);
+  assert.match(renderCostSuccess(chart), /class="cs-floor"/);
+  assert.equal(chart.points.find((p) => p.candidate === "priced")!.floor, false);
+});

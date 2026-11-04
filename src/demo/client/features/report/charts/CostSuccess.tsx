@@ -5,7 +5,7 @@
  * survive the HTML export, which carries no JavaScript.
  */
 
-import type { CostSuccessChart, ScatterPoint } from "../../../../../report-scatter.js";
+import { ARROW, type CostSuccessChart, type ScatterPoint } from "../../../../../report-scatter.js";
 import { cn } from "@/lib/utils";
 
 const f = (n: number): number => Math.round(n * 10) / 10;
@@ -26,6 +26,15 @@ function Mark({ p }: { p: ScatterPoint }) {
           y2={f(label.y - 4)}
           className="stroke-muted-foreground"
           strokeWidth={0.75}
+        />
+      )}
+      {p.floor && (
+        <path
+          d={`M${f(p.cx + 6)} ${f(p.cy)}h${ARROW - 4}m-4 -3.5l4 3.5l-4 3.5`}
+          className="fill-none stroke-muted-foreground"
+          strokeWidth={1.25}
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       )}
       {p.chosen && <circle cx={f(p.cx)} cy={f(p.cy)} r={9} className="fill-none stroke-brand" strokeWidth={2} />}
@@ -94,6 +103,9 @@ export function CostSuccess({ chart }: { chart: CostSuccessChart }) {
         <Key className="size-2.5 rounded-full bg-card ring-[1.5px] ring-muted-foreground ring-inset">removed by a gate</Key>
         <Key className="size-2.5 rounded-full bg-brand ring-2 ring-brand ring-offset-2 ring-offset-card">recommended</Key>
         <Key className="size-2.5 rounded-[2px] bg-brand-2">control</Key>
+        {chart.hasFloor && (
+          <span className="inline-flex items-center gap-1.5"><span aria-hidden>→</span>cost at least this</span>
+        )}
         {chart.gate && <Key className="h-0 w-4.5 border-t-[1.5px] border-dashed border-bad">{chart.gate.label}</Key>}
       </figcaption>
     </figure>
