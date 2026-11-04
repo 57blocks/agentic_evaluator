@@ -1,0 +1,149 @@
+# claim-denials-snf-flow probe — 8 of the 300 items, one per kind of case
+# plus a second reopening trap, picked as the items most models missed in the
+# v2.3 run (cd2-013, cd2-014 filing-through-date; cd2-169 new benefit period;
+# cd2-119 three-day stay; cd2-187 unprocessable; cd2-173 benefit exhausted;
+# cd2-005 late filing; cd2-003 duplicate). Same prompts, checks and
+# candidates as spec.yaml; only the inputs and the budget differ.
+#
+#   agenteval check-task datasets/tasks/claim-denials-snf-flow/probe.yaml
+#   agenteval plan datasets/tasks/claim-denials-snf-flow/probe.yaml
+#   agenteval run datasets/tasks/claim-denials-snf-flow/probe.yaml --yes --html   # billed
+
+protocol_version: "0.3"
+run_name: claim-denials-snf-flow-probe
+description: "Probe of claim-denials-snf-flow: 8 items, the hardest of each kind in the v2.3 run, on all three steps and both chain arms. Directional only."
+budget_usd: 10
+
+workflow:
+  # The best single model on claim-denials-snf-v2 (297/300 on v2.3): the arm
+  # the per-step combination has to beat, end to end.
+  control_candidate: opus-5.5
+  steps:
+    - id: extract
+      version: "1"
+      description: "Read the claim file: the contractor's reason, the claim's dates, and the facility's records copied verbatim."
+      producer: prompt
+      prompt_file: prompts/extract.md
+      test_set:
+        id: claim-denials-snf-flow-extract
+        labels_file: checks/manifest.json
+        inputs: [cd2-003, cd2-005, cd2-013, cd2-014, cd2-119, cd2-169, cd2-173, cd2-187]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash, opus-5.5, gpt-5.6-sol, qwen3.8-max, deepseek-v4-pro]
+      required_checks: [flow-check]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+    - id: decide
+      version: "1"
+      description: "From extract's summary: can the denial be reversed, and what should the facility do next (correctable, next_action)?"
+      producer: prompt
+      prompt_file: prompts/decide.md
+      input_from: extract
+      test_set:
+        id: claim-denials-snf-flow-decide
+        labels_file: checks/manifest.json
+        inputs: [cd2-003-decide, cd2-005-decide, cd2-013-decide, cd2-014-decide, cd2-119-decide, cd2-169-decide, cd2-173-decide, cd2-187-decide]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash, opus-5.5, gpt-5.6-sol, qwen3.8-max, deepseek-v4-pro]
+      required_checks: [flow-check]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+    - id: deadline
+      version: "1"
+      description: "From decide's answer: the last day to take next_action."
+      producer: prompt
+      prompt_file: prompts/deadline.md
+      input_from: decide
+      test_set:
+        id: claim-denials-snf-flow-deadline
+        labels_file: checks/manifest.json
+        inputs: [cd2-003-deadline, cd2-005-deadline, cd2-013-deadline, cd2-014-deadline, cd2-119-deadline, cd2-169-deadline, cd2-173-deadline, cd2-187-deadline]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash, opus-5.5, gpt-5.6-sol, qwen3.8-max, deepseek-v4-pro, deadline-rules]
+      required_checks: [flow-check]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: opus-5.5
+    model: anthropic/claude-opus-5.5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: gpt-5.6-sol
+    model: openai/gpt-5.6-sol
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: qwen3.8-max
+    model: qwen/qwen3.8-max-0902
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro-0813
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  # Not a model: RULES.md's deadline rules as date arithmetic, on the
+  # deadline step only. Is an LLM needed once next_action is decided?
+  - id: deadline-rules
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/deadline-rules.mjs]
+      reports_usage: true
+      version_files: [agents/deadline-rules.mjs]
+
+evaluators:
+  required_checks:
+    flow-check:
+      kind: command
+      description: "Each step hands on what the next needs, matching the key computed from RULES.md: extract the reason, the dates and the records verbatim; decide correctable and next_action; deadline the last day the rules allow."
+      argv: ["node", "checks/flow-check.mjs"]
+      version_files: [checks/flow-check.mjs, checks/manifest.json]
+      timeout_seconds: 30
+  judge:
+    # Required by the schema, never called: no method is declared. The
+    # checks decide every step; action_note is not asked for.
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/none.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  default_temperature: 0
