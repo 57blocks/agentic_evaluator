@@ -25,6 +25,12 @@
 # filing-through-date keys changed; every input is unchanged. Runs before
 # v2.3 graded those 50 items against the old `appeal` key.
 #
+# v2.4 (2026-11-03): R7 — a deadline that falls on a Saturday, Sunday or
+# federal holiday runs to the next workday (42 CFR 424.44(c); CPM Ch. 29
+# §310). 36 appeal and corrected-claim keys moved; 14 reopening keys also
+# accept the next workday, since no source settles a reopening. Inputs are
+# unchanged; runs before v2.4 marked those 50 rolled answers wrong.
+#
 #   node datasets/tasks/claim-denials-snf-v2/gen/generate.mjs     # rebuild (same seed, same set)
 #   agenteval check-task datasets/tasks/claim-denials-snf-v2            # free
 #   agenteval run datasets/tasks/claim-denials-snf-v2 --yes --html      # billed
