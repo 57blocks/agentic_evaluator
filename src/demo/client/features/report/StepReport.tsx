@@ -19,7 +19,9 @@ import { CoverageAndLedger } from "./sections/CoverageAndLedger";
 import { Profile } from "./sections/Profile";
 import { Duels, judgedFirst } from "./sections/Duels";
 import { Gaps, Outputs, RawRecords, Trials } from "./sections/Evidence";
-import { Fold, Section } from "./Section";
+import { Fold, Note, Section } from "./Section";
+import { CostSuccess } from "./charts/CostSuccess";
+import { COST_SUCCESS_HINT, COST_SUCCESS_TITLE, costSuccessNote } from "../../../../report-scatter.js";
 import { PlanStepCard } from "@/features/test-plan/TestPlan";
 
 export function StepReport({ report: r }: { report: Model }) {
@@ -46,6 +48,12 @@ export function StepReport({ report: r }: { report: Model }) {
       <SideBySide outputs={r.outputs} candidates={r.candidates} open={r.promptComparison !== null} />
       <AgentActivity agentActivity={r.agentActivity} />
       <Slices slices={r.slices} candidates={r.candidates.map((c) => c.id)} />
+      {r.costSuccess && (
+        <Section title={COST_SUCCESS_TITLE} hint={COST_SUCCESS_HINT}>
+          <CostSuccess chart={r.costSuccess} />
+          <Note>{costSuccessNote(r.costSuccess)}</Note>
+        </Section>
+      )}
       <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />
       <Certainty certainty={r.certainty} />
       <Profile absoluteRan={r.absoluteRan} distribution={r.distribution} scoreSummary={r.scoreSummary} preference={r.preference} candidates={r.candidates} />

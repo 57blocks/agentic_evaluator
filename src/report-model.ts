@@ -36,6 +36,7 @@ import { planFromRun, routeVia, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
 import { NO_PICK, plural, sha8 } from "./report-format.js";
 import { sliceRows, type SliceRow } from "./report-slices.js";
+import { costSuccessChart, gateNotesOf, type CostSuccessChart } from "./report-scatter.js";
 import type { RunAbout } from "./canon/about.js";
 import type { CandidateDef } from "./canon/types.js";
 import {
@@ -571,6 +572,8 @@ export interface StepReport {
     spend: number;
   };
   gates: GateRow[];
+  /** Required-check pass rate against cost per success, one point per candidate; null with fewer than two to compare. */
+  costSuccess: CostSuccessChart | null;
   /** The statistics behind the firmness label, and how much of the set carried evidence. */
   certainty: Certainty;
   /** What the traces showed the command candidates doing; empty when no trial carried one. */
@@ -620,6 +623,14 @@ export function buildStepReport(b: RunBundle): StepReport {
   const chosenView = views.find((v) => v.id === rec.chosen);
   const judge = judgeFavourite(b);
   const distribution = scoreDistribution(b.trials, new Map(views.map((v) => [v.id, { pass: v.checkPass, executed: v.checkExecuted }])));
+  const gates = gateRows(rec);
+  const rows = views.map((v, i) => ({
+    ...v,
+    isControl: m.control_candidate === v.id,
+    gated: !rec.eligible.includes(v.id),
+    chosen: rec.chosen === v.id,
+    colorIndex: i % 4,
+  }));
 
   return {
     kind: "step",
@@ -661,20 +672,15 @@ export function buildStepReport(b: RunBundle): StepReport {
         : null,
       spend: b.ledger.total,
     },
-    gates: gateRows(rec),
+    gates,
+    costSuccess: costSuccessChart(rows, rec.eligibility?.minimum_required_check_pass_rate ?? null, gateNotesOf(gates)),
     certainty: certaintyOf(rec, b.trials),
     filters: rec.filters,
     eligible: rec.eligible,
     promptVariants: promptVariantsOf(views),
     stepPromptFile: b.prompts?.stepFile ?? null,
     promptComparison: promptComparisonOf(b, views),
-    candidates: views.map((v, i) => ({
-      ...v,
-      isControl: m.control_candidate === v.id,
-      gated: !rec.eligible.includes(v.id),
-      chosen: rec.chosen === v.id,
-      colorIndex: i % 4,
-    })),
+    candidates: rows,
     trialsPer: m.execution.trials_per_case,
     control: m.control_candidate ?? null,
     coverage: b.summary.evaluation_coverage,
