@@ -4,7 +4,7 @@
  * through rules.mjs, so an answer always follows from RULES.md.
  */
 
-import { addDays, filingDeadline, inpatientDays, newBenefitPeriod, qualifyingStayMet, redeterminationDeadline, reopeningDeadline, SNF_DAYS_PER_PERIOD } from "./rules.mjs";
+import { addDays, appealDeadline, correctedClaimDeadline, filingDeadline, inpatientDays, newBenefitPeriod, qualifyingStayMet, reopeningAlsoAccepted, reopeningDeadline, SNF_DAYS_PER_PERIOD } from "./rules.mjs";
 
 export const pick = (rng, list) => list[Math.floor(rng() * list.length)];
 const int = (rng, lo, hi) => lo + Math.floor(rng() * (hi - lo + 1));
@@ -20,7 +20,14 @@ function dateIn(rng, from, to) {
 /** A stay of `days` days starting `from`: Through is the last day billed. */
 const stay = (from, days) => ({ from, through: addDays(from, days - 1) });
 
-const answer = (root_cause, correctable, next_action, deadline) => ({ root_cause, correctable, next_action, deadline });
+/** `alsoAccepted`: other deadlines the rules allow (R7 on a reopening); written only when there are some. */
+const answer = (root_cause, correctable, next_action, deadline, alsoAccepted = []) => ({
+  root_cause,
+  correctable,
+  next_action,
+  deadline,
+  ...(alsoAccepted.length > 0 ? { deadline_also_accepted: alsoAccepted } : {}),
+});
 
 export const ARCHETYPES = {
   "duplicate-paid": {
@@ -61,7 +68,7 @@ export const ARCHETYPES = {
         claim: { ...s, filed },
         remit: { date: remitDate, group: "CO", carc: 16, remark: "MA130" },
         history: [`${filed}  Claim submitted.`, `${addDays(filed, 2)}  Claim edit report: ${pick(rng, ["attending physician NPI missing", "occurrence code 50 date missing", "value code 80 (covered days) missing", "patient discharge status code missing"])}.`],
-        expected: answer("missing_or_invalid_information", "yes", "corrected_claim", filingDeadline(s.through)),
+        expected: answer("missing_or_invalid_information", "yes", "corrected_claim", correctedClaimDeadline(s.through)),
       };
     },
   },
@@ -76,7 +83,7 @@ export const ARCHETYPES = {
         claim: { ...s, filed },
         remit: { date: remitDate, group: "CO", carc: 29 },
         history: [`${addDays(s.through, 30)}  Claim held for therapy minutes reconciliation.`, `${filed}  Claim submitted.`, `${addDays(remitDate, 1)}  Staff note: "Denied as late. Admission was over a year before we billed, so we probably have to write it off."`],
-        expected: answer("timely_filing", "yes", "reopening", reopeningDeadline(remitDate)),
+        expected: answer("timely_filing", "yes", "reopening", reopeningDeadline(remitDate), reopeningAlsoAccepted(remitDate)),
       };
     },
   },
@@ -94,7 +101,7 @@ export const ARCHETYPES = {
         claim: { ...s, filed: addDays(s.through, 8), qualifying: { admitOrder: hospAdmit, discharge: hospDischarge } },
         remit: { date: remitDate, group: "PR", carc: 119 },
         history: [`Prior SNF stay at this facility: ${addDays(priorEnd, -int(rng, 70, 95))} to ${priorEnd} (Medicare days used in that benefit period: 100).`, `No hospital or SNF care between ${priorEnd} and ${hospAdmit} (beneficiary at home; confirmed with family and the hospital).`, `Hospital inpatient ${hospAdmit} to ${hospDischarge}; admitted here ${hospDischarge}.`],
-        expected: answer("benefit_limit_exhausted", "yes", "appeal", redeterminationDeadline(remitDate)),
+        expected: answer("benefit_limit_exhausted", "yes", "appeal", appealDeadline(remitDate)),
       };
     },
   },
@@ -134,7 +141,7 @@ export const ARCHETYPES = {
         claim: { ...s, filed: addDays(s.through, 6), qualifying: { admitOrder, discharge } },
         remit: { date: remitDate, group: "CO", carc: 96, contractorReason: "Qualifying 3-day inpatient hospital stay requirement not met." },
         history: [`Hospital record: emergency department ${ed}; observation ${ed} to ${admitOrder}; inpatient admission order signed ${admitOrder}; discharged ${discharge}.`, snfAdmit === discharge ? `Admitted here ${snfAdmit}, directly from the hospital.` : `Discharged home ${discharge}; admitted here ${snfAdmit} for skilled therapy related to the hospital stay.`],
-        expected: answer("qualifying_stay_not_met", "yes", "appeal", redeterminationDeadline(remitDate)),
+        expected: answer("qualifying_stay_not_met", "yes", "appeal", appealDeadline(remitDate)),
       };
     },
   },
