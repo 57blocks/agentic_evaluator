@@ -60,6 +60,12 @@ export interface CandidateView {
   costPerSuccess: number | null;
   /** False when any attempt's generation spend was not reported (cost source "none"). */
   costObserved: boolean;
+  /**
+   * Set only when cost per success is unknown because some spend went
+   * unreported: the reported spend alone per success. A floor — the missing
+   * calls can only add to it. The selector never ranks on it.
+   */
+  costPerSuccessFloor: number | null;
   p50: number | null;
   states: Array<[string, number]>;
   outcomes: { success: number; failure: number; undetermined: number };
@@ -215,6 +221,12 @@ export function duelRecord(
   return { wins, losses, ties, comparisons, rate: comparisons > 0 ? ((wins + ties / 2) / comparisons) * 100 : null };
 }
 
+function costFloor(costPerSuccess: number | null, own: readonly TrialRow[], successes: number): number | null {
+  if (costPerSuccess !== null || successes === 0) return null;
+  const reported = own.filter((t) => t.cost.source !== "none").reduce((s, t) => s + t.cost.generation, 0);
+  return reported > 0 ? reported / successes : null;
+}
+
 export function candidateViews(b: RunBundle): CandidateView[] {
   return b.summary.candidates.map((c) => {
     const own = b.trials.filter((t) => t.candidate === c.candidate);
@@ -235,6 +247,7 @@ export function candidateViews(b: RunBundle): CandidateView[] {
       absolute: abs.length ? abs.reduce((s, v) => s + v, 0) / abs.length : null,
       costPerSuccess: c.generation_cost_per_success,
       costObserved: own.every((t) => t.cost.source !== "none"),
+      costPerSuccessFloor: costFloor(c.generation_cost_per_success, own, c.outcomes.success),
       p50: c.p50_ms,
       states: Object.entries(c.completion_states).filter(([, n]) => n > 0),
       outcomes: c.outcomes,
