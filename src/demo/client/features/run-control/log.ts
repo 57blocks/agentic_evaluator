@@ -27,6 +27,14 @@ export function eventLine(event: RunEvent): string {
       return `⚠ Cancelled: ${event.step} dispatched ${event.dispatched}, ${event.skipped} never started`;
     case "candidate.stopped":
       return `⚠ Stopped ${event.candidate} after ${event.afterTrials} trial(s): ${event.reason}`;
+    case "transport.paused":
+      return `  paused: ${event.consecutive} transport failures in a row, probing again in ${Math.round(event.delayMs / 1000)}s`;
+    case "transport.resumed":
+      return `  resumed after ${Math.round(event.pausedMs / 1000)}s of waiting for the network`;
+    case "transport.gave_up":
+      return `⚠ Network still down after ${Math.round(event.pausedMs / 1000)}s; calls now fail as provider errors`;
+    case "run.halted":
+      return `⚠ Halted ${event.step} after ${event.consecutive} consecutive provider errors; ${event.skipped.generation} generation(s) never started — this run is incomplete`;
     case "integrity.gaps":
       return `⚠ The trace has ${event.gaps} long gap(s); this run's durations are unreliable`;
     case "step.done":
@@ -49,7 +57,10 @@ export function eventLine(event: RunEvent): string {
 function trialLine(event: Extract<RunEvent, { type: "trial" }>): string {
   const who = `${event.candidate} · ${event.input} · t${event.trial}`;
   if (event.reusedFrom) return `  reused ${who}`;
-  if (event.state === "skipped") return `  skipped ${who} — ${event.skipReason === "early-stop" ? "early stop" : "budget reached"}`;
+  if (event.state === "skipped") {
+    const why = event.skipReason === "early-stop" ? "early stop" : event.skipReason === "provider-errors" ? "run halted on provider errors" : "budget reached";
+    return `  skipped ${who} — ${why}`;
+  }
   const check = event.check ? ` · check ${event.check}` : "";
   const error = event.error ? `: ${event.error}` : "";
   return `  ${event.state} ${who}${check}${error}`;
