@@ -113,3 +113,29 @@ test("--reuse regrades a trial when only the trace rules changed", async () => {
   assert.ok(t?.reusedFrom, "the agent did not run again");
   assert.equal(t?.check, "fail", "the new rule (max 5 bash calls) was applied to the kept trace");
 });
+
+test("--reuse does not keep an old verdict for an agent whose files were not kept: it says the trial cannot be regraded", async () => {
+  // Arrange - one run, then its kept files go missing and the check changes.
+  const spec = await tracedTask("", UNTRACED);
+  await runSuite(spec, false, { yes: true, onEvent: () => {} });
+  const runs = path.join(path.dirname(spec), "runs");
+  const [run] = await fs.readdir(runs);
+  await fs.rm(path.join(runs, run, "checks"), { recursive: true, force: true });
+  await fs.appendFile(path.join(path.dirname(spec), "checks", "gate.cjs"), "// v2\n");
+
+  // Act
+  const events: { reusedFrom?: string; check?: string }[] = [];
+  const saved = process.env.EVAL_REUSE;
+  process.env.EVAL_REUSE = "1";
+  try {
+    await runSuite(spec, false, { yes: true, onEvent: (e) => { if (e.type === "trial") events.push(e); } });
+  } finally {
+    if (saved === undefined) delete process.env.EVAL_REUSE;
+    else process.env.EVAL_REUSE = saved;
+  }
+
+  // Assert - reused, and marked ungradable instead of passing on the old check.
+  const [t] = events;
+  assert.ok(t?.reusedFrom, "the agent did not run again");
+  assert.equal(t?.check, "evaluator_error");
+});
