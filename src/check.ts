@@ -260,7 +260,12 @@ function resolveArgv(
   return { argv: resolved, missing };
 }
 
-/** Version = the argv plus the contents of every declared version file. */
+/**
+ * Version = the argv plus the contents of every declared version file, and
+ * the task's answer key when it has one: the harness hands `references/` to
+ * every check, so a key that changed is a check that changed, and `--reuse`
+ * grades again. While a run hides the key, its private copy is hashed.
+ */
 export async function commandCheckVersion(
   argv: readonly string[],
   versionFiles: readonly string[],
@@ -274,7 +279,18 @@ export async function commandCheckVersion(
       return `${rel}:${sha256(content)}`;
     }),
   );
-  return `cmd-${short(sha256(argv.join(" ")))}+files-${short(sha256(parts.join("\n")))}`;
+  const key = await treeHash(referencesCopyFor(taskRoot) ?? path.join(path.resolve(taskRoot), "references"));
+  const all = key === null ? parts : [...parts, `references/:${key}`];
+  return `cmd-${short(sha256(argv.join(" ")))}+files-${short(sha256(all.join("\n")))}`;
+}
+
+/** Every file under `dir`, by relative path and content; null when there is no such directory. */
+async function treeHash(dir: string): Promise<string | null> {
+  const entries = await fs.readdir(dir, { recursive: true, withFileTypes: true }).catch(() => null);
+  if (entries === null) return null;
+  const files = entries.filter((e) => e.isFile()).map((e) => path.join(e.parentPath, e.name)).sort();
+  const parts = await Promise.all(files.map(async (f) => `${path.relative(dir, f)}:${sha256(await fs.readFile(f, "utf-8"))}`));
+  return sha256(parts.join("\n"));
 }
 
 /**

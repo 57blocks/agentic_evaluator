@@ -180,6 +180,23 @@ test("the version changes when the check script changes, not when it is re-run",
   assert.notEqual(a, otherFiles);
 });
 
+test("the version changes when the task's answer key changes, though no declared file did", async () => {
+  // Arrange - a task whose check declares only itself.
+  const task = await fs.mkdtemp(path.join(os.tmpdir(), "check-key-"));
+  await fs.mkdir(path.join(task, "references", "nested"), { recursive: true });
+  await fs.writeFile(path.join(task, "references", "nested", "a.txt"), "2026-06-15");
+  const version = () => commandCheckVersion([NODE, "checks/x.mjs"], [], task);
+  const before = await version();
+
+  // Act
+  await fs.writeFile(path.join(task, "references", "nested", "a.txt"), "2026-06-13");
+
+  // Assert
+  assert.notEqual(await version(), before);
+  assert.equal(await version(), await version());
+  await fs.rm(task, { recursive: true, force: true });
+});
+
 /* The shipped example gate, exercised through the same contract a spec uses. */
 
 const PRD = `
