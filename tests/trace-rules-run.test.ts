@@ -139,3 +139,31 @@ test("--reuse does not keep an old verdict for an agent whose files were not kep
   assert.ok(t?.reusedFrom, "the agent did not run again");
   assert.equal(t?.check, "evaluator_error");
 });
+
+test("--reuse carries a trial's kept files into the new run, so a regrade from that run still finds them", async () => {
+  // Arrange - run, then reuse it unchanged: the second run is all reused trials.
+  const spec = await tracedTask("", UNTRACED);
+  await runSuite(spec, false, { yes: true, onEvent: () => {} });
+  const saved = process.env.EVAL_REUSE;
+  process.env.EVAL_REUSE = "1";
+  try {
+    await runSuite(spec, false, { yes: true, onEvent: () => {} });
+    // The first run's files are gone; only the reused run's copy is left.
+    const runs = path.join(path.dirname(spec), "runs");
+    const [first] = (await fs.readdir(runs)).sort();
+    await fs.rm(path.join(runs, first), { recursive: true, force: true });
+    await fs.appendFile(path.join(path.dirname(spec), "checks", "gate.cjs"), "// v2\n");
+
+    // Act
+    const events: { reusedFrom?: string; check?: string }[] = [];
+    await runSuite(spec, false, { yes: true, onEvent: (e) => { if (e.type === "trial") events.push(e); } });
+
+    // Assert - regraded on the carried files, not refused for want of them.
+    const [t] = events;
+    assert.ok(t?.reusedFrom);
+    assert.equal(t?.check, "pass");
+  } finally {
+    if (saved === undefined) delete process.env.EVAL_REUSE;
+    else process.env.EVAL_REUSE = saved;
+  }
+});

@@ -231,6 +231,13 @@ async function regradeIfChanged(
   }
 }
 
+/** A reused trial's kept check files, copied into this run's own; nothing when there were none. */
+async function carryEvidence(fromRun: string, to: string, t: { candidate: string; inputSlug: string; trial: number }): Promise<void> {
+  const kept = path.join(fromRun, "checks", `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}`);
+  if (!(await fs.stat(kept).then((s) => s.isDirectory(), () => false))) return;
+  await keepEvidence(kept, to);
+}
+
 /** What an agent command printed, kept beside the files it left. */
 export const AGENT_LOG = "AGENT_OUTPUT.log";
 
@@ -730,6 +737,8 @@ export async function runAll(params: {
       if (reused) {
         // A reused failure has no output to grade: it stays the failure it was.
         const regraded = reused.record.status === "ok" ? await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir, leavesFiles: adapterIdOf(def, producer) !== "model-api" }) : null;
+        // Carry the graded files forward, so a later regrade from this run finds them.
+        if (!regraded) await carryEvidence(reused.dir, checkWorkDir, { candidate, inputSlug, trial });
         await copyTrace(reused.dir, outDir, { candidate, inputSlug, trial });
         params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: reused.record.completionState ?? "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
         return finish({ ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from });
