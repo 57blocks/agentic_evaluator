@@ -26,7 +26,11 @@
 #
 #   node datasets/tasks/contract-terms-long/gen/generate.mjs
 #   agenteval check-task datasets/tasks/contract-terms-long          # free
-#   caffeinate -i agenteval run datasets/tasks/contract-terms-long --yes --html   # billed, about $50
+#   caffeinate -i agenteval run datasets/tasks/contract-terms-long --yes --html   # billed, about $35
+#
+# 2026-11-05 run (runs/contract-terms-long-2026-11-05T07-46-34-295Z): 9 of 60
+# inputs separate the eight on the answers, all one-party or chain traps;
+# everything else is 100% for every model. datasets/README.md has the row.
 
 protocol_version: "0.3"
 run_name: contract-terms-long

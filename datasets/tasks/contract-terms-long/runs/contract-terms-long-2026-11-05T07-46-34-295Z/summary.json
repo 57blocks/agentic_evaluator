@@ -1,0 +1,552 @@
+{
+  "run": "contract-terms-long-2026-11-05T07-46-34-295Z",
+  "step": "extract",
+  "inputs": [
+    "ct-001",
+    "ct-002",
+    "ct-003",
+    "ct-004",
+    "ct-005",
+    "ct-006",
+    "ct-007",
+    "ct-008",
+    "ct-009",
+    "ct-010",
+    "ct-011",
+    "ct-012",
+    "ct-013",
+    "ct-014",
+    "ct-015",
+    "ct-016",
+    "ct-017",
+    "ct-018",
+    "ct-019",
+    "ct-020",
+    "ct-021",
+    "ct-022",
+    "ct-023",
+    "ct-024",
+    "ct-025",
+    "ct-026",
+    "ct-027",
+    "ct-028",
+    "ct-029",
+    "ct-030",
+    "ct-031",
+    "ct-032",
+    "ct-033",
+    "ct-034",
+    "ct-035",
+    "ct-036",
+    "ct-037",
+    "ct-038",
+    "ct-039",
+    "ct-040",
+    "ct-041",
+    "ct-042",
+    "ct-043",
+    "ct-044",
+    "ct-045",
+    "ct-046",
+    "ct-047",
+    "ct-048",
+    "ct-049",
+    "ct-050",
+    "ct-051",
+    "ct-052",
+    "ct-053",
+    "ct-054",
+    "ct-055",
+    "ct-056",
+    "ct-057",
+    "ct-058",
+    "ct-059",
+    "ct-060"
+  ],
+  "candidates": [
+    {
+      "candidate": "sonnet-5",
+      "valid_attempts": 60,
+      "classified": 60,
+      "task_success_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "reliability": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "required_check_pass_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "all_trials_pass_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "completion_states": {
+        "success": 60,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 57,
+        "failure": 3,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 57,
+        "fail": 3,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.064063,
+      "p50_ms": 5421,
+      "p95_ms": 11739
+    },
+    {
+      "candidate": "kimi-k3",
+      "valid_attempts": 60,
+      "classified": 60,
+      "task_success_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "reliability": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "required_check_pass_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "all_trials_pass_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "completion_states": {
+        "success": 60,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 57,
+        "failure": 3,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 57,
+        "fail": 3,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.044953,
+      "p50_ms": 9165,
+      "p95_ms": 25256
+    },
+    {
+      "candidate": "glm-5.3",
+      "valid_attempts": 60,
+      "classified": 60,
+      "task_success_rate": {
+        "value": 0.8833333333333333,
+        "numerator": 53,
+        "denominator": 60
+      },
+      "reliability": {
+        "value": 0.8833333333333333,
+        "numerator": 53,
+        "denominator": 60
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "required_check_pass_rate": {
+        "value": 0.8833333333333333,
+        "numerator": 53,
+        "denominator": 60
+      },
+      "all_trials_pass_rate": {
+        "value": 0.8833333333333333,
+        "numerator": 53,
+        "denominator": 60
+      },
+      "completion_states": {
+        "success": 60,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 53,
+        "failure": 7,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 53,
+        "fail": 7,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.016884,
+      "p50_ms": 10725,
+      "p95_ms": 49726
+    },
+    {
+      "candidate": "deepseek-v4.1-flash",
+      "valid_attempts": 60,
+      "classified": 60,
+      "task_success_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "reliability": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "required_check_pass_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "all_trials_pass_rate": {
+        "value": 0.95,
+        "numerator": 57,
+        "denominator": 60
+      },
+      "completion_states": {
+        "success": 60,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 57,
+        "failure": 3,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 57,
+        "fail": 3,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.005398,
+      "p50_ms": 12873,
+      "p95_ms": 40936
+    },
+    {
+      "candidate": "opus-5.5",
+      "valid_attempts": 60,
+      "classified": 60,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "completion_states": {
+        "success": 60,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 60,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 60,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.117136,
+      "p50_ms": 4382,
+      "p95_ms": 5213
+    },
+    {
+      "candidate": "gpt-5.6-sol",
+      "valid_attempts": 60,
+      "classified": 60,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "completion_states": {
+        "success": 60,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 60,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 60,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.092828,
+      "p50_ms": 3860,
+      "p95_ms": 5611
+    },
+    {
+      "candidate": "qwen3.8-max",
+      "valid_attempts": 60,
+      "classified": 60,
+      "task_success_rate": {
+        "value": 0.8666666666666667,
+        "numerator": 52,
+        "denominator": 60
+      },
+      "reliability": {
+        "value": 0.8666666666666667,
+        "numerator": 52,
+        "denominator": 60
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "required_check_pass_rate": {
+        "value": 0.8666666666666667,
+        "numerator": 52,
+        "denominator": 60
+      },
+      "all_trials_pass_rate": {
+        "value": 0.8666666666666667,
+        "numerator": 52,
+        "denominator": 60
+      },
+      "completion_states": {
+        "success": 60,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 52,
+        "failure": 8,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 52,
+        "fail": 8,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.060428,
+      "p50_ms": 44954,
+      "p95_ms": 109176
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "valid_attempts": 60,
+      "classified": 60,
+      "task_success_rate": {
+        "value": 0.9,
+        "numerator": 54,
+        "denominator": 60
+      },
+      "reliability": {
+        "value": 0.9,
+        "numerator": 54,
+        "denominator": 60
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 60,
+        "denominator": 60
+      },
+      "required_check_pass_rate": {
+        "value": 0.9473684210526315,
+        "numerator": 54,
+        "denominator": 57
+      },
+      "all_trials_pass_rate": {
+        "value": 0.9,
+        "numerator": 54,
+        "denominator": 60
+      },
+      "completion_states": {
+        "success": 57,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 3,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 54,
+        "failure": 6,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 54,
+        "fail": 3,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.050068,
+      "p50_ms": 15119,
+      "p95_ms": 61013
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "no minimum meaningful difference declared"
+    ]
+  },
+  "integrity": {
+    "events": 1919,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 104,
+    "threshold_ms": 300000,
+    "wall_ms": 4385240,
+    "in_flight_gaps": 0
+  },
+  "budget": {
+    "limit_usd": 70,
+    "spent_usd": 33.75281,
+    "stopped_early": false,
+    "skipped": {
+      "generation": 0,
+      "judging": 0,
+      "scoring": 0
+    }
+  },
+  "early_stop": {
+    "enabled": false,
+    "stopped": []
+  },
+  "judge_discrimination": {
+    "overall": {
+      "dimension": "overall",
+      "scored": 477,
+      "distinct": 4,
+      "min": 1,
+      "max": 5,
+      "saturated": false
+    },
+    "dimensions": [
+      {
+        "dimension": "faithful",
+        "scored": 477,
+        "distinct": 4,
+        "min": 1,
+        "max": 5,
+        "saturated": false
+      }
+    ],
+    "saturated": [],
+    "discriminates": true
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "terms-check",
+      "version": "cmd-fbb3f38e+files-c1cceec9",
+      "pass": 450,
+      "fail": 27,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "absolute-1-5",
+      "version": "google/gemini-3.1-pro-preview+rubric-6eac7a68+tpl-9d83475a",
+      "pass": 477,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}
