@@ -345,6 +345,7 @@ async function loadReusable(
   currentRunId: string,
   ws: Workspace,
   taskRoot: string,
+  timeoutMs: number,
 ): Promise<{ record: RunRecord; from: string; dir: string } | null> {
   // Every task's runs, not just this one's: `trialHash` is content-addressed,
   // so a generation produced under another task is the same generation.
@@ -363,14 +364,17 @@ async function loadReusable(
   // A multi-step run keeps each step under runs/<run>/<step>/.
   const dirs = candidates.flatMap(({ dir }) => [dir, path.join(dir, step)]);
   for (const dir of dirs) {
-    const hit = await findTrialRow(dir, step, hash);
+    const hit = await findTrialRow(dir, step, hash, timeoutMs);
     if (!hit) {
       // The hash covers the step's producer, input and candidate, so a
       // journal line with it is this trial; the step is implied.
-      const journaled = await findJournaled(dir, hash);
+      const journaled = await findJournaled(dir, hash, timeoutMs);
       if (journaled) return { record: journaled, from: displayPath(dir), dir };
       continue;
     }
+    // A failed attempt left no output to skip the call with: what is reused
+    // is the failure itself.
+    if (hit.legacy_status !== "ok") return { record: failedRecordFromRow(hit), from: displayPath(dir), dir };
     const text = await fs
       .readFile(path.join(dir, "raw", `${safeName(hit.candidate)}__${hit.input}__t${hit.trial}.txt`), "utf-8")
       .catch(() => null);
@@ -395,7 +399,7 @@ async function journal(outDir: string, record: RunRecord): Promise<void> {
 }
 
 /** A finished trial with that hash from a run's journal (a run that did not finish), or null. */
-async function findJournaled(dir: string, hash: string): Promise<RunRecord | null> {
+async function findJournaled(dir: string, hash: string, timeoutMs: number): Promise<RunRecord | null> {
   let raw: string;
   try {
     raw = await fs.readFile(path.join(dir, JOURNAL_FILE), "utf-8");
@@ -406,7 +410,7 @@ async function findJournaled(dir: string, hash: string): Promise<RunRecord | nul
     if (line.trim() === "") continue;
     try {
       const r = JSON.parse(line) as RunRecord;
-      if (r.trialHash === hash && r.status === "ok") return r;
+      if (r.trialHash === hash && (r.status === "ok" || isCandidatesOwnFailure({ state: r.completionState, ms: r.ms, promptTokens: r.promptTokens, costUsd: r.costUsd }, timeoutMs))) return r;
     } catch {
       // A line cut short by the crash itself.
     }
@@ -414,14 +418,45 @@ async function findJournaled(dir: string, hash: string): Promise<RunRecord | nul
   return null;
 }
 
-/** The first successful trial row in this run for that step and hash, or null. */
-async function findTrialRow(dir: string, step: string, hash: string): Promise<TrialRow | null> {
+/**
+ * A failed attempt that is the candidate's own outcome, so asking again under
+ * the same rules would be a second chance, not a regrade: a refusal or a
+ * malformed answer from a model that was reached, and a timeout that had at
+ * least the time this run allows.
+ * A provider error or a cancelled call says nothing about the candidate, and
+ * a timeout under a shorter limit than today's was cut off early: those are
+ * generated again.
+ */
+export function isCandidatesOwnFailure(
+  attempt: { state: string | undefined; ms: number; promptTokens: number; costUsd: number },
+  timeoutMs: number,
+): boolean {
+  const { state, ms } = attempt;
+  // An error nobody could classify is recorded as malformed (fail closed), so
+  // a malformed attempt is the model's own only if the model was reached: a
+  // missing API key is "malformed" too, and must not stick.
+  if (state === "refusal" || state === "malformed") return attempt.promptTokens > 0 || attempt.costUsd > 0;
+  // The clock that stops a call and the one that times it are not the same
+  // tick: a 300 s timeout is recorded as 299,999 ms.
+  return state === "timeout" && ms >= timeoutMs - TIMEOUT_SLACK_MS;
+}
+
+/** How far under its limit a recorded timeout can read and still have had the whole limit. */
+const TIMEOUT_SLACK_MS = 1_000;
+
+/**
+ * The trial row in this run for that step and hash: its success, or else a
+ * failure that was the candidate's own (isCandidatesOwnFailure). A success
+ * wins over a failure in the same run. Null when there is neither.
+ */
+async function findTrialRow(dir: string, step: string, hash: string, timeoutMs: number): Promise<TrialRow | null> {
   let raw: string;
   try {
     raw = await fs.readFile(path.join(dir, "scores.jsonl"), "utf-8");
   } catch {
     return null;
   }
+  let failed: TrialRow | null = null;
   for (const line of raw.split("\n")) {
     if (line.trim() === "") continue;
     let row: TrialRow;
@@ -430,9 +465,40 @@ async function findTrialRow(dir: string, step: string, hash: string): Promise<Tr
     } catch {
       continue;
     }
-    if (row.step === step && row.trial_hash === hash && row.legacy_status === "ok") return row;
+    if (row.step !== step || row.trial_hash !== hash) continue;
+    if (row.legacy_status === "ok") return row;
+    const own = isCandidatesOwnFailure({ state: row.completion_state, ms: row.ms, promptTokens: row.tokens.prompt, costUsd: row.cost.generation }, timeoutMs);
+    failed ??= own ? row : null;
   }
-  return null;
+  return failed;
+}
+
+/** A reused failure: the state, the time and spend it took, no output and no check. */
+function failedRecordFromRow(row: TrialRow): RunRecord {
+  return {
+    candidate: row.candidate,
+    inputSlug: row.input,
+    trial: row.trial,
+    text: "",
+    promptTokens: row.tokens.prompt,
+    completionTokens: row.tokens.completion,
+    cachedTokens: row.tokens.cached ?? undefined,
+    costUsd: row.cost.generation,
+    retryCostUsd: row.cost.retry,
+    costSource: row.cost.source,
+    ms: row.ms,
+    status: "error",
+    error: row.error ?? row.completion_state,
+    modelRef: row.model_ref,
+    deploymentRef: row.deployment_ref ?? undefined,
+    trialHash: row.trial_hash,
+    completionState: row.completion_state,
+    truncated: row.truncated,
+    finishReason: row.finish_reason ?? undefined,
+    isolation: row.isolation ?? undefined,
+    agent: row.agent ?? undefined,
+    traceError: row.agent_error,
+  };
 }
 
 function recordFromRow(row: TrialRow, text: string): RunRecord {
@@ -652,11 +718,12 @@ export async function runAll(params: {
     const checkWorkDir = path.join(outDir, "checks", `${safeName(candidate)}__${inputSlug}__t${trial}`);
 
     if (reuse) {
-      const reused = await loadReusable(suite.step, task.hash, runId, params.ws, suite.taskRoot);
+      const reused = await loadReusable(suite.step, task.hash, runId, params.ws, suite.taskRoot, timeoutMs);
       if (reused) {
-        const regraded = await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir });
+        // A reused failure has no output to grade: it stays the failure it was.
+        const regraded = reused.record.status === "ok" ? await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir }) : null;
         await copyTrace(reused.dir, outDir, { candidate, inputSlug, trial });
-        params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
+        params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: reused.record.completionState ?? "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
         return finish({ ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from });
       }
     }
