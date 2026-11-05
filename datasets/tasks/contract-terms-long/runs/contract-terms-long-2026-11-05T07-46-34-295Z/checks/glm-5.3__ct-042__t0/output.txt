@@ -1,0 +1,14 @@
+```json
+{
+  "parties": ["Meridian Energy Holdings, Inc.", "Northwind Security Group Co."],
+  "effective_date": "2024-03-27",
+  "initial_term_months": 24,
+  "auto_renewal": true,
+  "renewal_term_months": 12,
+  "non_renewal_notice_days": 120,
+  "governing_law": null,
+  "liability_cap": null
+}
+```
+
+Notes on the extraction: the Master Services Agreement fixes the initial term (24 months), automatic renewal (12-month successive terms), and non-renewal notice (120 days). The MSA contains no governing-law clause (only a Delaware venue provision, Section 25), and each SOW names a different state's law, so no single governing law is stated for the agreement. The MSA also contains no general liability cap — Section 23 only excludes consequential damages; the per-SOW caps (e.g., $400,000) are engagement-specific, not a general cap on a party's total liability under the agreement.

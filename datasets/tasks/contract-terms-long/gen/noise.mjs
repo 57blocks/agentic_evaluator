@@ -101,6 +101,7 @@ export function readable(text) {
     .split("\n")
     .filter((l) => !HEADER.test(l.trim()))
     .join("\n")
-    .replace(/([A-Za-z])-\n(?=[A-Za-z])/g, "$1")
+    // "sev-\nenty" rejoins; so does "seventy-\n-five", a hyphenated word wrapped at its own hyphen.
+    .replace(/([A-Za-z])-\n(?=[A-Za-z-])/g, "$1")
     .replace(/\s+/g, " ");
 }
