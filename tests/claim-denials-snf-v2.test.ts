@@ -56,6 +56,21 @@ test("R7: a reopening on a nonworkday accepts the anniversary and the next workd
   assert.equal(runCheck("cd2-014", answer("2026-10-20")).code, 1);
 });
 
+test("R7: the day a deadline rolled from is accepted too, the cautious answer; a day past the rolled one is not", async () => {
+  const { unrolledAlsoAccepted } = await rules();
+  assert.deepEqual(unrolledAlsoAccepted("2026-06-13"), ["2026-06-13"], "a Saturday");
+  assert.deepEqual(unrolledAlsoAccepted("2026-06-15"), [], "a Monday rolls nowhere");
+  // cd2-161: a corrected claim due Saturday 2026-06-13, rolled to Monday the 15th
+  const claim = (deadline: string) => JSON.stringify({ root_cause: "missing_or_invalid_information", correctable: "yes", next_action: "corrected_claim", deadline });
+  assert.equal(runCheck("cd2-161", claim("2026-06-13")).code, 0);
+  assert.equal(runCheck("cd2-161", claim("2026-06-15")).code, 0);
+  assert.equal(runCheck("cd2-161", claim("2026-06-16")).code, 1);
+  // cd2-210: an appeal due Saturday 2025-11-29, rolled to Monday 2025-12-01; the Friday before is not a rolled-from day
+  const appeal = (deadline: string) => JSON.stringify({ ...reference("cd2-210"), deadline });
+  assert.equal(runCheck("cd2-210", appeal("2025-11-29")).code, 0);
+  assert.equal(runCheck("cd2-210", appeal("2025-11-28")).code, 1);
+});
+
 test("R4: the admission day counts, the discharge day and observation time do not", async () => {
   const { inpatientDays, qualifyingStayMet } = await rules();
   assert.equal(inpatientDays("2025-03-03", "2025-03-06"), 3);
