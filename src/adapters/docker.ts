@@ -51,14 +51,18 @@ export interface RunOutcome {
  * committed. A named key the host does not have is dropped rather than
  * passed as an empty string, which an SDK would read as "configured".
  */
-export function containerEnv(declared: Record<string, string> | undefined): string[] {
+export function containerEnv(declared: Record<string, string> | undefined): { args: string[]; env: Record<string, string> } {
   const args: string[] = [];
+  const env: Record<string, string> = {};
   for (const [key, value] of Object.entries(declared ?? {})) {
     const resolved = value === "" ? process.env[key] : value;
     if (resolved === undefined) continue;
-    args.push("-e", `${key}=${resolved}`);
+    // `-e KEY` alone: docker reads the value from the client's environment,
+    // so the secret never sits in an argv that `ps` shows to every user.
+    args.push("-e", key);
+    env[key] = resolved;
   }
-  return args;
+  return { args, env };
 }
 
 /** `docker run` arguments, exported so a test can assert the flags. */
@@ -81,12 +85,15 @@ export function dockerArgs(
     "--cpus", cli.cpus ?? "2",
     // A fork bomb in generated code should not take the host down with it.
     "--pids-limit", "512",
+    // A minimal init as PID 1, so the SIGTERM a timeout sends is honoured
+    // instead of ignored by a bare node/sh that never installed a handler.
+    "--init",
     "-v", `${workDir}:${CONTAINER_WORKDIR}`,
     // The task's own code, read-only and outside the work dir, so it can be
     // run but neither changed nor collected as part of the deliverable.
     ...mounts.flatMap((m) => ["-v", `${m.host}:${m.container}:ro`]),
     "-w", CONTAINER_WORKDIR,
-    ...containerEnv(cli.env),
+    ...containerEnv(cli.env).args,
     cli.image!,
     ...argv,
   ];
@@ -140,7 +147,7 @@ export function runInDocker(
     execFile(
       "docker",
       args,
-      { timeout: opts.timeoutMs, maxBuffer: MAX_BUFFER },
+      { timeout: opts.timeoutMs, maxBuffer: MAX_BUFFER, env: { ...process.env, ...containerEnv(cli.env).env } },
       (error, stdout, stderr) => {
         const ms = Date.now() - t0;
         const out = { stdout: stdout ?? "", stderr: stderr ?? "" };
@@ -148,7 +155,7 @@ export function runInDocker(
           resolve({ ...out, exitCode: 0 });
           return;
         }
-        const e = error as NodeJS.ErrnoException & { killed?: boolean; code?: unknown };
+        const e = error as NodeJS.ErrnoException & { killed?: boolean; code?: unknown; signal?: NodeJS.Signals | null };
         if (e.killed) {
           execFile("docker", ["kill", name], () => {
             reject(new AdapterError("candidate container timed out", { kind: "timeout", ms }));
@@ -168,8 +175,10 @@ export function runInDocker(
           return;
         }
         // Not an exit code (e.g. output past the buffer): unclassified, which
-        // fails closed as the candidate's.
-        reject(new AdapterError(`docker run failed: ${out.stderr.trim() || e.message}`, { kind: "unknown", ms }));
+        // fails closed as the candidate's. Built from stderr and the code
+        // only — `e.message` repeats the argv, secrets included.
+        const why = out.stderr.trim() || (e.signal ? `docker client ended by ${String(e.signal)}` : `exit ${String(e.code)}`);
+        reject(new AdapterError(`docker run failed: ${why}`, { kind: "unknown", ms }));
       },
     );
   }));

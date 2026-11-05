@@ -34,6 +34,7 @@ import { applyExitPolicy } from "./exit-policy.js";
 import { AGENT_LOG, mapWithConcurrency, safeName } from "./generate.js";
 import { runsRootFor } from "./workspace.js";
 import { sha256 } from "../canon/hash.js";
+import { EvaluatorCallError, summarizeAttempts, type EvaluatorUsage } from "../canon/usage.js";
 
 /** Files a trial dir holds that the candidate did not write. */
 const NOT_THE_ANSWER = new Set([AGENT_LOG, "output.txt", "input.txt", "meta.json", ".eval-input.txt", ".eval-usage.json", "EVIDENCE_INCOMPLETE.txt", "node_modules", ".git"]);
@@ -118,16 +119,19 @@ export async function judgeRun(
     const version = `${suite.judge}+rubric-${short(sha256(rubric))}+tpl-${short(judgePromptTemplateSha(rubric, dims))}`;
 
     // One output per (candidate, input): the first trial that completed, as a run's judging does.
-    const answers = new Map<string, Map<string, string>>();
+    // The trial number travels with the text: the verdicts are written onto
+    // the trial that was actually judged, which is not always the first
+    // successful one (its files may not have been kept).
+    const answers = new Map<string, Map<string, { text: string; trial: number }>>();
     for (const t of trials) {
       if (t.completion_state !== "success") continue;
-      const byCandidate = answers.get(t.input) ?? new Map<string, string>();
+      const byCandidate = answers.get(t.input) ?? new Map<string, { text: string; trial: number }>();
       answers.set(t.input, byCandidate);
       if (byCandidate.has(t.candidate)) continue;
       const dir = await trialDirFor(runsRoot, stepDir, suite.step, t, provenance);
       if (!dir) continue;
       const text = await answerText(dir, suite.judgeShow, fixturePath(suite, t.input));
-      if (text.trim() !== "") byCandidate.set(t.candidate, text);
+      if (text.trim() !== "") byCandidate.set(t.candidate, { text, trial: t.trial });
     }
     const pairs: Array<{ input: string; a: string; b: string }> = [];
     for (const input of suite.inputs) {
@@ -135,7 +139,7 @@ export async function judgeRun(
       for (let i = 0; i < present.length; i++) for (let j = i + 1; j < present.length; j++) pairs.push({ input, a: present[i]!, b: present[j]! });
     }
 
-    const judged = await mapWithConcurrency(pairs, opts.concurrency ?? 4, async (p): Promise<{ p: typeof p; j: JudgedPair | null; error?: string }> => {
+    const judged = await mapWithConcurrency(pairs, opts.concurrency ?? 4, async (p): Promise<{ p: typeof p; j: JudgedPair | null; error?: string; usage?: EvaluatorUsage }> => {
       try {
         const j = await judge({
           judgeModel: suite.judge,
@@ -144,21 +148,34 @@ export async function judgeRun(
           dimensions: dims,
           inputSlug: p.input,
           a: p.a,
-          aText: answers.get(p.input)!.get(p.a)!,
+          aText: answers.get(p.input)!.get(p.a)!.text,
           b: p.b,
-          bText: answers.get(p.input)!.get(p.b)!,
+          bText: answers.get(p.input)!.get(p.b)!.text,
           timeoutMs: 240_000,
           traceContext: { phase: "judge-run", step: suite.step },
         });
         return { p, j };
       } catch (err) {
-        return { p, j: null, error: err instanceof Error ? err.message : String(err) };
+        // A failed call was still billed for its attempts; the row keeps that.
+        const usage = err instanceof EvaluatorCallError ? summarizeAttempts(err.attempts) : undefined;
+        return { p, j: null, error: err instanceof Error ? err.message : String(err), ...(usage ? { usage } : {}) };
       }
     });
 
     const run = manifest.run_id;
-    const pairRows: EvaluationRow[] = judged.map(({ p, j, error }) => {
-      if (!j) return { run, step: suite.step, evaluator: PAIRWISE_EVALUATOR_ID, version, state: "evaluator_error", subject: { kind: "pair", a: p.a, b: p.b, input: p.input }, reason: error ?? "judge failed" };
+    const pairRows: EvaluationRow[] = judged.map(({ p, j, error, usage }) => {
+      if (!j) {
+        return {
+          run,
+          step: suite.step,
+          evaluator: PAIRWISE_EVALUATOR_ID,
+          version,
+          state: "evaluator_error",
+          subject: { kind: "pair", a: p.a, b: p.b, input: p.input },
+          reason: error ?? "judge failed",
+          ...(usage ? { cost: { usd: usage.costUsd, retry_usd: usage.retryCostUsd, source: usage.costSource, calls: usage.calls }, ms: usage.ms } : {}),
+        };
+      }
       const dimensions: Record<string, "a" | "b" | "tie"> = {};
       const detail: Record<string, DimensionDetail> = {};
       for (const [k, v] of Object.entries(j.dimensions)) {
@@ -183,7 +200,9 @@ export async function judgeRun(
 
     // Each judged output carries its record against the others.
     const firstOk = new Map<string, number>();
-    for (const t of trials) if (t.completion_state === "success" && !firstOk.has(`${t.candidate}|${t.input}`)) firstOk.set(`${t.candidate}|${t.input}`, t.trial);
+    for (const [input, byCandidate] of answers) {
+      for (const [candidate, answer] of byCandidate) firstOk.set(`${candidate}|${input}`, answer.trial);
+    }
     const newTrials = trials.map((t) => {
       if (firstOk.get(`${t.candidate}|${t.input}`) !== t.trial) return { ...t, judge: { ...t.judge, pairwise: null } };
       const mine = judged.filter(({ p, j }) => j && p.input === t.input && (p.a === t.candidate || p.b === t.candidate));

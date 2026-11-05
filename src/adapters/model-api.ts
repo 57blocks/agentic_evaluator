@@ -1,4 +1,5 @@
 import { complete } from "../llm.js";
+import { fillTemplate } from "../prompt-template.js";
 import {
   requireModel,
   toCandidateResult,
@@ -13,7 +14,7 @@ export const modelApiAdapter: CandidateAdapter = {
   id: "model-api",
 
   async execute(request: CandidateRequest, context: ExecutionContext): Promise<CandidateResult> {
-    const prompt = request.promptTemplate.replace("{{input}}", request.inputText);
+    const prompt = fillTemplate(request.promptTemplate, request.inputText);
     return toCandidateResult(
       await complete({
         model: requireModel(request, "model-api"),

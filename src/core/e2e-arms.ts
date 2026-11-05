@@ -32,7 +32,7 @@ import {
 import { TSC_CHECK_ID } from "../check.js";
 import { openTrace } from "../canon/trace.js";
 import { classifyCompletion } from "../canon/states.js";
-import { defOf, errorRecord, generateOne, readInput, safeName } from "./generate.js";
+import { defOf, errorRecord, generateOne, noteEvidenceIncomplete, readInput, safeName } from "./generate.js";
 import { loadPromptTemplate } from "./execute.js";
 import { fixturePath } from "./fixture.js";
 import { finishForCompletion } from "./exit-policy.js";
@@ -87,8 +87,10 @@ async function openArmRunner(params: {
   emit: RunEventSink;
   budget?: BudgetGuard;
   halt?: ProviderErrorHalt;
+  /** Cancelled: cases not yet started are not generated, like a budget stop. */
+  signal?: AbortSignal;
 }): Promise<{ outDir: string; generate: E2eArmGenerate; close: () => Promise<unknown> }> {
-  const { armId, chain, root, runId, emit, budget, halt } = params;
+  const { armId, chain, root, runId, emit, budget, halt, signal } = params;
   const outDir = path.join(root, armId);
   await fs.mkdir(outDir, { recursive: true });
   const trace = await openTrace(outDir, `${runId}/${armId}`);
@@ -101,8 +103,9 @@ async function openArmRunner(params: {
     const def = defOf(step, candidate);
     const checkWorkDir = path.join(outDir, "checks", `${safeName(step.step)}__${inputSlug}__t${trial}`);
     // The run's budget covers the arms too: past it, a step is not started,
-    // and the case is undetermined rather than failed.
-    if (budget && !budget.allows("generation")) {
+    // and the case is undetermined rather than failed. A cancel is the same
+    // stop, by hand.
+    if (signal?.aborted || (budget && !budget.allows("generation"))) {
       emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: "skipped" });
       return { completion_state: "cancelled", text: "", artifacts: [], cost_usd: 0, ms: 0, checks: [] };
     }
@@ -162,7 +165,13 @@ async function openArmRunner(params: {
     }
   };
 
-  return { outDir, generate, close: trace.close };
+  const close = async (): Promise<number> => {
+    const rows = await trace.close();
+    const failure = trace.failure();
+    if (failure) await noteEvidenceIncomplete(outDir, failure);
+    return rows;
+  };
+  return { outDir, generate, close };
 }
 
 function validationArm(
@@ -191,8 +200,9 @@ export async function maybeRunE2eValidation(params: {
   chosenByStep: Record<string, string | null>;
   budget?: BudgetGuard;
   halt?: ProviderErrorHalt;
+  signal?: AbortSignal;
 }): Promise<E2eArms | null> {
-  const { suites, root, runId, chosenByStep, emit, budget, halt } = params;
+  const { suites, root, runId, chosenByStep, emit, budget, halt, signal } = params;
   const declared = e2eChain(suites);
   if (!declared) return null;
   const chain = e2eArmChain(declared);
@@ -212,7 +222,7 @@ export async function maybeRunE2eValidation(params: {
     armKind: "proposed" | "control",
     assignment: StepAssignment,
   ): Promise<E2eArmReport> => {
-    const opened = await openArmRunner({ armId, chain, root, runId, emit, budget, halt });
+    const opened = await openArmRunner({ armId, chain, root, runId, emit, budget, halt, signal });
     const delivered: Deliveries = new Map();
     deliveries[armId] = delivered;
     const runner = {

@@ -15,11 +15,12 @@ import path from "node:path";
 import { sha256 } from "../canon/hash.js";
 import { runProcess, type SpawnError } from "../proc.js";
 import { looksLikePath } from "../script-path.js";
-import { CONTAINER_WORKDIR, runInDocker, TASK_MOUNT, type Mount } from "./docker.js";
+import { CONTAINER_WORKDIR, containerEnv, runInDocker, TASK_MOUNT, type Mount } from "./docker.js";
 import { readReportedTokens, readReportedUsage, UNOBSERVED, USAGE_FILE, type ReportedUsage } from "./reported-usage.js";
 import { readTraceFile, TRACE_FILES } from "../traces/index.js";
 import type { AgentTrace } from "../canon/agent-trace.js";
 import { catalogPrice, costOf } from "../pricing.js";
+import { resolveUnder } from "../work-path.js";
 import type { AgentCliConfig } from "../canon/types.js";
 import {
   AdapterError,
@@ -128,8 +129,8 @@ async function containerArgv(raw: readonly string[], taskRoot: string): Promise<
 async function layStartingState(workDir: string, request: CandidateRequest): Promise<void> {
   if (request.seedFiles) {
     for (const f of request.seedFiles) {
-      const dest = path.join(workDir, f.path.replace(/^[/\\]+/, ""));
-      if (!dest.startsWith(workDir + path.sep)) throw new Error(`handoff file escapes the work dir: ${f.path}`);
+      const dest = resolveUnder(workDir, f.path);
+      if (dest === null) throw new Error(`handoff file escapes the work dir: ${f.path}`);
       await fs.mkdir(path.dirname(dest), { recursive: true });
       await fs.writeFile(dest, f.content, "utf-8");
     }
@@ -237,7 +238,8 @@ async function runCommand(
   args: string[],
   opts: { cwd: string; timeoutMs: number; env?: Record<string, string> },
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const env = opts.env ? { ...process.env, ...opts.env } : process.env;
+  // The same rule as the container: an empty declared value means the host's.
+  const env = opts.env ? { ...process.env, ...containerEnv(opts.env).env } : process.env;
   const t0 = Date.now();
   let ran;
   try {

@@ -83,4 +83,10 @@ export interface Provider {
   defaultKeyEnv?: string;
   build(req: ProviderRequest, endpoint: ModelEndpoint, apiKey: string | undefined): HttpRequest;
   parse(json: unknown): ProviderReply;
+  /**
+   * A failure the provider put in a 200 body (an upstream that died after
+   * the request was accepted, a gateway answering with an error object).
+   * Null when the body is a reply.
+   */
+  error?(json: unknown): { status?: number; message: string } | null;
 }
