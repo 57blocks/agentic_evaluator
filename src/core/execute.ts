@@ -18,7 +18,7 @@ import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
 import { silentSink, type RunEventSink } from "./events.js";
 import { methodsOf, planE2e, planStep, resolveConcurrency } from "./plan.js";
 import { hideAnswerKey } from "./answer-key.js";
-import { readInput, runAll, safeName, type PromptTemplate } from "./generate.js";
+import { noteEvidenceIncomplete, readInput, runAll, safeName, type PromptTemplate } from "./generate.js";
 import { judgeAll, scoreAll } from "./evaluate.js";
 import { maybeRunE2eValidation } from "./e2e-arms.js";
 import { CODEGEN_PREAMBLE } from "../producers/code-gen.js";
@@ -187,7 +187,7 @@ async function executeSuite(params: {
   const methods = methodsOf(suite);
   params.emit({ type: "phase", step: suite.step, phase: "judging", declared: methods.pairwise });
   const judged = methods.pairwise
-    ? await judgeAll(suite, rubric, records, limit, trace.emit, budget, params.emit, halt)
+    ? await judgeAll(suite, rubric, records, limit, trace.emit, budget, params.emit, halt, params.signal)
     : { judgements: [], failures: [], skipped: [] };
   params.emit({ type: "phase", step: suite.step, phase: "scoring", declared: methods.absolute });
   const scored: ScoredRecord[] = [];
@@ -203,6 +203,7 @@ async function executeSuite(params: {
         emit: params.emit,
         onScored: (s) => scored.push(s),
         onFailure: (f) => scoreFailures.push(f),
+        signal: params.signal,
       },
       budget,
       halt,
@@ -230,6 +231,10 @@ async function executeSuite(params: {
   const evaluations = toEvaluationRows(adaptInput);
   const ledger = buildLedger(trials, evaluations, PAIRWISE_EVALUATOR_ID, ABSOLUTE_EVALUATOR_ID);
   const traceRows = await trace.close();
+  // An append that failed leaves the file short, not the step lost: the
+  // billed work is already in; the gap is written down beside the run.
+  const traceFailure = trace.failure();
+  if (traceFailure) await noteEvidenceIncomplete(outDir, traceFailure);
   const integrity = await traceIntegrity(trace.file);
   const summary = {
     run: runId,
@@ -416,7 +421,9 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
 
     if (nested) {
       const chosenByStep = Object.fromEntries(steps.map((s) => [s.id, s.chosen]));
-      const e2e = opts.skipE2e ? null : await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit, budget, halt });
+      // Cancelled before the arms: they would be two more chained generations, billed in full.
+      const cancelledBeforeE2e = opts.signal?.aborted === true;
+      const e2e = opts.skipE2e || cancelledBeforeE2e ? null : await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit, budget, halt, signal: opts.signal });
       const control = e2e?.control ?? null;
       const record = buildWorkflowRecord({
         protocolVersion: suites[0].protocolVersion ?? "0.3",
@@ -454,7 +461,9 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
       const skipped =
         opts.skipE2e && planE2e(suites)
           ? "\n- **end-to-end validation not run**: skipped with `--no-e2e`. Each step's pick stands on its own inputs; whether they work as a combination was not checked.\n"
-          : "";
+          : cancelledBeforeE2e && planE2e(suites)
+            ? "\n- **end-to-end validation not run**: the run was cancelled before the arms started. Each step's pick stands on its own inputs; whether they work as a combination was not checked.\n"
+            : "";
       await fs.writeFile(path.join(root, "GAPS.md"), workflowGaps(steps, record.e2e_validation) + skipped, "utf-8");
       if (html) await writeWorkflowReport(root);
       emit({

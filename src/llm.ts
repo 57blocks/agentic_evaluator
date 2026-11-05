@@ -232,6 +232,22 @@ async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmR
         ),
       );
     }
+    // A failure the provider put in a 200 body is still the provider's: an
+    // http error with its status, retried under §7 like one on the wire,
+    // never an empty completion charged to the candidate.
+    const bodyError = provider.error?.(json);
+    if (bodyError) {
+      // Such a body can still carry usage (the upstream died after it had
+      // started answering): keep it, so the retry ledger sees what was billed.
+      return fail(
+        new LlmError(`${provider.label} ${bodyError.status ?? "error"}: ${bodyError.message.slice(0, 300)}`, {
+          kind: "http",
+          httpStatus: bodyError.status,
+          ms: elapsed(),
+          usage: normaliseUsage(params.model, provider.parse(json), endpoint),
+        }),
+      );
+    }
     const reply = provider.parse(json);
     const text = reply.text;
     const usage = normaliseUsage(params.model, reply, endpoint);

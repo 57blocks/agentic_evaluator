@@ -25,6 +25,7 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { resolveTaskAsset, resolveTaskAssetSync } from "./paths.js";
 import { looksLikePath } from "./script-path.js";
+import { resolveUnder } from "./work-path.js";
 import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
 import type { AgentTrace } from "./canon/agent-trace.js";
@@ -118,6 +119,47 @@ function canonicalJson(value: unknown): string {
   return JSON.stringify(value);
 }
 
+/**
+ * The candidate's files, each resolved inside `workDir`; or the check's own
+ * verdict when one of them would land outside it. That is the candidate's
+ * doing — a deliverable that names `../../.zshrc` is not acceptable output —
+ * so it fails the check rather than erroring the evaluator, and nothing is
+ * written before every path has been looked at.
+ */
+function placeFiles(
+  workDir: string,
+  files: readonly CheckFile[],
+  version: string,
+): { placed: Array<{ dest: string; content: string }> } | { failed: CheckResult } {
+  const placed: Array<{ dest: string; content: string }> = [];
+  for (const f of files) {
+    const dest = resolveUnder(workDir, f.path);
+    if (dest === null) {
+      return {
+        failed: {
+          state: "fail",
+          passed: false,
+          exitCode: -1,
+          output: `candidate file path escapes the work dir: ${f.path}`,
+          version,
+          reason: "file path escapes the work dir",
+        },
+      };
+    }
+    placed.push({ dest, content: f.content });
+  }
+  return { placed };
+}
+
+async function writePlaced(placed: ReadonlyArray<{ dest: string; content: string }>): Promise<void> {
+  await Promise.all(
+    placed.map(async (f) => {
+      await fs.mkdir(path.dirname(f.dest), { recursive: true });
+      await fs.writeFile(f.dest, f.content, "utf-8");
+    }),
+  );
+}
+
 /** Run `tsc --noEmit` on `files`, using the scaffold's tsconfig. Never throws. */
 export async function runCheck(params: {
   files: readonly CheckFile[];
@@ -140,16 +182,11 @@ export async function runCheck(params: {
     };
   }
 
+  const laid = placeFiles(workDir, files, version);
+  if ("failed" in laid) return laid.failed;
   try {
     await fs.mkdir(workDir, { recursive: true });
-    await Promise.all(
-      files.map(async (f) => {
-        const rel = f.path.replace(/^[/\\]+/, "");
-        const dest = path.join(workDir, rel);
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.writeFile(dest, f.content, "utf-8");
-      }),
-    );
+    await writePlaced(laid.placed);
     const tsconfig = await fs.readFile(path.join(scaffoldDir, "tsconfig.json"), "utf-8");
     await fs.writeFile(path.join(workDir, "tsconfig.json"), tsconfig, "utf-8");
   } catch (err) {
@@ -325,14 +362,12 @@ export async function runCommandCheck(params: {
 }): Promise<CheckResult> {
   const taskRoot = params.taskRoot;
   const version = await commandCheckVersion(params.argv, params.versionFiles, taskRoot);
+  const laid = placeFiles(params.workDir, params.files, version);
+  if ("failed" in laid) return laid.failed;
   try {
     await fs.mkdir(params.workDir, { recursive: true });
     await Promise.all([
-      ...params.files.map(async (f) => {
-        const dest = path.join(params.workDir, f.path.replace(/^[/\\]+/, ""));
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.writeFile(dest, f.content, "utf-8");
-      }),
+      writePlaced(laid.placed),
       writeFresh(path.join(params.workDir, "output.txt"), params.output),
       writeFresh(path.join(params.workDir, "input.txt"), params.input),
       writeFresh(path.join(params.workDir, "meta.json"), JSON.stringify(params.meta, null, 2)),
