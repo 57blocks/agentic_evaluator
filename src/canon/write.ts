@@ -20,6 +20,8 @@ import type { EvaluationRow, TrialRow } from "./rows.js";
 import { recommendFromCanon, type Recommendation } from "./select.js";
 import { INFRA_COMPLETION_STATES } from "./states.js";
 import { budgetGap, type BudgetState } from "./budget.js";
+import { haltGap, type HaltState } from "./halt.js";
+import { transportGap, type TransportGateState } from "../transport-gate.js";
 import { judgeDiscrimination, saturationGap, type JudgeDiscrimination } from "./discrimination.js";
 import { itemGaps, itemStats } from "./item-stats.js";
 import { earlyStopGaps, type EarlyStopRecord } from "./early-stop.js";
@@ -38,6 +40,10 @@ export interface CanonSummary {
   budget?: BudgetState;
   /** Candidates stopped once a gate was out of reach (early-stop.ts). Absent before it existed. */
   early_stop?: EarlyStopRecord;
+  /** Whether consecutive provider errors halted the run, and what that skipped (halt.ts). Absent before it existed. */
+  halt?: HaltState;
+  /** How long calls waited at the outage gate (transport-gate.ts). Absent before it existed. */
+  transport?: TransportGateState;
   evaluation_coverage: {
     evaluator: string;
     version: string;
@@ -125,6 +131,8 @@ export function buildGaps(
   earlyStop?: EarlyStopRecord,
   /** Candidates whose spec says their command leaves a trace (`cli.trace`). */
   tracing: readonly string[] = [],
+  halt?: HaltState,
+  transport?: TransportGateState,
 ): string {
   const lines: string[] = [
     "# GAPS — fields the protocol wants that this run did not observe",
@@ -134,6 +142,10 @@ export function buildGaps(
   ];
   const overBudget = budget ? budgetGap(budget) : null;
   if (overBudget !== null) lines.push(overBudget);
+  const halted = halt ? haltGap(halt) : null;
+  if (halted !== null) lines.push(halted);
+  const paused = transport ? transportGap(transport) : null;
+  if (paused !== null) lines.push(paused);
   lines.push(...earlyStopGaps(earlyStop));
   if (integrity && integrity.gaps_over_threshold > 0) {
     lines.push(
@@ -206,6 +218,8 @@ export function gapsFor(bundle: { manifest: RunManifest; trials: readonly TrialR
     Object.entries(bundle.manifest.candidates)
       .filter(([, def]) => def.cli?.trace !== undefined)
       .map(([id]) => id),
+    bundle.summary.halt,
+    bundle.summary.transport,
   );
 }
 

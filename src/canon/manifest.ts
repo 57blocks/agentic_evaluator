@@ -10,6 +10,8 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { INSTALL_ROOT } from "../paths.js";
 import type { Suite } from "../types.js";
+import { DEFAULT_MAX_PAUSE_MS } from "../transport-gate.js";
+import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS } from "./halt.js";
 import type { CandidateDef, EligibilityThresholds } from "./types.js";
 import { resolveEligibility } from "./select.js";
 import { readLabels, type InputLabels } from "./about.js";
@@ -70,6 +72,9 @@ export interface RunManifest {
     cache_mode: string;
     /** Absent in manifests written before early stop existed: it was off. */
     early_stop?: boolean;
+    /** Absent in manifests written before the outage gate and the halt existed. */
+    outage_wait_seconds?: number;
+    max_consecutive_provider_errors?: number | null;
   };
   harness: { name: string; version: string; git_sha: string | null; node: string };
   started_at: string;
@@ -154,6 +159,8 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
       benchmark_mode: suite.benchmarkMode ?? "capability-neutral",
       cache_mode: suite.cacheMode ?? "cold",
       early_stop: suite.earlyStop === true,
+      outage_wait_seconds: suite.outageWaitSeconds ?? DEFAULT_MAX_PAUSE_MS / 1000,
+      max_consecutive_provider_errors: suite.maxConsecutiveProviderErrors === undefined ? DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS : suite.maxConsecutiveProviderErrors,
     },
     harness: { ...harness, node: process.version },
     started_at: m.startedAt,

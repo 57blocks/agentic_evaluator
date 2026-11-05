@@ -14,8 +14,9 @@ export const EXIT = {
   /** The command line itself was wrong — unknown command, missing argument. */
   usage: 2,
   /**
-   * It ran, and the evidence is incomplete: the budget stopped it early, or
-   * the trace shows wall-clock gaps that make every duration in it unreliable.
+   * It ran, and the evidence is incomplete: the budget stopped it early,
+   * consecutive provider errors halted it (canon/halt.ts), or the trace
+   * shows wall-clock gaps that make every duration in it unreliable.
    * The outputs are real and worth keeping; they are not a whole run.
    */
   partial: 3,
