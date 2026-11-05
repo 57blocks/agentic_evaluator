@@ -204,3 +204,13 @@ test("a timeout under a shorter limit than today's is generated again", async ()
 
   await fs.rm(ws, { recursive: true, force: true });
 });
+
+test("which failed attempts are the candidate's own: a full-length timeout, a malformed answer from a model that was reached", async () => {
+  const { isCandidatesOwnFailure } = await import("../src/core/generate.js");
+  const attempt = (state: string, ms: number, promptTokens = 0, costUsd = 0) => ({ state, ms, promptTokens, costUsd });
+  assert.equal(isCandidatesOwnFailure(attempt("timeout", 299_999), 300_000), true, "a 300 s timeout is recorded as 299,999 ms");
+  assert.equal(isCandidatesOwnFailure(attempt("timeout", 120_000), 300_000), false, "cut off under a shorter limit");
+  assert.equal(isCandidatesOwnFailure(attempt("provider_error", 300_000), 300_000), false);
+  assert.equal(isCandidatesOwnFailure(attempt("malformed", 900, 2_100, 0.002), 300_000), true);
+  assert.equal(isCandidatesOwnFailure(attempt("malformed", 3), 300_000), false, "a missing API key is recorded as malformed, and never reached the model");
+});
