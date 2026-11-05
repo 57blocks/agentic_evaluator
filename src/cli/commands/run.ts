@@ -33,7 +33,10 @@ export const RUN_HELP = `agenteval run <task> [options]
   --html              also write report.html
   --json              emit one JSON object per event on stdout, instead of lines
   --plain             print one line per event even on an interactive terminal
-  --reuse             reuse a prior identical generation (matched on trial hash)
+  --reuse             reuse a prior identical generation (matched on trial hash),
+                      failures included: a refusal, a malformed answer, and a
+                      timeout that had at least today's limit stay what they
+                      were; a provider error is generated again
   --concurrency N     max LLM calls in flight; overrides the spec
   --step ID[,ID]      run only these steps (no end-to-end validation then):
                       re-run one step, or re-grade it with --reuse
