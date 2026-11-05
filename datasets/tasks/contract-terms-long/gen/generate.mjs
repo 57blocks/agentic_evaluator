@@ -7,10 +7,11 @@
  *   node datasets/tasks/contract-terms-long/gen/generate.mjs
  *
  * Same seed, same set. The first six rows are the 2026-10-15 first cut and
- * regenerate byte for byte; the rest are drawn from QUOTA after them, so the
- * rng stream the first six consume is untouched. Every graded value is
- * asserted to survive the noise pass (noise.mjs `readable`), or generation
- * fails.
+ * regenerate byte for byte; ct-007..060 are drawn from QUOTA after them and
+ * ct-061..100 from THIRD_CUT_QUOTA after those, each cut consuming the rng
+ * stream only after the cut before it, so an earlier cut never changes.
+ * Every graded value is asserted to survive the noise pass (noise.mjs
+ * `readable`), or generation fails.
  */
 
 import fs from "node:fs";
@@ -22,7 +23,7 @@ import { render } from "./render.mjs";
 import { addNoise, readable } from "./noise.mjs";
 
 const SEED = 20261015;
-const VERSION = "contract-terms-long-v2";
+const VERSION = "contract-terms-long-v3";
 const TASK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const HOLDOUT_EVERY = 5;
 const HOLDOUT_FIRST = 2;
@@ -47,22 +48,33 @@ const QUOTA = {
   absent: 6,
   "renewal-amendment": 4,
 };
+/**
+ * The third cut (ct-061..100), appended after the 60 so they regenerate
+ * unchanged. The 8-model run of the 60 separated the candidates on two traps
+ * only — an amendment one party never signed, and a chain filed out of order
+ * — and every other trap was 100% for every model, so this cut is those two
+ * plus ordinary controls, spread over the three noise levels (the first 60
+ * had every one-party packet at heavy noise).
+ */
+const THIRD_CUT_QUOTA = { "one-party": 16, chain: 16, none: 8 };
 const NOISE_CYCLE = ["clean", "light", "heavy"];
 const SOW_CYCLE = [6, 12, 4, 16, 8];
 
 /** The quota rows, each kind spread evenly through the sequence so every split and noise level sees every trap. */
-function quotaRows() {
-  const kinds = Object.keys(QUOTA);
+function quotaRows(quota, offset) {
+  const kinds = Object.keys(quota);
   const emitted = Object.fromEntries(kinds.map((k) => [k, 0]));
-  const total = Object.values(QUOTA).reduce((a, b) => a + b, 0);
-  return Array.from({ length: total }, (_, j) => {
-    const next = kinds.filter((k) => emitted[k] < QUOTA[k]).sort((a, b) => emitted[a] / QUOTA[a] - emitted[b] / QUOTA[b])[0];
+  const total = Object.values(quota).reduce((a, b) => a + b, 0);
+  return Array.from({ length: total }, (_, i) => {
+    const j = offset + i;
+    const next = kinds.filter((k) => emitted[k] < quota[k]).sort((a, b) => emitted[a] / quota[a] - emitted[b] / quota[b])[0];
     emitted[next] += 1;
     return [NOISE_CYCLE[j % NOISE_CYCLE.length], next, SOW_CYCLE[j % SOW_CYCLE.length]];
   });
 }
 
-const PLAN = [...FIRST_CUT, ...quotaRows()];
+const SECOND_CUT = quotaRows(QUOTA, 0);
+const PLAN = [...FIRST_CUT, ...SECOND_CUT, ...quotaRows(THIRD_CUT_QUOTA, SECOND_CUT.length)];
 
 function seeded(seed) {
   let a = seed >>> 0;
