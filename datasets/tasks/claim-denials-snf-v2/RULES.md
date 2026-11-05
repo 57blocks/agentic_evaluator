@@ -9,7 +9,7 @@ codes, as an 835 does. The set tests whether a model knows these rules.
 
 Sources:
 - **CFR** — Title 42 of the Code of Federal Regulations (text via Cornell LII, law.cornell.edu/cfr/text/42/…)
-- **CPM** — CMS, Medicare Claims Processing Manual (Pub. 100-04), Ch. 1 §70.1
+- **CPM** — CMS, Medicare Claims Processing Manual (Pub. 100-04), Ch. 1 §70.1 and Ch. 29 §310
 - **BPM** — CMS, Medicare Benefit Policy Manual (Pub. 100-02), Ch. 8 §20.1
 - **X12** — X12 Remittance Advice Remark Codes list (x12.org/codes/remittance-advice-remark-codes)
 
@@ -37,7 +37,7 @@ the contractor to reopen it.
 > redetermination for any reason. — CFR 405.980(c)(1)
 
 The deadline for `reopening` is the anniversary of the remittance date, which
-carries the initial determination. Exceptions to the filing limit
+carries the initial determination (on a nonworkday, see R7). Exceptions to the filing limit
 (administrative error, retroactive entitlement) are out of scope; no item
 raises one. (Until v2.3 this rule said "appealed"; the 2026-10-22 answer-key
 review caught it.)
@@ -50,7 +50,8 @@ review caught it.)
 > the date of the notice of initial determination, unless there is evidence to the
 > contrary. — CFR 405.942(a)
 
-The deadline for `appeal` is the remittance date plus 125 days.
+The deadline for `appeal` is the remittance date plus 125 days, moved to the
+next workday when that is a Saturday, Sunday or federal holiday (R7).
 
 ## R3 · An unprocessable claim (MA130) has no appeal rights: submit a new claim
 
@@ -59,7 +60,7 @@ The deadline for `appeal` is the remittance date plus 125 days.
 > the complete/correct information. — X12, remark code MA130
 
 The new claim is still bound by R1, so the deadline for `corrected_claim` is
-the anniversary of the Through date.
+the anniversary of the Through date, moved past a nonworkday (R7).
 
 ## R4 · Qualifying hospital stay: three inpatient days; observation does not count
 
@@ -104,6 +105,30 @@ the 60-day boundary.
 
 A claim denied as an exact duplicate (reason 18) of a claim already paid needs
 no further action and the duplicate balance is written off.
+
+## R7 · A deadline on a Saturday, Sunday or federal holiday runs to the next workday
+
+> If the last day of the period allowed under paragraph (a) or (b) of this
+> section falls on a Federal nonworkday, the time is extended to the next
+> succeeding workday. — CFR 424.44(c)
+
+> When the filing deadline for a redetermination ends on a Saturday, Sunday,
+> legal holiday, or any other nonwork day, the MAC shall apply a rollover period
+> that extends the filing deadline to the first working day after the Saturday,
+> Sunday, legal holiday, or other nonwork day. — CPM Ch. 29 §310 (as quoted by
+> MAC guidance; the manual gives the Saturday before Columbus Day as its example)
+
+Federal holidays are the eleven of 5 U.S.C. 6103(a), observed the Friday
+before when they fall on a Saturday and the Monday after when they fall on a
+Sunday. So the deadline for `corrected_claim` (CFR 424.44(c)) and for `appeal`
+(CPM Ch. 29 §310) moves to the next workday.
+
+No source found states the same for a reopening (CFR 405.980(c) says only
+"within 1 year"). When a reopening's anniversary is a nonworkday, the key
+accepts both the anniversary and the next workday (`deadline_also_accepted`):
+an item that rests on one reading of an unsettled rule would grade the reading.
+(Until v2.4 no deadline was rolled; a model that applied this rule was marked
+wrong on 50 items. The 2026-11-03 claim-denials-snf-flow probe caught it.)
 
 ## Left out on purpose
 

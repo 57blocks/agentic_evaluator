@@ -1,0 +1,243 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "claim-denials-snf-flow-probe-2026-11-03T09-18-23-124Z",
+  "run_name": "claim-denials-snf-flow-probe",
+  "handoff": true,
+  "steps": [
+    {
+      "id": "extract",
+      "dir": "extract",
+      "operating_mode": "lowest-cost",
+      "chosen": "deepseek-v4.1-flash",
+      "firmness": "directional",
+      "eligible": [
+        "sonnet-5",
+        "kimi-k3",
+        "deepseek-v4.1-flash",
+        "opus-5.5",
+        "gpt-5.6-sol",
+        "qwen3.8-max",
+        "deepseek-v4-pro"
+      ],
+      "gated": [
+        {
+          "candidate": "glm-5.3",
+          "reason": "reliability 0.875 (7/8) < 0.9"
+        }
+      ],
+      "trials": 64,
+      "ledger_total": 0.450225,
+      "ledger": {
+        "generation": 0.450225,
+        "judging": 0,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 0.450225,
+        "source": "provider-reported",
+        "successes": 63,
+        "cost_per_success": null,
+        "cost_per_attempt": null
+      }
+    },
+    {
+      "id": "decide",
+      "dir": "decide",
+      "operating_mode": "lowest-cost",
+      "chosen": "sonnet-5",
+      "firmness": "directional",
+      "eligible": [
+        "sonnet-5",
+        "opus-5.5"
+      ],
+      "gated": [
+        {
+          "candidate": "kimi-k3",
+          "reason": "required-check pass rate 0.750 (6/8) < 0.9"
+        },
+        {
+          "candidate": "glm-5.3",
+          "reason": "required-check pass rate 0.750 (6/8) < 0.9"
+        },
+        {
+          "candidate": "deepseek-v4.1-flash",
+          "reason": "required-check pass rate 0.750 (6/8) < 0.9"
+        },
+        {
+          "candidate": "gpt-5.6-sol",
+          "reason": "required-check pass rate 0.750 (6/8) < 0.9"
+        },
+        {
+          "candidate": "qwen3.8-max",
+          "reason": "required-check pass rate 0.714 (5/7) < 0.9"
+        },
+        {
+          "candidate": "deepseek-v4-pro",
+          "reason": "required-check pass rate 0.714 (5/7) < 0.9"
+        }
+      ],
+      "trials": 64,
+      "ledger_total": 1.020425,
+      "ledger": {
+        "generation": 1.020425,
+        "judging": 0,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 1.020425,
+        "source": "provider-reported",
+        "successes": 50,
+        "cost_per_success": null,
+        "cost_per_attempt": null
+      }
+    },
+    {
+      "id": "deadline",
+      "dir": "deadline",
+      "operating_mode": "lowest-cost",
+      "chosen": "deadline-rules",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5.5",
+        "deadline-rules"
+      ],
+      "gated": [
+        {
+          "candidate": "sonnet-5",
+          "reason": "required-check pass rate 0.625 (5/8) < 0.9"
+        },
+        {
+          "candidate": "kimi-k3",
+          "reason": "required-check pass rate 0.857 (6/7) < 0.9"
+        },
+        {
+          "candidate": "glm-5.3",
+          "reason": "required-check pass rate 0.571 (4/7) < 0.9"
+        },
+        {
+          "candidate": "deepseek-v4.1-flash",
+          "reason": "required-check pass rate 0.875 (7/8) < 0.9"
+        },
+        {
+          "candidate": "gpt-5.6-sol",
+          "reason": "required-check pass rate 0.875 (7/8) < 0.9"
+        },
+        {
+          "candidate": "deepseek-v4-pro",
+          "reason": "required-check pass rate 0.500 (4/8) < 0.9"
+        },
+        {
+          "candidate": "qwen3.8-max",
+          "reason": "reliability 0.375 (3/8) < 0.9"
+        }
+      ],
+      "trials": 72,
+      "ledger_total": 1.070287,
+      "ledger": {
+        "generation": 1.070287,
+        "judging": 0,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 1.070287,
+        "source": "estimated",
+        "successes": 52,
+        "cost_per_success": null,
+        "cost_per_attempt": null
+      }
+    }
+  ],
+  "ledger": {
+    "generation": 2.540937,
+    "judging": 0,
+    "scoring": 0,
+    "checks": 0,
+    "retries": 0,
+    "steps_total": 2.540937,
+    "e2e_total": 0.371745,
+    "total": 2.912682,
+    "source": "estimated"
+  },
+  "e2e_control": {
+    "kind": "control",
+    "candidate": "opus-5.5",
+    "assignment": {
+      "extract": "opus-5.5",
+      "decide": "opus-5.5",
+      "deadline": "opus-5.5"
+    },
+    "chain": [
+      "extract",
+      "decide",
+      "deadline"
+    ],
+    "cases": 8,
+    "success": 8,
+    "failure": 0,
+    "undetermined": 0,
+    "cost_usd": 0.30277999999999994
+  },
+  "e2e_proposed": {
+    "kind": "proposed",
+    "assignment": {
+      "extract": "deepseek-v4.1-flash",
+      "decide": "sonnet-5",
+      "deadline": "deadline-rules"
+    },
+    "chain": [
+      "extract",
+      "decide",
+      "deadline"
+    ],
+    "cases": 8,
+    "success": 7,
+    "failure": 1,
+    "undetermined": 0,
+    "cost_usd": 0.06896500800000001
+  },
+  "e2e_validation": {
+    "rule_version": "e2e-validate-v1",
+    "not_compared": [
+      "single-configuration workflows other than the declared control",
+      "the current production workflow"
+    ],
+    "operating_mode": "lowest-cost",
+    "thresholds": {
+      "minimum_reliability": 0.9,
+      "minimum_required_check_pass_rate": 0.9
+    },
+    "assignment": {
+      "extract": "deepseek-v4.1-flash",
+      "decide": "sonnet-5",
+      "deadline": "deadline-rules"
+    },
+    "control_assignment": {
+      "extract": "opus-5.5",
+      "decide": "opus-5.5",
+      "deadline": "opus-5.5"
+    },
+    "verdict": "keep-control",
+    "firmness": "directional",
+    "deltas": {
+      "metric": "cost_per_success",
+      "proposed": 0.009852143999999998,
+      "control": 0.037847500000000006,
+      "improvement": 0.027995356000000006,
+      "mmd": null,
+      "paired": {
+        "compared": 8,
+        "both_success": 7,
+        "proposed_only": 0,
+        "control_only": 1,
+        "neither": 0,
+        "inputs_proposed_better": 0,
+        "inputs_control_better": 1,
+        "inputs_same": 7,
+        "p_value": 1
+      }
+    },
+    "reasons": [
+      "the proposed combination fails the workflow eligibility gates: reliability 0.875 < 0.9"
+    ]
+  }
+}

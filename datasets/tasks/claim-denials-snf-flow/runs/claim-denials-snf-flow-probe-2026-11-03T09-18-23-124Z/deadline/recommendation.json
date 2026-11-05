@@ -1,0 +1,351 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "lowest-cost",
+  "control_candidate": "opus-5.5",
+  "eligibility": {
+    "minimum_reliability": 0.9,
+    "minimum_required_check_pass_rate": 0.9,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 0.9",
+      "removed": [
+        {
+          "candidate": "sonnet-5",
+          "reason": "required-check pass rate 0.625 (5/8) < 0.9"
+        },
+        {
+          "candidate": "kimi-k3",
+          "reason": "required-check pass rate 0.857 (6/7) < 0.9"
+        },
+        {
+          "candidate": "glm-5.3",
+          "reason": "required-check pass rate 0.571 (4/7) < 0.9"
+        },
+        {
+          "candidate": "deepseek-v4.1-flash",
+          "reason": "required-check pass rate 0.875 (7/8) < 0.9"
+        },
+        {
+          "candidate": "gpt-5.6-sol",
+          "reason": "required-check pass rate 0.875 (7/8) < 0.9"
+        },
+        {
+          "candidate": "deepseek-v4-pro",
+          "reason": "required-check pass rate 0.500 (4/8) < 0.9"
+        }
+      ],
+      "remaining": [
+        "opus-5.5",
+        "qwen3.8-max",
+        "deadline-rules"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 0.9",
+      "removed": [
+        {
+          "candidate": "qwen3.8-max",
+          "reason": "reliability 0.375 (3/8) < 0.9"
+        }
+      ],
+      "remaining": [
+        "opus-5.5",
+        "deadline-rules"
+      ]
+    }
+  ],
+  "eligible": [
+    "opus-5.5",
+    "deadline-rules"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "sonnet-5",
+      "eligible": false,
+      "generation_cost_per_success": 0.008124,
+      "p50_ms": 3188,
+      "p95_ms": 13725,
+      "reliability": {
+        "value": 0.625,
+        "numerator": 5,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 0.625,
+        "numerator": 5,
+        "denominator": 8
+      },
+      "task_success_rate": {
+        "value": 0.625,
+        "numerator": 5,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 0.625,
+        "numerator": 5,
+        "denominator": 8
+      }
+    },
+    {
+      "candidate": "kimi-k3",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 23453,
+      "p95_ms": 254516,
+      "reliability": {
+        "value": 0.75,
+        "numerator": 6,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 0.8571428571428571,
+        "numerator": 6,
+        "denominator": 7
+      },
+      "task_success_rate": {
+        "value": 0.75,
+        "numerator": 6,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 0.75,
+        "numerator": 6,
+        "denominator": 8
+      }
+    },
+    {
+      "candidate": "glm-5.3",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 11754,
+      "p95_ms": 209395,
+      "reliability": {
+        "value": 0.5,
+        "numerator": 4,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 0.5714285714285714,
+        "numerator": 4,
+        "denominator": 7
+      },
+      "task_success_rate": {
+        "value": 0.5,
+        "numerator": 4,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 0.5,
+        "numerator": 4,
+        "denominator": 8
+      }
+    },
+    {
+      "candidate": "deepseek-v4.1-flash",
+      "eligible": false,
+      "generation_cost_per_success": 0.004223,
+      "p50_ms": 19067,
+      "p95_ms": 41628,
+      "reliability": {
+        "value": 0.875,
+        "numerator": 7,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 0.875,
+        "numerator": 7,
+        "denominator": 8
+      },
+      "task_success_rate": {
+        "value": 0.875,
+        "numerator": 7,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 0.875,
+        "numerator": 7,
+        "denominator": 8
+      }
+    },
+    {
+      "candidate": "opus-5.5",
+      "eligible": true,
+      "generation_cost_per_success": 0.009516,
+      "p50_ms": 5694,
+      "p95_ms": 10653,
+      "reliability": {
+        "value": 1,
+        "numerator": 8,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 8,
+        "denominator": 8
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 8,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 8,
+        "denominator": 8
+      }
+    },
+    {
+      "candidate": "gpt-5.6-sol",
+      "eligible": false,
+      "generation_cost_per_success": 0.011109,
+      "p50_ms": 5434,
+      "p95_ms": 20928,
+      "reliability": {
+        "value": 0.875,
+        "numerator": 7,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 0.875,
+        "numerator": 7,
+        "denominator": 8
+      },
+      "task_success_rate": {
+        "value": 0.875,
+        "numerator": 7,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 0.875,
+        "numerator": 7,
+        "denominator": 8
+      }
+    },
+    {
+      "candidate": "qwen3.8-max",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 6189,
+      "p95_ms": 6487,
+      "reliability": {
+        "value": 0.375,
+        "numerator": 3,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "task_success_rate": {
+        "value": 0.375,
+        "numerator": 3,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 0.375,
+        "numerator": 3,
+        "denominator": 8
+      }
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "eligible": false,
+      "generation_cost_per_success": 0.036448,
+      "p50_ms": 948,
+      "p95_ms": 235763,
+      "reliability": {
+        "value": 0.5,
+        "numerator": 4,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 0.5,
+        "numerator": 4,
+        "denominator": 8
+      },
+      "task_success_rate": {
+        "value": 0.5,
+        "numerator": 4,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 0.5,
+        "numerator": 4,
+        "denominator": 8
+      }
+    },
+    {
+      "candidate": "deadline-rules",
+      "eligible": true,
+      "generation_cost_per_success": 0,
+      "p50_ms": 28,
+      "p95_ms": 28,
+      "reliability": {
+        "value": 1,
+        "numerator": 8,
+        "denominator": 8
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 8,
+        "denominator": 8
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 8,
+        "denominator": 8
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 8,
+        "denominator": 8
+      }
+    }
+  ],
+  "chosen": "deadline-rules",
+  "compared_to_control": {
+    "beats_control": true,
+    "reason": "chosen $0 vs control $0.009516 per successful task"
+  },
+  "firmness": "directional",
+  "firmness_reasons": [
+    "no minimum meaningful difference declared",
+    "deadline-rules: required-check-pass-rate 8/8 has a 95% interval down to 0.676, below the gate 0.9",
+    "deadline-rules: reliability 8/8 has a 95% interval down to 0.676, below the gate 0.9"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 0.9,
+        "successes": 8,
+        "n": 8,
+        "low": 0.6755924316585924,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 0.9,
+        "successes": 8,
+        "n": 8,
+        "low": 0.6755924316585924,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": null
+  },
+  "reasons": [
+    "lowest generation cost per successful task among eligible: $0",
+    "no minimum meaningful difference declared",
+    "deadline-rules: required-check-pass-rate 8/8 has a 95% interval down to 0.676, below the gate 0.9",
+    "deadline-rules: reliability 8/8 has a 95% interval down to 0.676, below the gate 0.9"
+  ],
+  "closest": null
+}

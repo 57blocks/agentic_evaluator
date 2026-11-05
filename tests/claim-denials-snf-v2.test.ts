@@ -12,10 +12,11 @@ const rules = () => import(pathToFileURL(path.join(TASK, "gen", "rules.mjs")).hr
 const CHECK = path.join(TASK, "checks", "triage-check.mjs");
 
 test("R1: timely through the anniversary of the Through date, late the day after", async () => {
+  // 2025-03-14 is a Friday, so R7 does not move it
   const { filingDeadline, isTimely } = await rules();
-  assert.equal(filingDeadline("2024-03-15"), "2025-03-15");
-  assert.equal(isTimely("2025-03-15", "2024-03-15"), true);
-  assert.equal(isTimely("2025-03-16", "2024-03-15"), false);
+  assert.equal(filingDeadline("2024-03-14"), "2025-03-14");
+  assert.equal(isTimely("2025-03-14", "2024-03-14"), true);
+  assert.equal(isTimely("2025-03-15", "2024-03-14"), false);
 });
 
 test("R1: the From date does not start the clock", async () => {
@@ -31,6 +32,28 @@ test("R1: a wrongful timely-filing denial is reopened within a year of the remit
 test("R2: redetermination is due 125 days after the remittance (120 from presumed receipt 5 days later)", async () => {
   const { redeterminationDeadline } = await rules();
   assert.equal(redeterminationDeadline("2025-08-28"), "2025-12-31");
+});
+
+test("R7: a deadline on a Saturday, Sunday or federal holiday runs to the next workday", async () => {
+  const { appealDeadline, correctedClaimDeadline, isTimely, nextWorkday } = await rules();
+  // CPM Ch. 29 §310's own example: the Saturday before Columbus Day runs to the Tuesday after
+  assert.equal(appealDeadline("2025-06-08"), "2025-10-14");
+  assert.equal(correctedClaimDeadline("2025-11-16"), "2026-11-16");
+  // 2026-07-04 is a Saturday, observed Friday 2026-07-03; the Sunday after rolls to Monday
+  assert.equal(nextWorkday("2026-07-03"), "2026-07-06");
+  assert.equal(correctedClaimDeadline("2025-07-05"), "2026-07-06");
+  assert.equal(isTimely("2025-03-17", "2024-03-15"), true, "2025-03-15 is a Saturday: filing runs to Monday");
+});
+
+test("R7: a reopening on a nonworkday accepts the anniversary and the next workday, and the check takes both", async () => {
+  const { reopeningAlsoAccepted } = await rules();
+  assert.deepEqual(reopeningAlsoAccepted("2025-10-18"), ["2026-10-19"]);
+  assert.deepEqual(reopeningAlsoAccepted("2025-07-30"), []);
+  // cd2-014: the anniversary 2026-10-18 is a Sunday
+  const answer = (deadline: string) => JSON.stringify({ root_cause: "timely_filing", correctable: "yes", next_action: "reopening", deadline });
+  assert.equal(runCheck("cd2-014", answer("2026-10-18")).code, 0);
+  assert.equal(runCheck("cd2-014", answer("2026-10-19")).code, 0);
+  assert.equal(runCheck("cd2-014", answer("2026-10-20")).code, 1);
 });
 
 test("R4: the admission day counts, the discharge day and observation time do not", async () => {

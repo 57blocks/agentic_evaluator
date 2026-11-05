@@ -1,0 +1,150 @@
+{
+  "inputs": 8,
+  "effective_n": 5,
+  "judge_effective_n": null,
+  "counts": {
+    "splits": 5,
+    "all-pass": 3,
+    "all-fail": 0,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "cd2-003-deadline",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deadline-rules": 1,
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-005-deadline",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deadline-rules": 1,
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-013-deadline",
+      "class": "splits",
+      "pass_rate": 0.7777777777777778,
+      "by_candidate": {
+        "deadline-rules": 1,
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6958153391346839
+    },
+    {
+      "input": "cd2-014-deadline",
+      "class": "splits",
+      "pass_rate": 0.7777777777777778,
+      "by_candidate": {
+        "deadline-rules": 1,
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 1
+      },
+      "discrimination": 0.6958153391346839
+    },
+    {
+      "input": "cd2-119-deadline",
+      "class": "splits",
+      "pass_rate": 0.4444444444444444,
+      "by_candidate": {
+        "deadline-rules": 1,
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.8803408430829505
+    },
+    {
+      "input": "cd2-169-deadline",
+      "class": "splits",
+      "pass_rate": 0.5555555555555556,
+      "by_candidate": {
+        "deadline-rules": 1,
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.9087389347953035
+    },
+    {
+      "input": "cd2-173-deadline",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "deadline-rules": 1,
+        "deepseek-v4-pro": 1,
+        "deepseek-v4.1-flash": 1,
+        "glm-5.3": 1,
+        "gpt-5.6-sol": 1,
+        "kimi-k3": 1,
+        "opus-5.5": 1,
+        "qwen3.8-max": 1,
+        "sonnet-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "cd2-187-deadline",
+      "class": "splits",
+      "pass_rate": 0.2222222222222222,
+      "by_candidate": {
+        "deadline-rules": 1,
+        "deepseek-v4-pro": 0,
+        "deepseek-v4.1-flash": 0,
+        "glm-5.3": 0,
+        "gpt-5.6-sol": 0,
+        "kimi-k3": 0,
+        "opus-5.5": 1,
+        "qwen3.8-max": 0,
+        "sonnet-5": 0
+      },
+      "discrimination": 0.6788442333021306
+    }
+  ]
+}
