@@ -8,11 +8,15 @@
  */
 
 import type { CandidateMeta, WorkflowStep } from "../../../../../workflow-report-model.js";
-import { fmtPct, fmtUsd } from "../../../../../report-format.js";
+import { fmtPct } from "../../../../../report-format.js";
 import { Badge } from "@/components/ui/badge";
 import { seriesColor } from "../tone";
 import { tintStyle } from "../charts/geometry";
 import { Note, Section } from "../Section";
+import { cn } from "@/lib/utils";
+
+/** Two significant digits under a cent, so a cheap model reads $0.0012, not $0.00. */
+const shortUsd = (v: number): string => (v === 0 ? "$0" : v < 0.01 ? `$${v.toPrecision(2)}` : `$${v.toFixed(2)}`);
 
 export function Swatch({ slot }: { slot: number }) {
   return <span aria-hidden className="inline-block size-2.5 shrink-0" style={{ background: seriesColor(slot) }} />;
@@ -27,9 +31,13 @@ function Cell({ step, candidate }: { step: WorkflowStep; candidate: string }) {
   const tries = row.outcomes.success + row.outcomes.failure + row.outcomes.undetermined;
   const successPct = tries > 0 ? (row.outcomes.success / tries) * 100 : null;
   const success = `${row.outcomes.success}/${tries}`;
-  const cost = row.costPerSuccess != null ? `${fmtUsd(row.costPerSuccess).replace(/(\.\d\d)\d+$/, "$1")}/success` : row.costObserved ? "no success" : "cost unobserved";
+  const cost = row.costPerSuccess != null ? `${shortUsd(row.costPerSuccess)}/success` : row.costObserved ? "no success" : "cost unobserved";
   return (
-    <td className="border border-border px-3 py-2 text-center" style={tintStyle(judged ? row.winRate : successPct, 0, 100)}>
+    <td
+      className={cn("border border-border px-3 py-2 text-center", row.gated && "opacity-55")}
+      style={row.gated ? undefined : tintStyle(judged ? row.winRate : successPct, 0, 100)}
+      title={row.gated ? `${candidate} was removed by an eligibility gate on this step` : undefined}
+    >
       <div className="flex items-center justify-center gap-1 font-mono text-sm font-semibold">
         {judged ? fmtPct(row.winRate) : success}
         {fav && <span title="The judge's favourite on this step">⬢</span>}
@@ -38,6 +46,7 @@ function Cell({ step, candidate }: { step: WorkflowStep; candidate: string }) {
         {judged ? `${success} passed · ${cost}` : cost}
       </div>
       {row.chosen && <Badge className="mt-1">Recommended</Badge>}
+      {row.gated && <div className="mt-1 text-[11px] font-medium text-bad">gated out</div>}
     </td>
   );
 }
@@ -75,7 +84,7 @@ export function Overview({ steps, candidates }: { steps: WorkflowStep[]; candida
       <Note>
         On a step a judge compared, the large number is the pairwise win rate (a tie counts as half), which only shows who the judge prefers and swings widely on small samples;
         on a step with no judge, it is the success count. Underneath: successes and the generation cost per success. ⬢ is the judge's favourite on the step; "Recommended"
-        is what the selector chose by eligibility gates and operating mode, the judge breaking a tie on assurance.
+        is what the selector chose by eligibility gates and operating mode, the judge breaking a tie on assurance. A faded, untinted cell is a candidate a gate removed on that step.
       </Note>
     </Section>
   );

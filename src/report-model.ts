@@ -36,6 +36,7 @@ import { planFromRun, routeVia, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
 import { NO_PICK, plural, sha8 } from "./report-format.js";
 import { sliceRows, type SliceRow } from "./report-slices.js";
+import { costSuccessChart, gateNotesOf, type CostSuccessChart } from "./report-scatter.js";
 import type { RunAbout } from "./canon/about.js";
 import type { CandidateDef } from "./canon/types.js";
 import {
@@ -59,6 +60,12 @@ export interface CandidateView {
   costPerSuccess: number | null;
   /** False when any attempt's generation spend was not reported (cost source "none"). */
   costObserved: boolean;
+  /**
+   * Set only when cost per success is unknown because some spend went
+   * unreported: the reported spend alone per success. A floor — the missing
+   * calls can only add to it. The selector never ranks on it.
+   */
+  costPerSuccessFloor: number | null;
   p50: number | null;
   states: Array<[string, number]>;
   outcomes: { success: number; failure: number; undetermined: number };
@@ -214,6 +221,12 @@ export function duelRecord(
   return { wins, losses, ties, comparisons, rate: comparisons > 0 ? ((wins + ties / 2) / comparisons) * 100 : null };
 }
 
+function costFloor(costPerSuccess: number | null, own: readonly TrialRow[], successes: number): number | null {
+  if (costPerSuccess !== null || successes === 0) return null;
+  const reported = own.filter((t) => t.cost.source !== "none").reduce((s, t) => s + t.cost.generation, 0);
+  return reported > 0 ? reported / successes : null;
+}
+
 export function candidateViews(b: RunBundle): CandidateView[] {
   return b.summary.candidates.map((c) => {
     const own = b.trials.filter((t) => t.candidate === c.candidate);
@@ -234,6 +247,7 @@ export function candidateViews(b: RunBundle): CandidateView[] {
       absolute: abs.length ? abs.reduce((s, v) => s + v, 0) / abs.length : null,
       costPerSuccess: c.generation_cost_per_success,
       costObserved: own.every((t) => t.cost.source !== "none"),
+      costPerSuccessFloor: costFloor(c.generation_cost_per_success, own, c.outcomes.success),
       p50: c.p50_ms,
       states: Object.entries(c.completion_states).filter(([, n]) => n > 0),
       outcomes: c.outcomes,
@@ -571,6 +585,8 @@ export interface StepReport {
     spend: number;
   };
   gates: GateRow[];
+  /** Required-check pass rate against cost per success, one point per candidate; null with fewer than two to compare. */
+  costSuccess: CostSuccessChart | null;
   /** The statistics behind the firmness label, and how much of the set carried evidence. */
   certainty: Certainty;
   /** What the traces showed the command candidates doing; empty when no trial carried one. */
@@ -620,6 +636,14 @@ export function buildStepReport(b: RunBundle): StepReport {
   const chosenView = views.find((v) => v.id === rec.chosen);
   const judge = judgeFavourite(b);
   const distribution = scoreDistribution(b.trials, new Map(views.map((v) => [v.id, { pass: v.checkPass, executed: v.checkExecuted }])));
+  const gates = gateRows(rec);
+  const rows = views.map((v, i) => ({
+    ...v,
+    isControl: m.control_candidate === v.id,
+    gated: !rec.eligible.includes(v.id),
+    chosen: rec.chosen === v.id,
+    colorIndex: i % 4,
+  }));
 
   return {
     kind: "step",
@@ -661,20 +685,15 @@ export function buildStepReport(b: RunBundle): StepReport {
         : null,
       spend: b.ledger.total,
     },
-    gates: gateRows(rec),
+    gates,
+    costSuccess: costSuccessChart(rows, rec.eligibility?.minimum_required_check_pass_rate ?? null, gateNotesOf(gates)),
     certainty: certaintyOf(rec, b.trials),
     filters: rec.filters,
     eligible: rec.eligible,
     promptVariants: promptVariantsOf(views),
     stepPromptFile: b.prompts?.stepFile ?? null,
     promptComparison: promptComparisonOf(b, views),
-    candidates: views.map((v, i) => ({
-      ...v,
-      isControl: m.control_candidate === v.id,
-      gated: !rec.eligible.includes(v.id),
-      chosen: rec.chosen === v.id,
-      colorIndex: i % 4,
-    })),
+    candidates: rows,
     trialsPer: m.execution.trials_per_case,
     control: m.control_candidate ?? null,
     coverage: b.summary.evaluation_coverage,
