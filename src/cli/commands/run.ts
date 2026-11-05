@@ -51,7 +51,8 @@ export const RUN_HELP = `agenteval run <task> [options]
   --workspace DIR     workspace to resolve <task> and write runs under
 
   Exits 0 when the run completed, 3 when it completed but the budget stopped
-  it early or its durations are unreliable, 1 on failure, 2 on a usage error.`;
+  it early, consecutive provider errors halted it (fix the network, then
+  --reuse) or its durations are unreliable, 1 on failure, 2 on a usage error.`;
 
 export const PLAN_HELP = `agenteval plan <task> [options]
 
@@ -97,10 +98,10 @@ export async function cmdRun(args: ParsedArgs, io: Io): Promise<ExitCode> {
   }
   if (args.flags.reuse) process.env.EVAL_REUSE = "1";
 
-  // Watch for the two things that make a finished run less than a whole one.
+  // Watch for the things that make a finished run less than a whole one.
   let partial = false;
   const watch = (e: RunEvent): void => {
-    if (e.type === "budget.stopped" || e.type === "integrity.gaps") partial = true;
+    if (e.type === "budget.stopped" || e.type === "integrity.gaps" || e.type === "run.halted") partial = true;
   };
   const write = (line: string): void => io.out(`${line}\n`);
   const live = wantsLiveView(args, io) ? liveView() : null;

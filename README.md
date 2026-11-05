@@ -1024,6 +1024,25 @@ it; the four datasets come to about 12 MB.
   kyc and claim datasets this would have saved about 40% of generation spend.
   The stopped candidate's rates cover only what it ran, and `GAPS.md` lists
   who stopped where. `plan` then shows generations as an upper bound.
+- A network outage pauses the run instead of failing it. A single call
+  retries a transport failure (network error, 408/409/425/429, 5xx) twice, a
+  second or two apart. When three failures arrive back to back across calls,
+  every call waits at a shared gate (5 s, then 10, 20, 40, 60 s between
+  probes) until one gets through; waiting there spends none of a call's own
+  retries, and trial durations exclude it. After `execution.outage_wait_seconds`
+  of waiting in one outage (default 600; 0 turns pausing off) the gate gives
+  up and calls fail as provider errors; the next call that gets through arms
+  it again. `GAPS.md` records every pause.
+- Consecutive provider errors halt the run. After
+  `execution.max_consecutive_provider_errors` trials in a row ended at the
+  transport or the gateway (default 10; `null` turns it off), nothing new is
+  started: in-flight calls finish, every unit not started is counted, `GAPS.md`
+  says so and the exit code is `3`. Provider errors sit outside every
+  candidate's denominators, so no rate is wrong, only partial; fix the
+  network and `run --reuse` to finish. Check failures, timeouts, refusals and
+  empty completions are candidates' results and never count. One limit: an
+  outage that black-holes requests instead of refusing them shows up as
+  `timeout` after the step's ceiling, which neither mechanism sees.
 - `methods: []` plus command-only candidates make a task free.
 - `agenteval models <task> --catalog-only` catches a mistyped model id for free.
 - On macOS, run billed tasks under `caffeinate -i`. If the machine sleeps, the

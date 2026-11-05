@@ -30,6 +30,7 @@ import { CODEGEN_PRODUCER_VERSION } from "../producers/code-gen.js";
 import { sha256, trialHash } from "../canon/hash.js";
 import { classifyCompletion } from "../canon/states.js";
 import { BudgetGuard } from "../canon/budget.js";
+import type { ProviderErrorHalt } from "../canon/halt.js";
 import type { CandidateDef, CostSource, EvaluationState,
   Isolation,
 } from "../canon/types.js";
@@ -664,6 +665,8 @@ export async function runAll(params: {
   budget: BudgetGuard;
   /** Early stop, when the spec turns it on (src/core/early-stop.ts). */
   stopper?: EarlyStop;
+  /** Halt on consecutive provider errors (src/canon/halt.ts). */
+  halt?: ProviderErrorHalt;
 }): Promise<RunRecord[]> {
   const { suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace, budget } = params;
   const trials = suite.trials ?? 2;
@@ -704,6 +707,7 @@ export async function runAll(params: {
   let dispatched = 0;
   let cancelled = 0;
   const finish = (record: RunRecord): RunRecord => {
+    params.halt?.record(record.completionState ?? "answered");
     const stop = params.stopper?.record(record);
     if (stop) params.emit({ type: "candidate.stopped", step: suite.step, candidate: stop.candidate, afterTrials: stop.after_trials, reason: stop.reason });
     return record;
@@ -741,6 +745,13 @@ export async function runAll(params: {
     // not recorded as a candidate failure — the candidate never got a turn.
     if (!budget.allows("generation")) {
       params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "skipped" });
+      return null;
+    }
+
+    // Only provider errors are coming back: the network is gone. Same
+    // accounting as the budget stop; `run --reuse` picks these up later.
+    if (params.halt && !params.halt.allows("generation")) {
+      params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "skipped", skipReason: "provider-errors" });
       return null;
     }
 
