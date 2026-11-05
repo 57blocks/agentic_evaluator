@@ -143,3 +143,64 @@ test("reuse finds the task's own runs when an unrelated tasks/ sits above it", a
 
   await fs.rm(root, { recursive: true, force: true });
 });
+
+/** Rewrite one finished run's rows, as if those trials had failed the way `fail` says. */
+async function failRows(ws: string, fail: (row: Record<string, unknown>, i: number) => Record<string, unknown> | null): Promise<void> {
+  const runs = path.join(ws, "tasks", "smoke-local", "runs");
+  const [run] = await fs.readdir(runs);
+  const file = path.join(runs, run, "scores.jsonl");
+  const rows = (await fs.readFile(file, "utf-8")).split("\n").filter(Boolean).map((l) => JSON.parse(l) as Record<string, unknown>);
+  const failed = rows.map((r, i) => {
+    const f = fail(r, i);
+    return f ? { ...r, ...f, legacy_status: "error", checks: {}, legacy_check_passed: null } : r;
+  });
+  await fs.writeFile(file, failed.map((r) => JSON.stringify(r)).join("\n") + "\n", "utf-8");
+  // The run's journal still says these trials succeeded; a real failed run's agrees with its rows.
+  await fs.rm(path.join(runs, run, "trials.partial.jsonl"), { force: true });
+}
+
+async function rerunWithReuse(spec: string): Promise<Array<Extract<RunEvent, { type: "trial" }>>> {
+  const events: RunEvent[] = [];
+  process.env.EVAL_REUSE = "1";
+  try {
+    await runSuite(spec, false, { yes: true, onEvent: (e) => events.push(e) });
+  } finally {
+    delete process.env.EVAL_REUSE;
+  }
+  return events.filter((e): e is Extract<RunEvent, { type: "trial" }> => e.type === "trial");
+}
+
+test("a timeout that had the full time limit is reused as a timeout; a provider error is generated again", async () => {
+  // Arrange - one trial timed out after more than any limit, the other hit a provider error.
+  const { ws, spec } = await workspaceWithSmoke();
+  await runSuite(spec, false, { yes: true });
+  await failRows(ws, (_, i) => (i === 0 ? { completion_state: "timeout", ms: 1e9, error: "timed out" } : { completion_state: "provider_error", error: "502" }));
+
+  // Act
+  const trials = await rerunWithReuse(spec);
+
+  // Assert - asking again under the same limit would be a second chance, not a
+  // regrade; the provider error says nothing about the candidate.
+  const timedOut = trials.find((t) => t.reusedFrom);
+  assert.equal(trials.filter((t) => t.reusedFrom).length, 1, JSON.stringify(trials));
+  assert.equal(timedOut?.state, "timeout");
+  assert.ok(trials.some((t) => !t.reusedFrom && t.state === "success"), "the provider error was not generated again");
+
+  await fs.rm(ws, { recursive: true, force: true });
+});
+
+test("a timeout under a shorter limit than today's is generated again", async () => {
+  // Arrange - both trials timed out after 1 ms: cut off long before this run's limit.
+  const { ws, spec } = await workspaceWithSmoke();
+  await runSuite(spec, false, { yes: true });
+  await failRows(ws, () => ({ completion_state: "timeout", ms: 1, error: "timed out" }));
+
+  // Act
+  const trials = await rerunWithReuse(spec);
+
+  // Assert
+  assert.equal(trials.filter((t) => t.reusedFrom).length, 0, JSON.stringify(trials));
+  assert.ok(trials.every((t) => t.state === "success"));
+
+  await fs.rm(ws, { recursive: true, force: true });
+});
