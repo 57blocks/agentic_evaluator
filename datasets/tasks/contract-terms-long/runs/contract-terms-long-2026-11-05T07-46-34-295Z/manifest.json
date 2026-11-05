@@ -1,0 +1,1074 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "contract-terms-long-2026-11-05T07-46-34-295Z",
+  "run_name": "contract-terms-long",
+  "step": {
+    "id": "extract",
+    "version": "2",
+    "description": null
+  },
+  "spec": {
+    "path": "tasks/contract-terms-long/spec.yaml",
+    "sha256": "43005129449a4bcb4129a380ce847f8ddc225dce3443c8b76f083f57fd7b61a0"
+  },
+  "description": "Does contract-term extraction hold up on long, scanned document packets whose amendments have to be sorted out? 60 synthetic packets of 7,000–20,000 words (an agreement with the graded articles in its back half, five schedules, 4–16 SOWs with their own terms, caps and laws as distractors) at three scan-noise levels; 44 carry a trap: amendment chains filed out of order, a restatement that supersedes an earlier amendment, unsigned, one-party and future-effective amendments, renewal and term changes, and clauses that are simply absent. Extract eight terms as they stand on the status date.",
+  "test_set": {
+    "id": "contract-terms-long",
+    "inputs": {
+      "ct-001": "a283a0c5fbba44cf40afc4a167daac8d371948cd29603669e7058e7d4c746a19",
+      "ct-002": "08217f6f872b8641e566fbddd5bbbea9853353dfc58a96b65176108f88dbca47",
+      "ct-003": "2977bb29bc1195514fd1f9c8f71ec14db0fe02dcb648e55d94fcafc6aa6a9ceb",
+      "ct-004": "6050e5c654d773b0cc466e7b41dbc98791d2aeea6221699aaf3d1c825ba73d20",
+      "ct-005": "84d844b4988b3063d222963adb0d7e62b15ab8065fcbbc81ab1b86758e416e40",
+      "ct-006": "2a05c53b2fc4c6890ddd7a8299700642f5ee24879ad5f59b0ad54478897e1cae",
+      "ct-007": "6f826e669c4a3299f37b080525db62abf6daddb9c7dacc15a253bbebd591c079",
+      "ct-008": "903b25d92ecad36b0d1c9b1bbb11e7ddcba2f79df1d8113cbea64b83ea79c80c",
+      "ct-009": "dd80b81147e00f6295a93914ac5001ffb684751adfda1d780c81ae70a370e5dc",
+      "ct-010": "3da9b86915f25542ddb184c297e9ee2ccf5d4fd762e75cb0608db64e2163b34d",
+      "ct-011": "5d9bd87339cec7cf698b4e488cc2be6f122e4de8ae8c866c8f1e5c70a7efdc51",
+      "ct-012": "e5161f0f3283f25f53cfb627417cfa0d7f7bc6ad392417380010c266e4c906ad",
+      "ct-013": "df0d09842e2a69fb3138840c4233cd5a150bda393b1e7e25340557acdb8277f8",
+      "ct-014": "5cf09892341f98c603c7734e1d7079717d0106a19df1f25c7dc5f8b5ebc2035b",
+      "ct-015": "fc4eadc33f230783939de557ea8b529bfaaed5561a48671b7d7d4746c8e44495",
+      "ct-016": "fb131ca9ddd97362353aa3c137d4e581f43421284697d091ffb3b6059ee362fc",
+      "ct-017": "733b73264e48a9146aeff5aab34aae382cec0fcad5b30dfd98f282e34b997507",
+      "ct-018": "ba9b0bfa45eda4a364715ff9b3715e367e88bbc41ca69dcfa6929f3c0c4341b5",
+      "ct-019": "6054a0e310ce1f219d3a23feef526dfaaa9950a244cbd5d9381b69e09a599615",
+      "ct-020": "fda4da2c6e9ed3bd9a8c2e08bd697bd39638aebd72ca186d5f177983eaaab515",
+      "ct-021": "486e6f94fbe5a92d347b26324d8ab1ce45c710443787c1e8b4ff48f66dddf64a",
+      "ct-022": "b27ad9fdb0338a0be8db3ee6f4ceabb49bd2414726631114682260f63717f7fe",
+      "ct-023": "278a35c37fc1982b00fe60caadb333f9e5299f70d9bd3040560958107d307f42",
+      "ct-024": "faa246692c06dbcfa1da2936f857d367fa40ed9a34c7551897b75827455eb41e",
+      "ct-025": "4b144440d1e42d0f8c17d79fc81f50df51003a5abd69275527e4b0a3c600221b",
+      "ct-026": "a9fbae2d04fd486c43ee9fd95c106f8867b3dd01d89c7217af8078bc1069c01f",
+      "ct-027": "0cc18e8aaaaeca57fe6f3f70b2488e98ed9aca85a7b43f7a353c95548cfc36c8",
+      "ct-028": "c32b60d240aaa28b86e48d1df0ac47691a5709b80058b6097e52b2391cb120fc",
+      "ct-029": "44d0e27b041de902e9401f33ac2bfd30b21fe8065771fd3d5ec9e038f170f3a0",
+      "ct-030": "cd71436c117e417d20dceb7b81f4f1e7d64b6daacd26eef336ef37078bdae6eb",
+      "ct-031": "08eb97b9f891498a6c1f0ca7ec7bfdb78646117a0afbb1ac8cbe4b2c240b294c",
+      "ct-032": "4d57f582c9d414c432337d485c70fdda15d8ea7aa1f1993d585dc454e9563323",
+      "ct-033": "c3d9bbaa5c5653bc32c747bb429bcf2bb8e5768f3d11ad9ebe768d2878b8e231",
+      "ct-034": "fa7a3c74d42919c6671da73af6fc51b302cdb49db45e98cd21245d354488d7d4",
+      "ct-035": "09be16b798fee38a90607a0dfd9b094997af1d67d735c3f907cd9a38c95d729b",
+      "ct-036": "ec2bddc329fb1d9da490a5d4b6c51ce93bac62b36b769ab6361dabbe297cfdf0",
+      "ct-037": "0a4d71cd614baf905d3aff1f1f9d941e33a04b440f12f7efe6487875e3452b9d",
+      "ct-038": "50f717a5b5e82c8fb4b2e50cb6cf2fb11cd73788d87ef536a8990753f540c0b6",
+      "ct-039": "c7be1a6de3de84965acd5d6d3fc1f476c6c23f5eef3272f183cdea1593cb7227",
+      "ct-040": "d2827254f3a2f57cb46cceb7159361f82ae584504dd3639aff7c4359016c3822",
+      "ct-041": "7e0ac4a795411ea13b9bde9468652b95dc253fed87af3991eb6a03250ab4d0e1",
+      "ct-042": "c7949bd880bcdf52cde8c111d442dfd6e232b4ac4c09b80c2498159528275ea6",
+      "ct-043": "60a6e12afd2bb9425803135a20febcbd253827c1e4d57f21c8fe1702cff485c3",
+      "ct-044": "ef8b668ba87ae8f63ced50ce7ef5fc698dca3afd7dc927a69989fd65f82eaad6",
+      "ct-045": "7fb9951688ee79f56f5130fe5a56d6a321a932a2329a66e3f8d83c9fe4ca551c",
+      "ct-046": "063140c62dda21b3229efa72fd08eee78b8cd678d993ff3f48f9061fffa27aa4",
+      "ct-047": "59c8c779e980897066e52b6a2be5775743d30e10c1c37b8f416b38b5be5e31ea",
+      "ct-048": "1ef6133afc4c5833f3e5ffade4aaaff8ddf93eabb311811e38252a7ac0659817",
+      "ct-049": "a54fff87edc727b42274cbaa24ccf67ef8a58cbc7e0d95d503a25a55a11e1f9c",
+      "ct-050": "680e4881201febf96468d33a19a3990fc4b735d9d7e7c805776b0f0bb5d59012",
+      "ct-051": "fb4456ab1d3187e133491b9f9f482d6e27eb05617941b6587fb7791f9e4ce267",
+      "ct-052": "afc14ba8e3997c4833664e94af1de158071976cbecdb721f46a8b11a5bcf3258",
+      "ct-053": "92d1f9cfdc45c7a3489e3fc1f5fbdd6c255a571f6caffcccfd5328a9b1104be0",
+      "ct-054": "fd14d913c8d10188587273ff503a7f624b791bddd2ca7d78252e65fd0eb2aa0c",
+      "ct-055": "4b8c04b39ec362dd45ab78c78dad578e1f23fd6a511de7442281b6527eb8dbbc",
+      "ct-056": "9e06fd920c73e6f180fd14d605687613d17e8c39868175f010b84258153dd807",
+      "ct-057": "c17df83e88ab88fc4e7a9875bbd7857dcaeb55ab6d76647547a1f185efb83d70",
+      "ct-058": "51273cf95afd9bd124fa4d0606c4ff2c5f2f9125bf3e96f2e6e9dd1d975b1010",
+      "ct-059": "2ac23fb5e227dda8a5a99bd480b8396ae8fd3c112d1aaca6a4123d89ec1d701d",
+      "ct-060": "c51f540c8e2232c46c49269af8e6efe9864872abdbcdae0245c67d930d88e7c0"
+    },
+    "labels": {
+      "ct-001": {
+        "tags": [
+          "noise-clean",
+          "8k-12k-words",
+          "effective-defined",
+          "term-words",
+          "renewal-auto",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-002": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-executed-amendment",
+          "amendments-1",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-none",
+          "cap-lesser_of"
+        ],
+        "split": "holdout"
+      },
+      "ct-003": {
+        "tags": [
+          "noise-light",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-004": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-out-of-order",
+          "amendments-2",
+          "8k-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-auto",
+          "cap-greater_of"
+        ],
+        "split": "dev"
+      },
+      "ct-005": {
+        "tags": [
+          "noise-heavy",
+          "8k-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-none",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-006": {
+        "tags": [
+          "noise-heavy",
+          "8k-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-auto-defined",
+          "cap-fixed"
+        ],
+        "split": "holdout"
+      },
+      "ct-007": {
+        "tags": [
+          "noise-clean",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto-defined",
+          "cap-greater_of"
+        ],
+        "split": "holdout"
+      },
+      "ct-008": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-executed-amendment",
+          "amendments-1",
+          "over-12k-words",
+          "effective-defined",
+          "term-end_date",
+          "renewal-mutual",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-009": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-out-of-order",
+          "amendments-2",
+          "under-8k-words",
+          "effective-defined",
+          "term-end_date",
+          "renewal-auto",
+          "cap-fees_paid"
+        ],
+        "split": "dev"
+      },
+      "ct-010": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-draft-amendment",
+          "amendments-1",
+          "has-draft",
+          "over-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-fees_paid"
+        ],
+        "split": "dev"
+      },
+      "ct-011": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-future-amendment",
+          "amendments-1",
+          "has-future",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-lesser_of",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-012": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-one-party",
+          "amendments-1",
+          "has-one-party",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-lesser_of"
+        ],
+        "split": "holdout"
+      },
+      "ct-013": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-chain",
+          "amendments-4",
+          "has-draft",
+          "over-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-mutual",
+          "cap-greater_of"
+        ],
+        "split": "dev"
+      },
+      "ct-014": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-restated",
+          "amendments-3",
+          "restated",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-015": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-absent",
+          "absent-law",
+          "over-12k-words",
+          "effective-defined",
+          "term-words",
+          "renewal-auto-defined",
+          "cap-lesser_of",
+          "law-absent",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-016": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-renewal-amendment",
+          "amendments-1",
+          "amends-renewal",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-lesser_of",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-017": {
+        "tags": [
+          "noise-light",
+          "8k-12k-words",
+          "effective-defined",
+          "term-words",
+          "renewal-auto",
+          "cap-fees_paid",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-018": {
+        "tags": [
+          "noise-heavy",
+          "over-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto-defined",
+          "cap-fees_paid",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-019": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-chain",
+          "amendments-4",
+          "has-one-party",
+          "under-8k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-020": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-restated",
+          "amendments-3",
+          "restated",
+          "over-12k-words",
+          "effective-defined",
+          "term-end_date",
+          "renewal-auto-defined",
+          "cap-fees_paid",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-021": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-absent",
+          "absent-cap",
+          "8k-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-auto",
+          "cap-absent"
+        ],
+        "split": "holdout"
+      },
+      "ct-022": {
+        "tags": [
+          "noise-clean",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-lesser_of"
+        ],
+        "split": "holdout"
+      },
+      "ct-023": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-executed-amendment",
+          "amendments-1",
+          "over-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-024": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-out-of-order",
+          "amendments-2",
+          "under-8k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-025": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-draft-amendment",
+          "amendments-1",
+          "has-draft",
+          "over-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto-defined",
+          "cap-fixed"
+        ],
+        "split": "dev"
+      },
+      "ct-026": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-future-amendment",
+          "amendments-1",
+          "has-future",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-none",
+          "cap-lesser_of"
+        ],
+        "split": "holdout"
+      },
+      "ct-027": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-one-party",
+          "amendments-1",
+          "has-one-party",
+          "8k-12k-words",
+          "effective-defined",
+          "term-end_date",
+          "renewal-auto-defined",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-028": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-renewal-amendment",
+          "amendments-1",
+          "amends-term",
+          "over-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-none",
+          "cap-fixed"
+        ],
+        "split": "dev"
+      },
+      "ct-029": {
+        "tags": [
+          "noise-light",
+          "under-8k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-030": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-chain",
+          "amendments-4",
+          "has-future",
+          "over-12k-words",
+          "effective-last_signature",
+          "term-end_date",
+          "renewal-auto-defined",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-031": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-restated",
+          "amendments-3",
+          "restated",
+          "over-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-032": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-absent",
+          "absent-term",
+          "8k-12k-words",
+          "effective-last_signature",
+          "term-absent",
+          "renewal-none",
+          "cap-fees_paid",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-033": {
+        "tags": [
+          "noise-heavy",
+          "over-12k-words",
+          "effective-defined",
+          "term-words",
+          "renewal-mutual",
+          "cap-fees_paid"
+        ],
+        "split": "dev"
+      },
+      "ct-034": {
+        "tags": [
+          "noise-clean",
+          "under-8k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-035": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-executed-amendment",
+          "amendments-1",
+          "over-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-mutual",
+          "cap-lesser_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-036": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-out-of-order",
+          "amendments-2",
+          "8k-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-mutual",
+          "cap-fees_paid",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-037": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-draft-amendment",
+          "amendments-1",
+          "has-draft",
+          "8k-12k-words",
+          "effective-defined",
+          "term-words",
+          "renewal-mutual",
+          "cap-fees_paid"
+        ],
+        "split": "holdout"
+      },
+      "ct-038": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-future-amendment",
+          "amendments-1",
+          "has-future",
+          "over-12k-words",
+          "effective-defined",
+          "term-end_date",
+          "renewal-auto",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-039": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-one-party",
+          "amendments-1",
+          "has-one-party",
+          "under-8k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-mutual",
+          "cap-fees_paid",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-040": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-chain",
+          "amendments-4",
+          "has-one-party",
+          "over-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-fees_paid",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-041": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-restated",
+          "amendments-3",
+          "restated",
+          "over-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-none",
+          "cap-lesser_of",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-042": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-absent",
+          "absent-law",
+          "absent-cap",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-absent",
+          "law-absent",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-043": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-renewal-amendment",
+          "amendments-1",
+          "amends-renewal",
+          "over-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto",
+          "cap-lesser_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-044": {
+        "tags": [
+          "noise-light",
+          "under-8k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto-defined",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-045": {
+        "tags": [
+          "noise-heavy",
+          "over-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-046": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-chain",
+          "amendments-4",
+          "has-one-party",
+          "8k-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-auto",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-047": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-restated",
+          "amendments-3",
+          "restated",
+          "8k-12k-words",
+          "effective-defined",
+          "term-end_date",
+          "renewal-auto",
+          "cap-greater_of"
+        ],
+        "split": "holdout"
+      },
+      "ct-048": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-absent",
+          "absent-cap",
+          "absent-term",
+          "over-12k-words",
+          "effective-as_of",
+          "term-absent",
+          "renewal-none",
+          "cap-absent",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-049": {
+        "tags": [
+          "noise-clean",
+          "under-8k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-050": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-executed-amendment",
+          "amendments-1",
+          "over-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-mutual",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-051": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-out-of-order",
+          "amendments-2",
+          "8k-12k-words",
+          "effective-defined",
+          "term-words",
+          "renewal-mutual",
+          "cap-fees_paid"
+        ],
+        "split": "holdout"
+      },
+      "ct-052": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-draft-amendment",
+          "amendments-1",
+          "has-draft",
+          "8k-12k-words",
+          "effective-last_signature",
+          "term-words",
+          "renewal-none",
+          "cap-fees_paid"
+        ],
+        "split": "holdout"
+      },
+      "ct-053": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-future-amendment",
+          "amendments-1",
+          "has-future",
+          "over-12k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-auto-defined",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-054": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-one-party",
+          "amendments-1",
+          "has-one-party",
+          "under-8k-words",
+          "effective-as_of",
+          "term-words",
+          "renewal-none",
+          "cap-greater_of",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-055": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-renewal-amendment",
+          "amendments-1",
+          "amends-renewal",
+          "over-12k-words",
+          "effective-defined",
+          "term-words",
+          "renewal-auto",
+          "cap-fees_paid",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-056": {
+        "tags": [
+          "noise-light",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-none",
+          "cap-lesser_of"
+        ],
+        "split": "holdout"
+      },
+      "ct-057": {
+        "tags": [
+          "hard",
+          "noise-heavy",
+          "trap-chain",
+          "amendments-4",
+          "has-one-party",
+          "8k-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-none",
+          "cap-fixed",
+          "venue-differs"
+        ],
+        "split": "holdout"
+      },
+      "ct-058": {
+        "tags": [
+          "hard",
+          "noise-clean",
+          "trap-restated",
+          "amendments-3",
+          "restated",
+          "has-draft",
+          "over-12k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-greater_of"
+        ],
+        "split": "dev"
+      },
+      "ct-059": {
+        "tags": [
+          "hard",
+          "noise-light",
+          "trap-absent",
+          "absent-law",
+          "under-8k-words",
+          "effective-as_of",
+          "term-end_date",
+          "renewal-auto",
+          "cap-fixed",
+          "law-absent",
+          "venue-differs"
+        ],
+        "split": "dev"
+      },
+      "ct-060": {
+        "tags": [
+          "noise-heavy",
+          "over-12k-words",
+          "effective-defined",
+          "term-end_date",
+          "renewal-auto-defined",
+          "cap-fixed"
+        ],
+        "split": "dev"
+      }
+    }
+  },
+  "candidates": {
+    "sonnet-5": {
+      "id": "sonnet-5",
+      "model": "anthropic/claude-sonnet-5",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "kimi-k3": {
+      "id": "kimi-k3",
+      "model": "moonshotai/kimi-k3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "glm-5.3": {
+      "id": "glm-5.3",
+      "model": "z-ai/glm-5.3",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "deepseek-v4.1-flash": {
+      "id": "deepseek-v4.1-flash",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "opus-5.5": {
+      "id": "opus-5.5",
+      "model": "anthropic/claude-opus-5.5",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "gpt-5.6-sol": {
+      "id": "gpt-5.6-sol",
+      "model": "openai/gpt-5.6-sol",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "qwen3.8-max": {
+      "id": "qwen3.8-max",
+      "model": "qwen/qwen3.8-max-0902",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    },
+    "deepseek-v4-pro": {
+      "id": "deepseek-v4-pro",
+      "model": "deepseek/deepseek-v4-pro-0813",
+      "provider_route": "openrouter",
+      "generation_settings": {
+        "temperature": 0
+      },
+      "adapter": "model-api"
+    }
+  },
+  "control_candidate": "sonnet-5",
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter",
+    "methods": [
+      "absolute-1-5"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "terms-check"
+    ],
+    "check_version": "cmd-fbb3f38e+files-c1cceec9",
+    "rubric_sha256": "6eac7a68c20234aabf0d682115ca5f108788da3c6d1c12b5b21a6e295d68e35c",
+    "check_description": "All eight extracted fields match the key the generator computed (binding amendments applied in effective-date order, a restatement superseding what came before it, absent clauses null).",
+    "producer_template_sha256": "b5a137a963b162b18c8731132cef8956915392091d5defaf7773d4fef22b8ebb",
+    "judge_template_sha256": "4d88d04a68b0103ee15b0080f5fb8f98e007cd06d49ea783ab5675cc5a28744e",
+    "score_template_sha256": "9d83475ad970c126331629e2aeb9c6986672869041898f8debe868e1579e5f25"
+  },
+  "prompts": {
+    "step_file": "prompts/extract.md",
+    "files": {
+      "prompts/extract.md": "You are a contracts analyst. Read the document packet below (an agreement,\nand any amendments, restatements or attachments filed with it) and extract\nthe agreement's key commercial terms as they stand on the packet's status\ndate.\n\nAnswer with one JSON object and nothing else, in exactly this shape:\n\n{\n  \"parties\": [\"<full legal name>\", \"<full legal name>\"],\n  \"effective_date\": \"YYYY-MM-DD\" | null,\n  \"initial_term_months\": <integer> | null,\n  \"auto_renewal\": true | false,\n  \"renewal_term_months\": <integer> | null,\n  \"non_renewal_notice_days\": <integer> | null,\n  \"governing_law\": \"<US state or country>\" | null,\n  \"liability_cap\":\n      { \"type\": \"fixed\", \"amount_usd\": <integer> }\n    | { \"type\": \"fees_paid\", \"months\": <integer> }\n    | { \"type\": \"greater_of\", \"amount_usd\": <integer>, \"months\": <integer> }\n    | { \"type\": \"lesser_of\", \"amount_usd\": <integer>, \"months\": <integer> }\n    | null\n}\n\nUse null when the agreement does not state the term.\n\n- \"initial_term_months\" is the length of the initial term in whole months,\n  however the agreement expresses it.\n- \"renewal_term_months\" and \"non_renewal_notice_days\" describe automatic\n  renewal: the length of each renewal term, and the notice a party must give\n  to stop it. Both are null when the agreement does not renew automatically.\n- \"liability_cap\" is the general cap on a party's total liability. \"fees_paid\"\n  means a cap equal to the fees paid or payable over the stated number of\n  months before the claim.\n\n## Document packet\n\n{{input}}\n"
+    }
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "lowest-cost",
+  "eligibility": {
+    "minimum_reliability": 0.9,
+    "minimum_required_check_pass_rate": 0.9,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 4,
+    "timeout_ms": 600000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold",
+    "early_stop": false
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.3.0",
+    "git_sha": "fb6cde0e",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-11-05T07:46:34.295Z",
+  "finished_at": "2026-11-05T08:59:39.682Z"
+}
