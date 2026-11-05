@@ -1,0 +1,596 @@
+{
+  "protocol_version": "0.3",
+  "arm_id": "e2e-control",
+  "arm_kind": "control",
+  "assignment": {
+    "extract": "opus-5.5",
+    "decide": "opus-5.5",
+    "deadline": "opus-5.5"
+  },
+  "chain": [
+    "extract",
+    "decide",
+    "deadline"
+  ],
+  "cases": [
+    {
+      "input": "cd2-003",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.009948,
+          "ms": 5000,
+          "input_sha": "02d80eb2475c620d60e251dad23718a023f4ca04b070e8defbb48897fbb01e32",
+          "output_sha": "b710d49425ed7aa96a5a8db2c739f93114d98e8a3c2a43cfe03890c347598538",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.012732,
+          "ms": 6742,
+          "input_sha": "b710d49425ed7aa96a5a8db2c739f93114d98e8a3c2a43cfe03890c347598538",
+          "output_sha": "0e8b62e5b7a8d7a537645a4ade7316883686cb39c014c81b26651a6d78c3c7dc",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.002236,
+          "ms": 3173,
+          "input_sha": "0e8b62e5b7a8d7a537645a4ade7316883686cb39c014c81b26651a6d78c3c7dc",
+          "output_sha": "c483a6cdf3fd3d0578186b1a1cddc163c42ec1751116818cf7678a7fd45b4a9d",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-005",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.011696,
+          "ms": 6269,
+          "input_sha": "322b38c9a8dc74424485048a01913fd8f101deef529e42232dede1cbdc1073b4",
+          "output_sha": "0028a89f338c90f385ab6415e793ca2002a87725412b3e7ede41b64eedb510a4",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.011552,
+          "ms": 6137,
+          "input_sha": "0028a89f338c90f385ab6415e793ca2002a87725412b3e7ede41b64eedb510a4",
+          "output_sha": "96ef1440270dbc7259ddefbbfc1422204071343550ccbe2fca70a05b3a160286",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.004276,
+          "ms": 4314,
+          "input_sha": "96ef1440270dbc7259ddefbbfc1422204071343550ccbe2fca70a05b3a160286",
+          "output_sha": "616bddf01bc9c66482666c70578d54e11789445bf1fb92ee6f2c16d8892833a0",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-013",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.012484,
+          "ms": 6147,
+          "input_sha": "bc9c48cb972972872516e0f6d79c079230449ba256106088aaf9ad5fb84fdecf",
+          "output_sha": "d2896d20080aad8dc83bf66579de2d2b092d52d58fbd0049349925711f5072eb",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.014852,
+          "ms": 7154,
+          "input_sha": "d2896d20080aad8dc83bf66579de2d2b092d52d58fbd0049349925711f5072eb",
+          "output_sha": "e41cfb6bf81db97eeabb3bf943742cef556943dd67fc89526a830ead00123d8f",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.01154,
+          "ms": 6487,
+          "input_sha": "e41cfb6bf81db97eeabb3bf943742cef556943dd67fc89526a830ead00123d8f",
+          "output_sha": "041a34daf4b52acb475847a58c50c5cc285650ba1213cc89f488da3b8a6b20ba",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-014",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.013472,
+          "ms": 6280,
+          "input_sha": "007952f2ab6eddff0c0c81165564f8c6e4b79d51e5a9fad6739981269981ffb7",
+          "output_sha": "2c32741d596a4d1d1b474cc42849b7e49b4edaed38fcc544a77cb4a98a953a2f",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.016832,
+          "ms": 7757,
+          "input_sha": "2c32741d596a4d1d1b474cc42849b7e49b4edaed38fcc544a77cb4a98a953a2f",
+          "output_sha": "80a3f644c55aba40e3b5f76ca6ad9c13b4add946673262937afd4075b6ba1ade",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.00758,
+          "ms": 6534,
+          "input_sha": "80a3f644c55aba40e3b5f76ca6ad9c13b4add946673262937afd4075b6ba1ade",
+          "output_sha": "735827b40ee9d7a271b9aa32142af00d6fbbf9407bed2421a3d07082cf1160c8",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-119",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.012204,
+          "ms": 4378,
+          "input_sha": "9815390c01c8db291a57dd65c9dc235eda6b424ff800d9319a304097e2a2f0fd",
+          "output_sha": "2d861b2c41917670c053f697b6c774e00f83e6e0e600e5d9a7259b431c775d21",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.017404,
+          "ms": 8570,
+          "input_sha": "2d861b2c41917670c053f697b6c774e00f83e6e0e600e5d9a7259b431c775d21",
+          "output_sha": "ffc9f214cfdd5038fd2b5f5f6a3a3ff981affa4e0b4e573cdfdd7f9644940afb",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.013992,
+          "ms": 9639,
+          "input_sha": "ffc9f214cfdd5038fd2b5f5f6a3a3ff981affa4e0b4e573cdfdd7f9644940afb",
+          "output_sha": "9aff2c104a426fd4fd9b4a3d1dcc3f0cda71ec63f2147c5e31d249384a86d5af",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-169",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.01546,
+          "ms": 5987,
+          "input_sha": "753d9d946daf7196fb82716c4dc0323c6972c3cfdb15d161d7aa9cdb4d54e595",
+          "output_sha": "6426b8d6e77491e3209d4ba2578f8b4f555f267719231b0d825344b02bc337a2",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.022224,
+          "ms": 11242,
+          "input_sha": "6426b8d6e77491e3209d4ba2578f8b4f555f267719231b0d825344b02bc337a2",
+          "output_sha": "fabb9e076f0f20ad5b5cff1705ee10d9e8cda64991af33b7302e5ddd990c4ab0",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.021392,
+          "ms": 9859,
+          "input_sha": "fabb9e076f0f20ad5b5cff1705ee10d9e8cda64991af33b7302e5ddd990c4ab0",
+          "output_sha": "e391c35d4c10cdf6d786430ccd998712083ab030704cfcb1a654ed3a562d143d",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-173",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.015572,
+          "ms": 5873,
+          "input_sha": "e2746ed0706f094ccaf21e21ec3e7a1600dae28ba314611e1838561ef17e7786",
+          "output_sha": "f44c5481d2f5dc7fab14795e5f39fd86f2d9c4e8acee94648fd32ebbe6ffff0a",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.018248,
+          "ms": 8354,
+          "input_sha": "f44c5481d2f5dc7fab14795e5f39fd86f2d9c4e8acee94648fd32ebbe6ffff0a",
+          "output_sha": "321bb8f03426ed00656fa820527eecc0e37b2b74133586d28f1d89330d266974",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.00588,
+          "ms": 5231,
+          "input_sha": "321bb8f03426ed00656fa820527eecc0e37b2b74133586d28f1d89330d266974",
+          "output_sha": "c483a6cdf3fd3d0578186b1a1cddc163c42ec1751116818cf7678a7fd45b4a9d",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-187",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.009364,
+          "ms": 4154,
+          "input_sha": "146998eb9fcf41bbb613500317b48f3d633cea1295454c4a8c804d0204c6434e",
+          "output_sha": "9ea4177a08c927c23207ebc8ffbc23b9d7c0dabdec6850483b195abbc89a79e4",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.0086,
+          "ms": 4285,
+          "input_sha": "9ea4177a08c927c23207ebc8ffbc23b9d7c0dabdec6850483b195abbc89a79e4",
+          "output_sha": "07942508eee2bd681224da1425c2eecf08cb911d763b1f3d89f11f97c8ec093f",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "opus-5.5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.01324,
+          "ms": 8617,
+          "input_sha": "07942508eee2bd681224da1425c2eecf08cb911d763b1f3d89f11f97c8ec093f",
+          "output_sha": "21068a731f0f813a429756911119dd33e95db42e981e54ebc8adf238b8b18ed4",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    }
+  ],
+  "totals": {
+    "cases": 8,
+    "success": 8,
+    "failure": 0,
+    "undetermined": 0,
+    "cost_usd": 0.30277999999999994,
+    "ms": 158183
+  },
+  "rates": {
+    "cases": 8,
+    "success": 8,
+    "failure": 0,
+    "undetermined": 0,
+    "task_success_rate": {
+      "value": 1,
+      "numerator": 8,
+      "denominator": 8
+    },
+    "reliability": {
+      "value": 1,
+      "numerator": 8,
+      "denominator": 8
+    },
+    "required_check_pass_rate": {
+      "value": 1,
+      "numerator": 24,
+      "denominator": 24
+    },
+    "total_cost_usd": 0.30278000000000005,
+    "cost_per_success": 0.037847500000000006,
+    "p50_ms": 19458,
+    "p95_ms": 27088
+  },
+  "kind": "single-model-e2e-control",
+  "candidate": "opus-5.5"
+}

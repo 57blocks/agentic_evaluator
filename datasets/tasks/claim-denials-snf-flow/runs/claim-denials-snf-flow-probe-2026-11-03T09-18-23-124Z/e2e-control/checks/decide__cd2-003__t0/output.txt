@@ -1,0 +1,18 @@
+```json
+{
+  "root_cause": "duplicate_claim",
+  "statement_from": "2025-04-01",
+  "statement_through": "2025-04-23",
+  "received_date": "2025-06-05",
+  "remittance_date": "2025-06-19",
+  "paid_through": null,
+  "qualifying_stay": null,
+  "records": [
+    "2025-05-12  Original claim submitted.",
+    "2025-05-29  Original claim PAID (ICN on remittance of that date).",
+    "2025-06-05  Same claim resubmitted by billing staff in error (no changes)."
+  ],
+  "correctable": "no",
+  "next_action": "write_off"
+}
+```
