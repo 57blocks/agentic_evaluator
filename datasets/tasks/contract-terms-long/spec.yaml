@@ -31,13 +31,15 @@
 #   agenteval check-task datasets/tasks/contract-terms-long          # free
 #   caffeinate -i agenteval run datasets/tasks/contract-terms-long --yes --html   # billed, about $60; --reuse keeps earlier trials
 #
-# 2026-11-05 run of the first 60 (runs/contract-terms-long-2026-11-05T07-46-34-295Z):
-# 9 of 60 inputs separate the eight on the answers, all one-party or chain
-# traps; everything else is 100% for every model. datasets/README.md has the row.
+# 2026-11-05 runs: the first 60 (runs/contract-terms-long-2026-11-05T07-46-34-295Z)
+# separated the eight on 9 inputs, all one-party or chain traps; the 100
+# (runs/contract-terms-long-2026-11-05T10-10-04-083Z, its 480 trials reused)
+# separate on 35 and sort the models into three tiers, almost entirely on the
+# one-party trap. datasets/README.md has the row.
 
 protocol_version: "0.3"
 run_name: contract-terms-long
-description: "Does contract-term extraction hold up on long, scanned document packets whose amendments have to be sorted out? 60 synthetic packets of 7,000–20,000 words (an agreement with the graded articles in its back half, five schedules, 4–16 SOWs with their own terms, caps and laws as distractors) at three scan-noise levels; 44 carry a trap: amendment chains filed out of order, a restatement that supersedes an earlier amendment, unsigned, one-party and future-effective amendments, renewal and term changes, and clauses that are simply absent. Extract eight terms as they stand on the status date."
+description: "Does contract-term extraction hold up on long, scanned document packets whose amendments have to be sorted out? 100 synthetic packets of 7,000–20,000 words (an agreement with the graded articles in its back half, five schedules, 4–16 SOWs with their own terms, caps and laws as distractors) at three scan-noise levels; 76 carry a trap: amendment chains filed out of order, a restatement that supersedes an earlier amendment, unsigned, one-party and future-effective amendments, renewal and term changes, and clauses that are simply absent. Extract eight terms as they stand on the status date."
 budget_usd: 70
 
 workflow:

@@ -1,0 +1,16 @@
+```json
+{
+  "parties": ["Tessellate Digital LLC", "Kitebridge Supply LLC"],
+  "effective_date": "2023-04-25",
+  "initial_term_months": 60,
+  "auto_renewal": true,
+  "renewal_term_months": 24,
+  "non_renewal_notice_days": 30,
+  "governing_law": "Ohio",
+  "liability_cap": {
+    "type": "lesser_of",
+    "amount_usd": 500000,
+    "months": 12
+  }
+}
+```
