@@ -410,7 +410,7 @@ async function findJournaled(dir: string, hash: string, timeoutMs: number): Prom
     if (line.trim() === "") continue;
     try {
       const r = JSON.parse(line) as RunRecord;
-      if (r.trialHash === hash && (r.status === "ok" || isCandidatesOwnFailure(r.completionState, r.ms, timeoutMs))) return r;
+      if (r.trialHash === hash && (r.status === "ok" || isCandidatesOwnFailure({ state: r.completionState, ms: r.ms, promptTokens: r.promptTokens, costUsd: r.costUsd }, timeoutMs))) return r;
     } catch {
       // A line cut short by the crash itself.
     }
@@ -421,15 +421,28 @@ async function findJournaled(dir: string, hash: string, timeoutMs: number): Prom
 /**
  * A failed attempt that is the candidate's own outcome, so asking again under
  * the same rules would be a second chance, not a regrade: a refusal or a
- * malformed answer, and a timeout that had at least the time this run allows.
+ * malformed answer from a model that was reached, and a timeout that had at
+ * least the time this run allows.
  * A provider error or a cancelled call says nothing about the candidate, and
  * a timeout under a shorter limit than today's was cut off early: those are
  * generated again.
  */
-function isCandidatesOwnFailure(state: string | undefined, ms: number, timeoutMs: number): boolean {
-  if (state === "refusal" || state === "malformed") return true;
-  return state === "timeout" && ms >= timeoutMs;
+export function isCandidatesOwnFailure(
+  attempt: { state: string | undefined; ms: number; promptTokens: number; costUsd: number },
+  timeoutMs: number,
+): boolean {
+  const { state, ms } = attempt;
+  // An error nobody could classify is recorded as malformed (fail closed), so
+  // a malformed attempt is the model's own only if the model was reached: a
+  // missing API key is "malformed" too, and must not stick.
+  if (state === "refusal" || state === "malformed") return attempt.promptTokens > 0 || attempt.costUsd > 0;
+  // The clock that stops a call and the one that times it are not the same
+  // tick: a 300 s timeout is recorded as 299,999 ms.
+  return state === "timeout" && ms >= timeoutMs - TIMEOUT_SLACK_MS;
 }
+
+/** How far under its limit a recorded timeout can read and still have had the whole limit. */
+const TIMEOUT_SLACK_MS = 1_000;
 
 /**
  * The trial row in this run for that step and hash: its success, or else a
@@ -454,7 +467,8 @@ async function findTrialRow(dir: string, step: string, hash: string, timeoutMs: 
     }
     if (row.step !== step || row.trial_hash !== hash) continue;
     if (row.legacy_status === "ok") return row;
-    failed ??= isCandidatesOwnFailure(row.completion_state, row.ms, timeoutMs) ? row : null;
+    const own = isCandidatesOwnFailure({ state: row.completion_state, ms: row.ms, promptTokens: row.tokens.prompt, costUsd: row.cost.generation }, timeoutMs);
+    failed ??= own ? row : null;
   }
   return failed;
 }
