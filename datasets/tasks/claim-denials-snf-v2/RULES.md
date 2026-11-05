@@ -130,6 +130,12 @@ an item that rests on one reading of an unsettled rule would grade the reading.
 (Until v2.4 no deadline was rolled; a model that applied this rule was marked
 wrong on 50 items. The 2026-11-03 claim-denials-snf-flow probe caught it.)
 
+The day a deadline rolled from is accepted too, for `appeal` and
+`corrected_claim` as well: filing on it is never late, so a model that gives
+the earlier, cautious date has not missed the rule's purpose. Only a deadline
+past the rolled day is wrong. (In v2.4 only the rolled day passed; every
+model missed it on 15 items, and opus-5.5 lost all 33 of its failures there.)
+
 ## Left out on purpose
 
 - Liability when the qualifying stay was **not** met. Whether the beneficiary

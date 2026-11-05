@@ -73,6 +73,12 @@ export const reopeningAlsoAccepted = (remittance) => {
   return rolled === reopeningDeadline(remittance) ? [] : [rolled];
 };
 
+/**
+ * R7 rolls a deadline forward, so the day it rolled from is the earlier,
+ * cautious answer: filing then is never late. The key accepts it as well.
+ */
+export const unrolledAlsoAccepted = (nominal) => (isNonworkday(nominal) ? [nominal] : []);
+
 /** R2: 120 days from receipt, receipt presumed 5 days after the notice. */
 export const REDETERMINATION_DAYS = 120;
 export const PRESUMED_RECEIPT_DAYS = 5;
