@@ -12,7 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { LlmError, type LlmTrace } from "../llm.js";
 import { AdapterError, adapterFor, modelRefOf, trialAdapterFields } from "../adapters/resolve.js";
-import { samplingOf } from "../adapters/types.js";
+import { adapterIdOf, samplingOf } from "../adapters/types.js";
 import { endpointOf } from "../providers/index.js";
 import { activityOf, type AgentActivity, type AgentTrace } from "../canon/agent-trace.js";
 import type { ArtifactFile } from "../adapters/types.js";
@@ -171,13 +171,17 @@ export async function generateOne(params: {
 /**
  * A reused trial whose check has since changed is graded again, on the files
  * it left (kept under its run), so fixing a check never means paying for the
- * generations again. Null when the check is unchanged, is not a command, or
- * the trial's files were not kept.
+ * generations again. Null when the check is unchanged or is not a command.
+ *
+ * A model's answer is all text, and the row carries it, so a model trial whose
+ * files were not kept is graded from an empty directory, as it was the first
+ * time. A trial that left files and lost them cannot be graded again: it says
+ * so, rather than keep a verdict from a check that no longer exists.
  */
 async function regradeIfChanged(
   suite: Suite,
   reused: { record: RunRecord; dir: string },
-  t: { candidate: string; inputSlug: string; inputText: string; trial: number; checkWorkDir: string },
+  t: { candidate: string; inputSlug: string; inputText: string; trial: number; checkWorkDir: string; leavesFiles: boolean },
 ): Promise<Partial<RunRecord> | null> {
   const check = suite.check;
   if (!check || check.kind !== "command") return null;
@@ -185,10 +189,14 @@ async function regradeIfChanged(
   const version = await requiredCheckVersion(check, suite.taskRoot);
   if (reused.record.checkVersion === version) return null;
   const kept = path.join(reused.dir, "checks", `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}`);
-  if (!(await fs.stat(kept).then((s) => s.isDirectory(), () => false))) return null;
+  const isKept = await fs.stat(kept).then((s) => s.isDirectory(), () => false);
+  if (!isKept && t.leavesFiles) {
+    const output = `the check changed, and the files this trial left were not kept under ${displayPath(reused.dir)}: generate it again without --reuse`;
+    return { checkPassed: false, checkOutput: output, checkReason: "kept files missing", checkState: "evaluator_error", checkVersion: version };
+  }
   const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "agenteval-regrade-"));
   try {
-    await fs.cp(kept, scratch, { recursive: true });
+    if (isKept) await fs.cp(kept, scratch, { recursive: true });
     const fixture = fixturePath(suite, t.inputSlug);
     const read = await keptTrace(reused.dir, t);
     const trace = read && "trace" in read ? read.trace : undefined;
@@ -721,7 +729,7 @@ export async function runAll(params: {
       const reused = await loadReusable(suite.step, task.hash, runId, params.ws, suite.taskRoot, timeoutMs);
       if (reused) {
         // A reused failure has no output to grade: it stays the failure it was.
-        const regraded = reused.record.status === "ok" ? await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir }) : null;
+        const regraded = reused.record.status === "ok" ? await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir, leavesFiles: adapterIdOf(def, producer) !== "model-api" }) : null;
         await copyTrace(reused.dir, outDir, { candidate, inputSlug, trial });
         params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: reused.record.completionState ?? "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
         return finish({ ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from });
