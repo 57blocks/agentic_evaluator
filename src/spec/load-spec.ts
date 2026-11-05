@@ -109,6 +109,10 @@ export interface EvalSpec {
     minimum_meaningful_difference?: number | null;
     /** Stop a candidate once a declared gate is out of its reach (canon/early-stop.ts). */
     early_stop?: boolean;
+    /** Total time to wait out a network outage before calls are let fail (transport-gate.ts); 0 turns pausing off. */
+    outage_wait_seconds?: number;
+    /** Consecutive provider errors that halt the run (canon/halt.ts); null turns the halt off. */
+    max_consecutive_provider_errors?: number | null;
   };
   "x-harness"?: {
     producer: "prompt" | "codegen";
@@ -470,6 +474,8 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     eligibility: step.eligibility,
     mmd: spec.execution.minimum_meaningful_difference ?? null,
     ...(spec.execution.early_stop ? { earlyStop: true } : {}),
+    ...(spec.execution.outage_wait_seconds !== undefined ? { outageWaitSeconds: spec.execution.outage_wait_seconds } : {}),
+    ...(spec.execution.max_consecutive_provider_errors !== undefined ? { maxConsecutiveProviderErrors: spec.execution.max_consecutive_provider_errors } : {}),
     controlCandidate: spec.workflow.control_candidate,
     benchmarkMode: spec.execution.benchmark_mode ?? "capability-neutral",
     cacheMode: spec.execution.cache_mode ?? "cold",

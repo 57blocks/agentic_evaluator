@@ -41,6 +41,7 @@ import { e2eArmChain, e2eChain, e2eRootInputs } from "./plan.js";
 import type { RunEventSink } from "./events.js";
 import { resolveEligibility } from "../canon/select.js";
 import type { BudgetGuard } from "../canon/budget.js";
+import type { ProviderErrorHalt } from "../canon/halt.js";
 import type { EligibilityThresholds } from "../canon/types.js";
 import type { Suite } from "../types.js";
 
@@ -85,8 +86,9 @@ async function openArmRunner(params: {
   runId: string;
   emit: RunEventSink;
   budget?: BudgetGuard;
+  halt?: ProviderErrorHalt;
 }): Promise<{ outDir: string; generate: E2eArmGenerate; close: () => Promise<unknown> }> {
-  const { armId, chain, root, runId, emit, budget } = params;
+  const { armId, chain, root, runId, emit, budget, halt } = params;
   const outDir = path.join(root, armId);
   await fs.mkdir(outDir, { recursive: true });
   const trace = await openTrace(outDir, `${runId}/${armId}`);
@@ -102,6 +104,11 @@ async function openArmRunner(params: {
     // and the case is undetermined rather than failed.
     if (budget && !budget.allows("generation")) {
       emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: "skipped" });
+      return { completion_state: "cancelled", text: "", artifacts: [], cost_usd: 0, ms: 0, checks: [] };
+    }
+    // So does the provider-error halt: a dead network ends the arms too.
+    if (halt && !halt.allows("generation")) {
+      emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: "skipped", skipReason: "provider-errors" });
       return { completion_state: "cancelled", text: "", artifacts: [], cost_usd: 0, ms: 0, checks: [] };
     }
     try {
@@ -130,6 +137,7 @@ async function openArmRunner(params: {
           ? []
           : [{ evaluator: step.check?.id ?? TSC_CHECK_ID, version: g.checkVersion ?? "unknown", state: g.checkState }];
       budget?.add(g.costUsd + (g.retryCostUsd ?? 0));
+      halt?.record(verdict.state);
       emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: verdict.state, ms: g.ms, costUsd: g.costUsd });
       return {
         completion_state: verdict.state,
@@ -141,6 +149,7 @@ async function openArmRunner(params: {
       };
     } catch (err) {
       const rec = errorRecord({ inputSlug, inputText, candidate, def, trial, hash: "" }, err);
+      halt?.record(rec.completionState ?? "answered");
       emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: rec.completionState ?? "error", error: rec.error });
       return {
         completion_state: rec.completionState ?? "malformed",
@@ -181,8 +190,9 @@ export async function maybeRunE2eValidation(params: {
   runId: string;
   chosenByStep: Record<string, string | null>;
   budget?: BudgetGuard;
+  halt?: ProviderErrorHalt;
 }): Promise<E2eArms | null> {
-  const { suites, root, runId, chosenByStep, emit, budget } = params;
+  const { suites, root, runId, chosenByStep, emit, budget, halt } = params;
   const declared = e2eChain(suites);
   if (!declared) return null;
   const chain = e2eArmChain(declared);
@@ -202,7 +212,7 @@ export async function maybeRunE2eValidation(params: {
     armKind: "proposed" | "control",
     assignment: StepAssignment,
   ): Promise<E2eArmReport> => {
-    const opened = await openArmRunner({ armId, chain, root, runId, emit, budget });
+    const opened = await openArmRunner({ armId, chain, root, runId, emit, budget, halt });
     const delivered: Deliveries = new Map();
     deliveries[armId] = delivered;
     const runner = {
@@ -304,6 +314,7 @@ export async function maybeRunE2eValidation(params: {
           control: deliveries["e2e-control"] ?? new Map(),
           proposed: deliveries["e2e-proposed"] ?? new Map(),
           ...(budget ? { budget } : {}),
+          ...(halt ? { halt } : {}),
         })
       : null;
 

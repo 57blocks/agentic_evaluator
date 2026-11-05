@@ -304,6 +304,10 @@ export const SPEC_SCHEMA = {
         cache_mode: { type: "string", enum: ["cold", "warm", "both"] },
         minimum_meaningful_difference: { type: ["number", "null"] },
         early_stop: { type: "boolean" },
+        /** How long the run waits out a network outage before letting calls fail; 0 turns pausing off. Default 600. */
+        outage_wait_seconds: { type: "integer", minimum: 0 },
+        /** Consecutive provider errors that halt the run; null turns the halt off. Default 10. */
+        max_consecutive_provider_errors: { type: ["integer", "null"], minimum: 1 },
       },
     },
     "x-harness": {
