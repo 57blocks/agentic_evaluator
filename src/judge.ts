@@ -131,6 +131,13 @@ function parseRound(text: string, dimensions: readonly string[]): RoundVerdict {
   for (const key of dimensions) {
     dims[key] = parseAxis(rawDims[key]); // missing → tie
   }
+  // The overall verdict is the one axis that cannot default: a reply with no
+  // winner in it ({"error": …}, a truncated object) is not a round of ties,
+  // it is a reply the judge did not give — retried, then an evaluator error.
+  const overall = typeof root.overall === "object" && root.overall !== null ? (root.overall as Record<string, unknown>).winner : undefined;
+  if (overall !== "A" && overall !== "B" && overall !== "tie") {
+    throw new Error(`judge returned no overall verdict: ${text.slice(0, 120)}`);
+  }
   return { dimensions: dims, overall: parseAxis(root.overall) };
 }
 

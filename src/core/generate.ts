@@ -557,6 +557,32 @@ async function keepTrace(outDir: string, t: { candidate: string; inputSlug: stri
 }
 
 /**
+ * Keep a finished trial's trace and journal row. The record is already
+ * built and billed: a disk fault here is the harness's, noted beside the run
+ * the way `keepEvidence` notes a copy that failed, never turned into a
+ * candidate failure at $0.
+ */
+async function persistTrial(outDir: string, t: { candidate: string; inputSlug: string; trial: number }, record: RunRecord, trace: AgentTrace | undefined): Promise<void> {
+  try {
+    await keepTrace(outDir, t, trace);
+    await journal(outDir, record);
+  } catch (err) {
+    const why = err instanceof Error ? err.message : String(err);
+    await noteEvidenceIncomplete(outDir, `keeping evidence for ${t.candidate} on ${t.inputSlug} trial ${t.trial} failed: ${why}`);
+  }
+}
+
+/**
+ * Leave a line in `EVIDENCE_INCOMPLETE.txt` beside the run: evidence the
+ * harness could not keep, named, so the numbers stand and the gap is on
+ * record. Best effort — a disk that cannot take the evidence may not take
+ * the note either.
+ */
+export async function noteEvidenceIncomplete(outDir: string, note: string): Promise<void> {
+  await fs.appendFile(path.join(outDir, "EVIDENCE_INCOMPLETE.txt"), `${note}\n`, "utf-8").catch(() => undefined);
+}
+
+/**
  * A reused trial's trace, read back for a regrade so the check sees the same
  * trace.json it would have on the first run. Null when the run kept none;
  * an error when it kept one that no longer parses, so the regrade says
@@ -818,8 +844,7 @@ export async function runAll(params: {
         ...(g.trace ? { agent: activityOf(g.trace) } : {}),
         ...(g.traceError !== undefined ? { traceError: g.traceError } : {}),
       };
-      await keepTrace(outDir, task, g.trace);
-      await journal(outDir, record);
+      await persistTrial(outDir, task, record, g.trace);
       return finish(record);
     } catch (err) {
       if (err instanceof AdapterError) await keepTrace(outDir, task, err.partial?.trace);

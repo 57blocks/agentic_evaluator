@@ -217,3 +217,39 @@ test("cancelling a run that is not in flight is refused rather than silently acc
     await f.close();
   }
 });
+
+test("two starts that race each other yield one run, not two", async () => {
+  const f = await serve();
+  try {
+    const { body: planned } = await json(`${f.origin}/api/plan/smoke-local`);
+    const body = post(f.origin, { task: "smoke-local", ack: planned.ack });
+
+    // Act - both requests are in flight before either has read the spec.
+    const [a, b] = await Promise.all([json(`${f.origin}/api/runs`, body), json(`${f.origin}/api/runs`, body)]);
+
+    // Assert - exactly one started; the other was told which one.
+    const statuses = [a.status, b.status].sort();
+    assert.deepEqual(statuses, [201, 409]);
+    const started = a.status === 201 ? a : b;
+    const refused = a.status === 201 ? b : a;
+    assert.equal(refused.body.runId, started.body.id);
+
+    await followRun(f.origin, started.body.id);
+  } finally {
+    await f.close();
+  }
+});
+
+test("following a run id the server does not know is a 404, and the server survives it", async () => {
+  const f = await serve();
+  try {
+    const res = await fetch(`${f.origin}/api/runs/no-such-run/events`);
+    assert.equal(res.status, 404);
+    assert.match(await res.text(), /run not found/);
+    // Still answering.
+    const { status } = await json(`${f.origin}/api/plan/smoke-local`);
+    assert.equal(status, 200);
+  } finally {
+    await f.close();
+  }
+});
