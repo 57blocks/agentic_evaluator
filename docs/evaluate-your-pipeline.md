@@ -32,7 +32,7 @@ agenteval does not import your app. It runs a command, once per trial, in an emp
 ```python
 model = sys.argv[1]
 stage = {"search": my_pipeline.search, "summarize": my_pipeline.summarize}[os.environ["EVAL_STEP"]]
-Path("result.txt").write_text(stage(Path(".eval-input.txt").read_text(), model))
+Path("result.txt").write_text(stage(unwrap(Path(".eval-input.txt").read_text()), model))  # unwrap: see step 4
 ```
 
 | agenteval gives the wrapper | the wrapper gives back |
@@ -45,7 +45,7 @@ One wrapper covers every stage. Each model is declared once and used on every st
 
 ## 3. Write a check for each stage
 
-A check is any program. It runs in the trial's folder, where `output.txt` holds the stage's output, `input.txt` what the stage was given, and `meta.json` which step and input this was. Exit 0 passes, exit 1 fails the candidate; any other exit is counted as the check's own error.
+A check is any program. It runs in the trial's folder, next to the files the stage wrote (`result.txt` here), with `input.txt` holding what the stage was given and `meta.json` saying which step and input this was. Read the stage's files themselves: `output.txt` is there too, but it wraps every file in a ```` ```file: ```` block. Exit 0 passes, exit 1 fails the candidate; any other exit is counted as the check's own error.
 
 The sample has one check for both stages:
 
@@ -80,7 +80,7 @@ candidates:
 Two things make this work:
 
 - **Each stage has its own inputs.** The summarize step's inputs are saved search results (`inputs/bikes-passages.txt`), so it is tested on good search output whichever model searched. A weak search model cannot make a summarizer look bad.
-- **`input_from: search` runs the whole pipeline too.** After testing each stage on its own, agenteval runs search then summarize twice: once with the control model on both, once with each step's pick. Each summarizer then works from the search it was chained to.
+- **`input_from: search` runs the whole pipeline too.** After testing each stage on its own, agenteval runs search then summarize twice: once with the control model on both, once with each step's pick. Each summarizer then works from the search it was chained to. In that chain, the summarize stage's input is not the search stage's raw text: it is each file search wrote, as a ```` ```file:result.txt ```` block. `run_stage.py` unwraps it (and `check.py` unwraps `input.txt` the same way), so a stage gets the same text whether it runs on its own or in the chain. Do the same in your wrapper, or a stage that parses its input, JSON say, will pass on its own and fail end to end.
 
 The [sample's spec](../examples/tasks/pipeline/spec.yaml) has the rest: the check's declaration, the pass gates, and how each step picks (`lowest-cost`).
 
