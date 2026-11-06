@@ -19,6 +19,7 @@ import { sha256 } from "./canon/hash.js";
 import type { CostSource } from "./canon/types.js";
 import { costOf } from "./pricing.js";
 import { apiKeyEnvOf, DEFAULT_ROUTE, providerFor, type ModelEndpoint, type ProviderReply, type SamplingOptions } from "./providers/index.js";
+import { transportGate, type TransportGate } from "./transport-gate.js";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
 
@@ -145,6 +146,8 @@ export interface CompleteParams extends SamplingOptions {
   timeoutMs?: number;
   trace?: LlmTrace;
   traceContext?: Record<string, unknown>;
+  /** Outage gate to wait at; the shared one when omitted. Tests pass their own. */
+  gate?: TransportGate;
 }
 
 async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmResult> {
@@ -229,6 +232,22 @@ async function attempt(params: CompleteParams, retryIndex: number): Promise<LlmR
         ),
       );
     }
+    // A failure the provider put in a 200 body is still the provider's: an
+    // http error with its status, retried under §7 like one on the wire,
+    // never an empty completion charged to the candidate.
+    const bodyError = provider.error?.(json);
+    if (bodyError) {
+      // Such a body can still carry usage (the upstream died after it had
+      // started answering): keep it, so the retry ledger sees what was billed.
+      return fail(
+        new LlmError(`${provider.label} ${bodyError.status ?? "error"}: ${bodyError.message.slice(0, 300)}`, {
+          kind: "http",
+          httpStatus: bodyError.status,
+          ms: elapsed(),
+          usage: normaliseUsage(params.model, provider.parse(json), endpoint),
+        }),
+      );
+    }
     const reply = provider.parse(json);
     const text = reply.text;
     const usage = normaliseUsage(params.model, reply, endpoint);
@@ -281,47 +300,63 @@ export function isTransportFailure(err: unknown): boolean {
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
+/** The same error, carrying what the abandoned attempts cost. Untouched when there were none. */
+function withRetries(err: unknown, retries: number, retryCostUsd: number): unknown {
+  if (!(err instanceof LlmError) || retries === 0) return err;
+  return new LlmError(err.message, {
+    kind: err.kind,
+    httpStatus: err.httpStatus,
+    ms: err.ms,
+    usage: err.usage,
+    provider: err.provider,
+    finishReason: err.finishReason,
+    refusal: err.refusal,
+    transportRetries: retries,
+    retryCostUsd,
+  });
+}
+
 /**
  * One completion, retrying transport failures with exponential backoff. The
  * returned result carries how many retries it took and what they were billed,
  * so the ledger can keep recovery cost out of the generation line.
+ *
+ * Two kinds of retry. A call's own (at most MAX_TRANSPORT_RETRIES, a second
+ * or two apart) cover a flapping gateway. When failures arrive back to back
+ * across calls, the shared gate (src/transport-gate.ts) closes and the call
+ * waits there instead, without spending its own retries, until the network
+ * answers again or the gate gives up.
  */
 export async function complete(params: CompleteParams): Promise<LlmResult> {
+  const gate = params.gate ?? transportGate;
   let retryCostUsd = 0;
-  for (let retry = 0; ; retry++) {
+  let ownRetries = 0;
+  let retries = 0;
+  for (;;) {
+    await gate.wait();
     try {
-      const result = await attempt(params, retry);
-      return retry === 0 ? result : { ...result, transportRetries: retry, retryCostUsd };
+      const result = await attempt(params, retries);
+      gate.succeeded();
+      return retries === 0 ? result : { ...result, transportRetries: retries, retryCostUsd };
     } catch (err) {
-      const last = retry >= MAX_TRANSPORT_RETRIES;
-      if (!isTransportFailure(err) || last) {
-        if (err instanceof LlmError && retry > 0) {
-          throw new LlmError(err.message, {
-            kind: err.kind,
-            httpStatus: err.httpStatus,
-            ms: err.ms,
-            usage: err.usage,
-            provider: err.provider,
-            finishReason: err.finishReason,
-            refusal: err.refusal,
-            transportRetries: retry,
-            retryCostUsd,
-          });
-        }
-        throw err;
-      }
-      retryCostUsd += (err as LlmError).usage?.costUsd ?? 0;
-      const delayMs = RETRY_BASE_DELAY_MS * 2 ** retry;
+      if (!isTransportFailure(err)) throw withRetries(err, retries, retryCostUsd);
+      const failure = err as LlmError;
+      retryCostUsd += failure.usage?.costUsd ?? 0;
+      const outage = gate.failed();
+      if (!outage && ownRetries >= MAX_TRANSPORT_RETRIES) throw withRetries(err, retries, retryCostUsd);
+      if (!outage) ownRetries += 1;
+      retries += 1;
+      const delayMs = outage ? gate.remainingMs() : RETRY_BASE_DELAY_MS * 2 ** (ownRetries - 1);
       params.trace?.({
         type: "model.retry",
         model: params.model,
         promptSha: sha256(params.prompt),
         promptChars: params.prompt.length,
-        ms: (err as LlmError).ms,
-        error: { kind: (err as LlmError).kind, httpStatus: (err as LlmError).httpStatus, message: (err as LlmError).message },
-        context: { ...params.traceContext, transport_retry: retry + 1, delay_ms: delayMs },
+        ms: failure.ms,
+        error: { kind: failure.kind, httpStatus: failure.httpStatus, message: failure.message },
+        context: { ...params.traceContext, transport_retry: retries, delay_ms: delayMs, ...(outage ? { outage: true } : {}) },
       });
-      await sleep(delayMs);
+      if (!outage) await sleep(delayMs);
     }
   }
 }

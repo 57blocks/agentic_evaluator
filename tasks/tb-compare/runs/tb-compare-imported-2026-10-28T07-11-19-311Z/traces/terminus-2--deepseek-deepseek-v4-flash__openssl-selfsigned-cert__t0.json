@@ -1,0 +1,105 @@
+{
+  "format": "atif",
+  "turns": 4,
+  "tool_calls": [
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": 3878,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": null,
+      "failed": null
+    }
+  ],
+  "retries": null,
+  "denials": null,
+  "compactions": null,
+  "turn_tokens": [
+    {
+      "prompt": 1100,
+      "cached": 0,
+      "output": 18485,
+      "costUsd": 0.00837325
+    },
+    {
+      "prompt": 3048,
+      "cached": 1024,
+      "output": 1123,
+      "costUsd": 0.0006577500000000003
+    },
+    {
+      "prompt": 4691,
+      "cached": 2816,
+      "output": 297,
+      "costUsd": 0.0003682000000000008
+    },
+    {
+      "prompt": 4902,
+      "cached": 4608,
+      "output": 266,
+      "costUsd": 0.0003648000000000002
+    }
+  ],
+  "models": [
+    "deepseek/deepseek-v4-flash"
+  ],
+  "cost_usd": 0.009764000000000002,
+  "ended": null
+}

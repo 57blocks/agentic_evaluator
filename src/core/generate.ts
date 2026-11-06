@@ -17,6 +17,7 @@ import { endpointOf } from "../providers/index.js";
 import { activityOf, type AgentActivity, type AgentTrace } from "../canon/agent-trace.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import { fixturePath, inputIdentity } from "./fixture.js";
+import { applyTraceRules } from "./trace-check.js";
 import { killProcessesUnder } from "../proc.js";
 import { finishForCompletion } from "./exit-policy.js";
 import { priceFromSpec } from "../pricing.js";
@@ -29,6 +30,7 @@ import { CODEGEN_PRODUCER_VERSION } from "../producers/code-gen.js";
 import { sha256, trialHash } from "../canon/hash.js";
 import { classifyCompletion } from "../canon/states.js";
 import { BudgetGuard } from "../canon/budget.js";
+import type { ProviderErrorHalt } from "../canon/halt.js";
 import type { CandidateDef, CostSource, EvaluationState,
   Isolation,
 } from "../canon/types.js";
@@ -180,8 +182,8 @@ async function regradeIfChanged(
 ): Promise<Partial<RunRecord> | null> {
   const check = suite.check;
   if (!check || check.kind !== "command") return null;
-  const { commandCheckVersion, runCommandCheck } = await import("../check.js");
-  const version = await commandCheckVersion(check.argv, check.versionFiles, suite.taskRoot);
+  const { requiredCheckVersion, runCommandCheck } = await import("../check.js");
+  const version = await requiredCheckVersion(check, suite.taskRoot);
   if (reused.record.checkVersion === version) return null;
   const kept = path.join(reused.dir, "checks", `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}`);
   if (!(await fs.stat(kept).then((s) => s.isDirectory(), () => false))) return null;
@@ -189,6 +191,9 @@ async function regradeIfChanged(
   try {
     await fs.cp(kept, scratch, { recursive: true });
     const fixture = fixturePath(suite, t.inputSlug);
+    const read = await keptTrace(reused.dir, t);
+    const trace = read && "trace" in read ? read.trace : undefined;
+    const traceError = read && "error" in read ? read.error : reused.record.traceError;
     const result = await runCommandCheck({
       argv: check.argv,
       versionFiles: check.versionFiles,
@@ -198,15 +203,21 @@ async function regradeIfChanged(
       output: reused.record.text,
       input: t.inputText,
       meta: { step: suite.step, candidate: t.candidate, input: t.inputSlug, trial: t.trial, ...(fixture ? { fixture } : {}), chained: false },
+      ...(trace ? { trace } : {}),
       workDir: scratch,
     });
     await keepEvidence(scratch, t.checkWorkDir);
+    const graded = applyTraceRules(result, check.trace, {
+      declaredTrace: suite.candidateDefs?.[t.candidate]?.cli?.trace !== undefined,
+      ...(trace ? { trace } : {}),
+      ...(traceError !== undefined ? { traceError } : {}),
+    });
     return {
-      checkPassed: result.passed,
-      checkOutput: result.output,
-      checkReason: result.reason,
-      checkState: result.state,
-      checkVersion: result.version,
+      checkPassed: graded.passed,
+      checkOutput: graded.output,
+      checkReason: graded.reason,
+      checkState: graded.state,
+      checkVersion: graded.version,
     };
   } finally {
     await fs.rm(scratch, { recursive: true, force: true, maxRetries: 3, retryDelay: 500 }).catch(() => undefined);
@@ -284,15 +295,21 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
             ...(params.fixtureDir ? { fixture: params.fixtureDir } : {}),
             chained: params.seedFiles !== undefined,
           },
+          ...(result.trace ? { trace: result.trace } : {}),
           workDir,
         });
+  const graded = applyTraceRules(check, suite.check.trace, {
+    declaredTrace: def.cli?.trace !== undefined,
+    ...(result.trace ? { trace: result.trace } : {}),
+    ...(result.traceError !== undefined ? { traceError: result.traceError } : {}),
+  });
   return {
     ...out,
-    checkPassed: check.passed,
-    checkOutput: check.output,
-    checkReason: check.reason,
-    checkState: check.state,
-    checkVersion: check.version,
+    checkPassed: graded.passed,
+    checkOutput: graded.output,
+    checkReason: graded.reason,
+    checkState: graded.state,
+    checkVersion: graded.version,
   };
 }
 
@@ -329,6 +346,7 @@ async function loadReusable(
   currentRunId: string,
   ws: Workspace,
   taskRoot: string,
+  timeoutMs: number,
 ): Promise<{ record: RunRecord; from: string; dir: string } | null> {
   // Every task's runs, not just this one's: `trialHash` is content-addressed,
   // so a generation produced under another task is the same generation.
@@ -347,14 +365,17 @@ async function loadReusable(
   // A multi-step run keeps each step under runs/<run>/<step>/.
   const dirs = candidates.flatMap(({ dir }) => [dir, path.join(dir, step)]);
   for (const dir of dirs) {
-    const hit = await findTrialRow(dir, step, hash);
+    const hit = await findTrialRow(dir, step, hash, timeoutMs);
     if (!hit) {
       // The hash covers the step's producer, input and candidate, so a
       // journal line with it is this trial; the step is implied.
-      const journaled = await findJournaled(dir, hash);
+      const journaled = await findJournaled(dir, hash, timeoutMs);
       if (journaled) return { record: journaled, from: displayPath(dir), dir };
       continue;
     }
+    // A failed attempt left no output to skip the call with: what is reused
+    // is the failure itself.
+    if (hit.legacy_status !== "ok") return { record: failedRecordFromRow(hit), from: displayPath(dir), dir };
     const text = await fs
       .readFile(path.join(dir, "raw", `${safeName(hit.candidate)}__${hit.input}__t${hit.trial}.txt`), "utf-8")
       .catch(() => null);
@@ -379,7 +400,7 @@ async function journal(outDir: string, record: RunRecord): Promise<void> {
 }
 
 /** A finished trial with that hash from a run's journal (a run that did not finish), or null. */
-async function findJournaled(dir: string, hash: string): Promise<RunRecord | null> {
+async function findJournaled(dir: string, hash: string, timeoutMs: number): Promise<RunRecord | null> {
   let raw: string;
   try {
     raw = await fs.readFile(path.join(dir, JOURNAL_FILE), "utf-8");
@@ -390,7 +411,7 @@ async function findJournaled(dir: string, hash: string): Promise<RunRecord | nul
     if (line.trim() === "") continue;
     try {
       const r = JSON.parse(line) as RunRecord;
-      if (r.trialHash === hash && r.status === "ok") return r;
+      if (r.trialHash === hash && (r.status === "ok" || isCandidatesOwnFailure({ state: r.completionState, ms: r.ms, promptTokens: r.promptTokens, costUsd: r.costUsd }, timeoutMs))) return r;
     } catch {
       // A line cut short by the crash itself.
     }
@@ -398,14 +419,45 @@ async function findJournaled(dir: string, hash: string): Promise<RunRecord | nul
   return null;
 }
 
-/** The first successful trial row in this run for that step and hash, or null. */
-async function findTrialRow(dir: string, step: string, hash: string): Promise<TrialRow | null> {
+/**
+ * A failed attempt that is the candidate's own outcome, so asking again under
+ * the same rules would be a second chance, not a regrade: a refusal or a
+ * malformed answer from a model that was reached, and a timeout that had at
+ * least the time this run allows.
+ * A provider error or a cancelled call says nothing about the candidate, and
+ * a timeout under a shorter limit than today's was cut off early: those are
+ * generated again.
+ */
+export function isCandidatesOwnFailure(
+  attempt: { state: string | undefined; ms: number; promptTokens: number; costUsd: number },
+  timeoutMs: number,
+): boolean {
+  const { state, ms } = attempt;
+  // An error nobody could classify is recorded as malformed (fail closed), so
+  // a malformed attempt is the model's own only if the model was reached: a
+  // missing API key is "malformed" too, and must not stick.
+  if (state === "refusal" || state === "malformed") return attempt.promptTokens > 0 || attempt.costUsd > 0;
+  // The clock that stops a call and the one that times it are not the same
+  // tick: a 300 s timeout is recorded as 299,999 ms.
+  return state === "timeout" && ms >= timeoutMs - TIMEOUT_SLACK_MS;
+}
+
+/** How far under its limit a recorded timeout can read and still have had the whole limit. */
+const TIMEOUT_SLACK_MS = 1_000;
+
+/**
+ * The trial row in this run for that step and hash: its success, or else a
+ * failure that was the candidate's own (isCandidatesOwnFailure). A success
+ * wins over a failure in the same run. Null when there is neither.
+ */
+async function findTrialRow(dir: string, step: string, hash: string, timeoutMs: number): Promise<TrialRow | null> {
   let raw: string;
   try {
     raw = await fs.readFile(path.join(dir, "scores.jsonl"), "utf-8");
   } catch {
     return null;
   }
+  let failed: TrialRow | null = null;
   for (const line of raw.split("\n")) {
     if (line.trim() === "") continue;
     let row: TrialRow;
@@ -414,9 +466,40 @@ async function findTrialRow(dir: string, step: string, hash: string): Promise<Tr
     } catch {
       continue;
     }
-    if (row.step === step && row.trial_hash === hash && row.legacy_status === "ok") return row;
+    if (row.step !== step || row.trial_hash !== hash) continue;
+    if (row.legacy_status === "ok") return row;
+    const own = isCandidatesOwnFailure({ state: row.completion_state, ms: row.ms, promptTokens: row.tokens.prompt, costUsd: row.cost.generation }, timeoutMs);
+    failed ??= own ? row : null;
   }
-  return null;
+  return failed;
+}
+
+/** A reused failure: the state, the time and spend it took, no output and no check. */
+function failedRecordFromRow(row: TrialRow): RunRecord {
+  return {
+    candidate: row.candidate,
+    inputSlug: row.input,
+    trial: row.trial,
+    text: "",
+    promptTokens: row.tokens.prompt,
+    completionTokens: row.tokens.completion,
+    cachedTokens: row.tokens.cached ?? undefined,
+    costUsd: row.cost.generation,
+    retryCostUsd: row.cost.retry,
+    costSource: row.cost.source,
+    ms: row.ms,
+    status: "error",
+    error: row.error ?? row.completion_state,
+    modelRef: row.model_ref,
+    deploymentRef: row.deployment_ref ?? undefined,
+    trialHash: row.trial_hash,
+    completionState: row.completion_state,
+    truncated: row.truncated,
+    finishReason: row.finish_reason ?? undefined,
+    isolation: row.isolation ?? undefined,
+    agent: row.agent ?? undefined,
+    traceError: row.agent_error,
+  };
 }
 
 function recordFromRow(row: TrialRow, text: string): RunRecord {
@@ -460,25 +543,73 @@ function recordFromRow(row: TrialRow, text: string): RunRecord {
   };
 }
 
-/** The turn list, beside the row's counts: traces/<candidate>__<input>__tN.json. */
+/** Where a run keeps a trial's turn list: traces/<candidate>__<input>__tN.json. */
+function tracePath(runDir: string, t: { candidate: string; inputSlug: string; trial: number }): string {
+  return path.join(runDir, "traces", `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}.json`);
+}
+
+/** The turn list, beside the row's counts. */
 async function keepTrace(outDir: string, t: { candidate: string; inputSlug: string; trial: number }, trace: AgentTrace | undefined): Promise<void> {
   if (!trace) return;
-  const dir = path.join(outDir, "traces");
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(dir, `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}.json`), JSON.stringify(trace, null, 2), "utf-8");
+  const file = tracePath(outDir, t);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, JSON.stringify(trace, null, 2), "utf-8");
+}
+
+/**
+ * Keep a finished trial's trace and journal row. The record is already
+ * built and billed: a disk fault here is the harness's, noted beside the run
+ * the way `keepEvidence` notes a copy that failed, never turned into a
+ * candidate failure at $0.
+ */
+async function persistTrial(outDir: string, t: { candidate: string; inputSlug: string; trial: number }, record: RunRecord, trace: AgentTrace | undefined): Promise<void> {
+  try {
+    await keepTrace(outDir, t, trace);
+    await journal(outDir, record);
+  } catch (err) {
+    const why = err instanceof Error ? err.message : String(err);
+    await noteEvidenceIncomplete(outDir, `keeping evidence for ${t.candidate} on ${t.inputSlug} trial ${t.trial} failed: ${why}`);
+  }
+}
+
+/**
+ * Leave a line in `EVIDENCE_INCOMPLETE.txt` beside the run: evidence the
+ * harness could not keep, named, so the numbers stand and the gap is on
+ * record. Best effort — a disk that cannot take the evidence may not take
+ * the note either.
+ */
+export async function noteEvidenceIncomplete(outDir: string, note: string): Promise<void> {
+  await fs.appendFile(path.join(outDir, "EVIDENCE_INCOMPLETE.txt"), `${note}\n`, "utf-8").catch(() => undefined);
+}
+
+/**
+ * A reused trial's trace, read back for a regrade so the check sees the same
+ * trace.json it would have on the first run. Null when the run kept none;
+ * an error when it kept one that no longer parses, so the regrade says
+ * which it was. Either way the regrade happens, on the files alone.
+ */
+async function keptTrace(runDir: string, t: { candidate: string; inputSlug: string; trial: number }): Promise<{ trace: AgentTrace } | { error: string } | null> {
+  const file = tracePath(runDir, t);
+  const raw = await fs.readFile(file, "utf-8").catch(() => null);
+  if (raw === null) return null;
+  try {
+    return { trace: JSON.parse(raw) as AgentTrace };
+  } catch (err) {
+    return { error: `the kept trace ${path.relative(runDir, file)} could not be read: ${err instanceof Error ? err.message : String(err)}` };
+  }
 }
 
 /** A reused trial's turn list travels with it, like its check evidence does. */
 async function copyTrace(fromDir: string, outDir: string, t: { candidate: string; inputSlug: string; trial: number }): Promise<void> {
-  const name = `${safeName(t.candidate)}__${t.inputSlug}__t${t.trial}.json`;
-  const src = path.join(fromDir, "traces", name);
+  const src = tracePath(fromDir, t);
   try {
     await fs.access(src);
   } catch {
     return;
   }
-  await fs.mkdir(path.join(outDir, "traces"), { recursive: true });
-  await fs.copyFile(src, path.join(outDir, "traces", name));
+  const dest = tracePath(outDir, t);
+  await fs.mkdir(path.dirname(dest), { recursive: true });
+  await fs.copyFile(src, dest);
 }
 
 export function errorRecord(task: GenTask, err: unknown): RunRecord {
@@ -560,6 +691,8 @@ export async function runAll(params: {
   budget: BudgetGuard;
   /** Early stop, when the spec turns it on (src/core/early-stop.ts). */
   stopper?: EarlyStop;
+  /** Halt on consecutive provider errors (src/canon/halt.ts). */
+  halt?: ProviderErrorHalt;
 }): Promise<RunRecord[]> {
   const { suite, producer, promptTpl, promptTemplateSha, inputTextBySlug, outDir, limit, runId, reuse, trace, budget } = params;
   const trials = suite.trials ?? 2;
@@ -600,6 +733,7 @@ export async function runAll(params: {
   let dispatched = 0;
   let cancelled = 0;
   const finish = (record: RunRecord): RunRecord => {
+    params.halt?.record(record.completionState ?? "answered");
     const stop = params.stopper?.record(record);
     if (stop) params.emit({ type: "candidate.stopped", step: suite.step, candidate: stop.candidate, afterTrials: stop.after_trials, reason: stop.reason });
     return record;
@@ -614,11 +748,12 @@ export async function runAll(params: {
     const checkWorkDir = path.join(outDir, "checks", `${safeName(candidate)}__${inputSlug}__t${trial}`);
 
     if (reuse) {
-      const reused = await loadReusable(suite.step, task.hash, runId, params.ws, suite.taskRoot);
+      const reused = await loadReusable(suite.step, task.hash, runId, params.ws, suite.taskRoot, timeoutMs);
       if (reused) {
-        const regraded = await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir });
+        // A reused failure has no output to grade: it stays the failure it was.
+        const regraded = reused.record.status === "ok" ? await regradeIfChanged(suite, reused, { candidate, inputSlug, inputText, trial, checkWorkDir }) : null;
         await copyTrace(reused.dir, outDir, { candidate, inputSlug, trial });
-        params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
+        params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: reused.record.completionState ?? "success", reusedFrom: reused.from, ...(regraded ? { check: regraded.checkState } : {}) });
         return finish({ ...reused.record, ...regraded, candidate, inputSlug, trial, reusedFrom: reused.from });
       }
     }
@@ -636,6 +771,13 @@ export async function runAll(params: {
     // not recorded as a candidate failure — the candidate never got a turn.
     if (!budget.allows("generation")) {
       params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "skipped" });
+      return null;
+    }
+
+    // Only provider errors are coming back: the network is gone. Same
+    // accounting as the budget stop; `run --reuse` picks these up later.
+    if (params.halt && !params.halt.allows("generation")) {
+      params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "skipped", skipReason: "provider-errors" });
       return null;
     }
 
@@ -702,8 +844,7 @@ export async function runAll(params: {
         ...(g.trace ? { agent: activityOf(g.trace) } : {}),
         ...(g.traceError !== undefined ? { traceError: g.traceError } : {}),
       };
-      await keepTrace(outDir, task, g.trace);
-      await journal(outDir, record);
+      await persistTrial(outDir, task, record, g.trace);
       return finish(record);
     } catch (err) {
       if (err instanceof AdapterError) await keepTrace(outDir, task, err.partial?.trace);

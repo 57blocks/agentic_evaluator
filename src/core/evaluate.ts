@@ -7,12 +7,13 @@
  * which is the distinction this whole layer exists to preserve.
  */
 
-import { type LlmTrace } from "../llm.js";
+import { isTransportFailure, type LlmTrace } from "../llm.js";
 import { judgePair, type JudgedPair } from "../judge.js";
 import { scoreOne } from "../score.js";
 import { mapWithConcurrency } from "./generate.js";
 import type { RunEventSink } from "./events.js";
 import { BudgetGuard } from "../canon/budget.js";
+import type { ProviderErrorHalt } from "../canon/halt.js";
 import type { PairFailure, ScoredRecord, SkippedPair, TrialFailure } from "../canon/adapt.js";
 import { EvaluatorCallError, summarizeAttempts, type EvaluatorUsage } from "../canon/usage.js";
 import type { RunRecord, Suite } from "../types.js";
@@ -41,6 +42,16 @@ function usageOfError(err: unknown): EvaluatorUsage {
 }
 
 /**
+ * What a failed evaluator call tells the provider-error halt: the transport
+ * never delivered it (its last attempt was a transport failure), or the
+ * model answered and the answer was unusable.
+ */
+export function evaluatorOutcome(err: unknown): "provider_error" | "answered" {
+  const cause = err instanceof EvaluatorCallError ? err.cause : err;
+  return isTransportFailure(cause) ? "provider_error" : "answered";
+}
+
+/**
  * Pairwise judge every candidate pair, per input. A failed judge call is kept
  * as an evaluator_error (with its cost) instead of vanishing; a pair where one
  * side produced no output is recorded as not_evaluated.
@@ -53,6 +64,10 @@ export async function judgeAll(
   trace: LlmTrace,
   budget: BudgetGuard,
   emit: RunEventSink,
+  /** Once tripped, no further pair is judged (canon/halt.ts). */
+  halt?: ProviderErrorHalt,
+  /** Cancelled: pairs not yet dispatched are skipped, like a budget stop. */
+  signal?: AbortSignal,
 ): Promise<JudgeOutcome> {
   const tasks: JudgeTask[] = [];
   const skipped: SkippedPair[] = [];
@@ -75,8 +90,16 @@ export async function judgeAll(
 
   const failures: PairFailure[] = [];
   const results = await mapWithConcurrency(tasks, limit, async (task): Promise<JudgedPair | null> => {
+    if (signal?.aborted) {
+      skipped.push({ input: task.inputSlug, a: task.a, b: task.b, reason: "run cancelled before this pair was judged" });
+      return null;
+    }
     if (!budget.allows("judging")) {
       skipped.push({ input: task.inputSlug, a: task.a, b: task.b, reason: "budget limit reached before this pair was judged" });
+      return null;
+    }
+    if (halt && !halt.allows("judging")) {
+      skipped.push({ input: task.inputSlug, a: task.a, b: task.b, reason: "run halted on consecutive provider errors before this pair was judged" });
       return null;
     }
     emit({ type: "judge", step: suite.step, a: task.a, b: task.b, input: task.inputSlug, ok: true });
@@ -94,11 +117,14 @@ export async function judgeAll(
         bText: task.bText,
         trace,
       });
-      budget.add(judged.usage?.costUsd ?? 0);
+      budget.add((judged.usage?.costUsd ?? 0) + (judged.usage?.retryCostUsd ?? 0));
+      halt?.record("answered");
       return judged;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      budget.add(usageOfError(err).costUsd);
+      const failureUsage = usageOfError(err);
+      budget.add(failureUsage.costUsd + failureUsage.retryCostUsd);
+      halt?.record(evaluatorOutcome(err));
       emit({ type: "judge", step: suite.step, a: task.a, b: task.b, input: task.inputSlug, ok: false, error: message });
       failures.push({ input: task.inputSlug, a: task.a, b: task.b, message, usage: usageOfError(err) });
       return null;
@@ -113,6 +139,8 @@ export interface ScoreHooks {
   onFailure?: (failure: TrialFailure) => void;
   /** Absent when the caller renders its own progress. */
   emit?: RunEventSink;
+  /** Cancelled: outputs not yet dispatched are not scored. */
+  signal?: AbortSignal;
 }
 
 /**
@@ -130,11 +158,15 @@ export async function scoreAll(
   limit: number,
   hooks: ScoreHooks = {},
   budget?: BudgetGuard,
+  /** Once tripped, no further output is scored (canon/halt.ts). */
+  halt?: ProviderErrorHalt,
 ): Promise<void> {
   const dimensions = suite.dimensions ?? [];
   const oks = records.filter((r) => r.status === "ok" && r.text.trim());
   await mapWithConcurrency(oks, limit, async (r): Promise<void> => {
+    if (hooks.signal?.aborted) return;
     if (budget && !budget.allows("scoring")) return;
+    if (halt && !halt.allows("scoring")) return;
     hooks.emit?.({ type: "score", step: suite.step, candidate: r.candidate, input: r.inputSlug, trial: r.trial, ok: true });
     try {
       const s = await scoreOne({
@@ -157,12 +189,14 @@ export async function scoreAll(
         usage: s.usage,
       };
       budget?.add(s.usage.costUsd + s.usage.retryCostUsd);
+      halt?.record("answered");
       hooks.onScored?.(scored);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       hooks.emit?.({ type: "score", step: suite.step, candidate: r.candidate, input: r.inputSlug, trial: r.trial, ok: false, error: message });
       const failureUsage = usageOfError(err);
       budget?.add(failureUsage.costUsd + failureUsage.retryCostUsd);
+      halt?.record(evaluatorOutcome(err));
       hooks.onFailure?.({ candidate: r.candidate, input: r.inputSlug, trial: r.trial, message, usage: failureUsage });
     }
   });

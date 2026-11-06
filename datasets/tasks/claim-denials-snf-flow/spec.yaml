@@ -1,0 +1,163 @@
+# claim-denials-snf-flow — claim-denials-snf-v2 as a three-step workflow:
+# which model should run each step, and does the per-step combination beat
+# the best single model end to end?
+#
+#   extract    the claim file      → reason, dates, records verbatim
+#   decide     extract's summary   → correctable, next_action   (the rules)
+#   deadline   decide's answer     → deadline                   (date arithmetic)
+#
+# Same 300 claim files and the same key as v2.4 (gen/generate.mjs imports
+# v2's generator and stops if a file or key differs). Each step is evaluated
+# on its own inputs (the correct previous answer: inputs/<id>-decide.txt,
+# <id>-deadline.txt), then the chain runs twice from the claim files: opus-5.5
+# on every step, and each step's pick. A chained case fails at its first
+# failed step. Across the steps the checks grade v2's four fields, but the
+# chain is not v2's single call: decide sees extract's summary, not the claim.
+# The deadline step also has a candidate that is not a model (deadline-rules).
+#
+# Why these steps: in the v2.3 run every model got root_cause right (0/2400
+# wrong), next_action split models on the reopening rule, and deadline was
+# the most missed field for every model but opus-5.5.
+#
+#   node datasets/tasks/claim-denials-snf-flow/gen/generate.mjs        # rebuild
+#   agenteval check-task datasets/tasks/claim-denials-snf-flow          # free
+#   agenteval run datasets/tasks/claim-denials-snf-flow --yes --html    # billed
+
+protocol_version: "0.3"
+run_name: claim-denials-snf-flow
+description: "Which model should run each step of triaging a denied Medicare skilled-nursing claim, and does the per-step combination beat the best single model end to end? claim-denials-snf-v2's 300 claims in three steps: extract (the contractor's reason, the dates, the records), decide (correctable, next action, under rules the model must know) and deadline (the last day for that action), plus a non-model deadline calculator. The chain is compared with opus-5.5 on every step."
+budget_usd: 250
+
+workflow:
+  # The best single model on claim-denials-snf-v2 (297/300 on v2.3): the arm
+  # the per-step combination has to beat, end to end.
+  control_candidate: opus-5.5
+  steps:
+    - id: extract
+      version: "1"
+      description: "Read the claim file: the contractor's reason, the claim's dates, and the facility's records copied verbatim."
+      producer: prompt
+      prompt_file: prompts/extract.md
+      test_set:
+        id: claim-denials-snf-flow-extract
+        labels_file: checks/manifest.json
+        inputs: [cd2-001, cd2-002, cd2-003, cd2-004, cd2-005, cd2-006, cd2-007, cd2-008, cd2-009, cd2-010, cd2-011, cd2-012, cd2-013, cd2-014, cd2-015, cd2-016, cd2-017, cd2-018, cd2-019, cd2-020, cd2-021, cd2-022, cd2-023, cd2-024, cd2-025, cd2-026, cd2-027, cd2-028, cd2-029, cd2-030, cd2-031, cd2-032, cd2-033, cd2-034, cd2-035, cd2-036, cd2-037, cd2-038, cd2-039, cd2-040, cd2-041, cd2-042, cd2-043, cd2-044, cd2-045, cd2-046, cd2-047, cd2-048, cd2-049, cd2-050, cd2-051, cd2-052, cd2-053, cd2-054, cd2-055, cd2-056, cd2-057, cd2-058, cd2-059, cd2-060, cd2-061, cd2-062, cd2-063, cd2-064, cd2-065, cd2-066, cd2-067, cd2-068, cd2-069, cd2-070, cd2-071, cd2-072, cd2-073, cd2-074, cd2-075, cd2-076, cd2-077, cd2-078, cd2-079, cd2-080, cd2-081, cd2-082, cd2-083, cd2-084, cd2-085, cd2-086, cd2-087, cd2-088, cd2-089, cd2-090, cd2-091, cd2-092, cd2-093, cd2-094, cd2-095, cd2-096, cd2-097, cd2-098, cd2-099, cd2-100, cd2-101, cd2-102, cd2-103, cd2-104, cd2-105, cd2-106, cd2-107, cd2-108, cd2-109, cd2-110, cd2-111, cd2-112, cd2-113, cd2-114, cd2-115, cd2-116, cd2-117, cd2-118, cd2-119, cd2-120, cd2-121, cd2-122, cd2-123, cd2-124, cd2-125, cd2-126, cd2-127, cd2-128, cd2-129, cd2-130, cd2-131, cd2-132, cd2-133, cd2-134, cd2-135, cd2-136, cd2-137, cd2-138, cd2-139, cd2-140, cd2-141, cd2-142, cd2-143, cd2-144, cd2-145, cd2-146, cd2-147, cd2-148, cd2-149, cd2-150, cd2-151, cd2-152, cd2-153, cd2-154, cd2-155, cd2-156, cd2-157, cd2-158, cd2-159, cd2-160, cd2-161, cd2-162, cd2-163, cd2-164, cd2-165, cd2-166, cd2-167, cd2-168, cd2-169, cd2-170, cd2-171, cd2-172, cd2-173, cd2-174, cd2-175, cd2-176, cd2-177, cd2-178, cd2-179, cd2-180, cd2-181, cd2-182, cd2-183, cd2-184, cd2-185, cd2-186, cd2-187, cd2-188, cd2-189, cd2-190, cd2-191, cd2-192, cd2-193, cd2-194, cd2-195, cd2-196, cd2-197, cd2-198, cd2-199, cd2-200, cd2-201, cd2-202, cd2-203, cd2-204, cd2-205, cd2-206, cd2-207, cd2-208, cd2-209, cd2-210, cd2-211, cd2-212, cd2-213, cd2-214, cd2-215, cd2-216, cd2-217, cd2-218, cd2-219, cd2-220, cd2-221, cd2-222, cd2-223, cd2-224, cd2-225, cd2-226, cd2-227, cd2-228, cd2-229, cd2-230, cd2-231, cd2-232, cd2-233, cd2-234, cd2-235, cd2-236, cd2-237, cd2-238, cd2-239, cd2-240, cd2-241, cd2-242, cd2-243, cd2-244, cd2-245, cd2-246, cd2-247, cd2-248, cd2-249, cd2-250, cd2-251, cd2-252, cd2-253, cd2-254, cd2-255, cd2-256, cd2-257, cd2-258, cd2-259, cd2-260, cd2-261, cd2-262, cd2-263, cd2-264, cd2-265, cd2-266, cd2-267, cd2-268, cd2-269, cd2-270, cd2-271, cd2-272, cd2-273, cd2-274, cd2-275, cd2-276, cd2-277, cd2-278, cd2-279, cd2-280, cd2-281, cd2-282, cd2-283, cd2-284, cd2-285, cd2-286, cd2-287, cd2-288, cd2-289, cd2-290, cd2-291, cd2-292, cd2-293, cd2-294, cd2-295, cd2-296, cd2-297, cd2-298, cd2-299, cd2-300]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash, opus-5.5, gpt-5.6-sol, qwen3.8-max, deepseek-v4-pro]
+      required_checks: [flow-check]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+    - id: decide
+      version: "1"
+      description: "From extract's summary: can the denial be reversed, and what should the facility do next (correctable, next_action)?"
+      producer: prompt
+      prompt_file: prompts/decide.md
+      input_from: extract
+      test_set:
+        id: claim-denials-snf-flow-decide
+        labels_file: checks/manifest.json
+        inputs: [cd2-001-decide, cd2-002-decide, cd2-003-decide, cd2-004-decide, cd2-005-decide, cd2-006-decide, cd2-007-decide, cd2-008-decide, cd2-009-decide, cd2-010-decide, cd2-011-decide, cd2-012-decide, cd2-013-decide, cd2-014-decide, cd2-015-decide, cd2-016-decide, cd2-017-decide, cd2-018-decide, cd2-019-decide, cd2-020-decide, cd2-021-decide, cd2-022-decide, cd2-023-decide, cd2-024-decide, cd2-025-decide, cd2-026-decide, cd2-027-decide, cd2-028-decide, cd2-029-decide, cd2-030-decide, cd2-031-decide, cd2-032-decide, cd2-033-decide, cd2-034-decide, cd2-035-decide, cd2-036-decide, cd2-037-decide, cd2-038-decide, cd2-039-decide, cd2-040-decide, cd2-041-decide, cd2-042-decide, cd2-043-decide, cd2-044-decide, cd2-045-decide, cd2-046-decide, cd2-047-decide, cd2-048-decide, cd2-049-decide, cd2-050-decide, cd2-051-decide, cd2-052-decide, cd2-053-decide, cd2-054-decide, cd2-055-decide, cd2-056-decide, cd2-057-decide, cd2-058-decide, cd2-059-decide, cd2-060-decide, cd2-061-decide, cd2-062-decide, cd2-063-decide, cd2-064-decide, cd2-065-decide, cd2-066-decide, cd2-067-decide, cd2-068-decide, cd2-069-decide, cd2-070-decide, cd2-071-decide, cd2-072-decide, cd2-073-decide, cd2-074-decide, cd2-075-decide, cd2-076-decide, cd2-077-decide, cd2-078-decide, cd2-079-decide, cd2-080-decide, cd2-081-decide, cd2-082-decide, cd2-083-decide, cd2-084-decide, cd2-085-decide, cd2-086-decide, cd2-087-decide, cd2-088-decide, cd2-089-decide, cd2-090-decide, cd2-091-decide, cd2-092-decide, cd2-093-decide, cd2-094-decide, cd2-095-decide, cd2-096-decide, cd2-097-decide, cd2-098-decide, cd2-099-decide, cd2-100-decide, cd2-101-decide, cd2-102-decide, cd2-103-decide, cd2-104-decide, cd2-105-decide, cd2-106-decide, cd2-107-decide, cd2-108-decide, cd2-109-decide, cd2-110-decide, cd2-111-decide, cd2-112-decide, cd2-113-decide, cd2-114-decide, cd2-115-decide, cd2-116-decide, cd2-117-decide, cd2-118-decide, cd2-119-decide, cd2-120-decide, cd2-121-decide, cd2-122-decide, cd2-123-decide, cd2-124-decide, cd2-125-decide, cd2-126-decide, cd2-127-decide, cd2-128-decide, cd2-129-decide, cd2-130-decide, cd2-131-decide, cd2-132-decide, cd2-133-decide, cd2-134-decide, cd2-135-decide, cd2-136-decide, cd2-137-decide, cd2-138-decide, cd2-139-decide, cd2-140-decide, cd2-141-decide, cd2-142-decide, cd2-143-decide, cd2-144-decide, cd2-145-decide, cd2-146-decide, cd2-147-decide, cd2-148-decide, cd2-149-decide, cd2-150-decide, cd2-151-decide, cd2-152-decide, cd2-153-decide, cd2-154-decide, cd2-155-decide, cd2-156-decide, cd2-157-decide, cd2-158-decide, cd2-159-decide, cd2-160-decide, cd2-161-decide, cd2-162-decide, cd2-163-decide, cd2-164-decide, cd2-165-decide, cd2-166-decide, cd2-167-decide, cd2-168-decide, cd2-169-decide, cd2-170-decide, cd2-171-decide, cd2-172-decide, cd2-173-decide, cd2-174-decide, cd2-175-decide, cd2-176-decide, cd2-177-decide, cd2-178-decide, cd2-179-decide, cd2-180-decide, cd2-181-decide, cd2-182-decide, cd2-183-decide, cd2-184-decide, cd2-185-decide, cd2-186-decide, cd2-187-decide, cd2-188-decide, cd2-189-decide, cd2-190-decide, cd2-191-decide, cd2-192-decide, cd2-193-decide, cd2-194-decide, cd2-195-decide, cd2-196-decide, cd2-197-decide, cd2-198-decide, cd2-199-decide, cd2-200-decide, cd2-201-decide, cd2-202-decide, cd2-203-decide, cd2-204-decide, cd2-205-decide, cd2-206-decide, cd2-207-decide, cd2-208-decide, cd2-209-decide, cd2-210-decide, cd2-211-decide, cd2-212-decide, cd2-213-decide, cd2-214-decide, cd2-215-decide, cd2-216-decide, cd2-217-decide, cd2-218-decide, cd2-219-decide, cd2-220-decide, cd2-221-decide, cd2-222-decide, cd2-223-decide, cd2-224-decide, cd2-225-decide, cd2-226-decide, cd2-227-decide, cd2-228-decide, cd2-229-decide, cd2-230-decide, cd2-231-decide, cd2-232-decide, cd2-233-decide, cd2-234-decide, cd2-235-decide, cd2-236-decide, cd2-237-decide, cd2-238-decide, cd2-239-decide, cd2-240-decide, cd2-241-decide, cd2-242-decide, cd2-243-decide, cd2-244-decide, cd2-245-decide, cd2-246-decide, cd2-247-decide, cd2-248-decide, cd2-249-decide, cd2-250-decide, cd2-251-decide, cd2-252-decide, cd2-253-decide, cd2-254-decide, cd2-255-decide, cd2-256-decide, cd2-257-decide, cd2-258-decide, cd2-259-decide, cd2-260-decide, cd2-261-decide, cd2-262-decide, cd2-263-decide, cd2-264-decide, cd2-265-decide, cd2-266-decide, cd2-267-decide, cd2-268-decide, cd2-269-decide, cd2-270-decide, cd2-271-decide, cd2-272-decide, cd2-273-decide, cd2-274-decide, cd2-275-decide, cd2-276-decide, cd2-277-decide, cd2-278-decide, cd2-279-decide, cd2-280-decide, cd2-281-decide, cd2-282-decide, cd2-283-decide, cd2-284-decide, cd2-285-decide, cd2-286-decide, cd2-287-decide, cd2-288-decide, cd2-289-decide, cd2-290-decide, cd2-291-decide, cd2-292-decide, cd2-293-decide, cd2-294-decide, cd2-295-decide, cd2-296-decide, cd2-297-decide, cd2-298-decide, cd2-299-decide, cd2-300-decide]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash, opus-5.5, gpt-5.6-sol, qwen3.8-max, deepseek-v4-pro]
+      required_checks: [flow-check]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+    - id: deadline
+      version: "1"
+      description: "From decide's answer: the last day to take next_action."
+      producer: prompt
+      prompt_file: prompts/deadline.md
+      input_from: decide
+      test_set:
+        id: claim-denials-snf-flow-deadline
+        labels_file: checks/manifest.json
+        inputs: [cd2-001-deadline, cd2-002-deadline, cd2-003-deadline, cd2-004-deadline, cd2-005-deadline, cd2-006-deadline, cd2-007-deadline, cd2-008-deadline, cd2-009-deadline, cd2-010-deadline, cd2-011-deadline, cd2-012-deadline, cd2-013-deadline, cd2-014-deadline, cd2-015-deadline, cd2-016-deadline, cd2-017-deadline, cd2-018-deadline, cd2-019-deadline, cd2-020-deadline, cd2-021-deadline, cd2-022-deadline, cd2-023-deadline, cd2-024-deadline, cd2-025-deadline, cd2-026-deadline, cd2-027-deadline, cd2-028-deadline, cd2-029-deadline, cd2-030-deadline, cd2-031-deadline, cd2-032-deadline, cd2-033-deadline, cd2-034-deadline, cd2-035-deadline, cd2-036-deadline, cd2-037-deadline, cd2-038-deadline, cd2-039-deadline, cd2-040-deadline, cd2-041-deadline, cd2-042-deadline, cd2-043-deadline, cd2-044-deadline, cd2-045-deadline, cd2-046-deadline, cd2-047-deadline, cd2-048-deadline, cd2-049-deadline, cd2-050-deadline, cd2-051-deadline, cd2-052-deadline, cd2-053-deadline, cd2-054-deadline, cd2-055-deadline, cd2-056-deadline, cd2-057-deadline, cd2-058-deadline, cd2-059-deadline, cd2-060-deadline, cd2-061-deadline, cd2-062-deadline, cd2-063-deadline, cd2-064-deadline, cd2-065-deadline, cd2-066-deadline, cd2-067-deadline, cd2-068-deadline, cd2-069-deadline, cd2-070-deadline, cd2-071-deadline, cd2-072-deadline, cd2-073-deadline, cd2-074-deadline, cd2-075-deadline, cd2-076-deadline, cd2-077-deadline, cd2-078-deadline, cd2-079-deadline, cd2-080-deadline, cd2-081-deadline, cd2-082-deadline, cd2-083-deadline, cd2-084-deadline, cd2-085-deadline, cd2-086-deadline, cd2-087-deadline, cd2-088-deadline, cd2-089-deadline, cd2-090-deadline, cd2-091-deadline, cd2-092-deadline, cd2-093-deadline, cd2-094-deadline, cd2-095-deadline, cd2-096-deadline, cd2-097-deadline, cd2-098-deadline, cd2-099-deadline, cd2-100-deadline, cd2-101-deadline, cd2-102-deadline, cd2-103-deadline, cd2-104-deadline, cd2-105-deadline, cd2-106-deadline, cd2-107-deadline, cd2-108-deadline, cd2-109-deadline, cd2-110-deadline, cd2-111-deadline, cd2-112-deadline, cd2-113-deadline, cd2-114-deadline, cd2-115-deadline, cd2-116-deadline, cd2-117-deadline, cd2-118-deadline, cd2-119-deadline, cd2-120-deadline, cd2-121-deadline, cd2-122-deadline, cd2-123-deadline, cd2-124-deadline, cd2-125-deadline, cd2-126-deadline, cd2-127-deadline, cd2-128-deadline, cd2-129-deadline, cd2-130-deadline, cd2-131-deadline, cd2-132-deadline, cd2-133-deadline, cd2-134-deadline, cd2-135-deadline, cd2-136-deadline, cd2-137-deadline, cd2-138-deadline, cd2-139-deadline, cd2-140-deadline, cd2-141-deadline, cd2-142-deadline, cd2-143-deadline, cd2-144-deadline, cd2-145-deadline, cd2-146-deadline, cd2-147-deadline, cd2-148-deadline, cd2-149-deadline, cd2-150-deadline, cd2-151-deadline, cd2-152-deadline, cd2-153-deadline, cd2-154-deadline, cd2-155-deadline, cd2-156-deadline, cd2-157-deadline, cd2-158-deadline, cd2-159-deadline, cd2-160-deadline, cd2-161-deadline, cd2-162-deadline, cd2-163-deadline, cd2-164-deadline, cd2-165-deadline, cd2-166-deadline, cd2-167-deadline, cd2-168-deadline, cd2-169-deadline, cd2-170-deadline, cd2-171-deadline, cd2-172-deadline, cd2-173-deadline, cd2-174-deadline, cd2-175-deadline, cd2-176-deadline, cd2-177-deadline, cd2-178-deadline, cd2-179-deadline, cd2-180-deadline, cd2-181-deadline, cd2-182-deadline, cd2-183-deadline, cd2-184-deadline, cd2-185-deadline, cd2-186-deadline, cd2-187-deadline, cd2-188-deadline, cd2-189-deadline, cd2-190-deadline, cd2-191-deadline, cd2-192-deadline, cd2-193-deadline, cd2-194-deadline, cd2-195-deadline, cd2-196-deadline, cd2-197-deadline, cd2-198-deadline, cd2-199-deadline, cd2-200-deadline, cd2-201-deadline, cd2-202-deadline, cd2-203-deadline, cd2-204-deadline, cd2-205-deadline, cd2-206-deadline, cd2-207-deadline, cd2-208-deadline, cd2-209-deadline, cd2-210-deadline, cd2-211-deadline, cd2-212-deadline, cd2-213-deadline, cd2-214-deadline, cd2-215-deadline, cd2-216-deadline, cd2-217-deadline, cd2-218-deadline, cd2-219-deadline, cd2-220-deadline, cd2-221-deadline, cd2-222-deadline, cd2-223-deadline, cd2-224-deadline, cd2-225-deadline, cd2-226-deadline, cd2-227-deadline, cd2-228-deadline, cd2-229-deadline, cd2-230-deadline, cd2-231-deadline, cd2-232-deadline, cd2-233-deadline, cd2-234-deadline, cd2-235-deadline, cd2-236-deadline, cd2-237-deadline, cd2-238-deadline, cd2-239-deadline, cd2-240-deadline, cd2-241-deadline, cd2-242-deadline, cd2-243-deadline, cd2-244-deadline, cd2-245-deadline, cd2-246-deadline, cd2-247-deadline, cd2-248-deadline, cd2-249-deadline, cd2-250-deadline, cd2-251-deadline, cd2-252-deadline, cd2-253-deadline, cd2-254-deadline, cd2-255-deadline, cd2-256-deadline, cd2-257-deadline, cd2-258-deadline, cd2-259-deadline, cd2-260-deadline, cd2-261-deadline, cd2-262-deadline, cd2-263-deadline, cd2-264-deadline, cd2-265-deadline, cd2-266-deadline, cd2-267-deadline, cd2-268-deadline, cd2-269-deadline, cd2-270-deadline, cd2-271-deadline, cd2-272-deadline, cd2-273-deadline, cd2-274-deadline, cd2-275-deadline, cd2-276-deadline, cd2-277-deadline, cd2-278-deadline, cd2-279-deadline, cd2-280-deadline, cd2-281-deadline, cd2-282-deadline, cd2-283-deadline, cd2-284-deadline, cd2-285-deadline, cd2-286-deadline, cd2-287-deadline, cd2-288-deadline, cd2-289-deadline, cd2-290-deadline, cd2-291-deadline, cd2-292-deadline, cd2-293-deadline, cd2-294-deadline, cd2-295-deadline, cd2-296-deadline, cd2-297-deadline, cd2-298-deadline, cd2-299-deadline, cd2-300-deadline]
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash, opus-5.5, gpt-5.6-sol, qwen3.8-max, deepseek-v4-pro, deadline-rules]
+      required_checks: [flow-check]
+      judged_dimensions: []
+      success_criteria:
+        mandatory_checks: all
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: opus-5.5
+    model: anthropic/claude-opus-5.5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: gpt-5.6-sol
+    model: openai/gpt-5.6-sol
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: qwen3.8-max
+    model: qwen/qwen3.8-max-0902
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro-0813
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  # Not a model: RULES.md's deadline rules as date arithmetic, on the
+  # deadline step only. Is an LLM needed once next_action is decided?
+  - id: deadline-rules
+    adapter: agent-cli
+    cli:
+      argv: [node, agents/deadline-rules.mjs]
+      reports_usage: true
+      version_files: [agents/deadline-rules.mjs]
+
+evaluators:
+  required_checks:
+    flow-check:
+      kind: command
+      description: "Each step hands on what the next needs, matching the key computed from RULES.md: extract the reason, the dates and the records verbatim; decide correctable and next_action; deadline the last day the rules allow."
+      argv: ["node", "checks/flow-check.mjs"]
+      version_files: [checks/flow-check.mjs, checks/manifest.json]
+      timeout_seconds: 30
+  judge:
+    # Required by the schema, never called: no method is declared. The
+    # checks decide every step; action_note is not asked for.
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/none.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  default_temperature: 0

@@ -1,0 +1,20 @@
+{
+  "root_cause": "benefit_limit_exhausted",
+  "statement_from": "2025-03-05",
+  "statement_through": "2025-04-02",
+  "received_date": "2025-04-10",
+  "remittance_date": "2025-04-22",
+  "paid_through": "2025-03-24",
+  "qualifying_stay": {
+    "admit_order": "2025-03-02",
+    "discharge": "2025-03-05"
+  },
+  "records": [
+    "Prior SNF stay at this facility: 2024-12-01 to 2025-02-18 (Medicare days used in that benefit period: 80).",
+    "Beneficiary at home 2025-02-19 to 2025-03-01.",
+    "Hospital inpatient 2025-03-02 to 2025-03-05; admitted here 2025-03-05.",
+    "Other coverage on file: none (no Medigap, no Medicaid)."
+  ],
+  "correctable": "no",
+  "next_action": "bill_patient"
+}

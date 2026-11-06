@@ -5,7 +5,8 @@
  * Reads `output.txt` (the candidate's JSON) and `meta.json` (which input)
  * from the work dir, and the answer key from references/<input>.txt. Graded
  * exactly: root_cause, correctable, next_action, deadline (null when the key
- * says null). Not graded here: action_note, which is the judge's.
+ * says null; any date in the key's deadline_also_accepted passes too, see R7).
+ * Not graded here: action_note, which is the judge's.
  *
  * Exit 0 = pass, 1 = fail, 3 = evaluator error (never blamed on the candidate).
  */
@@ -69,7 +70,8 @@ if (answer === null) {
   process.exit(1);
 }
 
-const wrong = FIELDS.filter((f) => norm(answer[f]) !== norm(expected[f]));
+const accepted = (f) => [expected[f], ...(f === "deadline" ? expected.deadline_also_accepted ?? [] : [])].map(norm);
+const wrong = FIELDS.filter((f) => !accepted(f).includes(norm(answer[f])));
 if (wrong.length > 0) {
   const detail = wrong.map((f) => `${f}: got ${show(answer[f])}, want ${show(expected[f])}`);
   say(`${label}${FIELDS.length - wrong.length}/${FIELDS.length} fields right | ${detail.join(" | ")}`, detail[0]);

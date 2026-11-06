@@ -48,15 +48,18 @@ test("a spec that wants network access says so", () => {
 test("only the env keys a spec names cross into the container", () => {
   process.env.AE_ISOLATION_FIXTURE = "from-host";
   try {
-    const args = containerEnv({ AE_ISOLATION_FIXTURE: "", LITERAL: "value", ABSENT_ON_HOST: "" });
+    const { args, env } = containerEnv({ AE_ISOLATION_FIXTURE: "", LITERAL: "value", ABSENT_ON_HOST: "" });
 
     // An empty value means "pass the host's through" — the spec still had to
     // name the key, so every secret the candidate sees is written down.
-    assert.ok(args.includes("AE_ISOLATION_FIXTURE=from-host"));
-    assert.ok(args.includes("LITERAL=value"));
+    assert.deepEqual(args, ["-e", "AE_ISOLATION_FIXTURE", "-e", "LITERAL"]);
+    // The values travel in the docker client's environment, never in its
+    // argv, where `ps` would show every secret for the length of the trial.
+    assert.equal(env.AE_ISOLATION_FIXTURE, "from-host");
+    assert.equal(env.LITERAL, "value");
     // A named key the host lacks is dropped, not passed as "": an SDK reads
     // an empty string as configured and fails later, further from the cause.
-    assert.ok(!args.some((a) => a.startsWith("ABSENT_ON_HOST")));
+    assert.ok(!("ABSENT_ON_HOST" in env));
   } finally {
     delete process.env.AE_ISOLATION_FIXTURE;
   }

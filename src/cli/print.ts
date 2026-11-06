@@ -50,6 +50,8 @@ export function formatEvent(e: RunEvent): string[] {
       if (e.reusedFrom) return [`  reuse  ${who}  ← ${e.reusedFrom}`];
       // One line says a candidate was stopped (candidate.stopped), not one per trial.
       if (e.state === "skipped" && e.skipReason === "early-stop") return [];
+      // One line says the run was halted (run.halted), not one per trial.
+      if (e.state === "skipped" && e.skipReason === "provider-errors") return [];
       if (e.state === "skipped") return [`  skip   ${who} — budget limit reached`];
       if (e.error) return [`  ${e.state.padEnd(8)} ${who}: ${e.error}`];
       const cost = e.costUsd === undefined ? "" : `, ${usd(e.costUsd)} ${e.costSource ?? ""}`;
@@ -75,6 +77,16 @@ export function formatEvent(e: RunEvent): string[] {
       ];
     case "candidate.stopped":
       return [`  stop   ${e.candidate} after ${e.afterTrials} trial(s): ${e.reason}; its remaining trials are not run (early stop)`];
+    case "transport.paused":
+      return [`  pause  ${e.consecutive} transport failures in a row — waiting ${Math.round(e.delayMs / 1000)}s before the next probe (${Math.round(e.pausedMs / 1000)}s waited in all)`];
+    case "transport.resumed":
+      return [`  resume network is back after ${Math.round(e.pausedMs / 1000)}s of waiting`];
+    case "transport.gave_up":
+      return [`⚠ network still down after ${Math.round(e.pausedMs / 1000)}s of waiting (${e.consecutive} failures in a row) — calls now fail as provider errors`];
+    case "run.halted":
+      return [
+        `⚠ halted ${e.step} after ${e.consecutive} consecutive provider errors — skipped ${e.skipped.generation} generation(s), ${e.skipped.judging} judgement(s), ${e.skipped.scoring} scoring call(s); this run is partial (see GAPS.md); fix the network and run --reuse`,
+      ];
     case "integrity.gaps":
       return [
         `⚠ ${e.gaps} wall-clock gap(s) > ${e.thresholdMs / 60000} min in the trace — host suspended? durations unreliable (see GAPS.md)`,

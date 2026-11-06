@@ -9,6 +9,8 @@ import fs from "node:fs/promises";
 import { renderArtifacts } from "../adapters/deliverable.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import type { BudgetGuard } from "../canon/budget.js";
+import type { ProviderErrorHalt } from "../canon/halt.js";
+import { evaluatorOutcome } from "./evaluate.js";
 import { matchesShow } from "../canon/show.js";
 import { judgePair } from "../judge.js";
 import type { LlmTrace } from "../llm.js";
@@ -54,12 +56,14 @@ export async function judgeDeliveries(params: {
   control: Deliveries;
   proposed: Deliveries;
   budget?: BudgetGuard;
+  /** The run's provider-error halt (canon/halt.ts): once tripped, no case is judged. */
+  halt?: ProviderErrorHalt;
   trace?: LlmTrace;
   /** The judge call; tests substitute one that does not bill. */
   judge?: typeof judgePair;
 }): Promise<E2eJudgement> {
   const judge = params.judge ?? judgePair;
-  const { root, config, control, proposed, budget } = params;
+  const { root, config, control, proposed, budget, halt } = params;
   const rubric = await fs.readFile(await resolveTaskAsset(root.taskRoot, config.rubricFile), "utf-8");
   const out: E2eJudgement = {
     model: root.judge,
@@ -79,6 +83,10 @@ export async function judgeDeliveries(params: {
       out.not_judged.push({ input, trial, reason: "budget limit reached" });
       continue;
     }
+    if (halt && !halt.allows("judging")) {
+      out.not_judged.push({ input, trial, reason: "run halted on consecutive provider errors" });
+      continue;
+    }
     try {
       const judged = await judge({
         judgeModel: root.judge,
@@ -95,6 +103,7 @@ export async function judgeDeliveries(params: {
         traceContext: { phase: "e2e-judge", input, trial },
       });
       budget?.add(judged.usage.costUsd + judged.usage.retryCostUsd);
+      halt?.record("answered");
       out.cost_usd += judged.usage.costUsd + judged.usage.retryCostUsd;
       const winner = side(judged.overall.resolved);
       out.wins[winner] += 1;
@@ -106,6 +115,7 @@ export async function judgeDeliveries(params: {
         dimensions: Object.fromEntries(Object.entries(judged.dimensions).map(([d, v]) => [d, side(v.resolved)])),
       });
     } catch (err) {
+      halt?.record(evaluatorOutcome(err));
       out.not_judged.push({ input, trial, reason: err instanceof Error ? err.message : String(err) });
     }
   }

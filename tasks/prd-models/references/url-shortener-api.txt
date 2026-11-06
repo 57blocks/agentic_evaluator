@@ -1,0 +1,23 @@
+# PRD: URL shortener API
+
+## Problem and goal
+Turn long URLs into short codes over an HTTP API.
+
+## User stories
+- As an API client, I want to POST a long URL and get a short code, so that I can share a short link.
+
+## Requirements
+- PRD-1: POST a long URL returns a short code.
+  - Acceptance: a valid URL returns a code; an invalid URL returns 400.
+- PRD-2: GET /<code> redirects to the original URL.
+  - Acceptance: a known code returns a redirect to the stored URL; an unknown code returns 404.
+- PRD-3: The same long URL returns the same code.
+  - Acceptance: posting the same URL twice returns the same code.
+- PRD-4: Codes never expire.
+  - Acceptance: a code still redirects regardless of age.
+
+## Out of scope
+- Any user interface, accounts and analytics.
+
+## Open questions / assumptions
+- Redirect status (301 vs 302) is not specified; assumed 301.

@@ -1,3 +1,5 @@
-# Review workbooks hold every answer key, holdout included: share them, never commit them.
-*.xlsx
+# A freshly built review workbook is shared with the reviewers, not committed.
+# A finished review goes in a dated folder (2026-10-22/) with its REVIEW.md,
+# reviewer names removed: every key it holds is already in tasks/*/references/.
+/*.xlsx
 __pycache__/

@@ -23,10 +23,14 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { resolveTaskAssetSync } from "./paths.js";
+import { resolveTaskAsset, resolveTaskAssetSync } from "./paths.js";
 import { looksLikePath } from "./script-path.js";
+import { resolveUnder } from "./work-path.js";
 import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
+import type { AgentTrace } from "./canon/agent-trace.js";
+import { hasTraceRules, type TraceRules } from "./canon/trace-rules.js";
+import type { CheckConfig } from "./types.js";
 
 /** Truncate captured compiler output so records / reports stay small. */
 const MAX_OUTPUT_CHARS = 8_000;
@@ -84,6 +88,78 @@ export async function checkVersion(scaffoldDir: string): Promise<string> {
   return `tsc-${ts}+scaffold-${short(sc)}`;
 }
 
+/**
+ * A check's version as the manifest and `--reuse` see it: the kind's own
+ * version, plus the trace rules when it has any, so editing a rule is a
+ * changed check (regraded on reuse, visible in the evidence) exactly like
+ * editing the script is.
+ */
+export async function requiredCheckVersion(check: CheckConfig, taskRoot: string): Promise<string> {
+  const base =
+    check.kind === "tsc"
+      ? await checkVersion(await resolveTaskAsset(taskRoot, check.scaffoldDir))
+      : await commandCheckVersion(check.argv, check.versionFiles, taskRoot);
+  return withTraceRules(base, check.trace);
+}
+
+/** `<version>+trace-<sha8 of the rules>`; unchanged when there are none. */
+export function withTraceRules(version: string, rules: TraceRules | undefined): string {
+  return hasTraceRules(rules) ? `${version}+trace-${short(sha256(canonicalJson(rules)))}` : version;
+}
+
+/** Keys sorted at every level, so the same rules written in another order hash alike. */
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    const o = value as Record<string, unknown>;
+    // An absent key and an undefined one are the same rule, as JSON.stringify would have it.
+    const keys = Object.keys(o).filter((k) => o[k] !== undefined).sort();
+    return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalJson(o[k])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+/**
+ * The candidate's files, each resolved inside `workDir`; or the check's own
+ * verdict when one of them would land outside it. That is the candidate's
+ * doing — a deliverable that names `../../.zshrc` is not acceptable output —
+ * so it fails the check rather than erroring the evaluator, and nothing is
+ * written before every path has been looked at.
+ */
+function placeFiles(
+  workDir: string,
+  files: readonly CheckFile[],
+  version: string,
+): { placed: Array<{ dest: string; content: string }> } | { failed: CheckResult } {
+  const placed: Array<{ dest: string; content: string }> = [];
+  for (const f of files) {
+    const dest = resolveUnder(workDir, f.path);
+    if (dest === null) {
+      return {
+        failed: {
+          state: "fail",
+          passed: false,
+          exitCode: -1,
+          output: `candidate file path escapes the work dir: ${f.path}`,
+          version,
+          reason: "file path escapes the work dir",
+        },
+      };
+    }
+    placed.push({ dest, content: f.content });
+  }
+  return { placed };
+}
+
+async function writePlaced(placed: ReadonlyArray<{ dest: string; content: string }>): Promise<void> {
+  await Promise.all(
+    placed.map(async (f) => {
+      await fs.mkdir(path.dirname(f.dest), { recursive: true });
+      await fs.writeFile(f.dest, f.content, "utf-8");
+    }),
+  );
+}
+
 /** Run `tsc --noEmit` on `files`, using the scaffold's tsconfig. Never throws. */
 export async function runCheck(params: {
   files: readonly CheckFile[];
@@ -106,16 +182,11 @@ export async function runCheck(params: {
     };
   }
 
+  const laid = placeFiles(workDir, files, version);
+  if ("failed" in laid) return laid.failed;
   try {
     await fs.mkdir(workDir, { recursive: true });
-    await Promise.all(
-      files.map(async (f) => {
-        const rel = f.path.replace(/^[/\\]+/, "");
-        const dest = path.join(workDir, rel);
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.writeFile(dest, f.content, "utf-8");
-      }),
-    );
+    await writePlaced(laid.placed);
     const tsconfig = await fs.readFile(path.join(scaffoldDir, "tsconfig.json"), "utf-8");
     await fs.writeFile(path.join(workDir, "tsconfig.json"), tsconfig, "utf-8");
   } catch (err) {
@@ -182,6 +253,10 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
  *                  output.txt  the deliverable text
  *                  input.txt   this test case's input
  *                  meta.json   { step, candidate, input, trial }
+ *                  trace.json  how the agent worked (src/canon/agent-trace.ts),
+ *                              only when the candidate declared `cli.trace`
+ *                              and its trace was read; never written otherwise,
+ *                              so a reference dir may supply its own
  *   cwd          the work dir
  *   exit 0       pass
  *   exit 1       fail — the candidate did not satisfy the check
@@ -196,6 +271,8 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
 
 const COMMAND_EXIT_PASS = 0;
 const COMMAND_EXIT_FAIL = 1;
+/** The agent's trace in the check's work dir, as the canonical model. */
+export const TRACE_FILE = "trace.json";
 
 /**
  * argv is written relative to the repo (`["node", "checks/x.mjs"]`) but the
@@ -237,6 +314,17 @@ export async function commandCheckVersion(
   return `cmd-${short(sha256(argv.join(" ")))}+files-${short(sha256(parts.join("\n")))}`;
 }
 
+/**
+ * The harness's own files go into a dir the candidate just wrote to. A
+ * symlink the candidate left under one of these names would send the write
+ * elsewhere on the host, so whatever is there is removed first (the link, not
+ * its target) and a fresh regular file written; the candidate has exited.
+ */
+async function writeFresh(file: string, content: string): Promise<void> {
+  await fs.rm(file, { force: true });
+  await fs.writeFile(file, content, { encoding: "utf-8", flag: "wx" });
+}
+
 /** Pull evidence out of the check's stdout, JSON or not. */
 function evidenceOf(stdout: string): { evidence: string; reason?: string } {
   const text = stdout.trim();
@@ -261,24 +349,31 @@ export async function runCommandCheck(params: {
   output: string;
   input: string;
   meta: { step: string; candidate: string; input: string; trial: number; fixture?: string; chained?: boolean };
+  /**
+   * The agent's trace, already read into the canonical model; written as
+   * `trace.json` so a check can grade the path taken (tests actually run, no
+   * tool off limits), not only the deliverable. Absent for model candidates
+   * and for a command that declared no trace.
+   */
+  trace?: AgentTrace;
   workDir: string;
   /** Task dir the check's argv and version files resolve against. */
   taskRoot: string;
 }): Promise<CheckResult> {
   const taskRoot = params.taskRoot;
   const version = await commandCheckVersion(params.argv, params.versionFiles, taskRoot);
+  const laid = placeFiles(params.workDir, params.files, version);
+  if ("failed" in laid) return laid.failed;
   try {
     await fs.mkdir(params.workDir, { recursive: true });
     await Promise.all([
-      ...params.files.map(async (f) => {
-        const dest = path.join(params.workDir, f.path.replace(/^[/\\]+/, ""));
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.writeFile(dest, f.content, "utf-8");
-      }),
-      fs.writeFile(path.join(params.workDir, "output.txt"), params.output, "utf-8"),
-      fs.writeFile(path.join(params.workDir, "input.txt"), params.input, "utf-8"),
-      fs.writeFile(path.join(params.workDir, "meta.json"), JSON.stringify(params.meta, null, 2), "utf-8"),
+      writePlaced(laid.placed),
+      writeFresh(path.join(params.workDir, "output.txt"), params.output),
+      writeFresh(path.join(params.workDir, "input.txt"), params.input),
+      writeFresh(path.join(params.workDir, "meta.json"), JSON.stringify(params.meta, null, 2)),
     ]);
+    // After the files: a trace the run read wins over one a reference carried.
+    if (params.trace) await writeFresh(path.join(params.workDir, TRACE_FILE), JSON.stringify(params.trace, null, 2));
   } catch (err) {
     return {
       state: "evaluator_error",

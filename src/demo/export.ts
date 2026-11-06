@@ -236,7 +236,43 @@ async function pageHtml(dataScripts: string[], meta: { exportedAt: string; works
   return html;
 }
 
+/** A directory is `prev` or sits inside it (both already resolved). */
+function isAtOrUnder(dir: string, ancestor: string): boolean {
+  const rel = path.relative(ancestor, dir);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+}
+
+async function realIfExists(dir: string): Promise<string> {
+  return fs.realpath(dir).catch(() => path.resolve(dir));
+}
+
+/**
+ * Whether `outDir` may be replaced. The export deletes the directory before
+ * writing, so it must not be the workspace, anything above it, the directory
+ * the user stands in, their home, or the filesystem root; and a directory
+ * that already holds files is replaced only when they are a previous export.
+ */
+export async function assertExportDir(workspaceRoot: string, outDir: string): Promise<void> {
+  const target = await realIfExists(outDir);
+  const protectedDirs = await Promise.all([workspaceRoot, process.cwd(), os.homedir()].map(realIfExists));
+  for (const dir of [...protectedDirs, path.parse(target).root]) {
+    if (isAtOrUnder(dir, target)) throw new Error(`refusing to export into ${outDir}: it holds ${dir}`);
+  }
+  const stat = await fs.stat(target).catch(() => null);
+  if (stat === null) return;
+  if (!stat.isDirectory()) throw new Error(`refusing to export into ${outDir}: it is a file`);
+  const entries = await fs.readdir(target);
+  if (entries.length === 0) return;
+  // A previous export holds nothing but what an export writes.
+  const previousExport = entries.includes("index.html") && entries.includes("data") && entries.every((e) => EXPORT_ENTRIES.has(e));
+  if (!previousExport) throw new Error(`refusing to export into ${outDir}: it is not empty and is not a previous export`);
+}
+
+/** Everything `exportDashboard` writes at the top of its directory. */
+const EXPORT_ENTRIES = new Set(["index.html", "data", "artifact", ".DS_Store"]);
+
 export async function exportDashboard(ws: Workspace, outDir: string): Promise<ExportResult> {
+  await assertExportDir(ws.root, outDir);
   const server = createDemoServer(ws);
   const base = await listenDemo(server, 0);
   try {

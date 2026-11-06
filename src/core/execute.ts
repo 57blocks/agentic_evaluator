@@ -11,14 +11,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { judgePromptTemplateSha, PAIRWISE_EVALUATOR_ID } from "../judge.js";
 import { scorePromptTemplateSha, ABSOLUTE_EVALUATOR_ID } from "../score.js";
-import { checkVersion as tscCheckVersion, commandCheckVersion, TSC_CHECK_ID } from "../check.js";
+import { requiredCheckVersion, TSC_CHECK_ID } from "../check.js";
 import { loadWorkflow } from "../spec/load-spec.js";
 import { displayPath, resolveTaskAsset } from "../paths.js";
 import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
 import { silentSink, type RunEventSink } from "./events.js";
 import { methodsOf, planE2e, planStep, resolveConcurrency } from "./plan.js";
 import { hideAnswerKey } from "./answer-key.js";
-import { readInput, runAll, safeName, type PromptTemplate } from "./generate.js";
+import { noteEvidenceIncomplete, readInput, runAll, safeName, type PromptTemplate } from "./generate.js";
 import { judgeAll, scoreAll } from "./evaluate.js";
 import { maybeRunE2eValidation } from "./e2e-arms.js";
 import { CODEGEN_PREAMBLE } from "../producers/code-gen.js";
@@ -27,6 +27,8 @@ import { openTrace, traceIntegrity } from "../canon/trace.js";
 import { buildManifest, type RunPrompts } from "../canon/manifest.js";
 import { buildLedger, type CostLedger } from "../canon/cost.js";
 import { BudgetGuard } from "../canon/budget.js";
+import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS, ProviderErrorHalt } from "../canon/halt.js";
+import { DEFAULT_MAX_PAUSE_MS, transportGate } from "../transport-gate.js";
 import { buildWorkflowRecord, workflowGaps, type WorkflowStepInput } from "../canon/workflow.js";
 import { directionality, ratesFor } from "../canon/rates.js";
 import { resolveEligibility } from "../canon/select.js";
@@ -98,6 +100,11 @@ export interface StepResult {
   ledger: CostLedger;
 }
 
+/** The run's halt, from the spec's `execution.max_consecutive_provider_errors` (default 10; null turns it off). */
+function haltFor(suite: Suite): ProviderErrorHalt {
+  return new ProviderErrorHalt(suite.maxConsecutiveProviderErrors === undefined ? DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS : suite.maxConsecutiveProviderErrors);
+}
+
 async function executeSuite(params: {
   suite: Suite;
   ws: Workspace;
@@ -110,6 +117,8 @@ async function executeSuite(params: {
   generatedAt: string;
   /** Shared across the steps of a multi-step run; one spec, one limit. */
   budget?: BudgetGuard;
+  /** Shared the same way: a dead network ends every step. */
+  halt?: ProviderErrorHalt;
 }): Promise<StepResult> {
   const { suite, outDir, runId, html, reuse, generatedAt } = params;
   const producer: ProducerKind = suite.producer ?? "prompt";
@@ -133,11 +142,7 @@ async function executeSuite(params: {
   const rubricSha = sha256(rubric);
   const judgeTplSha = judgePromptTemplateSha(rubric, dimensions);
   const scoreTplSha = scorePromptTemplateSha(rubric, dimensions);
-  const checkVersion = !suite.check
-    ? null
-    : suite.check.kind === "tsc"
-      ? await tscCheckVersion(await resolveTaskAsset(suite.taskRoot, suite.check.scaffoldDir))
-      : await commandCheckVersion(suite.check.argv, suite.check.versionFiles, suite.taskRoot);
+  const checkVersion = suite.check ? await requiredCheckVersion(suite.check, suite.taskRoot) : null;
   const manifest = await buildManifest(suite, {
     runId,
     startedAt: generatedAt,
@@ -153,6 +158,7 @@ async function executeSuite(params: {
   await writeManifest(outDir, manifest);
 
   const budget = params.budget ?? new BudgetGuard(suite.budgetUsd);
+  const halt = params.halt ?? haltFor(suite);
   const adaptBase = {
     runId,
     step: suite.step,
@@ -177,11 +183,11 @@ async function executeSuite(params: {
           toTrialRows({ ...adaptBase, records: [record], judgements: [], judgeFailures: [], skippedPairs: [], scores: [], scoreFailures: [] })[0],
       })
     : undefined;
-  const records = await runAll({ suite, ws: params.ws, emit: params.emit, signal: params.signal, producer, promptTpl, promptTemplateSha, candidatePrompts, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget, stopper });
+  const records = await runAll({ suite, ws: params.ws, emit: params.emit, signal: params.signal, producer, promptTpl, promptTemplateSha, candidatePrompts, inputTextBySlug, outDir, limit, runId, reuse, trace: trace.emit, budget, stopper, halt });
   const methods = methodsOf(suite);
   params.emit({ type: "phase", step: suite.step, phase: "judging", declared: methods.pairwise });
   const judged = methods.pairwise
-    ? await judgeAll(suite, rubric, records, limit, trace.emit, budget, params.emit)
+    ? await judgeAll(suite, rubric, records, limit, trace.emit, budget, params.emit, halt, params.signal)
     : { judgements: [], failures: [], skipped: [] };
   params.emit({ type: "phase", step: suite.step, phase: "scoring", declared: methods.absolute });
   const scored: ScoredRecord[] = [];
@@ -197,8 +203,10 @@ async function executeSuite(params: {
         emit: params.emit,
         onScored: (s) => scored.push(s),
         onFailure: (f) => scoreFailures.push(f),
+        signal: params.signal,
       },
       budget,
+      halt,
     );
   }
 
@@ -223,6 +231,10 @@ async function executeSuite(params: {
   const evaluations = toEvaluationRows(adaptInput);
   const ledger = buildLedger(trials, evaluations, PAIRWISE_EVALUATOR_ID, ABSOLUTE_EVALUATOR_ID);
   const traceRows = await trace.close();
+  // An append that failed leaves the file short, not the step lost: the
+  // billed work is already in; the gap is written down beside the run.
+  const traceFailure = trace.failure();
+  if (traceFailure) await noteEvidenceIncomplete(outDir, traceFailure);
   const integrity = await traceIntegrity(trace.file);
   const summary = {
     run: runId,
@@ -233,12 +245,18 @@ async function executeSuite(params: {
     integrity,
     budget: budget.state(),
     early_stop: stopper?.result() ?? { enabled: false, stopped: [] },
+    halt: halt.state(),
+    transport: transportGate.state(),
     judge_discrimination: judgeDiscrimination(trials),
     evaluation_coverage: evaluationCoverage(evaluations),
   };
   if (budget.stoppedEarly) {
     const st = budget.state();
     params.emit({ type: "budget.stopped", limitUsd: st.limit_usd ?? null, spentUsd: st.spent_usd, skipped: st.skipped });
+  }
+  if (halt.tripped) {
+    const st = halt.state();
+    params.emit({ type: "run.halted", step: suite.step, consecutive: st.longest_provider_error_run, skipped: st.skipped });
   }
   if (integrity.gaps_over_threshold > 0) {
     params.emit({ type: "integrity.gaps", gaps: integrity.gaps_over_threshold, thresholdMs: integrity.threshold_ms });
@@ -344,6 +362,15 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
 
   // The answer key is unreadable while candidates run (src/core/answer-key.ts).
   const answerKey = await hideAnswerKey(suites[0].taskRoot);
+  // The outage gate is shared by every model call in the process: on for
+  // the run (steps and e2e arms alike), off again after it, pauses forwarded
+  // as run events.
+  transportGate.configure({ maxPauseMs: (suites[0].outageWaitSeconds ?? DEFAULT_MAX_PAUSE_MS / 1000) * 1000 });
+  const unsubscribeGate = transportGate.subscribe((e) => {
+    if (e.type === "paused") emit({ type: "transport.paused", consecutive: e.consecutive, delayMs: e.delayMs, pausedMs: e.pausedMs });
+    else if (e.type === "resumed") emit({ type: "transport.resumed", pausedMs: e.pausedMs });
+    else emit({ type: "transport.gave_up", consecutive: e.consecutive, pausedMs: e.pausedMs });
+  });
   try {
     const generatedAt = new Date().toISOString();
     const runName = suites[0].runName ?? suites[0].suiteId;
@@ -356,6 +383,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
     if (nested) await fs.mkdir(root, { recursive: true });
 
     const budget = new BudgetGuard(suites[0].budgetUsd);
+    const halt = haltFor(suites[0]);
     const steps: WorkflowStepInput[] = [];
     let last: StepResult | null = null;
     for (const suite of suites) {
@@ -372,6 +400,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
         reuse,
         generatedAt,
         budget,
+        halt,
       });
       last = done;
       if (nested) {
@@ -392,7 +421,9 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
 
     if (nested) {
       const chosenByStep = Object.fromEntries(steps.map((s) => [s.id, s.chosen]));
-      const e2e = opts.skipE2e ? null : await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit, budget });
+      // Cancelled before the arms: they would be two more chained generations, billed in full.
+      const cancelledBeforeE2e = opts.signal?.aborted === true;
+      const e2e = opts.skipE2e || cancelledBeforeE2e ? null : await maybeRunE2eValidation({ suites, root, runId, chosenByStep, emit, budget, halt, signal: opts.signal });
       const control = e2e?.control ?? null;
       const record = buildWorkflowRecord({
         protocolVersion: suites[0].protocolVersion ?? "0.3",
@@ -430,7 +461,9 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
       const skipped =
         opts.skipE2e && planE2e(suites)
           ? "\n- **end-to-end validation not run**: skipped with `--no-e2e`. Each step's pick stands on its own inputs; whether they work as a combination was not checked.\n"
-          : "";
+          : cancelledBeforeE2e && planE2e(suites)
+            ? "\n- **end-to-end validation not run**: the run was cancelled before the arms started. Each step's pick stands on its own inputs; whether they work as a combination was not checked.\n"
+            : "";
       await fs.writeFile(path.join(root, "GAPS.md"), workflowGaps(steps, record.e2e_validation) + skipped, "utf-8");
       if (html) await writeWorkflowReport(root);
       emit({
@@ -444,6 +477,8 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
     }
     return last;
   } finally {
+    unsubscribeGate();
+    transportGate.configure({ maxPauseMs: 0 });
     await answerKey.restore();
   }
 }

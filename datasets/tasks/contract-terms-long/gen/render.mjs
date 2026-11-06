@@ -1,13 +1,14 @@
 /**
  * Writes an agreement (structures.mjs) out as a document packet: the
- * agreement with its boilerplate, schedules, one SOW and any amendments.
- * Returns the text and `protected`: every string that carries a graded value,
- * which noise.mjs must leave readable and generate.mjs asserts survives.
+ * agreement with its boilerplate, schedules, its SOWs, and any amendments or
+ * restatement, in the order filed. Returns the text and `protected`: every
+ * string that carries a graded value, which noise.mjs must leave readable and
+ * generate.mjs asserts survives.
  */
 
 import { SECTIONS } from "./library.mjs";
-import { pick } from "./structures.mjs";
-import { addDays, both, longDate, usd, usdBoth, words } from "./words.mjs";
+import { pick, shuffled } from "./structures.mjs";
+import { addDays, both, longDate, termEnd, usd, usdBoth, words } from "./words.mjs";
 import { securitySchedule, sowText } from "./filler.mjs";
 
 const DAY_POOL = [30, 45, 60, 90, 120, 180, 10, 15, 20];
@@ -36,25 +37,30 @@ function distractors(rng, c) {
 
 const fill = (text, values) => text.replace(/\{\{(\w+)\}\}/g, (_, k) => String(values[k] ?? `{{${k}}}`));
 
-function shuffled(rng, list) {
-  return list.map((x) => [rng(), x]).sort((a, b) => a[0] - b[0]).map(([, x]) => x);
+const NO_TERM = "This Agreement begins on the Effective Date and continues until terminated by either party in accordance with this Agreement.";
+
+/** The renewal sentence for `r`, under an agreement whose definitions may define the renewal terms. */
+function renewalSentence(r, key) {
+  if (r.kind === "auto") {
+    return r.defined
+      ? "After the Initial Term, this Agreement renews automatically for successive Renewal Terms unless either party gives written notice of non-renewal no later than the Non-Renewal Notice Period before the end of the then-current term."
+      : `After the Initial Term, this Agreement renews automatically for successive periods of ${key(both(r.months))} months each unless either party gives written notice of non-renewal at least ${key(both(r.noticeDays))} days before the end of the then-current term.`;
+  }
+  if (r.kind === "mutual") return `The parties may renew this Agreement for additional periods of ${both(r.months ?? 12)} months each by mutual written agreement signed at least ${both(r.daysBefore ?? 60)} days before the end of the then-current term. Absent such agreement, this Agreement expires at the end of the then-current term.`;
+  return "This Agreement does not renew automatically. It expires at the end of the Initial Term unless the parties extend it by a written amendment signed by both of them.";
+}
+
+/** The initial-term sentence: a number of months, or an end date the reader converts to months. */
+function termSentence(effectiveDate, months, style, key) {
+  return style === "end_date"
+    ? `The initial term of this Agreement begins on the Effective Date and ends on ${key(longDate(termEnd(effectiveDate, months)))} (the "Initial Term").`
+    : `The initial term of this Agreement is ${key(both(months))} months from the Effective Date (the "Initial Term").`;
 }
 
 /** The graded sentences. `key` records each graded surface form. */
 function termSentences(c, key) {
-  const initial = c.term.style === "end_date"
-    ? `The initial term of this Agreement begins on the Effective Date and ends on ${key(longDate(c.term.end))} (the "Initial Term").`
-    : `The initial term of this Agreement is ${key(both(c.term.months))} months from the Effective Date (the "Initial Term").`;
-  const r = c.renewal;
-  // Functions, so only the chosen sentence runs `key` (an eager literal would record the others).
-  const renewal = {
-    auto: () => r.defined
-      ? "After the Initial Term, this Agreement renews automatically for successive Renewal Terms unless either party gives written notice of non-renewal no later than the Non-Renewal Notice Period before the end of the then-current term."
-      : `After the Initial Term, this Agreement renews automatically for successive periods of ${key(both(r.months))} months each unless either party gives written notice of non-renewal at least ${key(both(r.noticeDays))} days before the end of the then-current term.`,
-    mutual: () => `The parties may renew this Agreement for additional periods of ${both(r.months ?? 12)} months each by mutual written agreement signed at least ${both(r.daysBefore ?? 60)} days before the end of the then-current term. Absent such agreement, this Agreement expires at the end of the then-current term.`,
-    none: () => "This Agreement does not renew automatically. It expires at the end of the Initial Term unless the parties extend it by a written amendment signed by both of them.",
-  }[r.kind]();
-  return [initial, renewal];
+  if (c.term === null) return [NO_TERM];
+  return [termSentence(c.effective.date, c.term.months, c.term.style, key), renewalSentence(c.renewal, key)];
 }
 
 export function capSentence(cap, customer, key) {
@@ -67,6 +73,14 @@ export function capSentence(cap, customer, key) {
 }
 
 const lawSentence = (law, key) => `This Agreement and any dispute arising out of it are governed by the laws of the ${key(`State of ${law}`)}, without regard to its conflict-of-laws rules.`;
+
+const EXCLUSION = "Neither party is liable for any indirect, incidental, special or consequential damages, or for lost profits, even if advised of their possibility.";
+
+function liabilityParas(c, values, key) {
+  // Without a general cap there is no carve-out either: a cap stated only for one kind of claim would be a different term.
+  if (c.cap === null) return [EXCLUSION, "Each party's liability for direct damages is otherwise as provided by applicable law."];
+  return [EXCLUSION, capSentence(c.cap, values.C, key), `The limitation above does not apply to a party's indemnification obligations or to its breach of the confidentiality obligations in this Agreement, for which that party's aggregate liability shall not exceed ${usdBoth(c.carveCap)}.`];
+}
 
 function preamble(c, key) {
   const [p, q] = c.parties.map((x) => `${key(x.name)}, ${x.entity} ("${x.short}")`);
@@ -88,17 +102,15 @@ function definitions(c, key) {
   return items;
 }
 
-/** Numbered sections; the graded articles sit in the back half, behind most of the boilerplate. */
+/** Numbered sections; the graded articles sit in the back half, behind most of the boilerplate. A missing clause is simply not there. */
 function body(rng, c, values, key) {
   const boiler = shuffled(rng, SECTIONS.slice(1)).map(([title, paras]) => ({ title, paras: paras.map((p) => fill(p, values)) }));
   boiler.find((s) => s.title === "Statements of Work")?.paras.push("If an SOW conflicts with this Agreement, this Agreement controls, unless the SOW expressly identifies by section number the provision of this Agreement that it overrides.");
-  const graded = [
-    { title: "Term and Renewal", paras: termSentences(c, key), id: "term" },
-    { title: "Limitation of Liability", paras: ["Neither party is liable for any indirect, incidental, special or consequential damages, or for lost profits, even if advised of their possibility.", capSentence(c.cap, values.C, key), `The limitation above does not apply to a party's indemnification obligations or to its breach of the confidentiality obligations in this Agreement, for which that party's aggregate liability shall not exceed ${usdBoth(c.carveCap)}.`], id: "cap" },
-    { title: "Governing Law", paras: [lawSentence(c.law, key)], id: "law" },
-  ];
+  const term = { title: "Term and Renewal", paras: termSentences(c, key), id: "term" };
+  const cap = { title: "Limitation of Liability", paras: liabilityParas(c, values, key), id: "cap" };
+  const law = c.law === null ? [] : [{ title: "Governing Law", paras: [lawSentence(c.law, key)], id: "law" }];
   const cut = Math.floor(boiler.length * 0.6);
-  const ordered = [...boiler.slice(0, cut), graded[0], ...boiler.slice(cut, cut + 3), graded[1], ...boiler.slice(cut + 3, cut + 5), graded[2], ...boiler.slice(cut + 5)];
+  const ordered = [...boiler.slice(0, cut), term, ...boiler.slice(cut, cut + 3), cap, ...boiler.slice(cut + 3, cut + 5), ...law, ...boiler.slice(cut + 5)];
   const defs = [...SECTIONS[0][1].map((p) => fill(p, values)), ...definitions(c, key)];
   const all = [{ title: "Definitions", paras: shuffled(rng, defs), id: "defs" }, ...ordered];
   return all.map((s, i) => ({ ...s, number: i + 1 }));
@@ -126,16 +138,30 @@ function schedules(rng, c, values) {
   ];
 }
 
-function amendmentText(a, c, sections, values, key) {
+/** The operative lines of an amendment, against the section numbers of the agreement it amends. */
+function amendmentLines(a, c, sections, values, key) {
   const sec = (id) => sections.find((s) => s.id === id).number;
   const lines = [];
-  if (a.changes.noticeDays !== undefined) {
-    lines.push(c.renewal.defined
-      ? `Section ${sec("defs")} is amended so that "Non-Renewal Notice Period" means ${key(both(a.changes.noticeDays))} days.`
-      : `In Section ${sec("term")}.2, the notice of non-renewal period is changed to ${key(both(a.changes.noticeDays))} days.`);
+  const ch = a.changes;
+  if (ch.termMonths !== undefined) {
+    lines.push(ch.termStyle === "end_date"
+      ? `Section ${sec("term")}.1 is amended so that the Initial Term ends on ${key(longDate(termEnd(c.effective.date, ch.termMonths)))}.`
+      : `Section ${sec("term")}.1 is deleted and replaced with: "${sec("term")}.1 ${termSentence(c.effective.date, ch.termMonths, "words", key)}"`);
   }
-  if (a.changes.cap !== undefined) lines.push(`Section ${sec("cap")}.2 is deleted and replaced with: "${sec("cap")}.2 ${capSentence(a.changes.cap, values.C, key)}"`);
-  if (a.changes.law !== undefined) lines.push(`Section ${sec("law")}.1 is amended to read: "${sec("law")}.1 ${lawSentence(a.changes.law, key)}"`);
+  if (ch.renewal !== undefined) lines.push(`Section ${sec("term")}.2 is deleted and replaced with: "${sec("term")}.2 ${renewalSentence(ch.renewal, key)}"`);
+  if (ch.noticeDays !== undefined) {
+    lines.push(c.renewal.defined && c.renewal.kind === "auto"
+      ? `Section ${sec("defs")} is amended so that "Non-Renewal Notice Period" means ${key(both(ch.noticeDays))} days.`
+      : `In Section ${sec("term")}.2, the notice of non-renewal period is changed to ${key(both(ch.noticeDays))} days.`);
+  }
+  if (ch.cap !== undefined) lines.push(`Section ${sec("cap")}.2 is deleted and replaced with: "${sec("cap")}.2 ${capSentence(ch.cap, values.C, key)}"`);
+  if (ch.law !== undefined) lines.push(`Section ${sec("law")}.1 is amended to read: "${sec("law")}.1 ${lawSentence(ch.law, key)}"`);
+  return lines;
+}
+
+function amendmentText(a, c, sections, values, key) {
+  const lines = amendmentLines(a, c, sections, values, key);
+  const title = `AMENDMENT NO. ${a.number} TO ${a.toRestated ? "AMENDED AND RESTATED " : ""}${c.kind.toUpperCase()}`;
   const head = a.draft ? "DRAFT — FOR DISCUSSION ONLY — NOT FOR SIGNATURE\n" : "";
   const when = a.draft
     ? `Proposed by ${c.parties[1].short}, circulated ${longDate(a.effective)}.`
@@ -143,11 +169,31 @@ function amendmentText(a, c, sections, values, key) {
       ? `This Amendment No. ${a.number} is signed on the dates below and takes effect on ${key(longDate(a.effective))}. Until then, the Agreement continues unchanged.`
       : `This Amendment No. ${a.number} is dated and effective ${key(longDate(a.effective))}.`;
   const sigDate = a.signedOn ?? a.effective;
-  const sigs = c.parties.map((p) => `${p.name.toUpperCase()}  By: ${a.signed ? `/s/ Authorized Signatory   Date: ${longDate(sigDate)}` : "______________________   Date: __________"}`).join("\n");
-  return `${head}AMENDMENT NO. ${a.number} TO ${c.kind.toUpperCase()}\n\n${when}\n${lines.map((l, i) => `${i + 1}. ${l}`).join("\n")}\n${lines.length + 1}. All other terms of the Agreement remain in full force and effect.\n\n${sigs}`;
+  const signedLine = `/s/ Authorized Signatory   Date: ${longDate(sigDate)}`;
+  const blankLine = "______________________   Date: __________";
+  const signedByParty = (i) => (a.signed ? true : a.signedBy === i);
+  const sigs = c.parties.map((p, i) => `${p.name.toUpperCase()}  By: ${signedByParty(i) ? signedLine : blankLine}`).join("\n");
+  return `${head}${title}\n\n${when}\n${lines.map((l, i) => `${i + 1}. ${l}`).join("\n")}\n${lines.length + 1}. All other terms of the Agreement remain in full force and effect.\n\n${sigs}`;
+}
+
+/** The agreement the restated terms describe: the original with its restated clauses. */
+const restatedAgreement = (c, r) => ({ ...c, term: { ...c.term, months: r.terms.termMonths }, renewal: r.terms.renewal, cap: r.terms.cap, law: r.terms.law });
+
+/** An amended and restated agreement: a whole second agreement that supersedes the first and everything that amended it. */
+function restatementText(r, c, sections, key) {
+  const [p, q] = c.parties.map((x) => `${x.name}, ${x.entity} ("${x.short}")`);
+  const opening = `This Amended and Restated ${c.kind} (this "Agreement") is entered into as of ${longDate(r.effective)} (the "Restatement Date") by and between ${p}, and ${q}. It amends and restates in its entirety the ${c.kind} between the parties that took effect on ${key(longDate(c.effective.date))}, as amended before the Restatement Date (the "Original Agreement"). From the Restatement Date, this Agreement supersedes the Original Agreement and every amendment to it, which are of no further effect. The "Effective Date" remains ${key(longDate(c.effective.date))}, and the Initial Term continues to run from it.`;
+  const sigs = c.parties.map((p) => `${p.name.toUpperCase()}\nBy: /s/ Authorized Signatory\nDate: ${longDate(r.effective)}`).join("\n\n");
+  return [
+    `AMENDED AND RESTATED ${c.kind.toUpperCase()}\n\n${opening}`,
+    ...sections.map(sectionText),
+    `IN WITNESS WHEREOF, the parties have caused this Amended and Restated Agreement to be executed by their authorized representatives.\n\n${sigs}`,
+  ].join("\n\n");
 }
 
 const RULE = "=".repeat(70);
+
+const docName = (a, c) => (a.restates ? `Amended and Restated ${c.kind}` : `Amendment No. ${a.number}${a.toRestated ? " to the Amended and Restated Agreement" : ""}${a.draft ? " (draft)" : ""}`);
 
 export function render(rng, c) {
   const kept = [];
@@ -157,8 +203,16 @@ export function render(rng, c) {
   };
   const values = distractors(rng, c);
   const sections = body(rng, c, values, key);
+  const restatement = c.amendments.find((a) => a.restates);
+  const restated = restatement ? restatedAgreement(c, restatement) : null;
+  const restatedSections = restated ? body(rng, restated, values, key) : null;
   const sowStarts = Array.from({ length: c.sowCount }, (_, i) => addDays(c.effective.date, 30 + 75 * i));
-  const docs = [`${c.kind}`, "Schedules A–E", ...sowStarts.map((_, i) => `Statement of Work No. ${i + 1}`), ...c.amendments.map((a) => `Amendment No. ${a.number}${a.draft ? " (draft)" : ""}`)];
+  const docs = [`${c.kind}`, "Schedules A–E", ...sowStarts.map((_, i) => `Statement of Work No. ${i + 1}`), ...c.amendments.map((a) => docName(a, c))];
+  const amendmentDoc = (a) => (a.restates
+    ? restatementText(a, c, restatedSections, key)
+    : a.toRestated
+      ? amendmentText(a, restated, restatedSections, values, key)
+      : amendmentText(a, c, sections, values, key));
   const parts = [
     `PACKET STATUS DATE: ${longDate(c.statusDate)}\nDocuments in packet, in the order filed: ${docs.map((d, i) => `(${i + 1}) ${d}`).join("; ")}`,
     // The agreement is one document: its sections are separated by blank lines, not by the rule between documents.
@@ -170,7 +224,7 @@ export function render(rng, c) {
     ...schedules(rng, c, values),
     securitySchedule(rng, values),
     ...sowStarts.map((start, i) => sowText(rng, c, i + 1, start, values)),
-    ...c.amendments.map((a) => amendmentText(a, c, sections, values, key)),
+    ...c.amendments.map(amendmentDoc),
   ];
   return { text: parts.join(`\n\n${RULE}\n\n`), protected: [...new Set(kept)] };
 }

@@ -17,6 +17,7 @@ import type { Suite } from "./types.js";
 import type { CandidateDef, EligibilityThresholds } from "./canon/types.js";
 import type { RunBundle } from "./report-v2.js";
 import { resolveEligibility } from "./canon/select.js";
+import { describeTraceRules, hasTraceRules } from "./canon/trace-rules.js";
 import { planStep, methodsOf, planE2e } from "./core/plan.js";
 import { readInput } from "./core/generate.js";
 import { gateLabels, modeExplain, modeLabel } from "./report-copy.js";
@@ -123,9 +124,10 @@ export function inputTitle(text: string): string {
 function checkHow(suite: Suite): Array<{ id: string; how: string }> {
   const c = suite.check;
   if (!c) return (suite.requiredChecks ?? []).map((id) => ({ id, how: "—" }));
-  if (suite.checkDescription) return [{ id: c.id, how: suite.checkDescription }];
-  if (c.kind === "tsc") return [{ id: c.id, how: `compile the candidate's files with tsc --noEmit (config from ${c.scaffoldDir}/)` }];
-  return [{ id: c.id, how: `run ${c.argv.join(" ")} in the trial dir, ${Math.round(c.timeoutMs / 1000)} s timeout` }];
+  const rules = hasTraceRules(c.trace) ? `; ${describeTraceRules(c.trace)}` : "";
+  if (suite.checkDescription) return [{ id: c.id, how: `${suite.checkDescription}${rules}` }];
+  if (c.kind === "tsc") return [{ id: c.id, how: `compile the candidate's files with tsc --noEmit (config from ${c.scaffoldDir}/)${rules}` }];
+  return [{ id: c.id, how: `run ${c.argv.join(" ")} in the trial dir, ${Math.round(c.timeoutMs / 1000)} s timeout${rules}` }];
 }
 
 // ── from the spec ────────────────────────────────────────────────────────────

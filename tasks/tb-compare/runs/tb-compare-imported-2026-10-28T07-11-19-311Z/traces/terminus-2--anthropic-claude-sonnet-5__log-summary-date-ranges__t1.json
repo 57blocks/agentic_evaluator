@@ -1,0 +1,75 @@
+{
+  "format": "atif",
+  "turns": 4,
+  "tool_calls": [
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "bash_command",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": null,
+      "failed": null
+    },
+    {
+      "name": "mark_task_complete",
+      "ms": null,
+      "failed": null
+    }
+  ],
+  "retries": null,
+  "denials": null,
+  "compactions": null,
+  "turn_tokens": [
+    {
+      "prompt": 1526,
+      "cached": 0,
+      "output": 211,
+      "costUsd": 0.0059245
+    },
+    {
+      "prompt": 4929,
+      "cached": 1525,
+      "output": 1226,
+      "costUsd": 0.0210745
+    },
+    {
+      "prompt": 7102,
+      "cached": 4928,
+      "output": 160,
+      "costUsd": 0.008020099999999999
+    },
+    {
+      "prompt": 7550,
+      "cached": 7101,
+      "output": 256,
+      "costUsd": 0.005101700000000001
+    }
+  ],
+  "models": [
+    "anthropic/claude-sonnet-5"
+  ],
+  "cost_usd": 0.0401208,
+  "ended": null
+}

@@ -21,8 +21,12 @@ export interface TraceSink {
   readonly file: string;
   /** Records the event; writes are serialized in call order. */
   emit: LlmTrace;
-  /** Resolves when every emitted row is on disk. */
+  /** Resolves once every row emitted so far has been attempted; never rejects. */
+  flush(): Promise<void>;
+  /** Resolves with the row count once every row has been attempted; never rejects. */
   close(): Promise<number>;
+  /** Why the file is incomplete, when an append failed; null when every row landed. Ask after close(). */
+  failure(): string | null;
 }
 
 export interface TraceIntegrity {
@@ -96,19 +100,30 @@ export async function openTrace(runDir: string, runId: string): Promise<TraceSin
 
   let seq = 0;
   let chain: Promise<void> = Promise.resolve();
+  // The first append that failed. The chain itself never rejects: a rejected
+  // tail would drop every later row and, unhandled, end the process in the
+  // middle of a paid generation. The failure is reported when the trace is
+  // closed, and the rows after it still land.
+  let firstFailure: unknown = null;
 
   const emit: LlmTrace = (event) => {
     seq += 1;
     const row: TraceRow = { seq, ts: new Date().toISOString(), run: runId, ...event };
-    chain = chain.then(() => fs.appendFile(file, `${JSON.stringify(row)}\n`, "utf-8"));
+    chain = chain
+      .then(() => fs.appendFile(file, `${JSON.stringify(row)}\n`, "utf-8"))
+      .catch((err: unknown) => {
+        firstFailure ??= err;
+      });
   };
 
   return {
     file,
     emit,
+    flush: () => chain,
     close: async () => {
       await chain;
       return seq;
     },
+    failure: () => (firstFailure === null ? null : `trace.jsonl could not be written in full: ${firstFailure instanceof Error ? firstFailure.message : String(firstFailure)}`),
   };
 }

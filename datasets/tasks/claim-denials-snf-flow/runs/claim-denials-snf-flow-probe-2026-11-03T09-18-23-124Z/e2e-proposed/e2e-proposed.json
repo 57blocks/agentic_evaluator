@@ -1,0 +1,574 @@
+{
+  "protocol_version": "0.3",
+  "arm_id": "e2e-proposed",
+  "arm_kind": "proposed",
+  "assignment": {
+    "extract": "deepseek-v4.1-flash",
+    "decide": "sonnet-5",
+    "deadline": "deadline-rules"
+  },
+  "chain": [
+    "extract",
+    "decide",
+    "deadline"
+  ],
+  "cases": [
+    {
+      "input": "cd2-003",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "deepseek-v4.1-flash",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.0009354,
+          "ms": 2133,
+          "input_sha": "02d80eb2475c620d60e251dad23718a023f4ca04b070e8defbb48897fbb01e32",
+          "output_sha": "b710d49425ed7aa96a5a8db2c739f93114d98e8a3c2a43cfe03890c347598538",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "sonnet-5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.006042,
+          "ms": 5815,
+          "input_sha": "b710d49425ed7aa96a5a8db2c739f93114d98e8a3c2a43cfe03890c347598538",
+          "output_sha": "9a32f2f50301246747dc369d13e14ba13a57f14911124bbfa341629fc38c5f3a",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "deadline-rules",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0,
+          "ms": 27,
+          "input_sha": "9a32f2f50301246747dc369d13e14ba13a57f14911124bbfa341629fc38c5f3a",
+          "output_sha": "546d3f923c4c6590237f8aae0c0eef6d710817261c47ad62aecfa88acbafd1f6",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-005",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "deepseek-v4.1-flash",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.00092424,
+          "ms": 2197,
+          "input_sha": "322b38c9a8dc74424485048a01913fd8f101deef529e42232dede1cbdc1073b4",
+          "output_sha": "0028a89f338c90f385ab6415e793ca2002a87725412b3e7ede41b64eedb510a4",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "sonnet-5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.005452,
+          "ms": 5438,
+          "input_sha": "0028a89f338c90f385ab6415e793ca2002a87725412b3e7ede41b64eedb510a4",
+          "output_sha": "0cce813a5a6e21ba18306a2001e9152867fe77d3873ffba33dfa24ef3aae07cb",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "deadline-rules",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0,
+          "ms": 28,
+          "input_sha": "0cce813a5a6e21ba18306a2001e9152867fe77d3873ffba33dfa24ef3aae07cb",
+          "output_sha": "546d3f923c4c6590237f8aae0c0eef6d710817261c47ad62aecfa88acbafd1f6",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-013",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "deepseek-v4.1-flash",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.000866904,
+          "ms": 2382,
+          "input_sha": "bc9c48cb972972872516e0f6d79c079230449ba256106088aaf9ad5fb84fdecf",
+          "output_sha": "acfed8ada0e44c90e162f4d2eebd7a22b48a3f856713cc699ae4bac8459b4b69",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "sonnet-5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.007284,
+          "ms": 6706,
+          "input_sha": "acfed8ada0e44c90e162f4d2eebd7a22b48a3f856713cc699ae4bac8459b4b69",
+          "output_sha": "d8430cb731dbf3334f23677ff36f27d2cf59bb338c307fae72441082f8f190b4",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "deadline-rules",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0,
+          "ms": 27,
+          "input_sha": "d8430cb731dbf3334f23677ff36f27d2cf59bb338c307fae72441082f8f190b4",
+          "output_sha": "c8a569edcabb99816c91d7f6462c1d1dcb2e504b8e9943869ed50d26962d9eed",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-014",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "deepseek-v4.1-flash",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.000778404,
+          "ms": 2041,
+          "input_sha": "007952f2ab6eddff0c0c81165564f8c6e4b79d51e5a9fad6739981269981ffb7",
+          "output_sha": "2c32741d596a4d1d1b474cc42849b7e49b4edaed38fcc544a77cb4a98a953a2f",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "sonnet-5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.007522,
+          "ms": 8004,
+          "input_sha": "2c32741d596a4d1d1b474cc42849b7e49b4edaed38fcc544a77cb4a98a953a2f",
+          "output_sha": "80a3f644c55aba40e3b5f76ca6ad9c13b4add946673262937afd4075b6ba1ade",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "deadline-rules",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0,
+          "ms": 27,
+          "input_sha": "80a3f644c55aba40e3b5f76ca6ad9c13b4add946673262937afd4075b6ba1ade",
+          "output_sha": "aa02a4d0d7b7e1d34ab6f74c1493e6bc55d1c70273dc5adfee0465da69425d45",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-119",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "deepseek-v4.1-flash",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.00091704,
+          "ms": 1862,
+          "input_sha": "9815390c01c8db291a57dd65c9dc235eda6b424ff800d9319a304097e2a2f0fd",
+          "output_sha": "53f35d41bff148bcfafb7e4b77efda3023dc69e1c83e1cd881b31cf06121f11f",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "sonnet-5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.009634,
+          "ms": 9263,
+          "input_sha": "53f35d41bff148bcfafb7e4b77efda3023dc69e1c83e1cd881b31cf06121f11f",
+          "output_sha": "01e4811ff3f4df57da31c960b82dba515c4f2d087ddbf866afbe7c1216182baa",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "deadline-rules",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0,
+          "ms": 27,
+          "input_sha": "01e4811ff3f4df57da31c960b82dba515c4f2d087ddbf866afbe7c1216182baa",
+          "output_sha": "ffa567959d3d26f4ce0e438aa41ae395aece3c1321b24cc565e7abde83408a8f",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-169",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "deepseek-v4.1-flash",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.001564608,
+          "ms": 3286,
+          "input_sha": "753d9d946daf7196fb82716c4dc0323c6972c3cfdb15d161d7aa9cdb4d54e595",
+          "output_sha": "a9d8d2a0e0028ac1762c3bfc4954331df73c6ff0d455b8f646e53bb39a8e718d",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "sonnet-5",
+          "completion_state": "success",
+          "task_outcome": "failure",
+          "outcome_reasons": [
+            "flow-check: fail"
+          ],
+          "cost_usd": 0.00988,
+          "ms": 8830,
+          "input_sha": "a9d8d2a0e0028ac1762c3bfc4954331df73c6ff0d455b8f646e53bb39a8e718d",
+          "output_sha": "35095b6e2375d5c4326648ee2e5641759ed893752a51556fc801512a952f0712",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "fail"
+            }
+          ]
+        }
+      ],
+      "outcome": "failure",
+      "aborted": true
+    },
+    {
+      "input": "cd2-173",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "deepseek-v4.1-flash",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.001714908,
+          "ms": 3067,
+          "input_sha": "e2746ed0706f094ccaf21e21ec3e7a1600dae28ba314611e1838561ef17e7786",
+          "output_sha": "973156a32260a2a9297a075b8416763c0880c395f7a12a8c832939d162af9980",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "sonnet-5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.011482,
+          "ms": 10864,
+          "input_sha": "973156a32260a2a9297a075b8416763c0880c395f7a12a8c832939d162af9980",
+          "output_sha": "8a9bb3d062af79809e0889aa80d2427b6013d0f84f8910ca9dda75b3a5fe4382",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "deadline-rules",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0,
+          "ms": 27,
+          "input_sha": "8a9bb3d062af79809e0889aa80d2427b6013d0f84f8910ca9dda75b3a5fe4382",
+          "output_sha": "546d3f923c4c6590237f8aae0c0eef6d710817261c47ad62aecfa88acbafd1f6",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    },
+    {
+      "input": "cd2-187",
+      "trial": 0,
+      "steps": [
+        {
+          "id": "extract",
+          "candidate": "deepseek-v4.1-flash",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.000903504,
+          "ms": 2172,
+          "input_sha": "146998eb9fcf41bbb613500317b48f3d633cea1295454c4a8c804d0204c6434e",
+          "output_sha": "4d55b77e12a7118f22be94ec92be30e9b703195207f55e9b37a99e8ee6055fce",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "decide",
+          "candidate": "sonnet-5",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0.003064,
+          "ms": 2470,
+          "input_sha": "4d55b77e12a7118f22be94ec92be30e9b703195207f55e9b37a99e8ee6055fce",
+          "output_sha": "07942508eee2bd681224da1425c2eecf08cb911d763b1f3d89f11f97c8ec093f",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        },
+        {
+          "id": "deadline",
+          "candidate": "deadline-rules",
+          "completion_state": "success",
+          "task_outcome": "success",
+          "outcome_reasons": [
+            "flow-check: pass"
+          ],
+          "cost_usd": 0,
+          "ms": 28,
+          "input_sha": "07942508eee2bd681224da1425c2eecf08cb911d763b1f3d89f11f97c8ec093f",
+          "output_sha": "98fc63232a061bee8eef16bff1cd2af81ed4c14929867af34558ac000883ebb7",
+          "checks": [
+            {
+              "evaluator": "flow-check",
+              "version": "cmd-30089f28+files-19492b6c",
+              "state": "pass"
+            }
+          ]
+        }
+      ],
+      "outcome": "success",
+      "aborted": false
+    }
+  ],
+  "totals": {
+    "cases": 8,
+    "success": 7,
+    "failure": 1,
+    "undetermined": 0,
+    "cost_usd": 0.06896500800000001,
+    "ms": 76721
+  },
+  "rates": {
+    "cases": 8,
+    "success": 7,
+    "failure": 1,
+    "undetermined": 0,
+    "task_success_rate": {
+      "value": 0.875,
+      "numerator": 7,
+      "denominator": 8
+    },
+    "reliability": {
+      "value": 0.875,
+      "numerator": 7,
+      "denominator": 8
+    },
+    "required_check_pass_rate": {
+      "value": 0.9565217391304348,
+      "numerator": 22,
+      "denominator": 23
+    },
+    "total_cost_usd": 0.068965008,
+    "cost_per_success": 0.009852143999999998,
+    "p50_ms": 9115,
+    "p95_ms": 13958
+  }
+}
