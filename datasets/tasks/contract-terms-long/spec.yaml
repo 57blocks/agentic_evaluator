@@ -18,37 +18,42 @@
 # never touches a graded value, and gen/generate.mjs asserts each one is still
 # in the text. RULES.md states every rule the key applies.
 #
-# 60 items: 16 ordinary, 44 traps; 24 holdout. The eight candidates are the
-# panel the other sets use, so the rows compare.
+# 100 items: 24 ordinary, 76 traps; 40 holdout. ct-061..100 are the third
+# cut: the 8-model run of the first 60 separated the candidates on two traps
+# only (an amendment one party never signed; a chain filed out of order), so
+# the cut is 16 of each plus 8 controls, over all three noise levels. The
+# eight candidates are the panel the other sets use, so the rows compare.
 #
 # What it does not test: real-world contract variety (all packets come from
 # one clause library) or a wide schema (eight fields).
 #
 #   node datasets/tasks/contract-terms-long/gen/generate.mjs
 #   agenteval check-task datasets/tasks/contract-terms-long          # free
-#   caffeinate -i agenteval run datasets/tasks/contract-terms-long --yes --html   # billed, about $35
+#   caffeinate -i agenteval run datasets/tasks/contract-terms-long --yes --html   # billed, about $60; --reuse keeps earlier trials
 #
-# 2026-11-05 run (runs/contract-terms-long-2026-11-05T07-46-34-295Z): 9 of 60
-# inputs separate the eight on the answers, all one-party or chain traps;
-# everything else is 100% for every model. datasets/README.md has the row.
+# 2026-11-05 runs: the first 60 (runs/contract-terms-long-2026-11-05T07-46-34-295Z)
+# separated the eight on 9 inputs, all one-party or chain traps; the 100
+# (runs/contract-terms-long-2026-11-05T10-10-04-083Z, its 480 trials reused)
+# separate on 35 and sort the models into three tiers, almost entirely on the
+# one-party trap. datasets/README.md has the row.
 
 protocol_version: "0.3"
 run_name: contract-terms-long
-description: "Does contract-term extraction hold up on long, scanned document packets whose amendments have to be sorted out? 60 synthetic packets of 7,000–20,000 words (an agreement with the graded articles in its back half, five schedules, 4–16 SOWs with their own terms, caps and laws as distractors) at three scan-noise levels; 44 carry a trap: amendment chains filed out of order, a restatement that supersedes an earlier amendment, unsigned, one-party and future-effective amendments, renewal and term changes, and clauses that are simply absent. Extract eight terms as they stand on the status date."
+description: "Does contract-term extraction hold up on long, scanned document packets whose amendments have to be sorted out? 100 synthetic packets of 7,000–20,000 words (an agreement with the graded articles in its back half, five schedules, 4–16 SOWs with their own terms, caps and laws as distractors) at three scan-noise levels; 76 carry a trap: amendment chains filed out of order, a restatement that supersedes an earlier amendment, unsigned, one-party and future-effective amendments, renewal and term changes, and clauses that are simply absent. Extract eight terms as they stand on the status date."
 budget_usd: 70
 
 workflow:
   control_candidate: sonnet-5
   steps:
     - id: extract
-      version: "2"
+      version: "3"
       producer: prompt
       prompt_file: prompts/extract.md
       rubric_file: rubrics/extract.md
       test_set:
         id: contract-terms-long
         labels_file: checks/manifest.json
-        inputs: [ct-001, ct-002, ct-003, ct-004, ct-005, ct-006, ct-007, ct-008, ct-009, ct-010, ct-011, ct-012, ct-013, ct-014, ct-015, ct-016, ct-017, ct-018, ct-019, ct-020, ct-021, ct-022, ct-023, ct-024, ct-025, ct-026, ct-027, ct-028, ct-029, ct-030, ct-031, ct-032, ct-033, ct-034, ct-035, ct-036, ct-037, ct-038, ct-039, ct-040, ct-041, ct-042, ct-043, ct-044, ct-045, ct-046, ct-047, ct-048, ct-049, ct-050, ct-051, ct-052, ct-053, ct-054, ct-055, ct-056, ct-057, ct-058, ct-059, ct-060]
+        inputs: [ct-001, ct-002, ct-003, ct-004, ct-005, ct-006, ct-007, ct-008, ct-009, ct-010, ct-011, ct-012, ct-013, ct-014, ct-015, ct-016, ct-017, ct-018, ct-019, ct-020, ct-021, ct-022, ct-023, ct-024, ct-025, ct-026, ct-027, ct-028, ct-029, ct-030, ct-031, ct-032, ct-033, ct-034, ct-035, ct-036, ct-037, ct-038, ct-039, ct-040, ct-041, ct-042, ct-043, ct-044, ct-045, ct-046, ct-047, ct-048, ct-049, ct-050, ct-051, ct-052, ct-053, ct-054, ct-055, ct-056, ct-057, ct-058, ct-059, ct-060, ct-061, ct-062, ct-063, ct-064, ct-065, ct-066, ct-067, ct-068, ct-069, ct-070, ct-071, ct-072, ct-073, ct-074, ct-075, ct-076, ct-077, ct-078, ct-079, ct-080, ct-081, ct-082, ct-083, ct-084, ct-085, ct-086, ct-087, ct-088, ct-089, ct-090, ct-091, ct-092, ct-093, ct-094, ct-095, ct-096, ct-097, ct-098, ct-099, ct-100]
       candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash, opus-5.5, gpt-5.6-sol, qwen3.8-max, deepseek-v4-pro]
       required_checks: [terms-check]
       judged_dimensions: [faithful]
@@ -117,7 +122,8 @@ execution:
   concurrency: 4
   benchmark_mode: capability-neutral
   cache_mode: cold
-  minimum_meaningful_difference: null
+  # Declared so a 5-point gap in required-check pass rate counts as a real difference (protocol §6).
+  minimum_meaningful_difference: 0.05
 
 x-harness:
   producer: prompt
