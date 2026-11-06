@@ -1,0 +1,315 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "lowest-cost",
+  "control_candidate": "sonnet-5",
+  "eligibility": {
+    "minimum_reliability": 0.9,
+    "minimum_required_check_pass_rate": 0.9,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 0.9",
+      "removed": [
+        {
+          "candidate": "kimi-k3",
+          "reason": "required-check pass rate 0.890 (89/100) < 0.9"
+        },
+        {
+          "candidate": "glm-5.3",
+          "reason": "required-check pass rate 0.770 (77/100) < 0.9"
+        },
+        {
+          "candidate": "deepseek-v4.1-flash",
+          "reason": "required-check pass rate 0.880 (88/100) < 0.9"
+        },
+        {
+          "candidate": "qwen3.8-max",
+          "reason": "required-check pass rate 0.710 (71/100) < 0.9"
+        },
+        {
+          "candidate": "deepseek-v4-pro",
+          "reason": "required-check pass rate 0.874 (83/95) < 0.9"
+        }
+      ],
+      "remaining": [
+        "sonnet-5",
+        "opus-5.5",
+        "gpt-5.6-sol"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 0.9",
+      "removed": [],
+      "remaining": [
+        "sonnet-5",
+        "opus-5.5",
+        "gpt-5.6-sol"
+      ]
+    }
+  ],
+  "eligible": [
+    "sonnet-5",
+    "opus-5.5",
+    "gpt-5.6-sol"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "sonnet-5",
+      "eligible": true,
+      "generation_cost_per_success": 0.067035,
+      "p50_ms": 6400,
+      "p95_ms": 11026,
+      "reliability": {
+        "value": 0.92,
+        "numerator": 92,
+        "denominator": 100
+      },
+      "required_check_pass_rate": {
+        "value": 0.92,
+        "numerator": 92,
+        "denominator": 100
+      },
+      "task_success_rate": {
+        "value": 0.92,
+        "numerator": 92,
+        "denominator": 100
+      },
+      "all_trials_pass_rate": {
+        "value": 0.92,
+        "numerator": 92,
+        "denominator": 100
+      }
+    },
+    {
+      "candidate": "kimi-k3",
+      "eligible": false,
+      "generation_cost_per_success": 0.048099,
+      "p50_ms": 10696,
+      "p95_ms": 38083,
+      "reliability": {
+        "value": 0.89,
+        "numerator": 89,
+        "denominator": 100
+      },
+      "required_check_pass_rate": {
+        "value": 0.89,
+        "numerator": 89,
+        "denominator": 100
+      },
+      "task_success_rate": {
+        "value": 0.89,
+        "numerator": 89,
+        "denominator": 100
+      },
+      "all_trials_pass_rate": {
+        "value": 0.89,
+        "numerator": 89,
+        "denominator": 100
+      }
+    },
+    {
+      "candidate": "glm-5.3",
+      "eligible": false,
+      "generation_cost_per_success": 0.018139,
+      "p50_ms": 10073,
+      "p95_ms": 73117,
+      "reliability": {
+        "value": 0.77,
+        "numerator": 77,
+        "denominator": 100
+      },
+      "required_check_pass_rate": {
+        "value": 0.77,
+        "numerator": 77,
+        "denominator": 100
+      },
+      "task_success_rate": {
+        "value": 0.77,
+        "numerator": 77,
+        "denominator": 100
+      },
+      "all_trials_pass_rate": {
+        "value": 0.77,
+        "numerator": 77,
+        "denominator": 100
+      }
+    },
+    {
+      "candidate": "deepseek-v4.1-flash",
+      "eligible": false,
+      "generation_cost_per_success": 0.006138,
+      "p50_ms": 13138,
+      "p95_ms": 39233,
+      "reliability": {
+        "value": 0.88,
+        "numerator": 88,
+        "denominator": 100
+      },
+      "required_check_pass_rate": {
+        "value": 0.88,
+        "numerator": 88,
+        "denominator": 100
+      },
+      "task_success_rate": {
+        "value": 0.88,
+        "numerator": 88,
+        "denominator": 100
+      },
+      "all_trials_pass_rate": {
+        "value": 0.88,
+        "numerator": 88,
+        "denominator": 100
+      }
+    },
+    {
+      "candidate": "opus-5.5",
+      "eligible": true,
+      "generation_cost_per_success": 0.119007,
+      "p50_ms": 4546,
+      "p95_ms": 5394,
+      "reliability": {
+        "value": 0.99,
+        "numerator": 99,
+        "denominator": 100
+      },
+      "required_check_pass_rate": {
+        "value": 0.99,
+        "numerator": 99,
+        "denominator": 100
+      },
+      "task_success_rate": {
+        "value": 0.99,
+        "numerator": 99,
+        "denominator": 100
+      },
+      "all_trials_pass_rate": {
+        "value": 0.99,
+        "numerator": 99,
+        "denominator": 100
+      }
+    },
+    {
+      "candidate": "gpt-5.6-sol",
+      "eligible": true,
+      "generation_cost_per_success": 0.093377,
+      "p50_ms": 4082,
+      "p95_ms": 6881,
+      "reliability": {
+        "value": 1,
+        "numerator": 100,
+        "denominator": 100
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 100,
+        "denominator": 100
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 100,
+        "denominator": 100
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 100,
+        "denominator": 100
+      }
+    },
+    {
+      "candidate": "qwen3.8-max",
+      "eligible": false,
+      "generation_cost_per_success": 0.074523,
+      "p50_ms": 47033,
+      "p95_ms": 105179,
+      "reliability": {
+        "value": 0.71,
+        "numerator": 71,
+        "denominator": 100
+      },
+      "required_check_pass_rate": {
+        "value": 0.71,
+        "numerator": 71,
+        "denominator": 100
+      },
+      "task_success_rate": {
+        "value": 0.71,
+        "numerator": 71,
+        "denominator": 100
+      },
+      "all_trials_pass_rate": {
+        "value": 0.71,
+        "numerator": 71,
+        "denominator": 100
+      }
+    },
+    {
+      "candidate": "deepseek-v4-pro",
+      "eligible": false,
+      "generation_cost_per_success": null,
+      "p50_ms": 19796,
+      "p95_ms": 97062,
+      "reliability": {
+        "value": 0.83,
+        "numerator": 83,
+        "denominator": 100
+      },
+      "required_check_pass_rate": {
+        "value": 0.8736842105263158,
+        "numerator": 83,
+        "denominator": 95
+      },
+      "task_success_rate": {
+        "value": 0.83,
+        "numerator": 83,
+        "denominator": 100
+      },
+      "all_trials_pass_rate": {
+        "value": 0.83,
+        "numerator": 83,
+        "denominator": 100
+      }
+    }
+  ],
+  "chosen": "sonnet-5",
+  "compared_to_control": {
+    "beats_control": false,
+    "reason": "chosen candidate is the control (sonnet-5)"
+  },
+  "firmness": "directional",
+  "firmness_reasons": [
+    "sonnet-5: required-check-pass-rate 92/100 has a 95% interval down to 0.850, below the gate 0.9",
+    "sonnet-5: reliability 92/100 has a 95% interval down to 0.850, below the gate 0.9"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 0.9,
+        "successes": 92,
+        "n": 100,
+        "low": 0.8500189223072278,
+        "high": 0.9589065387268155
+      },
+      {
+        "gate": "reliability",
+        "threshold": 0.9,
+        "successes": 92,
+        "n": 100,
+        "low": 0.8500189223072278,
+        "high": 0.9589065387268155
+      }
+    ],
+    "versus_runner_up": null
+  },
+  "reasons": [
+    "lowest generation cost per successful task among eligible: $0.067035",
+    "sonnet-5: required-check-pass-rate 92/100 has a 95% interval down to 0.850, below the gate 0.9",
+    "sonnet-5: reliability 92/100 has a 95% interval down to 0.850, below the gate 0.9"
+  ],
+  "closest": null
+}
