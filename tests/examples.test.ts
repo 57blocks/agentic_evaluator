@@ -1,13 +1,14 @@
 /**
  * The samples other people learn the tool on keep working.
  *
- * Only the free ones run here; `compare-models`, `compare-prompts`, `compare-agents`,
- * `compare-agent-models` and `compare-setups` are billed, so they are checked for what can be checked without spending: they
- * load, and their plans are the size their header comments promise.
+ * Only the free ones run here (pipeline needs python3, docker-sandbox Docker); `compare-models`, `compare-prompts`,
+ * `compare-agents`, `compare-agent-models` and `compare-setups` are billed, so they are checked for what can be checked
+ * without spending: they load, and their plans are the size their header comments promise.
  */
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -20,6 +21,7 @@ import { loadWorkflow } from "../src/spec/load-spec.js";
 import { dockerAvailable } from "../src/adapters/docker.js";
 
 const EXAMPLES = path.join(INSTALL_ROOT, "examples", "tasks");
+const hasPython = spawnSync("python3", ["--version"]).status === 0;
 
 /** Copy a sample into a fresh workspace, so a test run never writes into the checkout. */
 async function workspaceWith(task: string): Promise<string> {
@@ -40,7 +42,7 @@ async function runJson(task: string): Promise<Array<Record<string, unknown>>> {
 }
 
 test("every free sample declares no judging, so it cannot bill", async () => {
-  for (const task of ["custom-check", "chain-offline", "docker-sandbox"]) {
+  for (const task of ["custom-check", "chain-offline", "docker-sandbox", "pipeline"]) {
     // Act
     const plan = planWorkflow(await loadWorkflow(path.join(EXAMPLES, task, "spec.yaml")));
 
@@ -89,6 +91,20 @@ test("chain-offline: both arms run and the combination beats the broken control"
   // Assert
   const arms = events.filter((e) => e.type === "e2e.arm.done").map((e) => e.armId);
   assert.deepEqual(arms, ["e2e-control", "e2e-proposed"]);
+  const verdict = events.find((e) => e.type === "e2e.validated") as { verdict: string };
+  assert.equal(verdict.verdict, "adopt-combination");
+});
+
+test("pipeline: each stage gets its own model, and the combination is adopted over one model on both", { timeout: 120_000 }, async (t) => {
+  if (!hasPython) return t.skip("python3 not available");
+
+  // Act
+  const events = await runJson("pipeline");
+
+  // Assert - small searches half the question, mid makes up a claim when it summarizes.
+  const done = events.filter((e) => e.type === "step.done") as Array<{ chosen: string; gated: Array<{ candidate: string }> }>;
+  assert.deepEqual(done.map((d) => d.chosen), ["mid", "small"]);
+  assert.deepEqual(done.map((d) => d.gated.map((g) => g.candidate)), [["small"], ["mid"]]);
   const verdict = events.find((e) => e.type === "e2e.validated") as { verdict: string };
   assert.equal(verdict.verdict, "adopt-combination");
 });
