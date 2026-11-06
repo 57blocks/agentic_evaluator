@@ -1,9 +1,9 @@
 /**
  * The samples other people learn the tool on keep working.
  *
- * Only the free ones run here (pipeline needs python3, docker-sandbox Docker); `compare-models`, `compare-prompts`, `compare-agents`,
- * `compare-agent-models` and `compare-setups` are billed, so they are checked for what can be checked without spending: they
- * load, and their plans are the size their header comments promise.
+ * Only the free ones run here (pipeline needs python3, docker-sandbox Docker); `compare-models`, `compare-prompts`,
+ * `compare-agents`, `compare-agent-models` and `compare-setups` are billed, so they are checked for what can be checked
+ * without spending: they load, and their plans are the size their header comments promise.
  */
 
 import { test } from "node:test";
