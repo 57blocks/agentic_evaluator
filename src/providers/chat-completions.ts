@@ -53,6 +53,37 @@ function tokensOf(usage: RawUsage | undefined): BilledTokens {
   };
 }
 
+interface WireError {
+  code?: number | string;
+  message?: string;
+}
+
+/** An error object worth the name: it says something, or carries a code. `""` and `{}` are not failures. */
+function wireError(value: unknown): WireError | null {
+  if (typeof value === "string") return value !== "" ? { message: value } : null;
+  if (typeof value !== "object" || value === null) return null;
+  const rec = value as WireError;
+  const named = typeof rec.message === "string" && rec.message !== "";
+  const coded = typeof rec.code === "number" || (typeof rec.code === "string" && rec.code !== "");
+  return named || coded ? rec : null;
+}
+
+/**
+ * An error carried in a 200 body: OpenRouter answers `{ error }` for a
+ * refused request and `choices[0].error` with `finish_reason: "error"` when
+ * the upstream failed after it had accepted the call. Either is the
+ * provider's failure, not an empty completion from the candidate.
+ */
+function completionError(json: unknown): { status?: number; message: string } | null {
+  const r = json as (CompletionResponse & { error?: unknown }) | null;
+  if (typeof r !== "object" || r === null) return null;
+  const found = wireError(r.error) ?? wireError((r.choices?.[0] as { error?: unknown } | undefined)?.error);
+  if (!found) return null;
+  const status = typeof found.code === "number" ? found.code : undefined;
+  const message = typeof found.message === "string" && found.message !== "" ? found.message : JSON.stringify(found);
+  return { status, message };
+}
+
 function parseCompletion(json: unknown, servedBy: (r: CompletionResponse) => string | undefined): ProviderReply {
   const r = json as CompletionResponse;
   const choice = r.choices?.[0];
@@ -76,6 +107,7 @@ function chatUrl(baseUrl: string): string {
 
 export const openRouterProvider: Provider = {
   label: "OpenRouter",
+  error: completionError,
   defaultKeyEnv: "OPENROUTER_API_KEY",
   build(req: ProviderRequest, _endpoint: ModelEndpoint, apiKey: string | undefined): HttpRequest {
     return {
@@ -107,6 +139,7 @@ export const openRouterProvider: Provider = {
  */
 export const openAiProvider: Provider = {
   label: "OpenAI",
+  error: completionError,
   defaultKeyEnv: "OPENAI_API_KEY",
   build(req: ProviderRequest, endpoint: ModelEndpoint, apiKey: string | undefined): HttpRequest {
     return {
@@ -128,6 +161,7 @@ export const openAiProvider: Provider = {
 /** Any server speaking Chat Completions at `base_url`; sends what OpenRouter sends. */
 export const openAiCompatibleProvider: Provider = {
   label: "OpenAI-compatible",
+  error: completionError,
   build(req: ProviderRequest, endpoint: ModelEndpoint, apiKey: string | undefined): HttpRequest {
     if (!endpoint.baseUrl) throw new Error("route openai-compatible needs base_url");
     return {

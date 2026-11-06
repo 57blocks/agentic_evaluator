@@ -363,3 +363,24 @@ test("an empty trace block, an unknown rule, and min above max are rejected at l
   const self = await parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tool_order: [{ first: Bash, then: Bash }]"]]);
   assert.throws(() => compileSpec(self.spec, "x.yaml", self.sha, TASK_ROOT), /orders Bash before itself/);
 });
+
+test("a candidate listed twice on a step is rejected: it would run twice and count twice", async () => {
+  const dup = await parsePatched([[CANDIDATE_IDS, "candidate_ids: [sonnet-5, sonnet-5, kimi-k3]"]]).catch((err: unknown) => err);
+  assert.ok(dup instanceof SpecError, String(dup));
+  assert.match(dup.message, /candidate_ids/);
+});
+
+test("budget_usd: 0 is rejected rather than starting a run that skips everything", async () => {
+  const zero = await parsePatched([["budget_usd: 10", "budget_usd: 0"]]).catch((err: unknown) => err);
+  assert.ok(zero instanceof SpecError, String(zero));
+  assert.match(zero.message, /budget_usd/);
+});
+
+test("a step id or input name that is a path (`..`, a slash) is rejected before it names a directory", async () => {
+  const dots = await parsePatched([["- id: codegen", "- id: .."]]).catch((err: unknown) => err);
+  assert.ok(dots instanceof SpecError, String(dots));
+  assert.match(dots.message, /steps\/0\/id/);
+  const slash = await parsePatched([["inputs: [code-utils,", "inputs: [../../outside,"]]).catch((err: unknown) => err);
+  assert.ok(slash instanceof SpecError, String(slash));
+  assert.match(slash.message, /inputs\/0/);
+});

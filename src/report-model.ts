@@ -20,8 +20,8 @@ import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { CanonSummary } from "./canon/write.js";
 import type { Recommendation } from "./canon/select.js";
 import type { E2eValidation } from "./canon/e2e.js";
-import { judgeStandings } from "./canon/judge-standings.js";
 import { lineDiff, type DiffLine } from "./report-diff.js";
+import { fillTemplate } from "./prompt-template.js";
 export { SIDE_BY_SIDE_MAX_INPUTS, sideBySideOf, type SideBySideRow } from "./report-side-by-side.js";
 import type { RunPromptsAbout } from "./canon/about.js";
 import { itemStats } from "./canon/item-stats.js";
@@ -124,7 +124,7 @@ export function promptRequestOf(
   if (template === null || sample === null) return null;
   return {
     input: sample.id,
-    messages: [...(system !== null ? [{ role: "system" as const, content: system }] : []), { role: "user" as const, content: template.replace("{{input}}", sample.text) }],
+    messages: [...(system !== null ? [{ role: "system" as const, content: system }] : []), { role: "user" as const, content: fillTemplate(template, sample.text) }],
     exact: prompts.source === "frozen" && sample.matchesRun,
   };
 }
@@ -181,7 +181,7 @@ export function verdictWhy(b: RunBundle): string | null {
   if (!chosen) return null;
   const favourite = judgeFavourite(b);
   if (favourite === null || !favourite.sole || favourite.candidate !== chosen) return null;
-  const ranked = [...judgeStandings(b.trials)].filter((s) => s.comparisons > 0).sort((x, y) => (y.win_rate ?? -1) - (x.win_rate ?? -1));
+  const ranked = duelStandings(b);
   const runnerUp = b.recommendation.evidence?.versus_runner_up?.b ?? ranked.find((s) => s.candidate !== chosen)?.candidate ?? null;
   const won = b.evaluations.filter((e) => {
     if (e.subject.kind !== "pair" || e.state !== "pass" || !e.evidence) return false;
@@ -291,10 +291,7 @@ export interface JudgeFavourite {
  * order, and naming it would put a preference in the judge's mouth.
  */
 export function judgeFavourite(b: RunBundle): JudgeFavourite | null {
-  const ranked = [...judgeStandings(b.trials)]
-    .filter((s) => s.comparisons > 0)
-    .sort((a, z) => (z.win_rate ?? -1) - (a.win_rate ?? -1));
-  const [best, second] = ranked;
+  const [best, second] = duelStandings(b);
   if (!best) return null;
   const chosen = b.recommendation.chosen;
   return {
@@ -303,9 +300,23 @@ export function judgeFavourite(b: RunBundle): JudgeFavourite | null {
     losses: best.losses,
     ties: best.ties,
     comparisons: best.comparisons,
-    sole: !second || (second.win_rate ?? -1) < (best.win_rate ?? -1),
+    sole: !second || (second.rate ?? -1) < (best.rate ?? -1),
     disagrees: chosen !== null && best.candidate !== chosen,
   };
+}
+
+/**
+ * Every compared candidate ranked by `duelRecord`'s rate — the one the
+ * candidate table prints — so the judge's favourite and the table can never
+ * disagree on who is ahead. (`judgeStandings` counts a tie as a loss; this
+ * page counts it as half, and must do so everywhere.)
+ */
+function duelStandings(b: RunBundle): Array<{ candidate: string } & ReturnType<typeof duelRecord>> {
+  const order = [...new Set(b.trials.map((t) => t.candidate))];
+  return order
+    .map((candidate) => ({ candidate, ...duelRecord(candidate, b.evaluations) }))
+    .filter((s) => s.comparisons > 0)
+    .sort((a, z) => (z.rate ?? -1) - (a.rate ?? -1));
 }
 
 /** Headline facts under the recommendation: cost, check pass rate, firmness. */

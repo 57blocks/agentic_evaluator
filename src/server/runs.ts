@@ -127,9 +127,8 @@ export class RunRegistry {
     const inFlight = this.active;
     if (inFlight) throw new AlreadyRunning(inFlight.id);
 
-    const { ack, spec } = await this.planFor(request.task);
-    if (!sameAck(ack, request.ack)) throw new PlanMismatch(ack);
-
+    // The slot is taken before the first await: two starts racing each other
+    // both saw no run in flight, and only the first to get here may continue.
     const run: ActiveRun = {
       id: randomUUID(),
       task: request.task,
@@ -143,6 +142,16 @@ export class RunRegistry {
       abort: new AbortController(),
     };
     this.remember(run);
+
+    let spec: string;
+    try {
+      const planned = await this.planFor(request.task);
+      if (!sameAck(planned.ack, request.ack)) throw new PlanMismatch(planned.ack);
+      spec = planned.spec;
+    } catch (err) {
+      this.forget(run.id);
+      throw err;
+    }
 
     const emit = (event: RunEvent): void => {
       run.events.push(event);
@@ -205,6 +214,12 @@ export class RunRegistry {
       if (this.runs.get(id)?.status !== "running") this.runs.delete(id);
     }
     this.order = this.order.filter((id) => this.runs.has(id));
+  }
+
+  /** Release a slot taken by a start that never got going (a stale plan). */
+  private forget(id: string): void {
+    this.runs.delete(id);
+    this.order = this.order.filter((other) => other !== id);
   }
 }
 
