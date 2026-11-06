@@ -50,7 +50,7 @@ A check is any program. It runs in the trial's folder, next to the files the sta
 The sample has one check for both stages:
 
 - **search:** were the sources this question needs found?
-- **summarize:** does every bullet cite a passage it was given, and say only what that passage says?
+- **summarize:** does every bullet cite a passage it was given, and say only what that passage says? And is every passage used?
 
 ## 4. Write the spec
 
