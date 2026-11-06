@@ -1,0 +1,45 @@
+{
+  "rule_version": "e2e-validate-v1",
+  "not_compared": [
+    "single-configuration workflows other than the declared control",
+    "the current production workflow"
+  ],
+  "operating_mode": "lowest-cost",
+  "thresholds": {
+    "minimum_reliability": 0.9,
+    "minimum_required_check_pass_rate": 0.9
+  },
+  "assignment": {
+    "extract": "deepseek-v4.1-flash",
+    "decide": "sonnet-5",
+    "deadline": "deadline-rules"
+  },
+  "control_assignment": {
+    "extract": "opus-5.5",
+    "decide": "opus-5.5",
+    "deadline": "opus-5.5"
+  },
+  "verdict": "keep-control",
+  "firmness": "directional",
+  "deltas": {
+    "metric": "cost_per_success",
+    "proposed": 0.009852143999999998,
+    "control": 0.037847500000000006,
+    "improvement": 0.027995356000000006,
+    "mmd": null,
+    "paired": {
+      "compared": 8,
+      "both_success": 7,
+      "proposed_only": 0,
+      "control_only": 1,
+      "neither": 0,
+      "inputs_proposed_better": 0,
+      "inputs_control_better": 1,
+      "inputs_same": 7,
+      "p_value": 1
+    }
+  },
+  "reasons": [
+    "the proposed combination fails the workflow eligibility gates: reliability 0.875 < 0.9"
+  ]
+}

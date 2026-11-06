@@ -41,6 +41,7 @@ import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
 import { CHART_STYLES, renderScoreDistribution, renderScoreSummary } from "./report-charts.js";
 import { aboutOfRun, promptsOfRun, type RunAbout, type RunPromptsAbout } from "./canon/about.js";
 import { sliceRows } from "./report-slices.js";
+import { SCATTER_STYLES, costSuccessChart, gateNotesOf, renderCostSuccess } from "./report-scatter.js";
 import { renderCertainty } from "./report-certainty.js";
 import { agentActivityRows, type AgentActivityRow } from "./report-model.js";
 import { itemStats } from "./canon/item-stats.js";
@@ -404,7 +405,7 @@ export function renderRunReport(b: RunBundle): string {
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(m.run_name)} run report</title>
-<style>${PAGE_STYLE}${EVIDENCE_STYLES}${CHART_STYLES}</style></head>
+<style>${PAGE_STYLE}${EVIDENCE_STYLES}${CHART_STYLES}${SCATTER_STYLES}</style></head>
 <body><div class="page">
   <header class="run">
     <p class="eyebrow">Agentic Evaluator · run report · protocol ${escapeHtml(m.protocol_version)}</p>
@@ -426,6 +427,12 @@ export function renderRunReport(b: RunBundle): string {
   ${renderPromptComparison(promptComparison)}
 
   ${renderHero(b, views, support)}
+
+  ${renderCostSuccess(costSuccessChart(
+    views.map((v) => ({ ...v, isControl: m.control_candidate === v.id, gated: !rec.eligible.includes(v.id), chosen: rec.chosen === v.id })),
+    rec.eligibility?.minimum_required_check_pass_rate ?? null,
+    gateNotesOf(gateRows(rec)),
+  ))}
 
   <section class="card">
     <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule ${escapeHtml(rec.rule_version)}</span></h2>

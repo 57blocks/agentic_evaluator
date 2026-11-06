@@ -393,6 +393,7 @@ Every command takes `--help`.
 | `agenteval run <task> --yes` | execute (without `--yes` it only prints the plan) | if the task calls models |
 | `agenteval review <run>` | review a run blind in the dashboard; verdicts go to `runs/<run>/reviews/` | no |
 | `agenteval report <run>` | re-render a run's `report.html` (run id or path) | no |
+| `agenteval replay <run>...` | decide finished runs again under baseline rules (leaderboard, weighted cost, within q of best) and with grader errors blamed on the model; names the gate each pick fails | no |
 | `agenteval install-skill` | add the `/agenteval-new-task` skill for Claude Code to this workspace | no |
 | `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
 
@@ -780,6 +781,50 @@ plus `output.txt` (the deliverable), `input.txt` (the test case) and
 `output.txt` is its answer as text; for code and command candidates it holds
 the files as ```` ```file: ```` blocks, so read the files themselves.
 
+When a command candidate declares `cli.trace` and finished, `trace.json` is
+there too: how the agent worked, in the same shape the report reads
+(`turns`, `tool_calls[{name, ms, failed}]`, `retries`, `ended`, …). A check
+can then grade the path as well as the result: that the tests were actually
+run, that no tool off limits was used, that the agent did not loop on one
+failing call. Apply such rules only when `trace.json` is there and grade the
+deliverable alone when it is not: a model candidate never has one, and
+`check-task` probes the check with an empty answer and no trace, so a check
+that cannot do without one blocks its own task. That the trace was missing
+is already on the trial's row. For the oracle probe, a reference dir may
+carry its own `trace.json`, which is copied in with the rest.
+
+The common rules need no script. A check of either kind can carry `trace:`
+rules, judged after the check itself on every candidate that declares
+`cli.trace`:
+
+```yaml
+evaluators:
+  required_checks:
+    task-tests:
+      kind: command
+      argv: [node, checks/task-tests.mjs]
+      trace:
+        tool_used:                     # per tool: at least min, at most max calls
+          - { name: Bash, min: 1 }     #   the agent actually ran something
+          - { name: WebFetch, max: 0 } #   and never went to the web
+        tool_order:                    # first call of one before first call of the other
+          - { first: Edit, then: Bash }
+        max_tool_calls: 60
+        max_turns: 40
+        max_repeated_failures: 3       # no tool failing more than 3 times in a row
+```
+
+A rule the trace breaks fails a passing check, and the evidence names it
+(`trace rule: Bash called 0 times, min 1`). A candidate without `cli.trace`
+is graded on the deliverable alone and its evidence says so; one that
+declared a trace and left none is `not_evaluated`, undetermined rather than
+failed. `max_repeated_failures` needs a format that records whether a call
+failed: Claude Code's stream does, ATIF does not, and `check-task` warns
+when a rule cannot be judged for a candidate, or when no candidate on the
+step declares a trace at all. The rules are part of the check's version, so
+editing them on a command check regrades reused trials on `--reuse` like
+editing the script does, without running the agents again.
+
 Exit `0` passes, exit `1` fails the candidate; anything else — a crash, a
 timeout — is recorded as an evaluator error, never blamed on the candidate.
 Print `{"evidence": "...", "reason": "..."}` and both are kept with the trial.
@@ -985,6 +1030,25 @@ it; the four datasets come to about 12 MB.
   kyc and claim datasets this would have saved about 40% of generation spend.
   The stopped candidate's rates cover only what it ran, and `GAPS.md` lists
   who stopped where. `plan` then shows generations as an upper bound.
+- A network outage pauses the run instead of failing it. A single call
+  retries a transport failure (network error, 408/409/425/429, 5xx) twice, a
+  second or two apart. When three failures arrive back to back across calls,
+  every call waits at a shared gate (5 s, then 10, 20, 40, 60 s between
+  probes) until one gets through; waiting there spends none of a call's own
+  retries, and trial durations exclude it. After `execution.outage_wait_seconds`
+  of waiting in one outage (default 600; 0 turns pausing off) the gate gives
+  up and calls fail as provider errors; the next call that gets through arms
+  it again. `GAPS.md` records every pause.
+- Consecutive provider errors halt the run. After
+  `execution.max_consecutive_provider_errors` trials in a row ended at the
+  transport or the gateway (default 10; `null` turns it off), nothing new is
+  started: in-flight calls finish, every unit not started is counted, `GAPS.md`
+  says so and the exit code is `3`. Provider errors sit outside every
+  candidate's denominators, so no rate is wrong, only partial; fix the
+  network and `run --reuse` to finish. Check failures, timeouts, refusals and
+  empty completions are candidates' results and never count. One limit: an
+  outage that black-holes requests instead of refusing them shows up as
+  `timeout` after the step's ceiling, which neither mechanism sees.
 - `methods: []` plus command-only candidates make a task free.
 - `agenteval models <task> --catalog-only` catches a mistyped model id for free.
 - On macOS, run billed tasks under `caffeinate -i`. If the machine sleeps, the

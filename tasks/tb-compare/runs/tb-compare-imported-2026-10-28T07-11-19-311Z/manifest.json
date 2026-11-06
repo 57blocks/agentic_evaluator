@@ -1,0 +1,119 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "tb-compare-imported-2026-10-28T07-11-19-311Z",
+  "run_name": "tb-compare",
+  "step": {
+    "id": "harbor",
+    "version": "1",
+    "description": null
+  },
+  "spec": {
+    "path": "tasks/tb-compare/spec.yaml",
+    "sha256": "6ee679ebc2e7d3cda3270c5b2a69eeaeab18e9c159b6e36c19abbebac82e9da4"
+  },
+  "description": null,
+  "test_set": {
+    "id": "tb-compare-v1",
+    "inputs": {
+      "fix-git": "3225a7280bb650dcabcd5239fbb148a8f11516f7a5bf8267a3568cdefeee17ba",
+      "git-multibranch": "fbae623093de692d85ceb11db28f45b096a7ac8482957fe1aad49000895caeab",
+      "log-summary-date-ranges": "f53f38841cfac1264df978b5f1d6b71e23f2a0b9758c4c16d0cbec7501cfd73e",
+      "openssl-selfsigned-cert": "91a8c6394009fb67f627ed1262b1a8fcf7774017d9a999051c41162c457afaf7",
+      "regex-log": "038c4ae3993c466f2458cc0a8e264c35ec54989811043131f1546a412550a7e4",
+      "sanitize-git-repo": "c082b11792a047a126599bfb940f190c65933aac6a1386a35b2bb2b38244b6d6"
+    },
+    "labels": null
+  },
+  "candidates": {
+    "terminus-2--anthropic-claude-sonnet-5": {
+      "id": "terminus-2--anthropic-claude-sonnet-5",
+      "adapter": "agent-cli",
+      "cli": {
+        "argv": [
+          "bash",
+          "agents/harbor-run.sh",
+          "terminus-2",
+          "openrouter/anthropic/claude-sonnet-5",
+          "{{input}}"
+        ],
+        "reports_usage": true,
+        "trace": "atif"
+      }
+    },
+    "terminus-2--deepseek-deepseek-v4-flash": {
+      "id": "terminus-2--deepseek-deepseek-v4-flash",
+      "adapter": "agent-cli",
+      "cli": {
+        "argv": [
+          "bash",
+          "agents/harbor-run.sh",
+          "terminus-2",
+          "openrouter/deepseek/deepseek-v4-flash",
+          "{{input}}"
+        ],
+        "reports_usage": true,
+        "trace": "atif"
+      }
+    },
+    "claude-code--anthropic-claude-sonnet-5": {
+      "id": "claude-code--anthropic-claude-sonnet-5",
+      "adapter": "agent-cli",
+      "cli": {
+        "argv": [
+          "bash",
+          "agents/harbor-run.sh",
+          "claude-code",
+          "anthropic/claude-sonnet-5",
+          "{{input}}"
+        ],
+        "reports_usage": true,
+        "trace": "atif"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter",
+    "methods": []
+  },
+  "evaluators": {
+    "required_checks": [
+      "harbor-reward"
+    ],
+    "check_version": "cmd-5367303d+files-d9f0757e",
+    "rubric_sha256": "c35b3cdbb4ce49005ece6794e195ad0f1edf397404977969be9fb7fd0fd47fcc",
+    "check_description": "Harbor's verifier rewarded the trial at least 1; a missing reward is an evaluator error, not a failure.",
+    "producer_template_sha256": "1f1cfea2033817b8c1697078026ffe2cc9625af567f5c45f315d8ed1cecb5f5f",
+    "judge_template_sha256": "313c5d1bb70ba91e2eb1ae84186759350363a84c79fe2fce669ec3e4903cf5b0",
+    "score_template_sha256": "25dae01d5424a453f31da00545d979eb492f7d9fc0c9e21d7681843b53d3b28a"
+  },
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 0,
+    "minimum_required_check_pass_rate": 0,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 1,
+    "timeout_ms": 3000000,
+    "benchmark_mode": "capability-neutral",
+    "cache_mode": "cold",
+    "early_stop": false
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.3.0",
+    "git_sha": "5836dc12",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-10-27T07:12:38.096682Z",
+  "finished_at": "2026-10-28T07:11:19.330Z"
+}

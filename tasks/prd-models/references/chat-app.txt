@@ -1,0 +1,29 @@
+# PRD: Real-time group chat
+
+## Problem and goal
+Registered users need to talk in public channels in real time.
+
+## User stories
+- As a registered user, I want to create and join public channels, so that I can talk about a topic.
+- As a member, I want to see who is online, so that I know who might reply.
+
+## Requirements
+- PRD-1: A registered user can create a public channel.
+  - Acceptance: a new channel appears in the channel list for all users.
+- PRD-2: A registered user can join a channel.
+  - Acceptance: after joining, the user can post in it and receives its messages.
+- PRD-3: Post text messages that appear instantly for all members.
+  - Acceptance: a message appears for other members without a page reload, within 2 seconds.
+- PRD-4: Show who is online per channel.
+  - Acceptance: a member going offline disappears from the channel's online list.
+- PRD-5: Display a timestamp on each message.
+  - Acceptance: every message shows the time it was posted.
+- PRD-6: Load message history when a channel is opened.
+  - Acceptance: opening a channel shows its earlier messages in order.
+
+## Out of scope
+- Private channels, direct messages, attachments, reactions.
+- Registration itself (assumed to exist).
+
+## Open questions / assumptions
+- How much history loads at once is not specified; assumed the most recent 50 with older on scroll.

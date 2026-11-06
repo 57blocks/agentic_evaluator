@@ -85,7 +85,7 @@ export type RunEvent =
       /** Run directory a prior identical generation came from. */
       reusedFrom?: string;
       /** Why a skipped trial was skipped; budget when absent. */
-      skipReason?: "budget" | "early-stop";
+      skipReason?: "budget" | "early-stop" | "provider-errors";
       error?: string;
     }
   | { type: "judge"; step: string; a: string; b: string; input: string; ok: boolean; error?: string }
@@ -98,6 +98,17 @@ export type RunEvent =
     }
   /** A gate went out of the candidate's reach; its remaining trials are not run. */
   | { type: "candidate.stopped"; step: string; candidate: string; afterTrials: number; reason: string }
+  /** Consecutive transport failures closed the outage gate; every call waits `delayMs` before probing again. */
+  | { type: "transport.paused"; consecutive: number; delayMs: number; pausedMs: number }
+  /** A call got through; the outage is over. */
+  | { type: "transport.resumed"; pausedMs: number }
+  /** The gate waited as long as it was allowed; calls now fail as provider errors. */
+  | { type: "transport.gave_up"; consecutive: number; pausedMs: number }
+  /**
+   * Consecutive provider errors tripped the halt (canon/halt.ts). Nothing
+   * further was started; what was skipped is counted by kind.
+   */
+  | { type: "run.halted"; step: string; consecutive: number; skipped: { generation: number; judging: number; scoring: number } }
   /** Wall-clock gaps that make every duration in this run unreliable. */
   | { type: "integrity.gaps"; gaps: number; thresholdMs: number }
   /**

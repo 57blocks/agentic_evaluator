@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>claim-denials-snf-flow-probe workflow report</title>
+<style>
+:root{--ground:#F4F6F9;--surface:#fff;--surface-2:#FAFBFC;--ink:#2B3038;--ink-2:#6B7079;--ink-3:#919499;--rule:#E2E5EA;--accent:#1E78EE;--accent-2:#469BFF;--accent-soft:#EBF4FF;--champ:#F4F9FF;--ok-bg:#EBF9F2;--ok-fg:#1B9A6A;--bad-bg:#FFF0F0;--bad-fg:#F03B3B;--warn-bg:#FCF1D6;--warn-fg:#8A5A00;--shadow:0 2px 6px rgba(27,43,75,.08);--mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;--s1:#2A78D6;--s2:#EB6834;--s3:#1BAF7A;--s4:#EDA100}
+@media(prefers-color-scheme:dark){:root{--ground:#16191E;--surface:#1F2329;--surface-2:#272C33;--ink:#E6E8EC;--ink-2:#ABAEB2;--ink-3:#919499;--rule:#2E343C;--accent:#93C1FF;--accent-2:#469BFF;--accent-soft:rgba(70,155,255,.14);--champ:#1A2A3F;--ok-bg:#173A2C;--ok-fg:#8FE0BC;--bad-bg:#45211F;--bad-fg:#FFB9B9;--warn-bg:#3D3218;--warn-fg:#F6D58A;--shadow:0 2px 6px rgba(0,0,0,.3)}}
+body{margin:0;color:var(--ink);font:14px/1.55 "Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:44px 24px 80px;background:var(--ground)}
+.page{max-width:68rem;margin:0 auto;display:grid;gap:20px}
+.mono,td.num,code,pre,.kv dd{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.kv dd{font-size:13px}
+.small{font-size:12px}
+header.run{display:grid;gap:6px}.eyebrow{margin:0;font-size:13px;color:var(--accent);font-weight:600}
+h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.022em}h1 .id{font-family:var(--mono);font-weight:700;font-size:26px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:8px 0 0;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.kv div{display:grid;gap:2px}.kv dt{font-size:12px;color:var(--ink-3)}.kv dd{margin:0;font-size:13px;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--warn-fg);padding:16px 20px;border-radius:12px;box-shadow:var(--shadow)}
+.verdict.firm{border-left-color:var(--ok-fg)}.verdict.needs-review{border-left-color:var(--bad-fg)}
+.verdict .champ-line b{color:var(--accent)}
+.verdict .tag{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
+.verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
+.verdict p{margin:0}
+.champ-line{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}.champ-line b{font-weight:700}.champ-line .mode{color:var(--ink-2);font-weight:400}
+.trophy{font-size:18px}
+.champ-facts{margin:3px 0 6px;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+section.card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 24px 22px;display:grid;gap:12px;box-shadow:var(--shadow)}
+section.card h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--ink);display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-weight:600;color:var(--ink-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:8px 13px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--surface-2)}
+th.num,td.num{text-align:right;white-space:nowrap}
+td.num .bar{margin-right:8px}td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}tr:last-child td{border-bottom:none}
+td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:var(--mono)}td.cand .prompt{display:block;font-weight:400;font-size:12px;color:var(--ink-3)}
+td .sub{display:block;font-size:11px;color:var(--ink-3)}
+tr.control td.cand::after{content:"control";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
+tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}tr.gated td{color:var(--ink-3)}
+tbody tr{transition:background .12s ease}tbody tr:hover{background:var(--accent-soft)}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:baseline}
+.sw0{background:var(--s1)}.sw1{background:var(--s2)}.sw2{background:var(--s3)}.sw3{background:var(--s4)}
+.bar{display:inline-block;width:92px;height:9px;background:var(--surface-2);border-radius:99px;vertical-align:middle;margin-right:8px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--rule)}
+.bar span{display:block;height:100%;border-radius:99px;background:var(--accent-2)}
+.pill.pass{background:var(--ok-bg);color:var(--ok-fg)}.pill.miss{background:var(--bad-bg);color:var(--bad-fg)}
+ol.trace{margin:0;padding-left:1.2em;font-size:13px;color:var(--ink-2);display:grid;gap:8px}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
+td.ok{color:var(--ok-fg)}td.bad{color:var(--bad-fg)}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.two-col>*{min-width:0;overflow:hidden}
+.two-col .table-wrap{overflow-x:auto}
+.ledger td:first-child{color:var(--ink-2)}.ledger tr.total td{font-weight:600;border-top:2px solid var(--rule)}
+.note{font-size:12.5px;color:var(--ink-2);margin:0}code{background:var(--surface-2);padding:0 5px;border-radius:3px;font-size:12px}
+ul.gaps{margin:0;padding-left:1.1em;font-size:13px;color:var(--ink-2);display:grid;gap:4px}
+details{font-size:13px}summary{cursor:pointer;color:var(--accent);font-weight:500}
+pre{margin:8px 0 0;padding:12px;background:var(--surface-2);border-radius:6px;overflow-x:auto;font-size:12px;line-height:1.55;max-height:420px}
+.steps{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}.steps .arrow{align-self:center;color:var(--ink-3)}
+.step-card{flex:1 1 200px;min-width:0;display:grid;gap:6px;align-content:start;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.step-card.open{border-left:4px solid var(--bad-fg)}.step-card .idx{font-size:12px;color:var(--ink-2);font-weight:500}
+.step-card .pick{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);overflow-wrap:anywhere}.step-card.open .pick{font-family:inherit;color:var(--bad-fg)}
+.step-card .pill{justify-self:start}.step-card .small{color:var(--ink-2)}
+footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
+@media(max-width:480px){h1{font-size:20px}.verdict{grid-template-columns:1fr}section.card{padding:14px}}
+</style></head>
+<body><div class="page">
+  <header class="run">
+    <p class="eyebrow">Agentic Evaluator · workflow report · protocol 0.3</p>
+    <h1>Workflow · <span class="id">claim-denials-snf-flow-probe</span></h1>
+    <dl class="kv">
+      <div><dt>Run</dt><dd>claim-denials-snf-flow-probe-2026-11-03T09-18-23-124Z</dd></div>
+      <div><dt>Steps</dt><dd>3 · chained handoff</dd></div>
+      <div><dt>Total system cost</dt><dd>$2.9127</dd></div>
+      <div><dt>End-to-end</dt><dd>keep-control · directional</dd></div>
+    </dl>
+  </header>
+  <section class="card">
+    <h2>What this evaluates</h2>
+    <p>Probe of claim-denials-snf-flow: 8 items, the hardest of each kind in the v2.3 run, on all three steps and both chain arms. Directional only.</p>
+    <ul><li><b>extract</b>: Read the claim file: the contractor&#39;s reason, the claim&#39;s dates, and the facility&#39;s records copied verbatim.</li><li><b>decide</b>: From extract&#39;s summary: can the denial be reversed, and what should the facility do next (correctable, next_action)?</li><li><b>deadline</b>: From decide&#39;s answer: the last day to take next_action.</li></ul>
+    
+  </section>
+  <div class="verdict ">
+    <span class="tag">keep-control</span>
+    <div><p>The proposed combination did not beat the single-model control by the declared minimum meaningful difference, so the control is kept.</p>
+    <p class="sub">directional · operating mode lowest-cost · rule e2e-validate-v1<br>the proposed combination fails the workflow eligibility gates: reliability 0.875 &lt; 0.9</p></div>
+  </div>
+  <section class="card">
+    <h2>Every step has a recommendation (3 of 3) <span class="hint">evaluated independently, not validated as a workflow</span></h2>
+    <div class="steps"><div class="step-card">
+    <span class="idx">1 · extract</span>
+    <span class="pick">deepseek-v4.1-flash</span>
+    <span class="pill warn">directional</span>
+    <span class="small">lowest cost · gated out: glm-5.3 (reliability 0.875 (7/8) &lt; 0.9)</span>
+    <span class="small">64 trials · $0.4502 · <a href="extract/report.html">extract/report.html</a></span>
+  </div><span class="arrow" aria-hidden="true">→</span><div class="step-card">
+    <span class="idx">2 · decide</span>
+    <span class="pick">sonnet-5</span>
+    <span class="pill warn">directional</span>
+    <span class="small">lowest cost · gated out: kimi-k3 (required-check pass rate 0.750 (6/8) &lt; 0.9); glm-5.3 (required-check pass rate 0.750 (6/8) &lt; 0.9); deepseek-v4.1-flash (required-check pass rate 0.750 (6/8) &lt; 0.9); gpt-5.6-sol (required-check pass rate 0.750 (6/8) &lt; 0.9); qwen3.8-max (required-check pass rate 0.714 (5/7) &lt; 0.9); deepseek-v4-pro (required-check pass rate 0.714 (5/7) &lt; 0.9)</span>
+    <span class="small">64 trials · $1.0204 · <a href="decide/report.html">decide/report.html</a></span>
+  </div><span class="arrow" aria-hidden="true">→</span><div class="step-card">
+    <span class="idx">3 · deadline</span>
+    <span class="pick">deadline-rules</span>
+    <span class="pill warn">directional</span>
+    <span class="small">lowest cost · gated out: sonnet-5 (required-check pass rate 0.625 (5/8) &lt; 0.9); kimi-k3 (required-check pass rate 0.857 (6/7) &lt; 0.9); glm-5.3 (required-check pass rate 0.571 (4/7) &lt; 0.9); deepseek-v4.1-flash (required-check pass rate 0.875 (7/8) &lt; 0.9); gpt-5.6-sol (required-check pass rate 0.875 (7/8) &lt; 0.9); deepseek-v4-pro (required-check pass rate 0.500 (4/8) &lt; 0.9); qwen3.8-max (reliability 0.375 (3/8) &lt; 0.9)</span>
+    <span class="small">72 trials · $1.0703 · <a href="deadline/report.html">deadline/report.html</a></span>
+  </div></div>
+  </section>
+  <section class="card">
+    <h2>Arm assignments <span class="hint">the same (input, trial) pairs</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Step</th><th>Control arm</th><th>Proposed arm</th></tr></thead>
+      <tbody><tr><td class="cand">extract</td><td>opus-5.5</td><td class="cand">deepseek-v4.1-flash ←</td></tr><tr><td class="cand">decide</td><td>opus-5.5</td><td class="cand">sonnet-5 ←</td></tr><tr><td class="cand">deadline</td><td>opus-5.5</td><td class="cand">deadline-rules ←</td></tr></tbody>
+    </table></div>
+    <p class="note">The control arm runs the control candidate on every step; the proposed arm runs each step's recommended candidate. Arrows mark the steps where the two differ.</p>
+  </section>
+  <section class="card">
+    <h2>End-to-end arms</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Arm</th><th class="num">Workflows</th><th class="num">Success</th><th class="num">Failure</th><th class="num">Undetermined</th><th class="num">Cost</th></tr></thead>
+      <tbody><tr><td class="cand">control</td><td class="num">8</td><td class="num">8</td><td class="num">0</td><td class="num">0</td><td class="num">$0.3028</td></tr><tr><td class="cand">proposed</td><td class="num">8</td><td class="num">7</td><td class="num">1</td><td class="num">0</td><td class="num">$0.0690</td></tr></tbody>
+    </table></div>
+    <p class="note">Decision metric <code>cost_per_success</code>: proposed 0.0099 vs control 0.0378, improvement 0.0280, minimum meaningful difference not declared. Paired: 8 cases (both arms succeeded 7, only proposed 0, only control 1, neither 0).</p>
+  </section>
+  <section class="card">
+    <h2>Recommendation per step <span class="hint">who each gate removed, trials, cost and the step report</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Step</th><th>Recommended</th><th>Gated out</th><th class="num">Trials</th><th class="num">Cost</th><th>Report</th></tr></thead>
+      <tbody><tr class="chosen">
+    <td class="cand">extract<span class="model">lowest cost</span></td>
+    <td>deepseek-v4.1-flash<span class="sub">directional</span></td>
+    <td class="small">glm-5.3 (reliability 0.875 (7/8) &lt; 0.9)</td>
+    <td class="num">64</td>
+    <td class="num">$0.4502</td>
+    <td class="small"><a href="extract/report.html">extract/report.html</a></td>
+  </tr><tr class="chosen">
+    <td class="cand">decide<span class="model">lowest cost</span></td>
+    <td>sonnet-5<span class="sub">directional</span></td>
+    <td class="small">kimi-k3 (required-check pass rate 0.750 (6/8) &lt; 0.9); glm-5.3 (required-check pass rate 0.750 (6/8) &lt; 0.9); deepseek-v4.1-flash (required-check pass rate 0.750 (6/8) &lt; 0.9); gpt-5.6-sol (required-check pass rate 0.750 (6/8) &lt; 0.9); qwen3.8-max (required-check pass rate 0.714 (5/7) &lt; 0.9); deepseek-v4-pro (required-check pass rate 0.714 (5/7) &lt; 0.9)</td>
+    <td class="num">64</td>
+    <td class="num">$1.0204</td>
+    <td class="small"><a href="decide/report.html">decide/report.html</a></td>
+  </tr><tr class="chosen">
+    <td class="cand">deadline<span class="model">lowest cost</span></td>
+    <td>deadline-rules<span class="sub">directional</span></td>
+    <td class="small">sonnet-5 (required-check pass rate 0.625 (5/8) &lt; 0.9); kimi-k3 (required-check pass rate 0.857 (6/7) &lt; 0.9); glm-5.3 (required-check pass rate 0.571 (4/7) &lt; 0.9); deepseek-v4.1-flash (required-check pass rate 0.875 (7/8) &lt; 0.9); gpt-5.6-sol (required-check pass rate 0.875 (7/8) &lt; 0.9); deepseek-v4-pro (required-check pass rate 0.500 (4/8) &lt; 0.9); qwen3.8-max (reliability 0.375 (3/8) &lt; 0.9)</td>
+    <td class="num">72</td>
+    <td class="num">$1.0703</td>
+    <td class="small"><a href="deadline/report.html">deadline/report.html</a></td>
+  </tr></tbody>
+    </table></div>
+  </section>
+  <section class="card">
+    <h2>Whole-workflow cost <span class="hint">source: estimated</span></h2>
+    <div class="table-wrap"><table class="ledger">
+      <tbody>
+        <tr class=""><td>Generation</td><td class="num">$2.5409</td></tr><tr class=""><td>Judging</td><td class="num">$0.0000</td></tr><tr class=""><td>Scoring</td><td class="num">$0.0000</td></tr><tr class=""><td>Checks</td><td class="num">$0.0000</td></tr><tr class=""><td>Retries</td><td class="num">$0.0000</td></tr>
+        <tr class=""><td>All steps</td><td class="num">$2.5409</td></tr><tr class=""><td>End-to-end arms</td><td class="num">$0.3717</td></tr><tr class="total"><td>Total system cost</td><td class="num">$2.9127</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">The end-to-end arms are listed separately: they are extra generations, not a double count of the step evidence.</p>
+  </section>
+  <section class="card">
+    <h2>Not observed and not compared <span class="hint">GAPS.md</span></h2>
+    <ul class="gaps"><li class="sub"><b>Every step</b></li><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: the provider reported cached prompt tokens on some calls; recorded under <code>tokens.cached</code>, no cache cost breakdown.</li><li><code>human_intervention</code>: not observed; no trace format read here says whether the agent waited on a person.</li><li><code>tool_calls</code>, turns: not observed; no candidate declared <code>cli.trace</code>, so what the agents did between input and output is not recorded.</li><li><code>checkpoint</code>: not observed; no trace format read here says whether the agent resumed from one.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>absolute 1–5 scoring: **not run** — the spec declares <code>methods</code> without <code>absolute-1-5</code>. Magnitude is therefore not observed at all in this run; the empty score columns are a declaration, not a failure.</li><li>pairwise judging: **not run** — the spec declares <code>methods</code> without <code>pairwise-swap</code>. No preference direction is observed in this run.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: the chosen candidate&#39;s gated rates carry Wilson 95% intervals, and a highest-assurance pick must beat the runner-up on an exact sign test over inputs (recommendation.json <code>evidence</code>). Inputs generated from one template are still treated as independent, which overstates certainty when they share a template.</li><li class="sub"><b>Individual steps</b></li><li><code>extract</code>: generation cost: **not observed** for 1 trial(s) (glm-5.3). These candidates&#39; spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger <code>generation</code> and <code>total</code> are lower bounds, and <code>cost_per_success</code> / <code>cost_per_attempt</code> are null.</li><li><code>extract</code>: <code>deployment_ref.region / tier</code>: route plus who served the call (OpenRouter&#39;s upstream provider, or the model id a direct API answered with); region and service tier are not exposed.</li><li><code>extract</code>: effective N: 1 of 8 inputs separated any two candidates on task success; 7 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).</li><li><code>decide</code>: generation cost: **not observed** for 2 trial(s) (deepseek-v4-pro, qwen3.8-max). These candidates&#39; spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger <code>generation</code> and <code>total</code> are lower bounds, and <code>cost_per_success</code> / <code>cost_per_attempt</code> are null.</li><li><code>decide</code>: <code>deployment_ref.region / tier</code>: route plus who served the call (OpenRouter&#39;s upstream provider, or the model id a direct API answered with); region and service tier are not exposed.</li><li><code>decide</code>: effective N: 3 of 8 inputs separated any two candidates on task success; 5 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).</li><li><code>deadline</code>: generation cost: **not observed** for 7 trial(s) (glm-5.3, kimi-k3, qwen3.8-max). These candidates&#39; spend was not reported to the harness, so their cost per success is undefined (null, not $0); ledger <code>generation</code> and <code>total</code> are lower bounds, and <code>cost_per_success</code> / <code>cost_per_attempt</code> are null.</li><li><code>deadline</code>: generation cost: **self-reported** by deadline-rules through <code>.eval-usage.json</code> (the spec declares <code>cli.reports_usage</code>). Recorded as <code>estimated</code>; not verified by the harness, so it is only as trustworthy as the command that wrote it.</li><li><code>deadline</code>: <code>deployment_ref.region / tier</code>: who served the model is read from the command&#39;s trace (<code>cli/…</code>), from OpenRouter&#39;s upstream provider, or from the model id a direct API answered with; region and service tier are not exposed.</li><li><code>deadline</code>: effective N: 5 of 8 inputs separated any two candidates on task success; 3 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json).</li><li class="sub"><b>End to end</b></li><li>verdict <code>keep-control</code> is directional; rule e2e-validate-v1.</li><li>not compared: single-configuration workflows other than the declared control</li><li>not compared: the current production workflow</li></ul>
+  </section>
+  <footer><span>claim-denials-snf-flow-probe-2026-11-03T09-18-23-124Z/</span><span>workflow.json · e2e-validation.json</span><span>each step's evidence is in its own directory</span></footer>
+</div></body></html>

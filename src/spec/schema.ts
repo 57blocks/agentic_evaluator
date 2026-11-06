@@ -10,6 +10,12 @@
 /** The protocol version a spec must declare; the dashboard shows the same value. */
 export const PROTOCOL_VERSION = "0.3";
 
+/**
+ * A step id or input name becomes a directory under the run, and an input
+ * name a file under `inputs/`: no separators, and neither `.` nor `..`.
+ */
+const PATH_SAFE = "^(?!\\.\\.?$)[^/\\\\]+$";
+
 /** USD per million tokens, on a candidate or the judge. */
 const PRICE_SCHEMA = {
   type: "object",
@@ -37,7 +43,8 @@ export const SPEC_SCHEMA = {
     run_name: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{1,63}$" },
     /** What this evaluation decides and tests, in a few sentences; the report opens with it. */
     description: { type: "string", minLength: 1 },
-    budget_usd: { type: "number", minimum: 0 },
+    // Strictly positive: a zero ceiling would start a run that skips every call.
+    budget_usd: { type: "number", exclusiveMinimum: 0 },
     workflow: {
       type: "object",
       additionalProperties: false,
@@ -48,8 +55,8 @@ export const SPEC_SCHEMA = {
           type: "object",
           additionalProperties: false,
           properties: {
-            inputs: { type: "array", minItems: 1, items: { type: "string" } },
-            final_checks: { type: "array", minItems: 1, items: { type: "string" } },
+            inputs: { type: "array", minItems: 1, uniqueItems: true, items: { type: "string", pattern: PATH_SAFE } },
+            final_checks: { type: "array", minItems: 1, uniqueItems: true, items: { type: "string" } },
             // Per step, in the arms only: a chained step can do far more than
             // on its own inputs (every task, not one).
             steps: {
@@ -83,7 +90,7 @@ export const SPEC_SCHEMA = {
             additionalProperties: false,
             required: ["id", "version", "test_set", "candidate_ids"],
             properties: {
-              id: { type: "string" },
+              id: { type: "string", pattern: PATH_SAFE },
               version: { type: "string" },
               /** What this step's candidates do, in a sentence; shown beside the step's id. */
               description: { type: "string", minLength: 1 },
@@ -93,14 +100,14 @@ export const SPEC_SCHEMA = {
                 required: ["id", "inputs"],
                 properties: {
                   id: { type: "string" },
-                  inputs: { type: "array", minItems: 1, items: { type: "string" } },
+                  inputs: { type: "array", minItems: 1, uniqueItems: true, items: { type: "string", pattern: PATH_SAFE } },
                   fixture_dir: { type: "string", minLength: 1 },
                   /** JSON, task-relative: { "<input>": { "tags": [...], "split": "dev" } }; the report breaks results down by it. */
                   labels_file: { type: "string", minLength: 1 },
                 },
               },
-              candidate_ids: { type: "array", minItems: 1, items: { type: "string" } },
-              required_checks: { type: "array", items: { type: "string" } },
+              candidate_ids: { type: "array", minItems: 1, uniqueItems: true, items: { type: "string" } },
+              required_checks: { type: "array", uniqueItems: true, items: { type: "string" } },
               judged_dimensions: { type: "array", items: { type: "string" } },
               success_criteria: {
                 type: "object",
@@ -225,6 +232,40 @@ export const SPEC_SCHEMA = {
               timeout_seconds: { type: "number", exclusiveMinimum: 0 },
               /** What a pass means, in one sentence; the report shows it beside the pass rate. */
               description: { type: "string", minLength: 1 },
+              /** Rules over the trace a command candidate leaves (`cli.trace`), judged after the check itself. */
+              trace: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  tool_used: {
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["name"],
+                      properties: {
+                        name: { type: "string", minLength: 1 },
+                        min: { type: "integer", minimum: 0 },
+                        max: { type: "integer", minimum: 0 },
+                      },
+                    },
+                  },
+                  tool_order: {
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["first", "then"],
+                      properties: { first: { type: "string", minLength: 1 }, then: { type: "string", minLength: 1 } },
+                    },
+                  },
+                  max_tool_calls: { type: "integer", minimum: 0 },
+                  max_turns: { type: "integer", minimum: 0 },
+                  max_repeated_failures: { type: "integer", minimum: 0 },
+                },
+              },
             },
           },
         },
@@ -270,6 +311,10 @@ export const SPEC_SCHEMA = {
         cache_mode: { type: "string", enum: ["cold", "warm", "both"] },
         minimum_meaningful_difference: { type: ["number", "null"] },
         early_stop: { type: "boolean" },
+        /** How long the run waits out a network outage before letting calls fail; 0 turns pausing off. Default 600. */
+        outage_wait_seconds: { type: "integer", minimum: 0 },
+        /** Consecutive provider errors that halt the run; null turns the halt off. Default 10. */
+        max_consecutive_provider_errors: { type: ["integer", "null"], minimum: 1 },
       },
     },
     "x-harness": {

@@ -113,3 +113,72 @@ test("a FIFO left as the trace does not block the harness", { skip: process.plat
   assert.ok(Date.now() - started < 5_000, "the open returned");
   assert.match(r.traceError ?? "", /not a regular file/);
 });
+
+/* The trace reaches the required check as trace.json, and is kept with the trial's evidence. */
+
+test("a run's check sees the trace as trace.json, kept beside the files the agent left", async () => {
+  const { generateOne } = await import("../src/core/generate.js");
+  const taskRoot = await fs.mkdtemp(path.join(os.tmpdir(), "trace-task-"));
+  const evidence = path.join(taskRoot, "runs", "r1", "checks", "c__i__t0");
+  // Pass only if the trace shows the agent used its terminal.
+  const check = `const t = JSON.parse(require("fs").readFileSync("trace.json", "utf-8")); process.exit(t.tool_calls.length > 0 ? 0 : 1)`;
+  const suite = {
+    step: "s", taskRoot, inputs: ["i"], candidates: ["c"],
+    check: { id: "used-the-terminal", kind: "command", argv: [process.execPath, "-e", check], versionFiles: [], timeoutMs: 10_000 },
+  } as unknown as import("../src/types.js").Suite;
+
+  const g = await generateOne({
+    suite, producer: "codegen", promptTpl: "", inputSlug: "i", inputText: "go",
+    def: { id: "c", adapter: "agent-cli", cli: { argv: [process.execPath, "-e", copyingTrace()], trace: "atif" } },
+    temperature: 0, timeoutMs: 10_000, checkWorkDir: evidence, trace: () => {}, traceContext: {},
+  });
+
+  assert.equal(g.checkState, "pass", g.checkOutput);
+  const kept = JSON.parse(await fs.readFile(path.join(evidence, "trace.json"), "utf-8")) as { format: string; tool_calls: unknown[] };
+  assert.equal(kept.format, "atif");
+  assert.equal(kept.tool_calls.length, 23);
+  assert.ok(!g.artifacts.some((f) => f.path === "trace.json"), "the written trace is not the candidate's deliverable");
+});
+
+/* A reused trial regraded under a changed check gets its trace back: fixing a check never means paying for the agent again. */
+
+test("--reuse regrades a trial with the trace it left, so a new trace rule needs no new run", async () => {
+  const { runSuite } = await import("../src/core/execute.js");
+  const sample = path.resolve(import.meta.dirname, "..", "examples", "tasks", "custom-check");
+  const ws = await fs.mkdtemp(path.join(os.tmpdir(), "trace-reuse-"));
+  const task = path.join(ws, "tasks", "traced");
+  await fs.cp(sample, task, { recursive: true, filter: (src) => !src.includes(`${path.sep}runs`) });
+  const spec = path.join(task, "spec.yaml");
+  let yaml = await fs.readFile(spec, "utf-8");
+  // One candidate that leaves an ATIF trace; one command check, versioned by its file.
+  yaml = yaml.replace(/candidates:[\s\S]*?\nevaluators:/, `candidates:\n  - id: tracer\n    adapter: agent-cli\n    cli:\n      argv: [${JSON.stringify(process.execPath)}, -e, ${JSON.stringify(copyingTrace())}]\n      trace: atif\n\nevaluators:`);
+  yaml = yaml.replace("candidate_ids: [careful, sloppy]", "candidate_ids: [tracer]").replace("control_candidate: careful", "control_candidate: tracer");
+  yaml = yaml.replace("argv: [node, checks/release-notes.mjs]", `argv: [${JSON.stringify(process.execPath)}, checks/gate.cjs]`).replace("version_files: [checks/release-notes.mjs]", "version_files: [checks/gate.cjs]");
+  await fs.writeFile(spec, yaml);
+  const gate = path.join(task, "checks", "gate.cjs");
+  await fs.writeFile(gate, "process.exit(require('fs').existsSync('out.txt') ? 0 : 1);\n");
+
+  await runSuite(spec, false, { yes: true, onEvent: () => {} });
+  const runsRoot = path.join(task, "runs");
+  const [firstRun] = await fs.readdir(runsRoot);
+  const evidence = (run: string) => path.join(runsRoot, run, "checks", "tracer__changelog__t0", "trace.json");
+  assert.ok(await fs.stat(evidence(firstRun!)).then(() => true, () => false), "the first run kept trace.json with the check's evidence");
+
+  // The check changes: now it grades the path, not the file.
+  await fs.writeFile(gate, "const t = JSON.parse(require('fs').readFileSync('trace.json', 'utf-8')); process.exit(t.tool_calls.length === 23 ? 0 : 1);\n");
+  const events: { reusedFrom?: string; check?: string; state: string }[] = [];
+  const saved = process.env.EVAL_REUSE;
+  process.env.EVAL_REUSE = "1";
+  try {
+    await runSuite(spec, false, { yes: true, onEvent: (e) => { if (e.type === "trial") events.push(e); } });
+  } finally {
+    if (saved === undefined) delete process.env.EVAL_REUSE;
+    else process.env.EVAL_REUSE = saved;
+  }
+
+  const [trial] = events;
+  assert.ok(trial?.reusedFrom, "the agent did not run again");
+  assert.equal(trial?.check, "pass", "the new rule was applied to the kept trace");
+  const second = (await fs.readdir(runsRoot)).find((r) => r !== firstRun)!;
+  assert.ok(await fs.stat(evidence(second)).then(() => true, () => false), "the regrade's evidence carries trace.json too");
+});

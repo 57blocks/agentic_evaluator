@@ -1,0 +1,22 @@
+# PRD: Clinic online booking
+
+## Problem and goal
+Patients should book appointments online without calling.
+
+## User stories
+- As a patient, I want to book a free slot online, so that I don't have to call.
+- As a receptionist, I want to approve bookings, so that the calendar stays correct.
+
+## Requirements
+- PRD-1: Patients see the doctor's free 30-minute slots and book one.
+  - Acceptance: a booked slot is no longer shown as free.
+- PRD-2: The receptionist approves or rejects each booking.
+  - Acceptance: a booking is valid only after approval.
+- PRD-3: The patient is told the outcome.
+  - Acceptance: the patient gets an instant "request received" message and a confirmation when approved.
+
+## Out of scope
+- Payments, multiple doctors, cancellations.
+
+## Open questions / assumptions
+- Conflict: the brief requires receptionist approval and also an instant confirmation. Assumed "instant" means an instant acknowledgement of the request, with the real confirmation after approval. Needs product sign-off.

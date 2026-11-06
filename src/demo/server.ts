@@ -209,6 +209,13 @@ async function sendReport(ws: Workspace, res: http.ServerResponse, kind: string,
  * run rather than whatever happened to arrive after it showed up.
  */
 function streamRun(runs: RunRegistry, res: http.ServerResponse, runId: string): void {
+  // Look the run up before any header goes out: a 404 after a 200 is a
+  // second writeHead, which throws, and the catch around the request would
+  // then throw a third time — an unhandled rejection that ends the server.
+  if (!runs.get(runId)) {
+    sendJson(res, 404, { error: "run not found" });
+    return;
+  }
   res.writeHead(200, {
     "content-type": "text/event-stream; charset=utf-8",
     "cache-control": "no-store",
@@ -224,7 +231,7 @@ function streamRun(runs: RunRegistry, res: http.ServerResponse, runId: string): 
     },
   );
   if (!unsubscribe) {
-    sendJson(res, 404, { error: "run not found" });
+    res.end();
     return;
   }
   res.on("close", unsubscribe);

@@ -329,3 +329,58 @@ test("a legacy suites/*.json path is refused with a pointer to spec.yaml", async
     return true;
   });
 });
+
+test("trace rules on a check compile onto it, for either kind", async () => {
+  const { spec, sha } = await parsePatched([
+    ["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tool_used: [{ name: Bash, min: 1 }, { name: WebFetch, max: 0 }]\n        tool_order: [{ first: Edit, then: Bash }]\n        max_tool_calls: 60"],
+  ]);
+
+  const suite = compileSpec(spec, "x.yaml", sha, TASK_ROOT);
+
+  assert.deepEqual(suite.check, {
+    id: "tsc-noemit",
+    kind: "tsc",
+    scaffoldDir: "scaffold",
+    trace: { tool_used: [{ name: "Bash", min: 1 }, { name: "WebFetch", max: 0 }], tool_order: [{ first: "Edit", then: "Bash" }], max_tool_calls: 60 },
+  });
+});
+
+test("an empty trace block, an unknown rule, and min above max are rejected at load time", async () => {
+  const empty = await parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace: {}"]]);
+  assert.throws(() => compileSpec(empty.spec, "x.yaml", empty.sha, TASK_ROOT), /trace: \{\} with no rule/);
+
+  await assert.rejects(
+    parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tools_used: [{ name: Bash }]"]]),
+    /tools_used|additional propert/i,
+  );
+
+  const inverted = await parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tool_used: [{ name: Bash, min: 3, max: 1 }]"]]);
+  assert.throws(() => compileSpec(inverted.spec, "x.yaml", inverted.sha, TASK_ROOT), /min 3 above max 1/);
+
+  const unbounded = await parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tool_used: [{ name: Bash }]"]]);
+  assert.throws(() => compileSpec(unbounded.spec, "x.yaml", unbounded.sha, TASK_ROOT), /needs min, max or both/);
+
+  const self = await parsePatched([["      kind: tsc\n      scaffold_dir: scaffold", "      kind: tsc\n      scaffold_dir: scaffold\n      trace:\n        tool_order: [{ first: Bash, then: Bash }]"]]);
+  assert.throws(() => compileSpec(self.spec, "x.yaml", self.sha, TASK_ROOT), /orders Bash before itself/);
+});
+
+test("a candidate listed twice on a step is rejected: it would run twice and count twice", async () => {
+  const dup = await parsePatched([[CANDIDATE_IDS, "candidate_ids: [sonnet-5, sonnet-5, kimi-k3]"]]).catch((err: unknown) => err);
+  assert.ok(dup instanceof SpecError, String(dup));
+  assert.match(dup.message, /candidate_ids/);
+});
+
+test("budget_usd: 0 is rejected rather than starting a run that skips everything", async () => {
+  const zero = await parsePatched([["budget_usd: 10", "budget_usd: 0"]]).catch((err: unknown) => err);
+  assert.ok(zero instanceof SpecError, String(zero));
+  assert.match(zero.message, /budget_usd/);
+});
+
+test("a step id or input name that is a path (`..`, a slash) is rejected before it names a directory", async () => {
+  const dots = await parsePatched([["- id: codegen", "- id: .."]]).catch((err: unknown) => err);
+  assert.ok(dots instanceof SpecError, String(dots));
+  assert.match(dots.message, /steps\/0\/id/);
+  const slash = await parsePatched([["inputs: [code-utils,", "inputs: [../../outside,"]]).catch((err: unknown) => err);
+  assert.ok(slash instanceof SpecError, String(slash));
+  assert.match(slash.message, /inputs\/0/);
+});

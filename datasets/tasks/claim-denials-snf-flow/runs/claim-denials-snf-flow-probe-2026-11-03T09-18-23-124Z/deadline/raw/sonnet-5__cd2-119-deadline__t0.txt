@@ -1,0 +1,15 @@
+Looking at this case: the clinical records show the qualifying stay actually *was* met (inpatient admission order 5/27, discharge 5/30 = 3 qualifying inpatient days: 5/27, 5/28, 5/29), so this denial is correctable via appeal with supporting documentation (the admission order/discharge summary).
+
+**Deadline calculation (Redetermination — first level appeal):**
+
+- Medicare allows **120 days** from the **date of receipt** of the Medicare Remittance Advice (notice of initial determination).
+- Receipt is **presumed to be 5 calendar days** after the date of the notice (42 CFR § 405.942), absent evidence otherwise.
+
+**Calculation:**
+- Remittance (notice) date: 2025-07-14
+- Presumed receipt date: 2025-07-14 + 5 days = **2025-07-19**
+- Appeal deadline: 2025-07-19 + 120 days = **2025-11-16**
+
+```json
+{ "deadline": "2025-11-16" }
+```

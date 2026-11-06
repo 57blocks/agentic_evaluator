@@ -1,0 +1,22 @@
+{
+  "inputs": 1,
+  "effective_n": 0,
+  "counts": {
+    "splits": 0,
+    "all-pass": 0,
+    "all-fail": 0,
+    "flat": 0,
+    "unscored": 1
+  },
+  "items": [
+    {
+      "input": "fix-git",
+      "class": "unscored",
+      "pass_rate": 1,
+      "by_candidate": {
+        "oracle": 1
+      },
+      "discrimination": null
+    }
+  ]
+}
