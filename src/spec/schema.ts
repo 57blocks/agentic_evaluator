@@ -97,10 +97,13 @@ export const SPEC_SCHEMA = {
               test_set: {
                 type: "object",
                 additionalProperties: false,
-                required: ["id", "inputs"],
+                required: ["id"],
                 properties: {
                   id: { type: "string" },
+                  /** The inputs to run; with items_file, a subset of its ids (all of them when absent). */
                   inputs: { type: "array", minItems: 1, uniqueItems: true, items: { type: "string", pattern: PATH_SAFE } },
+                  /** JSONL, task-relative: one line per input (id, input | input_file, expected, tags, split); see src/core/items.ts. */
+                  items_file: { type: "string", minLength: 1 },
                   fixture_dir: { type: "string", minLength: 1 },
                   /** JSON, task-relative: { "<input>": { "tags": [...], "split": "dev" } }; the report breaks results down by it. */
                   labels_file: { type: "string", minLength: 1 },
