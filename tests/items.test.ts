@@ -58,6 +58,7 @@ test("a bad line is named by file and line number", () => {
   const cases: Array<[string, RegExp]> = [
     ['{"id":"a","input":"x"}\nnot json\n', /items\.jsonl:2: not valid JSON/],
     ['{"id":"a","input":"x"}\n{"id":"a","input":"y"}\n', /items\.jsonl:2: id "a" is already used on line 1/],
+    ['{"id":"q-1","input":"x"}\n{"id":"Q-1","input":"y"}\n', /items\.jsonl:2: id "Q-1" is already used on line 1/],
     ['{"id":"a","input":"x","input_file":"a.txt"}\n', /items\.jsonl:1 \(a\): give exactly one of "input" and "input_file"/],
     ['{"id":"a"}\n', /exactly one of "input" and "input_file"/],
     ['{"id":"../a","input":"x"}\n', /items\.jsonl:1: "id" must be a string usable as a file name/],
@@ -108,7 +109,7 @@ test("writing out creates inputs/ and references/, and leaves equal files alone"
   assert.equal((await fs.stat(path.join(task, "inputs", "changelog.txt"))).mtimeMs, before, "an equal file is not rewritten");
 });
 
-test("an edit to the items file rewrites the files written from it, and drops an answer it no longer has", async () => {
+test("an edit to the items file rewrites the files written from it; an answer it no longer has must be deleted by hand", async () => {
   // Arrange - files written, then the items file edited after them
   const task = await fs.mkdtemp(path.join(os.tmpdir(), "items-edit-"));
   const file = path.join(task, "items.jsonl");
@@ -118,12 +119,15 @@ test("an edit to the items file rewrites the files written from it, and drops an
   await ageBy(path.join(task, "references", "changelog.txt"), -60);
   await fs.writeFile(file, jsonl([{ id: "changelog", input: "a new question" }, ITEMS[1]]));
 
-  // Act
+  // Act + Assert - the old answer key may be hand-written: refused, not deleted
+  await assert.rejects(
+    materializeItems(task, "items.jsonl", readItems(task, "items.jsonl")),
+    /references\/changelog\.txt is an answer key for a line of items\.jsonl with no "expected": add the answer to the line, or delete the file/,
+  );
+  assert.match(await fs.readFile(path.join(task, "references", "changelog.txt"), "utf-8"), /"prs"/);
+  await fs.rm(path.join(task, "references", "changelog.txt"));
   await materializeItems(task, "items.jsonl", readItems(task, "items.jsonl"));
-
-  // Assert
   assert.equal(await fs.readFile(path.join(task, "inputs", "changelog.txt"), "utf-8"), "a new question\n");
-  await assert.rejects(fs.stat(path.join(task, "references", "changelog.txt")), "a stale answer key would still be graded against");
 });
 
 test("a file edited by hand after the items file fails the load, named, and is left as it is", async () => {

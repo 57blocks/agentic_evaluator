@@ -97,9 +97,10 @@ export function parseItemsText(text: string, file: string): ParsedLine[] {
       throw new ItemsError(`${where}: not valid JSON (${err instanceof Error ? err.message : String(err)})`);
     }
     const item = parseLine(raw, where);
-    const first = seen.get(item.id);
+    // Compared without case: on macOS "A" and "a" would share inputs/a.txt.
+    const first = seen.get(item.id.toLowerCase());
     if (first !== undefined) throw new ItemsError(`${where}: id "${item.id}" is already used on line ${first}`);
-    seen.set(item.id, i + 1);
+    seen.set(item.id.toLowerCase(), i + 1);
     out.push(item);
   });
   if (out.length === 0) throw new ItemsError(`${file}: no items`);
@@ -188,12 +189,15 @@ function targetsOf(item: TestItem): Target[] {
   ];
 }
 
+const listed = (paths: readonly string[]): string => paths.slice(0, 5).join(", ") + (paths.length > 5 ? ` and ${paths.length - 5} more` : "");
+
 const mtimeOf = (abs: string): Promise<number | null> => fs.stat(abs).then((s) => s.mtimeMs, () => null);
 
 /**
  * Write the items out where the engine and checks read them: inputs/<id>.txt
- * and references/<id>.txt, removing a reference whose line no longer has an
- * `expected` (a stale answer key would still be graded against).
+ * and references/<id>.txt. A reference whose line has no `expected` fails
+ * the load rather than being deleted or kept: it may be hand-written, and a
+ * stale answer key would still be graded against.
  *
  * The items file is the source, but a hand edit is never reverted in
  * silence: a file that differs from it and was changed after it fails the
@@ -204,6 +208,7 @@ export async function materializeItems(taskRoot: string, itemsFile: string, item
   const itemsMtime = (await mtimeOf(path.resolve(taskRoot, itemsFile))) ?? 0;
   const pending: Array<Target & { abs: string }> = [];
   const edited: string[] = [];
+  const orphans: string[] = [];
   for (const item of items) {
     if (item.expected !== undefined && (await fs.stat(path.join(taskRoot, "references", item.id)).then((st) => st.isDirectory(), () => false))) {
       throw new ItemsError(`references/${item.id}/ would be graded instead of ${itemsFile}'s expected for ${item.id}: remove one of them`);
@@ -212,23 +217,29 @@ export async function materializeItems(taskRoot: string, itemsFile: string, item
       const abs = path.join(taskRoot, target.rel);
       const current = await fs.readFile(abs, "utf-8").catch(() => null);
       if (current === target.text) continue;
+      if (target.text === null) {
+        orphans.push(target.rel.split(path.sep).join("/"));
+        continue;
+      }
       const mtime = current === null ? null : await mtimeOf(abs);
       if (mtime !== null && mtime > itemsMtime) edited.push(target.rel.split(path.sep).join("/"));
       else pending.push({ ...target, abs });
     }
   }
   if (edited.length > 0) {
-    const shown = edited.slice(0, 5).join(", ") + (edited.length > 5 ? ` and ${edited.length - 5} more` : "");
     throw new ItemsError(
-      `${shown} ${edited.length === 1 ? "was" : "were"} changed after ${itemsFile} and no longer match${edited.length === 1 ? "es" : ""} it. ` +
+      `${listed(edited)} ${edited.length === 1 ? "was" : "were"} changed after ${itemsFile} and no longer match${edited.length === 1 ? "es" : ""} it. ` +
         `${itemsFile} is the source: put the change there, or delete the file to have it written again`,
     );
   }
+  if (orphans.length > 0) {
+    throw new ItemsError(
+      `${listed(orphans)} ${orphans.length === 1 ? "is an answer key" : "are answer keys"} for ${orphans.length === 1 ? "a line" : "lines"} of ${itemsFile} with no "expected": ` +
+        `add the answer to the line, or delete the file`,
+    );
+  }
   for (const { abs, text } of pending) {
-    if (text === null) {
-      await fs.rm(abs, { force: true });
-      continue;
-    }
+    if (text === null) continue;
     await fs.mkdir(path.dirname(abs), { recursive: true });
     await fs.writeFile(abs, text, "utf-8");
   }
