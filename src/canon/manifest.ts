@@ -129,7 +129,8 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     test_set: {
       id: suite.testSetId ?? null,
       inputs: m.inputShas,
-      labels: suite.labelsFile && suite.taskRoot ? await readLabels(suite.taskRoot, suite.labelsFile) : null,
+      // An items file's labels were read at load: the file is hidden by now.
+      labels: suite.labels ?? (suite.labelsFile && suite.taskRoot ? await readLabels(suite.taskRoot, suite.labelsFile) : null),
     },
     candidates: suite.candidateDefs ?? {},
     control_candidate: suite.controlCandidate ?? null,

@@ -8,6 +8,7 @@
 
 import type { AgentActivity } from "./canon/agent-trace.js";
 import type { TraceRules } from "./canon/trace-rules.js";
+import type { InputLabels } from "./canon/about.js";
 import type {
   CandidateDef,
   CompletionState,
@@ -213,6 +214,12 @@ export interface Suite {
   stepDescription?: string;
   /** `test_set.labels_file`, task-relative: tags and split per input. */
   labelsFile?: string;
+  /** Tags and split per input, read from `test_set.items_file` when the spec was loaded. */
+  labels?: InputLabels;
+  /** `test_set.items_file`, task-relative: hidden with references/ while a run is in flight. */
+  itemsFile?: string;
+  /** Files under inputs/ or references/ that held other text until the items file was written out. */
+  itemsReplaced?: string[];
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;

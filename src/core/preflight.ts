@@ -28,14 +28,13 @@ import { inputsToClearGate, minDetectableGap, wilson } from "../canon/stats.js";
 import { matchesShow } from "../canon/review.js";
 import { describeTraceRules, hasTraceRules } from "../canon/trace-rules.js";
 import { fixturePath, isDir } from "./fixture.js";
-import { restoreAnswerKey } from "./answer-key.js";
 import { e2eChain, e2eRootInputs } from "./plan.js";
 import { readInput } from "./generate.js";
 import { envRefs } from "../adapters/agent-cli.js";
 import type { CandidateDef } from "../canon/types.js";
 import { taskInputPath } from "../paths.js";
 import { looksLikePath } from "../script-path.js";
-import { loadWorkflow } from "../spec/load-spec.js";
+import { loadWorkflow, restoreAnswerKeyOf } from "../spec/load-spec.js";
 import type { Suite } from "../types.js";
 import { probeCheck } from "./preflight-check.js";
 
@@ -316,6 +315,18 @@ async function fixtureFindings(suite: Suite): Promise<Finding[]> {
   return out;
 }
 
+/** test_set.items_file: how many items, and any file under inputs/ or references/ it just overwrote. */
+function itemsFindings(suite: Suite): Finding[] {
+  if (!suite.itemsFile) return [];
+  const out: Finding[] = [{ severity: "ok", code: "items.file", message: `${suite.inputs.length} inputs from ${suite.itemsFile}, written out as inputs/ and references/` }];
+  const replaced = suite.itemsReplaced ?? [];
+  if (replaced.length > 0) {
+    const shown = replaced.slice(0, 5).join(", ") + (replaced.length > 5 ? ` and ${replaced.length - 5} more` : "");
+    out.push({ severity: "warning", code: "items.replaced", message: `${shown} held other text and ${replaced.length === 1 ? "was" : "were"} rewritten from ${suite.itemsFile}: edit the items file, not the files written from it` });
+  }
+  return out;
+}
+
 async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Finding[]> {
   const findings: Finding[] = [
     ...stepFindings(suite),
@@ -325,6 +336,7 @@ async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Fi
     ...(await reviewFindings(suite)),
     ...(await judgeShowFindings(suite)),
     ...(await fixtureFindings(suite)),
+    ...itemsFindings(suite),
   ];
   if (suite.inputFrom) {
     // Evaluated on its own inputs like any step; only the e2e arms hand it the previous step's output.
@@ -352,15 +364,16 @@ async function e2eFindings(suites: readonly Suite[], opts: { keep?: boolean }): 
 }
 
 export async function preflightTask(specPath: string, opts: { keep?: boolean } = {}): Promise<PreflightReport> {
+  // A run that was killed outright leaves references/ (and an items file)
+  // unreadable (answer-key.ts); put them back before the spec reads them.
+  const recovered = await restoreAnswerKeyOf(specPath);
   const suites = await loadWorkflow(specPath);
   const steps: PreflightReport["steps"] = [];
-  // A run that was killed outright leaves references/ unreadable (answer-key.ts).
-  const recovered = suites.length > 0 && restoreAnswerKey(suites[0]!.taskRoot);
   for (const suite of suites) steps.push({ step: suite.stepId ?? suite.step, findings: await preflightStep(suite, opts) });
   const e2e = await e2eFindings(suites, opts);
   if (e2e) steps.push({ step: "e2e", findings: e2e });
   if (recovered) {
-    steps[0]!.findings.unshift({ severity: "warning", code: "references.restored", message: "references/ was left unreadable by an interrupted run; made readable again" });
+    steps[0]!.findings.unshift({ severity: "warning", code: "references.restored", message: "the answer key (references/, or the items file) was left unreadable by an interrupted run; made readable again" });
   }
   const all = steps.flatMap((s) => s.findings);
   return {

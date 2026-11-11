@@ -858,6 +858,36 @@ required check's passes per candidate for each tag and split. All four are
 frozen into the run's `manifest.json`. `agenteval report` on a run made before they existed
 reads them from the task's current spec and says so on the page.
 
+### A test set as one file
+
+When each input is a text and its answer fits in a line, write the whole set
+as one JSONL file instead of `inputs/`, `references/`, a labels file and an id
+list:
+
+```yaml
+test_set:
+  id: revenue-questions
+  items_file: items.jsonl      # inputs: [q-001, q-007] beside it runs a subset
+```
+
+```jsonl
+{"id":"q-001","input":"What was enterprise net revenue in Q3 FY2026?","expected":{"q3_net_revenue_usd":4210000},"tags":["ordinary"],"split":"dev"}
+{"id":"q-002","input_file":"packets/q-002.txt","expected":{"q3_net_revenue_usd":3980000},"tags":["source-conflict"],"split":"holdout"}
+```
+
+Each line needs an `id` and exactly one of `input` (a string, or any JSON
+value) and `input_file` (a task-relative file, read as it stands: for inputs
+too long to read inside a line). `expected`, `tags` and `split` are optional;
+other keys, such as `provenance`, are ignored.
+
+Loading the spec writes the items out as `inputs/<id>.txt` and
+`references/<id>.txt` — a string as itself plus a newline, anything else as
+JSON indented by two plus a newline — so checks, review and the report read
+the files they always have. The items file is the source: `check-task` warns
+when it overwrote a file edited by hand. While candidates run, the items file
+is unreadable along with `references/`, because it holds the answers. For now
+an items file is for single-step tasks, and it replaces `labels_file`.
+
 ### Workflows
 
 A task can have several steps, each evaluated on its own inputs. Add
