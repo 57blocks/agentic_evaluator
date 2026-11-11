@@ -884,9 +884,9 @@ Loading the spec writes the items out as `inputs/<id>.txt` and
 `references/<id>.txt` — a string as itself plus a newline, anything else as
 JSON indented by two plus a newline — so checks, review and the report read
 the files they always have. The items file is the source: edit it, and the
-files written from it are rewritten (a line that drops its `expected` loses
-its reference). A written file changed by hand after the items file is never
-reverted in silence: loading fails and names it. While candidates run, the
+files written from it are rewritten. A written file changed by hand after
+the items file is never reverted in silence, and a reference whose line has
+no `expected` is never deleted: in both cases loading fails and names it. While candidates run, the
 items file is unreadable along with `references/`, because it holds the
 answers. For now an items file is for single-step tasks, and it replaces
 `labels_file`.
