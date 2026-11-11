@@ -218,8 +218,6 @@ export interface Suite {
   labels?: InputLabels;
   /** `test_set.items_file`, task-relative: hidden with references/ while a run is in flight. */
   itemsFile?: string;
-  /** Files under inputs/ or references/ that held other text until the items file was written out. */
-  itemsReplaced?: string[];
   /** sha256 of the spec file as loaded, and its repo-relative path. */
   specSha?: string;
   specPath?: string;

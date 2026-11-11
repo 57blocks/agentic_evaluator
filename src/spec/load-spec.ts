@@ -545,7 +545,7 @@ function specPathFor(ws: Workspace, abs: string): string {
 }
 
 /** What a step's items file contributed, merged onto its Suite. */
-type ItemsExtras = Pick<Suite, "labels" | "itemsFile" | "itemsReplaced">;
+type ItemsExtras = Pick<Suite, "labels" | "itemsFile">;
 
 /**
  * Fill each `items_file` step's inputs from the file, write its items out as
@@ -580,8 +580,12 @@ async function resolveItems(spec: EvalSpec, specPath: string, taskRoot: string):
     const ids = items.map((i) => i.id);
     const missing = (step.test_set.inputs ?? []).filter((id) => !ids.includes(id));
     if (missing.length > 0) throw specError(specPath, `step "${step.id}" inputs ${missing.join(", ")} are not in ${file}`);
-    const replaced = hiddenByUs ? [] : await materializeItems(taskRoot, items);
-    extras.set(step.id, { labels: labelsOfItems(items), itemsFile: file, ...(replaced.length > 0 ? { itemsReplaced: replaced } : {}) });
+    try {
+      if (!hiddenByUs) await materializeItems(taskRoot, file, items);
+    } catch (err) {
+      throw specError(specPath, err instanceof Error ? err.message : String(err));
+    }
+    extras.set(step.id, { labels: labelsOfItems(items), itemsFile: file });
     steps.push({ ...step, test_set: { ...step.test_set, inputs: step.test_set.inputs ?? ids } });
   }
   return { spec: { ...spec, workflow: { ...spec.workflow, steps } }, extras };

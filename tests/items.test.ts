@@ -84,25 +84,74 @@ test("input_file is read as it stands, and must stay inside the task", async () 
   assert.throws(() => readItems(task, "escape.jsonl"), /input_file "\.\.\/outside\.txt" must be a path inside the task/);
 });
 
-test("writing out creates inputs/ and references/, leaves equal files alone, and reports overwritten edits", async () => {
+/** Set a file's mtime relative to now, so "changed before / after the items file" is not left to the clock. */
+const ageBy = (file: string, seconds: number): Promise<void> => {
+  const t = new Date(Date.now() + seconds * 1000);
+  return fs.utimes(file, t, t);
+};
+
+test("writing out creates inputs/ and references/, and leaves equal files alone", async () => {
   // Arrange
   const task = await fs.mkdtemp(path.join(os.tmpdir(), "items-out-"));
   await fs.writeFile(path.join(task, "items.jsonl"), jsonl(ITEMS));
   const items = readItems(task, "items.jsonl");
 
   // Act
-  const first = await materializeItems(task, items);
-  const second = await materializeItems(task, items);
-  await fs.writeFile(path.join(task, "inputs", "changelog.txt"), "edited by hand\n");
-  const third = await materializeItems(task, items);
+  await materializeItems(task, "items.jsonl", items);
+  const before = (await fs.stat(path.join(task, "inputs", "changelog.txt"))).mtimeMs;
+  await materializeItems(task, "items.jsonl", items);
 
   // Assert
-  assert.deepEqual(first, [], "new files are not overwrites");
-  assert.deepEqual(second, []);
-  assert.deepEqual(third, ["inputs/changelog.txt"]);
   assert.equal(await fs.readFile(path.join(task, "inputs", "changelog.txt"), "utf-8"), CHANGELOG + "\n");
   assert.equal(await fs.readFile(path.join(task, "references", "changelog.txt"), "utf-8"), '{\n  "prs": [\n    412,\n    415\n  ]\n}\n');
   await assert.rejects(fs.stat(path.join(task, "references", "breaking.txt")), "no expected, no reference");
+  assert.equal((await fs.stat(path.join(task, "inputs", "changelog.txt"))).mtimeMs, before, "an equal file is not rewritten");
+});
+
+test("an edit to the items file rewrites the files written from it, and drops an answer it no longer has", async () => {
+  // Arrange - files written, then the items file edited after them
+  const task = await fs.mkdtemp(path.join(os.tmpdir(), "items-edit-"));
+  const file = path.join(task, "items.jsonl");
+  await fs.writeFile(file, jsonl(ITEMS));
+  await materializeItems(task, "items.jsonl", readItems(task, "items.jsonl"));
+  await ageBy(path.join(task, "inputs", "changelog.txt"), -60);
+  await ageBy(path.join(task, "references", "changelog.txt"), -60);
+  await fs.writeFile(file, jsonl([{ id: "changelog", input: "a new question" }, ITEMS[1]]));
+
+  // Act
+  await materializeItems(task, "items.jsonl", readItems(task, "items.jsonl"));
+
+  // Assert
+  assert.equal(await fs.readFile(path.join(task, "inputs", "changelog.txt"), "utf-8"), "a new question\n");
+  await assert.rejects(fs.stat(path.join(task, "references", "changelog.txt")), "a stale answer key would still be graded against");
+});
+
+test("a file edited by hand after the items file fails the load, named, and is left as it is", async () => {
+  // Arrange
+  const task = await itemsTask();
+  await loadWorkflow(path.join(task, "spec.yaml"));
+  const ref = path.join(task, "references", "changelog.txt");
+  await fs.writeFile(ref, "edited\n");
+  await ageBy(ref, 60);
+
+  // Act + Assert - the same for check-task, a run, and any other load
+  await assert.rejects(
+    loadWorkflow(path.join(task, "spec.yaml")),
+    /references\/changelog\.txt was changed after items\.jsonl and no longer matches it\. items\.jsonl is the source: put the change there, or delete the file/,
+  );
+  await assert.rejects(runSuite(path.join(task, "spec.yaml"), false, { yes: true }), /references\/changelog\.txt was changed after items\.jsonl/);
+  assert.equal(await fs.readFile(ref, "utf-8"), "edited\n");
+
+  // Deleting it has it written again.
+  await fs.rm(ref);
+  await loadWorkflow(path.join(task, "spec.yaml"));
+  assert.match(await fs.readFile(ref, "utf-8"), /"prs"/);
+});
+
+test("a references/<id>/ directory beside an expected answer is refused: it would be graded instead", async () => {
+  const task = await itemsTask();
+  await fs.mkdir(path.join(task, "references", "changelog"), { recursive: true });
+  await assert.rejects(loadWorkflow(path.join(task, "spec.yaml")), /references\/changelog\/ would be graded instead of items\.jsonl's expected for changelog/);
 });
 
 test("a spec with items_file and no inputs runs every item, with tags and split on the suite", async () => {
@@ -175,15 +224,14 @@ test("a reader that never loaded the file is told why it cannot, and what to run
   restoreAnswerKey(task, ["items.jsonl"]);
 });
 
-test("check-task warns when the items file overwrote a hand edit", async () => {
+test("a run after a killed run puts the items file back before reading it", async () => {
   const task = await itemsTask();
-  await loadWorkflow(path.join(task, "spec.yaml"));
-  await fs.writeFile(path.join(task, "references", "changelog.txt"), "edited\n");
+  await fs.chmod(path.join(task, "items.jsonl"), 0);
 
-  const report = await preflightTask(path.join(task, "spec.yaml"));
+  await runSuite(path.join(task, "spec.yaml"), false, { yes: true });
 
-  assert.equal(findingOf(report, "items.replaced")?.severity, "warning");
-  assert.match(findingOf(report, "items.replaced")?.message ?? "", /references\/changelog\.txt held other text/);
+  assert.match(await fs.readFile(path.join(task, "items.jsonl"), "utf-8"), /"id":"changelog"/);
+  assert.equal((await fs.readdir(path.join(task, "runs"))).length, 1);
 });
 
 test("a run from an items file: candidates cannot read it, and the manifest keeps its tags", async () => {
