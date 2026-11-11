@@ -315,16 +315,10 @@ async function fixtureFindings(suite: Suite): Promise<Finding[]> {
   return out;
 }
 
-/** test_set.items_file: how many items, and any file under inputs/ or references/ it just overwrote. */
+/** test_set.items_file: how many items it holds, written out where checks read them. */
 function itemsFindings(suite: Suite): Finding[] {
   if (!suite.itemsFile) return [];
-  const out: Finding[] = [{ severity: "ok", code: "items.file", message: `${suite.inputs.length} inputs from ${suite.itemsFile}, written out as inputs/ and references/` }];
-  const replaced = suite.itemsReplaced ?? [];
-  if (replaced.length > 0) {
-    const shown = replaced.slice(0, 5).join(", ") + (replaced.length > 5 ? ` and ${replaced.length - 5} more` : "");
-    out.push({ severity: "warning", code: "items.replaced", message: `${shown} held other text and ${replaced.length === 1 ? "was" : "were"} rewritten from ${suite.itemsFile}: edit the items file, not the files written from it` });
-  }
-  return out;
+  return [{ severity: "ok", code: "items.file", message: `${suite.inputs.length} inputs from ${suite.itemsFile}, written out as inputs/ and references/` }];
 }
 
 async function preflightStep(suite: Suite, opts: { keep?: boolean }): Promise<Finding[]> {

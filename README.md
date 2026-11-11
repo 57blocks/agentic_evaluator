@@ -883,10 +883,21 @@ other keys, such as `provenance`, are ignored.
 Loading the spec writes the items out as `inputs/<id>.txt` and
 `references/<id>.txt` — a string as itself plus a newline, anything else as
 JSON indented by two plus a newline — so checks, review and the report read
-the files they always have. The items file is the source: `check-task` warns
-when it overwrote a file edited by hand. While candidates run, the items file
-is unreadable along with `references/`, because it holds the answers. For now
-an items file is for single-step tasks, and it replaces `labels_file`.
+the files they always have. The items file is the source: edit it, and the
+files written from it are rewritten (a line that drops its `expected` loses
+its reference). A written file changed by hand after the items file is never
+reverted in silence: loading fails and names it. While candidates run, the
+items file is unreadable along with `references/`, because it holds the
+answers. For now an items file is for single-step tasks, and it replaces
+`labels_file`.
+
+`expected` is the reference answer in the sense `check-task` uses: it is
+handed to the check as the deliverable text (`output.txt`), and the check must
+pass it. During a run the check reads it as the answer key, from
+`$EVAL_REFERENCES_DIR/<id>.txt`. For a `prompt` model the two line up — its
+answer is text. A command candidate's deliverable is the files it leaves, so
+its check reads those during a run and `output.txt` when `check-task` probes
+it with the reference.
 
 ### Workflows
 

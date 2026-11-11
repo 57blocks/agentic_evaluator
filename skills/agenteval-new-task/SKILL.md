@@ -102,7 +102,7 @@ Show your work: list the criteria you included and the ones you left out, with a
 
 ### Reference answers
 
-For each input you can, write a correct answer the check must pass — `references/<input>/` holding the files a good candidate would leave (and `output.txt` if the deliverable is text), or `references/<input>.txt` — with an items file, the line's `expected`. **References must come from the user or be human-verified** — never from a model that is a candidate, or the check learns to reward imitating it.
+For each input you can, write a correct answer the check must pass — `references/<input>/` holding the files a good candidate would leave (and `output.txt` if the deliverable is text), or `references/<input>.txt` — with an items file, the line's `expected`. `check-task` hands that to the check as `output.txt`; a command candidate's real deliverable is its files, so its check reads those during a run and falls back to `output.txt` (`reference.md`, "A test set as one file"). **References must come from the user or be human-verified** — never from a model that is a candidate, or the check learns to reward imitating it.
 
 ### Sign-off 2: the grading
 

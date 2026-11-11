@@ -178,32 +178,58 @@ export function labelsOfItems(items: readonly TestItem[]): InputLabels {
   return Object.fromEntries(items.map((i) => [i.id, { tags: [...i.tags], ...(i.split !== undefined ? { split: i.split } : {}) }]));
 }
 
-/**
- * Write one file unless it already holds exactly this text. Returns whether a
- * file that held something else was replaced: the items file wins, and the
- * caller says so rather than overwrite in silence.
- */
-async function writeIfChanged(abs: string, text: string): Promise<"same" | "created" | "replaced"> {
-  const current = await fs.readFile(abs, "utf-8").catch(() => null);
-  if (current === text) return "same";
-  await fs.mkdir(path.dirname(abs), { recursive: true });
-  await fs.writeFile(abs, text, "utf-8");
-  return current === null ? "created" : "replaced";
+/** A file under inputs/ or references/ and what the items file says it should hold (null: it should not exist). */
+type Target = { rel: string; text: string | null };
+
+function targetsOf(item: TestItem): Target[] {
+  return [
+    { rel: path.join("inputs", `${item.id}.txt`), text: item.input },
+    { rel: path.join("references", `${item.id}.txt`), text: item.expected ?? null },
+  ];
 }
+
+const mtimeOf = (abs: string): Promise<number | null> => fs.stat(abs).then((s) => s.mtimeMs, () => null);
 
 /**
  * Write the items out where the engine and checks read them: inputs/<id>.txt
- * and references/<id>.txt. Returns the task-relative paths that held
- * different text before (hand edits the items file has just overwritten).
+ * and references/<id>.txt, removing a reference whose line no longer has an
+ * `expected` (a stale answer key would still be graded against).
+ *
+ * The items file is the source, but a hand edit is never reverted in
+ * silence: a file that differs from it and was changed after it fails the
+ * load, naming the file. One changed before it is just out of date (the
+ * items file was edited since) and is rewritten.
  */
-export async function materializeItems(taskRoot: string, items: readonly TestItem[]): Promise<string[]> {
-  const replaced: string[] = [];
+export async function materializeItems(taskRoot: string, itemsFile: string, items: readonly TestItem[]): Promise<void> {
+  const itemsMtime = (await mtimeOf(path.resolve(taskRoot, itemsFile))) ?? 0;
+  const pending: Array<Target & { abs: string }> = [];
+  const edited: string[] = [];
   for (const item of items) {
-    const targets: Array<[string, string]> = [[path.join("inputs", `${item.id}.txt`), item.input]];
-    if (item.expected !== undefined) targets.push([path.join("references", `${item.id}.txt`), item.expected]);
-    for (const [rel, text] of targets) {
-      if ((await writeIfChanged(path.join(taskRoot, rel), text)) === "replaced") replaced.push(rel.split(path.sep).join("/"));
+    if (item.expected !== undefined && (await fs.stat(path.join(taskRoot, "references", item.id)).then((st) => st.isDirectory(), () => false))) {
+      throw new ItemsError(`references/${item.id}/ would be graded instead of ${itemsFile}'s expected for ${item.id}: remove one of them`);
+    }
+    for (const target of targetsOf(item)) {
+      const abs = path.join(taskRoot, target.rel);
+      const current = await fs.readFile(abs, "utf-8").catch(() => null);
+      if (current === target.text) continue;
+      const mtime = current === null ? null : await mtimeOf(abs);
+      if (mtime !== null && mtime > itemsMtime) edited.push(target.rel.split(path.sep).join("/"));
+      else pending.push({ ...target, abs });
     }
   }
-  return replaced;
+  if (edited.length > 0) {
+    const shown = edited.slice(0, 5).join(", ") + (edited.length > 5 ? ` and ${edited.length - 5} more` : "");
+    throw new ItemsError(
+      `${shown} ${edited.length === 1 ? "was" : "were"} changed after ${itemsFile} and no longer match${edited.length === 1 ? "es" : ""} it. ` +
+        `${itemsFile} is the source: put the change there, or delete the file to have it written again`,
+    );
+  }
+  for (const { abs, text } of pending) {
+    if (text === null) {
+      await fs.rm(abs, { force: true });
+      continue;
+    }
+    await fs.mkdir(path.dirname(abs), { recursive: true });
+    await fs.writeFile(abs, text, "utf-8");
+  }
 }
