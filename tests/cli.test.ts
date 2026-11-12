@@ -276,7 +276,12 @@ test("report on a workflow run re-renders every step's page, not just the workfl
     recursive: true,
     filter: (s) => !s.includes(`${path.sep}runs`),
   });
-  await run(["run", "smoke-workflow", "--yes", "--workspace", ws]);
+  // No judge: with no key the run would refuse to start, and judging is not what this tests.
+  const specPath = path.join(ws, "tasks", "smoke-workflow", "spec.yaml");
+  const spec = await fs.readFile(specPath, "utf-8");
+  await fs.writeFile(specPath, spec.replace("methods: [pairwise-swap, absolute-1-5]", "methods: []").replaceAll(/judged_dimensions: \[[^\]]*\]/g, "judged_dimensions: []"));
+  const ran = await run(["run", "smoke-workflow", "--yes", "--workspace", ws]);
+  assert.equal(ran.code, EXIT.ok);
   const runsRoot = path.join(ws, "tasks", "smoke-workflow", "runs");
   const runId = (await fs.readdir(runsRoot))[0];
   const stepDirs = (await fs.readdir(path.join(runsRoot, runId), { withFileTypes: true }))

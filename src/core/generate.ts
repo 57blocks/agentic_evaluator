@@ -30,7 +30,7 @@ import { CODEGEN_PRODUCER_VERSION } from "../producers/code-gen.js";
 import { sha256, trialHash } from "../canon/hash.js";
 import { classifyCompletion } from "../canon/states.js";
 import { BudgetGuard } from "../canon/budget.js";
-import type { ProviderErrorHalt } from "../canon/halt.js";
+import { isHaltedTimeout, type HaltState, type HaltTrial, type ProviderErrorHalt } from "../canon/halt.js";
 import type { CandidateDef, CostSource, EvaluationState,
   Isolation,
 } from "../canon/types.js";
@@ -370,12 +370,16 @@ async function loadReusable(
       // The hash covers the step's producer, input and candidate, so a
       // journal line with it is this trial; the step is implied.
       const journaled = await findJournaled(dir, hash, timeoutMs);
+      if (journaled && (await haltBlamed(dir, journaled.completionState, { candidate: journaled.candidate, input: journaled.inputSlug, trial: journaled.trial }))) return null;
       if (journaled) return { record: journaled, from: displayPath(dir), dir };
       continue;
     }
     // A failed attempt left no output to skip the call with: what is reused
-    // is the failure itself.
-    if (hit.legacy_status !== "ok") return { record: failedRecordFromRow(hit), from: displayPath(dir), dir };
+    // is the failure itself — unless the halt blamed it on the link.
+    if (hit.legacy_status !== "ok") {
+      if (await haltBlamed(dir, hit.completion_state, { candidate: hit.candidate, input: hit.input, trial: hit.trial })) return null;
+      return { record: failedRecordFromRow(hit), from: displayPath(dir), dir };
+    }
     const text = await fs
       .readFile(path.join(dir, "raw", `${safeName(hit.candidate)}__${hit.input}__t${hit.trial}.txt`), "utf-8")
       .catch(() => null);
@@ -385,6 +389,19 @@ async function loadReusable(
     return { record: recordFromRow(hit, text), from: displayPath(dir), dir };
   }
   return null;
+}
+
+/**
+ * A timeout that run's halt blamed on the link rather than the candidate
+ * (canon/halt.ts): generated again, not kept as the candidate's failure.
+ */
+async function haltBlamed(dir: string, state: string | undefined, trial: HaltTrial): Promise<boolean> {
+  if (state !== "timeout") return false;
+  const summary = await fs
+    .readFile(path.join(dir, "summary.json"), "utf-8")
+    .then((raw) => JSON.parse(raw) as { halt?: HaltState })
+    .catch(() => null);
+  return isHaltedTimeout(summary?.halt, trial);
 }
 
 /**
@@ -733,7 +750,10 @@ export async function runAll(params: {
   let dispatched = 0;
   let cancelled = 0;
   const finish = (record: RunRecord): RunRecord => {
-    params.halt?.record(record.completionState ?? "answered");
+    // A reused trial says nothing about the link now: the halt never sees it.
+    if (!record.reusedFrom) {
+      params.halt?.record(record.completionState ?? "answered", { candidate: record.candidate, trial: { candidate: record.candidate, input: record.inputSlug, trial: record.trial } });
+    }
     const stop = params.stopper?.record(record);
     if (stop) params.emit({ type: "candidate.stopped", step: suite.step, candidate: stop.candidate, afterTrials: stop.after_trials, reason: stop.reason });
     return record;
@@ -777,7 +797,7 @@ export async function runAll(params: {
     // Only provider errors are coming back: the network is gone. Same
     // accounting as the budget stop; `run --reuse` picks these up later.
     if (params.halt && !params.halt.allows("generation")) {
-      params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "skipped", skipReason: "provider-errors" });
+      params.emit({ type: "trial", step: suite.step, candidate, input: inputSlug, trial, state: "skipped", skipReason: params.halt.trippedBy === "timeouts" ? "timeouts" : "provider-errors" });
       return null;
     }
 

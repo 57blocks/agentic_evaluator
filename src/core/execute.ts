@@ -17,6 +17,7 @@ import { displayPath, resolveTaskAsset } from "../paths.js";
 import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
 import { silentSink, type RunEventSink } from "./events.js";
 import { methodsOf, planE2e, planStep, resolveConcurrency } from "./plan.js";
+import { describeMissingKey, missingE2eKeys, missingModelKeys } from "./model-keys.js";
 import { hideAnswerKey } from "./answer-key.js";
 import { noteEvidenceIncomplete, readInput, runAll, safeName, type PromptTemplate } from "./generate.js";
 import { judgeAll, scoreAll } from "./evaluate.js";
@@ -27,7 +28,7 @@ import { openTrace, traceIntegrity } from "../canon/trace.js";
 import { buildManifest, type RunPrompts } from "../canon/manifest.js";
 import { buildLedger, type CostLedger } from "../canon/cost.js";
 import { BudgetGuard } from "../canon/budget.js";
-import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS, ProviderErrorHalt } from "../canon/halt.js";
+import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS, DEFAULT_MAX_CONSECUTIVE_TIMEOUTS, haltStreak, ProviderErrorHalt } from "../canon/halt.js";
 import { DEFAULT_MAX_PAUSE_MS, transportGate } from "../transport-gate.js";
 import { buildWorkflowRecord, workflowGaps, type WorkflowStepInput } from "../canon/workflow.js";
 import { directionality, ratesFor } from "../canon/rates.js";
@@ -100,9 +101,12 @@ export interface StepResult {
   ledger: CostLedger;
 }
 
-/** The run's halt, from the spec's `execution.max_consecutive_provider_errors` (default 10; null turns it off). */
+/** The run's halt, from the spec's `execution.max_consecutive_provider_errors` and `max_consecutive_timeouts` (default 10 each; null turns one off). */
 function haltFor(suite: Suite): ProviderErrorHalt {
-  return new ProviderErrorHalt(suite.maxConsecutiveProviderErrors === undefined ? DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS : suite.maxConsecutiveProviderErrors);
+  return new ProviderErrorHalt(
+    suite.maxConsecutiveProviderErrors === undefined ? DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS : suite.maxConsecutiveProviderErrors,
+    suite.maxConsecutiveTimeouts === undefined ? DEFAULT_MAX_CONSECUTIVE_TIMEOUTS : suite.maxConsecutiveTimeouts,
+  );
 }
 
 async function executeSuite(params: {
@@ -256,7 +260,7 @@ async function executeSuite(params: {
   }
   if (halt.tripped) {
     const st = halt.state();
-    params.emit({ type: "run.halted", step: suite.step, consecutive: st.longest_provider_error_run, skipped: st.skipped });
+    params.emit({ type: "run.halted", step: suite.step, reason: st.reason ?? "provider_errors", consecutive: haltStreak(st), skipped: st.skipped });
   }
   if (integrity.gaps_over_threshold > 0) {
     params.emit({ type: "integrity.gaps", gaps: integrity.gaps_over_threshold, thresholdMs: integrity.threshold_ms });
@@ -358,6 +362,14 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
   if (isSpec && !opts.yes) {
     emit({ type: "preview.only" });
     return null;
+  }
+
+  // A call without its key would be recorded as the candidate's malformed
+  // answer, trial after trial: refuse before anything is written.
+  const needed = [...suites.flatMap(missingModelKeys), ...(e2ePlan ? missingE2eKeys(suites) : [])];
+  const missingKeys = [...new Map(needed.map((k) => [`${k.who}\0${k.env}`, k])).values()];
+  if (missingKeys.length > 0) {
+    throw new Error(`cannot start: an API key this run needs is not set\n${missingKeys.map((k) => `  - ${describeMissingKey(k)}`).join("\n")}`);
   }
 
   // The answer key is unreadable while candidates run (src/core/answer-key.ts).
