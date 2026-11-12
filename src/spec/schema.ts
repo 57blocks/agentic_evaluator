@@ -315,6 +315,8 @@ export const SPEC_SCHEMA = {
         outage_wait_seconds: { type: "integer", minimum: 0 },
         /** Consecutive provider errors that halt the run; null turns the halt off. Default 10. */
         max_consecutive_provider_errors: { type: ["integer", "null"], minimum: 1 },
+        /** Consecutive unanswered calls (timeouts and provider errors) across two or more candidates that halt the run; null turns it off. Default 10. */
+        max_consecutive_timeouts: { type: ["integer", "null"], minimum: 1 },
       },
     },
     "x-harness": {

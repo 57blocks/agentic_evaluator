@@ -34,7 +34,7 @@ export function eventLine(event: RunEvent): string {
     case "transport.gave_up":
       return `⚠ Network still down after ${Math.round(event.pausedMs / 1000)}s; calls now fail as provider errors`;
     case "run.halted":
-      return `⚠ Halted ${event.step} after ${event.consecutive} consecutive provider errors; ${event.skipped.generation} generation(s) never started — this run is incomplete`;
+      return `⚠ Halted ${event.step} after ${event.consecutive} ${event.reason === "timeouts" ? "consecutive timeouts" : "consecutive provider errors"}; ${event.skipped.generation} generation(s) never started — this run is incomplete`;
     case "integrity.gaps":
       return `⚠ The trace has ${event.gaps} long gap(s); this run's durations are unreliable`;
     case "step.done":
@@ -58,7 +58,7 @@ function trialLine(event: Extract<RunEvent, { type: "trial" }>): string {
   const who = `${event.candidate} · ${event.input} · t${event.trial}`;
   if (event.reusedFrom) return `  reused ${who}`;
   if (event.state === "skipped") {
-    const why = event.skipReason === "early-stop" ? "early stop" : event.skipReason === "provider-errors" ? "run halted on provider errors" : "budget reached";
+    const why = event.skipReason === "early-stop" ? "early stop" : event.skipReason === "provider-errors" ? "run halted on provider errors" : event.skipReason === "timeouts" ? "run halted on timeouts" : "budget reached";
     return `  skipped ${who} — ${why}`;
   }
   const check = event.check ? ` · check ${event.check}` : "";

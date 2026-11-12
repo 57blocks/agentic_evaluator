@@ -1039,10 +1039,19 @@ it; the four datasets come to about 12 MB.
   started: in-flight calls finish, every unit not started is counted, `GAPS.md`
   says so and the exit code is `3`. Provider errors sit outside every
   candidate's denominators, so no rate is wrong, only partial; fix the
-  network and `run --reuse` to finish. Check failures, timeouts, refusals and
-  empty completions are candidates' results and never count. One limit: an
-  outage that black-holes requests instead of refusing them shows up as
-  `timeout` after the step's ceiling, which neither mechanism sees.
+  network and `run --reuse` to finish. Check failures, refusals and empty
+  completions are candidates' results and never count.
+- Consecutive timeouts halt the run too, since an outage that black-holes
+  requests shows up as `timeout` after the step's ceiling rather than as a
+  provider error. A timeout can also be a slow model's own result, so it
+  counts only in a streak of unanswered calls (timeouts and provider errors,
+  nothing answered in between) that reaches
+  `execution.max_consecutive_timeouts` (default 10; `null` turns it off) and
+  has at least two candidates timing out in it: one slow model cannot trip
+  it, even beside a stray provider error, and a step
+  with a single candidate never is. The timeouts in that streak stay in this
+  run's rates, and `GAPS.md` says so; `run --reuse` generates them again
+  instead of keeping them. Reused trials never count toward either halt.
 - `methods: []` plus command-only candidates make a task free.
 - `agenteval models <task> --catalog-only` catches a mistyped model id for free.
 - On macOS, run billed tasks under `caffeinate -i`. If the machine sleeps, the

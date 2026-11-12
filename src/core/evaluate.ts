@@ -13,7 +13,7 @@ import { scoreOne } from "../score.js";
 import { mapWithConcurrency } from "./generate.js";
 import type { RunEventSink } from "./events.js";
 import { BudgetGuard } from "../canon/budget.js";
-import type { ProviderErrorHalt } from "../canon/halt.js";
+import { haltCause, type ProviderErrorHalt } from "../canon/halt.js";
 import type { PairFailure, ScoredRecord, SkippedPair, TrialFailure } from "../canon/adapt.js";
 import { EvaluatorCallError, summarizeAttempts, type EvaluatorUsage } from "../canon/usage.js";
 import type { RunRecord, Suite } from "../types.js";
@@ -99,7 +99,7 @@ export async function judgeAll(
       return null;
     }
     if (halt && !halt.allows("judging")) {
-      skipped.push({ input: task.inputSlug, a: task.a, b: task.b, reason: "run halted on consecutive provider errors before this pair was judged" });
+      skipped.push({ input: task.inputSlug, a: task.a, b: task.b, reason: `run halted on ${haltCause(halt.trippedBy)} before this pair was judged` });
       return null;
     }
     emit({ type: "judge", step: suite.step, a: task.a, b: task.b, input: task.inputSlug, ok: true });

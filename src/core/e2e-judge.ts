@@ -9,7 +9,7 @@ import fs from "node:fs/promises";
 import { renderArtifacts } from "../adapters/deliverable.js";
 import type { ArtifactFile } from "../adapters/types.js";
 import type { BudgetGuard } from "../canon/budget.js";
-import type { ProviderErrorHalt } from "../canon/halt.js";
+import { haltCause, type ProviderErrorHalt } from "../canon/halt.js";
 import { evaluatorOutcome } from "./evaluate.js";
 import { matchesShow } from "../canon/show.js";
 import { judgePair } from "../judge.js";
@@ -84,7 +84,7 @@ export async function judgeDeliveries(params: {
       continue;
     }
     if (halt && !halt.allows("judging")) {
-      out.not_judged.push({ input, trial, reason: "run halted on consecutive provider errors" });
+      out.not_judged.push({ input, trial, reason: `run halted on ${haltCause(halt.trippedBy)}` });
       continue;
     }
     try {
