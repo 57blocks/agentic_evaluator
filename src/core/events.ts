@@ -17,6 +17,7 @@
  */
 
 import type { CompletionState } from "../canon/types.js";
+import type { HaltReason } from "../canon/halt.js";
 import type { TrialRow } from "../canon/rows.js";
 import type { FirmnessEvidence } from "../canon/select.js";
 import type { StoppedCandidate } from "../canon/early-stop.js";
@@ -85,7 +86,7 @@ export type RunEvent =
       /** Run directory a prior identical generation came from. */
       reusedFrom?: string;
       /** Why a skipped trial was skipped; budget when absent. */
-      skipReason?: "budget" | "early-stop" | "provider-errors";
+      skipReason?: "budget" | "early-stop" | "provider-errors" | "timeouts";
       error?: string;
     }
   | { type: "judge"; step: string; a: string; b: string; input: string; ok: boolean; error?: string }
@@ -108,7 +109,7 @@ export type RunEvent =
    * Consecutive provider errors tripped the halt (canon/halt.ts). Nothing
    * further was started; what was skipped is counted by kind.
    */
-  | { type: "run.halted"; step: string; consecutive: number; skipped: { generation: number; judging: number; scoring: number } }
+  | { type: "run.halted"; step: string; /** Absent in events from before timeouts could halt a run. */ reason?: HaltReason; consecutive: number; skipped: { generation: number; judging: number; scoring: number } }
   /** Wall-clock gaps that make every duration in this run unreliable. */
   | { type: "integrity.gaps"; gaps: number; thresholdMs: number }
   /**

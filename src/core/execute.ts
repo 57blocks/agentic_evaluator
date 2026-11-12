@@ -28,7 +28,7 @@ import { openTrace, traceIntegrity } from "../canon/trace.js";
 import { buildManifest, type RunPrompts } from "../canon/manifest.js";
 import { buildLedger, type CostLedger } from "../canon/cost.js";
 import { BudgetGuard } from "../canon/budget.js";
-import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS, ProviderErrorHalt } from "../canon/halt.js";
+import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS, DEFAULT_MAX_CONSECUTIVE_TIMEOUTS, haltStreak, ProviderErrorHalt } from "../canon/halt.js";
 import { DEFAULT_MAX_PAUSE_MS, transportGate } from "../transport-gate.js";
 import { buildWorkflowRecord, workflowGaps, type WorkflowStepInput } from "../canon/workflow.js";
 import { directionality, ratesFor } from "../canon/rates.js";
@@ -101,9 +101,12 @@ export interface StepResult {
   ledger: CostLedger;
 }
 
-/** The run's halt, from the spec's `execution.max_consecutive_provider_errors` (default 10; null turns it off). */
+/** The run's halt, from the spec's `execution.max_consecutive_provider_errors` and `max_consecutive_timeouts` (default 10 each; null turns one off). */
 function haltFor(suite: Suite): ProviderErrorHalt {
-  return new ProviderErrorHalt(suite.maxConsecutiveProviderErrors === undefined ? DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS : suite.maxConsecutiveProviderErrors);
+  return new ProviderErrorHalt(
+    suite.maxConsecutiveProviderErrors === undefined ? DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS : suite.maxConsecutiveProviderErrors,
+    suite.maxConsecutiveTimeouts === undefined ? DEFAULT_MAX_CONSECUTIVE_TIMEOUTS : suite.maxConsecutiveTimeouts,
+  );
 }
 
 async function executeSuite(params: {
@@ -257,7 +260,7 @@ async function executeSuite(params: {
   }
   if (halt.tripped) {
     const st = halt.state();
-    params.emit({ type: "run.halted", step: suite.step, consecutive: st.longest_provider_error_run, skipped: st.skipped });
+    params.emit({ type: "run.halted", step: suite.step, reason: st.reason ?? "provider_errors", consecutive: haltStreak(st), skipped: st.skipped });
   }
   if (integrity.gaps_over_threshold > 0) {
     params.emit({ type: "integrity.gaps", gaps: integrity.gaps_over_threshold, thresholdMs: integrity.threshold_ms });

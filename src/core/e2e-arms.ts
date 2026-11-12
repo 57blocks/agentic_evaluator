@@ -111,7 +111,7 @@ async function openArmRunner(params: {
     }
     // So does the provider-error halt: a dead network ends the arms too.
     if (halt && !halt.allows("generation")) {
-      emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: "skipped", skipReason: "provider-errors" });
+      emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: "skipped", skipReason: halt.trippedBy === "timeouts" ? "timeouts" : "provider-errors" });
       return { completion_state: "cancelled", text: "", artifacts: [], cost_usd: 0, ms: 0, checks: [] };
     }
     try {
@@ -140,7 +140,7 @@ async function openArmRunner(params: {
           ? []
           : [{ evaluator: step.check?.id ?? TSC_CHECK_ID, version: g.checkVersion ?? "unknown", state: g.checkState }];
       budget?.add(g.costUsd + (g.retryCostUsd ?? 0));
-      halt?.record(verdict.state);
+      halt?.record(verdict.state, { candidate });
       emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: verdict.state, ms: g.ms, costUsd: g.costUsd });
       return {
         completion_state: verdict.state,
@@ -152,7 +152,7 @@ async function openArmRunner(params: {
       };
     } catch (err) {
       const rec = errorRecord({ inputSlug, inputText, candidate, def, trial, hash: "" }, err);
-      halt?.record(rec.completionState ?? "answered");
+      halt?.record(rec.completionState ?? "answered", { candidate });
       emit({ type: "trial", step: step.step, candidate, input: inputSlug, trial, state: rec.completionState ?? "error", error: rec.error });
       return {
         completion_state: rec.completionState ?? "malformed",

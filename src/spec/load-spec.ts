@@ -113,6 +113,8 @@ export interface EvalSpec {
     outage_wait_seconds?: number;
     /** Consecutive provider errors that halt the run (canon/halt.ts); null turns the halt off. */
     max_consecutive_provider_errors?: number | null;
+    /** Consecutive timeouts, across two or more candidates, that halt the run (canon/halt.ts); null turns it off. */
+    max_consecutive_timeouts?: number | null;
   };
   "x-harness"?: {
     producer: "prompt" | "codegen";
@@ -476,6 +478,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     ...(spec.execution.early_stop ? { earlyStop: true } : {}),
     ...(spec.execution.outage_wait_seconds !== undefined ? { outageWaitSeconds: spec.execution.outage_wait_seconds } : {}),
     ...(spec.execution.max_consecutive_provider_errors !== undefined ? { maxConsecutiveProviderErrors: spec.execution.max_consecutive_provider_errors } : {}),
+    ...(spec.execution.max_consecutive_timeouts !== undefined ? { maxConsecutiveTimeouts: spec.execution.max_consecutive_timeouts } : {}),
     controlCandidate: spec.workflow.control_candidate,
     benchmarkMode: spec.execution.benchmark_mode ?? "capability-neutral",
     cacheMode: spec.execution.cache_mode ?? "cold",

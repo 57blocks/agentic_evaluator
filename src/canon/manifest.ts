@@ -11,7 +11,7 @@ import { promisify } from "node:util";
 import { INSTALL_ROOT } from "../paths.js";
 import type { Suite } from "../types.js";
 import { DEFAULT_MAX_PAUSE_MS } from "../transport-gate.js";
-import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS } from "./halt.js";
+import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS, DEFAULT_MAX_CONSECUTIVE_TIMEOUTS } from "./halt.js";
 import type { CandidateDef, EligibilityThresholds } from "./types.js";
 import { resolveEligibility } from "./select.js";
 import { readLabels, type InputLabels } from "./about.js";
@@ -75,6 +75,8 @@ export interface RunManifest {
     /** Absent in manifests written before the outage gate and the halt existed. */
     outage_wait_seconds?: number;
     max_consecutive_provider_errors?: number | null;
+    /** Absent in manifests written before timeouts could halt a run. */
+    max_consecutive_timeouts?: number | null;
   };
   harness: { name: string; version: string; git_sha: string | null; node: string };
   started_at: string;
@@ -161,6 +163,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
       early_stop: suite.earlyStop === true,
       outage_wait_seconds: suite.outageWaitSeconds ?? DEFAULT_MAX_PAUSE_MS / 1000,
       max_consecutive_provider_errors: suite.maxConsecutiveProviderErrors === undefined ? DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS : suite.maxConsecutiveProviderErrors,
+      max_consecutive_timeouts: suite.maxConsecutiveTimeouts === undefined ? DEFAULT_MAX_CONSECUTIVE_TIMEOUTS : suite.maxConsecutiveTimeouts,
     },
     harness: { ...harness, node: process.version },
     started_at: m.startedAt,
