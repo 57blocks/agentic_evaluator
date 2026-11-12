@@ -23,6 +23,7 @@ import { findWorkspace, runsDir, tasksDir, type Workspace } from "../core/worksp
 import { AlreadyRunning, PlanMismatch, RunRegistry, type PlanAck } from "../server/runs.js";
 import { buildOverview } from "../server/overview.js";
 import { hasReport, loadReportModel } from "../report-model.js";
+import { DiffTargetError, diffRunDirs } from "../core/run-diff-pairs.js";
 import { NoSuchSpecError } from "../core/workspace.js";
 import { listRuns, listSpecs, listTasks, liveRunIndex, loadRun, safeId } from "./catalog.js";
 import { loadReviewSession, recordVerdict, reveal, ReviewError, type VerdictInput } from "../core/review-service.js";
@@ -201,6 +202,26 @@ async function sendReport(ws: Workspace, res: http.ServerResponse, kind: string,
     return;
   }
   sendJson(res, 200, await loadReportModel(abs));
+}
+
+/**
+ * The step diffs between two runs (src/core/run-diff-pairs.ts), as `agenteval
+ * diff --json` computes them, plus the steps only one run has. Runs are named
+ * by id and found through the run index, never by a path from the request.
+ */
+async function sendDiff(ws: Workspace, res: http.ServerResponse, before: string, after: string): Promise<void> {
+  const index = await liveRunIndex({ ws });
+  const missing = [before, after].filter((id) => !index.has(id));
+  if (missing.length > 0) {
+    sendJson(res, 404, { error: `no run ${missing.join(", ")}` });
+    return;
+  }
+  try {
+    sendJson(res, 200, await diffRunDirs(index.get(before)!, index.get(after)!));
+  } catch (err) {
+    if (!(err instanceof DiffTargetError)) throw err;
+    sendJson(res, 422, { error: err.message });
+  }
 }
 
 /**
@@ -410,6 +431,11 @@ async function handle(
       return;
     }
     sendJson(res, 200, view);
+    return;
+  }
+  const diff = url.pathname.match(/^\/api\/diff\/([^/]+)\/([^/]+)$/);
+  if (diff) {
+    await sendDiff(ws, res, decodeURIComponent(diff[1]), decodeURIComponent(diff[2]));
     return;
   }
   const report = url.pathname.match(/^\/api\/report\/(run|fixture|task)\/(.+)$/);

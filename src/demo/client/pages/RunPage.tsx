@@ -95,7 +95,20 @@ function E2eLine({ e2e }: { e2e: NonNullable<RunView["e2e"]> }) {
   );
 }
 
-export function RunPage({ run }: { run: RunView }) {
+/** The run before this one, one click away: did the conclusion change? */
+function CompareLink({ run, previous }: { run: RunView; previous: RunView }) {
+  return (
+    <section aria-label="Compare" className={cn(SECTION_CARD, "flex flex-wrap items-center gap-2 border border-border bg-card p-4")}>
+      <h3 className={cn(SECTION_TITLE, "mr-2")}>Compare</h3>
+      <Button size="sm" variant="outline" onClick={() => navigate({ view: "diff", before: previous.id, after: run.id })}>
+        With the previous run ({runStamp(previous)})
+      </Button>
+      <span className="text-xs text-muted-foreground">Did the recommendation, the gates or any input change?</span>
+    </section>
+  );
+}
+
+export function RunPage({ run, previous }: { run: RunView; previous: RunView | null }) {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -110,6 +123,7 @@ export function RunPage({ run }: { run: RunView }) {
       </header>
 
       <ReportLinks run={run} />
+      {previous && <CompareLink run={run} previous={previous} />}
 
       <section aria-label="Recommendation per step" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {run.steps.map((step) => (

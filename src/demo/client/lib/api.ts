@@ -25,6 +25,11 @@ export function reportUrl(dir: string): string {
   return `/api/report/${encodePath(dir)}`;
 }
 
+/** The step diffs between two runs, by run id: earlier first. */
+export function diffUrl(before: string, after: string): string {
+  return `/api/diff/${encodeURIComponent(before)}/${encodeURIComponent(after)}`;
+}
+
 /** A file inside a task's definition directory. */
 export function taskFileUrl(task: string, rel: string): string {
   return `/artifact/task/${encodeURIComponent(task)}/${encodePath(rel)}`;
@@ -80,6 +85,23 @@ export interface JsonResponse<T> {
   ok: boolean;
   status: number;
   body: T & { error?: string };
+}
+
+/**
+ * A GET whose error answers carry `{error}` worth showing: the body is read
+ * either way. A snapshot answers 404 with an empty body for a URL it did not
+ * record, which reads as that.
+ */
+export async function getJsonResponse<T>(url: string): Promise<JsonResponse<T>> {
+  const res = await read(url);
+  const text = await res.text();
+  let body: T & { error?: string };
+  try {
+    body = JSON.parse(text) as T & { error?: string };
+  } catch {
+    body = { error: res.ok ? "the answer was not JSON" : `HTTP ${res.status}` } as T & { error?: string };
+  }
+  return { ok: res.ok, status: res.status, body };
 }
 
 /** POST that hands back the status too: the run API answers 409 with data. */

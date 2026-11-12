@@ -4,13 +4,7 @@
  * rate moved, and which shared inputs flipped and why.
  */
 
-import type { Count, Flip, GateStatus, RateChange, RateWithInterval, RunDiff } from "../canon/run-diff.js";
-
-const CAUSE: Record<Flip["cause"], string> = {
-  "same-answer": "same answer, graded differently",
-  "new-answer": "new answer",
-  unknown: "answer not kept, cause unknown",
-};
+import type { Count, RateChange, RateWithInterval, RunDiff } from "../canon/run-diff.js";
 
 const pct = (v: number | null): string => (v === null ? "—" : v.toFixed(2));
 const frac = (c: Count | null): string => (c === null || c.denominator === 0 ? "—" : `${c.numerator}/${c.denominator}`);
@@ -40,24 +34,14 @@ function recommendationLine(d: RunDiff): string {
   return changed ? `recommendation CHANGED: ${show(a)} → ${show(b)}` : `recommendation unchanged: ${show(b)}`;
 }
 
-function gateMove(a: GateStatus, b: GateStatus): string {
-  if (a.state === "unrecorded" || b.state === "unrecorded") return "not recorded";
-  if (a.state === "absent") return b.state === "in" ? "new, in" : "new, out";
-  if (b.state === "absent") return "dropped";
-  if (a.state === b.state) return a.state === "in" ? "stayed in" : "stayed out";
-  return b.state === "in" ? "ENTERED" : "LEFT";
+/** The reason a candidate is out, from whichever run had it out (the later one first). */
+export function gateReason(g: RunDiff["gates"][number]): string {
+  const out = g.b.state === "out" ? g.b : g.a.state === "out" ? g.a : null;
+  return out && "reason" in out && out.reason ? out.reason : "";
 }
 
 function gateLines(d: RunDiff): string[] {
-  const order = ["LEFT", "ENTERED", "new, in", "new, out", "dropped", "stayed out", "stayed in", "not recorded"];
-  const rows = d.gates
-    .map((g) => ({ g, move: gateMove(g.a, g.b) }))
-    .sort((x, y) => order.indexOf(x.move) - order.indexOf(y.move))
-    .map(({ g, move }) => {
-      const out = g.b.state === "out" ? g.b : g.a.state === "out" ? g.a : null;
-      return [move, g.candidate, out && "reason" in out && out.reason ? out.reason : ""];
-    });
-  return ["gates", ...table(rows)];
+  return ["gates", ...table(d.gates.map((g) => [g.move, g.candidate, gateReason(g)]))];
 }
 
 function rateLines(d: RunDiff): string[] {
@@ -66,29 +50,31 @@ function rateLines(d: RunDiff): string[] {
   return ["task success rate, as recorded [95% interval]", ...table([head, ...d.rates.map(row)])];
 }
 
-function flipLines(d: RunDiff): string[] {
+/** Per flipped input and trial, what the check said before and after (`--why`). */
+function whyLines(d: RunDiff, g: RunDiff["flipGroups"][number]): string[] {
+  const flips = d.flips.filter((f) => f.candidate === g.candidate && f.direction === g.direction && f.cause === g.cause);
+  return flips.flatMap((f) => {
+    const trials = [...new Set([...f.trials.a, ...f.trials.b].map((t) => t.trial))].sort((x, y) => x - y);
+    return trials.map((t) => {
+      const side = (notes: typeof f.trials.a) => notes.find((n) => n.trial === t)?.summary ?? "—";
+      return `      ${f.input} t${t}: before ${side(f.trials.a)} | after ${side(f.trials.b)}`;
+    });
+  });
+}
+
+function flipLines(d: RunDiff, why: boolean): string[] {
   if (d.inputs.shared === 0) return ["flips: no shared inputs to compare"];
-  const groups = new Map<string, Flip[]>();
-  for (const f of d.flips) {
-    const key = `${f.candidate}\0${f.direction}\0${f.cause}`;
-    groups.set(key, [...(groups.get(key) ?? []), f]);
-  }
-  const lines = [...groups.values()].map((fs) => {
-    const f = fs[0]!;
-    const dir = f.direction === "fail-to-pass" ? "fail → pass" : "pass → fail";
-    // A check version change the whole run shares is said once, above.
-    const runWide = d.setup.find((s) => s.what === "check version");
-    const own = fs.flatMap((x) => (x.checkVersion && !(runWide && x.checkVersion.a === runWide.a && x.checkVersion.b === runWide.b) ? [`check ${x.checkVersion.a} → ${x.checkVersion.b}`] : []));
-    const versions = [...new Set(own)];
-    const why = [CAUSE[f.cause], ...versions].join("; ");
-    return `  ${f.candidate}  ${dir} ×${fs.length}  ${fs.map((x) => x.input).join(", ")}  — ${why}`;
+  const lines = d.flipGroups.flatMap((g) => {
+    const dir = g.direction === "fail-to-pass" ? "fail → pass" : "pass → fail";
+    const cause = [g.causeText, ...g.checkVersions.map((v) => `check ${v}`)].join("; ");
+    return [`  ${g.candidate}  ${dir} ×${g.inputs.length}  ${g.inputs.join(", ")}  — ${cause}`, ...(why ? whyLines(d, g) : [])];
   });
   const none = d.flips.length === 0 ? ["  none: every shared input kept its outcome"] : [];
   const skipped = d.notCompared > 0 ? [`  ${d.notCompared} candidate × input pair(s) not compared: not run or not graded on one side`] : [];
   return [`flips on the ${d.inputs.shared} shared input(s)`, ...lines, ...none, ...skipped];
 }
 
-export function diffLines(d: RunDiff): string[] {
+export function diffLines(d: RunDiff, opts: { why?: boolean } = {}): string[] {
   const steps = d.a.step === d.b.step ? `step ${d.a.step}` : `steps ${d.a.step} → ${d.b.step}`;
   return [
     `diff ${d.a.run} → ${d.b.run} (${steps})`,
@@ -101,6 +87,6 @@ export function diffLines(d: RunDiff): string[] {
     "",
     ...rateLines(d),
     "",
-    ...flipLines(d),
+    ...flipLines(d, opts.why === true),
   ];
 }

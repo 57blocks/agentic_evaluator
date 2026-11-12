@@ -61,9 +61,10 @@ test("lists who left or entered the gates, with the run's own reason", () => {
   const d = diffRuns(a, b);
   const gate = (c: string) => d.gates.find((g) => g.candidate === c);
 
-  assert.deepEqual(gate("kimi"), { candidate: "kimi", a: { state: "in" }, b: { state: "out", reason: "pass rate 0.89 < 0.9" } });
-  assert.deepEqual(gate("glm"), { candidate: "glm", a: { state: "out", reason: "pass rate 0.7 < 0.9" }, b: { state: "in" } });
-  assert.deepEqual(gate("sonnet"), { candidate: "sonnet", a: { state: "in" }, b: { state: "in" } });
+  assert.deepEqual(gate("kimi"), { candidate: "kimi", a: { state: "in" }, b: { state: "out", reason: "pass rate 0.89 < 0.9" }, move: "LEFT" });
+  assert.deepEqual(gate("glm"), { candidate: "glm", a: { state: "out", reason: "pass rate 0.7 < 0.9" }, b: { state: "in" }, move: "ENTERED" });
+  assert.deepEqual(gate("sonnet"), { candidate: "sonnet", a: { state: "in" }, b: { state: "in" }, move: "stayed in" });
+  assert.deepEqual(d.gates.map((g) => g.move), ["LEFT", "ENTERED", "stayed in"], "changes are listed first");
 });
 
 test("a candidate in only one run is absent on the other side", () => {
@@ -207,4 +208,39 @@ test("a run without a recommendation says so, rather than reading as nobody pass
   assert.equal(d.recommendation.a, null);
   assert.equal(d.recommendation.changed, false);
   assert.deepEqual(d.gates[0]?.a, { state: "unrecorded" });
+});
+
+test("flips are grouped by candidate, direction and cause, with the cause in words", () => {
+  const a = side("run-a", [row("opus", "i1", "failure"), row("opus", "i2", "failure"), row("opus", "i3")]);
+  const b = side("run-b", [row("opus", "i1"), row("opus", "i2"), row("opus", "i3", "failure")]);
+
+  const groups = diffRuns(a, b).flipGroups.map((g) => [g.candidate, g.direction, g.causeText, g.inputs]);
+
+  assert.deepEqual(groups, [
+    ["opus", "fail-to-pass", "answer not kept, cause unknown", ["i1", "i2"]],
+    ["opus", "pass-to-fail", "answer not kept, cause unknown", ["i3"]],
+  ]);
+});
+
+test("an answer on one side and a timeout on the other is a new answer, and its check version says none ran", () => {
+  const a = side("run-a", [row("opus", "i1")]);
+  const b = side("run-b", [row("opus", "i1", "failure", { completion_state: "timeout", checks: {} })]);
+
+  const [flip] = diffRuns(a, b).flips;
+
+  assert.equal(flip?.cause, "new-answer");
+  assert.deepEqual(flip?.checkVersion, { a: "v1", b: "no check ran" });
+});
+
+test("each flip carries what the check said on each side, trial by trial", () => {
+  const a = side("run-a", [row("opus", "i1", "failure", { checks: { key: { state: "fail", version: "v1", reason: "next_action: got corrected_claim, want appeal", evidence: "2/4 fields right" } } })]);
+  const b = side("run-b", [row("opus", "i1", "success", { checks: { key: { state: "pass", version: "v2", reason: "pass" } } })]);
+  const timedOut = side("run-c", [row("opus", "i1", "failure", { completion_state: "timeout", checks: {} })]);
+
+  const [flip] = diffRuns(a, b).flips;
+  const [toTimeout] = diffRuns(b, timedOut).flips;
+
+  assert.deepEqual(flip?.trials.a, [{ trial: 0, state: "success", checks: [{ id: "key", state: "fail", reason: "next_action: got corrected_claim, want appeal", evidence: "2/4 fields right" }], summary: "fail — next_action: got corrected_claim, want appeal" }]);
+  assert.deepEqual(flip?.trials.b, [{ trial: 0, state: "success", checks: [{ id: "key", state: "pass", reason: "pass" }], summary: "pass" }]);
+  assert.deepEqual(toTimeout?.trials.b, [{ trial: 0, state: "timeout", checks: [], summary: "timeout" }], "a timeout ran no check, and says it timed out");
 });

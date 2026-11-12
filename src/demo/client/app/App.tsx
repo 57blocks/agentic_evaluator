@@ -18,6 +18,8 @@ import { HomePage } from "@/pages/HomePage";
 import { TaskPage } from "@/pages/TaskPage";
 import { RunPage } from "@/pages/RunPage";
 import { ReportPage } from "@/pages/ReportPage";
+import { DiffPage } from "@/features/diff/DiffPage";
+import { previousRun } from "@/lib/runs";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { isSnapshot, READ_ONLY, snapshotMeta } from "@/lib/snapshot";
 
@@ -68,6 +70,10 @@ function reportLabel(run: RunView, dir: string): string {
 /** The trail back, built from whatever the route resolved to. */
 function crumbsFor(route: Route, task: TaskView | undefined, run: RunView | undefined, catalog: Catalog): Crumb[] {
   if (route.view === "task") return [{ label: task?.name ?? route.specPath }];
+  if (route.view === "diff") {
+    const owner = run?.task ? catalog.tasks.find((t) => t.name === run.task) : undefined;
+    return [...(owner ? [{ label: owner.name, route: { view: "task", specPath: owner.specPath } as Route }] : []), { label: "Compare runs" }];
+  }
   if (route.view !== "run" && route.view !== "report" && route.view !== "review") return [];
   if (!run) return [{ label: route.runId }];
   const owner = run.task ? catalog.tasks.find((t) => t.name === run.task) : undefined;
@@ -90,10 +96,14 @@ export function App() {
 
   const task =
     route.view === "task" ? catalog.tasks.find((t) => t.specPath === route.specPath) : undefined;
+  const runs = allRuns(catalog);
   const run =
     route.view === "run" || route.view === "report" || route.view === "review"
-      ? allRuns(catalog).find((r) => r.id === route.runId)
-      : undefined;
+      ? runs.find((r) => r.id === route.runId)
+      : route.view === "diff"
+        ? runs.find((r) => r.id === route.after)
+        : undefined;
+  const before = route.view === "diff" ? runs.find((r) => r.id === route.before) : undefined;
 
   return (
     <Shell crumbs={crumbsFor(route, task, run, catalog)}>
@@ -103,14 +113,16 @@ export function App() {
         ) : (
           <Notice title="Loading…" />
         )
+      ) : route.view === "diff" && before && run ? (
+        <DiffPage before={before} after={run} />
       ) : task ? (
         <TaskPage task={task} onRunFinished={reload} />
       ) : run && route.view === "report" ? (
         <ReportPage run={run} dir={route.dir} />
       ) : run && route.view === "review" ? (
         isSnapshot() ? <Notice title="Blind review is not available here" detail={READ_ONLY} /> : <ReviewPage runId={run.id} reviewer={route.reviewer} />
-      ) : run ? (
-        <RunPage run={run} />
+      ) : run && route.view === "run" ? (
+        <RunPage run={run} previous={previousRun(runs, run)} />
       ) : (
         <Notice
           title="Nothing is at this address any more"

@@ -43,6 +43,9 @@ export default defineConfig(({ mode }) => ({
           cssCodeSplit: false,
           assetsInlineLimit: 100_000_000,
           rollupOptions: { output: { inlineDynamicImports: true } },
+          // One inlined file is the point of this build (see above), so the
+          // generic 500 kB code-splitting hint does not apply; warn only well past it.
+          chunkSizeWarningLimit: 1024,
         }
       : {
           outDir: path.resolve(here, "dist/demo"),

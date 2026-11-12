@@ -12,6 +12,10 @@ import { sha256 } from "../canon/hash.js";
 import { trialKey, type DiffManifest, type DiffRow, type RunSide } from "../canon/run-diff.js";
 import type { Rate } from "../canon/rates.js";
 import { safeName } from "./generate.js";
+import { displayPath } from "../paths.js";
+
+/** The two runs cannot be compared as asked — not a run, not finished, no such step; the message says why. */
+export class DiffTargetError extends Error {}
 
 async function readJson<T>(file: string): Promise<T | null> {
   try {
@@ -24,7 +28,7 @@ async function readJson<T>(file: string): Promise<T | null> {
 
 async function readRows(dir: string): Promise<DiffRow[]> {
   const raw = await fs.readFile(path.join(dir, "scores.jsonl"), "utf-8").catch((err: NodeJS.ErrnoException) => {
-    if (err.code === "ENOENT") throw new Error(`${dir} has no scores.jsonl: not a finished run`);
+    if (err.code === "ENOENT") throw new DiffTargetError(`${displayPath(dir)} has no scores.jsonl: not a finished run`);
     throw err;
   });
   return raw
@@ -55,7 +59,7 @@ async function readOutputs(dir: string, rows: readonly DiffRow[]): Promise<Map<s
 
 export async function loadRunSide(dir: string): Promise<RunSide> {
   const manifest = await readJson<DiffManifest & { run_id?: string; step?: { id?: string } }>(path.join(dir, "manifest.json"));
-  if (manifest === null) throw new Error(`${dir} has no manifest.json: not a run directory`);
+  if (manifest === null) throw new DiffTargetError(`${displayPath(dir)} has no manifest.json: not a run directory`);
   const rows = await readRows(dir);
   const summary = await readJson<{ candidates?: Array<{ candidate: string; task_success_rate: Rate }> }>(path.join(dir, "summary.json"));
   return {
