@@ -30,6 +30,7 @@ import { cmdReview, REVIEW_HELP } from "./commands/review.js";
 import { cmdImportHarbor, IMPORT_HARBOR_HELP } from "./commands/import-harbor.js";
 import { cmdReplay, REPLAY_HELP } from "./commands/replay.js";
 import { cmdDiff, DIFF_HELP } from "./commands/diff.js";
+import { CALIBRATE_HELP, cmdCalibrate } from "./commands/calibrate.js";
 
 interface Command {
   summary: string;
@@ -53,6 +54,7 @@ export const COMMANDS: Record<string, Command> = {
   combine: { summary: "build one run from a run and its re-grades and re-runs", help: COMBINE_HELP, valued: VALUED, run: cmdCombine },
   judge: { summary: "judge a finished run again, without generating", help: JUDGE_HELP, valued: VALUED, run: cmdJudge },
   replay: { summary: "decide finished runs again under baseline rules, and with grader errors blamed on the model", help: REPLAY_HELP, valued: VALUED, run: cmdReplay },
+  calibrate: { summary: "does the judge's 1–5 score separate answers a person called right from wrong", help: CALIBRATE_HELP, valued: [...VALUED, "labels"], run: cmdCalibrate },
   review: { summary: "review a run blind, in the dashboard", help: REVIEW_HELP, valued: [...VALUED, "reviewer"], run: cmdReview },
   dash: { summary: "serve the dashboard, or export it as files", help: DASH_HELP, valued: [...VALUED, "export"], run: cmdDash },
   "install-skill": { summary: "add the /agenteval-new-task skill for Claude Code", help: INSTALL_SKILL_HELP, valued: VALUED, run: cmdInstallSkill },
