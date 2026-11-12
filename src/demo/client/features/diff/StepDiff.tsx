@@ -6,8 +6,8 @@
  * this file only lays it out.
  */
 
-import type { Count, GateMove, RateWithInterval, RunDiff } from "../../../../canon/run-diff.js";
-import { Note, Section, Tag, type TagTone } from "@/features/report/Section";
+import type { Count, Flip, FlipGroup, GateMove, RateWithInterval, RunDiff, TrialNote } from "../../../../canon/run-diff.js";
+import { Fold, Note, Section, Tag, type TagTone } from "@/features/report/Section";
 import { firmnessTone } from "@/lib/tone";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -134,6 +134,54 @@ function Rates({ d }: { d: RunDiff }) {
   );
 }
 
+function Said({ note }: { note: TrialNote | undefined }) {
+  if (!note) return <span className="text-muted-foreground">—</span>;
+  const evidence = note.checks.map((c) => c.evidence).filter(Boolean).join(" · ");
+  return (
+    <span className="flex flex-col gap-0.5">
+      <span className={note.summary.startsWith("pass") ? "text-ok" : "text-bad"}>{note.summary}</span>
+      {evidence && <span className="text-[11px] break-words text-muted-foreground">{evidence}</span>}
+    </span>
+  );
+}
+
+/** Input by input and trial by trial, what the check said before and after: the "why" behind the group. */
+function Why({ flips }: { flips: readonly Flip[] }) {
+  const rows = flips.flatMap((f) =>
+    [...new Set([...f.trials.a, ...f.trials.b].map((t) => t.trial))]
+      .sort((x, y) => x - y)
+      .map((trial) => ({ f, trial })),
+  );
+  return (
+    <Fold title="What the check said" count={`${flips.length} input(s)`}>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Input</TableHead>
+              <TableHead>Before</TableHead>
+              <TableHead>After</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map(({ f, trial }) => (
+              <TableRow key={`${f.input}-${trial}`}>
+                <TableCell className="align-top font-mono text-[12px] whitespace-nowrap">
+                  {f.input} <span className="text-muted-foreground">t{trial}</span>
+                </TableCell>
+                <TableCell className="max-w-[28rem] align-top text-[12px] whitespace-normal"><Said note={f.trials.a.find((n) => n.trial === trial)} /></TableCell>
+                <TableCell className="max-w-[28rem] align-top text-[12px] whitespace-normal"><Said note={f.trials.b.find((n) => n.trial === trial)} /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Fold>
+  );
+}
+
+const inGroup = (g: FlipGroup) => (f: Flip): boolean => f.candidate === g.candidate && f.direction === g.direction && f.cause === g.cause;
+
 function Flips({ d }: { d: RunDiff }) {
   if (d.inputs.shared === 0) return <Note>The two runs share no input, so nothing can flip.</Note>;
   return (
@@ -147,6 +195,7 @@ function Flips({ d }: { d: RunDiff }) {
             <span className="text-muted-foreground">{[g.causeText, ...g.checkVersions.map((v) => `check ${v}`)].join("; ")}</span>
           </p>
           <p className="font-mono text-[12px] break-words text-muted-foreground">{g.inputs.join(", ")}</p>
+          <Why flips={d.flips.filter(inGroup(g))} />
         </div>
       ))}
       {d.notCompared > 0 && <Note>{d.notCompared} candidate × input pair(s) not compared: not run or not graded on one side.</Note>}

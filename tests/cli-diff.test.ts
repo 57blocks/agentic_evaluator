@@ -74,3 +74,11 @@ test("a workflow run diffs step by step", async () => {
   assert.equal((r.out.match(/^diff /gm) ?? []).length, 3);
   assert.match(r.out, /recommendation unchanged/);
 });
+
+test("diff --why prints what the check said before and after on each flipped input", async () => {
+  const claims = "datasets/tasks/claim-denials-snf-v2/runs";
+  const r = await run(["diff", `${claims}/claim-denials-snf-v2-2026-10-20T07-42-08-589Z`, `${claims}/claim-denials-snf-v2-2026-10-30T01-21-18-738Z`, "--why"]);
+
+  assert.equal(r.code, EXIT.ok, r.err);
+  assert.match(r.out, /^ {6}cd2-\d+ t\d+: before (pass|fail|timeout)[^\n]* \| after (pass|fail|timeout)/m);
+});

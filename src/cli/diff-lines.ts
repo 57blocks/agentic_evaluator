@@ -50,19 +50,31 @@ function rateLines(d: RunDiff): string[] {
   return ["task success rate, as recorded [95% interval]", ...table([head, ...d.rates.map(row)])];
 }
 
-function flipLines(d: RunDiff): string[] {
+/** Per flipped input and trial, what the check said before and after (`--why`). */
+function whyLines(d: RunDiff, g: RunDiff["flipGroups"][number]): string[] {
+  const flips = d.flips.filter((f) => f.candidate === g.candidate && f.direction === g.direction && f.cause === g.cause);
+  return flips.flatMap((f) => {
+    const trials = [...new Set([...f.trials.a, ...f.trials.b].map((t) => t.trial))].sort((x, y) => x - y);
+    return trials.map((t) => {
+      const side = (notes: typeof f.trials.a) => notes.find((n) => n.trial === t)?.summary ?? "—";
+      return `      ${f.input} t${t}: before ${side(f.trials.a)} | after ${side(f.trials.b)}`;
+    });
+  });
+}
+
+function flipLines(d: RunDiff, why: boolean): string[] {
   if (d.inputs.shared === 0) return ["flips: no shared inputs to compare"];
-  const lines = d.flipGroups.map((g) => {
+  const lines = d.flipGroups.flatMap((g) => {
     const dir = g.direction === "fail-to-pass" ? "fail → pass" : "pass → fail";
-    const why = [g.causeText, ...g.checkVersions.map((v) => `check ${v}`)].join("; ");
-    return `  ${g.candidate}  ${dir} ×${g.inputs.length}  ${g.inputs.join(", ")}  — ${why}`;
+    const cause = [g.causeText, ...g.checkVersions.map((v) => `check ${v}`)].join("; ");
+    return [`  ${g.candidate}  ${dir} ×${g.inputs.length}  ${g.inputs.join(", ")}  — ${cause}`, ...(why ? whyLines(d, g) : [])];
   });
   const none = d.flips.length === 0 ? ["  none: every shared input kept its outcome"] : [];
   const skipped = d.notCompared > 0 ? [`  ${d.notCompared} candidate × input pair(s) not compared: not run or not graded on one side`] : [];
   return [`flips on the ${d.inputs.shared} shared input(s)`, ...lines, ...none, ...skipped];
 }
 
-export function diffLines(d: RunDiff): string[] {
+export function diffLines(d: RunDiff, opts: { why?: boolean } = {}): string[] {
   const steps = d.a.step === d.b.step ? `step ${d.a.step}` : `steps ${d.a.step} → ${d.b.step}`;
   return [
     `diff ${d.a.run} → ${d.b.run} (${steps})`,
@@ -75,6 +87,6 @@ export function diffLines(d: RunDiff): string[] {
     "",
     ...rateLines(d),
     "",
-    ...flipLines(d),
+    ...flipLines(d, opts.why === true),
   ];
 }
