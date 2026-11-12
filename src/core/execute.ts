@@ -12,7 +12,7 @@ import path from "node:path";
 import { judgePromptTemplateSha, PAIRWISE_EVALUATOR_ID } from "../judge.js";
 import { scorePromptTemplateSha, ABSOLUTE_EVALUATOR_ID } from "../score.js";
 import { requiredCheckVersion, TSC_CHECK_ID } from "../check.js";
-import { loadWorkflow } from "../spec/load-spec.js";
+import { loadWorkflow, restoreAnswerKeyOf } from "../spec/load-spec.js";
 import { displayPath, resolveTaskAsset } from "../paths.js";
 import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
 import { silentSink, type RunEventSink } from "./events.js";
@@ -340,6 +340,8 @@ export interface RunOptions {
 
 export async function runSuite(suitePath: string, html: boolean, opts: RunOptions = {}): Promise<StepResult | null> {
   const emit = opts.onEvent ?? silentSink;
+  // A killed run may have left the answer key unreadable, items file included: put it back before loading.
+  if (/\.ya?ml$/i.test(suitePath)) await restoreAnswerKeyOf(suitePath);
   const all = await loadWorkflow(suitePath);
   const unknown = (opts.steps ?? []).filter((id) => !all.some((s) => s.step === id));
   if (unknown.length > 0) throw new Error(`no step ${unknown.join(", ")} in ${suitePath} (steps: ${all.map((s) => s.step).join(", ")})`);
@@ -373,7 +375,7 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
   }
 
   // The answer key is unreadable while candidates run (src/core/answer-key.ts).
-  const answerKey = await hideAnswerKey(suites[0].taskRoot);
+  const answerKey = await hideAnswerKey(suites[0].taskRoot, [...new Set(all.flatMap((s) => (s.itemsFile ? [s.itemsFile] : [])))]);
   // The outage gate is shared by every model call in the process: on for
   // the run (steps and e2e arms alike), off again after it, pauses forwarded
   // as run events.

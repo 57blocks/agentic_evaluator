@@ -23,6 +23,8 @@ import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
 import { hasTraceRules, type TraceRules } from "../canon/trace-rules.js";
 import type { CheckConfig, JudgeMethod } from "../types.js";
 import { workspaceForSpec, type Workspace } from "../core/workspace.js";
+import { labelsOfItems, materializeItems, readItems } from "../core/items.js";
+import { referencesCopyFor, restoreAnswerKey } from "../core/answer-key.js";
 import type { Suite } from "../types.js";
 import { SPEC_SCHEMA } from "./schema.js";
 
@@ -33,7 +35,8 @@ export interface EvalStep {
   id: string;
   version: string;
   description?: string;
-  test_set: { id: string; inputs: string[]; fixture_dir?: string; labels_file?: string };
+  /** `inputs` is filled from `items_file` by `loadWorkflow` when the spec leaves it out. */
+  test_set: { id: string; inputs?: string[]; items_file?: string; fixture_dir?: string; labels_file?: string };
   candidate_ids: string[];
   required_checks?: string[];
   judged_dimensions?: string[];
@@ -180,8 +183,22 @@ function stepOverrides(step: EvalStep, spec: EvalSpec): {
 }
 
 /** Semantic checks the schema cannot express. */
+/** A step's inputs once its items file (if any) has been read; `checkSemantics` guarantees them. */
+function inputsOf(step: EvalStep): string[] {
+  return step.test_set.inputs ?? [];
+}
+
 function checkSemantics(spec: EvalSpec, specPath: string): void {
   const steps = spec.workflow.steps;
+  for (const step of steps) {
+    if (step.test_set.inputs) continue;
+    throw specError(
+      specPath,
+      step.test_set.items_file
+        ? `step "${step.id}" test_set.items_file is read when the spec is loaded from disk (loadWorkflow), not compiled in memory`
+        : `step "${step.id}" test_set needs inputs or items_file`,
+    );
+  }
   const stepDupes = duplicateIds(steps.map((s) => s.id));
   if (stepDupes.length > 0) throw specError(specPath, `duplicate step ids ${stepDupes.join(", ")}`);
 
@@ -293,7 +310,7 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
 function checkE2eBlock(spec: EvalSpec, specPath: string, root: EvalStep): void {
   const e2e = spec.workflow.e2e;
   if (!e2e) return;
-  const unknown = (e2e.inputs ?? []).filter((i) => !root.test_set.inputs.includes(i));
+  const unknown = (e2e.inputs ?? []).filter((i) => !inputsOf(root).includes(i));
   if (unknown.length > 0) {
     throw specError(specPath, `workflow.e2e.inputs ${unknown.join(", ")} are not inputs of "${root.id}", where the chain starts`);
   }
@@ -446,7 +463,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     judgeEndpoint: endpointOf(spec.evaluators.judge),
     judgeMethods: judgeMethodsOf(spec, step.judge),
     ...((step.judge?.show ?? spec.evaluators.judge.show)?.length ? { judgeShow: step.judge?.show ?? spec.evaluators.judge.show } : {}),
-    inputs: [...step.test_set.inputs],
+    inputs: [...inputsOf(step)],
     trials: spec.execution.trials_per_case,
     temperature: harness.default_temperature ?? DEFAULT_TEMPERATURE,
     timeoutMs: step.maximum_completion_time_seconds
@@ -530,6 +547,79 @@ function specPathFor(ws: Workspace, abs: string): string {
   return rel.startsWith("..") ? abs : rel;
 }
 
+/** What a step's items file contributed, merged onto its Suite. */
+type ItemsExtras = Pick<Suite, "labels" | "itemsFile">;
+
+/**
+ * Fill each `items_file` step's inputs from the file, write its items out as
+ * inputs/ and references/ (src/core/items.ts), and keep its tags and split
+ * for the Suite. A new spec object: the parsed one is not touched.
+ */
+async function resolveItems(spec: EvalSpec, specPath: string, taskRoot: string): Promise<{ spec: EvalSpec; extras: Map<string, ItemsExtras> }> {
+  const extras = new Map<string, ItemsExtras>();
+  const withItems = spec.workflow.steps.filter((s) => s.test_set.items_file);
+  if (withItems.length === 0) return { spec, extras };
+  if (spec.workflow.steps.length > 1) {
+    throw specError(specPath, `test_set.items_file supports single-step tasks for now; this spec has ${spec.workflow.steps.length} steps`);
+  }
+  // While this process's own run hides references/, the files are already out.
+  const hiddenByUs = referencesCopyFor(taskRoot) !== null;
+  const steps: EvalStep[] = [];
+  for (const step of spec.workflow.steps) {
+    const file = step.test_set.items_file;
+    if (!file) {
+      steps.push(step);
+      continue;
+    }
+    if (step.test_set.labels_file) {
+      throw specError(specPath, `step "${step.id}" declares both items_file and labels_file: the items file carries tags and split`);
+    }
+    let items;
+    try {
+      items = readItems(taskRoot, file);
+    } catch (err) {
+      throw specError(specPath, err instanceof Error ? err.message : String(err));
+    }
+    const ids = items.map((i) => i.id);
+    const missing = (step.test_set.inputs ?? []).filter((id) => !ids.includes(id));
+    if (missing.length > 0) throw specError(specPath, `step "${step.id}" inputs ${missing.join(", ")} are not in ${file}`);
+    try {
+      if (!hiddenByUs) await materializeItems(taskRoot, file, items);
+    } catch (err) {
+      throw specError(specPath, err instanceof Error ? err.message : String(err));
+    }
+    extras.set(step.id, { labels: labelsOfItems(items), itemsFile: file });
+    steps.push({ ...step, test_set: { ...step.test_set, inputs: step.test_set.inputs ?? ids } });
+  }
+  return { spec: { ...spec, workflow: { ...spec.workflow, steps } }, extras };
+}
+
+/**
+ * Make a task's answer key readable again after a run that was killed
+ * outright: references/ and any items file the spec names. Done before a
+ * spec is loaded by the commands that own the task (run, check-task), never
+ * by a reader such as the dashboard's catalog, which would undo a live run's
+ * hiding. True when something was put back.
+ */
+export async function restoreAnswerKeyOf(specPath: string): Promise<boolean> {
+  const abs = path.resolve(specPath);
+  const text = await fs.readFile(abs, "utf-8").catch(() => null);
+  let files: string[] = [];
+  if (text !== null) {
+    try {
+      files = itemsFilesOf(parseSpec(text, specPath));
+    } catch {
+      // A broken spec is reported by the load that follows.
+    }
+  }
+  return restoreAnswerKey(path.dirname(abs), files);
+}
+
+/** Every items file a spec names, task-relative. */
+export function itemsFilesOf(spec: EvalSpec): string[] {
+  return [...new Set(spec.workflow.steps.flatMap((s) => (s.test_set.items_file ? [s.test_set.items_file] : [])))];
+}
+
 export async function loadWorkflow(specPath: string): Promise<Suite[]> {
   if (/\.json$/i.test(specPath)) {
     throw new SpecError(
@@ -539,8 +629,9 @@ export async function loadWorkflow(specPath: string): Promise<Suite[]> {
   const abs = path.resolve(specPath);
   const ws = await workspaceForSpec(abs);
   const text = await fs.readFile(abs, "utf-8");
-  const spec = parseSpec(text, specPath);
-  return compileWorkflow(spec, specPathFor(ws, abs), sha256(text), path.dirname(abs));
+  const taskRoot = path.dirname(abs);
+  const { spec, extras } = await resolveItems(parseSpec(text, specPath), specPath, taskRoot);
+  return compileWorkflow(spec, specPathFor(ws, abs), sha256(text), taskRoot).map((suite) => ({ ...suite, ...extras.get(suite.step) }));
 }
 
 export async function loadSpec(specPath: string): Promise<Suite> {
