@@ -23,7 +23,7 @@ Ask what choice this task informs, in one sentence: *"which model should draft o
 
 Then pin down:
 
-- **What one input is.** A prompt text? A repo/fixture plus an instruction? A task name for an external harness? Each input becomes `inputs/<slug>.txt`; whatever else a candidate needs (fixtures, a scaffold) lives in the task directory.
+- **What one input is.** A prompt text? A repo/fixture plus an instruction? A task name for an external harness? Each input becomes `inputs/<slug>.txt`; whatever else a candidate needs (fixtures, a scaffold) lives in the task directory. When an input is a text and its answer is a value — the usual shape of data a user brings (a CSV or JSONL of questions and answers) — write the set as one `items.jsonl` instead and point `test_set.items_file` at it (`reference.md`, "A test set as one file"): one line per input with `id`, `input`, `expected`, `tags`, `split`; the engine writes the files out. Single-step tasks only, for now.
 - **What a candidate is.** A model through OpenRouter (`producer: prompt` or `codegen`), or a command (`adapter: agent-cli`: `claude -p`, opencode, a script, a wrapper around another harness).
 - **What the deliverable is.** Text (`output.txt` in the check's dir) or files the candidate leaves behind (the end state). For agents, the end state is the answer — grade files, not narration.
 
@@ -84,7 +84,7 @@ Cover **both directions** where it applies — cases where the candidate should 
 
 ### Sign-off 1: the inputs
 
-Write them to `tasks/<name>/inputs/<slug>.txt` (slugs short and descriptive), then show the user **every input**, not a summary — a simple HTML page or the files themselves, whichever they'll actually read. Observations are quantitative (counts, named cases). Ask:
+Write them to `tasks/<name>/inputs/<slug>.txt` (slugs short and descriptive), or as lines of `tasks/<name>/items.jsonl`, then show the user **every input**, not a summary — a simple HTML page or the files themselves, whichever they'll actually read. Observations are quantitative (counts, named cases). Ask:
 
 > Here are the N inputs. Are these the cases this decision depends on? Anything missing, or anything here that doesn't matter?
 
@@ -102,7 +102,7 @@ Show your work: list the criteria you included and the ones you left out, with a
 
 ### Reference answers
 
-For each input you can, write a correct answer the check must pass — `references/<input>/` holding the files a good candidate would leave (and `output.txt` if the deliverable is text), or `references/<input>.txt`. **References must come from the user or be human-verified** — never from a model that is a candidate, or the check learns to reward imitating it.
+For each input you can, write a correct answer the check must pass — `references/<input>/` holding the files a good candidate would leave (and `output.txt` if the deliverable is text), or `references/<input>.txt` — with an items file, the line's `expected`. `check-task` hands that to the check as `output.txt`; a command candidate's real deliverable is its files, so its check reads those during a run and falls back to `output.txt` (`reference.md`, "A test set as one file"). **References must come from the user or be human-verified** — never from a model that is a candidate, or the check learns to reward imitating it.
 
 ### Sign-off 2: the grading
 
@@ -140,7 +140,7 @@ A task whose candidates all score 100% answers only "the cheapest is enough". Th
 
 ## Step 4 — Ready to run
 
-0. Make the report say what it tests: a top-level `description` (the decision and what the inputs are, in a few sentences), a `description` on the required check (what a pass means), and `test_set.labels_file: checks/manifest.json` when items are tagged, so the report breaks results down by tag (`reference.md`, "Saying what a task evaluates").
+0. Make the report say what it tests: a top-level `description` (the decision and what the inputs are, in a few sentences), a `description` on the required check (what a pass means), and tags on the inputs — `tags` and `split` on each line of an items file, or `test_set.labels_file: checks/manifest.json` — so the report breaks results down by tag (`reference.md`, "Saying what a task evaluates").
 1. `agenteval check-task <name>` reports **0 blocking**. Read the remaining warnings out to the user in one line each and let them decide.
 2. `agenteval plan <name>` — show the counts (generations, judge calls, budget).
 3. Ask for consent in one line: *"N candidates × M inputs × T trials, judge on/off, budget $B — run it?"* For a workflow, give it per step plus the chain: *"task-breakdown 10×3, test-design 10×3, implementation 10×2, chain 2 arms on demo-todo, budget $600 — run it?"* Only on a yes: `agenteval run <name> --yes --html`, then point them at `runs/<run>/report.html` and `GAPS.md`.

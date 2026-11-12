@@ -14,6 +14,7 @@ import type { RunManifest } from "./manifest.js";
 import type { CandidateDef } from "./types.js";
 import { sha256 } from "./hash.js";
 import { taskInputPath } from "../paths.js";
+import { labelsOfItems, readItems } from "../core/items.js";
 
 export interface InputLabel {
   tags: string[];
@@ -46,6 +47,15 @@ export function parseLabels(json: unknown, file: string): InputLabels {
     out[input] = { tags: [...value.tags], ...(typeof value.split === "string" ? { split: value.split } : {}) };
   }
   return out;
+}
+
+/** Tags and split from a test set's items file; null when it cannot be read (hidden by a run, gone). */
+function labelsOfItemsFile(taskRoot: string, file: string): InputLabels | null {
+  try {
+    return labelsOfItems(readItems(taskRoot, file));
+  } catch {
+    return null;
+  }
 }
 
 export async function readLabels(taskRoot: string, file: string): Promise<InputLabels> {
@@ -173,11 +183,12 @@ export async function aboutOfRun(dir: string, m: RunManifest): Promise<RunAbout>
     const step = spec.workflow.steps.find((s) => s.id === m.step.id);
     const checkId = step?.required_checks?.[0];
     const labelsFile = step?.test_set.labels_file;
+    const itemsFile = step?.test_set.items_file;
     const about: RunAbout = {
       description: spec.description ?? null,
       stepDescription: step?.description ?? null,
       checkDescription: (checkId && spec.evaluators.required_checks?.[checkId]?.description) || null,
-      labels: labelsFile ? await readLabels(taskRoot, labelsFile).catch(() => null) : null,
+      labels: labelsFile ? await readLabels(taskRoot, labelsFile).catch(() => null) : itemsFile ? labelsOfItemsFile(taskRoot, itemsFile) : null,
       source: "current-spec",
     };
     return about.description || about.stepDescription || about.checkDescription || about.labels ? about : none;
