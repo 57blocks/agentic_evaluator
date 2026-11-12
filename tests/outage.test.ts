@@ -225,9 +225,26 @@ test("provider errors and timeouts together make one unanswered streak", () => {
   const halt = new ProviderErrorHalt(10, 4);
   halt.record("provider_error", { candidate: "a" });
   halt.record("timeout", { candidate: "b", trial: { candidate: "b", input: "in-1", trial: 1 } });
-  halt.record("provider_error", { candidate: "a" });
-  halt.record("timeout", { candidate: "b", trial: { candidate: "b", input: "in-2", trial: 1 } });
+  halt.record("timeout", { candidate: "a", trial: { candidate: "a", input: "in-1", trial: 1 } });
+  halt.record("provider_error", { candidate: "b" });
   assert.equal(halt.trippedBy, "timeouts");
+});
+
+test("one slow candidate beside another's provider errors does not halt the run", () => {
+  const halt = new ProviderErrorHalt(10, 3);
+  for (let i = 0; i < 6; i++) {
+    halt.record("timeout", { candidate: "slow", trial: { candidate: "slow", input: `in-${i}`, trial: 1 } });
+    if (i === 2) halt.record("provider_error", { candidate: "other" });
+  }
+  assert.equal(halt.tripped, false);
+});
+
+test("an end-to-end arm's timeouts, which name no trial, still halt the run", () => {
+  const halt = new ProviderErrorHalt(10, 3);
+  for (const c of ["a", "b", "a"]) halt.record("timeout", { candidate: c });
+  assert.equal(halt.trippedBy, "timeouts");
+  assert.equal(halt.state().halted_timeouts, undefined);
+  assert.match(haltGap(halt.state())!, /timeouts halted the run.*`run --reuse` to run what never started/);
 });
 
 test("a streak of provider errors alone is the provider-error halt's, not the timeout halt's", () => {
@@ -239,7 +256,10 @@ test("a streak of provider errors alone is the provider-error halt's, not the ti
 
 test("a null timeout limit turns the timeout halt off", () => {
   const halt = new ProviderErrorHalt(10, null);
-  for (let i = 0; i < 50; i++) halt.record("timeout", { candidate: i % 2 ? "a" : "b" });
+  for (let i = 0; i < 50; i++) {
+    const candidate = i % 2 ? "a" : "b";
+    halt.record("timeout", { candidate, trial: { candidate, input: `in-${i}`, trial: 1 } });
+  }
   assert.equal(halt.tripped, false);
 });
 

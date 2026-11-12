@@ -1047,7 +1047,8 @@ it; the four datasets come to about 12 MB.
   counts only in a streak of unanswered calls (timeouts and provider errors,
   nothing answered in between) that reaches
   `execution.max_consecutive_timeouts` (default 10; `null` turns it off) and
-  spans at least two candidates: one slow model cannot trip it, and a step
+  has at least two candidates timing out in it: one slow model cannot trip
+  it, even beside a stray provider error, and a step
   with a single candidate never is. The timeouts in that streak stay in this
   run's rates, and `GAPS.md` says so; `run --reuse` generates them again
   instead of keeping them. Reused trials never count toward either halt.
