@@ -17,6 +17,7 @@ import { displayPath, resolveTaskAsset } from "../paths.js";
 import { runsRootFor, workspaceForSpec, type Workspace } from "./workspace.js";
 import { silentSink, type RunEventSink } from "./events.js";
 import { methodsOf, planE2e, planStep, resolveConcurrency } from "./plan.js";
+import { describeMissingKey, missingModelKeys } from "./model-keys.js";
 import { hideAnswerKey } from "./answer-key.js";
 import { noteEvidenceIncomplete, readInput, runAll, safeName, type PromptTemplate } from "./generate.js";
 import { judgeAll, scoreAll } from "./evaluate.js";
@@ -358,6 +359,13 @@ export async function runSuite(suitePath: string, html: boolean, opts: RunOption
   if (isSpec && !opts.yes) {
     emit({ type: "preview.only" });
     return null;
+  }
+
+  // A call without its key would be recorded as the candidate's malformed
+  // answer, trial after trial: refuse before anything is written.
+  const missingKeys = [...new Map(suites.flatMap(missingModelKeys).map((k) => [`${k.who}\0${k.env}`, k])).values()];
+  if (missingKeys.length > 0) {
+    throw new Error(`cannot start: an API key this run needs is not set\n${missingKeys.map((k) => `  - ${describeMissingKey(k)}`).join("\n")}`);
   }
 
   // The answer key is unreadable while candidates run (src/core/answer-key.ts).
