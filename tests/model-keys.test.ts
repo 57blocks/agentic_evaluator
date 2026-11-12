@@ -4,7 +4,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { runSuite } from "../src/core/execute.js";
-import { missingModelKeys } from "../src/core/model-keys.js";
+import { missingE2eKeys, missingModelKeys } from "../src/core/model-keys.js";
+import type { Suite } from "../src/types.js";
 import { preflightTask } from "../src/core/preflight.js";
 import { loadWorkflow } from "../src/spec/load-spec.js";
 
@@ -93,4 +94,37 @@ test("check-task warns, without blocking, when the OpenRouter key is not set", a
   assert.ok(keys.length > 0);
   assert.ok(keys.every((f) => f.severity === "warning" && /refuse to start/.test(f.message)));
   await fs.rm(dir, { recursive: true, force: true });
+});
+
+/** A two-step chain whose steps neither judge nor run model candidates: only end-to-end calls need a key. */
+function chain(over: Partial<Suite> = {}): Suite[] {
+  const step = (id: string): Suite =>
+    ({
+      step: id,
+      candidates: ["agent"],
+      candidateDefs: {
+        agent: { id: "agent", adapter: "agent-cli", cli: { argv: ["node", "a.mjs"] } },
+        control: { id: "control", model: "fake/control", provider_route: "openrouter" },
+      },
+      judge: "fake/judge",
+      judgeEndpoint: { route: "openrouter" },
+      judgeMethods: [],
+      ...over,
+    }) as unknown as Suite;
+  return [step("one"), step("two")];
+}
+
+test("end-to-end validation needs the control candidate's key and the end-to-end judge's", async () => {
+  const suites = chain({ controlCandidate: "control", e2eJudge: { rubricFile: "r.md", dimensions: [] } });
+
+  const steps = await withKey(undefined, async () => suites.flatMap(missingModelKeys));
+  const e2e = await withKey(undefined, async () => missingE2eKeys(suites));
+
+  assert.deepEqual(steps, [], "the steps alone call no model");
+  assert.deepEqual(e2e.map((k) => k.who), ["control", "control", "end-to-end judge fake/judge"]);
+});
+
+test("end-to-end validation without a judge or a model control needs no key", async () => {
+  const e2e = await withKey(undefined, async () => missingE2eKeys(chain({ controlCandidate: "agent" })));
+  assert.deepEqual(e2e, []);
 });
