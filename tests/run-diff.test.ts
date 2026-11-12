@@ -197,3 +197,14 @@ test("a changed gate threshold is named on its own; a threshold unset on both si
 
   assert.deepEqual(d.setup, [{ what: "gate minimum_reliability", a: "1", b: "0.9" }]);
 });
+
+test("a run without a recommendation says so, rather than reading as nobody passing", () => {
+  const a = side("run-a", [row("sonnet", "i1")], { recommendation: null });
+  const b = side("run-b", [row("sonnet", "i1")]);
+
+  const d = diffRuns(a, b);
+
+  assert.equal(d.recommendation.a, null);
+  assert.equal(d.recommendation.changed, false);
+  assert.deepEqual(d.gates[0]?.a, { state: "unrecorded" });
+});

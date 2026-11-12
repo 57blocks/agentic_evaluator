@@ -61,7 +61,8 @@ export interface SetupChange {
   b: string;
 }
 
-export type GateStatus = { state: "in" } | { state: "out"; reason?: string } | { state: "absent" };
+/** "unrecorded": the run kept no recommendation.json, so who passed its gates is not known. */
+export type GateStatus = { state: "in" } | { state: "out"; reason?: string } | { state: "absent" } | { state: "unrecorded" };
 
 export interface RateWithInterval extends Rate {
   low: number | null;
@@ -80,7 +81,7 @@ export interface RateChange {
   b: RateWithInterval | null;
   /** Counted on the inputs both runs share. */
   shared: { a: Count; b: Count };
-  /** Counted on the inputs only that run has; null when there are none. */
+  /** Counted on the inputs that run does not share: only it has them, or their content changed. Null when there are none. */
   onlyA: Count | null;
   onlyB: Count | null;
 }
@@ -104,8 +105,9 @@ export interface RunDiff {
   setup: SetupChange[];
   inputs: { shared: number; added: string[]; removed: string[]; changed: string[] };
   recommendation: {
-    a: { chosen: string | null; firmness: string | null };
-    b: { chosen: string | null; firmness: string | null };
+    /** null when that run kept no recommendation.json. */
+    a: { chosen: string | null; firmness: string | null } | null;
+    b: { chosen: string | null; firmness: string | null } | null;
     changed: boolean;
   };
   gates: Array<{ candidate: string; a: GateStatus; b: GateStatus }>;
@@ -198,14 +200,16 @@ function compareInputs(a: RunSide, b: RunSide): { sharedNames: string[]; added: 
 /* ── recommendation and gates ────────────────────────────────────────────── */
 
 function recommendationChange(a: RunSide, b: RunSide): RunDiff["recommendation"] {
-  const pick = (s: RunSide) => ({ chosen: s.recommendation?.chosen ?? null, firmness: s.recommendation?.firmness ?? null });
+  const pick = (s: RunSide) => (s.recommendation === null ? null : { chosen: s.recommendation.chosen ?? null, firmness: s.recommendation.firmness ?? null });
   const pa = pick(a);
   const pb = pick(b);
-  return { a: pa, b: pb, changed: pa.chosen !== pb.chosen || pa.firmness !== pb.firmness };
+  const changed = pa !== null && pb !== null && (pa.chosen !== pb.chosen || pa.firmness !== pb.firmness);
+  return { a: pa, b: pb, changed };
 }
 
 function gateStatus(s: RunSide, candidate: string): GateStatus {
   if (!candidatesOf(s).includes(candidate)) return { state: "absent" };
+  if (s.recommendation === null) return { state: "unrecorded" };
   if (s.recommendation?.eligible?.includes(candidate)) return { state: "in" };
   const removal = (s.recommendation?.filters ?? []).flatMap((f) => f.removed).find((r) => r.candidate === candidate);
   return removal ? { state: "out", reason: removal.reason } : { state: "out" };
