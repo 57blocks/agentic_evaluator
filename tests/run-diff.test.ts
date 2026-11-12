@@ -231,3 +231,16 @@ test("an answer on one side and a timeout on the other is a new answer, and its 
   assert.equal(flip?.cause, "new-answer");
   assert.deepEqual(flip?.checkVersion, { a: "v1", b: "no check ran" });
 });
+
+test("each flip carries what the check said on each side, trial by trial", () => {
+  const a = side("run-a", [row("opus", "i1", "failure", { checks: { key: { state: "fail", version: "v1", reason: "next_action: got corrected_claim, want appeal", evidence: "2/4 fields right" } } })]);
+  const b = side("run-b", [row("opus", "i1", "success", { checks: { key: { state: "pass", version: "v2", reason: "pass" } } })]);
+  const timedOut = side("run-c", [row("opus", "i1", "failure", { completion_state: "timeout", checks: {} })]);
+
+  const [flip] = diffRuns(a, b).flips;
+  const [toTimeout] = diffRuns(b, timedOut).flips;
+
+  assert.deepEqual(flip?.trials.a, [{ trial: 0, state: "success", checks: [{ id: "key", state: "fail", reason: "next_action: got corrected_claim, want appeal", evidence: "2/4 fields right" }], summary: "fail — next_action: got corrected_claim, want appeal" }]);
+  assert.deepEqual(flip?.trials.b, [{ trial: 0, state: "success", checks: [{ id: "key", state: "pass", reason: "pass" }], summary: "pass" }]);
+  assert.deepEqual(toTimeout?.trials.b, [{ trial: 0, state: "timeout", checks: [], summary: "timeout" }], "a timeout ran no check, and says it timed out");
+});

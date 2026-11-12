@@ -88,6 +88,15 @@ export interface RateChange {
 
 export type FlipCause = "same-answer" | "new-answer" | "unknown";
 
+/** One graded trial behind a flip: how it ended, and what each required check said about it. */
+export interface TrialNote {
+  trial: number;
+  state: DiffRow["completion_state"];
+  checks: Array<{ id: string; state: string; reason?: string; evidence?: string }>;
+  /** One line every view prints: the check's state and reason, or how the trial ended when no answer came. */
+  summary: string;
+}
+
 export interface Flip {
   candidate: string;
   input: string;
@@ -97,6 +106,8 @@ export interface Flip {
   cause: FlipCause;
   /** The required checks' versions on each side, when they differ. */
   checkVersion: { a: string; b: string } | null;
+  /** What the check said on each side: the "why" behind the flip. */
+  trials: { a: TrialNote[]; b: TrialNote[] };
 }
 
 /** How a candidate crossed the gates between the runs, in the words every view prints. */
@@ -340,9 +351,22 @@ function flipsOf(candidate: string, a: RunSide, b: RunSide, shared: readonly str
       b: { pass: pb, n: gb.length },
       cause: causeOf(a, b, ga, gb),
       checkVersion: checkVersions(ga, gb),
+      trials: { a: ga.map(trialNote), b: gb.map(trialNote) },
     });
   }
   return { flips, notCompared };
+}
+
+function trialNote(r: DiffRow): TrialNote {
+  const checks = Object.entries(r.checks).map(([id, c]) => ({
+    id,
+    state: c.state,
+    ...(c.reason ? { reason: c.reason } : {}),
+    ...(c.evidence ? { evidence: c.evidence } : {}),
+  }));
+  const said = checks.map((c) => (c.reason && c.reason !== c.state ? `${c.state} — ${c.reason}` : c.state)).join("; ");
+  const summary = r.completion_state !== "success" ? `${r.completion_state}${said ? ` (${said})` : ""}` : said || "no check ran";
+  return { trial: r.trial, state: r.completion_state, checks, summary };
 }
 
 const slashed = (p: string): string => p.replace(/\\/g, "/").replace(/\/+$/, "");

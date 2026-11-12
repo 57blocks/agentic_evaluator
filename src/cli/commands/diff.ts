@@ -24,12 +24,14 @@ export const DIFF_HELP = `agenteval diff <before> <after> [options]
   <before> <after>    run ids, or paths to run directories
   --step ID           the step to compare, when a run is a workflow run
                       (without it, every step both workflow runs have)
+  --why               under each flip, what the check said on each side,
+                      input by input and trial by trial
   --json              print the comparison as JSON: an array, one entry
                       per compared step
   --workspace DIR     workspace to look the run ids up in`;
 
 export async function cmdDiff(args: ParsedArgs, io: Io): Promise<ExitCode> {
-  rejectUnknown(args.flags, ["workspace", "step", "json"]);
+  rejectUnknown(args.flags, ["workspace", "step", "json", "why"]);
   const [before, after] = args.positional;
   if (before === undefined || after === undefined) throw new UsageError("which two runs? `agenteval diff <before> <after>` (try `agenteval ls`)");
 
@@ -51,6 +53,6 @@ export async function cmdDiff(args: ParsedArgs, io: Io): Promise<ExitCode> {
     io.out(`${JSON.stringify(diffs, null, 2)}\n`);
     return EXIT.ok;
   }
-  io.out(`${[...unmatched.map((u) => `note: ${u}, not compared`), ...diffs.map((d) => diffLines(d).join("\n"))].join("\n\n")}\n`);
+  io.out(`${[...unmatched.map((u) => `note: ${u}, not compared`), ...diffs.map((d) => diffLines(d, { why: args.flags.why === true }).join("\n"))].join("\n\n")}\n`);
   return EXIT.ok;
 }
