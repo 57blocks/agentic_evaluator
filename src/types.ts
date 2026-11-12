@@ -163,6 +163,8 @@ export interface Suite {
   outageWaitSeconds?: number;
   /** Consecutive provider errors that halt the run (canon/halt.ts); default 10, null turns the halt off. */
   maxConsecutiveProviderErrors?: number | null;
+  /** Consecutive timeouts, across two or more candidates, that halt the run (canon/halt.ts); default 10, null turns it off. */
+  maxConsecutiveTimeouts?: number | null;
   controlCandidate?: string;
   benchmarkMode?: "capability-neutral" | "production-realistic";
   cacheMode?: "cold" | "warm" | "both";

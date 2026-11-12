@@ -8,6 +8,7 @@
 
 import type { RunEvent, RunEventSink, StepPlan } from "../core/events.js";
 import { summaryLines } from "./summary.js";
+import { haltCause } from "../canon/halt.js";
 
 function usd(n: number, places = 4): string {
   return `$${n.toFixed(places)}`;
@@ -51,7 +52,7 @@ export function formatEvent(e: RunEvent): string[] {
       // One line says a candidate was stopped (candidate.stopped), not one per trial.
       if (e.state === "skipped" && e.skipReason === "early-stop") return [];
       // One line says the run was halted (run.halted), not one per trial.
-      if (e.state === "skipped" && e.skipReason === "provider-errors") return [];
+      if (e.state === "skipped" && (e.skipReason === "provider-errors" || e.skipReason === "timeouts")) return [];
       if (e.state === "skipped") return [`  skip   ${who} — budget limit reached`];
       if (e.error) return [`  ${e.state.padEnd(8)} ${who}: ${e.error}`];
       const cost = e.costUsd === undefined ? "" : `, ${usd(e.costUsd)} ${e.costSource ?? ""}`;
@@ -85,7 +86,7 @@ export function formatEvent(e: RunEvent): string[] {
       return [`⚠ network still down after ${Math.round(e.pausedMs / 1000)}s of waiting (${e.consecutive} failures in a row) — calls now fail as provider errors`];
     case "run.halted":
       return [
-        `⚠ halted ${e.step} after ${e.consecutive} consecutive provider errors — skipped ${e.skipped.generation} generation(s), ${e.skipped.judging} judgement(s), ${e.skipped.scoring} scoring call(s); this run is partial (see GAPS.md); fix the network and run --reuse`,
+        `⚠ halted ${e.step} after ${e.consecutive} ${haltCause(e.reason)} — skipped ${e.skipped.generation} generation(s), ${e.skipped.judging} judgement(s), ${e.skipped.scoring} scoring call(s); this run is partial (see GAPS.md); fix the network and run --reuse`,
       ];
     case "integrity.gaps":
       return [
