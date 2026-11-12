@@ -34,12 +34,14 @@ function setupLines(d: RunDiff): string[] {
 }
 
 function recommendationLine(d: RunDiff): string {
-  const show = (r: { chosen: string | null; firmness: string | null }) => `${r.chosen ?? "none"}${r.firmness ? ` (${r.firmness})` : ""}`;
+  const show = (r: { chosen: string | null; firmness: string | null } | null) => (r === null ? "not recorded" : `${r.chosen ?? "none"}${r.firmness ? ` (${r.firmness})` : ""}`);
   const { a, b, changed } = d.recommendation;
+  if (a === null || b === null) return `recommendation: ${show(a)} → ${show(b)} (a run without recommendation.json cannot be compared)`;
   return changed ? `recommendation CHANGED: ${show(a)} → ${show(b)}` : `recommendation unchanged: ${show(b)}`;
 }
 
 function gateMove(a: GateStatus, b: GateStatus): string {
+  if (a.state === "unrecorded" || b.state === "unrecorded") return "not recorded";
   if (a.state === "absent") return b.state === "in" ? "new, in" : "new, out";
   if (b.state === "absent") return "dropped";
   if (a.state === b.state) return a.state === "in" ? "stayed in" : "stayed out";
@@ -47,7 +49,7 @@ function gateMove(a: GateStatus, b: GateStatus): string {
 }
 
 function gateLines(d: RunDiff): string[] {
-  const order = ["LEFT", "ENTERED", "new, in", "new, out", "dropped", "stayed out", "stayed in"];
+  const order = ["LEFT", "ENTERED", "new, in", "new, out", "dropped", "stayed out", "stayed in", "not recorded"];
   const rows = d.gates
     .map((g) => ({ g, move: gateMove(g.a, g.b) }))
     .sort((x, y) => order.indexOf(x.move) - order.indexOf(y.move))
@@ -59,7 +61,7 @@ function gateLines(d: RunDiff): string[] {
 }
 
 function rateLines(d: RunDiff): string[] {
-  const head = ["candidate", "before", "after", "shared inputs", "only after", "only before"];
+  const head = ["candidate", "before", "after", "shared inputs", "after, not shared", "before, not shared"];
   const row = (r: RateChange) => [r.candidate, rateText(r.a), rateText(r.b), `${frac(r.shared.a)} → ${frac(r.shared.b)}`, frac(r.onlyB), frac(r.onlyA)];
   return ["task success rate, as recorded [95% interval]", ...table([head, ...d.rates.map(row)])];
 }

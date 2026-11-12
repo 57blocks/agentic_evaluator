@@ -26,7 +26,8 @@ export const DIFF_HELP = `agenteval diff <before> <after> [options]
   <before> <after>    run ids, or paths to run directories
   --step ID           the step to compare, when a run is a workflow run
                       (without it, every step both workflow runs have)
-  --json              print the comparison as JSON
+  --json              print the comparison as JSON: an array, one entry
+                      per compared step
   --workspace DIR     workspace to look the run ids up in`;
 
 /** The step directories to compare, as [before, after] pairs. */
@@ -75,7 +76,8 @@ export async function cmdDiff(args: ParsedArgs, io: Io): Promise<ExitCode> {
   const diffs = await Promise.all(pairs.map(async ([a, b]) => diffRuns(await loadRunSide(a), await loadRunSide(b))));
 
   if (args.flags.json) {
-    io.out(`${JSON.stringify(diffs.length === 1 ? diffs[0] : diffs, null, 2)}\n`);
+    // Always one entry per compared step, so a script reads one shape.
+    io.out(`${JSON.stringify(diffs, null, 2)}\n`);
     return EXIT.ok;
   }
   const unmatched = step === undefined && pairs.length > 1 ? await unmatchedSteps(da, db) : [];

@@ -39,7 +39,9 @@ test("diff says the pick changed, who left the gates, and how each rate moved", 
 
 test("diff --json splits every recorded rate exactly into shared and new inputs", async () => {
   const r = await run(["diff", SIXTY, HUNDRED, "--json"]);
-  const d = JSON.parse(r.out) as RunDiff;
+  const [d, ...rest] = JSON.parse(r.out) as RunDiff[];
+  assert.equal(rest.length, 0);
+  assert.ok(d);
 
   assert.equal(r.code, EXIT.ok);
   for (const rate of d.rates) {
