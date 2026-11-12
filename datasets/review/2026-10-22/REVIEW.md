@@ -88,6 +88,35 @@ one except the 20 opus-5.5 answers above:
 | kyc-ubo-v2 · gpt-5.6-sol | 10 | 0 | 0 |
 | kyc-ubo-v2 · opus-5.5 | 10 | 0 | 0 |
 
+## Judge calibration
+
+The same review says, for each answer of the reviewed models, whether it was
+right. [`../build/judge_labels.py`](../build/judge_labels.py) turns that into
+labels for `agenteval calibrate` (`judge-labels/`), checking that each answer
+the review shows is the one in the combined 2026-10-21 run; the
+filing-through-date items, whose labels follow from the R1 ruling rather than
+a review, are kept apart in `claim-denials-r1-derived.jsonl`.
+
+```
+agenteval calibrate datasets/tasks/claim-denials-snf-v2/runs/claim-denials-snf-v2-combined-2026-10-21T00-51-44-560Z \
+  --labels datasets/review/2026-10-22/judge-labels/claim-denials.jsonl
+```
+
+| set · score | right (n · mean) | wrong (n · mean) | AUC [95%, resampled by input] | wrong scored 5 |
+|---|---|---|---|---|
+| claim-denials · sound-action | 645 · 4.93 | 45 · 5.00 | 0.48 [0.47–0.49] | 45 of 45 |
+| kyc-ubo-v2 · overall | 580 · 4.85 | 18 · 4.22 | 0.62 [0.49–0.74] | 12 of 18 |
+| kyc-ubo-v2 · correct-basis | 580 · 4.93 | 18 · 4.06 | 0.65 [0.54–0.77] | 12 of 18 |
+| kyc-ubo-v2 · reasoning-clarity | 580 · 4.85 | 18 · 4.89 | 0.48 [0.44–0.55] | 17 of 18 |
+
+On claim-denials the judge's score does not separate right answers from
+wrong ones: it gave every wrong answer a 5. On kyc only `correct-basis`
+separates them, weakly. Read with three limits: the judge was asked to grade
+only the explanation (`action_note`; `reasoning` and `basis`), not the
+fields the review judged; the review was not blind; and outside R1 the labels
+never overrule the check, so this is the judge measured against the check
+on keys a person confirmed.
+
 ## Why this is in the repository
 
 The 说明 sheet asks reviewers to keep the workbook internal because it holds

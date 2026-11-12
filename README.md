@@ -392,6 +392,7 @@ Every command takes `--help`.
 | `agenteval review <run>` | review a run blind in the dashboard; verdicts go to `runs/<run>/reviews/` | no |
 | `agenteval report <run>` | re-render a run's `report.html` (run id or path) | no |
 | `agenteval diff <before> <after>` | did the conclusion change between two runs: the pick, who entered or left the gates, each pass rate split into shared and new inputs, and which shared inputs flipped — same answer graded differently, or a new answer (`--step`, `--json`); in the dashboard, Compare on a run or task page | no |
+| `agenteval calibrate <run> --labels FILE` | does the judge's 1–5 score separate answers a person called right from the ones they called wrong: AUC with an input-resampled 95% interval, per judged dimension and per label group, and how often the labels overrule the check | no |
 | `agenteval replay <run>...` | decide finished runs again under baseline rules (leaderboard, weighted cost, within q of best) and with grader errors blamed on the model; names the gate each pick fails | no |
 | `agenteval install-skill` | add the `/agenteval-new-task` skill for Claude Code to this workspace | no |
 | `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
