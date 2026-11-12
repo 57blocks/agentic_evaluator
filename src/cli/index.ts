@@ -29,6 +29,7 @@ import { cmdInstallSkill, INSTALL_SKILL_HELP } from "./commands/install-skill.js
 import { cmdReview, REVIEW_HELP } from "./commands/review.js";
 import { cmdImportHarbor, IMPORT_HARBOR_HELP } from "./commands/import-harbor.js";
 import { cmdReplay, REPLAY_HELP } from "./commands/replay.js";
+import { cmdDiff, DIFF_HELP } from "./commands/diff.js";
 
 interface Command {
   summary: string;
@@ -48,6 +49,7 @@ export const COMMANDS: Record<string, Command> = {
   init: { summary: "create a runnable task to edit", help: INIT_HELP, valued: VALUED, run: cmdInit },
   models: { summary: "are this task's models reachable from here, and at what price", help: MODELS_HELP, valued: VALUED, run: cmdModels },
   report: { summary: "re-render a run's report.html", help: REPORT_HELP, valued: VALUED, run: cmdReport },
+  diff: { summary: "did the conclusion change between two runs, and why", help: DIFF_HELP, valued: VALUED, run: cmdDiff },
   combine: { summary: "build one run from a run and its re-grades and re-runs", help: COMBINE_HELP, valued: VALUED, run: cmdCombine },
   judge: { summary: "judge a finished run again, without generating", help: JUDGE_HELP, valued: VALUED, run: cmdJudge },
   replay: { summary: "decide finished runs again under baseline rules, and with grader errors blamed on the model", help: REPLAY_HELP, valued: VALUED, run: cmdReplay },
