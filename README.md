@@ -26,6 +26,7 @@ candidate to use, why, what it cost, and what it could not observe.
 | you want to | do this | needs |
 |---|---|---|
 | see what a finished evaluation looks like | from a clone: `agenteval dash --workspace datasets` ([Datasets](#datasets)) | nothing: no key, no spend |
+| choose a model for each stage of an app you already have | [Evaluate your own pipeline](docs/evaluate-your-pipeline.md), with the `pipeline` sample | `python3` for the sample: offline, free |
 | build an evaluation for a decision of your own | `agenteval install-skill`, then `/agenteval-new-task` in Claude Code ([Build a task with Claude Code](#build-a-task-with-claude-code)) | Claude Code; a key only when you choose to run |
 | try the tool in a minute | `agenteval init my-task && agenteval run my-task --yes --html` ([Quick start](#quick-start-free-offline)) | nothing: offline, free |
 | write a task by hand, file by file | [Tutorial](#tutorial-compare-two-models-on-your-own-prompt) | an OpenRouter key, under a cent |
@@ -303,13 +304,13 @@ To put your own program in as a candidate, see
 
 ## Samples
 
-The package ships eight sample tasks. Copy one — or all of them — into your
+The package ships nine sample tasks. Copy one — or all of them — into your
 workspace and run it by name:
 
 ```bash
 mkdir -p tasks
 cp -R "$(npm root -g)/57b-agenteval/examples/tasks/custom-check" tasks/   # one
-cp -R "$(npm root -g)/57b-agenteval/examples/tasks/"* tasks/             # or all eight
+cp -R "$(npm root -g)/57b-agenteval/examples/tasks/"* tasks/             # or all nine
 agenteval ls                                                        # what you now have
 agenteval run custom-check --yes --html
 ```
@@ -320,6 +321,7 @@ Copying keeps their runs in your workspace instead of in the global install.
 |---|---|---|---|
 | `custom-check` | grading with your own check script; wrapping any program as a candidate | nothing | free |
 | `chain-offline` | a two-step workflow and its end-to-end validation | nothing | free |
+| `pipeline` | your own app's stages: one wrapper runs each stage with each model, then the per-stage picks are tested end to end ([guide](docs/evaluate-your-pipeline.md)) | `python3` | free |
 | `docker-sandbox` | the same agent run in a Docker container and on the host; each trial records which | Docker running | free |
 | `compare-models` | two real models, a deterministic gate plus a pairwise judge | `OPENROUTER_API_KEY` | capped at $0.50 |
 | `compare-prompts` | one model with three prompts (the step's, its own `prompt_file`, a `system`) on eight changelogs, picked by judge preference | `OPENROUTER_API_KEY` | capped at $3 |
@@ -693,7 +695,9 @@ a whole project, `evaluators.judge.show` (globs such as `[README.md, "src/**"]`)
 narrows what the judge reads, and what the report shows, to those files. The
 check still gets every file. Use `x-harness: { producer: codegen }`. Add
 `image:` to run it in Docker (see [Safety](#safety)); `agenteval init` and the
-`custom-check` sample are working examples.
+`custom-check` sample are working examples. To wrap an application of your
+own, one agent or stage per step, see
+[Evaluate your own pipeline](docs/evaluate-your-pipeline.md).
 
 agenteval cannot see what a command spends, so its cost is recorded as
 unobserved: `unobserved` in the tables, `null` per success, named in
@@ -907,7 +911,9 @@ A task can have several steps, each evaluated on its own inputs. Add
 `input_from: <earlier step id>` to chain them: the run then also executes the
 whole chain twice — once with `control_candidate` on every step, once with each
 step's recommended candidate — and reports whether the combination beats the
-single model. The `chain-offline` sample shows this.
+single model. The `chain-offline` sample shows this; `pipeline` shows it
+on an app's stages, and [Evaluate your own pipeline](docs/evaluate-your-pipeline.md)
+walks through doing it for yours.
 
 In the chain, a step's input is the previous step's output, rendered as text.
 For agents whose next stage needs the project itself, add `handoff: workdir`
