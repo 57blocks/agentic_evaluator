@@ -18,6 +18,7 @@ import { RunButton, RunPanel } from "@/features/run-control/RunControl";
 import { isSnapshot } from "@/lib/snapshot";
 import { useRun } from "@/features/run-control/useRun";
 import { TestPlan } from "@/features/test-plan/TestPlan";
+import { ComparePicker } from "@/features/diff/ComparePicker";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -140,6 +141,7 @@ export function TaskPage({ task, onRunFinished }: { task: TaskView; onRunFinishe
         <div className="overflow-x-auto">
           <RunsTable runs={task.runs} />
         </div>
+        {!isSnapshot() && <ComparePicker runs={task.runs} />}
       </section>
 
       <section aria-label="Test plan" className="flex flex-col gap-3">

@@ -88,6 +88,15 @@ export interface RateChange {
 
 export type FlipCause = "same-answer" | "new-answer" | "unknown";
 
+/** One graded trial behind a flip: how it ended, and what each required check said about it. */
+export interface TrialNote {
+  trial: number;
+  state: DiffRow["completion_state"];
+  checks: Array<{ id: string; state: string; reason?: string; evidence?: string }>;
+  /** One line every view prints: the check's state and reason, or how the trial ended when no answer came. */
+  summary: string;
+}
+
 export interface Flip {
   candidate: string;
   input: string;
@@ -97,6 +106,31 @@ export interface Flip {
   cause: FlipCause;
   /** The required checks' versions on each side, when they differ. */
   checkVersion: { a: string; b: string } | null;
+  /** What the check said on each side: the "why" behind the flip. */
+  trials: { a: TrialNote[]; b: TrialNote[] };
+}
+
+/** How a candidate crossed the gates between the runs, in the words every view prints. */
+export type GateMove = "LEFT" | "ENTERED" | "new, in" | "new, out" | "dropped" | "stayed out" | "stayed in" | "not recorded";
+
+/** The order moves are listed in: changes first. */
+export const GATE_MOVE_ORDER: readonly GateMove[] = ["LEFT", "ENTERED", "new, in", "new, out", "dropped", "stayed out", "stayed in", "not recorded"];
+
+export const FLIP_CAUSE_TEXT: Record<FlipCause, string> = {
+  "same-answer": "same answer, graded differently",
+  "new-answer": "new answer",
+  unknown: "answer not kept, cause unknown",
+};
+
+/** Flips of one candidate, one direction and one cause, as a view lists them. */
+export interface FlipGroup {
+  candidate: string;
+  direction: Flip["direction"];
+  cause: FlipCause;
+  causeText: string;
+  inputs: string[];
+  /** Check version changes these flips carry beyond the one the whole run shares. */
+  checkVersions: string[];
 }
 
 export interface RunDiff {
@@ -110,9 +144,11 @@ export interface RunDiff {
     b: { chosen: string | null; firmness: string | null } | null;
     changed: boolean;
   };
-  gates: Array<{ candidate: string; a: GateStatus; b: GateStatus }>;
+  /** Ordered changes first (GATE_MOVE_ORDER). */
+  gates: Array<{ candidate: string; a: GateStatus; b: GateStatus; move: GateMove }>;
   rates: RateChange[];
   flips: Flip[];
+  flipGroups: FlipGroup[];
   /** Shared inputs a candidate has on both sides but that did not run, or was not graded, on one of them. */
   notCompared: number;
 }
@@ -126,15 +162,23 @@ export function diffRuns(a: RunSide, b: RunSide): RunDiff {
   const candidates = unionInOrder(candidatesOf(a), candidatesOf(b));
   const sharedSet = new Set(inputs.sharedNames);
   const compared = candidates.map((c) => flipsOf(c, a, b, inputs.sharedNames));
+  const setup = setupChanges(a, b);
   return {
     a: { run: a.run, step: a.step },
     b: { run: b.run, step: b.step },
-    setup: setupChanges(a, b),
+    setup,
     inputs: { shared: inputs.sharedNames.length, added: inputs.added, removed: inputs.removed, changed: inputs.changed },
     recommendation: recommendationChange(a, b),
-    gates: candidates.map((c) => ({ candidate: c, a: gateStatus(a, c), b: gateStatus(b, c) })),
+    gates: candidates
+      .map((c) => {
+        const ga = gateStatus(a, c);
+        const gb = gateStatus(b, c);
+        return { candidate: c, a: ga, b: gb, move: gateMove(ga, gb) };
+      })
+      .sort((x, y) => GATE_MOVE_ORDER.indexOf(x.move) - GATE_MOVE_ORDER.indexOf(y.move)),
     rates: candidates.map((c) => rateChange(c, a, b, sharedSet)),
     flips: compared.flatMap((x) => x.flips),
+    flipGroups: groupFlips(compared.flatMap((x) => x.flips), setup.find((s) => s.what === "check version") ?? null),
     notCompared: compared.reduce((s, x) => s + x.notCompared, 0),
   };
 }
@@ -205,6 +249,34 @@ function recommendationChange(a: RunSide, b: RunSide): RunDiff["recommendation"]
   const pb = pick(b);
   const changed = pa !== null && pb !== null && (pa.chosen !== pb.chosen || pa.firmness !== pb.firmness);
   return { a: pa, b: pb, changed };
+}
+
+function gateMove(a: GateStatus, b: GateStatus): GateMove {
+  if (a.state === "unrecorded" || b.state === "unrecorded") return "not recorded";
+  if (a.state === "absent") return b.state === "in" ? "new, in" : "new, out";
+  if (b.state === "absent") return "dropped";
+  if (a.state === b.state) return a.state === "in" ? "stayed in" : "stayed out";
+  return b.state === "in" ? "ENTERED" : "LEFT";
+}
+
+function groupFlips(flips: readonly Flip[], runWide: SetupChange | null): FlipGroup[] {
+  const groups = new Map<string, Flip[]>();
+  for (const f of flips) {
+    const key = `${f.candidate}\0${f.direction}\0${f.cause}`;
+    groups.set(key, [...(groups.get(key) ?? []), f]);
+  }
+  return [...groups.values()].map((fs) => {
+    const first = fs[0]!;
+    const own = fs.flatMap((x) => (x.checkVersion && !(runWide && x.checkVersion.a === runWide.a && x.checkVersion.b === runWide.b) ? [`${x.checkVersion.a} → ${x.checkVersion.b}`] : []));
+    return {
+      candidate: first.candidate,
+      direction: first.direction,
+      cause: first.cause,
+      causeText: FLIP_CAUSE_TEXT[first.cause],
+      inputs: fs.map((x) => x.input),
+      checkVersions: [...new Set(own)],
+    };
+  });
 }
 
 function gateStatus(s: RunSide, candidate: string): GateStatus {
@@ -279,9 +351,22 @@ function flipsOf(candidate: string, a: RunSide, b: RunSide, shared: readonly str
       b: { pass: pb, n: gb.length },
       cause: causeOf(a, b, ga, gb),
       checkVersion: checkVersions(ga, gb),
+      trials: { a: ga.map(trialNote), b: gb.map(trialNote) },
     });
   }
   return { flips, notCompared };
+}
+
+function trialNote(r: DiffRow): TrialNote {
+  const checks = Object.entries(r.checks).map(([id, c]) => ({
+    id,
+    state: c.state,
+    ...(c.reason ? { reason: c.reason } : {}),
+    ...(c.evidence ? { evidence: c.evidence } : {}),
+  }));
+  const said = checks.map((c) => (c.reason && c.reason !== c.state ? `${c.state} — ${c.reason}` : c.state)).join("; ");
+  const summary = r.completion_state !== "success" ? `${r.completion_state}${said ? ` (${said})` : ""}` : said || "no check ran";
+  return { trial: r.trial, state: r.completion_state, checks, summary };
 }
 
 const slashed = (p: string): string => p.replace(/\\/g, "/").replace(/\/+$/, "");
@@ -297,6 +382,8 @@ function causeOf(a: RunSide, b: RunSide, ga: readonly DiffRow[], gb: readonly Di
     const fromA = reusedFromRun(rb.reused_from, a.run);
     const sameSource = rb.reused_from !== null && ra.reused_from !== null && slashed(rb.reused_from) === slashed(ra.reused_from);
     if (fromA || sameSource) return "same-answer";
+    // An answer on one side and a timeout, refusal or malformed reply on the other: the answer changed.
+    if (ra.completion_state !== rb.completion_state) return "new-answer";
     const oa = a.outputs.get(trialKey(ra.candidate, ra.input, ra.trial));
     const ob = b.outputs.get(trialKey(rb.candidate, rb.input, rb.trial));
     if (oa === undefined || ob === undefined) return "unknown";
@@ -308,7 +395,8 @@ function causeOf(a: RunSide, b: RunSide, ga: readonly DiffRow[], gb: readonly Di
 }
 
 function checkVersions(ga: readonly DiffRow[], gb: readonly DiffRow[]): { a: string; b: string } | null {
-  const versions = (rows: readonly DiffRow[]) => [...new Set(rows.flatMap((r) => Object.values(r.checks).map((c) => c.version)))].sort().join(", ");
+  // A trial with no answer (a timeout) ran no check: say so rather than print nothing.
+  const versions = (rows: readonly DiffRow[]) => [...new Set(rows.flatMap((r) => Object.values(r.checks).map((c) => c.version)))].sort().join(", ") || "no check ran";
   const va = versions(ga);
   const vb = versions(gb);
   return va !== vb ? { a: va, b: vb } : null;

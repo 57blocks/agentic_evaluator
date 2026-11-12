@@ -13,7 +13,9 @@ export type Route =
   /** `dir` is artifact-relative: a workflow root, or one step inside a run. */
   | { view: "report"; runId: string; dir: string }
   /** Blind human review of one run; `reviewer` empty until the page asks for a name. */
-  | { view: "review"; runId: string; reviewer: string };
+  | { view: "review"; runId: string; reviewer: string }
+  /** Two runs compared, earlier first. */
+  | { view: "diff"; before: string; after: string };
 
 const HOME: Route = { view: "home" };
 
@@ -21,6 +23,9 @@ export function parseRoute(hash: string): Route {
   const params = new URLSearchParams(hash.replace(/^#/, ""));
   const specPath = params.get("spec");
   if (specPath) return { view: "task", specPath };
+  const before = params.get("diff");
+  const after = params.get("to");
+  if (before && after) return { view: "diff", before, after };
   const runId = params.get("run");
   const dir = params.get("report");
   const reviewer = params.get("review");
@@ -40,6 +45,8 @@ export function hashFor(route: Route): string {
       return `#run=${encodeURIComponent(route.runId)}&report=${encodeURIComponent(route.dir)}`;
     case "review":
       return `#run=${encodeURIComponent(route.runId)}&review=${encodeURIComponent(route.reviewer)}`;
+    case "diff":
+      return `#diff=${encodeURIComponent(route.before)}&to=${encodeURIComponent(route.after)}`;
     case "home":
       return "#";
   }

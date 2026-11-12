@@ -22,7 +22,8 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createDemoServer, listenDemo } from "./server.js";
-import { artifactUrl, reportUrl, taskFileUrl } from "./client/lib/api.js";
+import { artifactUrl, diffUrl, reportUrl, taskFileUrl } from "./client/lib/api.js";
+import { previousRun } from "./client/lib/runs.js";
 import type { Workspace } from "../core/workspace.js";
 import type { RunView, TaskView } from "./catalog.js";
 
@@ -174,7 +175,11 @@ function runsOf(catalog: CatalogShape): RunView[] {
 function urlsFor(catalog: CatalogShape): string[] {
   const urls: string[] = [];
   for (const task of catalog.tasks) for (const rel of task.files ?? []) urls.push(taskFileUrl(task.name, rel));
-  for (const run of runsOf(catalog)) {
+  const runs = runsOf(catalog);
+  for (const run of runs) {
+    // Each run against the one before it: the comparison its page links to.
+    const previous = previousRun(runs, run);
+    if (previous) urls.push(diffUrl(previous.id, run.id));
     urls.push(reportUrl(run.dir));
     for (const step of run.steps) {
       urls.push(reportUrl(step.dir));
