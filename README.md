@@ -1,6 +1,6 @@
 # agenteval
 
-[![npm](https://img.shields.io/npm/v/57b-agenteval)](https://www.npmjs.com/package/57b-agenteval)
+[![npm](https://img.shields.io/npm/v/@57block/agenteval)](https://www.npmjs.com/package/@57block/agenteval)
 
 Pick the right model — or agent, or combination of both — for each step of
 your AI workflow, with evidence you can check.
@@ -37,16 +37,16 @@ free and say what a run would do before anything is billed, and
 
 ## Install
 
-Published on npm as [`57b-agenteval`](https://www.npmjs.com/package/57b-agenteval).
+Published on npm as [`@57block/agenteval`](https://www.npmjs.com/package/@57block/agenteval).
 Requires Node.js 22 or newer.
 
 ```bash
-npm install -g 57b-agenteval        # installs the `agenteval` command
+npm install -g @57block/agenteval   # installs the `agenteval` command
 agenteval --version
 ```
 
-Or without installing: `npx 57b-agenteval <command>`. To update, run the
-install again; to remove it, `npm uninstall -g 57b-agenteval`.
+Or without installing: `npx @57block/agenteval <command>`. To update, run the
+install again; to remove it, `npm uninstall -g @57block/agenteval`.
 
 ### API key
 
@@ -308,8 +308,8 @@ workspace and run it by name:
 
 ```bash
 mkdir -p tasks
-cp -R "$(npm root -g)/57b-agenteval/examples/tasks/custom-check" tasks/   # one
-cp -R "$(npm root -g)/57b-agenteval/examples/tasks/"* tasks/             # or all eight
+cp -R "$(npm root -g)/@57block/agenteval/examples/tasks/custom-check" tasks/   # one
+cp -R "$(npm root -g)/@57block/agenteval/examples/tasks/"* tasks/             # or all eight
 agenteval ls                                                        # what you now have
 agenteval run custom-check --yes --html
 ```
