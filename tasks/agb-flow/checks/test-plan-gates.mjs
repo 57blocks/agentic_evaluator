@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * qa: a test plan was written, and every acceptance criterion in the PRD has
+ * test-plan: a test plan was written, and every acceptance criterion in the PRD has
  * at least one acceptance test covering it (agb's ac-coverage gate).
  *
  * Calibrated on the plans demo-todo, chessicle and invoice adopted: none
@@ -20,7 +20,7 @@ const tests = Object.values(plan).find(Array.isArray) ?? [];
 if (tests.length === 0) finish(1, ".ab/test-plan.json lists no acceptance tests", "empty test plan");
 
 ensureGit();
-const { findings, headlines } = agb(["check", "--all", "--gate=ac-coverage", "--stage=qa"]);
+const { findings, headlines } = agb(["check", "--all", "--gate=ac-coverage", "--stage=test-plan"]);
 const texts = headlines.filter((h) => h.gate === "ac-coverage").map((h) => ({ ...h }));
 const hard = findings.filter((f) => f.severity === "hard");
 const uncovered = texts.filter((h) => UNCOVERED.test(h.text));

@@ -1,0 +1,11 @@
+[
+  {
+    "service": "task",
+    "method": "GET",
+    "endpoint": "/api/tasks",
+    "requestFields": "none",
+    "responseFields": "{ tasks: { id: string; title: string; description: string; assigneeId: string | null; status: \"todo\" | \"in_progress\" | \"done\" }[] }",
+    "authType": "none",
+    "description": "看板任务列表：默认按 VAR-01 渲染 todo/in_progress 分列"
+  }
+]

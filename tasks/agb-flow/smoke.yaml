@@ -1,48 +1,135 @@
-# Smoke test of agb-flow: one cheap model, one input per step, no chain.
-# Same fixtures, checks and wrapper as spec.yaml.
+# Smoke test of agb-flow: one Claude model and one third-party endpoint,
+# one input per step. Same fixtures, checks, rubrics and wrapper as spec.yaml;
+# it proves each step runs end to end and measures what a trial costs.
 
 protocol_version: "0.3"
 run_name: agb-flow-smoke
-# Counts what candidates report spending, the e2e arms included; past it no
-# new trial starts.
-budget_usd: 5
+description: "Which model should run each step of agb's flow (spec, architecture, task breakdown, test design, implementation)? Each input is a real agb project at the moment that step began (chessicle and invoice for spec; demo-todo, chessicle and invoice for architecture, task breakdown and test design; three demo-todo tasks for implementation). Every candidate runs the step through the same wrapper and agb's own stage command; a check grades the work with agb's gates or the task's tests, and a judge compares candidates pairwise."
+# Counts what candidates report spending; past it no new trial starts.
+budget_usd: 40
 
 workflow:
   steps:
-    - id: task-breakdown
+    - id: spec
       version: "1"
-      test_set: { id: smoke, inputs: [demo-todo], fixture_dir: fixture/task-breakdown }
-      candidate_ids: [glm-5-3]
+      description: "Spec: normalize the client's external document into docs/PRD.md and .ab/prd.json without rewriting it."
+      test_set:
+        id: spec-v1
+        # demo-todo has no external document: its PRD was generated.
+        inputs: [chessicle]
+        fixture_dir: fixture/spec
+      candidate_ids: &all [opus-5-5, deepseek-flash]
+      required_checks: [spec-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 15
+      judge:
+        rubric_file: rubrics/spec.md
+        methods: [pairwise-swap]
+        show: [docs/PRD.md, .ab/prd.json, .ab/questions.json]
+        dimensions: [faithful, machine, questions, buildable]
+
+    - id: architecture
+      version: "1"
+      description: "Architecture: turn the PRD into API contracts, cross-cutting decisions (docs/DESIGN.md) and components (.ab/arch.json)."
+      test_set:
+        id: architecture-v1
+        inputs: [demo-todo]
+        fixture_dir: fixture/architecture
+      candidate_ids: *all
+      required_checks: [arch-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 15
+      judge:
+        rubric_file: rubrics/architecture.md
+        methods: [pairwise-swap]
+        show: [docs/DESIGN.md, "_contracts/**", .ab/arch.json, .ab/design.json]
+        dimensions: [decisions, contract, components, constraints]
+
+    - id: task-breakdown
+      version: "2"
+      description: "Task breakdown: turn the PRD, design and API contracts into a task plan (.ab/tasks.json) and a UI contract."
+      test_set:
+        id: task-breakdown-v1
+        inputs: [demo-todo]
+        # each input is a directory as well as a text: fixture/<input>/
+        # is laid into the work dir before the candidate starts.
+        fixture_dir: fixture/task-breakdown
+      candidate_ids: *all
       required_checks: [plan-gates]
       success_criteria: { mandatory_checks: all }
       operating_mode: highest-assurance
       eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
       maximum_completion_time_seconds: 3000
-      max_cost_per_trial_usd: 2
+      # a spend cap per trial, handed to the command as {{max_cost_usd}}.
+      max_cost_per_trial_usd: 15
+      judge:
+        rubric_file: rubrics/breakdown.md
+        methods: [pairwise-swap]
+        show: [".ab/tasks.json", UI_CONTRACT.md]
+        dimensions: [granularity, ordering, clarity, domains]
+
     - id: test-design
-      version: "1"
-      test_set: { id: smoke, inputs: [demo-todo], fixture_dir: fixture/test-design }
-      candidate_ids: [glm-5-3]
+      version: "2"
+      description: "Test design: write a test plan (.ab/test-plan.json) that covers every acceptance criterion of the adopted task plan."
+      test_set:
+        id: test-design-v1
+        inputs: [demo-todo]
+        fixture_dir: fixture/test-design
+      candidate_ids: *all
       required_checks: [test-plan-gates]
       success_criteria: { mandatory_checks: all }
       operating_mode: highest-assurance
       eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
       maximum_completion_time_seconds: 1800
-      max_cost_per_trial_usd: 2
+      max_cost_per_trial_usd: 10
+      # Both plans pass the coverage gate; the judge says whose tests are better.
+      judge:
+        rubric_file: rubrics/test-plan.md
+        methods: [pairwise-swap]
+        show: [.ab/test-plan.json]
+        dimensions: [coverage, falsifiable, levels, traceable]
+
     - id: implementation
-      version: "1"
-      test_set: { id: smoke, inputs: [demo-todo-T-001], fixture_dir: fixture/implementation }
-      candidate_ids: [glm-5-3]
+      version: "2"
+      description: "Implementation: build one task of the plan with agb run, so the task's own acceptance tests pass."
+      test_set:
+        id: implementation-v2
+        # Three demo-todo tasks, each from the project as it stood just
+        # before it: T-004 (task detail, server and page), T-005 (status
+        # transitions), T-006 (the board page). Test files that only later
+        # tasks own, and the cross-page App test, are left out, so nothing in
+        # the tree is red that this task is not meant to turn green.
+        inputs: [demo-todo-T-004]
+        fixture_dir: fixture/implementation
+      candidate_ids: *all
       required_checks: [task-tests]
+      # The task's own acceptance tests (the check) decide; agb's exit is kept as evidence.
+      exit_code: ignore
       success_criteria: { mandatory_checks: all }
       operating_mode: highest-assurance
       eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
       maximum_completion_time_seconds: 3600
-      max_cost_per_trial_usd: 2
+      # The judge reads only what each candidate added or changed (src and
+      # tests); `agenteval judge` leaves out files identical to the fixture.
+      judge:
+        rubric_file: rubrics/code.md
+        methods: [pairwise-swap]
+        show: ["client/**", "server/**", package.json, "*.config.*", tsconfig.json]
+        dimensions: [correctness, structure, tests, scope]
+      max_cost_per_trial_usd: 10
+      # agb run is heavy (installs, builds, a dev server); three at once is
+      # what this machine takes.
+      concurrency: 3
 
 # One command for every step: agents/agb-step.mjs reads EVAL_STEP and runs the
-# matching stage with the model it is given. argv names the model as the tool
-# knows it; `model` is the OpenRouter id agenteval prices its tokens with
+# matching agb stage with the model it is given. argv names the model as the
+# tool knows it; `model` is the OpenRouter id agenteval prices its tokens with
 # (reports_usage: tokens). Providers are plain env, keys read at run time.
 x-providers:
   deepseek: &deepseek
@@ -55,35 +142,51 @@ x-providers:
     ANTHROPIC_API_KEY: ""
 
 candidates:
-  - id: glm-5-3
+  - id: opus-5-5
     adapter: agent-cli
-    model: z-ai/glm-5.3
-    cli: { argv: [node, agents/agb-step.mjs, z-ai/glm-5.3, "{{max_cost_usd}}"], reports_usage: tokens, version_files: [agents/agb-step.mjs], env: *openrouter }
+    model: anthropic/claude-opus-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-opus-5-5, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
+  - id: deepseek-flash
+    adapter: agent-cli
+    model: deepseek/deepseek-v4.1-flash
+    cli: { argv: [node, agents/agb-step.mjs, deepseek-flash, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *deepseek }
 
 evaluators:
   required_checks:
+    spec-gates:
+      kind: command
+      description: "docs/PRD.md, .ab/prd.json and the source snapshot exist; no hard finding at the spec stage, and prd-id and prd-quality are clean."
+      argv: [node, checks/spec-gates.mjs]
+      version_files: [checks/spec-gates.mjs, checks/lib.mjs]
+      timeout_seconds: 600
+    arch-gates:
+      kind: command
+      description: "An API contract and docs/DESIGN.md exist; no hard finding at the arch stage, and design-closure is clean."
+      argv: [node, checks/arch-gates.mjs]
+      version_files: [checks/arch-gates.mjs, checks/lib.mjs]
+      timeout_seconds: 600
     plan-gates:
       kind: command
+      description: "The task plan claims every page and endpoint in the design and has no cycle between domains."
       argv: [node, checks/plan-gates.mjs]
-      version_files: [checks/plan-gates.mjs]
+      version_files: [checks/plan-gates.mjs, checks/lib.mjs]
       timeout_seconds: 300
     test-plan-gates:
       kind: command
+      description: "The test plan covers every acceptance criterion of the adopted task plan."
       argv: [node, checks/test-plan-gates.mjs]
-      version_files: [checks/test-plan-gates.mjs]
+      version_files: [checks/test-plan-gates.mjs, checks/lib.mjs]
       timeout_seconds: 300
     task-tests:
       kind: command
+      description: "The task's own acceptance tests, restored from the fixture, all pass."
       argv: [node, checks/task-tests.mjs]
-      version_files: [checks/task-tests.mjs]
+      version_files: [checks/task-tests.mjs, checks/lib.mjs]
       timeout_seconds: 900
-    app-gates:
-      kind: command
-      argv: [node, checks/app-gates.mjs]
-      version_files: [checks/app-gates.mjs]
-      timeout_seconds: 2400
+  # The judge's vendor must differ from every candidate's; the candidates cover
+  # Anthropic, Moonshot, Zhipu and DeepSeek.
   judge:
-    model: google/gemini-3.1-pro-preview
+    model: x-ai/grok-4.7
     provider_route: openrouter
     rubric_file: rubrics/breakdown.md
     methods: []

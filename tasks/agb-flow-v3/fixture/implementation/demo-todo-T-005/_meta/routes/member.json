@@ -1,0 +1,8 @@
+{
+  "feature": "member",
+  "routes": [
+    { "method": "GET", "path": "/api/members" },
+    { "method": "POST", "path": "/api/members" },
+    { "method": "DELETE", "path": "/api/members/:memberId" }
+  ]
+}

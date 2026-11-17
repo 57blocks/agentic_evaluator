@@ -1,0 +1,1171 @@
+{
+  "questions": [
+    {
+      "id": "Q-001",
+      "question": "discount / tax / overall_discount 的合法区间到底是什么？下界（能否填 0）和上界（能否填 100）两处写法互相排斥。",
+      "blocks": [
+        "arch",
+        "detail",
+        "qa"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Entity: Invoice Item 字段表写 `0 ≤ value < 100`；§Invoice Validation Error Copy 写 `Discount must be a number larger than 0 and less than 100.`（tax / overall discount 同形）。原文自己已经注明「源文档有『大于0』冲突，按允许 0 处理，To be confirmed」——那是一次未经裁决的自选。另：§Entity: Invoice 的 overall_discount 行写 `0 ≤ value < 100，To be confirmed 是否允许 100`，上界同样未定。",
+      "cost": "按文案实现的话，一张没有折扣也没有税的普通发票根本存不下来；这条约束会被写进 api-routes 的校验里，后面每个域都照着建。",
+      "stage": "prd",
+      "answer": "范围对，文案错。三个字段合法区间统一为 `0 ≤ value < 100`（允许 0，不含 100）。错误文案需改写为 `must be 0 or larger and less than 100`（discount / tax / overall discount 三处）。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-002",
+      "question": "category / memo 的最小长度是 3 还是 0（即非必填时可否短于 3 个字符）？创建页与编辑页两处约束不同。",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Entity: Invoice —— category「创建页 <100；编辑页 3–100 存在冲突，按 <100 处理，To be confirmed」；memo「创建页 <500；编辑页 3–500 存在冲突，按 <500 处理，To be confirmed」。两者是同一个决定。",
+      "cost": "编辑页按 3–100 实现的话，一个 2 字的 category 在创建页能存、在编辑页存不回去，用户改别的字段时会被一条自己没碰过的校验挡住。",
+      "stage": "prd",
+      "answer": "创建页对：无最小长度。category 为 0–100 字符、memo 为 0–500 字符，创建页与编辑页统一（两字段本就非必填）。编辑页的 3–100 / 3–500 作废。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-003",
+      "question": "Settled 是不是终态？状态表标它为终态，转移表却有一条 Settled → Error。",
+      "blocks": [
+        "arch",
+        "detail",
+        "qa"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Invoice State Enum：Settled 的 Is Terminal = 是；§Invoice State Transitions：`Pending / Received / Settling / Settled / Overdue` --Payment abnormal callback--> `Error`。",
+      "cost": "状态机闭合检查按哪一份写都能过，但两份实现出来的系统不一样：已结算发票能不能被回调改状态，决定了对账口径和 Dashboard 已收金额是否会回退。",
+      "stage": "prd",
+      "answer": "保留 `Settled → Error` 这条转移，把状态表里 Settled 的 Is Terminal 改成【否】。理由：多付/少付/误付由链上回调发现，时间上不保证在结算前。Dashboard 已收金额因此可能回退，这是接受的。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-004",
+      "question": "Error 状态怎么出去？状态表标它非终态，但转移表里没有任何一条从 Error 出发的转移。",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Invoice State Enum：Error 的 Is Terminal = 否；§Invoice State Transitions 中 Error 只作为目标状态出现，无出边。§EH009 写「Manual handling not in product interface」。§Exceptions 表 Payment abnormal 行的 Copy 为「Error 状态；To be confirmed」。",
+      "cost": "非终态且无出边的状态在状态机闭合检查里会红。不许为了消红自己编一条转移——编出来的那条会被下游当成真需求实现。",
+      "stage": "prd",
+      "answer": "Error 改为【终态】。与 §Out of Scope、§EH009「人工处理不在本次界面范围」一致，本版不编造任何恢复转移。Error 与 Voided 共同构成状态机的终态集合。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-005",
+      "question": "Overdue 状态怎么出去？它标为非终态，但唯一出边是 → Error；逾期发票能否被补付、能否被 Void？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Invoice State Enum：Overdue 的 Is Terminal = 否，Available Actions 写「To be confirmed 是否可 Void」；§Invoice State Transitions 无 Overdue → Received / Voiding；§EH007 写 Overdue 页面只读、隐藏 Pay Now。§Out of Scope 写「滞纳金」不做。",
+      "cost": "按现在的写法，一张逾期发票永远收不到款也作废不掉，只能一直挂在 Unreceived Overdue 里；商户唯一的出路是复制一张新发票，而这件事没人写过。",
+      "stage": "prd",
+      "answer": "逾期后不可付款（§EH007 的只读语义不变），但可作废：新增转移 `Overdue --Void invoice--> Voiding`，与 Pending 的 Void 同一套原因校验（3–500 字符）与失败回退。Overdue 的 Available Actions 因此确定为 View Detail、Duplicate、Void。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-006",
+      "question": "Create&Send 在「支付链接已生成、邮件发送失败」时回到 Draft，那条已经生成的支付链接怎么处理？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Core Flow 第 5 步（先生成 Payment Link，再发邮件）；§EH003 邮件失败「Invoice returns to Draft」；§Entity: Invoice 的 payment_link 只写了「生成失败回 Draft」，没写生成成功但后续失败时怎么办。",
+      "cost": "不撤销的话，系统里会存在一张 Draft 发票挂着一条活的支付链接——付款方拿到链接仍可付款，而商户以为它还没发出去；这笔钱进来时发票状态是 Draft，整条对账链路没有对应的处理分支。",
+      "stage": "prd",
+      "answer": "回 Draft 之前必须先撤销支付链接（复用 Void 走的 cancel payment link 接口），确保 Draft 上不存在可付款入口，payment_link 字段一并清空。撤销本身也失败时的兜底路径归入 Q-049（卡住状态的人工恢复）。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-007",
+      "question": "冻结客户时，「存在进行中发票」的判定清单到底包含哪些状态？两处写法不一致。",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Client State Transitions 的 Precondition 列：`无 Pending / Received / Settling / Overdue / Settlement Failed 发票`（5 个状态）；§Invoice Lifecycle 写「In-progress records appear in the list: Draft, Sending, Pending, Voiding, Settling」（另一组 5 个）。Sending 与 Voiding 两边都没同时出现。",
+      "cost": "按前者实现的话，一个正处于 Sending / Voiding 的客户可以被冻结，随后那张发票的回调会落到一个已冻结客户上——而冻结的定义是「不允许新建和发送相关发票」，这条回调该放行还是拒绝没人定义过。",
+      "stage": "prd",
+      "answer": "7 个状态阻止冻结：Sending / Pending / Received / Voiding / Settling / Settlement Failed / Overdue。判据是「钱在路上或状态未定」。Draft 不阻止冻结——草稿尚未发出，且 Create&Send 已有 Client Active 前置校验。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-008",
+      "question": "发票实际是用哪个 Token、收到多少钱，记在哪个字段？数据模型里没有这个字段，但结算和 Dashboard 都要按 Token 汇总。",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Entity: Invoice 只有 payment_tokens（数组）、primary_token（仅用于未付款列表展示优先级）和 total_amount（单值）；§Entity: Invoice Item 的 amount_by_token 是 Token → Decimal 的对象；§Entity: Settlement Request 的 request_amount 写「按 Token 汇总」；§Metrics 的 Received Invoice by Token 也按 Token 汇总。样例数据里一张多 Token 发票（CL001-20260902-b2c3，Tron-USDT / ETH-USDC）只有一个 total_amount = 250.000000。",
+      "cost": "没有「实收 Token + 实收金额」这两个字段，多 Token 发票在 Received 之后的金额是不确定的：结算选它时按哪个 Token 汇总、Dashboard 计入哪一列，都没有真相来源。这是数据层 schema，定错要做数据迁移。",
+      "stage": "prd",
+      "answer": "新增两个字段：paid_token（Enum，同 payment_tokens 取值域）与 paid_amount（Decimal），均由付款成功回调写入，Received 之前为空。Received 之后所有按 Token 的汇总（Settlement request_amount、Dashboard Received Invoice by Token）一律读 paid_token / paid_amount；amount_by_token 保留为报价，不再用于事后汇总。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-009",
+      "question": "`Due` 是什么？它被当成校验对象、详情页字段和小数位约束反复引用，但实体表里没有定义这个字段。",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Entity: Invoice 的 total_amount 那一行列数错位（`| total_amount | Decimal | Yes | 最多 To be confirmed 位小数 | 系统计算 | Due | Due >= 1 | 是 | 否 | Due 保留 6 位小数 |`，比表头多一格）；§Detail Page Fields 把 Due 与 Total amount 并列为两个字段；§Invoice Validation Error Copy 有 `The invoice amount due must be greater than or equal to 1.`。另：样例数据里 CL001-20260913-n4o5 是一条 total 0.999999 的 Draft，而按状态机它存不下来。",
+      "cost": "Due 等于 total_amount 还是「total_amount 减去已付」，决定了 `Due >= 1` 这条校验在什么时刻生效，也决定详情页是展示一个金额还是两个。",
+      "stage": "prd",
+      "answer": "Due ≡ total_amount，是同一个数的展示别名，不是独立字段（本版无部分付款：少付直接进 Error）。total_amount 那一行的列错位需修正；详情页不再并列两行；`Due >= 1` 即 total_amount 的下限，在 Save Draft 与 Create&Send 两处都校验。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-010",
+      "question": "invoice_id 和 settlement_request_id 的编号规则分别是什么？invoice_id 的格式定义写 `CUST123-…`（像商户号），样例数据用的却是客户号 `CL001-…`。",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Entity: Invoice —— invoice_id 的 Enum/Format 写 `CUST123-YYYYMMDD-hash`；§Invoice Sample Data 全部形如 `CL001-20260901-a1b2`，而 CL001 与 §Client Sample Data 的 client_id `CL-001` 同源。§Entity: Settlement Request 的 settlement_request_id 行 Enum/Format 写「日期 + hash value」，Notes 写「格式 To be confirmed」。",
+      "cost": "前缀取客户号的话，同一商户不同客户的发票号前缀不同，发票号就不是商户维度可读的；这个编号会印在发给付款方的邮件和支付页上，定错要做数据迁移。",
+      "stage": "prd",
+      "answer": "商户号前缀，格式定义为准：invoice_id = `<merchant>-YYYYMMDD-hash`；settlement_request_id = `SR-YYYYMMDD-hash`（与现有样例一致）。§Invoice Sample Data 里的客户号前缀属笔误，需一并修正。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-011",
+      "question": "Recurring Series 的 end_type 到底有几个枚举值？`End Date / No End Date Manual Stop` 读不出边界。",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Entity: Recurring Series —— end_type 的 Enum/Format 写 `End Date / No End Date Manual Stop`；§Recurring Series Sample Data 把 `No End Date Manual Stop` 整体当成一个取值使用。",
+      "cost": "如果本意是三个值（End Date / No End Date / Manual Stop），创建页就要多一个选项，Series 的终止路径也多一条；按两个值实现后再改要动枚举和已有数据。",
+      "stage": "prd",
+      "answer": "两个值：`End Date` 与 `No End Date`。`Manual Stop` 是对 No End Date 的说明（只能靠 Discontinue 手动停），不是独立取值——Discontinue 是动作，不是结束条件类型。枚举需照此改写。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-012",
+      "question": "有没有 Client 详情页？Client 状态表里有「Detail Page Display」一列，但页面地图里没有这个页面。",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Client State Enum 的 Detail Page Display 列（两行均为 To be confirmed）；§Merchant Page Map 只有 Client List 和 Add/Edit Client Modal，没有 Client Detail；docs/prototype.html 的 data-bp-view 里也只有 `clients` 和 `client-modal`。",
+      "cost": "页面地图是 page-coverage 的输入。多一个页面就多一批任务；少一个页面则状态表那一列永远没有落点。",
+      "stage": "prd",
+      "answer": "没有 Client 详情页。删掉 §Client State Enum 的 Detail Page Display 列；客户信息只在列表行与新增/编辑弹窗中呈现。与页面地图和原型一致。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-013",
+      "question": "Recurring Series 在界面上落在哪？它有独立状态机和「List Display Copy」列，但没有 Series 列表页，只在 Invoice Detail 里提到一个「周期区域 To be confirmed」。",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Recurring Series State Enum 三行的 List Display Copy 均为 To be confirmed；§Merchant Page Map 无 Recurring Series 页面；§Recurring Series Lifecycle 写 User-visible Location = 「Invoice Detail 周期区域 To be confirmed」；docs/prototype.html 无对应视图。",
+      "cost": "商户要停掉一个周期，得先找到它。现在的写法下入口只能是「随便打开一张该 Series 生成的发票」——Discontinued / Completed 的 Series 在没有在途发票时就没有任何入口。",
+      "stage": "prd",
+      "answer": "不新增页面：Series 只在 Invoice Detail 的周期区域呈现，入口是 Invoice List 按 Invoice Type = Recurring 筛出任一张该 Series 生成的发票。删掉 §Recurring Series State Enum 的 List Display Copy 列（没有列表就没有列表文案）。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-014",
+      "question": "Merchant 的商户名、Logo、企业账户 ID、可用钱包范围分别从 Cobo 企业门户的哪个接口取？应用挂载在门户下的哪个路径前缀？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Open Questions 第 1 条；§P0 Open-Item Blocker Table 第 1 行（自评为「Blocks Prototype 是 / Blocks Development 是」）；§Entity: Invoice 的 from_name 写「来源 Cobo 企业账户」但未指来源接口；§Roles and Permission Matrix 的 Role source 行为 To be confirmed。",
+      "cost": "这是 §P0 Open-Item Blocker Table 里唯一影响 F001–F014 全部功能的一条。商户身份取不到，发票的 From、邮件模板的商户名与 Logo、结算可选钱包三处都没有真相来源；路径前缀定不下来，页面路由要返工。",
+      "stage": "prd",
+      "answer": "路径前缀 = `/apps/invoice/*`（.ab/prd.json 的全部页面 route 按此前缀落地）；前端身份凭据形态 = token。四要素（商户名 / Logo / 企业账户 ID / 可用钱包范围）的具体接口来源另立 Q-052 继续追。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-052",
+      "question": "商户身份四要素（商户名、Logo、企业账户 ID、可用钱包范围）能不能从 Cobo 公开 API 拿到？分别对应哪个接口？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "source": "由 Q-014 拆出。参考文档：https://www.cobo.com/developers/v2_cn/guides/overview/introduction（evan.liu 指定）。docs/PRD.md §Entity: Invoice 的 from_name、§Output Template 的商户名与 Logo、§Entity: Settlement Request 的 wallet_id、§NFR Security 的企业账户隔离，四处消费方都指向这里。 2026-09-09 查证 Cobo 官方文档所得：https://cobo.com/developers/v2_cn/apps/org-access-tokens.md；https://cobo.com/developers/v2_cn/apps/authentication.md",
+      "cost": "拿不到就得由门户在挂载时注入或另开内部接口，四个消费方全部要改取数路径。Logo 若无接口则要走上传，多一套素材管理。",
+      "stage": "prd",
+      "answer": "部分查证。Portal App 模型已确认：用户在 Cobo Portal 安装应用 → 团队管理员在 Cobo Guard 审批 → Cobo 回调 manifest 里的 callback_url（`POST <callback_url>?approval_result=1&org_id=<uuid>`，approval_result 1=首次安装、2=更新设置）→ 应用用 App Key + client ID + org_id 调 `/v2/oauth/get-org-access-token`（grant_type=`org_implicit`）换取 Org Access Token，过期用 `/v2/oauth/refresh-org-access-token`（token 约 12 小时，refresh token 30 天；不刷新会返回 500）。由此可得：【企业账户 ID】= 安装回调里的 org_id；【可用钱包范围】= 安装时管理员勾选的钱包集合（应用无法越权）。",
+      "note": "待办：agent 需查阅上述 Cobo 文档后回填。2026-09-09 首次尝试时 WebFetch / WebSearch 因平台分类器不可用而无法执行，尚未查证。",
+      "answeredBy": "claude（文档查证）",
+      "answeredAt": "2026-09-09",
+      "followUp": "【已关闭】原残留：商户名与 Logo 未找到来源。Q-069 确认了外部事实——拿到 org access token 后另有按 org_id 读组织信息的接口，返回组织名称与 Logo URL（Logo 可空，需默认值兜底）。"
+    },
+    {
+      "id": "Q-015",
+      "question": "Payer 的发票链接怎么做访问控制？是否需要签名 token、过期时间、访问次数上限或收件邮箱校验？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Risks 表「Payer 链接安全未定义 / 可能泄露发票信息或被非目标用户访问」；§Suggested Follow-up Questions 第 2 条；§Roles and Permission Matrix 的 Payer Invoice Detail 行「非对应链接显示不可访问 To be confirmed」。注意这一条没有进 §Open Questions 清单。",
+      "cost": "链接里带的是发票金额、商户名、付款方名称和一个可直接付款的入口。裸 ID 链接等于任何拿到 URL 的人都能看到并代付；这属于鉴权模型，是 arch 阶段第一个固化的东西。",
+      "stage": "prd",
+      "answer": "【后半已被 Q-067 修正为「不设过期」，此处保留原裁决记录】原裁决（2026-09-09，evan.liu）：签名 token + 过期时间：链接携带不可枚举的签名 token，有效期自 Due Date 起算一段固定天数，过期后页面只读并提示联系商户。不做打开时的邮箱二次校验（与 F008 降低付款门槛的意图冲突）。具体天数见本条 followUp，未定。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "followUp": "【已关闭】原残留：有效期天数未定。Q-067 裁定不设过期时间，这个数字不再需要。",
+      "supersededBy": "Q-067"
+    },
+    {
+      "id": "Q-016",
+      "question": "Dashboard 的法币汇率来自哪里？取哪个时间点的汇率、按哪个时区切日？汇率取不到时降级成什么？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Open Questions 第 2 条；§Metrics 的 Invoice Sent「按当前汇率折算法币」未指来源；§Exceptions 表「System degradation / Dashboard exchange rate unavailable」文案为 To be confirmed，兜底写「可展示 Crypto 原币金额 To be confirmed」；§Risks 表同条。",
+      "cost": "汇率时间点不定，同一张发票在不同时刻打开 Dashboard 会显示不同金额，而商户会拿这个数去对账。降级策略不定，汇率服务挂掉时整个 Dashboard 是白屏还是退回原币，没有答案。",
+      "stage": "prd",
+      "answer": "没有汇率：首发四个 Token 均为美元稳定币，一律按 1:1 计价，不做法币折算。因此无汇率来源、无折算时间点、无汇率降级——§Metrics 的「按当前汇率折算法币」需改写，§Exceptions 表的 System degradation（Dashboard exchange rate unavailable）整行作废，§Risks 表的汇率风险行作废。时区：所有日期切分与 Due Date 逾期判定统一按 UTC。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-017",
+      "question": "Create&Send、Void、Payment、Settlement 四条外部调用的超时阈值和重试次数分别是多少？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Open Questions 第 3 条；§NFR Performance「具体接口超时阈值 To be confirmed」、§NFR Reliability「SLA To be confirmed」；§P0 Open-Item Blocker Table 第 3 行（影响 F003 / F006 / F008 / F011 / F014）。",
+      "cost": "超时阈值决定「回滚到 Draft」在第几秒发生，重试次数决定幂等键要挡多久。这两个数不定，EH002 / EH005 / EH010 三条异常处理都没法写成可验收的行为。",
+      "stage": "prd",
+      "answer": "四条用户发起的外部调用统一 120 秒超时，且【不做自动重试】——超时即按既定路径回滚（Create&Send 撤销链接后回 Draft、Void 回 Pending、Settlement 不创建并保留选择），重试一律由用户再次点击发起。这与 §EH002 / §EH005 / §EH010 的 Recovery 写法一致。§EH004 / §EH006 的 24 小时卡住阈值为最终值，非占位。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "note": "2026-09-09 先答为「重试 3 次，间隔 10s/30s/60s」，随即由 evan.liu 更正为「用户操作不自动重试，重试由用户发起」。此处记录最终裁决。HTTP 请求是挂满 120s 还是立即返回后由 Sending / Voiding / In Progress 承载，属实现形态，留给 arch 的 DEC，不改变本条需求。"
+    },
+    {
+      "id": "Q-018",
+      "question": "Cobo 的支付回调与结算回调怎么验签？Cobo 侧提供签名头、共享密钥还是 mTLS？回调的幂等语义由哪一方保证？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Open Questions 第 3 条；§File and External Integration Spec 的 External System State 行「认证方式、回调验签、重试次数、超时阈值、幂等规则需技术方案确认」；§NFR Security「callback 需验签」但未指方案；§P0 Open-Item Blocker Table 第 4 行；§Invoice State Transitions 中三条「回调失败 To be confirmed」。 2026-09-09 查证 Cobo 官方文档所得：https://cobo.com/developers/v2_cn/guides/webhooks-callbacks/set-up-endpoint.md",
+      "cost": "回调直接改发票状态和资金结算结果。验签方案不定就没法写回调路由；伪造回调可以把任意发票改成 Settled。",
+      "stage": "prd",
+      "answer": "已查证（Cobo WaaS 2.0 Webhook）：签名头为 `BIZ_RESP_SIGNATURE` / `BIZ-RESP-SIGNATURE`，时间戳头为 `BIZ_TIMESTAMP` / `BIZ-TIMESTAMP`（下划线与连字符两种拼法都发，因为 nginx 默认会丢弃含下划线的头，两个都要读）。验签算法：取【原始】请求体字节与时间戳，拼成 `raw_body|timestamp`，做两次 SHA-256，再用 Ed25519 以 Cobo 环境公钥验签。公钥不随请求下发，需按环境硬编码：dev = a04ea1d5fa8da71f1dcfccf972b9c4eba0a2d8aba1f6da26f49977b08a0d2718，prod = 8d4a482641adb2a34b726f05827dba9a9653e5857469b8749052bf4458a86729。关键约束：签名覆盖原始字节，不可反序列化后再序列化（会丢 null/空字段并重排键序，导致验签失败）。重试：Webhook 最多 10 次、默认超时 2 秒；Callback 最多 30 次，且需回 `ok` / `deny` 纯文本。Cobo 不跟随 301/302。幂等：Cobo 【不提供】幂等字段，去重由我方实现（持久化 Event ID / Transaction ID 并跳过已处理）。事件顺序不保证。",
+      "answeredBy": "claude（文档查证）",
+      "answeredAt": "2026-09-09",
+      "note": "2 秒超时是硬约束：回调处理必须先应答再异步处理，不能在回调里同步跑结算/发信。"
+    },
+    {
+      "id": "Q-019",
+      "question": "Cobo Pay 的支付环节是跳转到 Cobo 的独立页面，还是在我们的付款页里内嵌组件？付款完成后回到哪里？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Payer Page Map 的 Cobo Pay Payment Page 行 Platform / Main Actions / Empty State 三列均为 To be confirmed；§Multi-platform 表同页 Top-level Pages 为 To be confirmed；§Key Action Feedback 的 Pay Now 行「支付成功页/返回页 To be confirmed」；§Platform Support 的 First-release Platform 行同。",
+      "cost": "跳转和内嵌是两套前端实现、两套回跳与状态刷新逻辑。它同时决定 Payer 侧要不要做支付结果页——现在页面地图里那一页是空的。",
+      "stage": "prd",
+      "answer": "跳转到 Cobo 托管的支付页，完成后回跳到 Payer Invoice Detail，由该页重新拉取发票状态呈现结果。不自建支付结果页——支付结果直接体现在发票详情的状态上。Cobo Pay Payment Page 因此是外部页面，不进我们的页面清单。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-020",
+      "question": "各金额字段保留几位小数？现在 unit_price 写 8 位、Due 写 6 位，四个计算字段都是「最多 To be confirmed 位小数」。折扣金额是否显示为负数？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Entity: Invoice 的 amount_without_tax / total_tax_amount / discount_amount / total_amount 四行 Enum/Format 均为「最多 To be confirmed 位小数」，discount_amount 的 Notes 另写「展示负数 To be confirmed」；§Entity: Invoice Item 的 unit_price_by_token 写「最多 8 位小数」；total_amount 的 Notes 写「Due 保留 6 位小数」。",
+      "cost": "小数位是数据层类型（decimal 精度），也是计算链 `unit price * qty * (1-discount) * (1-overall discount) * (1+tax)` 每一步的舍入位置。定错要做数据迁移，且金额对不上。",
+      "stage": "prd",
+      "answer": "【已被 Q-057 修正为 2 位，此处保留原裁决记录】原裁决（2026-09-09，evan.liu）：存储与展示统一 6 位小数，与四个首发 Token 的链上精度一致，unit_price_by_token 由 8 位改为 6 位，中间计算用高精度、仅最终金额舍入。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "followUp": "discount_amount 是否以负数展示（§Entity: Invoice 该行 Notes「展示负数 To be confirmed」）仍未定，属展示口径，归入 detail 批次一并确认。",
+      "supersededBy": "Q-057",
+      "note": "2026-09-09 同日经 Q-057 修正为 2 位：Cobo 的 create-payout 规定 amount 最多两位非零小数且超出即报错，6 位小数的发票求和后提不出去。修正前已向 evan.liu 复述过本条原裁决并获确认。计算链的高精度中间值与「仅最终金额舍入」两条仍然成立，只是舍入目标由 6 位改为 2 位。"
+    },
+    {
+      "id": "Q-021",
+      "question": "一次 Settlement Request 能不能混选不同 Token 的发票？settlement_token 与所选发票的 Token 必须一致到什么程度？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Entity: Settlement Request 的 settlement_token 行 Notes「与所选发票 Token 一致规则 To be confirmed」；§Settlement Request Page 的模块里 Token 与发票选择表格并列，但未说明选 Token 是否过滤发票列表。依赖 Q-008 的 paid_token。",
+      "cost": "决定 Settlement Request 是「一次一 Token」还是「一次多 Token 分笔结算」，直接改结算接口的入参形状和 request_amount 的类型（单值 vs 按 Token 的映射）。",
+      "stage": "prd",
+      "answer": "一次一个 Token。选定 settlement_token 后，可结算发票列表只显示 paid_token 与之匹配的发票。settlement_token / request_amount / wallet_address 三个字段保持单值形状不变。多币种需分多次提交。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-022",
+      "question": "周期发票到点自动生成失败时怎么办（重试几次、跳过还是告警）？Series 创建后是否允许编辑频率、结束日期、客户和金额？Discontinue 与到期完成的反馈文案是什么？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Recurring Series State Transitions 的 Scheduled generation 行「生成失败 To be confirmed；是否重试 To be confirmed」，Discontinue 行与 End date reached 行成功/失败反馈均为 To be confirmed；§Entity: Recurring Series 的 frequency / end_date / invoice_template_snapshot 三行 Editable 列均为 To be confirmed；§Open Questions 第 5 条；§Key Action Feedback 的 Discontinue Recurring 行。注意 §US008 的第 4 条验收标准正文里就写着「failure handling is To be confirmed」——那条 AC 现在判不出过或不过。",
+      "cost": "定时任务失败重试没有规则，最容易出的事就是重复生成并重复发出发票邮件——原文自己也写了「must not silently create duplicate invoices」，但没写靠什么保证。",
+      "stage": "prd",
+      "answer": "（一）生成失败：以 (series_id, 应发送日期) 为幂等键，同一期只能生成一张——这是「不静默重复生成」的唯一有效保证。失败后有限次重试，仍失败则跳过本期并通知商户，next_send_date 正常往后走。（二）Series 创建后不可编辑：frequency / end_date / invoice_template_snapshot 三行 Editable 一律填「否」，要改就 Discontinue 后重建，已生成的历史发票不受影响。Series 实体不对外暴露写接口（除 Discontinue）。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "answerAddendum": "（三）cron 定时生成失败：在当次任务内固定重试 3 次，全部失败则跳过本期并邮件通知商户，next_send_date 正常往后走。此条独立于 Q-017 的「用户操作不自动重试」——定时生成没有用户在场，无人可点重试。",
+      "followUp": "Discontinue 与「到期完成」两处的成功/失败反馈文案仍未定，归入 detail 批次。"
+    },
+    {
+      "id": "Q-023",
+      "question": "发票状态变更历史 / Draft 编辑版本历史要不要留？要留的话在哪展示、展示哪些字段？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §History/Versions 整节（是否保留、展示字段、是否可恢复对比，三项全部 To be confirmed）；§Invoice Lifecycle 的「Version history: To be confirmed」与 Save Draft success 行的 Enters Stats/History；§Open Questions 第 4 条提到操作日志。",
+      "cost": "要留就是一张新表加一条写入路径，贯穿所有状态转移；这属于数据层 schema，事后补要回填历史。",
+      "stage": "prd",
+      "answer": "只留状态变更流水，不做字段级版本历史。新增一张状态变更日志表（发票、旧状态、新状态、触发方 Merchant/System、时间、外部回调参考），贯穿所有状态转移写入。P0 不做展示界面（与 Q-038 的审计日志范围一致）。Draft 编辑不留版本快照。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-024",
+      "question": "删除 Draft 发票的成功/失败反馈文案是什么？删除后是否可恢复？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Delete 节「Whether recoverable: To be confirmed；Assumption / to be confirmed：不可恢复」；§Invoice Lifecycle「Draft deletion recoverability: To be confirmed」；§Key Action Feedback 的 Delete Draft 行 Success Feedback 与 Failure Feedback 均为 To be confirmed；§US003 第 4 条验收标准写「shows failure feedback To be confirmed」；§Out of Scope 却已经写了「Draft 删除恢复」不做。",
+      "cost": "Out of Scope 和 Delete 节对「可否恢复」给的是两个答案，需要一次裁决把其中一处改掉。文案缺失让 US003 那条 AC 判不出过或不过。",
+      "stage": "prd",
+      "answer": "以 §Out of Scope 为准：Draft 删除为硬删除、不可恢复，§Delete 与 §Invoice Lifecycle 两处 TBD 改写为「不可恢复」。反馈文案沿用既有句式：成功 `Successfully deleted the draft invoice.`、失败 `Failed to delete the draft invoice`。§US003 第 4 条 AC 中的 To be confirmed 替换为该失败文案，使其可判定。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-025",
+      "question": "Payer 支付失败 / 取消 / 超时时，页面显示什么文案、跳到哪里、能不能原地重试？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §EH008 的 User feedback 为 To be confirmed；§Exceptions 表 Payment success / Payment failure / Payment cancelled 三行文案均为 To be confirmed；§Key Action Feedback 的 Pay Now 行与 Select payment method 行失败反馈为 To be confirmed；§P0 Open-Item Blocker Table 第 7 行给了一个原型默认值 `Payment failed. Please try again or contact the merchant.`（自评 Blocks Prototype 是）。",
+      "cost": "这是付款方在整条流程里唯一会遇到失败的地方。文案和跳转不定，付款方失败后不知道钱有没有扣、该找谁。",
+      "stage": "prd",
+      "answer": "三种失败（失败 / 取消 / 超时）都从 Cobo 托管页回跳到 Payer Invoice Detail，页顶横幅按三种情形分别给一句提示（失败态沿用 `Payment failed. Please try again or contact the merchant.` 的句式）。发票仍为 Pending，Pay Now 保留，付款方可原地重试。不新建支付结果页（与 Q-019 一致）。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "followUp": "取消态与超时态的具体英文文案未逐字确定，归入 Q-032 的统一文案表一并给。"
+    },
+    {
+      "id": "Q-026",
+      "question": "Invoice 服务费的最终费率是多少？现在页面按结算金额的 2% 展示并标注「实际以后端返回为准」。",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §F012 Notes「Invoice 服务费暂按 2% To be confirmed」；§Entity: Settlement Request 的 invoice_service_fee 行 Default = `request_amount * 2%`、Validation = 「2% To be confirmed」；§Assumptions 最后一条；§Risks 表「结算费率 2% 未最终确认」；§P0 Open-Item Blocker Table 第 8 行。",
+      "cost": "这个数直接印在 Settlement Confirmation 页上给商户看，然后从他的结算金额里扣。展示值和实扣值不一致是账务问题，不是文案问题。",
+      "stage": "prd",
+      "answer": "MVP 不收取 Invoice 服务费：invoice_service_fee 恒为 0，2% 这个数从 §F012 Notes、字段表 Default/Validation、§Assumptions 末条一并去掉。total_estimated_fee 因此只等于 cobo_pay_estimated_fee（仍由 Cobo API 返回，页面只展示后端返回值，不在前端自算）。§P0 Open-Item Blocker Table 第 8 行随之关闭。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-027",
+      "question": "Cobo 返回的 Settlement ID 要不要展示给商户？展示的话放在哪一页？发票上的结算信息对商户可见吗？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Open Questions 第 7 条；§Entity: Settlement Request 的 settlement_id 行 User-visible = To be confirmed、Notes 写「源文档提到但未定义展示」；§Settlement Detail Page 的 Must Show 列没有它；§Roles and Permission Matrix 的 Settlement information on invoice 行「可见 To be confirmed」。",
+      "cost": "商户拿着这个 ID 才能和 Cobo 客服对账。不展示的话，结算出问题时商户手上没有可引用的凭据。",
+      "stage": "prd",
+      "answer": "settlement_id 展示在 Settlement Detail 页（可复制），Settlement List 不展示。回调写入前为空，此时显示占位。发票详情页不展示结算信息——§Roles and Permission Matrix 的「Settlement information on invoice」行据此定为不展示。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-028",
+      "question": "Client / Invoice / Settlement 三个列表要不要分页（页大小、翻页还是滚动加载）？Settlement 列表的默认排序是否也是 Create Time 倒序？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Page Responsibilities 表中 Client List、Invoice List 的 Optional to Show 列均为「分页 To be confirmed」；§List Page 的 Default sort order：Client 与 Invoice 都是「Create Time 倒序」，Settlement 写「Create Time 倒序 / To be confirmed」。",
+      "cost": "分页与否决定列表接口的入参形状（offset/cursor）和前端表格组件的选型。发票量上来之后不分页的列表会直接拖垮页面。",
+      "stage": "prd",
+      "answer": "Client / Invoice / Settlement 三个列表统一采用翻页式分页（页码器），默认每页 20 条，后端按 offset 分页。三个列表的默认排序统一为 Create Time 倒序——Settlement 那处的 To be confirmed 去掉。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-029",
+      "question": "在创建/编辑发票这类整页表单上点返回或离开时，要不要弹「未保存变更」确认？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Edit Page 的 Cancel behavior「页面级取消/返回是否提示未保存变更：To be confirmed」；§Exceptions 表 User cancellation 行「表单页 To be confirmed」。",
+      "cost": "发票表单是本产品填写量最大的页面（客户、多 Token 单价、多行 item、折扣税费）。误触返回丢掉全部输入是这类页面最常见的投诉。",
+      "stage": "prd",
+      "answer": "整页表单（创建 / 编辑 / 复制发票）在表单已被修改时，点返回或离开弹「未保存变更」确认，提供「离开」与「继续编辑」两个选项；未修改则直接返回。弹窗类（Add/Edit Client、Void Invoice）维持原状：Cancel 直接关闭不保存。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-030",
+      "question": "列表里整行点击是跳详情，还是只有 Action 列可点？Client 和 Invoice 两处写法不同。",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §List Page 的 Row click behavior：Client「To be confirmed，默认不整行跳转」、Invoice「Assumption / to be confirmed：点击 View Detail 进入详情，整行点击不跳转」、Settlement「点击 View Detail 进入详情」（唯一确定的一条）。",
+      "cost": "三个列表的交互约定不统一，用户在一个列表里养成的习惯到另一个列表就失效。这条会写进 UI 契约，改起来是三个页面一起改。",
+      "stage": "prd",
+      "answer": "三个列表统一：整行不可点，只有 Action 列的操作可点（Invoice / Settlement 的 View Detail、Client 的 Edit / Freeze / Unfreeze）。三处写法归一，Client 与 Invoice 两处的 TBD / Assumption 去掉。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-031",
+      "question": "四处空状态和无权限页的文案确认：Client List、Settlement List、Settlement Request 可结算发票为空、无权限页，以及所选 Token 没有可用钱包地址时的提示。",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "asset",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §List Page Empty state（Client / Settlement 两条均为 Assumption / to be confirmed）；§Exceptions 表 Empty clients / Empty settlement / Empty settlement invoice list / No permission 四行；§EH001 User feedback；§EH012 Wallet address unavailable 的 User feedback 为 To be confirmed，§P0 Open-Item Blocker Table 第 9 行给了原型默认值 `No wallet address available for the selected token.`。对照：Invoice List 的空状态文案 `There are no invoice records yet.` 是确定的。",
+      "cost": "这些是用户第一次进入产品时唯一看到的内容。原文给了默认值但没有人拍板——默认值只是待确认的事实，不是裁决。",
+      "stage": "prd",
+      "answer": "五句全部定稿，去掉 Assumption / to be confirmed 标记：Client List `There are no client records yet. Add a client to create invoices faster.`；Settlement List `There are no settlement records yet.`；Settlement Request 可结算发票为空 `There are no invoices available for settlement.`；无权限页 `You do not have permission to access this page.`；无可用钱包地址 `No wallet address available for the selected token.`。与已确定的 Invoice List 文案同句式。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-032",
+      "question": "断网、第三方服务不可用，以及页面跳转类操作失败时，页面显示什么、用什么形式（横幅还是 toast）？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "asset",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Exceptions 表 No network/offline 行与 Third-party unavailable 行，Copy 列均为 To be confirmed（兜底策略已写：不提交新请求 / 保持原状态）；§Exceptions 表 Payment abnormal 行的 Error 文案；§Key Action Feedback 的 Duplicate Invoice / Request Settlement / View Settlement Detail 三行 Failure Feedback 均为 To be confirmed。",
+      "cost": "整条流程依赖四个外部服务，这是最高频的失败面。没有统一文案，每个页面会各写一套。",
+      "stage": "prd",
+      "answer": "本阶段定统一模式，逐字文案随 UI 契约在 detail 阶段一次性补齐：(1) 断网/离线——页顶常驻横幅，可重试，期间不提交新请求，表单输入保留；(2) 单次操作失败——toast 提示 + 保留输入 + 原地重试，文案沿用既有句式 `Failed to <action>`；(3) 第三方不可用——同 (2)，并保持发票/结算原状态不变；(4) 支付异常 Error——商户端提示联系 super admin（§EH009）。Q-025 遗留的支付取消态与超时态文案并入这一批。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "followUp": "逐字英文文案未定，已明确留到 detail 阶段随 UI 契约补齐；本条只裁决交互模式，不裁决字符串。"
+    },
+    {
+      "id": "Q-033",
+      "question": "Send Reminder 在哪些发票状态下可用？本地邮件客户端打不开时降级成什么？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Key Action Feedback 的 Send Reminder 行：Precondition「发票存在；推荐 Pending 状态 To be confirmed」、Failure Feedback「浏览器或本地邮件打开失败 To be confirmed」、Recovery「手动复制信息 To be confirmed」；§Platform Support 的 Permission Requests 行「若 mailto 依赖本地邮件客户端，失败降级 To be confirmed」。",
+      "cost": "这个动作走的是 mailto 打开商户本机邮件客户端，不是系统发信——这一点和 F014 的邮件服务集成是两条路径。可用状态不定，商户可能对一张 Voided 发票发催款提醒。",
+      "stage": "prd",
+      "answer": "仅 Pending 与 Overdue 两个状态可用，其余状态按钮置灰。保持 mailto 路径不变（不改为系统发信）。mailto 打不开时降级：弹出一个含收件人、主题、正文与付款链接的面板，提供「复制」按钮供商户手动发送。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-034",
+      "question": "Sending 和 Voiding 状态的发票能不能 Duplicate？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Invoice State Enum 的 Sending 行 Available Actions「View Detail；To be confirmed 是否可 Duplicate」；Voiding 行只写 View Detail；其余状态都明确写了 Duplicate 可用与否。",
+      "cost": "Action 列是 UI 契约里按钮禁用规则的直接来源，11 个状态缺 2 个就得有人在实现时替它决定。",
+      "stage": "prd",
+      "answer": "Sending 与 Voiding 均可 Duplicate（Duplicate 只读原发票内容、另开新 Draft，不影响原发票的进行中状态）。规则归一为：11 个状态中除 Settling 外均可 Duplicate。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "note": "遗留的不对称：Settling 与 Sending / Voiding 同为异步中间态，却是唯一不可 Duplicate 的。此为原文既有写法，本次未改动，仅在此记录以免下游误以为是笔误。"
+    },
+    {
+      "id": "Q-035",
+      "question": "一张发票最多能加多少行 item？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §File and External Integration Spec 的 Size Limits 行「To be confirmed；发票 item 行数上限、邮件 CC 上限为 3」——CC 上限确定为 3，item 行数上限未定。§Entity: Invoice Item 只写「至少一行 item」。",
+      "cost": "没有上限的话，item 行数会进入支付链接入参和邮件模板，超长时在哪一层截断没人定义。",
+      "stage": "prd",
+      "answer": "单张发票最多 50 行 item。达到上限时 Add Item 按钮置灰（与 CC 上限 3 的处理方式一致）。§File and External Integration Spec 的 Size Limits 据此补齐。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-036",
+      "question": "前端基线：商户端 PC Web 的最小分辨率与支持浏览器版本？Payer 页面按 H5 做到什么基线？导航是侧边栏还是顶部？无障碍要求做到哪一层（图表的文本替代）？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Platform Support 表 Design Baseline（「PC Web 最小分辨率 To be confirmed；Assumption：1440px」）、Navigation Mode（「侧边栏或顶部导航 To be confirmed」）、Browser/OS Version、Responsive Range、Safe Area/Keyboard/Back 五行；§NFR Compatibility；§NFR Accessibility「图表需有文本指标或替代说明 To be confirmed」。",
+      "cost": "这几项是 UI 契约和设计 token 表的前提。断点定错，商户端和 Payer 端的布局都要返工。",
+      "stage": "prd",
+      "answer": "商户端最小分辨率 1440px。导航按 docs/prototype.html 现状定稿：248px 固定左侧栏（prototype.html:97 的 `<aside id=\"sidebar\" class=\"w-[248px] shrink-0 ... sticky top-0 h-screen\">`），不是顶部导航。浏览器支持 Chrome / Safari / Edge / Firefox 四家。Payer 端需支持手机浏览（邮件链接在移动端打开是主路径）。无障碍：图表旁提供数字表作为文本替代。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "followUp": "两处具体数值仍未给（未自行编造）：(1) 四家浏览器各自的最低版本；(2) Payer H5 的最小宽度基线，以及移动安全区 / 键盘避让 / 系统返回是否需要专门处理（§Platform Support 的 Safe Area/Keyboard/Back 行）。不阻塞机制，但阻塞 UI 契约的取值。"
+    },
+    {
+      "id": "Q-037",
+      "question": "这个项目用什么技术栈？仓库现在只有 docs/PRD.md 和 docs/prototype.html，没有 package.json，探不出前端框架、后端框架和数据层。",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "stack-unknown",
+      "source": "仓库根目录无 package.json / 无锁文件；node_modules/ 为空目录；docs/prototype.html 是一份自带 Tailwind 类名的单文件原型，不构成工程栈。",
+      "cost": "arch 阶段的 DEC 和数据层 schema 都要按栈写；栈不定，api-routes 契约的形状和数据层选型都无从落笔。",
+      "stage": "prd",
+      "answer": "前端 React，前后端分离；后端 Node.js + Koa，独立服务；数据库 PostgreSQL + ORM；Recurring Series 的调度用同进程 cron。前端路由挂在 `/apps/invoice/*`（见 Q-014）。ORM 具体选型属 arch 的 DEC，不在本阶段裁决。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-038",
+      "question": "Dashboard 指标钻取、结算记录导出、完整审计日志这三项，P0 是否都不做？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "scope",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Out of Scope 最后一行把三项一起写成「To be confirmed：Dashboard 指标钻取、结算导出、完整审计日志」——列在 Out of Scope 标题下却又标为待确认；§Metrics 表四个用户可见指标的 Drill-down 列均为 To be confirmed；§Merchant Page Map 的 Dashboard 行 Reachable Pages 为 To be confirmed；§Detail Page 的 Settlement Action「To be confirmed 是否支持导出」。",
+      "cost": "钻取要做的话，Dashboard 每个指标都要多一个目标页面和一套带筛选参数的跳转，页面地图里 Dashboard 的 Reachable Pages 现在是空的。",
+      "stage": "prd",
+      "answer": "三项都不进 P0，确认为 Out of Scope：Dashboard 指标不支持钻取（四个指标的 Drill-down 列写「不支持」，Dashboard 的 Reachable Pages 写「无」）、Settlement 不支持导出、不做审计日志展示界面（状态变更流水仍按 Q-023 落库，只是不出界面）。§Out of Scope 末行的 To be confirmed 去掉。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-039",
+      "question": "update_time、send_time、series_id 三个字段对用户可见吗？可见的话在哪些页面显示？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Entity: Invoice 的 update_time / send_time / series_id 三行 User-visible 列均为 To be confirmed；§Entity: Client 的 update_time 同；§Entity: Recurring Series 的 series_id 同。而 §Detail Page Fields 列出的 Invoice Detail 字段里没有这三个。",
+      "cost": "详情页字段清单是 UI 契约的直接输入，缺一个字段就是一处后补的返工。",
+      "stage": "prd",
+      "answer": "send_time 对商户可见，在 Invoice Detail 增加一行「发送时间」（与 Q-046 的 Dashboard 归日口径同源）。update_time（Invoice 与 Client 两处）与 series_id 不展示，User-visible 列由 To be confirmed 改为「否」。series_id 虽不展示，Invoice Detail 的周期区域仍显示频率与下次发送日期（Q-013）。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-040",
+      "question": "两个内部指标（发票创建成功率、结算成功率）的数据从哪来、谁看？",
+      "blocks": [],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Metrics 表中这两行的 Source / Notes 列为 To be confirmed；§Internal Success Metrics 表标注「默认不展示」。",
+      "cost": "不挡任何阶段——它们默认不进界面。但没有埋点来源的话，上线后没人能回答「做得怎么样」。",
+      "stage": "prd",
+      "answer": "从 Q-023 的状态变更流水表推导，不额外埋点。发票创建成功率 = Sending→Pending 的转移次数 / Create&Send 提交次数；结算成功率 = (Success + Partial Success) / Settlement Request 总数。两个指标默认不入界面。",
+      "answeredAt": "2026-09-09",
+      "answeredBy": "evan.liu",
+      "note": "答于 2026-09-09 与 Q-042 同一轮；当时 answeredBy 暂缺是在等 Q-042 确认 Owner，Q-042 已确认为 evan.liu，此处补签。"
+    },
+    {
+      "id": "Q-041",
+      "question": "P1 / P2 现在整段是 To be confirmed，本次交付是否就按「只做 P0 的 F001–F014」推进？",
+      "blocks": [],
+      "kind": "scope",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Feature List 的 P1 与 P2 两节内容均为 To be confirmed。",
+      "cost": "不挡当前阶段——P0 的 14 个 Feature 已经足够开工。留着是为了让「P1 为空」是一次记录在案的确认，而不是没人看过。",
+      "stage": "prd",
+      "answer": "本次只做 P0 的 F001–F014。§Feature List 的 P1 与 P2 两节由 To be confirmed 改写为「本版本无」，后续需求另开一轮规格。",
+      "answeredAt": "2026-09-09",
+      "answeredBy": "evan.liu",
+      "note": "答于 2026-09-09 与 Q-042 同一轮；当时 answeredBy 暂缺是在等 Q-042 确认 Owner，Q-042 已确认为 evan.liu，此处补签。"
+    },
+    {
+      "id": "Q-042",
+      "question": "这份 PRD 的 Owner / 决策人是谁？后续台账里 answeredBy 要写谁？",
+      "blocks": [],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Overview 的 **Owner**: To be confirmed。",
+      "cost": "不挡阶段，但台账里每条答案都要记名。没有署名的裁决在下个会话里分不出是人定的还是 agent 自己填的。",
+      "stage": "prd",
+      "answer": "Owner = evan.liu，写入 §Overview 的 Owner 字段。本轮 52 条的裁决人同为 evan.liu，台账中已有的 answeredBy 无需变更。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-043",
+      "question": "原型的登录模拟与角色切换机制，是否就按 docs/prototype.html 现在的做法（顶部角色切换器、不模拟真实门户登录、演示数据在切换间保留）定稿？",
+      "blocks": [],
+      "kind": "scope",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Multi-role Demo Mechanism 表中 Simulate real login / Role-switch mechanism / Does data state persist 三行均为 Assumption / to be confirmed；docs/prototype.html 已实现 data-bp-role 切换器与 no-permission 视图。",
+      "cost": "不挡阶段——原文已明确它「不进入正式 Feature List」。留着是为了让这条边界被确认过一次，避免它在详设时被当成待开发功能拆成任务。",
+      "stage": "prd",
+      "answer": "角色切换器【仅为原型演示】，真实实现里不存在：Cobo 用户登录后直达 Invoice 系统（Merchant 视角唯一），付款方通过发票的 share URL 直接打开 Payer 页，两个视角没有切换入口。§Multi-role Demo Mechanism 整节标注为 demo helper，不拆任务、不进正式 Feature List。真实产品中不存在「切换后默认落地页」「数据是否跨切换保留」这类问题。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "note": "该答案同时确认：Payer 的入口是可分享的 share URL（不限于邮件里的 View Details），与 prototype.html:1836「Share this Cobo Pay link with the payer」一致。这加强了 Q-015 的裁决——链接可被转发，因此签名 token + 过期时间是必需的，而非可选。"
+    },
+    {
+      "id": "Q-044",
+      "question": "Invoice Detail、Settlement Detail、Invoice Email 三处的默认/空状态分别是什么样？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Merchant Page Map 中 Invoice Detail Page 与 Settlement Detail Page 的 Empty/Default State 列均为 To be confirmed；§Payer Page Map 中 Invoice Email 同。",
+      "cost": "详情页的加载态与字段缺省显示（没有 CC、没有 Memo、Recurring 区域不存在时）是 UI 契约里每个页面都要声明的一项，缺了下游会各写各的。",
+      "stage": "prd",
+      "answer": "空字段整块隐藏，不显示占位行：CC / Memo / Category / 周期区域为空时不渲染该区块（Invoice Detail、Settlement Detail、Invoice Email 三处一致）。加载态统一用骨架屏，与列表页保持一致。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-045",
+      "question": "四处「Optional to Show / 高级过滤 / 明细展开」具体包含什么？Add/Edit Client Modal、Void Invoice Modal、Settlement Request Page、Settlement Confirmation Page。",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Page Responsibilities and Module Boundaries 表的 Optional to Show 列：Add/Edit Client Modal 与 Void Invoice Modal 为 To be confirmed、Settlement Request Page 为「高级过滤 To be confirmed」、Settlement Confirmation Page 为「明细展开 To be confirmed」。",
+      "cost": "这一列是页面模块边界的一半。留空的话，详设拆任务时这四个页面各自要多一轮返工来定该不该有这些模块。",
+      "stage": "prd",
+      "answer": "四处都不做，Optional to Show 列一律写「无」：Add/Edit Client Modal 与 Void Invoice Modal 保持一事一做；Settlement Request Page 不做高级过滤（Must Show 里的基础搜索与过滤够用）；Settlement Confirmation Page 不做明细展开。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-046",
+      "question": "Invoice Sent 指标把哪些状态计入？堆叠项里的 Other 具体指哪几个状态？Sending、Voiding、Voided、Draft 各归哪一类？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §User-visible Metrics 表写 Invoice Sent「按 Pending、Received、Settled、Error、Other 堆叠」，未定义 Other；§Invoice Lifecycle 的 Create&Send submitted 行写「进入 Invoice Sent 统计规则 To be confirmed」；Void submitted / Void success 两行的 Enters Stats/History 也是 To be confirmed。",
+      "cost": "商户拿 Dashboard 的这个数当应收总额看。Sending 算不算「已发送」、作废的算不算，直接改这个数字，而口径没写下来时前后端会各算一套。",
+      "stage": "prd",
+      "answer": "Invoice Sent 计入除 Draft 与 Sending 之外的全部状态，按 send_time 所在的 UTC 日期归日（Q-016 定 UTC）。Sent 是发送日当天发生过的事实，不因后续状态变化而回退，历史柱子保持稳定。堆叠项：Pending / Received / Settled / Error / Other，其中 Other = Overdue + Settling + Settlement Failed + Voiding + Voided。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-047",
+      "question": "实体表里若干 Validation / Notes 列留空（client_id、item_id、Invoice Item 的 invoice_id、invoice_type、client_name、client_email、Recurring 的 client_id 与 invoice_template_snapshot、wallet_id、cobo_pay_estimated_fee）——这些是确有约束待补，还是就是没有额外约束？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Entity: Client / Invoice / Invoice Item / Recurring Series / Settlement Request 五张字段表中，上述字段的 Validation Rule 或 Notes 列为 To be confirmed。",
+      "cost": "这些字段要进数据层 schema。「没有额外约束」和「约束还没写」在表里长得一模一样，而下游只能按前者建。",
+      "stage": "prd",
+      "answer": "就是没有额外约束。这 10 个字段不接受用户输入：id 类只需非空 + 外键完整性；client_name / client_email 直接采用创建时的来源值；wallet_id / cobo_pay_estimated_fee 直接采用 Cobo API 返回值。字段表中对应的 To be confirmed 改写为「无额外约束」。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-048",
+      "question": "Payment Link / Email / Wallet / Settlement 四个 Cobo 接口的入参、认证方式和错误码规格什么时候能拿到？拿到之前 arch 阶段的契约按什么写？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §File and External Integration Spec 的 Fields/Parameters 行（四个 API 的参数列表后面都跟着 To be confirmed）；§F014 Notes「参数、认证、错误码需后续技术规格补齐」；§Risks 表第 1 行「外部 API 规格未确认」。 2026-09-09 查证 Cobo 官方文档所得：https://cobo.com/developers/v2_cn/apps/authentication.md；https://cobo.com/payments/llms.txt；https://www.cobo.com/payments/cn/guides/create-orders",
+      "cost": "F014 是另外 13 个 Feature 的公共依赖。接口规格拿不到，arch 只能定义我们这一侧的形状，四个集成点全部要留成适配层——这件事要提前知道，不能到编码时才发现。",
+      "stage": "prd",
+      "answer": "已查证。认证：本项目是 Cobo Portal App，走 Cobo OAuth（App Key / App Secret，Ed25519）。四个请求头：`Authorization: Bearer <org_access_token>`、`Biz-Api-Key`（App Key）、`Biz-Api-Nonce`（须与签名中的 TIMESTAMP 相同）、`Biz-Api-Signature`。签名串 `{METHOD}|{PATH}|{TIMESTAMP}|{PARAMS}|{BODY}`，双 SHA-256 后用 App Secret 签。环境：dev `https://api.dev.cobo.com/v2`，prod `https://api.cobo.com/v2`。支付侧另有独立文档站与 OpenAPI spec（/payments/en/cobo_waas2_openapi_spec/dev_openapi.yaml），端点齐备：收款用 Create pay-in order / Create order link；查单用 Get pay-in order information（返回 received_token_amount 与 transactions 数组）；费用预估用 Estimate fees；错误码有专页（api-references/error-codes）。关键入参：merchant_id、psp_order_code（团队内唯一，实际充当幂等键，Cobo 未提供单独的 idempotency header）、payable_currency（链隐含在币种代码里，如 `ETH_USDT`，没有独立的 chain 参数）、payable_amount。所以【接口规格已经拿得到，不需要等】，arch 阶段可以直接按真实契约写，不必留通用适配层。",
+      "answeredBy": "claude（文档查证）",
+      "answeredAt": "2026-09-09",
+      "note": "单笔低于 0.05 USDT 等值的转账不自动入账（粉尘阈值）。与我方 Due >= 1 的下限不冲突。"
+    },
+    {
+      "id": "Q-049",
+      "question": "发票卡在 Sending / Voiding 超过 24 小时之后，后端的人工恢复路径是什么？商户联系 super admin 之后发生什么？这两个状态可重试吗？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Invoice State Transitions 的两条 Stuck > 24h 行 Failure Handling 均为 To be confirmed；§EH004「backend recovery To be confirmed」；§EH006；§Exceptions 表 Sending timeout 行 Retryable 为 To be confirmed。另：Q-006 确定「回 Draft 前先撤销链接」后，撤销本身失败的兜底也归到这一条。",
+      "cost": "这两个状态的唯一出路现在是一句 tooltip。没有恢复路径的话，任何一次外部调用失联都会留下一张永久卡住的发票，而付款方那边的钱可能已经付了。",
+      "stage": "prd",
+      "answer": "提供一个内部恢复接口（不进商户界面）：先查询 Cobo 侧该发票/链接的真实状态，再据此推进（Sending → Pending，Voiding → Voided）或回滚（Sending → Draft 并撤销链接，Voiding → Pending）。不做无对账的自动回滚——卡住时链接可能已发出且已被付款。Q-006 里「撤销链接本身失败」同样走这条恢复路径。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-050",
+      "question": "两个结算请求选中同一张发票时怎么办？发票在被选中和提交之间已进入 Settling 的话，提示什么、是整单失败还是剔除该发票后继续？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Exceptions 表 Data conflict 行「Invoice selected for settlement already Settling」，Copy 为 To be confirmed，兜底写「刷新后移除不可选项」；§Entity: Settlement Request 的 idempotency_key 只挡「同一次提交重复创建」，不挡两次不同提交选中同一张发票。",
+      "cost": "幂等键防的是重复提交，防不了并发占用。同一张发票被两个请求结算出去是资金问题，要在契约层用乐观锁或状态前置条件解决，不是前端刷新能解决的。",
+      "stage": "prd",
+      "answer": "服务端在提交时对每张发票做带前置条件的状态更新（`status IN (Received, Settlement Failed)` 才可进 Settling，乐观锁）。已被别的请求占用的发票剔除，剩余发票照常提交，并在结果里告知商户哪几张被移除。不整单失败，不做预占。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-051",
+      "question": "未明确到字段级的权限，是否就按 PRD 写的那套统一默认策略执行（未确认字段对 Payer 默认隐藏、未确认操作对 Payer 默认不可用）？",
+      "blocks": [
+        "detail"
+      ],
+      "kind": "scope",
+      "rule": "tbd-unanchored",
+      "source": "docs/PRD.md §Roles and Permission Matrix 开头「Assumption / to be confirmed：未明确到字段级的权限采用统一默认策略」共 6 条。",
+      "cost": "默认拒绝是安全的方向，所以这条不贵——但它得被确认一次，否则「Settlement information on invoice 对商户可见吗」这类具体行会一直悬着。",
+      "stage": "prd",
+      "answer": "六条默认策略按原文执行，开头的「Assumption / to be confirmed」去掉，改为生效规则。未确认的字段与操作对 Payer 一律默认关闭（默认拒绝），与 Q-015 的链接鉴权取向一致。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09"
+    },
+    {
+      "id": "Q-053",
+      "question": "PRD 的结算模型建在 Cobo 已废弃的接口上。查证后替代方案已明确是 payout，但两者的对象模型【根本不同】：Cobo 的 payout 是【按账户余额提款】，`POST /payments/payouts` 的请求体里【没有任何字段能关联 pay-in order】——也就是说「勾选若干张 Received 发票去结算」在 Cobo 侧没有对应概念。F010–F013 怎么改？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "https://cobo.com/payments/llms.txt 的 Settlement 小节：「Deprecated settlement endpoints still listed: Create settlement request / List all settlement requests / Get settlement request information / List all settlement details. The first three now point users toward the payout equivalents.」对应 docs/PRD.md §F010–§F013、§Entity: Settlement Request、§Settlement Request State Machine 全部以 Settlement Request 为核心对象。现行替代是 Create payout / Get payout information / List all payouts（另有 Crypto payouts 与 Settlement Network 两份指南）。 2026-09-09 查证：https://www.cobo.com/payments/en/guides/crypto-payouts；https://www.cobo.com/payments/en/api-references/payment/create-payout；https://www.cobo.com/payments/en/guides/amounts-and-balances；https://www.cobo.com/payments/en/guides/settlement-network",
+      "cost": "这不只是换个端点。PRD 的 Settlement Request 是「发票的集合」，Cobo 的 payout 是「从余额里提一笔钱到一个地址」。改按 payout 建的话：发票与结算的关联变成【纯我方账本】，Cobo 不认；单张发票的 Settlement Failed 状态没有来源（payout 的 PartiallyCompleted 说的是多币种分腿，不是逐张发票）；Q-021（一次一 Token）与 Q-050（并发占用乐观锁）两条裁决都要重做。涉及 4 个 P0 Feature、1 个实体、1 个状态机（WF-04）、4 个页面。",
+      "stage": "prd",
+      "answer": "改按 payout 建，一笔 payout 覆盖全部所选发票。保留「勾选发票去结算」的商户体验：所选发票按 paid_amount 求和 → 发一笔 `POST /payments/payouts`（source_account = merchant_id 5、payout_channel = Crypto、payout_params 单项 token_id + amount、recipient_info.address = 所选目标地址、request_id = 我方 Settlement Request ID）。发票与结算的关联是【纯我方账本】，靠 request_id 串联，Cobo 不认。结果广播：payout 回调 Completed → 所选发票全部 Settled；Failed → 全部 Settlement Failed。【删除 Partial Success】：Q-021 已定一次只结算一个 Token，payout_params 只有一项，因此 Cobo 的 PartiallyCompleted（多币种分腿部分成功）在我们的用法下不会出现，该状态没有来源。需一并删除的：§F013 的「部分成功时需显示成功和失败发票」、§EH011、§Settlement Request State Enum 与 Transitions 里的 Partial Success、§Metrics 中依赖它的结算成功率口径（Q-040 需改为仅 Success / 总数）、§US-007 与 §Exceptions 表中对应的 AC 与行。",
+      "findings": {
+        "endpoint": "POST /payments/payouts（operationId create_payout），成功返回 201 + PaymentPayout",
+        "required": "request_id（调用方生成、须唯一，是唯一的幂等/追踪手段，Cobo 无独立 idempotency header）、source_account（merchant_id 或字面量 \"developer\"）、payout_channel（Crypto | OffRamp）、payout_params[]（token_id + amount）、recipient_info（address + token_id）",
+        "status": "Pending / Preparing / Transferring / Completed / PartiallyCompleted / Failed / RejectedByBank",
+        "webhook": "payment.payout.status.updated",
+        "noOrderLink": "规格中不存在任何引用 pay-in order 或 order_id 的字段——payout 只从 source_account 的余额扣",
+        "crossChain": "同种资产跨链自动桥接并收取处理费（bridging_fee），不支持跨资产兑换",
+        "settlementNetwork": "Settlement Network 与本场景无关：它是 Client 与流动性提供方在 settlement room 里走 DVP，仅 Portal 操作、无 REST 端点，不是发票结算的替代品。已排除。"
+      },
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "impact": {
+        "removed": [
+          "Settlement Request 的 Partial Success 状态",
+          "F013 的部分成功展示",
+          "EH011",
+          "US-007 中关于 partial success 的 AC",
+          "Exceptions 表的 Partial settlement success 行"
+        ],
+        "kept": [
+          "勾选发票的交互",
+          "Settling / Settled / Settlement Failed 三个发票状态",
+          "Q-021 一次一 Token",
+          "Q-050 的乐观锁剔除"
+        ],
+        "rewritten": [
+          "WF-04：状态收敛为 In Progress / Success / Failed",
+          "Settlement Request 实体：新增 payout_id 与 request_id 映射，settlement_id 语义改为 payout_id",
+          "Q-040 的结算成功率口径"
+        ]
+      },
+      "note": "Q-027 已定展示 Cobo 侧的结算凭据；按本决定，那个凭据实际是 payout_id（PaymentPayout 的必填字段），而非原文的 settlement_id。"
+    },
+    {
+      "id": "Q-054",
+      "question": "多付与少付的判定与 Cobo 的实际语义对不上：Cobo 的 pay-in order 只有 Pending / Expired / Underpaid / Completed 四个状态，【多付也落在 Completed，没有公开的 Overpaid 状态】，而少付有一个 `amount_tolerance` 容差参数。PRD 规定多付与少付都进 Error。怎么判、容差取多少？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "source": "https://www.cobo.com/payments/cn/guides/create-orders：「Completed — payable threshold met (overpayment also lands here; there is no public Overpaid status)」「Underpaid — terminal; validity window closed with the cumulative total still below payable amount minus amount_tolerance」。对应 docs/PRD.md §EH009 与 §Invoice State Transitions 的 Payment abnormal callback 行（多付/少付/误付 → Error）。",
+      "cost": "多付无法靠状态识别，只能比对 Get pay-in order information 的 received_token_amount 与 payable_amount——这条逻辑现在没人写过。容差定多少直接决定一笔差 0.01 的付款是 Completed 还是 Underpaid，也就决定发票是 Received 还是 Error。",
+      "stage": "prd",
+      "answer": "amount_tolerance = 0，多付与少付一律进 Error，与 PRD 原文一致。少付：Cobo 判 Underpaid（终态），我方收到后置发票为 Error。多付：Cobo 判 Completed，无法从状态识别，需在收到 payment.order.status.updated 时拉 Get pay-in order information，比对 received_token_amount 与 payable_amount——相等则置 Received，大于则置 Error。这条比对逻辑必须显式实现，原文没有写过。连带结论：Received 的发票实收恒等于面额（均为 2 位小数），因此 Q-053 的结算求和用面额或实收完全等价，Q-057 的精度残留自动消解。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "note": "正常路径不会不符：Q-019 定了付款方走 Cobo 托管页，按页面给出的 payable_amount 支付。不符主要来自付款方绕过托管页直接向收款地址转账，或从交易所提币被扣手续费——这两种都应当进 Error 走人工，符合 §EH009。"
+    },
+    {
+      "id": "Q-055",
+      "question": "Q-005 定了「逾期不可付款」，但 Cobo 侧仍可能收到迟付：`payment.transaction.late` 事件为每笔迟到的入账各发一次，且【不改变订单终态】。这笔钱到账后，发票怎么处理？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "source": "https://www.cobo.com/payments/cn/guides/create-orders：「payment.transaction.late — one per late deposit; does not alter the terminal state」。对应 Q-005 的裁决（Overdue 只读、不可付款，只能 Void）与 docs/PRD.md §EH007。 2026-09-09 查证：https://www.cobo.com/payments/en/guides/crypto-payouts；https://www.cobo.com/payments/en/api-references/payment/create-payout；https://www.cobo.com/payments/en/guides/amounts-and-balances；https://www.cobo.com/payments/en/guides/settlement-network",
+      "cost": "「我们的界面不让付」挡不住付款方直接向收款地址转账。钱已经到账而发票停在 Overdue 或 Voided，是一笔账上找不到归属的资金——这正是 Error 状态存在的场景，但现在没有一条转移把 late 事件接到 Error 上。",
+      "stage": "prd",
+      "answer": "已查证，Cobo 侧已有确定行为：「Deposits arriving after Expired, terminal Underpaid, or Completed are not credited to the merchant account」——过期后到账的款项【不入商户账户】，且「Late payments do not settle to the merchant account through this flow」。所以 Q-005「逾期不可付款」不会造成「钱进来了但发票停在 Overdue」的对账黑洞：钱不会进商户余额。`payment.transaction.late` 仅为通知事件，不改订单终态、不产生可结算余额。我方处理：收到该事件时记入状态变更流水并邮件通知商户，不改发票状态，由商户线下与付款方处理退款。",
+      "answeredBy": "claude（文档查证）",
+      "answeredAt": "2026-09-09",
+      "note": "这条从「PRD 与 Cobo 冲突」降级为「已有既定行为」。但它引出一个残留问题：那笔未入账的钱在 Cobo 侧的去向与退款路径，本 PRD 未涉及（Cobo 有 refund 系列端点）。"
+    },
+    {
+      "id": "Q-056",
+      "question": "Q-019 定了跳转 Cobo 托管页，但 `Create order link` 的语义与 PRD 的流程对不上两处：(1) 该接口只返回支付 URL，【此时 Cobo 尚未创建订单，没有 order_id】，order_id 要等付款方在托管页提交后才由 `payment.order.status.updated` 带回；(2) 付款方是在【Cobo 的托管页上】选币种与链的。发票该在哪一刻进 Pending？我们 Payer 页的 Select payment method 还留吗？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "https://www.cobo.com/payments/cn/guides/create-orders：「For Create order link, the call returns only a payment URL. Importantly, Cobo 此时尚未创建支付订单，因此还没有 order_id。」「for order links this fires with Pending carrying the newly minted order_id」。对应 docs/PRD.md §Invoice State Transitions 的 `Sending --Payment link + email success--> Pending`、§Payer Invoice Detail 的 Select payment method、以及 Q-008 的 paid_token。",
+      "cost": "若沿用 Create order link，则发票进 Pending 时我们手上没有 order_id，后续所有按订单查账的动作都要靠 psp_order_code 反查；而付款方选币种发生在 Cobo 页上，我们 Payer 页那个 Select payment method 就是重复的一步（且两处选的可能不一致）。改用 Create pay-in order 可以立刻拿到 order_id 与收款地址，但那要求我们在创建时就锁定单一币种——与 F003「支持多 Token」直接冲突。",
+      "stage": "prd",
+      "answer": "用 `Create order link`，保留 F003 的多 Token 支持。发票按 USD 计价（pricing_currency = USD、pricing_amount = 发票金额），payable_currency 由付款方在 Cobo 托管页上选择，稳定币 1:1 换算（Q-016）。Create&Send 时调 Create order link 拿到支付 URL 并发信，成功即进 Pending——【此时手上没有 order_id】，靠 psp_order_code（= 发票号）反查；order_id 由首个 `payment.order.status.updated` 事件带回后补写。Payer 页【删除 Select payment method 模块】：币种由付款方在 Cobo 页上选，两处都能选会产生不一致且没人定义以哪个为准。paid_token 仍由付款成功回调写入（Q-008）。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "impact": {
+        "removed": [
+          "Payer Invoice Detail 的 Select payment method（IC-049）",
+          "§Key Action Feedback 的 Select payment method 行"
+        ],
+        "changed": [
+          "Invoice 实体新增 cobo_order_id（回调后补写，创建时为空）",
+          "psp_order_code = invoice_id，作为反查键与 Cobo 侧的唯一性约束",
+          "Sending → Pending 的判定：拿到支付 URL 且邮件发送成功即可，不等 order_id"
+        ],
+        "kept": [
+          "payment_tokens 数组与多 Token 支持（F003）",
+          "primary_token 的展示优先级规则"
+        ]
+      },
+      "note": "连带发现：Q-016 裁定稳定币 1:1 之后，§Entity: Invoice Item 的 amount_by_token（Token → Decimal 映射）四个取值必然相同，该字段实际已退化为单值。unit_price_by_token 同理。是否把这两个字段收敛为标量属数据层化简，留给 arch 判断，此处只记录事实。"
+    },
+    {
+      "id": "Q-057",
+      "question": "结算金额的小数位与 Cobo payout 的限制直接冲突：payout 的 `amount` 【最多两位非零小数】，`100.567` 会被【拒绝而不是四舍五入】；而 Q-020 已裁定发票金额一律 6 位小数。多张发票求和后几乎必然超过两位——这一笔提不出去。怎么解？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "https://www.cobo.com/payments/en/api-references/payment/create-payout：「amount ... up to two nonzero fractional digits; more (e.g. 100.567) is rejected with an invalid amount format error instead of being rounded」。与 Q-020 的裁决（存储与展示统一 6 位小数）直接冲突。",
+      "cost": "这是运行时会直接报错的冲突，不是风格问题：商户勾选几张 6 位小数的发票，合计金额提交 payout 时被 Cobo 拒绝，而界面上没有任何地方解释为什么。要么发票金额限制到 2 位（推翻 Q-020 并改数据层精度），要么结算时截断（那截掉的零头留在余额里，账对不平），两条路都要人拍板。",
+      "stage": "prd",
+      "answer": "发票金额改为 2 位小数，全链路一致：unit_price_by_token 与所有金额字段均为 2 位。每张发票 2 位 → 多张求和仍是 2 位 → payout 的 amount 必然被接受，不需要截断、不产生零头。【本条修正 Q-020】：Q-020 原裁定 6 位，理由是四个 Token 链上精度为 6 位；但链上 6 位是收款侧的事实，两位限制是提款侧的 API 约束，两者在链路上分开——发票作为商业单据用 2 位（相当于分）足够。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "followUp": "【已关闭】原残留：结算求和按 paid_amount 时可能超过两位小数。Q-054 裁定容差 0 且多付进 Error 后，Received 发票的实收恒等于面额（2 位），求和必为 2 位，冲突消失。"
+    },
+    {
+      "id": "Q-058",
+      "question": "Cobo Payments 需要一个 Merchant 实体（含 KYC），而本 PRD 完全没有这个概念。谁来创建、什么时候创建、KYC 由谁提交？",
+      "blocks": [
+        "arch"
+      ],
+      "kind": "decision",
+      "source": "https://www.cobo.com/payments/en/guides/amounts-and-balances：「Merchant accounts — one per merchant, each representing an actual business entity receiving payments」「Every deposit must land in a merchant account before settling」；create-pay-in-order 要求 `merchant_id`「指向一个已存在且归属于您团队的商户」；create-payout 的 `source_account` 同为 merchant_id。端点：create-merchant / update-merchant / list-all-merchants / submit-merchant-kyc / get-merchant-kyc。对照 docs/PRD.md：全文没有 Merchant 实体，只有 Cobo 企业账户与 Client（付款方）。",
+      "cost": "没有 merchant_id 就【创建不了任何 pay-in order】，也就发不出任何一张发票——这是整条主流程的前置条件。而 KYC 是一套带附件上传的独立流程（upload-file-v2），本 PRD 一个字没写。它同时决定 Q-052 的商户名/Logo 到底取 Cobo 组织还是这个 Merchant 记录。",
+      "stage": "prd",
+      "answer": "不需要在本产品内建 Merchant 或 KYC：merchant_id 由 Cobo 支付平台侧提供，通过 Cobo 给的注册脚本带外完成，已注册就绪。取值：merchant_id = 5，app_id = invoice。因此 create-merchant / submit-merchant-kyc / upload-file-v2 一律不接入，也不需要「商户未就绪」状态、引导页或自助开通流程——merchant_id 作为一个配置项注入即可。对 Q-052 的影响：商户名与 Logo 不来自 Payments 的 Merchant 记录（我方不维护它），仍需确认是否取自 Cobo 企业账户，Q-052 的 followUp 保持未决。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "config": {
+        "merchant_id": "5",
+        "app_id": "invoice"
+      },
+      "note": "merchant_id 与 app_id 是标识符不是密钥，可进 .env.example 与文档。配套的 App Key / App Secret 属密钥，另见 Q-060。"
+    },
+    {
+      "id": "Q-059",
+      "question": "结算收款地址的来源对不上：PRD 写「由 Cobo Wallet API 返回」，而 payout 的 `recipient_info.address` 要求是【已注册/已审批的目标地址】，Cobo 为此另有一套 destination 注册表（create-destination / list-all-destinations 等）。Settlement Request 页那两个下拉（Wallet、Wallet Address）到底读哪个？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": "https://www.cobo.com/payments/en/api-references/payment/create-payout：「address — Registered/approved destination crypto address; verify its chain_id network matches the token's network」；https://cobo.com/payments/llms.txt 列出 create-destination / list-all-destinations / get-destination-information / update-destination / delete-destination 及 entry 级端点。对照 docs/PRD.md §Entity: Settlement Request 的 wallet_id「Cobo Wallet ID」与 wallet_address「由 Cobo Wallet API 返回」。",
+      "cost": "读错来源的话，商户在下拉里选到一个未注册的地址，提交 payout 时才被拒。而 destination 是需要预先注册与审批的对象——这意味着「选钱包地址」之前还有一个本 PRD 未涉及的地址注册流程，Q-031 那句 `No wallet address available for the selected token.` 的触发条件也随之改变。",
+      "stage": "prd",
+      "answer": "改读 destination 注册表，不用 Cobo Wallet API。Settlement Request 页两个下拉的数据源：Wallet 下拉 ← `list-all-destinations`，Wallet Address 下拉 ← `list-destination-entries`。destination 的两级结构正好对应现有的 Wallet → Address 两级 UI，页面结构不变。地址的注册与审批在 Cobo Portal 带外完成（与 Q-058 的 merchant_id 同一取向），本应用【只读、不写】，不接 create-destination / create-destination-entry。选中后需校对 destination entry 的 chain_id 与所选 token 的链一致（payout 规格要求）。列表为空时沿用 Q-031 的文案 `No wallet address available for the selected token.`",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-09",
+      "impact": {
+        "changed": [
+          "§Entity: Settlement Request 的 wallet_id 语义：Cobo Wallet ID → destination id",
+          "wallet_address 的来源：Cobo Wallet API → destination entry",
+          "§F014 的集成清单：Wallet API 移出，destination 只读接口移入",
+          "Q-031 空态文案的触发条件：从「钱包无地址」改为「该 token 下无已注册 destination entry」"
+        ]
+      },
+      "note": "chain_id 与 token 链的匹配校验要在前端过滤时就做，不能等提交 payout 被拒——那时商户已经走完整个勾选流程。"
+    },
+    {
+      "id": "Q-060",
+      "question": "接入 Cobo 需要哪几个密钥、分别在哪个环境配置好了？（Cobo OAuth 的 App Key / App Secret，以及 dev 与 prod 两套）",
+      "blocks": [
+        "code"
+      ],
+      "kind": "secret",
+      "env": [
+        "COBO_APP_KEY",
+        "COBO_APP_SECRET",
+        "DATABASE_URL",
+        "PAYER_LINK_SIGNING_SECRET",
+        "APP_JWT_SIGNING_KEY"
+      ],
+      "source": "由 Q-048 的查证得出：Cobo OAuth 以 App Key / App Secret（Ed25519）签名，四个请求头 Authorization / Biz-Api-Key / Biz-Api-Nonce / Biz-Api-Signature；环境分 https://api.dev.cobo.com/v2 与 https://api.cobo.com/v2。Q-058 已给出非密钥部分：merchant_id=5、app_id=invoice。仓库当前没有 .env.example，也没有代码读取这些变量——现在问是为了不让它拖到编码阶段才发现。",
+      "cost": "没有 App Key / App Secret，任何一次 Cobo 调用都签不出名，整条主流程跑不起来。回调验签用的公钥是按环境硬编码的常量，不属密钥（见 Q-018）。",
+      "stage": "prd",
+      "answer": "已配置（值在 .env，不进 git）。四类密钥全部就绪：① Cobo OAuth 的 App Key / App Secret（Ed25519，dev 与 prod 两套，Q-048）；② PostgreSQL 连接串（Q-066）；③ Payer 链接的签名密钥（Q-067 定了不可枚举的签名 token 且不设过期，这把钥匙泄露等于所有发票永久可读，轮换成本高，需按高敏感度对待）；④ 我方签发 JWT 的签名密钥（Q-062）。Cobo 回调验签用的公钥不属密钥——它是按环境硬编码的常量（Q-018）。附带修复：.env 原先未被 .gitignore 覆盖（未跟踪但未忽略，一次 git add . 就会进历史），本次已补上 .env / .env.* 并保留 .env.example 例外。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-061",
+      "question": "clients / invoices / settlement_requests 三张表按哪个键做租户分区？§NFR Security 写「Merchant 数据按 Cobo 企业账户隔离」、§Roles and Permission Matrix 写「可查看本商户发票」，都要求有一个隔离单位；而 Q-058 把 merchant_id 定成常量 5 并说「作为一个配置项注入即可」，读起来像单主体。两处说的是不是同一个东西？",
+      "blocks": [
+        "arch",
+        "detail",
+        "code"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Non-functional Requirements > Security；docs/PRD.md §Roles and Permission Matrix（Invoice List / Settlement Detail 两行）；对照 .ab/questions.json 的 Q-058（merchant_id = 5）与 Q-052（Portal App 安装回调带 org_id、/v2/oauth/get-org-access-token 按 org 换 token）",
+      "cost": "租户键是每张表和每条查询都要带的东西。定在契约之前便宜，定在有数据之后要做数据迁移；漏了它则任何一个组织都能读另一个组织的发票。",
+      "stage": "arch",
+      "answer": "两处不是同一个东西，不构成矛盾：merchant_id = 5 是【Invoice 应用自己】在 Cobo Payments 侧的收单主体，是应用级常量，与使用者无关；使用者是 Cobo 的用户。隔离单位裁定为【Cobo 组织 org_id】—— clients / invoices / settlement_requests 三张表各带一列 org_id，服务端每条查询强制带上它，同一组织内的不同成员共用同一套客户与发票。org_id 的来源是 Q-052 查证的 Portal App 安装回调与 org access token 链路。连带结论：所有组织的收款都落在 merchant_id=5 这一个余额池里，因此「某组织能结算多少」由我方账本（该组织自己 Received 发票的 paid_amount 之和）决定，不由 Cobo 余额决定。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-062",
+      "question": "浏览器调我方后端 /api/* 时，带的是谁签发的凭据、放在哪里、怎么续期？Q-014 只定了「前端身份凭据形态 = token」，没定签发方与存放处；Q-052 查证到的 org access token 是我方服务端调 Cobo 用的凭据，不是浏览器的。",
+      "blocks": [
+        "arch",
+        "detail",
+        "code"
+      ],
+      "kind": "decision",
+      "source": ".ab/questions.json 的 Q-014（「前端身份凭据形态 = token」，未定签发方）与 Q-052（Portal App 安装 → 回调带 org_id → /v2/oauth/get-org-access-token 换 org access token，服务端用）；docs/PRD.md §Roles and Permission Matrix 末行 Role source 也写着 To be confirmed（Q-014）",
+      "cost": "契约里每条端点的 auth 字段靠这一条才写得下去。stage-arch 明写：契约一个 auth 字段都没写时，auth-coverage 完全沉默——「漏了鉴权」与「本来就该公开」在那一刻分不开，要到编码期才有人指名。",
+      "stage": "arch",
+      "answer": "我方签发 JWT，前端只放内存。用户从 Cobo Portal 进入应用时，我方服务端校验门户交接的凭据一次，签发我方自己的 JWT（载荷含 org_id，见 Q-061）；前端保存在内存中，不写入 localStorage / sessionStorage，每次请求带 `Authorization: Bearer <token>`；刷新页面或开新标签页重新走一次门户换取，不做 refresh token。不把 Cobo org access token 交给浏览器——那是我方服务端调 Cobo 的凭据，泄露等于泄露整个组织在 Cobo 侧的权限。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15",
+      "followUp": "【已关闭】原残留：门户交接的凭据形态未确认。Q-069 确认为 Cobo 签发的 JWT（载荷含 email / org_id / iss），按 Cobo 的 JWKS 端点取公钥验签。"
+    },
+    {
+      "id": "Q-063",
+      "question": "unit_price_by_token / amount_by_token 的 Object 形状要不要收敛为标量？收敛的话 primary_token 怎么办？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": ".ab/prd.json 的 domain.entities[InvoiceItem].notes 自己写明「Q-016 的稳定币 1:1 使 unit_price_by_token 与 amount_by_token 的各 Token 取值必然相同，两字段实际已退化为标量——是否收敛属数据层化简，留给 arch」；docs/prototype.html:1598 为每个选中 Token 各渲染一个价格输入框，但其样例数据（prototype.html:1092-1093）里各 Token 价格全部相同；Q-056 已定 Create order link 只接受 pricing_currency=USD + pricing_amount 单值",
+      "cost": "每一条带金额的端点（创建/编辑/详情/列表/Payer 页/结算选单）的 requestSchema 与 responseSchema 都取决于这一条；定错要同时改契约、数据层 schema 和所有金额渲染。",
+      "stage": "arch",
+      "answer": "全收敛为标量 USD。unit_price、item amount、amount_without_tax、total_tax_amount、discount_amount、total_amount 全部改为单值 USD，2 位小数（Q-057）。payment_tokens 数组保留，但语义改为「允许付款方在 Cobo 托管页上选哪几种币」，原样传给 Create order link。primary_token 删除——它在原文里的唯一用途是「未付款列表金额显示主币」，而 USD 计价下列表直接显示 USD，没有主币概念。paid_token / paid_amount（Q-008）保留，由付款成功回调写入，结算按 paid_token 分组（Q-021）。原型里每个 Token 一个价格输入框的画法随之作废，改为单个 Unit price 输入框。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-064",
+      "question": "结算 payout 的 amount 填所选发票 paid_amount 的全额，还是扣掉预估手续费后的净额？手续费从哪儿出？",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": ".ab/questions.json 的 Q-053（amount = 所选发票 paid_amount 求和）与 Q-026（invoice_service_fee 恒为 0，total_estimated_fee = cobo_pay_estimated_fee，由 Cobo Estimate fees 返回）；docs/PRD.md §Page Responsibilities 的 Settlement Confirmation Page 行「发票数量、金额、预估费用、费用说明」。两条裁决都没说手续费从哪一笔钱里出。",
+      "cost": "决定 POST /api/settlements 的 requestSchema / responseSchema、确认页那三个数字的含义，以及这笔 payout 会不会因余额不足被 Cobo 拒。",
+      "stage": "arch",
+      "answer": "全额，手续费另从余额扣。payout 的 amount = 所选发票 paid_amount 之和，必为 2 位小数（Q-054 定容差 0、实收恒等于面额，求和仍是 2 位），因此必然通过 Q-057 查证的「amount 最多两位非零小数、超出即拒绝」这条约束。手续费由 Cobo 从 merchant_id=5 的余额另扣，不从 payout 金额里减——相减会破坏 2 位小数不变量（预估费的小数位由 Cobo 返回，不保证 2 位）。确认页的「总金额」与「预估费用」两行因此就是字面意思：提出去的是总金额，手续费是额外开销。连带风险（写进 DESIGN，不另开问题）：所有组织共用 merchant_id=5 的余额池（Q-061），累计手续费会啃掉池子，需运营侧补足；本版不做提交前余额校验，余额不足表现为 payout 失败回调 → Settlement Request = Failed → 所选发票回 Settlement Failed，可重试。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-065",
+      "question": "发票邮件与通知邮件由谁发送？发信域名归谁？服务商从未被裁决过——F014、§Core Flow 第 5 步、状态机 Sending → Pending 三处都依赖「邮件服务」，而 Q-048 查证的 Cobo 支付侧文档站与 OpenAPI spec 里没有任何邮件端点。",
+      "blocks": [
+        "arch",
+        "code"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §Background（「与 Cobo Pay、Cobo Wallet、邮件服务和结算能力集成」）、§Feature List F014、§Core Flow 第 5 步、§Invoice State Transitions（Sending → Pending 的前置是「Cobo API 与邮件服务成功」）、§File and External Integration Spec 的「Email API：recipient、cc、subject、invoice content、link To be confirmed」；台账 60 条里无一条问过服务商",
+      "cost": "Create&Send 是 P0 主链路，Sending → Pending 这条转移的另一半条件就是邮件发送成功。服务商不定，这一半的失败路径、重试语义与密钥都写不出来。",
+      "stage": "arch",
+      "answer": "由 Cobo 提供邮件能力，不自建也不另接第三方服务商（与 Q-058 / Q-059 一致的取向：能带外交给 Cobo 的就不在本产品内建）。对 arch 的影响到此为止——邮件调用是我方服务端 → Cobo 的内部调用，不出现在 _contracts/api-routes.json 里；我方契约只暴露 Create&Send（POST /api/invoices/:invoiceId/send）与 Send Reminder，邮件在其后的异步流程中发出（EH004 的 24 小时卡住阈值已经决定了它是异步后台处理，不是请求内同步等待）。发信域名随 Cobo 侧能力走。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15",
+      "followUp": "【Cobo 的邮件端点规格未经验证，挡 code】：Q-048 已查证的支付侧文档站（含 dev_openapi.yaml）里没有邮件端点，所以「Cobo 提供邮件能力」这一条目前只是取向，不是查证结果。需向 Cobo 确认：端点路径与入参（收件人 / CC / 主题 / 正文或模板 id / 变量）、是否支持 HTML 模板、失败与退信怎么回告（同步错误码还是 webhook 事件）、是否需要单独的发信域名验证。拿不到之前，编码期只能先按一个内部发信适配层写，接口形状随 Cobo 回复再定。与 Q-060 同属接入 Cobo 前必须闭合的一批。"
+    },
+    {
+      "id": "Q-066",
+      "question": "技术栈的六个维度（languages / frontend / backend / data / api / layout）与三个 agb 判不了的配套项分别定什么？Q-037 定了形状（React、Node+Koa、PostgreSQL+ORM）但明写「ORM 具体选型属 arch 的 DEC」，且仓库无 package.json，resolveStack 探测为空。",
+      "blocks": [
+        "arch",
+        "detail",
+        "code"
+      ],
+      "kind": "decision",
+      "rule": "stack-unknown",
+      "source": ".abrc.json 无 stack 键、仓库根无 package.json → resolveStack 探测为空；.ab/questions.json 的 Q-037（形状已定、ORM 留给 arch）；既有安装证据 node_modules/.package-lock.json（cobo-invoice@0.1.0）与 node_modules/.modules.yaml（pnpm 的 hoistedDependencies 结构）",
+      "cost": "不写进 .abrc.json 的 stack，下游知识包一个都注不进来、门禁挂不上适配器；只写 .abrc.json 不写 DEC，则下一个人（或下一个 agent）会重新决定一次。",
+      "stage": "arch",
+      "answer": "全部按推荐拍板。词表内五维：languages = ts；frontend = react-router（SPA，与 Q-037「前后端分离」及 Q-014 的 /apps/invoice/* 挂载一致；不选 next-app 以免多出一个与 Koa 职责重复的 SSR 服务端）；backend = koa（Q-037 已裁决且已安装；这一维 19 个取值门禁支持度相同，不构成选择依据）；data = drizzle（drizzle-orm / drizzle-kit / pg 均已安装，且 drizzle 在门禁「该跑的都能跑」那一档，含 model-shape）；chain 不写（本产品不碰链，链上交互全在 Cobo 侧）。api = REST，但【REST 不在 stack 词表内】——它没有正向特征、resolveStack 探不到，因此 .abrc.json 的 stack.api 留空而不是写 \"rest\"。目录布局 = apps/web（前端）+ services/api（后端）+ _contracts/（共享契约与数据层 schema）；本阶段不建目录、不装依赖，布局写进 DEC，.abrc.json 的 layout 等脚手架落地后再声明（layout-declared 会查声明路径是否真的有东西，指着空目录比不声明更贵）。三个 agb 判不了的配套项照实记录：包管理器 pnpm（既有事实）、边界校验库 zod（尚未安装）、前端服务端状态 @tanstack/react-query（尚未安装）。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-067",
+      "question": "Payer 链接的有效期定几天？Q-015 已定机制为「不可枚举的签名 token + 自 Due Date 起算一段固定天数」，天数未定；而 EH007 要求 Overdue / Received / Settled / Voided 等状态下 Payer 打开链接仍能看到只读页面与状态说明，链接失效必须晚于逾期。",
+      "blocks": [
+        "arch",
+        "detail",
+        "code"
+      ],
+      "kind": "decision",
+      "source": ".ab/questions.json 的 Q-015 及其 followUp（「有效期天数未定（取值开放，未编造选项）…… 需在 arch 之前补齐」）；.ab/prd.json 的 VAR-10（值为「未定」）与 RULE-10；docs/PRD.md §EH007（非 Pending 状态仍需只读展示）",
+      "cost": "GET /api/pay/:token 是契约里唯一一条 auth: public 的读端点，它的失效判定就是它的鉴权本身。不定就写不出那条端点的语义。",
+      "stage": "arch",
+      "answer": "【本条修正 Q-015 的后半】不设过期时间：链接只靠不可枚举的签名 token 做访问控制，永久有效。撤销路径靠业务状态——发票 Void 之后页面只读，Q-015 的「过期后只读并提示联系商户」这一降级路径因此不再需要。前半（签名 token、不做打开时的邮箱二次校验）原样保留。接受的风险已明确告知并被选择：邮件被转发或邮箱泄露时，该发票的金额、客户名与商品明细永久可读；缓解手段只有 token 本身的不可枚举性。连带修改：.ab/prd.json 的 VAR-10 由「未定」改为「不过期」，RULE-10 的「自 Due Date 起算固定天数后失效」一句作废。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-068",
+      "question": "同一产品已有一份手写实现（/Users/57block/pythonproject/cobo-invoice-backend，Python 3.11 + FastAPI + SQLAlchemy + Alembic + App Runner，110 个已合并 PR，业务模块齐全）。本仓库要不要按 stack-selection 的判据 1「既有事实优先」去对齐它？至少 6 处冲突：后端栈、邮件服务商（它用 Mailgun）、是否有汇率折算（它有 ExchangeRate 表与定时任务）、金额按币还是标量（它有 InvoiceToken / TokenSubtotal）、结算地址源（它用 Cobo Wallet API）、结算服务费率（它按配置 0.3 收）。",
+      "blocks": [
+        "arch",
+        "detail",
+        "code"
+      ],
+      "kind": "scope",
+      "source": "/Users/57block/pythonproject/cobo-invoice-backend 的 app/models.py、app/api/auth_api.py、app/service/portal_service.py、core/email/email.py 与目录结构；对照 .ab/questions.json 的 Q-016 / Q-026 / Q-037 / Q-053 / Q-059 与 .abrc.json 的 mode: greenfield",
+      "cost": "判错方向会让这一轮的契约与 DEC 全部作废：对齐它就等于推翻台账里 60 条裁决中的至少 6 条；忽略它则可能重复造一个已经在跑的系统。",
+      "stage": "arch",
+      "answer": "不对齐，全部重写。本仓库是 agentic builder 的【对照实验】：目的是量化 AI 生成的代码与人手写的代码差多少，那份 Python 实现是【对照组】，参考它会污染实验结论。因此：不读它、不对齐它、不把它当「既有事实优先」的判据；上述 6 处冲突以本仓库的裁决为准（Q-016 无汇率、Q-026 零服务费、Q-037/Q-066 Node+Koa+drizzle、Q-053 payout、Q-059 destination 注册表、Q-063 标量 USD），冲突本身正是这次要测量的差异，不是缺陷。.abrc.json 的 mode: greenfield 保持不变。唯一例外是【外部事实】——Cobo 平台自己定的接口语义与 Portal 交接给应用的凭据形态不是设计选择，那部分向人问，不从对照组代码里抄。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-069",
+      "question": "门户交接的外部事实：（a）用户从 Cobo Portal 打开内嵌应用时，前端拿到的是什么凭据、怎么验？（b）发票 from_name 与邮件模板里的企业名 / Logo 从哪个 Cobo 接口读？Q-052 的 followUp 查了 apps/authentication、apps/org-access-tokens、webhooks/introduction 三页都没找到读组织名称/Logo 的端点。",
+      "blocks": [
+        "arch",
+        "detail"
+      ],
+      "kind": "decision",
+      "source": ".ab/questions.json 的 Q-052 followUp（「商户名与 Logo 仍未找到来源 …… 这一半仍挡 arch」）与 Q-062 followUp（「门户交接那一刻交给我们的到底是什么仍未确认」）；docs/PRD.md §Entity: Invoice 的 from_name 行（「不可编辑，来源 Cobo 企业账户」）与 §File and External Integration Spec 的 Output Template（邮件含商户名、Logo）",
+      "cost": "换取会话那条端点的 requestSchema、发票 from_name 的来源、邮件模板的商户名与 Logo 都卡在这一条。",
+      "stage": "arch",
+      "answer": "外部事实确认如下（Cobo 平台定的，不是我方设计选择）：（a）Cobo Portal 把一个【Cobo 签发的 JWT】交给前端，载荷含 email / org_id / iss；我方服务端按 Cobo 的 JWKS 端点取公钥验签。（b）拿到 org access token 后，另有一个【按 org_id 读组织信息】的接口返回组织名称与 Logo URL，Logo 可能为空需有默认值兜底。这两条作为外部事实采用；【拿到之后怎么做一律按 Q-062 自行设计，不参照对照组实现】——会话时长、是否引入 refresh token、凭据存放处（Q-062 已定：我方签发 JWT、前端只放内存、不做 refresh）、组织名与 Logo 是落库快照还是每次实时拉，都不从对照组抄。发票 from_name 取组织名称，邮件模板的商户名与 Logo 同源。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15",
+      "note": "来源边界由 Q-068 划定：外部事实（Cobo 的接口语义与交接形态）可用，设计选择不可抄。"
+    },
+    {
+      "id": "Q-070",
+      "question": "Settlement Confirmation Page 的「预估费用」在提交之前没有数据来源：_contracts/api-routes.json 里 coboPayEstimatedFee 只出现在 POST /api/settlements 的响应中，而那已经是提交之后。",
+      "blocks": [
+        "detail",
+        "code"
+      ],
+      "kind": "gap",
+      "source": "docs/PRD.md §Page Responsibilities and Module Boundaries 的 Settlement Confirmation Page 行（Must Show「发票数量、金额、预估费用、费用说明」，Key CTA「Confirm」）；§Page Map 同页「确认结算金额、费用与提交」；§US-007 的 AC-031「Given wallet address is missing / When Merchant is on Settlement Confirmation Page / Then Confirm is disabled」；.ab/questions.json 的 Q-026「页面只展示后端返回值，不在前端自算」与 Q-048（Cobo 的费用预估用 Estimate fees）",
+      "cost": "PAGE-010 是 P0 页面，它的 Must Show 里有一个字段没有数据来源；不补则要么前端自算（推翻 Q-026），要么这一页少一块（推翻两处 Must Show 与 F012 的 User Value）。",
+      "stage": "detail",
+      "answer": "新增一条提交前预估端点 POST /api/settlements/estimate（auth: required，无副作用、不创建任何记录、不带幂等键），入参与 POST /api/settlements 一致（settlementToken / destinationId / entryId / invoiceIds），返回 invoiceCount / requestAmount / coboPayEstimatedFee / invoiceServiceFee / totalEstimatedFee。服务端转调 Q-048 已查证的 Cobo Estimate fees。金额口径与 DEC-008 一致：requestAmount 是所选发票 paid_amount 的全额，不减手续费；invoiceServiceFee 恒为 0（Q-026）。该端点归 settlement 域、CMP-006 拥有。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-071",
+      "question": "创建/编辑/复制发票页的 Client 选择控件怎么拿数据？DEC-006 / Q-028 定了 GET /api/clients 每页 20 条，而原型（docs/prototype.html:417 的 fClient）是一个把客户全量渲染进去的普通 select——一个有 21 个活跃客户的商户选不到第 21 个，且这个故障没有任何提示。",
+      "blocks": [
+        "detail",
+        "code"
+      ],
+      "kind": "gap",
+      "source": "docs/prototype.html:417 `<select id=\"fClient\" data-bp-state=\"form-client\">`（demo 数据只有 3 个客户，掩盖了分页问题）；docs/PRD.md §Entity: Invoice 的 client_id 行「下拉只显示 Active」；.ab/design.json 的 DEC-006 与 .ab/questions.json 的 Q-028（每页 20、offset 分页）",
+      "cost": "PAGE-004 / PAGE-005 / PAGE-006 三个页面的任务与 UI_CONTRACT 里该控件的 testid 都取决于它；选错控件类型的后果是下游忠实实现一个用不了的下拉。",
+      "stage": "detail",
+      "answer": "改成可搜索组合框（combobox），复用 GET /api/clients，不新增端点：入参 status=Active + q（输入即筛选）+ 每页 20。控件类型【从 select 改为可输入筛选的 combobox】，UI_CONTRACT 按 combobox 写（输入框 + 选项列表两个锚点），并需要键盘可达与 aria 处理。原型那个 select 的画法随之作废——它只在 demo 的 3 条数据下成立。注意与 Client List 工具栏上的 client-type-filter 区分：那一个确实是 select（prototype.html:327），两者不是同一个控件。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    },
+    {
+      "id": "Q-072",
+      "question": "四条 AC 的正文被后来的裁决作废了，照它们写用例会断言一个被否掉的行为：AC-011 的边界值 0.999999（6 位小数）与 Q-057 的 2 位小数冲突；AC-020 要求付款方页显示 token selection，而 Q-056 已删除该模块；AC-015 与 AC-038 的正文里还留着「To be confirmed」，根本写不出断言。改 AC 正文，还是别的？",
+      "blocks": [
+        "qa",
+        "code"
+      ],
+      "kind": "decision",
+      "source": "docs/PRD.md §US-002 的 AC-011、§US-005 的 AC-020、§US-003 的 AC-015、§US-008 的 AC-038；对照 .ab/questions.json 的 Q-057（金额 2 位小数）、Q-056（删除 Payer 页的 Select payment method）、Q-024（删除失败文案）、Q-022 的 answerAddendum（重试 3 次后跳过本期并通知商户）。注意 PRD 顶部的 Adjudication Overrides 表没有点到这四条，所以它们不像 AC-033 那样已被覆盖声明兜住。",
+      "cost": "AC 正文是 AT-* 的 title 唯一的依据。留着作废的正文，下游写出的用例会去断言一个被否掉的行为，而且它「符合原文」——review 的人也查得到出处，这类缺陷要到有人真的用那个功能时才暴露。",
+      "stage": "qa",
+      "answer": "按裁决改写 AC 正文，四处都机械落实：(1) AC-011 的边界值 0.999999 改为 0.99——2 位小数下「刚好小于 1」的那个值（Q-057）；(2) AC-020 删去 token selection 一词，付款方页只有明细与 Pay Now，币种在 Cobo 托管页选（Q-056）；(3) AC-015 的「failure feedback To be confirmed（Q-024）」填入 `Failed to delete the draft invoice`；(4) AC-038 的「failure handling is To be confirmed（Q-022）」填入「当次任务内重试 3 次，仍失败则跳过本期并邮件通知商户，next_send_date 正常往后走」。处理方式与上一轮 AC-033 一致。同时在 PRD 顶部的 Adjudication Overrides 表补上这四行，使偏离可复核。",
+      "answeredBy": "evan.liu",
+      "answeredAt": "2026-09-15"
+    }
+  ]
+}

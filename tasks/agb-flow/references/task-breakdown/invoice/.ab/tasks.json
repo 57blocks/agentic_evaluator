@@ -579,6 +579,10 @@
           "subSteps": [
             {
               "action": "对齐契约",
+              "detail": "PATCH /api/invoices/:invoiceId 的请求、响应与错误形状（仅 Draft 可编辑）"
+            },
+            {
+              "action": "对齐契约",
               "detail": "PATCH 的部分更新语义、DELETE 的响应与失败形状"
             },
             {

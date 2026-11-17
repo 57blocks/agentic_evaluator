@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * detail: a task plan was written, and agb's coverage and structure gates
+ * tasks: a task plan was written, and agb's coverage and structure gates
  * find nothing wrong with it.
  *
  * Two tiers, calibrated on the plans demo-todo, chessicle and invoice adopted:
@@ -23,7 +23,7 @@ if (tasks === 0) finish(1, ".ab/tasks.json contains no tasks", "empty plan");
 ensureGit();
 const found = [];
 for (const gate of [...REQUIRED, ...RECORDED]) {
-  const { findings, headlines } = agb(["check", "--all", `--gate=${gate}`, "--stage=detail"]);
+  const { findings, headlines } = agb(["check", "--all", `--gate=${gate}`, "--stage=tasks"]);
   for (const f of findings) found.push({ ...f, text: headlines.find((h) => h.gate === f.gate)?.text ?? f.message ?? "" });
 }
 const blocking = found.filter((f) => f.severity === "hard" || (f.severity === "partial" && REQUIRED.includes(f.gate)));

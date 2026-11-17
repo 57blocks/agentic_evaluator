@@ -896,6 +896,10 @@
           "subSteps": [
             {
               "action": "对齐契约",
+              "detail": "GET /api/games/{gameId} 的响应形状（报告页读取对局 PGN）"
+            },
+            {
+              "action": "对齐契约",
               "detail": "GET /api/analysis/{analysisId}/events 的响应形状"
             },
             {

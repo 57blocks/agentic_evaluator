@@ -1,0 +1,24 @@
+
+# AGB 的簿记文件：本地产生，不进 git（见 ab-core BOOKKEEPING_PATHS）
+.ab/events.jsonl
+.ab/attempts.json
+.ab/boot.log
+.ab/run/
+.ab/knowledge-candidates.jsonl
+.ab/knowledge-reviewed.jsonl
+.ab/evidence/
+
+# node
+node_modules/
+
+# 编辑器与系统
+.DS_Store
+.idea/
+
+# AGB bookkeeping files: generated locally, kept out of git (see BOOKKEEPING_PATHS in ab-core)
+.ab/upload.json
+
+# 密钥：值只在本地，永远不进 git（security-hardening）
+.env
+.env.*
+!.env.example

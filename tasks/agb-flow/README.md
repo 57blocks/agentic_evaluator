@@ -1,58 +1,68 @@
 # agb-flow
 
-Which model should run each step of agb's flow, and does the per-step best
-combination beat one model end to end? One spec, three steps, nine models.
+Which model should run each step of agb's flow? One spec, five of agb's six
+stages, five models. agb at `beb56b90` (2026-11-09); not comparable with the
+October run, whose agb had other stages and whose code step left later
+tasks' tests in the tree.
 
 | Step | Input (a real agb project, at the moment the step started) | Candidate runs | Right |
 |---|---|---|---|
-| task-breakdown | PRD, design and contracts in place (`fixture/task-breakdown/`, 3 projects) | `claude -p` + stage-detail | a task plan, with every page and endpoint claimed and no domain cycle (`checks/plan-gates.mjs`) |
-| test-design | the adopted task plan in place (`fixture/test-design/`, 3 projects) | `claude -p` + stage-qa | a test plan covering every acceptance criterion (`checks/test-plan-gates.mjs`) |
-| implementation | demo-todo just before each task (`fixture/implementation/`, 8 tasks) | `agb run`, that one task | the task's own acceptance tests, restored from the fixture, all pass (`checks/task-tests.mjs`) |
+| spec | the client's documents in `docs/prd-source/` (`fixture/spec/`: chessicle, invoice) | `claude -p /agb-skills:agb-spec` | PRD, `.ab/prd.json` and source snapshot; no hard finding at the stage; `prd-id`, `prd-quality` clean (`checks/spec-gates.mjs`) |
+| architecture | the adopted PRD (`fixture/architecture/`: demo-todo, chessicle, invoice) | `claude -p /agb-skills:agb-arch` | API contract and `docs/DESIGN.md`; no hard finding; `design-closure` clean (`checks/arch-gates.mjs`) |
+| task-breakdown | PRD, design and contracts (`fixture/task-breakdown/`, 3 projects) | `claude -p /agb-skills:agb-tasks` | every page and endpoint claimed, no domain cycle (`checks/plan-gates.mjs`) |
+| test-design | the adopted task plan (`fixture/test-design/`, 3 projects) | `claude -p /agb-skills:agb-test-plan` | every acceptance criterion covered (`checks/test-plan-gates.mjs`) |
+| implementation | demo-todo just before T-004, T-005, T-006 (`fixture/implementation/`) | `agb run`, that one task | the task's own acceptance tests, restored from the fixture, all pass (`checks/task-tests.mjs`) |
 
-Then the chain runs end to end on demo-todo, twice: opus-5.5 on every step,
-and each step's pick. Each step starts from the previous step's work dir
-(`handoff: workdir`); the implementation step builds every task. The delivered app is
-graded by `checks/app-gates.mjs` (installs, builds, its whole test suite
-passes under `agb smoke`), and a judge compares the two deliveries.
+Delivery (agb's sixth stage) and the end-to-end chain are not in this round.
 
-## What agenteval does for this task
+## How a step runs
 
-Everything a wrapper used to do around agenteval, agenteval now does
-(docs/design/agb-flow-gaps.md): lays each input's fixture in, hands a step's
-work dir to the next, runs every trial and check outside this repo, hides
-`references/` while candidates run, stops a timed-out agent's whole process
-tree, prices the tokens a command reports, and resumes a run that died
-(`--reuse`). So `agents/agb-step.mjs` only sets the model, commits, and runs
-the step.
+`agents/agb-step.mjs` sets every model slot agb has (`models`, `verifier`,
+`securityReview`) to the candidate, commits the tree, and runs the stage:
+
+- The four planning stages are agb's own slash commands, run unattended with
+  `--accept-recommended` and a system note saying no one is there: questions
+  with a recommendation take it, the rest are left open in the ledger. The
+  commands converge with `./.ab/bin/agb check`, which the wrapper provides.
+- The code step is `agb run` with the mutation pass, verifier, security
+  review and contract audit off: what is measured is the candidate writing
+  code. `AB_USAGE_WAIT_MAX_H=0`: a subscription's usage limit fails the trial
+  instead of waiting out the window.
+
+## Checks
+
+Calibrated on the adopted projects (`references/<step>/<input>/`): every
+check fails an untouched start and passes the references
+(`agenteval check-task agb-flow`, free). A gate the references trip is
+counted in the evidence, never gated on: `prd-content-preserved` (invoice's
+adopted PRD drops 158 source lines) and `arch-closure` (demo-todo's design
+predates `.ab/arch.json`; invoice's has a component cycle).
+
+## Fixtures
+
+- spec: chessicle's PRD and TRD; invoice's original PRD and prototype
+  (`invoice_b`). demo-todo has no external document (its PRD was generated).
+- architecture: the task-breakdown fixture minus `_contracts/`,
+  `docs/DESIGN.md`, `.ab/design.json`, `.ab/arch.json`.
+- implementation: `git archive` of agb-demo-todo at the commit before each
+  `[T-xxx]`, minus test files only later tasks own and the cross-page
+  `client/src/App.test.tsx`. References: the `[T-xxx]` commit itself.
+- Every `.abrc.json` says `"lang": "zh"`: the sources are Chinese, and
+  without it agb's commands write English and translate the source line by line.
 
 ## Candidates
 
 `argv` names the model as the tool knows it; `model` is the OpenRouter id
 agenteval prices the reported tokens with. DeepSeek is reached directly
-(`DEEPSEEK_API_KEY`), the other non-Claude models through OpenRouter
-(`OPENROUTER_API_KEY`), both through claude's Anthropic-compatible endpoint.
-OpenRouter only guarantees tool use for Anthropic's own models: a failure
-there may be the bridge's, not the model's.
-
-## References
-
-`references/<step>/<input>/` is each project's adopted state after that step:
-- task-breakdown: the adopted plans (invoice's corrected one, 2c2281d).
-- test-design: the adopted test plans. chessicle's anchors 32 tests to criteria its
-  PRD numbers differently; the check records that, never gates on it.
-- implementation: the commit of each `[T-xxx]`.
-- e2e: demo-todo's end state (bb90b34) with two test fixes: as delivered,
-  its client suite fails when run whole (no cleanup between tests, one
-  `findByTestId` on a list), which agb never ran.
-
-`agenteval check-task agb-flow` (free, a few minutes: it installs and runs
-the reference app) confirms every check fails an untouched start and passes
-its references.
+(`DEEPSEEK_API_KEY`), Kimi and GLM through OpenRouter (`OPENROUTER_API_KEY`),
+both through claude's Anthropic-compatible endpoint. OpenRouter only
+guarantees tool use for Anthropic's own models: a failure there may be the
+bridge's, not the model's. Claude models sign in with `CLAUDE_CODE_OAUTH_TOKEN`.
 
 ## Cost
 
-Per trial, capped by `max_cost_per_trial_usd`: task-breakdown $15, test-design $10, implementation $10.
-Fable 5.1 is $10/$50 per million tokens, 2.5× opus-5.5; it may hit the
-task-breakdown cap on invoice. The chain's implementation step builds all of demo-todo (8
-tasks; agb run cost $19.70 on it originally). `budget_usd` stops new trials
-once reported spend passes it.
+`smoke.yaml` first (opus-5.5 and deepseek-flash, one input per step,
+`budget_usd: 40`), then `spec.yaml` (`budget_usd: 300`). Per-trial caps
+(claude's `--max-budget-usd`): spec, architecture and task-breakdown $15;
+test-design $10. `agb run` has had no cost cap since agb #109, so the code
+step is bounded only by its time limit (3600 s).

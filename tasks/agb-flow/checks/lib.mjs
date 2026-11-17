@@ -38,11 +38,13 @@ export function sh(cmd, args, { minutes = 10, dir = cwd } = {}) {
   return spawnSync(cmd, args, { cwd: dir, encoding: "utf-8", timeout: minutes * 60 * 1000, maxBuffer: 64 * 1024 * 1024 });
 }
 
-/** agb reads `git ls-files` to see the project; a work dir has no history. */
+/**
+ * agb reads `git ls-files` to see the project. A work dir may have no history,
+ * or files the candidate left uncommitted: what is graded is what is on disk.
+ */
 export function ensureGit(dir = cwd) {
-  if (existsSync(path.join(dir, ".git"))) return;
   const g = (...a) => sh("git", ["-c", "user.name=agentic-evaluator", "-c", "user.email=eval@localhost", ...a], { minutes: 2, dir });
-  g("init", "-q");
+  if (!existsSync(path.join(dir, ".git"))) g("init", "-q");
   g("add", "-A");
   g("commit", "-q", "--allow-empty", "-m", "agb-flow: graded state");
 }
@@ -71,6 +73,62 @@ export function agb(args, { minutes = 10 } = {}) {
     if (head) headlines.push({ severity: head[1], gate: head[2], text: (lines[i + 1] ?? "").trim() });
   });
   return { findings, headlines, report };
+}
+
+/** The first JSON object in a text that may carry more after it (agb prints a footer). */
+function firstObject(text) {
+  const start = text.indexOf("{");
+  if (start < 0) throw new Error("no JSON object");
+  let depth = 0;
+  let inString = false;
+  for (let i = start; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === "\\") i++;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{") depth++;
+    else if (c === "}" && --depth === 0) return JSON.parse(text.slice(start, i + 1));
+  }
+  throw new Error("unterminated JSON object");
+}
+
+/**
+ * Every hard and partial finding agb reports at a stage, from
+ * `agb check --all --json` (the whole verdict, untruncated). Exits 2 when agb
+ * is missing, crashed, or printed no verdict.
+ */
+export function stageFindings(stage, { minutes = 10 } = {}) {
+  if (!AGB.every(existsSync)) finish(2, `agb not found under ${AGB_HOME} (set AGB_HOME)`, "agb not found");
+  const r = sh(AGB[0], [AGB[1], "check", "--all", `--stage=${stage}`, "--json"], { minutes });
+  const out = `${r.stdout ?? ""}`;
+  if (r.error || (r.status !== 0 && r.status !== 1)) {
+    finish(2, `agb check --stage=${stage} exited with ${r.status ?? r.error?.message}: ${`${r.stderr ?? ""}${out}`.slice(-600)}`, "agb did not run");
+  }
+  let verdict;
+  try {
+    verdict = firstObject(out);
+  } catch (e) {
+    finish(2, `agb check --json printed no readable verdict (${e.message}): ${out.slice(0, 300)}`, "agb verdict unreadable");
+  }
+  return (verdict.findings ?? []).filter((f) => f.severity === "hard" || f.severity === "partial");
+}
+
+/**
+ * The rule the spec and architecture checks share, calibrated on the adopted
+ * projects, none of which has a hard finding at its stage: fail on any hard
+ * finding, or on a partial from a gate in `strict` (gates every adopted
+ * project is clean on). Every other partial is counted, never gated on.
+ */
+export function gradeStage(stage, { strict, summary }) {
+  ensureGit();
+  const findings = stageFindings(stage);
+  const blocking = findings.filter((f) => f.severity === "hard" || strict.includes(f.gate));
+  const noted = findings.filter((f) => !blocking.includes(f));
+  const line = `${summary}. Partials (recorded, not gated): ${countByGate(noted)}`;
+  if (blocking.length === 0) finish(0, line);
+  const say = (f) => `${f.severity} ${f.gate}: ${(f.message ?? "").slice(0, 200)}`;
+  finish(1, `${line}. Fails: ${blocking.map(say).join("; ")}`, say(blocking[0]));
 }
 
 /** "gate N, gate M" for the findings of a severity, most frequent first. */

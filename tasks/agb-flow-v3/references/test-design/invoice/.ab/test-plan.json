@@ -1,0 +1,514 @@
+{
+  "cases": [
+    {
+      "id": "AT-001",
+      "covers": [
+        "AC-005"
+      ],
+      "level": "unit",
+      "title": "客户名 2 字符被拒、3 字符与 100 字符通过、101 字符被拒"
+    },
+    {
+      "id": "AT-002",
+      "covers": [
+        "AC-001"
+      ],
+      "level": "integration",
+      "title": "POST /api/clients 合法且不重复的邮箱 → 201 且 status 为 Active，库里多出一行"
+    },
+    {
+      "id": "AT-003",
+      "covers": [
+        "AC-002"
+      ],
+      "level": "integration",
+      "title": "POST /api/clients 邮箱为空 → 400，fields 指向 clientEmail，库里不新增任何行"
+    },
+    {
+      "id": "AT-004",
+      "covers": [
+        "AC-001"
+      ],
+      "level": "integration",
+      "title": "同组织内重复邮箱 → 409；另一组织用同一邮箱 → 201"
+    },
+    {
+      "id": "AT-005",
+      "covers": [
+        "AC-001"
+      ],
+      "level": "e2e",
+      "title": "新增客户后弹窗关闭、列表出现该客户、global-toast 显示 `Successfully added the client.`"
+    },
+    {
+      "id": "AT-006",
+      "covers": [
+        "AC-004"
+      ],
+      "level": "e2e",
+      "title": "无客户时 Client List 渲染 client-empty 与 client-add-btn，不渲染空表格"
+    },
+    {
+      "id": "AT-007",
+      "covers": [
+        "AC-003"
+      ],
+      "level": "e2e",
+      "title": "无会话访问 /apps/invoice/clients → 渲染 no-permission-page，不渲染 app-sidebar，且不发出客户列表请求"
+    },
+    {
+      "id": "AT-008",
+      "covers": [
+        "AC-011"
+      ],
+      "level": "unit",
+      "title": "应付总额 0.99 被拒、1.00 通过；三位小数的输入被拒"
+    },
+    {
+      "id": "AT-009",
+      "covers": [
+        "AC-006"
+      ],
+      "level": "integration",
+      "title": "POST /api/invoices/:invoiceId/send 校验通过 → 发票由 Draft 转 Sending"
+    },
+    {
+      "id": "AT-010",
+      "covers": [
+        "AC-006"
+      ],
+      "level": "integration",
+      "title": "支付链接与邮件都成功后 → 发票由 Sending 转 Pending 且 payment_link 已写入"
+    },
+    {
+      "id": "AT-011",
+      "covers": [
+        "AC-007"
+      ],
+      "level": "integration",
+      "title": "未选付款币种 → 400 且不产生任何发送尝试"
+    },
+    {
+      "id": "AT-012",
+      "covers": [
+        "AC-008"
+      ],
+      "level": "integration",
+      "title": "客户为 Frozen → 400 且返回 `The selected client is frozen and can not create and send for the invoice.`"
+    },
+    {
+      "id": "AT-013",
+      "covers": [
+        "AC-009"
+      ],
+      "level": "integration",
+      "title": "Cobo 支付链接接口超时 → 发票回到 Draft、字段保留、payment_link 为空"
+    },
+    {
+      "id": "AT-014",
+      "covers": [
+        "AC-010"
+      ],
+      "level": "integration",
+      "title": "同一幂等键并发两次 send → 只产生一次发送尝试；同键不同请求体 → 409"
+    },
+    {
+      "id": "AT-015",
+      "covers": [
+        "AC-006"
+      ],
+      "level": "e2e",
+      "title": "点击 invoice-create-send-btn 后按钮禁用，列表状态由 Sending 变 Pending，global-toast 显示 `Successfully created and sent invoice`"
+    },
+    {
+      "id": "AT-016",
+      "covers": [
+        "AC-007"
+      ],
+      "level": "e2e",
+      "title": "未选币种点击创建并发送 → invoice-token-error 显示 `Please choose the payment token.`，页面未跳转"
+    },
+    {
+      "id": "AT-017",
+      "covers": [
+        "AC-011"
+      ],
+      "level": "e2e",
+      "title": "应付总额 0.99 时保存草稿 → 页面显示 `The invoice amount due must be greater than or equal to 1.`"
+    },
+    {
+      "id": "AT-018",
+      "covers": [
+        "AC-012"
+      ],
+      "level": "integration",
+      "title": "PATCH 草稿发票保存有效修改 → 200 且 update_time 比修改前更新"
+    },
+    {
+      "id": "AT-019",
+      "covers": [
+        "AC-013"
+      ],
+      "level": "integration",
+      "title": "PATCH 一张 Pending 发票 → 被拒，发票字段一个都没变"
+    },
+    {
+      "id": "AT-020",
+      "covers": [
+        "AC-014"
+      ],
+      "level": "integration",
+      "title": "DELETE 草稿成功后 → 再 GET 该发票详情返回 404"
+    },
+    {
+      "id": "AT-021",
+      "covers": [
+        "AC-012"
+      ],
+      "level": "e2e",
+      "title": "编辑草稿保存后 global-toast 显示 `Successfully edited the draft invoice`"
+    },
+    {
+      "id": "AT-022",
+      "covers": [
+        "AC-013"
+      ],
+      "level": "e2e",
+      "title": "Pending 发票所在行的 invoice-edit-btn 处于禁用态且点击不跳转"
+    },
+    {
+      "id": "AT-023",
+      "covers": [
+        "AC-015"
+      ],
+      "level": "e2e",
+      "title": "删除请求失败时草稿仍在列表，global-toast 显示 `Failed to delete the draft invoice`"
+    },
+    {
+      "id": "AT-024",
+      "covers": [
+        "AC-017"
+      ],
+      "level": "unit",
+      "title": "作废原因 2 字符与 501 字符被拒，3 字符与 500 字符通过"
+    },
+    {
+      "id": "AT-025",
+      "covers": [
+        "AC-016"
+      ],
+      "level": "integration",
+      "title": "Pending 发票带合法原因作废 → 转 Voiding；取消链接回调成功后转 Voided"
+    },
+    {
+      "id": "AT-026",
+      "covers": [
+        "AC-018"
+      ],
+      "level": "integration",
+      "title": "取消支付链接失败 → 发票回到 Pending 且 void_reason 保留"
+    },
+    {
+      "id": "AT-027",
+      "covers": [
+        "AC-019"
+      ],
+      "level": "integration",
+      "title": "同一幂等键并发两次作废 → 只处理一次，只写一条状态流水"
+    },
+    {
+      "id": "AT-028",
+      "covers": [
+        "AC-017"
+      ],
+      "level": "e2e",
+      "title": "作废原因为空时点击提交 → void-reason-error 出现，发票状态不变"
+    },
+    {
+      "id": "AT-029",
+      "covers": [
+        "AC-016"
+      ],
+      "level": "e2e",
+      "title": "作废成功后 global-toast 显示 `Voided the invoice successfully`，列表状态变为 Voided"
+    },
+    {
+      "id": "AT-030",
+      "covers": [
+        "AC-020"
+      ],
+      "level": "integration",
+      "title": "Pending 且未逾期的发票 GET /api/pay/:token → 200，payable 为 true 且带 paymentUrl"
+    },
+    {
+      "id": "AT-031",
+      "covers": [
+        "AC-020"
+      ],
+      "level": "e2e",
+      "title": "Pending 未逾期时付款方页渲染 payer-pay-now-btn，且页面上不存在任何币种选择控件"
+    },
+    {
+      "id": "AT-032",
+      "covers": [
+        "AC-021"
+      ],
+      "level": "integration",
+      "title": "Overdue 发票 GET /api/pay/:token → payable 为 false 且响应不含 paymentUrl"
+    },
+    {
+      "id": "AT-033",
+      "covers": [
+        "AC-021"
+      ],
+      "level": "e2e",
+      "title": "Overdue 时不渲染 payer-pay-now-btn，payer-readonly-banner 说明已逾期并提示联系商户"
+    },
+    {
+      "id": "AT-034",
+      "covers": [
+        "AC-022"
+      ],
+      "level": "e2e",
+      "title": "Received 与 Settled 两种状态下页面只读、不渲染 payer-pay-now-btn，并说明发票已付款"
+    },
+    {
+      "id": "AT-035",
+      "covers": [
+        "AC-023"
+      ],
+      "level": "e2e",
+      "title": "Cobo 支付页不可用回跳后 payer-result-banner 显示失败提示，发票仍为 Pending 且付款按钮仍可点"
+    },
+    {
+      "id": "AT-036",
+      "covers": [
+        "AC-024"
+      ],
+      "level": "integration",
+      "title": "付款成功回调处理完成后再次请求付款页 → 仍为 Received、payable 为 false"
+    },
+    {
+      "id": "AT-037",
+      "covers": [
+        "AC-026"
+      ],
+      "level": "unit",
+      "title": "日期范围 15 天通过、16 天被拒"
+    },
+    {
+      "id": "AT-038",
+      "covers": [
+        "AC-025"
+      ],
+      "level": "unit",
+      "title": "发送时间按 UTC 归日，本地时区为 UTC+8 时跨日边界的记录不落到相邻那一天"
+    },
+    {
+      "id": "AT-039",
+      "covers": [
+        "AC-025"
+      ],
+      "level": "integration",
+      "title": "GET /api/dashboard/invoice-sent 按日分桶，每日五个堆叠项之和等于该日总额，且不含 Draft 与 Sending"
+    },
+    {
+      "id": "AT-040",
+      "covers": [
+        "AC-026"
+      ],
+      "level": "integration",
+      "title": "日期范围超过 15 天 → 400，绕过前端直接请求同样被拒"
+    },
+    {
+      "id": "AT-041",
+      "covers": [
+        "AC-026"
+      ],
+      "level": "e2e",
+      "title": "选择 16 天范围 → dash-range-error 显示 `You cannot select a date range longer than 15 days.`，且不发出图表请求"
+    },
+    {
+      "id": "AT-042",
+      "covers": [
+        "AC-027"
+      ],
+      "level": "e2e",
+      "title": "四个指标都无数据时渲染 dashboard-empty 与创建发票引导，而不是四个空框"
+    },
+    {
+      "id": "AT-043",
+      "covers": [
+        "AC-028"
+      ],
+      "level": "e2e",
+      "title": "无会话访问 /apps/invoice/dashboard → 渲染 no-permission-page 且不加载任何指标"
+    },
+    {
+      "id": "AT-044",
+      "covers": [
+        "AC-030"
+      ],
+      "level": "e2e",
+      "title": "一张发票都没勾选时 settlement-next-btn 处于禁用态"
+    },
+    {
+      "id": "AT-045",
+      "covers": [
+        "AC-031"
+      ],
+      "level": "e2e",
+      "title": "未选钱包地址时 settlement-confirm-btn 处于禁用态"
+    },
+    {
+      "id": "AT-046",
+      "covers": [
+        "AC-029"
+      ],
+      "level": "integration",
+      "title": "POST /api/settlements 合法提交 → 201 且状态 In Progress，所选发票全部转 Settling"
+    },
+    {
+      "id": "AT-047",
+      "covers": [
+        "AC-032"
+      ],
+      "level": "integration",
+      "title": "结算接口超时 → 不创建第二条结算请求，已选发票仍停留在原状态"
+    },
+    {
+      "id": "AT-048",
+      "covers": [
+        "AC-034"
+      ],
+      "level": "integration",
+      "title": "同一幂等键并发两次 Confirm → 库里只有一条结算请求"
+    },
+    {
+      "id": "AT-049",
+      "covers": [
+        "AC-029"
+      ],
+      "level": "e2e",
+      "title": "提交成功后 global-toast 显示 `Settlement Request submitted successfully.`"
+    },
+    {
+      "id": "AT-050",
+      "covers": [
+        "AC-033"
+      ],
+      "level": "integration",
+      "title": "payout 回调完成 → 结算请求 Success 且全部关联发票 Settled；回调失败 → Failed 且全部关联发票 Settlement Failed"
+    },
+    {
+      "id": "AT-051",
+      "covers": [
+        "AC-033"
+      ],
+      "level": "unit",
+      "title": "结算状态枚举只接受 In Progress / Success / Failed，写入 Partial Success 被拒"
+    },
+    {
+      "id": "AT-052",
+      "covers": [
+        "AC-035"
+      ],
+      "level": "integration",
+      "title": "打开周期开关保存发票 → 创建一条 Active 的 Series，并与生成的发票建立关联"
+    },
+    {
+      "id": "AT-053",
+      "covers": [
+        "AC-036"
+      ],
+      "level": "integration",
+      "title": "到达 next_send_date 后调度跑一次 → 生成一张新发票并进入 Sending"
+    },
+    {
+      "id": "AT-054",
+      "covers": [
+        "AC-038"
+      ],
+      "level": "unit",
+      "title": "同一 series_id 与同一应发送日期的幂等键重复时，第二次不生成发票"
+    },
+    {
+      "id": "AT-055",
+      "covers": [
+        "AC-038"
+      ],
+      "level": "integration",
+      "title": "生成连续失败 3 次后跳过本期、向商户发出通知、next_send_date 前移，且该期没有任何发票被创建"
+    },
+    {
+      "id": "AT-056",
+      "covers": [
+        "AC-037"
+      ],
+      "level": "integration",
+      "title": "停止 Series → 状态变 Discontinued，已生成发票的状态一个都没变，后续调度不再生成"
+    },
+    {
+      "id": "AT-057",
+      "covers": [
+        "AC-037"
+      ],
+      "level": "e2e",
+      "title": "详情页确认停止后周期区域显示已停止，且不再出现停止入口"
+    },
+    {
+      "id": "AT-058",
+      "covers": [],
+      "level": "integration",
+      "title": "三条用户发起的外部调用在 120 秒无响应时按各自路径回滚，且外部客户端只被调用一次——没有自动重试"
+    },
+    {
+      "id": "AT-059",
+      "covers": [],
+      "level": "integration",
+      "title": "停留在 Sending 或 Voiding 超过 24 小时的发票可被查出，列表行渲染 invoice-stuck-tooltip"
+    },
+    {
+      "id": "AT-060",
+      "covers": [],
+      "level": "integration",
+      "title": "客户、发票、结算三个列表默认每页 20 条，total 等于全量行数，第 2 页与第 1 页无重叠行"
+    },
+    {
+      "id": "AT-061",
+      "covers": [],
+      "level": "unit",
+      "title": "金额一律序列化为两位小数的字符串，三位小数的输入在服务端被拒而不是被四舍五入"
+    },
+    {
+      "id": "AT-062",
+      "covers": [],
+      "level": "unit",
+      "title": "付款方链接 token 至少 128 bit 熵，且无法由 invoice_id 或创建时间推导"
+    },
+    {
+      "id": "AT-063",
+      "covers": [],
+      "level": "integration",
+      "title": "回调请求体被篡改一个字节即验签失败且不进入业务处理；同一 event_id 投递两次只生效一次"
+    },
+    {
+      "id": "AT-064",
+      "covers": [],
+      "level": "integration",
+      "title": "用 B 组织的会话请求 A 组织的客户、发票、结算详情 → 一律 404；列表查询返回空"
+    },
+    {
+      "id": "AT-065",
+      "covers": [],
+      "level": "integration",
+      "title": "服务端拒绝第 51 行 item 与第 4 个 CC 收件人，即使绕过前端置灰直接提交"
+    },
+    {
+      "id": "AT-066",
+      "covers": [],
+      "level": "integration",
+      "title": "两个结算请求并发选中同一张发票 → 后一个把它剔除、其余发票照常提交，被剔除的 id 出现在 removedInvoiceIds 里"
+    }
+  ]
+}

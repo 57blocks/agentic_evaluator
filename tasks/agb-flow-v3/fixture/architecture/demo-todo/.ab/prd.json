@@ -1,0 +1,248 @@
+{
+  "product": "Team Tasks",
+  "tier": "S",
+  "pages": [
+    {
+      "id": "PAGE-001",
+      "name": "任务看板",
+      "route": "/",
+      "layoutRegions": [
+        "Header: 产品名 + 当前成员下拉 + 新建任务主操作 + 成员管理链接",
+        "Toolbar: 负责人筛选下拉 + 显示已完成开关",
+        "Sidebar: 成员工作量列表，每行为「成员名 · 当前工作量」",
+        "Body: 按状态分列的任务卡片（待办 / 进行中 /（可选）已完成）"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-01",
+          "name": "当前成员",
+          "type": "下拉选择",
+          "interaction": "选择",
+          "effect": "会话身份更新；该成员的任务卡片加高亮边框；筛选不变"
+        },
+        {
+          "id": "IC-02",
+          "name": "新建任务",
+          "type": "按钮",
+          "interaction": "点击",
+          "effect": "按钮进入按下态；导航到「新建任务」/tasks/new"
+        },
+        {
+          "id": "IC-03",
+          "name": "负责人筛选",
+          "type": "下拉选择",
+          "interaction": "选择",
+          "effect": "列表就地过滤为该负责人的任务；各列计数同步更新"
+        },
+        {
+          "id": "IC-04",
+          "name": "显示已完成",
+          "type": "开关",
+          "interaction": "点击切换",
+          "effect": "开启时追加「已完成」列，关闭时移除该列；不触发重新加载"
+        },
+        {
+          "id": "IC-05",
+          "name": "任务卡片",
+          "type": "卡片",
+          "interaction": "点击",
+          "effect": "卡片高亮；导航到「任务详情」/tasks/:taskId"
+        },
+        {
+          "id": "IC-06",
+          "name": "卡片状态推进",
+          "type": "按钮",
+          "interaction": "点击",
+          "effect": "按钮 loading；成功后卡片移入目标列，工作量侧栏刷新；失败时卡片归位并弹出错误 toast"
+        },
+        {
+          "id": "IC-07",
+          "name": "成员管理入口",
+          "type": "链接",
+          "interaction": "点击",
+          "effect": "导航到「成员管理」/members"
+        }
+      ],
+      "staticElements": [
+        "列标题与各列计数",
+        "成员工作量数字",
+        "空态提示文案"
+      ],
+      "states": ["loading", "empty", "error", "populated"]
+    },
+    {
+      "id": "PAGE-002",
+      "name": "新建任务",
+      "route": "/tasks/new",
+      "layoutRegions": [
+        "Header: 标题「新建任务」",
+        "Body: 标题输入、描述文本域、负责人下拉（含「未分配」）",
+        "Footer: 创建按钮 + 取消按钮"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-08",
+          "name": "标题",
+          "type": "文本输入",
+          "interaction": "输入、失焦",
+          "effect": "本地更新；为空时失焦显示内联校验「标题必填」并禁用创建按钮"
+        },
+        {
+          "id": "IC-09",
+          "name": "描述",
+          "type": "文本域",
+          "interaction": "输入",
+          "effect": "本地更新；无校验"
+        },
+        {
+          "id": "IC-10",
+          "name": "负责人",
+          "type": "下拉选择",
+          "interaction": "选择",
+          "effect": "本地更新；默认值为「未分配」"
+        },
+        {
+          "id": "IC-11",
+          "name": "创建",
+          "type": "按钮",
+          "interaction": "点击",
+          "effect": "按钮 loading 且表单只读；成功后导航回「任务看板」/ 且新任务出现在待办列；失败时留在本页显示错误并保留输入"
+        },
+        {
+          "id": "IC-12",
+          "name": "取消",
+          "type": "按钮",
+          "interaction": "点击",
+          "effect": "丢弃草稿；导航回「任务看板」/"
+        }
+      ],
+      "staticElements": ["各字段标签", "标题必填标记"],
+      "states": ["loading", "idle", "submitting", "error"]
+    },
+    {
+      "id": "PAGE-003",
+      "name": "任务详情",
+      "route": "/tasks/:taskId",
+      "layoutRegions": [
+        "Header: 返回看板链接 + 当前状态徽标",
+        "Body: 标题（内联可编辑）、描述（内联可编辑）、负责人下拉",
+        "Footer: 当前状态允许的转移按钮组"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-13",
+          "name": "标题",
+          "type": "内联文本输入",
+          "interaction": "输入、失焦",
+          "effect": "失焦即保存；保存中字段禁用；成功显示已保存标记，失败回滚为原值并显示原因"
+        },
+        {
+          "id": "IC-14",
+          "name": "描述",
+          "type": "内联文本域",
+          "interaction": "输入、失焦",
+          "effect": "失焦即保存；保存中字段禁用；成功显示已保存标记，失败回滚为原值并显示原因"
+        },
+        {
+          "id": "IC-15",
+          "name": "负责人",
+          "type": "下拉选择",
+          "interaction": "选择",
+          "effect": "立即保存改派；成功后 Header 与看板工作量随之更新，失败回滚"
+        },
+        {
+          "id": "IC-16",
+          "name": "状态转移",
+          "type": "按钮组",
+          "interaction": "点击",
+          "effect": "只渲染 WF-01 允许的转移；点击后按钮 loading，成功后状态徽标更新，失败显示原因"
+        },
+        {
+          "id": "IC-17",
+          "name": "返回看板",
+          "type": "链接",
+          "interaction": "点击",
+          "effect": "导航到「任务看板」/"
+        }
+      ],
+      "staticElements": ["状态徽标", "字段标签"],
+      "states": ["loading", "saving", "error", "populated"]
+    },
+    {
+      "id": "PAGE-004",
+      "name": "成员管理",
+      "route": "/members",
+      "layoutRegions": [
+        "Header: 返回看板链接 + 标题「成员管理」",
+        "Body: 成员列表，每行为姓名 + 移除按钮",
+        "Footer: 新成员姓名输入 + 添加成员按钮"
+      ],
+      "interactiveComponents": [
+        {
+          "id": "IC-18",
+          "name": "新成员姓名",
+          "type": "文本输入",
+          "interaction": "输入、回车",
+          "effect": "本地更新；回车等价于点击「添加成员」"
+        },
+        {
+          "id": "IC-19",
+          "name": "添加成员",
+          "type": "按钮",
+          "interaction": "点击",
+          "effect": "按钮 loading；成功后成员出现在列表且输入框清空；重名时显示内联错误「该成员已存在」"
+        },
+        {
+          "id": "IC-20",
+          "name": "移除成员",
+          "type": "按钮",
+          "interaction": "点击",
+          "effect": "弹出确认；确认后该成员从名册消失，其名下任务负责人变为「未分配」；失败时列表不变并显示原因"
+        },
+        {
+          "id": "IC-21",
+          "name": "返回看板",
+          "type": "链接",
+          "interaction": "点击",
+          "effect": "导航到「任务看板」/"
+        }
+      ],
+      "staticElements": ["成员总数", "姓名文本"],
+      "states": ["loading", "empty", "error", "populated"]
+    }
+  ],
+  "domain": {
+    "entities": [
+      { "type": "Task" },
+      { "type": "Member" }
+    ],
+    "variables": [
+      {
+        "id": "VAR-01",
+        "name": "当前工作状态集",
+        "description": "计入「团队当前工作」的任务状态集合，默认为 todo 与 in_progress"
+      }
+    ],
+    "rules": [
+      {
+        "id": "RULE-01",
+        "name": "成员当前工作量",
+        "inputVariableId": "VAR-01",
+        "description": "某成员的当前工作量 = 负责人为该成员且状态属于 VAR-01 的任务条数"
+      }
+    ],
+    "workflows": [
+      {
+        "id": "WF-01",
+        "entity": "Task",
+        "initial": "todo",
+        "states": ["todo", "in_progress", "done"],
+        "transitions": [
+          { "from": "todo", "to": "in_progress", "action": "开始处理", "actor": "任意成员" },
+          { "from": "in_progress", "to": "todo", "action": "退回待办", "actor": "任意成员" },
+          { "from": "in_progress", "to": "done", "action": "标记完成", "actor": "任意成员" }
+        ]
+      }
+    ]
+  }
+}

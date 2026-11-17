@@ -1,32 +1,71 @@
-# agb's whole flow, in one spec: which model should run each step, and does
-# the per-step best combination beat one model end to end?
+# agb's flow, in one spec: which model should run each step?
 #
-#   task-breakdown   .ab/tasks.json, UI_CONTRACT.md   (agb stage-detail)
-#   test-design      .ab/test-plan.json               (agb stage-qa)
-#   implementation   every task, via `agb run`        (agb stage-code)
+#   spec             docs/PRD.md, .ab/prd.json                        (/agb-spec)
+#   architecture     _contracts/, docs/DESIGN.md, .ab/arch.json       (/agb-arch)
+#   task-breakdown   .ab/tasks.json, UI_CONTRACT.md                   (/agb-tasks)
+#   test-design      .ab/test-plan.json                               (/agb-test-plan)
+#   implementation   one task, via `agb run`                          (stage-code)
 #
 # Each step is evaluated on its own inputs: real agb projects at the moment
-# that step started (fixture/), the same for every model, so a step's result
-# does not depend on which model ran the step before.
+# that step started (fixture/<step>/), the same for every model, so a step's
+# result does not depend on which model ran the step before. agb's sixth
+# stage (delivery) and the end-to-end chain are not in this round.
 #
-# The end-to-end check (each step's pick chained, against opus-5.5 throughout)
-# is off for now. To turn it on: input_from + handoff: workdir on test-design and implementation,
-# and a workflow.e2e block (inputs, final_checks: [app-gates], steps, judge).
-#
-# Every field here is supported (docs/design/agb-flow-gaps.md tracks how).
-# Not built yet: the task's files — agents/agb-step.mjs, the fixtures under
-# fixture/<step>/, the checks and the rubrics.
+# agb at 57blocks/agb beb56b90 (2026-11-09). Not comparable with the October
+# run (agb then had stage-detail / stage-qa, and the code step left later
+# tasks' tests in the tree).
 
 protocol_version: "0.3"
 run_name: agb-flow
-description: "Which model should run each step of agb's flow (task breakdown, test design, implementation), and does the per-step best combination beat one model end to end? Each input is a real agb project at the moment that step began (demo-todo, chessicle and invoice for task breakdown and test design; demo-todo tasks for implementation). Every candidate runs the step through the same wrapper; a check grades the work itself, and a judge compares candidates pairwise."
+description: "Which model should run each step of agb's flow (spec, architecture, task breakdown, test design, implementation)? Each input is a real agb project at the moment that step began (chessicle and invoice for spec; demo-todo, chessicle and invoice for architecture, task breakdown and test design; three demo-todo tasks for implementation). Every candidate runs the step through the same wrapper and agb's own stage command; a check grades the work with agb's gates or the task's tests, and a judge compares candidates pairwise."
 # Counts what candidates report spending; past it no new trial starts.
-budget_usd: 600
+budget_usd: 300
 
 workflow:
   steps:
-    - id: task-breakdown
+    - id: spec
       version: "1"
+      description: "Spec: normalize the client's external document into docs/PRD.md and .ab/prd.json without rewriting it."
+      test_set:
+        id: spec-v1
+        # demo-todo has no external document: its PRD was generated.
+        inputs: [chessicle, invoice]
+        fixture_dir: fixture/spec
+      candidate_ids: &all [opus-5-5, sonnet-5-5, kimi-k3-1-pro, glm-5-3, deepseek-flash]
+      required_checks: [spec-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 15
+      judge:
+        rubric_file: rubrics/spec.md
+        methods: [pairwise-swap]
+        show: [docs/PRD.md, .ab/prd.json, .ab/questions.json]
+        dimensions: [faithful, machine, questions, buildable]
+
+    - id: architecture
+      version: "1"
+      description: "Architecture: turn the PRD into API contracts, cross-cutting decisions (docs/DESIGN.md) and components (.ab/arch.json)."
+      test_set:
+        id: architecture-v1
+        inputs: [demo-todo, chessicle, invoice]
+        fixture_dir: fixture/architecture
+      candidate_ids: *all
+      required_checks: [arch-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 15
+      judge:
+        rubric_file: rubrics/architecture.md
+        methods: [pairwise-swap]
+        show: [docs/DESIGN.md, "_contracts/**", .ab/arch.json, .ab/design.json]
+        dimensions: [decisions, contract, components, constraints]
+
+    - id: task-breakdown
+      version: "2"
       description: "Task breakdown: turn the PRD, design and API contracts into a task plan (.ab/tasks.json) and a UI contract."
       test_set:
         id: task-breakdown-v1
@@ -34,7 +73,7 @@ workflow:
         # each input is a directory as well as a text: fixture/<input>/
         # is laid into the work dir before the candidate starts.
         fixture_dir: fixture/task-breakdown
-      candidate_ids: &all [opus-5-5, fable-5-1, gpt-5-6-sol, gemini-4-argon, deepseek-v4-pro, deepseek-flash, kimi-k3, glm-5-3, glm-5-3-prime, qwen-3-8-max]
+      candidate_ids: *all
       required_checks: [plan-gates]
       success_criteria: { mandatory_checks: all }
       operating_mode: highest-assurance
@@ -42,7 +81,6 @@ workflow:
       maximum_completion_time_seconds: 3000
       # a spend cap per trial, handed to the command as {{max_cost_usd}}.
       max_cost_per_trial_usd: 15
-      # per-step judge.
       judge:
         rubric_file: rubrics/breakdown.md
         methods: [pairwise-swap]
@@ -50,7 +88,7 @@ workflow:
         dimensions: [granularity, ordering, clarity, domains]
 
     - id: test-design
-      version: "1"
+      version: "2"
       description: "Test design: write a test plan (.ab/test-plan.json) that covers every acceptance criterion of the adopted task plan."
       test_set:
         id: test-design-v1
@@ -62,30 +100,28 @@ workflow:
       operating_mode: highest-assurance
       eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
       maximum_completion_time_seconds: 1800
+      max_cost_per_trial_usd: 10
       # Both plans pass the coverage gate; the judge says whose tests are better.
       judge:
         rubric_file: rubrics/test-plan.md
         methods: [pairwise-swap]
         show: [.ab/test-plan.json]
         dimensions: [coverage, falsifiable, levels, traceable]
-      max_cost_per_trial_usd: 10
 
     - id: implementation
-      version: "1"
+      version: "2"
       description: "Implementation: build one task of the plan with agb run, so the task's own acceptance tests pass."
       test_set:
-        id: implementation-v1
-        # Two tasks of demo-todo, of two kinds, each from the project as it
-        # stood just before it: T-001 starts from nothing (scaffold, server,
-        # client, database); T-006 adds the board page to a working codebase.
-        # In the chain the step builds every task.
-        inputs: [demo-todo-T-001, demo-todo-T-006]
+        id: implementation-v2
+        # Three demo-todo tasks, each from the project as it stood just
+        # before it: T-004 (task detail, server and page), T-005 (status
+        # transitions), T-006 (the board page). Test files that only later
+        # tasks own, and the cross-page App test, are left out, so nothing in
+        # the tree is red that this task is not meant to turn green.
+        inputs: [demo-todo-T-004, demo-todo-T-005, demo-todo-T-006]
         fixture_dir: fixture/implementation
       candidate_ids: *all
       required_checks: [task-tests]
-      # agb fails a task its own gates or verifier would not pass, however the
-      # code turned out: a single task leaves later tasks' red tests in the tree
-      # (compile gate), and each candidate verifies itself (as strict as it is).
       # The task's own acceptance tests (the check) decide; agb's exit is kept as evidence.
       exit_code: ignore
       success_criteria: { mandatory_checks: all }
@@ -100,14 +136,13 @@ workflow:
         show: ["client/**", "server/**", package.json, "*.config.*", tsconfig.json]
         dimensions: [correctness, structure, tests, scope]
       max_cost_per_trial_usd: 10
-      # per-step concurrency. agb run is heavy (installs, builds, a dev
-      # server); three at once is what this machine takes.
+      # agb run is heavy (installs, builds, a dev server); three at once is
+      # what this machine takes.
       concurrency: 3
 
 # One command for every step: agents/agb-step.mjs reads EVAL_STEP and runs the
-# matching agb stage (task-breakdown → stage-detail, test-design → stage-qa,
-# implementation → stage-code) with the model it is given. argv names the model as the tool
-# knows it; `model` is the OpenRouter id agenteval prices its tokens with
+# matching agb stage with the model it is given. argv names the model as the
+# tool knows it; `model` is the OpenRouter id agenteval prices its tokens with
 # (reports_usage: tokens). Providers are plain env, keys read at run time.
 x-providers:
   deepseek: &deepseek
@@ -124,71 +159,57 @@ candidates:
     adapter: agent-cli
     model: anthropic/claude-opus-5.5
     cli: { argv: [node, agents/agb-step.mjs, claude-opus-5-5, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
-  - id: fable-5-1
+  - id: sonnet-5-5
     adapter: agent-cli
-    model: anthropic/claude-fable-5.1
-    cli: { argv: [node, agents/agb-step.mjs, claude-fable-5-1, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
-  - id: gpt-5-6-sol
+    model: anthropic/claude-sonnet-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-sonnet-5-5, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
+  - id: kimi-k3-1-pro
     adapter: agent-cli
-    model: openai/gpt-5.6-sol
-    cli: { argv: [node, agents/agb-step.mjs, openai/gpt-5.6-sol, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *openrouter }
-  - id: gemini-4-argon
-    adapter: agent-cli
-    model: google/gemini-4-argon
-    cli: { argv: [node, agents/agb-step.mjs, google/gemini-4-argon, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *openrouter }
-  - id: deepseek-v4-pro
-    adapter: agent-cli
-    model: deepseek/deepseek-v4-pro-0813
-    cli: { argv: [node, agents/agb-step.mjs, deepseek-v4-pro, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *deepseek }
-  - id: deepseek-flash
-    adapter: agent-cli
-    model: deepseek/deepseek-v4.1-flash
-    cli: { argv: [node, agents/agb-step.mjs, deepseek-flash, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *deepseek }
-  - id: kimi-k3
-    adapter: agent-cli
-    model: moonshotai/kimi-k3
-    cli: { argv: [node, agents/agb-step.mjs, moonshotai/kimi-k3, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *openrouter }
+    model: moonshotai/kimi-k3.1-pro
+    cli: { argv: [node, agents/agb-step.mjs, moonshotai/kimi-k3.1-pro, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *openrouter }
   - id: glm-5-3
     adapter: agent-cli
     model: z-ai/glm-5.3
     cli: { argv: [node, agents/agb-step.mjs, z-ai/glm-5.3, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *openrouter }
-  - id: glm-5-3-prime
+  - id: deepseek-flash
     adapter: agent-cli
-    model: z-ai/glm-5.3-prime
-    cli: { argv: [node, agents/agb-step.mjs, z-ai/glm-5.3-prime, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *openrouter }
-  - id: qwen-3-8-max
-    adapter: agent-cli
-    model: qwen/qwen3.8-max-0902
-    cli: { argv: [node, agents/agb-step.mjs, qwen/qwen3.8-max-0902, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *openrouter }
+    model: deepseek/deepseek-v4.1-flash
+    cli: { argv: [node, agents/agb-step.mjs, deepseek-flash, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs], env: *deepseek }
 
 evaluators:
   required_checks:
+    spec-gates:
+      kind: command
+      description: "docs/PRD.md, .ab/prd.json and the source snapshot exist; no hard finding at the spec stage, and prd-id and prd-quality are clean."
+      argv: [node, checks/spec-gates.mjs]
+      version_files: [checks/spec-gates.mjs, checks/lib.mjs]
+      timeout_seconds: 600
+    arch-gates:
+      kind: command
+      description: "An API contract and docs/DESIGN.md exist; no hard finding at the arch stage, and design-closure is clean."
+      argv: [node, checks/arch-gates.mjs]
+      version_files: [checks/arch-gates.mjs, checks/lib.mjs]
+      timeout_seconds: 600
     plan-gates:
       kind: command
       description: "The task plan claims every page and endpoint in the design and has no cycle between domains."
       argv: [node, checks/plan-gates.mjs]
-      version_files: [checks/plan-gates.mjs]
+      version_files: [checks/plan-gates.mjs, checks/lib.mjs]
       timeout_seconds: 300
     test-plan-gates:
       kind: command
       description: "The test plan covers every acceptance criterion of the adopted task plan."
       argv: [node, checks/test-plan-gates.mjs]
-      version_files: [checks/test-plan-gates.mjs]
+      version_files: [checks/test-plan-gates.mjs, checks/lib.mjs]
       timeout_seconds: 300
     task-tests:
       kind: command
       description: "The task's own acceptance tests, restored from the fixture, all pass."
       argv: [node, checks/task-tests.mjs]
-      version_files: [checks/task-tests.mjs]
+      version_files: [checks/task-tests.mjs, checks/lib.mjs]
       timeout_seconds: 900
-    app-gates:
-      kind: command
-      description: "The delivered app installs, builds, and its whole test suite passes under agb smoke."
-      argv: [node, checks/app-gates.mjs]
-      version_files: [checks/app-gates.mjs]
-      timeout_seconds: 2400
   # The judge's vendor must differ from every candidate's; the candidates cover
-  # Anthropic, OpenAI, Google, DeepSeek, Moonshot, Zhipu and Qwen.
+  # Anthropic, Moonshot, Zhipu and DeepSeek.
   judge:
     model: x-ai/grok-4.7
     provider_route: openrouter

@@ -10,10 +10,16 @@
  * (EVAL_CHAINED). This sets all of agb's model slots to <model>, commits the
  * tree and runs the step:
  *
- *   task-breakdown  `claude -p` + stage-detail   .ab/tasks.json, UI_CONTRACT.md
- *   test-design     `claude -p` + stage-qa       .ab/test-plan.json
+ *   spec            `claude -p /agb-skills:agb-spec`        docs/PRD.md, .ab/prd.json
+ *   architecture    `claude -p /agb-skills:agb-arch`        _contracts/, docs/DESIGN.md, .ab/design.json, .ab/arch.json
+ *   task-breakdown  `claude -p /agb-skills:agb-tasks`       .ab/tasks.json, UI_CONTRACT.md
+ *   test-design     `claude -p /agb-skills:agb-test-plan`   .ab/test-plan.json
  *   implementation  `agb run`: one task (the plan cut down to the input's task), or,
  *           chained, every task in the plan
+ *
+ * The four planning stages run agb's own slash commands, unattended: no one
+ * is in the session, so questions with a recommendation take it
+ * (--accept-recommended) and the rest are left open in the ledger.
  *
  * Tokens are reported, not dollars (reports_usage: tokens): agenteval prices
  * them. The provider comes from the candidate's env (ANTHROPIC_BASE_URL);
@@ -23,19 +29,22 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
 const [model, capArg] = process.argv.slice(2);
 /** agenteval's step id → the agb stage it runs. Below, `step` is the stage. */
-const STAGE = { "task-breakdown": "detail", "test-design": "qa", implementation: "code" };
+const STAGE = { spec: "spec", architecture: "arch", "task-breakdown": "tasks", "test-design": "test-plan", implementation: "code" };
 const step = STAGE[process.env.EVAL_STEP];
 const chained = process.env.EVAL_CHAINED === "1";
 const cwd = process.cwd();
 const AGB_HOME = process.env.AGB_HOME ?? path.join(os.homedir(), "workspace", "57b", "agb");
 const AGB = [path.join(AGB_HOME, "node_modules", ".bin", "tsx"), path.join(AGB_HOME, "packages", "agb", "src", "run", "cli.ts")];
+// The plugin as Claude Code installs it: the stages are its slash commands
+// (.claude/commands/agb-<stage>.md), each splicing in the packs it needs.
 const PLUGIN = path.join(AGB_HOME, "skills", "dist", "packages", "claude-code");
+const command = (stage) => path.join(PLUGIN, ".claude", "commands", `agb-${stage}.md`);
 // What claude charges a model it does not know, per million input tokens:
 // Opus rates (measured 2026-10-14, claude 2.1.296; docs/design/agb-flow-gaps.md B1).
 const CLAUDE_FALLBACK_INPUT = 5;
@@ -52,8 +61,8 @@ if (!model || !(cap > 0) || !step) {
   refuse(`usage: agb-step.mjs <model> <max-cost-usd>, with EVAL_STEP ${Object.keys(STAGE).join("|")} (agenteval sets it)`);
 }
 if (!AGB.every(existsSync)) refuse(`agb not found under ${AGB_HOME} (set AGB_HOME)`);
-if (step !== "code" && !existsSync(path.join(PLUGIN, "skills", `stage-${step}`))) {
-  refuse(`agb's Claude Code plugin has no stage-${step} at ${PLUGIN} (run pnpm install in AGB_HOME)`);
+if (step !== "code" && !existsSync(command(step))) {
+  refuse(`agb's Claude Code plugin has no /agb-${step} command at ${PLUGIN} (build agb's skills in AGB_HOME)`);
 }
 if (!existsSync(path.join(cwd, ".abrc.json"))) refuse("the work dir holds no agb project (.abrc.json): no fixture was laid in");
 
@@ -81,6 +90,9 @@ const env = {
   // Its own npm cache: trials run side by side, and two installs writing one
   // cache at once crash npm, which would fail the candidate for nothing.
   npm_config_cache: path.join(claudeHome, "npm-cache"),
+  // agb run waits out a subscription's usage window (up to a week) before it
+  // retries; a trial would sit until its timeout. Fail now, as usage-limit.
+  AB_USAGE_WAIT_MAX_H: "0",
   ...(isClaude
     ? {}
     : {
@@ -115,9 +127,22 @@ function reportTokens(t) {
 
 // ── Starting state ──────────────────────────────────────────────────────
 // One model for everything agb runs: its spec, coding and escalation slots,
-// and the verifier that reviews each task (sonnet unless told otherwise, which
-// would put a second model into every Claude candidate's run).
-json(".abrc.json", (rc) => ({ ...rc, models: { spec: model, coding: model, escalation: model }, verifier: { ...rc.verifier, model } }));
+// the verifier and the security reviewer (both sonnet unless told otherwise,
+// which would put a second model into every candidate's run). The code step
+// turns those two off as well; pinning them is for the run that leaves them on.
+json(".abrc.json", (rc) => ({
+  ...rc,
+  models: { spec: model, coding: model, escalation: model },
+  verifier: { ...rc.verifier, model },
+  securityReview: { ...rc.securityReview, model },
+}));
+// The stage commands converge with `./.ab/bin/agb check` (agb's converging
+// pack); a project agb installed has it, a fixture does not. Kept out of git.
+const shim = path.join(cwd, ".ab", "bin", "agb");
+if (!existsSync(shim)) {
+  mkdirSync(path.dirname(shim), { recursive: true });
+  writeFileSync(shim, `#!/bin/sh\nexec ${JSON.stringify(AGB[0])} ${JSON.stringify(AGB[1])} "$@"\n`, { mode: 0o755 });
+}
 // The whole shell, for every candidate alike (the user's decision, 2026-10-14).
 // Narrowed rules (`Bash(npm:*)`) stop an unattended run at the first command
 // shape not listed (a `for` loop, `curl`), and agb only writes the rule it was
@@ -140,20 +165,32 @@ if (step === "code" && !chained) {
   }));
 }
 git("init", "-q");
+writeFileSync(path.join(cwd, ".git", "info", "exclude"), ".ab/bin/\n.claude/\n");
 git("add", "-A");
 git("commit", "-q", "-m", `agb-flow: ${step} starts`);
 
 // ── The step ────────────────────────────────────────────────────────────
-const PROMPTS = {
-  detail:
-    "用 stage-detail skill 完成这个项目的详设与任务拆解阶段。输入在 docs/PRD.md、docs/DESIGN.md 与 _contracts/；" +
-    "按 skill 的要求产出 .ab/tasks.json 与 UI_CONTRACT.md。只做这一个阶段，不要写代码，不要写测试。" +
-    "遇到需要问人的地方，按最合理的假设继续，并把假设写进产物。",
-  qa:
-    "用 stage-qa skill 完成这个项目的测试设计阶段。输入在 docs/PRD.md、.ab/prd.json、.ab/tasks.json 与 UI_CONTRACT.md；" +
-    "按 skill 的要求产出 .ab/test-plan.json。只做这一个阶段，不要写代码，不要写用例正文。" +
-    "遇到需要问人的地方，按最合理的假设继续，并把假设写进产物。",
-};
+/** The slash command each planning stage runs, with its arguments. */
+function stageCommand(stage) {
+  if (stage !== "spec") return `/agb-skills:agb-${stage} --accept-recommended`;
+  // The spec stage needs the external document named; the fixture holds it under docs/prd-source/.
+  const dir = path.join(cwd, "docs", "prd-source");
+  const sources = existsSync(dir) ? readdirSync(dir).map((f) => `docs/prd-source/${f}`) : [];
+  if (sources.length === 0) refuse("the spec step's fixture has no docs/prd-source/: nothing to normalize");
+  const prototypes = existsSync(path.join(cwd, "docs")) ? readdirSync(path.join(cwd, "docs")).filter((f) => /\.html?$/.test(f)).map((f) => `docs/${f}`) : [];
+  return `/agb-skills:agb-spec --accept-recommended 需求原文在 ${sources.join("、")}` + (prototypes.length ? `；原型在 ${prototypes.join("、")}` : "");
+}
+
+/**
+ * Said once, the same for every candidate: the session is unattended. Without
+ * it a stage asks its questions and ends its turn waiting for an answer, and
+ * the step is graded on a half-done stage.
+ */
+const UNATTENDED =
+  "这是一次无人值守的评测运行：会话里没有人，不会有人回答，也不要停下来等。" +
+  "需要问人的问题按 asking 的「全部按推荐」处理：有推荐项的按推荐落（answeredBy 写 \"eval-operator\"）；" +
+  "没有推荐、要人给取值或密钥的，登记进 .ab/questions.json 留空，继续把这一阶段做完。" +
+  "只做这一个阶段，收尾按 converging 收敛门禁并提交。";
 
 /**
  * claude's event stream is the trace: every model call, tool call and the
@@ -168,9 +205,13 @@ function runClaude(prompt) {
     "--model", model,
     "--max-budget-usd", String(claudeCap),
     "--plugin-dir", PLUGIN,
+    // The packs a command reads at run time live in the plugin, outside the work dir.
+    "--add-dir", PLUGIN,
+    "--append-system-prompt", UNATTENDED,
     "--permission-mode", "acceptEdits",
-    "--allowedTools", "Read", "Edit", "Write", "Glob", "Grep", "Skill", "Bash(ls:*)",
-  ], { cwd, env, encoding: "utf-8", stdio: ["ignore", "pipe", "inherit"], maxBuffer: 16 * 1024 * 1024 });
+    // The whole shell, as in the code step: converging runs agb check and git commit.
+    "--allowedTools", "Read", "Edit", "Write", "Glob", "Grep", "Skill", "Bash",
+  ],{ cwd, env, encoding: "utf-8", stdio: ["ignore", "pipe", "inherit"], maxBuffer: 16 * 1024 * 1024 });
   writeFileSync(path.join(cwd, ".eval-trace.jsonl"), r.stdout ?? "");
   const lines = (r.stdout ?? "").split("\n").filter(Boolean);
   let out;
@@ -200,9 +241,13 @@ function agbTokens() {
 let status;
 try {
   if (step === "code") {
-    // The closing mutation pass is a diagnosis, not the task, and costs differently per model.
+    // What is measured is the candidate writing code. The closing mutation
+    // pass, the verifier, the security review and the contract audit are
+    // diagnoses run by further sessions: each costs differently per model and
+    // the verifier, being the candidate, fails strict models on themselves.
     // agenteval enforces the time limit (and stops the whole tree); no second clock here.
-    const exit = run(AGB[0], [AGB[1], "run", `--max-cost=${claudeCap}`, "--no-mutate"], 24 * 60);
+    // agb has no cost cap since #109 (2026-10-17); the time limit bounds the trial.
+    const exit = run(AGB[0], [AGB[1], "run", "--no-mutate", "--no-verifier", "--no-security-review", "--no-audit"], 24 * 60);
     agbTokens();
     // Done means every planned task completed. agb's own closing verdict is
     // not the ruler here: alone, a task leaves the later tasks' red tests in
@@ -215,7 +260,7 @@ try {
     console.log(`agb run exited ${exit}; ${planned.filter((id) => completed.has(id)).length} of ${planned.length} planned tasks completed`);
     status = allDone ? 0 : exit || 1;
   } else {
-    status = runClaude(PROMPTS[step]);
+    status = runClaude(stageCommand(step));
   }
 } finally {
   // Build output is not the deliverable.
