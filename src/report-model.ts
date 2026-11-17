@@ -18,7 +18,7 @@ import { modelRefOf } from "./adapters/types.js";
 import type { CostLedger } from "./canon/cost.js";
 import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import type { CanonSummary } from "./canon/write.js";
-import type { Recommendation } from "./canon/select.js";
+import { CHECK_SCORE_BREAKER, type Recommendation } from "./canon/select.js";
 import type { E2eValidation } from "./canon/e2e.js";
 import { lineDiff, type DiffLine } from "./report-diff.js";
 import { fillTemplate } from "./prompt-template.js";
@@ -54,6 +54,8 @@ export interface CandidateView {
   attempts: number;
   checkPass: number;
   checkExecuted: number;
+  /** Mean score the required check reported (0–1); null when it reports none. */
+  checkScore: number | null;
   winRate: number | null;
   comparisons: number;
   absolute: number | null;
@@ -181,6 +183,8 @@ export function verdictWhy(b: RunBundle): string | null {
   if (!chosen) return null;
   const favourite = judgeFavourite(b);
   if (favourite === null || !favourite.sole || favourite.candidate !== chosen) return null;
+  // The check's own score broke the tie: the judge's reason is not why it won.
+  if (b.recommendation.reasons.some((r) => r.includes(CHECK_SCORE_BREAKER))) return null;
   const ranked = duelStandings(b);
   const runnerUp = b.recommendation.evidence?.versus_runner_up?.b ?? ranked.find((s) => s.candidate !== chosen)?.candidate ?? null;
   const won = b.evaluations.filter((e) => {
@@ -242,6 +246,7 @@ export function candidateViews(b: RunBundle): CandidateView[] {
       attempts: c.valid_attempts,
       checkPass: c.check_states.pass,
       checkExecuted: c.check_states.pass + c.check_states.fail,
+      checkScore: c.required_check_score ?? null,
       winRate: duel.rate,
       comparisons: duel.comparisons,
       absolute: abs.length ? abs.reduce((s, v) => s + v, 0) / abs.length : null,
@@ -327,6 +332,7 @@ export function verdictFacts(rec: Recommendation, chosenView: CandidateView | un
       ? "cost per success unobserved"
       : chosenView.costPerSuccess != null ? `$${chosenView.costPerSuccess.toFixed(4)} per success` : null,
     chosenView.checkExecuted > 0 ? `required check ${chosenView.checkPass}/${chosenView.checkExecuted} passed` : null,
+    chosenView.checkScore !== null ? `check score ${Math.round(chosenView.checkScore * 100)}%` : null,
   ].filter((x): x is string => x !== null);
 }
 

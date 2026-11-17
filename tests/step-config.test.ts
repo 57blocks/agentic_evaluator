@@ -215,6 +215,31 @@ test("combine chooses by the spec's current eligibility, not the one the source 
   assert.equal(manifest.eligibility.minimum_required_check_pass_rate, 0.5, "the combined run records the threshold it chose by");
 });
 
+test("combine records and chooses by the spec's current minimum meaningful difference, not the one the source runs recorded", async () => {
+  const { combineRuns } = await import("../src/core/combine.js");
+  const spec = await sampleWorkspace();
+  const runsRoot = path.join(path.dirname(spec), "runs");
+  await runSuite(spec, false, { yes: true, skipE2e: true });
+  const [full] = await fs.readdir(runsRoot);
+  await new Promise((r) => setTimeout(r, 20));
+  await runSuite(spec, false, { yes: true, candidates: ["fake-pass"] });
+  const partial = (await fs.readdir(runsRoot)).find((d) => d !== full)!;
+  // Declare one after both runs finished.
+  const yaml = await fs.readFile(spec, "utf-8");
+  const declared = yaml.includes("minimum_meaningful_difference:")
+    ? yaml.replace(/minimum_meaningful_difference: .*/, "minimum_meaningful_difference: 0.05")
+    : yaml.replace("execution:\n", "execution:\n  minimum_meaningful_difference: 0.05\n");
+  assert.notEqual(declared, yaml, "the sample spec could not be edited");
+  await fs.writeFile(spec, declared);
+
+  const result = await combineRuns(spec, [full!, partial], {});
+
+  const manifest = JSON.parse(await fs.readFile(path.join(result.dir, "draft", "manifest.json"), "utf-8"));
+  assert.equal(manifest.minimum_meaningful_difference, 0.05, "the combined run kept the source runs' value");
+  const recommendation = JSON.parse(await fs.readFile(path.join(result.dir, "draft", "recommendation.json"), "utf-8"));
+  assert.doesNotMatch(recommendation.reasons.join(" "), /no minimum meaningful difference declared/);
+});
+
 test("judge compares a finished run's kept outputs and the recommendation follows, generating nothing", async () => {
   const { judgeRun } = await import("../src/core/judge-run.js");
   const spec = await sampleWorkspace();

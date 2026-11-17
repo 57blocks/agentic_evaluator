@@ -61,6 +61,12 @@ export interface CheckResult {
   /** e.g. "tsc-6.0.2+scaffold-a1f3b2c4". */
   version: string;
   reason?: string;
+  /**
+   * How much of the deliverable a command check accepted, in [0, 1], when it
+   * reports one (`{"score": 0.93}`). Never decides pass/fail; it separates
+   * candidates the verdict alone cannot.
+   */
+  score?: number;
 }
 
 let cachedTscVersion: string | undefined;
@@ -262,8 +268,11 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
  *   exit 1       fail — the candidate did not satisfy the check
  *   anything else, a spawn failure, or a timeout → evaluator_error, which is
  *                NEVER counted as a candidate failure (protocol §5)
- *   stdout       optional JSON {"evidence": "...", "reason": "..."}; plain
- *                text is kept verbatim as the evidence instead
+ *   stdout       optional JSON {"evidence": "...", "reason": "...", "score": 0.93};
+ *                plain text is kept verbatim as the evidence instead. `score`
+ *                (a number in [0, 1]: held-out tests passed, requirements
+ *                covered) is kept beside the verdict; anything else there is
+ *                ignored, never an evaluator error
  *
  * The command runs on this host with the caller's privileges. Until the
  * Docker sandbox lands, only declare checks you would run yourself.
@@ -325,15 +334,22 @@ async function writeFresh(file: string, content: string): Promise<void> {
   await fs.writeFile(file, content, { encoding: "utf-8", flag: "wx" });
 }
 
-/** Pull evidence out of the check's stdout, JSON or not. */
-function evidenceOf(stdout: string): { evidence: string; reason?: string } {
+/** A check's score is kept only as a finite number in [0, 1]; anything else is no score. */
+function scoreOf(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1 ? value : undefined;
+}
+
+/** Pull evidence (and a score, when reported) out of the check's stdout, JSON or not. */
+function evidenceOf(stdout: string): { evidence: string; reason?: string; score?: number } {
   const text = stdout.trim();
   if (!text.startsWith("{")) return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
   try {
-    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown };
+    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown; score?: unknown };
+    const score = scoreOf(parsed.score);
     return {
       evidence: typeof parsed.evidence === "string" ? parsed.evidence.slice(0, MAX_OUTPUT_CHARS) : text.slice(0, MAX_OUTPUT_CHARS),
       ...(typeof parsed.reason === "string" ? { reason: parsed.reason } : {}),
+      ...(score === undefined ? {} : { score }),
     };
   } catch {
     return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
@@ -411,13 +427,14 @@ export async function runCommandCheck(params: {
     const why = e.code === "ENOENT" ? `check program not found: ${program}` : `check could not start: ${e.message}`;
     return { state: "evaluator_error", passed: false, exitCode: -1, output: why, version, reason: why };
   }
-  const { evidence, reason } = evidenceOf(ran.stdout);
+  const { evidence, reason, score } = evidenceOf(ran.stdout);
+  const scored = score === undefined ? {} : { score };
   const errText = ran.stderr.trim().slice(0, MAX_OUTPUT_CHARS);
   if (!ran.timedOut && ran.exitCode === COMMAND_EXIT_PASS) {
-    return { state: "pass", passed: true, exitCode: COMMAND_EXIT_PASS, output: evidence, version, ...(reason ? { reason } : {}) };
+    return { state: "pass", passed: true, exitCode: COMMAND_EXIT_PASS, output: evidence, version, ...(reason ? { reason } : {}), ...scored };
   }
   if (!ran.timedOut && ran.exitCode === COMMAND_EXIT_FAIL) {
-    return { state: "fail", passed: false, exitCode: COMMAND_EXIT_FAIL, output: evidence || errText, version, ...(reason ? { reason } : {}) };
+    return { state: "fail", passed: false, exitCode: COMMAND_EXIT_FAIL, output: evidence || errText, version, ...(reason ? { reason } : {}), ...scored };
   }
   const why = ran.timedOut ? `check timed out after ${params.timeoutMs}ms` : `check exited with ${String(ran.exitCode ?? "a signal")}`;
   return {

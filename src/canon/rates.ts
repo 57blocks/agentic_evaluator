@@ -20,7 +20,7 @@
  * meaningful difference and the statistics (stats.ts) all support a firm claim.
  */
 
-import type { TrialRow } from "./rows.js";
+import type { CheckCell, TrialRow } from "./rows.js";
 import { INFRA_COMPLETION_STATES } from "./states.js";
 import { MIN_DIFFERING_INPUTS } from "./stats.js";
 import type { CompletionState, EvaluationState } from "./types.js";
@@ -39,6 +39,12 @@ export interface CandidateRates {
   reliability: Rate;
   evaluation_coverage: Rate;
   required_check_pass_rate: Rate;
+  /**
+   * Mean of the scores the required check reported over this candidate's
+   * graded trials (pass or fail), in [0, 1]; null unless every graded trial
+   * carries one. Absent in summaries written before checks could score.
+   */
+  required_check_score?: number | null;
   /** pass^k over inputs (see the header). Absent in summaries written before it existed. */
   all_trials_pass_rate?: Rate;
   completion_states: Record<CompletionState, number>;
@@ -74,6 +80,13 @@ const EMPTY_EVAL: Record<EvaluationState, number> = {
   pass: 0, fail: 0, not_evaluated: 0, evaluator_error: 0,
 };
 
+/** Mean score over the graded (pass/fail) cells; null when none is graded or one lacks a score. */
+function meanScore(cells: readonly CheckCell[]): number | null {
+  const graded = cells.filter((c) => c.state === "pass" || c.state === "fail");
+  if (graded.length === 0 || graded.some((c) => c.score === undefined)) return null;
+  return graded.reduce((s, c) => s + (c.score as number), 0) / graded.length;
+}
+
 export function ratesFor(candidate: string, rows: readonly TrialRow[]): CandidateRates {
   const own = rows.filter((r) => r.candidate === candidate);
   const successes = own.filter((r) => r.task_outcome === "success").length;
@@ -105,6 +118,7 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
     reliability: rate(successes, own.length - infra),
     evaluation_coverage: rate(classified, own.length),
     required_check_pass_rate: rate(checkStates.pass, checkStates.pass + checkStates.fail),
+    required_check_score: meanScore(checkCells),
     all_trials_pass_rate: allTrialsPassRate(own),
     completion_states: completion,
     outcomes: { success: successes, failure: failures, undetermined },
