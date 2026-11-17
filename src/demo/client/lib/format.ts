@@ -10,6 +10,7 @@
 
 import type { RunView, TaskView } from "../../catalog.js";
 import { NEEDS_REVIEW } from "./copy.js";
+import { isCombined } from "../../spend.js";
 
 export function runDate(iso: string | null): string {
   return iso ? iso.slice(0, 10) : "";
@@ -47,13 +48,17 @@ export interface Spend {
  */
 export function spendLabel(task: TaskView): Spend | null {
   if (task.spentUsd == null) return null;
-  const n = task.runs.length;
+  // A combined run spent nothing of its own: it is neither counted nor an overrun.
+  const spending = task.runs.filter((r) => !isCombined(r));
+  const combined = task.runs.length - spending.length;
+  const n = spending.length;
   const spent = n > 1 ? `$${task.spentUsd.toFixed(2)} over ${n} runs` : `$${task.spentUsd.toFixed(2)}`;
-  if (task.budgetUsd == null) return { text: spent, over: false };
+  const note = combined === 0 ? "" : ` · ${combined} combined run${combined > 1 ? "s" : ""} not counted`;
+  if (task.budgetUsd == null) return { text: spent + note, over: false };
   const budget = task.budgetUsd;
-  const overruns = task.runs.filter((r) => r.totalUsd !== null && r.totalUsd > budget).length;
+  const overruns = spending.filter((r) => r.totalUsd !== null && r.totalUsd > budget).length;
   const flag = overruns === 0 ? "" : n > 1 ? ` · ${overruns} over budget` : " over budget";
-  return { text: `${spent} · cap $${budget} per run${flag}`, over: overruns > 0 };
+  return { text: `${spent} · cap $${budget} per run${flag}${note}`, over: overruns > 0 };
 }
 
 /**
