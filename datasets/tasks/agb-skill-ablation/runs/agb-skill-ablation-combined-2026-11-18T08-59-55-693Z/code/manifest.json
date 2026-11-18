@@ -1,0 +1,172 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-skill-ablation-combined-2026-11-18T08-59-55-693Z/code",
+  "run_name": "agb-skill-ablation",
+  "step": {
+    "id": "code",
+    "version": "1",
+    "description": "Build the whole planned project (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints), with or without agb's skills."
+  },
+  "spec": {
+    "path": "tasks/agb-skill-ablation/spec.yaml",
+    "sha256": "9937abad9501ba164809428ee649b19e2eca84daa1172c5870f74199b6438209"
+  },
+  "description": "(agb 0a8c4ee7) Does agb's Claude Code skill pack make Claude better at each agb stage? Same model and starting tree (agb's adopted output of the earlier stages), with the agb-skills plugin running /agb-<stage> or without any plugin. Planning steps: passes when the deliverables parse, agb's required gates are the score, pairwise judge on substance. Code: held-out acceptance tests.",
+  "test_set": {
+    "id": "code-v1",
+    "inputs": {
+      "demo-todo": "9ffe96cbe0dcc1fbe29ae3cac4859888f40e435c97bd51d0f01a484fef36eb55",
+      "invoice": "b2ac59090b12c7c4c0b566b22a57389bd0bc23fb5df71736a05c8fb9cc58b118"
+    },
+    "labels": null
+  },
+  "candidates": {
+    "opus-5-5-skill": {
+      "id": "opus-5-5-skill",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}",
+          "skill"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "6a0021665d13d724ca88aa09c187da16e3e226e536e27436365fa3aca8c7547d"
+      }
+    },
+    "opus-5-5-none": {
+      "id": "opus-5-5-none",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}",
+          "none"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "6a0021665d13d724ca88aa09c187da16e3e226e536e27436365fa3aca8c7547d"
+      }
+    },
+    "sonnet-5-5-skill": {
+      "id": "sonnet-5-5-skill",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}",
+          "skill"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "6a0021665d13d724ca88aa09c187da16e3e226e536e27436365fa3aca8c7547d"
+      }
+    },
+    "sonnet-5-5-none": {
+      "id": "sonnet-5-5-none",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}",
+          "none"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "6a0021665d13d724ca88aa09c187da16e3e226e536e27436365fa3aca8c7547d"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "openai/gpt-6.1-sol",
+    "provider_route": "openrouter",
+    "methods": [
+      "pairwise-swap"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "build-tests"
+    ],
+    "check_version": "cmd-c0156e9f+files-ee9197e9",
+    "rubric_sha256": "fa8dfe5f7245d380aa9645d1a1ce4dd150412e73be73c684c824e6c26dc640ef",
+    "check_description": "First the arm: the trace must show the arm the candidate is labelled (-skill loaded agb-skills with /agb-code and acted on it; -none had no agb plugin, command, skill or CLI call), else the trial is void (evaluator error). Then the built app comes up (install, compose services, migrations, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the held-out pass rate is the score.",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "1fc69c82db6a66ecbce049b37384f5775e6a62046dfde264ec9bac1e3abcb884",
+    "score_template_sha256": "f7f3161e0bad3793db0c837c3a53beb00175c7c76fda2497f6fd5b1f0f548fbc"
+  },
+  "prompts": null,
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": 0.05,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 1,
+    "timeout_ms": 57600000,
+    "benchmark_mode": "production-realistic",
+    "cache_mode": "cold",
+    "early_stop": false,
+    "outage_wait_seconds": 600,
+    "max_consecutive_provider_errors": 10,
+    "max_consecutive_timeouts": 10
+  },
+  "harness": {
+    "name": "@57block/agenteval",
+    "version": "0.4.0",
+    "git_sha": "ccd82bc2",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-11-17T18:30:51.166Z",
+  "finished_at": "2026-11-18T08:59:55.790Z"
+}

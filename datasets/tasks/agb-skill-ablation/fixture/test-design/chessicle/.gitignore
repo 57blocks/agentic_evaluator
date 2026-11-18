@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.DS_Store
+
+# AGB 的簿记文件：本地产生，不进 git（见 ab-core BOOKKEEPING_PATHS）
+.ab/events.jsonl
+.ab/attempts.json
+.ab/boot.log
+.ab/run/
+.ab/knowledge-candidates.jsonl
+.ab/knowledge-reviewed.jsonl
+.ab/evidence/
+docs/prototype/

@@ -1,0 +1,1442 @@
+{
+  "domains": [
+    {
+      "id": "auth",
+      "name": "身份与入口",
+      "tasks": [
+        {
+          "id": "T-000",
+          "title": "路由骨架：聚合器按目录自动发现各域路由模块",
+          "role": "frontend",
+          "description": "只建聚合器，一个文件。src/web/routes.tsx 用 Vite 的 import.meta.glob 发现 src/web/routes/*.routes.tsx，**所以没有任何共享文件需要被第二个域修改** —— 每个域自己建自己那一份路由模块。这是为了从计划上消掉跨域文件冲突，而不是等编码期在门禁里看见。",
+          "dependsOn": [],
+          "coversRequirementIds": [
+            "PAGE-001",
+            "PAGE-003"
+          ],
+          "acceptanceCriteria": [
+            "src/web/routes.tsx 用 import.meta.glob 收集 src/web/routes/*.routes.tsx 并展平成路由表",
+            "目录为空时应用仍能启动并渲染一个占位",
+            "新增一个域的路由模块无需修改 src/web/routes.tsx",
+            "构建产物里被 glob 到的模块都真的打进去了（不是只在 dev 生效）"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "聚合器 + 七个域模块 + 启动冒烟"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/web/routes.tsx",
+              "src/web/__tests__/routes-discovery.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-001",
+          "title": "用户可请求登录验证码",
+          "role": "fullstack",
+          "description": "PAGE-001 的第一步。无密码（DEC-002）。出生年在这里收下并决定账号初始状态 —— 年龄门属于注册（DEC-003 / Q-031），家长同意流程本身归 consent 域。",
+          "dependsOn": [
+            "T-000"
+          ],
+          "coversRequirementIds": [
+            "F009",
+            "PAGE-001",
+            "DEC-002",
+            "DEC-003",
+            "Q-031"
+          ],
+          "acceptanceCriteria": [
+            "填入邮箱点发码后收到 6 位码，响应 expiresInSeconds 为 120",
+            "出生年使账号年龄 <13 时初始状态为 pending_consent",
+            "出生年使账号年龄 ≥13 时初始状态为 active",
+            "出生年按 DEC-016 列级加密存储，只存年份"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/auth/request-code 的请求、响应、错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点 + users/login_codes 两张表 + 年龄门 + PAGE-001 邮箱步 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/auth/request-code.ts",
+              "src/server/auth/age-gate.ts",
+              "src/web/pages/Login.tsx",
+              "src/server/auth/__tests__/age-gate.test.ts",
+              "src/web/routes/auth.routes.tsx"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-002",
+          "title": "验证码正确则建立会话并进入我的对局",
+          "role": "fullstack",
+          "description": "PAGE-001 的第二步。会话是服务端 session cookie（DEC-001）—— 选它是因为 EH006 与 Q-011 都要求账号能被立刻销掉，而 JWT 在过期前撤销不了。",
+          "dependsOn": [
+            "T-001"
+          ],
+          "coversRequirementIds": [
+            "F009",
+            "AC-001",
+            "PAGE-001",
+            "DEC-001"
+          ],
+          "acceptanceCriteria": [
+            "正确的码建立会话并跳转 PAGE-003",
+            "错误或过期的码在 login-error 里显示服务端返回的 code 与 message",
+            "会话 cookie 是 httpOnly + Secure + SameSite=Lax，JS 读不到",
+            "同一个码不能用第二次"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/auth/verify-code 的请求、响应、错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点 + sessions 表 + PAGE-001 验码步 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/auth/verify-code.ts",
+              "src/server/auth/session.ts",
+              "src/server/auth/__tests__/verify-code.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/Login.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-003",
+          "title": "已登录用户可读取自身信息并登出",
+          "role": "fullstack",
+          "description": "GET /api/auth/me 与 POST /api/auth/logout。登出即删 sessions 行 —— DEC-001 选服务端 session 就是为了这种即时失效。",
+          "dependsOn": [
+            "T-001"
+          ],
+          "coversRequirementIds": [
+            "PAGE-001",
+            "DEC-001",
+            "Q-017"
+          ],
+          "acceptanceCriteria": [
+            "已登录时 me 返回 userId/email/status/birthYear",
+            "登出后同一 cookie 再次请求受保护端点返回 401",
+            "会话超过 30 天未活动后失效（滑动过期）"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "两个端点 + 会话中间件 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/auth/me.ts",
+              "src/server/auth/logout.ts",
+              "src/server/auth/__tests__/session.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-004",
+          "title": "匿名发码端点按邮箱与 IP 双维度限流",
+          "role": "backend",
+          "description": "CON-006 / DEC-017。发码类 5 次/小时/邮箱，验证类 10 次/小时/邮箱，两类各再按 IP 限一道。只按邮箱拦不住换邮箱刷，只按 IP 会误伤学校 NAT 出口。",
+          "dependsOn": [
+            "T-001"
+          ],
+          "coversRequirementIds": [
+            "DEC-017",
+            "Q-034"
+          ],
+          "acceptanceCriteria": [
+            "同一邮箱一小时内第 6 次发码被拒，login-rate-limited 可见",
+            "同一 IP 超过阈值后被拒，且错误形状与全站一致（DEC-005）",
+            "限流计数按邮箱与 IP 分别独立生效"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "限流中间件 + 四条 public 写端点接上 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/middleware/rate-limit.ts",
+              "src/server/middleware/__tests__/rate-limit.test.ts"
+            ],
+            "modifies": [
+              "src/server/auth/request-code.ts",
+              "src/server/auth/verify-code.ts"
+            ]
+          }
+        },
+        {
+          "id": "T-005",
+          "title": "不支持的浏览器被导向提示页",
+          "role": "frontend",
+          "description": "EH007 / PAGE-010。浏览器嗅探判定不支持时前端路由强制跳入 /unsupported，站内不放导航入口（.ab/prd.json 的 entry 字段说明了这一点）。",
+          "dependsOn": [
+            "T-000"
+          ],
+          "coversRequirementIds": [
+            "PAGE-010",
+            "AC-001"
+          ],
+          "acceptanceCriteria": [
+            "受支持的浏览器不会进入 /unsupported",
+            "不受支持时进入该页并看到引导改用 Chrome 或 Safari 的文案",
+            "该页不依赖会话，未登录也能渲染"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "嗅探工具 + 路由守卫 + PAGE-010 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/web/pages/Unsupported.tsx",
+              "src/web/lib/browser-support.ts",
+              "src/web/lib/__tests__/browser-support.test.ts"
+            ],
+            "modifies": [
+              "src/web/routes/auth.routes.tsx"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "consent",
+      "name": "家长同意",
+      "tasks": [
+        {
+          "id": "T-101",
+          "title": "不满 13 岁的注册进入家长同意流并发码",
+          "role": "fullstack",
+          "description": "PAGE-002。账号初始状态由 auth 的年龄门定（DEC-003），这个域只负责「已经是 pending_consent 的账号怎么走完家长同意」。码只存哈希（TRD §5）。",
+          "dependsOn": [
+            "T-000",
+            "T-001"
+          ],
+          "coversRequirementIds": [
+            "F009",
+            "AC-008",
+            "PAGE-002",
+            "DEC-003",
+            "Q-031"
+          ],
+          "acceptanceCriteria": [
+            "pending_consent 账号进入 PAGE-002 并可填家长邮箱",
+            "提交家长邮箱后发出 6 位码，响应里 expiresInSeconds 为 120",
+            "未同意前调用任何上传端点返回 403",
+            "parent_consents 里存的是码的哈希，不是明文"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/consent/request 的请求、响应、错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点 + parent_consents 表 + PAGE-002 + 年龄门分支 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/consent/request.ts",
+              "src/web/pages/Consent.tsx",
+              "src/server/consent/__tests__/request.test.ts",
+              "src/web/routes/consent.routes.tsx"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-102",
+          "title": "家长确认同意后账号转为可用",
+          "role": "fullstack",
+          "description": "POST /api/consent/confirm。CON-005：码 6 位、2 分钟过期、一次性。码只存哈希（TRD §5）。",
+          "dependsOn": [
+            "T-101"
+          ],
+          "coversRequirementIds": [
+            "AC-008",
+            "PAGE-002",
+            "CON-005"
+          ],
+          "acceptanceCriteria": [
+            "2 分钟内提交正确码后账号状态转 active 并可上传",
+            "同一个码第二次提交被拒（一次性）",
+            "超过 2 分钟提交返回 expired 且 consent-expired-notice 可见",
+            "parent_consents 里存的是码的哈希，不是明文"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "端点 + 状态转移 WF-01 + PAGE-002 确认态 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/consent/confirm.ts",
+              "src/server/consent/__tests__/confirm.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-103",
+          "title": "验证码过期可重发，旧码立即失效",
+          "role": "fullstack",
+          "description": "EH005 / Q-008。重发使旧码立即失效；用户中途离开则账号挂起在 suspended_awaiting_consent，下次登录可继续或改家长邮箱。",
+          "dependsOn": [
+            "T-102"
+          ],
+          "coversRequirementIds": [
+            "EH005",
+            "AC-008",
+            "Q-008",
+            "CON-005"
+          ],
+          "acceptanceCriteria": [
+            "点击重发后旧码立即不可用，新码 2 分钟有效",
+            "中途离开再登录时回到 PAGE-002 并可重发或改家长邮箱",
+            "consent-suspended-notice 在挂起状态下可见"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "POST /api/consent/resend + 挂起态转移 + PAGE-002 重发按钮 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/consent/resend.ts",
+              "src/server/consent/__tests__/resend.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/Consent.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-104",
+          "title": "家长拒绝后展示文案再硬删账号并留拒绝记录",
+          "role": "fullstack",
+          "description": "EH006 / Q-009。业务数据硬删；另存一条只含家长邮箱哈希与时间戳的 consent_denials，同邮箱不可重注册。",
+          "dependsOn": [
+            "T-102"
+          ],
+          "coversRequirementIds": [
+            "EH006",
+            "Q-009",
+            "DEC-004"
+          ],
+          "acceptanceCriteria": [
+            "拒绝后先展示「家长已拒绝」，之后账号与其全部数据被删除",
+            "consent_denials 里只有邮箱哈希与时间戳，不含任何儿童数据",
+            "同一家长邮箱再次注册时被拒"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "POST /api/consent/decline + 硬删流程 + consent_denials + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/consent/decline.ts",
+              "src/server/consent/delete-account.ts",
+              "src/server/consent/__tests__/decline.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-105",
+          "title": "签发并校验家长撤回同意的签名令牌",
+          "role": "backend",
+          "description": "DEC-004。撤回的主体是家长，而家长在这个系统里没有账号 —— 建家长身份就要再来一套注册与鉴权。签名令牌把「证明你是那个家长」压缩成一个可验证的字符串。",
+          "dependsOn": [
+            "T-104"
+          ],
+          "coversRequirementIds": [
+            "Q-011",
+            "DEC-004"
+          ],
+          "acceptanceCriteria": [
+            "同意邮件里带一个 HMAC 签名且与该 userId 绑定的撤回令牌",
+            "令牌被篡改时校验失败",
+            "令牌使用过一次后不能再用",
+            "属于别的用户的令牌无法撤回本用户的同意"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "令牌签发与校验 + parent_consents.revokeTokenHash + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/consent/revoke-token.ts",
+              "src/server/consent/__tests__/revoke-token.test.ts"
+            ],
+            "modifies": [
+              "src/server/consent/request.ts"
+            ]
+          }
+        },
+        {
+          "id": "T-106",
+          "title": "家长凭撤回链接删除账号",
+          "role": "fullstack",
+          "description": "Q-011 / PAGE-011。无需登录即可打开，确认后走与 EH006 同一条删除流程。",
+          "dependsOn": [
+            "T-105"
+          ],
+          "coversRequirementIds": [
+            "Q-011",
+            "PAGE-011",
+            "EH006"
+          ],
+          "acceptanceCriteria": [
+            "撤回链接在未登录状态下能打开 PAGE-011",
+            "点击确认后账号与其全部数据被删除，revoke-done-notice 可见",
+            "令牌无效或已使用时 revoke-invalid-link 可见且不删任何数据"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "POST /api/consent/revoke + PAGE-011 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/consent/revoke.ts",
+              "src/web/pages/ConsentRevoke.tsx",
+              "src/server/consent/__tests__/revoke.test.ts"
+            ],
+            "modifies": [
+              "src/web/routes/consent.routes.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-107",
+          "title": "同意与删除动作写入审计事件",
+          "role": "backend",
+          "description": "DEC-016。只记同意发出/确认/拒绝/撤回、账号删除、照片删除这六类合规上要举证的动作，且审计行里不含任何儿童数据。",
+          "dependsOn": [
+            "T-106"
+          ],
+          "coversRequirementIds": [
+            "DEC-016",
+            "Q-017"
+          ],
+          "acceptanceCriteria": [
+            "六类动作各写一条 audit_events",
+            "审计行只有 name/subjectId/createdAt，不含姓名、邮箱或出生年",
+            "日志输出里不出现 parent_email、child_name 或验证码"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "审计写入工具 + 六个调用点接上 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/audit/write.ts",
+              "src/server/audit/__tests__/write.test.ts"
+            ],
+            "modifies": [
+              "src/server/consent/confirm.ts",
+              "src/server/consent/decline.ts",
+              "src/server/consent/revoke.ts"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "game",
+      "name": "对局导入与 OCR",
+      "tasks": [
+        {
+          "id": "T-201",
+          "title": "用户可上传记谱纸照片，重复提交不会重跑",
+          "role": "fullstack",
+          "description": "F005 / PAGE-004。上传收客户端生成的 idempotencyKey（DEC-006）—— Q-013 定了 120 秒硬上限，比赛场 4G 下客户端一定会重发，而一次重发意味着重跑一遍 OCR 与 LLM。",
+          "dependsOn": [
+            "T-000",
+            "T-102",
+            "T-502"
+          ],
+          "coversRequirementIds": [
+            "F005",
+            "AC-001",
+            "PAGE-004",
+            "DEC-006"
+          ],
+          "acceptanceCriteria": [
+            "选择照片提交后返回 jobId 并进入 PAGE-005",
+            "同一个 idempotencyKey 重发返回同一个 jobId 而不是新建 job",
+            "同键不同请求体返回 409",
+            "in-flight 的同键请求返回同一个 jobId",
+            "upload-stay-warning 在提交前可见",
+            "该行为发生时通过 src/web/lib/track.ts 上报 photo_uploaded 事件"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/games/photo 的请求、响应、错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "上传端点 + 幂等占位表 + PAGE-004 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/upload.ts",
+              "src/server/lib/idempotency.ts",
+              "src/web/pages/AnalyzeUpload.tsx",
+              "src/server/lib/__tests__/idempotency.test.ts",
+              "src/web/routes/game.routes.tsx"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-202",
+          "title": "进度分阶段推送，且警告在标签页失焦时仍可见",
+          "role": "fullstack",
+          "description": "F007 / PAGE-005 / AC-010。进度走 SSE（DEC-008）。AC-010 是我在规格阶段为 F007 补的那条验收标准 —— 原文这条 P0 一条验收标准都没有。",
+          "dependsOn": [
+            "T-201"
+          ],
+          "coversRequirementIds": [
+            "F007",
+            "AC-010",
+            "PAGE-005",
+            "DEC-008"
+          ],
+          "acceptanceCriteria": [
+            "PAGE-005 依次显示 uploading → prescanning → reconstructing 的阶段推进",
+            "progress-stay-warning 在浏览器标签页失焦时仍然可见",
+            "progress-bar 随阶段推进",
+            "SSE 流的失败形状与全站一致（DEC-005）"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET /api/games/jobs/{jobId}/events 的响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "SSE 端点 + PAGE-005 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/job-events.ts",
+              "src/web/pages/AnalyzeProcessing.tsx",
+              "src/server/game/__tests__/job-events.test.ts"
+            ],
+            "modifies": [
+              "src/web/routes/game.routes.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-203",
+          "title": "可读率低于阈值或不是记谱纸时要求重拍",
+          "role": "fullstack",
+          "description": "EH001 / EH008（Q-005 裁定并入同一状态，只换文案）。阈值 80% 是配置项 VAR-01，不硬编码。",
+          "dependsOn": [
+            "T-201",
+            "T-502"
+          ],
+          "coversRequirementIds": [
+            "EH001",
+            "EH008",
+            "AC-002",
+            "Q-005",
+            "PAGE-004"
+          ],
+          "acceptanceCriteria": [
+            "可读率低于 80% 时停止重建并让 upload-retake-notice 可见",
+            "上传的不是记谱纸时进入同一 retake 状态，但 upload-not-scoresheet-notice 文案不同",
+            "阈值改成 60% 后行为随配置变化，无需改代码",
+            "该行为发生时通过 src/web/lib/track.ts 上报 prescan_failed 事件"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "图像健康检查 + 预扫判定 + 两种文案 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/prescan.ts",
+              "src/server/game/image-sanity.ts",
+              "src/server/game/__tests__/prescan.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/AnalyzeUpload.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-204",
+          "title": "重建对局并列出需要确认的歧义着法",
+          "role": "backend",
+          "description": "F006 / EH002。TRD §4.1 阶段 6 的 beam search：约束到合法着法（后置过滤，Q-027），允许插入/删除修复且修复必须显式上报，绝不静默应用。",
+          "dependsOn": [
+            "T-203"
+          ],
+          "coversRequirementIds": [
+            "F006",
+            "AC-003",
+            "EH002",
+            "Q-027",
+            "CON-003"
+          ],
+          "acceptanceCriteria": [
+            "每个不确定的半步返回带置信度的候选列表",
+            "beam 插入或删除的半步被标成 repair 并出现在歧义列表里",
+            "重建出的着法序列全部通过 chess.js 合法性校验",
+            "一个非法 SAN 不会进入 games.pgn"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET /api/games/jobs/{jobId}/ambiguities 的响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "分割/识别适配器调用 + beam 解码 + 歧义端点 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/reconstruct.ts",
+              "src/server/game/beam.ts",
+              "src/server/game/ambiguities.ts",
+              "src/server/game/__tests__/beam.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-205",
+          "title": "用户确认歧义着法后生成对局",
+          "role": "fullstack",
+          "description": "US-003 / PAGE-006。布局取原型的 ocr 步骤（Q-014）。写操作等响应再改 UI（DEC-015）—— 确认后的下一步直接花钱跑分析，乐观回滚在这里最不能出现。",
+          "dependsOn": [
+            "T-204",
+            "T-502"
+          ],
+          "coversRequirementIds": [
+            "F006",
+            "AC-003",
+            "PAGE-006",
+            "Q-014",
+            "DEC-015"
+          ],
+          "acceptanceCriteria": [
+            "歧义列表逐条可从候选中选择或手工输入 SAN",
+            "全部确认后生成 games 行并进入分析",
+            "确认操作等服务端响应再改界面，不做乐观更新",
+            "服务端拒绝非法 SAN 并在 UI 上给出可操作错误",
+            "该行为发生时通过 src/web/lib/track.ts 上报 moves_confirmed 事件"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "POST /api/games/jobs/{jobId}/confirmations + PAGE-006 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/confirmations.ts",
+              "src/web/pages/AnalyzeConfirm.tsx",
+              "src/server/game/__tests__/confirmations.test.ts"
+            ],
+            "modifies": [
+              "src/web/routes/game.routes.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-206",
+          "title": "离开页面导致扫描丢失，返回时看到明确提示",
+          "role": "fullstack",
+          "description": "EH004 / DEC-008。SSE 断线即放弃该 job，v1 不做续跑（PRD 明确 out of scope）。beforeunload 触发浏览器自带的离开确认。",
+          "dependsOn": [
+            "T-201"
+          ],
+          "coversRequirementIds": [
+            "EH004",
+            "F007",
+            "DEC-008",
+            "PAGE-005"
+          ],
+          "acceptanceCriteria": [
+            "SSE 断线后 job 转入 abandoned",
+            "用户返回时 GET /api/games/jobs/{jobId} 返回 abandoned 且 progress-abandoned-notice 可见",
+            "分析进行中关闭标签页会触发浏览器的离开确认对话框"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "断线检测 + abandoned 转移 + beforeunload + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/abandon.ts",
+              "src/web/hooks/useStayOnTab.ts",
+              "src/server/game/__tests__/abandon.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/AnalyzeProcessing.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-207",
+          "title": "我的对局列表按 cursor 分页",
+          "role": "fullstack",
+          "description": "PAGE-003 / DEC-007。列表按时间倒序，而用户会一边翻页一边上传新对局 —— offset 在这种写入并发下会漏条和重条。",
+          "dependsOn": [
+            "T-201"
+          ],
+          "coversRequirementIds": [
+            "PAGE-003",
+            "DEC-007"
+          ],
+          "acceptanceCriteria": [
+            "首屏返回一页并给出 nextCursor",
+            "翻页期间新增一条对局不会导致漏条或重条",
+            "零对局时 dashboard-empty-state 可见",
+            "dashboard-load-more-btn 在没有下一页时消失"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "GET /api/games + (createdAt,id) 索引 + PAGE-003 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/list.ts",
+              "src/web/pages/Dashboard.tsx",
+              "src/server/game/__tests__/list-pagination.test.ts"
+            ],
+            "modifies": [
+              "src/web/routes/game.routes.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-208",
+          "title": "照片在分析完成后立即删除，并有生命周期兜底",
+          "role": "backend",
+          "description": "CON-004。PRD 的 In Scope 明确「Uploaded notation photos deleted after analysis」，Out of Scope 明确不留作训练。deletedAt 是举证点。",
+          "dependsOn": [
+            "T-107",
+            "T-205"
+          ],
+          "coversRequirementIds": [
+            "CON-004",
+            "DEC-016"
+          ],
+          "acceptanceCriteria": [
+            "分析完成后 photo_objects.deletedAt 被写入且对象存储里的对象不存在",
+            "S3 lifecycle 规则为 24 小时，作为删除失败时的兜底",
+            "games 行里不留任何照片引用"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "删除钩子 + lifecycle 配置 + 审计事件 + 聚焦测试"
+            },
+            {
+              "action": "复用",
+              "detail": "审计写入走 consent 域 T-106 建好的 src/server/audit/write.ts，不在本域另写一份"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/delete-photo.ts",
+              "infra/s3-lifecycle.json",
+              "src/server/game/__tests__/delete-photo.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-209",
+          "title": "上传慢时改文案而不是提前失败",
+          "role": "fullstack",
+          "description": "Q-013 / CON-001。20–30 秒是目标不是契约：超 30 秒只改进度屏文案，硬上限 120 秒才判失败。F007 已要求用户守在页面上，提前弄挂等于让他白守。",
+          "dependsOn": [
+            "T-201"
+          ],
+          "coversRequirementIds": [
+            "Q-013",
+            "CON-001",
+            "PAGE-005"
+          ],
+          "acceptanceCriteria": [
+            "超过 30 秒时 progress-slow-network-notice 可见且流程继续",
+            "超过 120 秒才返回 timeout 失败",
+            "失败形状与全站一致（DEC-005）"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "超时分档 + 进度屏文案切换 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/game/timeouts.ts",
+              "src/server/game/__tests__/timeouts.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/AnalyzeProcessing.tsx"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "analysis",
+      "name": "引擎分析与解释",
+      "tasks": [
+        {
+          "id": "T-301",
+          "title": "引擎先浅层快跑再加深，逐步产出评估",
+          "role": "backend",
+          "description": "TRD §4.2 的两趟设计：先浅层快跑拿到全局评估，再加深到目标深度。Stockfish 跑服务端（DEC-009）—— 学校 Chromebook 上 WASM 引擎又慢又耗电，而分类必须可复现，设备异构做不到。",
+          "dependsOn": [
+            "T-205",
+            "T-000"
+          ],
+          "coversRequirementIds": [
+            "F001",
+            "DEC-009",
+            "CON-002"
+          ],
+          "acceptanceCriteria": [
+            "确认对局后启动分析并返回 analysisId 与 status analyzing",
+            "浅层快跑先给出全局评估，随后加深到目标深度",
+            "引擎在服务端运行，浏览器不下载引擎",
+            "同一个 idempotencyKey 重发不会启动第二次分析"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/games/{gameId}/analysis 的请求、响应、错误形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "引擎 worker 池 + 两趟评估 + analysis_reports 写入 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/analysis/start.ts",
+              "src/server/analysis/engine.ts",
+              "src/server/analysis/__tests__/engine-passes.test.ts",
+              "src/web/routes/analysis.routes.tsx"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-302",
+          "title": "首条解释在 5 秒内出现，其余流式补",
+          "role": "fullstack",
+          "description": "F002 / US-004 / CON-002。第一个失误（没有失误则第 1 步）立刻送 LLM，其余解释流式补，未完成的显示加载态。首条走 Haiku 4.5 保延迟（Q-028）。",
+          "dependsOn": [
+            "T-301",
+            "T-502"
+          ],
+          "coversRequirementIds": [
+            "F002",
+            "AC-004",
+            "CON-002",
+            "Q-028",
+            "PAGE-007"
+          ],
+          "acceptanceCriteria": [
+            "确认着法后 5 秒内 report-move-explanation 出现至少一条",
+            "尚未完成的着法显示 report-move-explanation-loading",
+            "SSE 流按 move / summary / done / failed 四种事件推送",
+            "该行为发生时通过 src/web/lib/track.ts 上报 analysis_completed 事件"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "GET /api/analysis/{analysisId}/events 的响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "首条解释快路 + SSE 流 + 加载态 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/analysis/explain.ts",
+              "src/server/analysis/events.ts",
+              "src/server/analysis/__tests__/first-explanation.test.ts"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-303",
+          "title": "九档着法分类逐步渲染，且不只靠颜色区分",
+          "role": "fullstack",
+          "description": "F001 / PAGE-007 / Q-016。分类阈值按 TRD §4.2 那张表起步。WCAG 2.1 AA 要求颜色之外有第二重编码 —— 符号表在 UI_CONTRACT.md，Good 与 Miss 无符号所以 aria-label 必须带完整分类名。",
+          "dependsOn": [
+            "T-301",
+            "T-502"
+          ],
+          "coversRequirementIds": [
+            "F001",
+            "AC-004",
+            "PAGE-007",
+            "Q-016"
+          ],
+          "acceptanceCriteria": [
+            "每一步渲染出九档之一的分类，取值来自 centipawn loss 分档",
+            "report-move-class-badge 除颜色外带符号或文字，Good 与 Miss 的 aria-label 含完整分类名",
+            "点击 report-move-row 展开该步解释",
+            "键盘可遍历整个着法列表且焦点可见",
+            "GameReport 页从一开始就渲染评分弹层的挂点，由 review 域填充（避免跨域改同一文件）",
+            "该行为发生时通过 src/web/lib/track.ts 上报 report_viewed 事件"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "分类器 + 着法列表组件 + 无障碍标注 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/analysis/classify.ts",
+              "src/web/components/MoveList.tsx",
+              "src/web/pages/GameReport.tsx",
+              "src/server/analysis/__tests__/classify.test.ts"
+            ],
+            "modifies": [
+              "src/web/routes/analysis.routes.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-304",
+          "title": "报告顶部给出战略失误与败因摘要",
+          "role": "fullstack",
+          "description": "F003 / AC-005。PRD 的产品目标明确要求「Summarize strategic mistakes and why you lost this game at the top of every game analysis」。摘要是一次 LLM 调用（TRD §4.2）。",
+          "dependsOn": [
+            "T-303"
+          ],
+          "coversRequirementIds": [
+            "F003",
+            "AC-005",
+            "PAGE-007"
+          ],
+          "acceptanceCriteria": [
+            "report-summary-strategic 出现在报告顶部而不是底部",
+            "报告含关键转折点、复发主题与整体准确率三项",
+            "准确率是数值且与逐步分类一致"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "摘要 LLM 调用 + 报告头部组件 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/analysis/summarize.ts",
+              "src/web/components/ReportSummary.tsx",
+              "src/server/analysis/__tests__/summarize.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/GameReport.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-305",
+          "title": "引擎崩溃重试一次，仍失败则出局部报告",
+          "role": "fullstack",
+          "description": "EH003 / Q-007。横幅要量化到「前 N 步已分析，第 N+1 步起缺失」—— 只说「部分失败」用户判断不了还能不能用。",
+          "dependsOn": [
+            "T-301"
+          ],
+          "coversRequirementIds": [
+            "EH003",
+            "Q-007",
+            "PAGE-007"
+          ],
+          "acceptanceCriteria": [
+            "引擎崩溃时自动重试一次",
+            "重试仍失败时返回 status partial 且带 analysedThroughPly",
+            "report-partial-banner 文案里含已分析到第几步",
+            "未分析的步在着法表里置灰",
+            "report-retry-btn 可重新发起分析",
+            "POST /api/analysis/{analysisId}/retry 可重新发起分析，同一 idempotencyKey 不会启动第二次"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "重试与降级 + 局部报告横幅 + 重试端点 + 聚焦测试"
+            },
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/analysis/{analysisId}/retry 的请求、响应、错误形状（幂等键同 DEC-006）"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/analysis/retry.ts",
+              "src/web/components/PartialBanner.tsx",
+              "src/server/analysis/__tests__/retry.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/GameReport.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-306",
+          "title": "学习推荐只走白名单，宁可为空也不给未审链接",
+          "role": "fullstack",
+          "description": "F004 / DEC-010 / CON-007。这些链接直接展示给儿童，而它们由 LLM 从搜索结果里挑出来 —— 属于「模型输出当敌意」那条边界。白名单存配置表，加一家不用发版。",
+          "dependsOn": [
+            "T-304"
+          ],
+          "coversRequirementIds": [
+            "F004",
+            "AC-006",
+            "DEC-010",
+            "CON-007",
+            "Q-032",
+            "PAGE-007"
+          ],
+          "acceptanceCriteria": [
+            "写入 study_recommendations 的每条 url 域名都在白名单内",
+            "youtube.com 的链接额外校验频道在频道白名单内",
+            "非 https 的链接被拒",
+            "全部候选都不中白名单时推荐列表为空且 report-study-empty 可见，绝不回退开放网络结果",
+            "推荐挂在触发它的那一步上"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "概念标签聚合 + 搜索调用 + 白名单三道校验 + 推荐列表 UI + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/analysis/recommend.ts",
+              "src/server/analysis/allowlist.ts",
+              "src/web/components/StudyList.tsx",
+              "src/server/analysis/__tests__/allowlist.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/GameReport.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-307",
+          "title": "报告钉死引擎版本与深度，旧报告可复现",
+          "role": "backend",
+          "description": "CON-008。同一局两次分析必须给同一个结论 —— 这也是 DEC-009 选服务端引擎的理由之一。",
+          "dependsOn": [
+            "T-301"
+          ],
+          "coversRequirementIds": [
+            "CON-008",
+            "DEC-009"
+          ],
+          "acceptanceCriteria": [
+            "每份 analysis_reports 记录 engineVersion 与 depth",
+            "同一局在同一 engineVersion 与 depth 下重复分析给出相同分类",
+            "engineVersion 是钉死的具体版本而不是 latest"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "版本钉死 + 报告字段写入 + 复现性聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/analysis/engine-version.ts",
+              "src/server/analysis/__tests__/reproducible.test.ts"
+            ],
+            "modifies": [
+              "src/server/analysis/start.ts"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "prep",
+      "name": "对手准备",
+      "tasks": [
+        {
+          "id": "T-401",
+          "title": "按官方评分源解析对手身份，评分匹配含历史评分",
+          "role": "backend",
+          "description": "F008 / DEC-012。PRD 明确要求「只知道旧评分也要能认出人」，这条规则只有评分源的历史能满足。uschess 走 MSA 爬虫，FIDE 优先吃月度 XML dump 而不是实时爬（CON-009）。",
+          "dependsOn": [
+            "T-000",
+            "T-002"
+          ],
+          "coversRequirementIds": [
+            "F008",
+            "AC-007",
+            "DEC-012",
+            "Q-010"
+          ],
+          "acceptanceCriteria": [
+            "用户给的评分等于当前评分或历史里任一个评分时算命中",
+            "两个源都通过同一个 RatedPlayer 形状返回，加第三个源不用改调用方",
+            "姓名必填而评分与联合会留空时仍可检索（Q-001）",
+            "抓取带真实 User-Agent、遵守 robots.txt、不登录任何站点"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/opponents/search 的请求与响应形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "uschess 与 FIDE 两个适配器 + rating_lookup_cache + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/prep/uschess.ts",
+              "src/server/prep/fide.ts",
+              "src/server/prep/resolve-identity.ts",
+              "src/server/prep/__tests__/rating-history.test.ts",
+              "src/web/routes/prep.routes.tsx"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-402",
+          "title": "同名多人时列出候选让用户消歧",
+          "role": "fullstack",
+          "description": "EH009 / Q-006 / PAGE-009。Q-001 定了评分选填，所以这条路径会常走到 —— 它不是边缘情况。渲染在 PAGE-009 已有的 disambiguation 态，不新增页面。",
+          "dependsOn": [
+            "T-401"
+          ],
+          "coversRequirementIds": [
+            "EH009",
+            "Q-006",
+            "PAGE-009",
+            "AC-007"
+          ],
+          "acceptanceCriteria": [
+            "多个可能匹配时返回 status ambiguous 与候选列表",
+            "每个候选带评分、联合会、最近活动与来源链接",
+            "候选超过 N 条时回退到「请补充评分或联合会」",
+            "用户选定候选后继续检索该人的棋局"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "消歧分支 + PAGE-009 候选列表 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/prep/disambiguate.ts",
+              "src/web/pages/OpponentPrep.tsx",
+              "src/server/prep/__tests__/disambiguate.test.ts"
+            ],
+            "modifies": [
+              "src/web/routes/prep.routes.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-403",
+          "title": "找到公开棋局并聚合开局倾向与准备变例",
+          "role": "fullstack",
+          "description": "US-007 / AC-007。身份解析之后才找棋局（DEC-012 的顺序）。v1 只接 Lichess 与 Chess.com 两个棋局来源（Q-010）。",
+          "dependsOn": [
+            "T-402"
+          ],
+          "coversRequirementIds": [
+            "F008",
+            "AC-007",
+            "US-007",
+            "PAGE-009",
+            "Q-010"
+          ],
+          "acceptanceCriteria": [
+            "返回执白与执黑各自的开局分布（含局数与胜率）",
+            "返回 2 到 3 条建议准备变例",
+            "prep-openings-white 与 prep-openings-black 在页面上可见",
+            "同名但评分相差很大的在线账号不被当成同一个人",
+            "GET /api/opponents/reports/{reportId} 返回已聚合的报告，过期后重新抓取"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "Lichess 与 Chess.com 适配器 + 聚合与 LLM 生成变例 + PAGE-009 结果区 + 聚焦测试"
+            },
+            {
+              "action": "对齐契约",
+              "detail": "GET /api/opponents/reports/{reportId} 的响应形状（含 sourcesQueried 与 expiresAt）"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/prep/lichess.ts",
+              "src/server/prep/chesscom.ts",
+              "src/server/prep/aggregate.ts",
+              "src/server/prep/__tests__/aggregate.test.ts"
+            ],
+            "modifies": [
+              "src/web/pages/OpponentPrep.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-404",
+          "title": "姓名与评分与联合会全不匹配时报无信息，不猜",
+          "role": "fullstack",
+          "description": "F008 明确要求「If there is no information matching the name and rating and federation, the ai reports there is no information」。猜一个人比说不知道贵得多。",
+          "dependsOn": [
+            "T-401"
+          ],
+          "coversRequirementIds": [
+            "F008",
+            "AC-007",
+            "PAGE-009"
+          ],
+          "acceptanceCriteria": [
+            "全不匹配时返回 status no_information 与空 matches，而不是报错",
+            "prep-no-information 可见且不展示任何猜测出的档案",
+            "不因为姓名部分相似就返回候选"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "无结果分支 + PAGE-009 空态 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/prep/__tests__/no-information.test.ts"
+            ],
+            "modifies": [
+              "src/server/prep/resolve-identity.ts",
+              "src/web/pages/OpponentPrep.tsx"
+            ]
+          }
+        },
+        {
+          "id": "T-405",
+          "title": "外部源统一退避重试，单源失败降级并标明哪个源没到",
+          "role": "backend",
+          "description": "DEC-011 / CON-009。沉默的缺失会被用户当成「这个人没有公开棋局」—— 所以哪个源没到必须进响应。缓存 7 天避免重复抓取。",
+          "dependsOn": [
+            "T-403"
+          ],
+          "coversRequirementIds": [
+            "DEC-011",
+            "CON-009",
+            "Q-018"
+          ],
+          "acceptanceCriteria": [
+            "所有外部调用最多 3 次指数退避，只重试幂等 GET 与 5xx/429",
+            "单个源失败时返回部分结果并在 sourcesQueried 里标出该源 ok 为 false",
+            "prep-sources-queried 在页面上列出每个源的状态",
+            "评分查询与对手报告缓存 7 天"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "统一 HTTP 客户端 + 降级聚合 + 缓存 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/lib/external-client.ts",
+              "src/server/prep/cache.ts",
+              "src/server/lib/__tests__/external-client.test.ts"
+            ],
+            "modifies": [
+              "src/server/prep/aggregate.ts",
+              "src/web/pages/OpponentPrep.tsx"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "name": "指标采集",
+      "tasks": [
+        {
+          "id": "T-501",
+          "title": "比赛局数填写页写入主指标的分母",
+          "role": "fullstack",
+          "description": "PAGE-008。主成功指标是「分析报告查看数 ÷ 自报局数」，分母完全靠这个页面的自报值。（从报告页跳到本页的那个入口由 analysis 域自己的任务负责，本域不改别域的页面）",
+          "dependsOn": [
+            "T-000",
+            "T-003"
+          ],
+          "coversRequirementIds": [
+            "PAGE-008",
+            "AC-005"
+          ],
+          "acceptanceCriteria": [
+            "提交局数后写入 tournament_checkins 并回到 PAGE-003",
+            "checkin-games-played-input 只接受正整数",
+            "同一时间段重复提交更新而不是新增",
+            "提交时上报 tournament_count_submitted 事件"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/metrics/tournament-checkin 的形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "端点 + PAGE-008 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/metrics/checkin.ts",
+              "src/web/pages/TournamentCheckin.tsx",
+              "src/server/metrics/__tests__/checkin.test.ts",
+              "src/web/routes/metrics.routes.tsx"
+            ],
+            "modifies": []
+          }
+        },
+        {
+          "id": "T-502",
+          "title": "六个埋点事件写入自建表，不接第三方分析",
+          "role": "fullstack",
+          "description": "Q-022。本域只拥有上报端点、上报库与指标查询。六个事件各自的触发点由**拥有那个页面的域**在自己的任务里接上 —— 否则 metrics 要改 game 与 analysis 的页面文件，那是跨域文件冲突。",
+          "dependsOn": [
+            "T-003"
+          ],
+          "coversRequirementIds": [
+            "Q-022",
+            "AC-005"
+          ],
+          "acceptanceCriteria": [
+            "POST /api/metrics/events 接受六个事件名，其余名字返回 400",
+            "事件写入 metric_events，properties 里不含儿童姓名或家长邮箱",
+            "主指标可由 report_viewed 去重计数除以 tournament_count_submitted 算出",
+            "代码里不存在任何第三方分析 SDK"
+          ],
+          "subSteps": [
+            {
+              "action": "垂直切片",
+              "detail": "POST /api/metrics/events + 六个上报点 + 指标查询 + 聚焦测试"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/metrics/events.ts",
+              "src/web/lib/track.ts",
+              "src/server/metrics/__tests__/events.test.ts"
+            ],
+            "modifies": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "name": "站内评分",
+      "tasks": [
+        {
+          "id": "T-601",
+          "title": "看完报告后弹出站内评分，30 天内不再弹",
+          "role": "fullstack",
+          "description": "F010 / AC-009 / Q-002。v1 是纯 Web 应用没有应用商店，所以星级只能自己收。写操作等响应再改 UI（DEC-015）。",
+          "dependsOn": [
+            "T-000",
+            "T-303"
+          ],
+          "coversRequirementIds": [
+            "F010",
+            "AC-009",
+            "PAGE-007",
+            "Q-002",
+            "DEC-015"
+          ],
+          "acceptanceCriteria": [
+            "看完一份分析报告后 report-review-prompt 首次弹出",
+            "提交或关闭后 30 天内不再弹出",
+            "GET /api/reviews/eligibility 返回 shouldPrompt 与 nextEligibleAt",
+            "stars 只接受 1 到 5 的整数",
+            "提交等服务端响应再改界面"
+          ],
+          "subSteps": [
+            {
+              "action": "对齐契约",
+              "detail": "POST /api/reviews 与 GET /api/reviews/eligibility 的形状"
+            },
+            {
+              "action": "垂直切片",
+              "detail": "两个端点 + reviews 表 + 弹层组件 + 冷却判定 + 聚焦测试"
+            },
+            {
+              "action": "挂点",
+              "detail": "挂进 analysis 域 T-302 预留的挂点，不改 GameReport.tsx"
+            }
+          ],
+          "files": {
+            "creates": [
+              "src/server/review/create.ts",
+              "src/server/review/eligibility.ts",
+              "src/web/components/ReviewPrompt.tsx",
+              "src/server/review/__tests__/cooldown.test.ts",
+              "src/web/routes/review.routes.tsx"
+            ],
+            "modifies": []
+          }
+        }
+      ]
+    }
+  ]
+}

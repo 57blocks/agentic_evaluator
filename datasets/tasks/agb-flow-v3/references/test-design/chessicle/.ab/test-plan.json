@@ -1,0 +1,334 @@
+{
+  "cases": [
+    {
+      "id": "AT-001",
+      "covers": [
+        "AC-001"
+      ],
+      "level": "unit",
+      "title": "可读率 80% 恰好达标 → 继续重建；79% → 不继续"
+    },
+    {
+      "id": "AT-002",
+      "covers": [
+        "AC-001"
+      ],
+      "level": "integration",
+      "title": "预扫通过后 job 转入 reconstructing，未通过则不写任何 games 行"
+    },
+    {
+      "id": "AT-003",
+      "covers": [
+        "AC-002"
+      ],
+      "level": "unit",
+      "title": "可读率低于阈值时失败码是 prescan_failed，不是通用错误"
+    },
+    {
+      "id": "AT-004",
+      "covers": [
+        "AC-002"
+      ],
+      "level": "e2e",
+      "title": "上传低可读率照片后 upload-retake-notice 出现，且提示改善光线"
+    },
+    {
+      "id": "AT-005",
+      "covers": [
+        "AC-003"
+      ],
+      "level": "unit",
+      "title": "低置信半步被标为歧义并给出按置信度排序的候选"
+    },
+    {
+      "id": "AT-006",
+      "covers": [
+        "AC-003"
+      ],
+      "level": "unit",
+      "title": "beam 插入或删除的半步带 repair 标记，绝不静默应用"
+    },
+    {
+      "id": "AT-007",
+      "covers": [
+        "AC-003"
+      ],
+      "level": "integration",
+      "title": "GET ambiguities 只返回未解决的半步，已确认的不再出现"
+    },
+    {
+      "id": "AT-008",
+      "covers": [
+        "AC-003"
+      ],
+      "level": "e2e",
+      "title": "歧义列表里选一个候选后 confirm-submit-btn 可提交并进入分析"
+    },
+    {
+      "id": "AT-009",
+      "covers": [
+        "AC-003"
+      ],
+      "level": "unit",
+      "title": "重建出的着法序列全部通过合法性校验，非法 SAN 不进 pgn"
+    },
+    {
+      "id": "AT-010",
+      "covers": [
+        "AC-004"
+      ],
+      "level": "integration",
+      "title": "确认着法后 5 秒内 SSE 流里至少出现一条 move 解释"
+    },
+    {
+      "id": "AT-011",
+      "covers": [
+        "AC-004"
+      ],
+      "level": "e2e",
+      "title": "未完成的着法显示 report-move-explanation-loading，完成后被替换"
+    },
+    {
+      "id": "AT-012",
+      "covers": [
+        "AC-005"
+      ],
+      "level": "unit",
+      "title": "摘要聚合出关键转折点、复发主题与整体准确率三项"
+    },
+    {
+      "id": "AT-013",
+      "covers": [
+        "AC-005"
+      ],
+      "level": "e2e",
+      "title": "report-summary-strategic 在着法列表之前渲染，不在报告底部"
+    },
+    {
+      "id": "AT-014",
+      "covers": [
+        "AC-006"
+      ],
+      "level": "unit",
+      "title": "推荐挂在触发它的那一步上，不是笼统挂在整局"
+    },
+    {
+      "id": "AT-015",
+      "covers": [
+        "AC-006"
+      ],
+      "level": "unit",
+      "title": "白名单外域名被丢弃；全部不中时推荐为空，不回退开放网络结果"
+    },
+    {
+      "id": "AT-016",
+      "covers": [
+        "AC-006"
+      ],
+      "level": "unit",
+      "title": "youtube.com 链接的频道不在频道白名单内时被丢弃"
+    },
+    {
+      "id": "AT-017",
+      "covers": [
+        "AC-006"
+      ],
+      "level": "unit",
+      "title": "非 https 的推荐链接被拒"
+    },
+    {
+      "id": "AT-018",
+      "covers": [
+        "AC-007"
+      ],
+      "level": "unit",
+      "title": "用户给的评分等于历史里任一个评分时算命中，不只比当前评分"
+    },
+    {
+      "id": "AT-019",
+      "covers": [
+        "AC-007"
+      ],
+      "level": "integration",
+      "title": "解析到人之后才检索棋局，返回执白与执黑的开局分布与准备变例"
+    },
+    {
+      "id": "AT-020",
+      "covers": [
+        "AC-007"
+      ],
+      "level": "integration",
+      "title": "姓名与评分与联合会全不匹配时返回 no_information，不返回猜测档案"
+    },
+    {
+      "id": "AT-021",
+      "covers": [
+        "AC-007"
+      ],
+      "level": "e2e",
+      "title": "留空评分也能提交检索；同名多人时 prep-candidate-list 出现"
+    },
+    {
+      "id": "AT-022",
+      "covers": [
+        "AC-008"
+      ],
+      "level": "unit",
+      "title": "家长验证码 121 秒后过期；同一个码第二次校验失败"
+    },
+    {
+      "id": "AT-023",
+      "covers": [
+        "AC-008"
+      ],
+      "level": "integration",
+      "title": "重发后旧码立即失效，新码 2 分钟有效"
+    },
+    {
+      "id": "AT-024",
+      "covers": [
+        "AC-008"
+      ],
+      "level": "integration",
+      "title": "同一邮箱一小时内第 6 次发码被拒；按 IP 另有一道独立计数"
+    },
+    {
+      "id": "AT-025",
+      "covers": [
+        "AC-008"
+      ],
+      "level": "e2e",
+      "title": "不满 13 岁注册后进入 consent 屏，家长确认后账号可上传"
+    },
+    {
+      "id": "AT-026",
+      "covers": [
+        "AC-008"
+      ],
+      "level": "unit",
+      "title": "不满 13 岁初始状态是 pending_consent；13 岁及以上直接是 active"
+    },
+    {
+      "id": "AT-027",
+      "covers": [
+        "AC-009"
+      ],
+      "level": "unit",
+      "title": "距上次评分弹层不足 30 天时 shouldPrompt 为 false"
+    },
+    {
+      "id": "AT-028",
+      "covers": [
+        "AC-009"
+      ],
+      "level": "e2e",
+      "title": "看完报告后 report-review-prompt 弹出，提交后当次不再弹"
+    },
+    {
+      "id": "AT-029",
+      "covers": [
+        "AC-009"
+      ],
+      "level": "unit",
+      "title": "stars 只接受 1 到 5 的整数，0 与 6 被拒"
+    },
+    {
+      "id": "AT-030",
+      "covers": [
+        "AC-010"
+      ],
+      "level": "e2e",
+      "title": "标签页失焦时 progress-stay-warning 仍然可见"
+    },
+    {
+      "id": "AT-031",
+      "covers": [
+        "AC-010"
+      ],
+      "level": "integration",
+      "title": "上传超过 30 秒只切换文案且流程继续；超过 120 秒才返回 timeout"
+    },
+    {
+      "id": "AT-032",
+      "covers": [
+        "AC-011"
+      ],
+      "level": "integration",
+      "title": "分析完成后 photo_objects.deletedAt 被写入，且对象存储里取不到该对象"
+    },
+    {
+      "id": "AT-033",
+      "covers": [
+        "AC-011"
+      ],
+      "level": "integration",
+      "title": "照片删除写一条 photo_deleted 审计事件，且该事件不含儿童数据"
+    },
+    {
+      "id": "AT-034",
+      "covers": [
+        "AC-012"
+      ],
+      "level": "unit",
+      "title": "同一局在同一 engineVersion 与 depth 下重复分析给出相同的逐步分类"
+    },
+    {
+      "id": "AT-035",
+      "covers": [
+        "AC-012"
+      ],
+      "level": "unit",
+      "title": "engineVersion 是钉死的具体版本，不是 latest 之类的浮动标识"
+    },
+    {
+      "id": "AT-036",
+      "covers": [
+        "AC-013"
+      ],
+      "level": "integration",
+      "title": "一个源失败时报告仍返回部分结果，sourcesQueried 里该源 ok 为 false"
+    },
+    {
+      "id": "AT-037",
+      "covers": [
+        "AC-013"
+      ],
+      "level": "e2e",
+      "title": "prep-sources-queried 列出每个源的状态，失败的那个可被看见"
+    },
+    {
+      "id": "AT-038",
+      "covers": [],
+      "level": "unit",
+      "title": "外部调用最多重试 3 次且只重试幂等 GET 与 5xx/429"
+    },
+    {
+      "id": "AT-039",
+      "covers": [],
+      "level": "integration",
+      "title": "同一 idempotencyKey 重发返回同一 jobId；同键不同请求体返回 409"
+    },
+    {
+      "id": "AT-040",
+      "covers": [],
+      "level": "unit",
+      "title": "错误响应全站一种形状：HTTP 状态 + { code, message }，不含堆栈"
+    },
+    {
+      "id": "AT-041",
+      "covers": [],
+      "level": "unit",
+      "title": "OCR 准确率度量在标注夹具集上算出三个数：每半步准确率、整局零干预率、每局平均点击数"
+    }
+  ],
+  "_red": {
+    "observedAt": "2026-09-10",
+    "command": "pnpm test（聚焦：vitest run <路径>）",
+    "runner": "vitest 2.1.9",
+    "result": "15 个用例文件全部失败，0 个通过",
+    "reason": "全部因目标模块尚未创建而失败（Failed to load url ../../src/server/…）",
+    "strength": "这是正确的红，但比「N 条断言失败」弱一档：断言还没执行过。编码期每个任务建出模块之后，同一批用例会在**行为**上再红一次，那一次才是断言级的红。不要把这一次记成更强的证据。",
+    "notE2E": "计划里 9 条 e2e 在 RED 阶段跑不起来（要起服务与真实 testid），所以每条 AC 都另有至少一条 unit 或 integration 用例现在就能跑红。",
+    "planGapFound": "RED 的附带产出：自查「测试引用的模块有没有任务承诺创建」时翻出两处任务计划缺口 —— src/server/lib/errors.ts（DEC-005 全站错误形状，17 条决策里唯一没有任务负责的一条）与 src/server/game/accuracy.ts（CON-003 的度量）。已补 T-006 与 T-210。"
+  }
+}

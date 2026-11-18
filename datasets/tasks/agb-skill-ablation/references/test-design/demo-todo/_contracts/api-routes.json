@@ -1,0 +1,84 @@
+{
+  "endpoints": [
+    {
+      "method": "GET",
+      "endpoint": "/api/members",
+      "domain": "member",
+      "auth": "public",
+      "audience": "user",
+      "prdJustification": "PAGE-004 成员列表；PAGE-001 IC-01 当前成员下拉与 IC-03 负责人筛选下拉；PAGE-002 IC-10 负责人下拉的选项来源（AC-04）",
+      "requestSchema": "none",
+      "responseSchema": "{ members: { id: string; name: string }[] }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/members",
+      "domain": "member",
+      "auth": "public",
+      "audience": "user",
+      "prdJustification": "PAGE-004 IC-19 添加成员；AC-12 重名时不增加名册条数",
+      "requestSchema": "{ name: string }",
+      "responseSchema": "{ id: string; name: string }"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/api/members/:memberId",
+      "domain": "member",
+      "auth": "public",
+      "audience": "user",
+      "prdJustification": "PAGE-004 IC-20 移除成员；AC-13 移除后其名下任务负责人变为未分配",
+      "requestSchema": "none",
+      "responseSchema": "{ id: string }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/tasks",
+      "domain": "task",
+      "auth": "public",
+      "audience": "user",
+      "prdJustification": "PAGE-001 任务看板全量加载；IC-03/IC-04 均为客户端本地过滤，不触发重新请求；RULE-01 工作量统计基于此列表聚合",
+      "requestSchema": "none",
+      "responseSchema": "{ tasks: { id: string; title: string; description: string; assigneeId: string | null; status: \"todo\" | \"in_progress\" | \"done\" }[] }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/tasks",
+      "domain": "task",
+      "auth": "public",
+      "audience": "user",
+      "prdJustification": "PAGE-002 IC-11 创建任务；AC-01/AC-02/AC-03",
+      "requestSchema": "{ title: string; description?: string; assigneeId?: string | null }",
+      "responseSchema": "{ id: string; title: string; description: string; assigneeId: string | null; status: \"todo\" }"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/tasks/:taskId",
+      "domain": "task",
+      "auth": "public",
+      "audience": "user",
+      "prdJustification": "PAGE-003 任务详情加载；taskId 不存在时对应 error 态（「任务不存在」）",
+      "requestSchema": "none",
+      "responseSchema": "{ id: string; title: string; description: string; assigneeId: string | null; status: \"todo\" | \"in_progress\" | \"done\" }"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/tasks/:taskId",
+      "domain": "task",
+      "auth": "public",
+      "audience": "user",
+      "prdJustification": "PAGE-003 IC-13 标题内联保存、IC-14 描述内联保存、IC-15 负责人改派；AC-05 改派后工作量联动",
+      "requestSchema": "{ title?: string; description?: string; assigneeId?: string | null }",
+      "responseSchema": "{ id: string; title: string; description: string; assigneeId: string | null; status: \"todo\" | \"in_progress\" | \"done\" }"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/tasks/:taskId/transitions",
+      "domain": "task",
+      "auth": "public",
+      "audience": "user",
+      "prdJustification": "PAGE-001 IC-06 卡片状态推进；PAGE-003 IC-16 状态转移按钮组；WF-01 状态机；AC-06/AC-07",
+      "requestSchema": "{ to: \"todo\" | \"in_progress\" | \"done\" }",
+      "responseSchema": "{ id: string; status: \"todo\" | \"in_progress\" | \"done\" }"
+    }
+  ]
+}

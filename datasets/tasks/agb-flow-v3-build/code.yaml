@@ -1,0 +1,94 @@
+# agb-flow v3, agb stage 5 (code) as one step, the way agb names it: opus and
+# sonnet through agb on both projects (demo-todo, invoice). Same builds as
+# spec.yaml (build-demo-todo / build-invoice), regrouped by agb stage. The
+# agb-vs-bare-claude comparison is not an agb stage: it stays in spec.yaml's
+# build-demo-todo step and its own report.
+#
+# Implementation: build the whole project from its adopted plan
+# with the latest agb (57blocks/agb 0a8c4ee7). All three projects measure as
+# small (under 80,000 source tokens), so agb codes the whole task list in one
+# session, then its gates and closing audit (fixed auditor: opus) send problems
+# back to that session for repair.
+#
+#   build-demo-todo  opus, sonnet through agb; opus, sonnet bare (`claude -p`,
+#                    no agb plugin): agb's orchestration vs none
+#   build-invoice    opus, sonnet through agb
+#
+# Graded by tests the candidate never saw (checks/build-tests.mjs and
+# references/build/_heldout/<input>/): the check passes when the app comes up;
+# the held-out pass rate in its evidence is the measurement.
+
+protocol_version: "0.3"
+run_name: agb-flow-v3-code
+description: "(agb 0a8c4ee7) Which Claude model should code a whole project with agb, and how much does agb's orchestration add over bare claude? Each input is a planned project (PRD, design, contracts, task list, test plan) with no code yet; the candidate builds all of it; held-out acceptance tests run against the built app."
+budget_usd: 400
+
+workflow:
+  steps:
+    - id: code
+      version: "1"
+      description: "agb stage 5, code: build the whole project from its adopted plan (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints)."
+      test_set:
+        id: code-v1
+        inputs: [demo-todo, invoice]
+        fixture_dir: fixture/build
+      candidate_ids: [opus-5-5, sonnet-5-5]
+      required_checks: [build-tests]
+      exit_code: ignore
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 57600
+      max_cost_per_trial_usd: 200
+      concurrency: 1
+      judge:
+        rubric_file: rubrics/code.md
+        methods: [pairwise-swap]
+        show: ["apps/*/src/**", "services/*/src/**", "packages/*/src/**", "client/src/**", "server/src/**", "src/**", package.json, README.md]
+        dimensions: [correctness, structure, tests, scope]
+
+# agents/agb-step.mjs runs `agb run` (AGB_HOME, default ~/workspace/57b/agb-eval),
+# or, with `bare`, plain `claude -p` without agb. Claude models sign in with
+# CLAUDE_CODE_OAUTH_TOKEN (the subscription).
+candidates:
+  - id: opus-5-5
+    adapter: agent-cli
+    model: anthropic/claude-opus-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-opus-5-5, "{{max_cost_usd}}"], reports_usage: tokens, version_files: [agents/agb-step.mjs] }
+  - id: sonnet-5-5
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-sonnet-5-5, "{{max_cost_usd}}"], reports_usage: tokens, version_files: [agents/agb-step.mjs] }
+  - id: opus-bare
+    adapter: agent-cli
+    model: anthropic/claude-opus-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-opus-5-5, "{{max_cost_usd}}", bare], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
+  - id: sonnet-bare
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-sonnet-5-5, "{{max_cost_usd}}", bare], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
+
+evaluators:
+  required_checks:
+    build-tests:
+      kind: command
+      description: "The built app comes up (install, compose services, db:fresh, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the pass rate is in the evidence."
+      argv: [node, checks/build-tests.mjs]
+      version_files: [checks/build-tests.mjs]
+      timeout_seconds: 2400
+  judge:
+    model: openai/gpt-6.1-sol
+    provider_route: openrouter
+    rubric_file: rubrics/code.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 1
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0

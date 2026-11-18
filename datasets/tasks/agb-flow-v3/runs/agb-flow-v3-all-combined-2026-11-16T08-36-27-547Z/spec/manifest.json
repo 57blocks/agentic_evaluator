@@ -1,0 +1,132 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-flow-v3-all-combined-2026-11-16T08-36-27-547Z/spec",
+  "run_name": "agb-flow-v3",
+  "step": {
+    "id": "spec",
+    "version": "1",
+    "description": "Spec: normalize the client's external document into docs/PRD.md and .ab/prd.json without rewriting it."
+  },
+  "spec": {
+    "path": "tasks/agb-flow-v3/spec.yaml",
+    "sha256": "7a083b29009a9be2ac227da43c1afdc80630b151257b7eac04869192a8a306a8"
+  },
+  "description": "(agb 0a8c4ee7) Which Claude model should run each planning step of agb (spec, architecture, task breakdown, test design)? Inputs are real agb projects at the moment the step began; every candidate runs agb's own stage command through the same wrapper; a check grades with agb's gates and a judge compares candidates pairwise.",
+  "test_set": {
+    "id": "spec-v1",
+    "inputs": {
+      "chessicle": "b7dad749775e19deaa9105a33cbc60b8b28c56c14abe9271ae81724bdf238ed2",
+      "invoice": "b2ac59090b12c7c4c0b566b22a57389bd0bc23fb5df71736a05c8fb9cc58b118"
+    },
+    "labels": null
+  },
+  "candidates": {
+    "opus-5-5": {
+      "id": "opus-5-5",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "149ebf8f5b47e1d62ae571fcbf9504e0544aa053719dfcdd114c1a644cd5adb2"
+      }
+    },
+    "sonnet-5-5": {
+      "id": "sonnet-5-5",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "149ebf8f5b47e1d62ae571fcbf9504e0544aa053719dfcdd114c1a644cd5adb2"
+      }
+    },
+    "fable-5-2": {
+      "id": "fable-5-2",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-fable-5.2",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-fable-5-2",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "149ebf8f5b47e1d62ae571fcbf9504e0544aa053719dfcdd114c1a644cd5adb2"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "openai/gpt-6.1-sol",
+    "provider_route": "openrouter",
+    "methods": [
+      "pairwise-swap"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "spec-gates"
+    ],
+    "check_version": "cmd-8c285f94+files-4c298dda",
+    "rubric_sha256": "5c53b8c6c674f54252c9ba4b73541736527633a8c29805d3adb1369386f357f6",
+    "check_description": "docs/PRD.md, .ab/prd.json and the source snapshot exist; no hard finding at the spec stage, and prd-id and prd-quality are clean.",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "298bea7cfd6214ca91eb2f8ffe5b5fe521befdde74af92dbee4c1ffad314c8a0",
+    "score_template_sha256": "f62618290b23ccf0250bf9a577b3f6d52176c35121ae4e7bf3f2dde44335c00b"
+  },
+  "prompts": null,
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": 0.05,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 3,
+    "timeout_ms": 3000000,
+    "benchmark_mode": "production-realistic",
+    "cache_mode": "cold",
+    "early_stop": false,
+    "outage_wait_seconds": 600,
+    "max_consecutive_provider_errors": 10
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.3.0",
+    "git_sha": "34c2d191",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-11-13T09:04:37.061Z",
+  "finished_at": "2026-11-16T08:36:27.550Z"
+}

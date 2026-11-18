@@ -1,0 +1,225 @@
+# Does agb's Claude Code skill pack make Claude better at each agb stage?
+# Same model, same starting tree, with and without the plugin, at every
+# stage agb has before delivery: spec, architecture, task breakdown, test
+# design, code. Each step starts from agb's adopted output of the stages
+# before it (agb-flow-v3's fixtures), so the no-skill arm inherits agb's
+# earlier stages at every step: this measures each stage alone, not a chain.
+#
+#   *-skill  claude -p "/agb-skills:agb-<stage> --accept-recommended"
+#              --plugin-dir <agb-skills> --add-dir <agb-skills>
+#            agb-skills = AGB_HOME/skills/dist/packages/claude-code, plugin
+#            build e849b1563289 in the 57blocks/agb 0a8c4ee7 checkout (built
+#            2026-11-13, the build agb-flow-v3 used; skills/dist is
+#            untracked). Planning stages run agb-flow-v3's path verbatim and
+#            converge with agb's CLI, which is also the grader's ruler. Code
+#            starts `agb run` and supervises it, reopened (at most 3 sessions)
+#            while the plan is unfinished.
+#   *-none   claude -p "<what this stage must produce>"
+#            No plugin, no agb CLI, Claude Code's built-in plugins only. A
+#            planning stage's prompt carries a deliverable contract
+#            (agents/contracts/<step>.md): paths, JSON shapes and ID rules the
+#            grader reads, not agb's method.
+#
+# Grading. agb's format alone cannot make a planning trial fail (eligibility),
+# but it does weigh: with 2-3 gates per input, one miss moves the score by
+# 0.11 or more, above the 0.05 minimum meaningful difference, so the score
+# settles the pick before the judge. Read score, judge and cost side by side.
+#   planning  the check passes when the deliverables exist and parse; agb's
+#             REQUIRED gates (as agb-flow-v3 calibrated them) are its score,
+#             the share that came out clean, each failed one named. The judge
+#             (pairwise, both orders) compares substance and is told not to
+#             reward agb's conventions; it still sees .ab/*.json, so it is not
+#             blind to the arm.
+#   code      held-out acceptance tests neither arm saw (checks/build-tests.mjs,
+#             references/build/_heldout/<input>/): passes when the app comes
+#             up, the held-out pass rate is the score (invoice: API only).
+# Every check first runs checks/arm-check.mjs on the trace: a trial that is
+# not the arm it is labelled is void (an evaluator error), not a loss, and
+# makes that candidate's reliability fall short until it is re-run.
+#
+# All 27 of agb-flow-v3's skill-arm planning trials score 1.0 under these
+# checks (regraded 2026-11-17), as they all passed there.
+#
+# A subscription usage limit fails a planning trial (exit 75 is not ignored
+# there) and is graded on what it left: such trials are re-run, not read.
+#
+# Read the answer as within-model deltas (opus skill vs none, sonnet skill vs
+# none), not as the four-way pick: the pick also weighs cost and speed.
+
+protocol_version: "0.3"
+run_name: agb-skill-ablation
+description: "(agb 0a8c4ee7) Does agb's Claude Code skill pack make Claude better at each agb stage? Same model and starting tree (agb's adopted output of the earlier stages), with the agb-skills plugin running /agb-<stage> or without any plugin. Planning steps: passes when the deliverables parse, agb's required gates are the score, pairwise judge on substance. Code: held-out acceptance tests."
+budget_usd: 1000
+
+workflow:
+  steps:
+    - id: spec
+      version: "1"
+      description: "Spec: normalize the client's external document into docs/PRD.md and .ab/prd.json without rewriting it."
+      test_set:
+        id: spec-v1
+        inputs: [chessicle, invoice]
+        fixture_dir: fixture/spec
+      candidate_ids: &arms [opus-5-5-skill, opus-5-5-none, sonnet-5-5-skill, sonnet-5-5-none]
+      required_checks: [spec-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 30
+      judge:
+        rubric_file: rubrics/spec.md
+        methods: [pairwise-swap]
+        show: [docs/PRD.md, .ab/prd.json, .ab/questions.json]
+        dimensions: [faithful, machine, questions, buildable]
+
+    - id: architecture
+      version: "1"
+      description: "Architecture: turn the PRD into API contracts, cross-cutting decisions (docs/DESIGN.md) and components (.ab/arch.json)."
+      test_set:
+        id: architecture-v1
+        inputs: [demo-todo, chessicle, invoice]
+        fixture_dir: fixture/architecture
+      candidate_ids: *arms
+      required_checks: [arch-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 30
+      judge:
+        rubric_file: rubrics/architecture.md
+        methods: [pairwise-swap]
+        show: [docs/DESIGN.md, "_contracts/**", .ab/arch.json, .ab/design.json]
+        dimensions: [decisions, contract, components, constraints]
+
+    - id: task-breakdown
+      version: "1"
+      description: "Task breakdown: turn the PRD, design and API contracts into a task plan (.ab/tasks.json) and a UI contract."
+      test_set:
+        id: task-breakdown-v1
+        inputs: [demo-todo, chessicle, invoice]
+        fixture_dir: fixture/task-breakdown
+      candidate_ids: *arms
+      required_checks: [plan-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 15
+      judge:
+        rubric_file: rubrics/breakdown.md
+        methods: [pairwise-swap]
+        show: [".ab/tasks.json", UI_CONTRACT.md]
+        dimensions: [granularity, ordering, clarity, domains]
+
+    - id: test-design
+      version: "1"
+      description: "Test design: write a test plan (.ab/test-plan.json) that covers every acceptance criterion."
+      test_set:
+        id: test-design-v1
+        inputs: [demo-todo, chessicle, invoice]
+        fixture_dir: fixture/test-design
+      candidate_ids: *arms
+      required_checks: [test-plan-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 1800
+      max_cost_per_trial_usd: 10
+      judge:
+        rubric_file: rubrics/test-plan.md
+        methods: [pairwise-swap]
+        show: [.ab/test-plan.json]
+        dimensions: [coverage, falsifiable, levels, traceable]
+
+    - id: code
+      version: "1"
+      description: "Build the whole planned project (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints), with or without agb's skills."
+      test_set:
+        id: code-v1
+        inputs: [demo-todo, invoice]
+        fixture_dir: fixture/build
+      candidate_ids: *arms
+      required_checks: [build-tests]
+      exit_code: ignore
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 57600
+      max_cost_per_trial_usd: 200
+      concurrency: 1
+      judge:
+        rubric_file: rubrics/code.md
+        methods: [pairwise-swap]
+        show: ["apps/*/src/**", "services/*/src/**", "packages/*/src/**", "client/src/**", "server/src/**", "src/**", package.json, README.md]
+        dimensions: [correctness, structure, tests, scope]
+
+
+# Claude models sign in with CLAUDE_CODE_OAUTH_TOKEN (the subscription).
+candidates:
+  - id: opus-5-5-skill
+    adapter: agent-cli
+    model: anthropic/claude-opus-5.5
+    cli: { argv: [node, agents/claude-arm.mjs, claude-opus-5-5, "{{max_cost_usd}}", skill], reports_usage: tokens, trace: claude-code, version_files: [agents/claude-arm.mjs, agents/contracts/spec.md, agents/contracts/architecture.md, agents/contracts/task-breakdown.md, agents/contracts/test-design.md] }
+  - id: opus-5-5-none
+    adapter: agent-cli
+    model: anthropic/claude-opus-5.5
+    cli: { argv: [node, agents/claude-arm.mjs, claude-opus-5-5, "{{max_cost_usd}}", none], reports_usage: tokens, trace: claude-code, version_files: [agents/claude-arm.mjs, agents/contracts/spec.md, agents/contracts/architecture.md, agents/contracts/task-breakdown.md, agents/contracts/test-design.md] }
+  - id: sonnet-5-5-skill
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5.5
+    cli: { argv: [node, agents/claude-arm.mjs, claude-sonnet-5-5, "{{max_cost_usd}}", skill], reports_usage: tokens, trace: claude-code, version_files: [agents/claude-arm.mjs, agents/contracts/spec.md, agents/contracts/architecture.md, agents/contracts/task-breakdown.md, agents/contracts/test-design.md] }
+  - id: sonnet-5-5-none
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5.5
+    cli: { argv: [node, agents/claude-arm.mjs, claude-sonnet-5-5, "{{max_cost_usd}}", none], reports_usage: tokens, trace: claude-code, version_files: [agents/claude-arm.mjs, agents/contracts/spec.md, agents/contracts/architecture.md, agents/contracts/task-breakdown.md, agents/contracts/test-design.md] }
+
+evaluators:
+  required_checks:
+    spec-gates:
+      kind: command
+      description: "Arm confirmed from the trace (else void). Passes when docs/PRD.md, docs/PRD.source.md and a readable .ab/prd.json exist; score: share clean of no hard finding, prd-id, prd-quality."
+      argv: [node, checks/spec-gates.mjs]
+      version_files: [checks/spec-gates.mjs, checks/lib.mjs, checks/arm-check.mjs]
+      timeout_seconds: 600
+    arch-gates:
+      kind: command
+      description: "Arm confirmed from the trace (else void). Passes when _contracts/api-routes.json lists endpoints and docs/DESIGN.md exists; score: share clean of no hard finding, design-closure."
+      argv: [node, checks/arch-gates.mjs]
+      version_files: [checks/arch-gates.mjs, checks/lib.mjs, checks/arm-check.mjs]
+      timeout_seconds: 600
+    plan-gates:
+      kind: command
+      description: "Arm confirmed from the trace (else void). Passes when .ab/tasks.json has tasks; score: share clean of page-coverage, contract-coverage, plan-domain-cycle."
+      argv: [node, checks/plan-gates.mjs]
+      version_files: [checks/plan-gates.mjs, checks/lib.mjs, checks/arm-check.mjs]
+      timeout_seconds: 900
+    test-plan-gates:
+      kind: command
+      description: "Arm confirmed from the trace (else void). Passes when .ab/test-plan.json lists cases; score: share clean of no hard ac-coverage finding, every AC covered."
+      argv: [node, checks/test-plan-gates.mjs]
+      version_files: [checks/test-plan-gates.mjs, checks/lib.mjs, checks/arm-check.mjs]
+      timeout_seconds: 600
+    build-tests:
+      kind: command
+      description: "First the arm: the trace must show the arm the candidate is labelled (-skill loaded agb-skills with /agb-code and acted on it; -none had no agb plugin, command, skill or CLI call), else the trial is void (evaluator error). Then the built app comes up (install, compose services, migrations, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the held-out pass rate is the score."
+      argv: [node, checks/build-tests.mjs]
+      version_files: [checks/build-tests.mjs, checks/arm-check.mjs]
+      timeout_seconds: 2400
+  judge:
+    model: openai/gpt-6.1-sol
+    provider_route: openrouter
+    rubric_file: rubrics/code.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 1
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: 0.05
+
+x-harness:
+  producer: codegen
+  default_temperature: 0

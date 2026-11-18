@@ -1,0 +1,112 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-flow-v3-all-combined-2026-11-16T08-36-27-547Z/code",
+  "run_name": "agb-flow-v3-code",
+  "step": {
+    "id": "code",
+    "version": "1",
+    "description": "agb stage 5, code: build the whole project from its adopted plan (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints)."
+  },
+  "spec": {
+    "path": "tasks/agb-flow-v3-build/code.yaml",
+    "sha256": "0836fbbcd3312995bfa6bf4b0235e9b94f6f27a3ed4eaaf3fd231e3424b4f596"
+  },
+  "description": "(agb 0a8c4ee7) Which Claude model should code a whole project with agb, and how much does agb's orchestration add over bare claude? Each input is a planned project (PRD, design, contracts, task list, test plan) with no code yet; the candidate builds all of it; held-out acceptance tests run against the built app.",
+  "test_set": {
+    "id": "code-v1",
+    "inputs": {
+      "demo-todo": "9ffe96cbe0dcc1fbe29ae3cac4859888f40e435c97bd51d0f01a484fef36eb55",
+      "invoice": "b2ac59090b12c7c4c0b566b22a57389bd0bc23fb5df71736a05c8fb9cc58b118"
+    },
+    "labels": null
+  },
+  "candidates": {
+    "opus-5-5": {
+      "id": "opus-5-5",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "d842fee9f06864b1555d2acc4a76fbe105c4c4474da1e948cddf7d8e5f374ee7"
+      }
+    },
+    "sonnet-5-5": {
+      "id": "sonnet-5-5",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "d842fee9f06864b1555d2acc4a76fbe105c4c4474da1e948cddf7d8e5f374ee7"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "openai/gpt-6.1-sol",
+    "provider_route": "openrouter",
+    "methods": [
+      "pairwise-swap"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "build-tests"
+    ],
+    "check_version": "cmd-c0156e9f+files-fd754c84",
+    "rubric_sha256": "fa8dfe5f7245d380aa9645d1a1ce4dd150412e73be73c684c824e6c26dc640ef",
+    "check_description": "The built app comes up (install, compose services, db:fresh, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the pass rate is in the evidence.",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "1fc69c82db6a66ecbce049b37384f5775e6a62046dfde264ec9bac1e3abcb884",
+    "score_template_sha256": "f7f3161e0bad3793db0c837c3a53beb00175c7c76fda2497f6fd5b1f0f548fbc"
+  },
+  "prompts": null,
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": 0.05,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 1,
+    "timeout_ms": 57600000,
+    "benchmark_mode": "production-realistic",
+    "cache_mode": "cold",
+    "early_stop": false,
+    "outage_wait_seconds": 600,
+    "max_consecutive_provider_errors": 10,
+    "max_consecutive_timeouts": 10
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.3.0",
+    "git_sha": "e93f0be2",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-11-16T05:56:11.141Z",
+  "finished_at": "2026-11-16T08:36:27.588Z"
+}

@@ -1,0 +1,173 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-skill-ablation-combined-2026-11-18T08-59-55-693Z/test-design",
+  "run_name": "agb-skill-ablation",
+  "step": {
+    "id": "test-design",
+    "version": "1",
+    "description": "Test design: write a test plan (.ab/test-plan.json) that covers every acceptance criterion."
+  },
+  "spec": {
+    "path": "tasks/agb-skill-ablation/spec.yaml",
+    "sha256": "9937abad9501ba164809428ee649b19e2eca84daa1172c5870f74199b6438209"
+  },
+  "description": "(agb 0a8c4ee7) Does agb's Claude Code skill pack make Claude better at each agb stage? Same model and starting tree (agb's adopted output of the earlier stages), with the agb-skills plugin running /agb-<stage> or without any plugin. Planning steps: passes when the deliverables parse, agb's required gates are the score, pairwise judge on substance. Code: held-out acceptance tests.",
+  "test_set": {
+    "id": "test-design-v1",
+    "inputs": {
+      "demo-todo": "9ffe96cbe0dcc1fbe29ae3cac4859888f40e435c97bd51d0f01a484fef36eb55",
+      "chessicle": "b7dad749775e19deaa9105a33cbc60b8b28c56c14abe9271ae81724bdf238ed2",
+      "invoice": "b2ac59090b12c7c4c0b566b22a57389bd0bc23fb5df71736a05c8fb9cc58b118"
+    },
+    "labels": null
+  },
+  "candidates": {
+    "opus-5-5-skill": {
+      "id": "opus-5-5-skill",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}",
+          "skill"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "8977263a77d12ff1ea1c7985e4cb733cf7ccc2ead9891827dd8dd43abea24e78"
+      }
+    },
+    "opus-5-5-none": {
+      "id": "opus-5-5-none",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}",
+          "none"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "8977263a77d12ff1ea1c7985e4cb733cf7ccc2ead9891827dd8dd43abea24e78"
+      }
+    },
+    "sonnet-5-5-skill": {
+      "id": "sonnet-5-5-skill",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}",
+          "skill"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "8977263a77d12ff1ea1c7985e4cb733cf7ccc2ead9891827dd8dd43abea24e78"
+      }
+    },
+    "sonnet-5-5-none": {
+      "id": "sonnet-5-5-none",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}",
+          "none"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "8977263a77d12ff1ea1c7985e4cb733cf7ccc2ead9891827dd8dd43abea24e78"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "openai/gpt-6.1-sol",
+    "provider_route": "openrouter",
+    "methods": [
+      "pairwise-swap"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "test-plan-gates"
+    ],
+    "check_version": "cmd-856b32ab+files-656e270e",
+    "rubric_sha256": "fb8d08cc02572057a9267f87a763f2da68a0238837148a7dd9ce066c568f973e",
+    "check_description": "Arm confirmed from the trace (else void). Passes when .ab/test-plan.json lists cases; score: share clean of no hard ac-coverage finding, every AC covered.",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "27e078daaca447677128ec9ee088cae7651c05e13717caf99434e246a17ab034",
+    "score_template_sha256": "a8a8f22d6af0c498a2c170efd0312859578ffe27780127fdcb5c98ef203807d1"
+  },
+  "prompts": null,
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": 0.05,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 1,
+    "timeout_ms": 1800000,
+    "benchmark_mode": "production-realistic",
+    "cache_mode": "cold",
+    "early_stop": false,
+    "outage_wait_seconds": 600,
+    "max_consecutive_provider_errors": 10,
+    "max_consecutive_timeouts": 10
+  },
+  "harness": {
+    "name": "@57block/agenteval",
+    "version": "0.4.0",
+    "git_sha": "ccd82bc2",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-11-17T07:37:55.127Z",
+  "finished_at": "2026-11-18T08:59:55.774Z"
+}

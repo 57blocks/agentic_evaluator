@@ -1,0 +1,172 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-skill-ablation-combined-2026-11-18T08-59-55-693Z/spec",
+  "run_name": "agb-skill-ablation",
+  "step": {
+    "id": "spec",
+    "version": "1",
+    "description": "Spec: normalize the client's external document into docs/PRD.md and .ab/prd.json without rewriting it."
+  },
+  "spec": {
+    "path": "tasks/agb-skill-ablation/spec.yaml",
+    "sha256": "9937abad9501ba164809428ee649b19e2eca84daa1172c5870f74199b6438209"
+  },
+  "description": "(agb 0a8c4ee7) Does agb's Claude Code skill pack make Claude better at each agb stage? Same model and starting tree (agb's adopted output of the earlier stages), with the agb-skills plugin running /agb-<stage> or without any plugin. Planning steps: passes when the deliverables parse, agb's required gates are the score, pairwise judge on substance. Code: held-out acceptance tests.",
+  "test_set": {
+    "id": "spec-v1",
+    "inputs": {
+      "chessicle": "b7dad749775e19deaa9105a33cbc60b8b28c56c14abe9271ae81724bdf238ed2",
+      "invoice": "b2ac59090b12c7c4c0b566b22a57389bd0bc23fb5df71736a05c8fb9cc58b118"
+    },
+    "labels": null
+  },
+  "candidates": {
+    "opus-5-5-skill": {
+      "id": "opus-5-5-skill",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}",
+          "skill"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "8977263a77d12ff1ea1c7985e4cb733cf7ccc2ead9891827dd8dd43abea24e78"
+      }
+    },
+    "opus-5-5-none": {
+      "id": "opus-5-5-none",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}",
+          "none"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "8977263a77d12ff1ea1c7985e4cb733cf7ccc2ead9891827dd8dd43abea24e78"
+      }
+    },
+    "sonnet-5-5-skill": {
+      "id": "sonnet-5-5-skill",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}",
+          "skill"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "8977263a77d12ff1ea1c7985e4cb733cf7ccc2ead9891827dd8dd43abea24e78"
+      }
+    },
+    "sonnet-5-5-none": {
+      "id": "sonnet-5-5-none",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/claude-arm.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}",
+          "none"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/claude-arm.mjs",
+          "agents/contracts/spec.md",
+          "agents/contracts/architecture.md",
+          "agents/contracts/task-breakdown.md",
+          "agents/contracts/test-design.md"
+        ],
+        "version_sha": "8977263a77d12ff1ea1c7985e4cb733cf7ccc2ead9891827dd8dd43abea24e78"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "openai/gpt-6.1-sol",
+    "provider_route": "openrouter",
+    "methods": [
+      "pairwise-swap"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "spec-gates"
+    ],
+    "check_version": "cmd-8c285f94+files-338ae9c1",
+    "rubric_sha256": "149e728fa28f0e4794e7dde4f58c1738e62936478b28df26d8fea3353ab6c5e1",
+    "check_description": "Arm confirmed from the trace (else void). Passes when docs/PRD.md, docs/PRD.source.md and a readable .ab/prd.json exist; score: share clean of no hard finding, prd-id, prd-quality.",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "b39c0c4bb0cdb932d66d44fb26f5208dcd14d79058ea55cd339b830d034cbd97",
+    "score_template_sha256": "c1cf0a03dfc21b92f6089f3c572b7e48f5e0ed31bec281077486121dc041c083"
+  },
+  "prompts": null,
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": 0.05,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 1,
+    "timeout_ms": 3000000,
+    "benchmark_mode": "production-realistic",
+    "cache_mode": "cold",
+    "early_stop": false,
+    "outage_wait_seconds": 600,
+    "max_consecutive_provider_errors": 10,
+    "max_consecutive_timeouts": 10
+  },
+  "harness": {
+    "name": "@57block/agenteval",
+    "version": "0.4.0",
+    "git_sha": "ccd82bc2",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-11-17T07:37:55.127Z",
+  "finished_at": "2026-11-18T08:59:55.696Z"
+}

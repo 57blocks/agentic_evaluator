@@ -1,0 +1,162 @@
+{
+  "run": "agb-flow-v3-all-combined-2026-11-16T08-36-27-547Z/task-breakdown",
+  "step": "task-breakdown",
+  "inputs": [
+    "demo-todo",
+    "chessicle",
+    "invoice"
+  ],
+  "candidates": [
+    {
+      "candidate": "opus-5-5",
+      "valid_attempts": 3,
+      "classified": 3,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_score": null,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "completion_states": {
+        "success": 3,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 3,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 3,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 5.29652,
+      "p50_ms": 1170136,
+      "p95_ms": 1380317
+    },
+    {
+      "candidate": "sonnet-5-5",
+      "valid_attempts": 3,
+      "classified": 3,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_score": null,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "completion_states": {
+        "success": 3,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 3,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 3,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.971056,
+      "p50_ms": 290141,
+      "p95_ms": 320437
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "3 inputs; no comparison can be significant with fewer than 6"
+    ]
+  },
+  "integrity": {
+    "events": 24,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 2273,
+    "threshold_ms": 300000,
+    "wall_ms": 2040158,
+    "in_flight_gaps": 2
+  },
+  "judge_discrimination": {
+    "overall": {
+      "dimension": "overall",
+      "scored": 0,
+      "distinct": 0,
+      "min": null,
+      "max": null,
+      "saturated": false
+    },
+    "dimensions": [],
+    "saturated": [],
+    "discriminates": false
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "plan-gates",
+      "version": "cmd-e1f9a9f4+files-5a66e899",
+      "pass": 6,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "pairwise-swap",
+      "version": "openai/gpt-6.1-sol+rubric-b613cd5e+tpl-f111f170",
+      "pass": 3,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}
