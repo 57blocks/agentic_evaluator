@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agb-skill-ablation run report</title>
+<style>
+:root{--ground:#F4F6F9;--surface:#fff;--surface-2:#FAFBFC;--ink:#2B3038;--ink-2:#6B7079;--ink-3:#919499;--rule:#E2E5EA;--accent:#1E78EE;--accent-2:#469BFF;--accent-soft:#EBF4FF;--champ:#F4F9FF;--ok-bg:#EBF9F2;--ok-fg:#1B9A6A;--bad-bg:#FFF0F0;--bad-fg:#F03B3B;--warn-bg:#FCF1D6;--warn-fg:#8A5A00;--shadow:0 2px 6px rgba(27,43,75,.08);--mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;--s1:#2A78D6;--s2:#EB6834;--s3:#1BAF7A;--s4:#EDA100}
+@media(prefers-color-scheme:dark){:root{--ground:#16191E;--surface:#1F2329;--surface-2:#272C33;--ink:#E6E8EC;--ink-2:#ABAEB2;--ink-3:#919499;--rule:#2E343C;--accent:#93C1FF;--accent-2:#469BFF;--accent-soft:rgba(70,155,255,.14);--champ:#1A2A3F;--ok-bg:#173A2C;--ok-fg:#8FE0BC;--bad-bg:#45211F;--bad-fg:#FFB9B9;--warn-bg:#3D3218;--warn-fg:#F6D58A;--shadow:0 2px 6px rgba(0,0,0,.3)}}
+body{margin:0;color:var(--ink);font:14px/1.55 "Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:44px 24px 80px;background:var(--ground)}
+.page{max-width:68rem;margin:0 auto;display:grid;gap:20px}
+.mono,td.num,code,pre,.kv dd{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.kv dd{font-size:13px}
+.small{font-size:12px}
+header.run{display:grid;gap:6px}.eyebrow{margin:0;font-size:13px;color:var(--accent);font-weight:600}
+h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.022em}h1 .id{font-family:var(--mono);font-weight:700;font-size:26px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:8px 0 0;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.kv div{display:grid;gap:2px}.kv dt{font-size:12px;color:var(--ink-3)}.kv dd{margin:0;font-size:13px;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--warn-fg);padding:16px 20px;border-radius:12px;box-shadow:var(--shadow)}
+.verdict.firm{border-left-color:var(--ok-fg)}.verdict.needs-review{border-left-color:var(--bad-fg)}
+.verdict .champ-line b{color:var(--accent)}
+.verdict .tag{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
+.verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
+.verdict p{margin:0}
+.champ-line{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}.champ-line b{font-weight:700}.champ-line .mode{color:var(--ink-2);font-weight:400}
+.trophy{font-size:18px}
+.champ-facts{margin:3px 0 6px;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+section.card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 24px 22px;display:grid;gap:12px;box-shadow:var(--shadow)}
+section.card h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--ink);display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-weight:600;color:var(--ink-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:8px 13px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--surface-2)}
+th.num,td.num{text-align:right;white-space:nowrap}
+td.num .bar{margin-right:8px}td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}tr:last-child td{border-bottom:none}
+td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:var(--mono)}td.cand .prompt{display:block;font-weight:400;font-size:12px;color:var(--ink-3)}
+td .sub{display:block;font-size:11px;color:var(--ink-3)}
+tr.control td.cand::after{content:"control";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
+tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}tr.gated td{color:var(--ink-3)}
+tbody tr{transition:background .12s ease}tbody tr:hover{background:var(--accent-soft)}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:baseline}
+.sw0{background:var(--s1)}.sw1{background:var(--s2)}.sw2{background:var(--s3)}.sw3{background:var(--s4)}
+.bar{display:inline-block;width:92px;height:9px;background:var(--surface-2);border-radius:99px;vertical-align:middle;margin-right:8px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--rule)}
+.bar span{display:block;height:100%;border-radius:99px;background:var(--accent-2)}
+.pill.pass{background:var(--ok-bg);color:var(--ok-fg)}.pill.miss{background:var(--bad-bg);color:var(--bad-fg)}
+ol.trace{margin:0;padding-left:1.2em;font-size:13px;color:var(--ink-2);display:grid;gap:8px}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
+td.ok{color:var(--ok-fg)}td.bad{color:var(--bad-fg)}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.two-col>*{min-width:0;overflow:hidden}
+.two-col .table-wrap{overflow-x:auto}
+.ledger td:first-child{color:var(--ink-2)}.ledger tr.total td{font-weight:600;border-top:2px solid var(--rule)}
+.note{font-size:12.5px;color:var(--ink-2);margin:0}code{background:var(--surface-2);padding:0 5px;border-radius:3px;font-size:12px}
+ul.gaps{margin:0;padding-left:1.1em;font-size:13px;color:var(--ink-2);display:grid;gap:4px}
+details{font-size:13px}summary{cursor:pointer;color:var(--accent);font-weight:500}
+pre{margin:8px 0 0;padding:12px;background:var(--surface-2);border-radius:6px;overflow-x:auto;font-size:12px;line-height:1.55;max-height:420px}
+.steps{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}.steps .arrow{align-self:center;color:var(--ink-3)}
+.step-card{flex:1 1 200px;min-width:0;display:grid;gap:6px;align-content:start;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.step-card.open{border-left:4px solid var(--bad-fg)}.step-card .idx{font-size:12px;color:var(--ink-2);font-weight:500}
+.step-card .pick{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);overflow-wrap:anywhere}.step-card.open .pick{font-family:inherit;color:var(--bad-fg)}
+.step-card .pill{justify-self:start}.step-card .small{color:var(--ink-2)}
+footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
+@media(max-width:480px){h1{font-size:20px}.verdict{grid-template-columns:1fr}section.card{padding:14px}}
+
+.pref-high{color:var(--ok-fg);font-weight:600}.pref-low{color:var(--ink-3)}
+
+.duel{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin:10px 0}
+.duel header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.duel .evidence{margin:6px 0 10px;color:var(--ink-2)}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid var(--rule)}
+.chip.win{background:var(--ok-bg);color:var(--ok-fg);border-color:transparent}
+.chip.tie{background:var(--surface-2);color:var(--ink-2);border-color:transparent}
+.chip.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:transparent}
+pre.diff span{display:block}pre.diff .add{background:var(--ok-bg);color:var(--ok-fg)}pre.diff .del{background:var(--bad-bg);color:var(--bad-fg);text-decoration:line-through}pre.diff .same{color:var(--ink-3)}
+blockquote.system{margin:8px 0 0;padding:4px 12px;border-left:3px solid var(--ok-fg);font-size:13px}blockquote.system p{margin:2px 0 0;white-space:pre-wrap}
+.sbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:8px}.sbs article{min-width:0;border:1px solid var(--rule);border-radius:8px;padding:8px 10px}.sbs header{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.sbs pre{max-height:520px;white-space:pre-wrap;word-break:break-word}
+table.dims{width:100%}table.dims th{text-align:left;font-weight:500;white-space:nowrap;width:1%;padding-right:14px}
+details>summary{cursor:pointer;padding:6px 0;color:var(--ink-2)}
+pre.raw{max-height:460px;overflow:auto;background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-word;font-size:12px}
+.muted{color:var(--ink-3)}
+
+.viz{margin:14px 0 0;padding:0}
+.viz figcaption{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.viz-legend{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0;font-size:12px;color:var(--ink-2)}
+.viz-lg{display:inline-flex;gap:6px;align-items:center}
+.viz-flag{font-size:10px;font-weight:600;background:var(--warn-bg);color:var(--warn-fg);padding:0 5px;border-radius:3px;white-space:nowrap}
+.viz-note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+table.viz-heat{width:100%;border-collapse:separate;border-spacing:2px}
+table.viz-heat th{font-size:12px;font-weight:500;color:var(--ink-2);text-align:left;white-space:nowrap}
+table.viz-heat th.num,table.viz-heat td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.viz-cell{text-align:center;border-radius:4px;padding:8px 6px;font-variant-numeric:tabular-nums;color:var(--ink)}
+td.viz-none{background:var(--surface-2);color:var(--ink-3)}
+.viz-scale{display:flex;gap:2px;align-items:center;margin-top:8px;font-size:11px;color:var(--ink-3)}
+.viz-step{width:26px;height:8px;border-radius:2px;display:inline-block}
+.sd-1{--sd:#c93a39;--sd-fg:#fff}.sd-2{--sd:#f0a3a0;--sd-fg:#2B3038}.sd-3{--sd:#e2e1dd;--sd-fg:#2B3038}.sd-4{--sd:#8dbbf1;--sd-fg:#2B3038}.sd-5{--sd:#1c5cab;--sd-fg:#fff}
+.sd-row{display:grid;grid-template-columns:minmax(90px,160px) 1fr 44px 96px;gap:10px;align-items:center;margin:3px 0;font-size:12px}
+.sd-head{color:var(--ink-3);font-size:11px;margin-bottom:2px}
+.sd-name{font-family:var(--mono);font-size:11px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-bar{display:flex;gap:2px;height:20px;min-width:0}
+.sd-seg{flex-basis:0;min-width:2px;background:var(--sd);color:var(--sd-fg);font-size:10px;line-height:20px;text-align:center;overflow:hidden;white-space:nowrap}
+.sd-seg:first-child{border-radius:4px 0 0 4px}.sd-seg:last-child{border-radius:0 4px 4px 0}.sd-seg:only-child{border-radius:4px}
+.sd-u{background:var(--surface);color:var(--ink-3);box-shadow:inset 0 0 0 1px var(--ink-3)}
+.sd-seg.sd-u{background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 3px,var(--rule) 3px,var(--rule) 5px)}
+.sd-mean,.sd-check{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sd-sub{color:var(--ink-3)}
+.sd-key{width:12px;height:12px;border-radius:2px;display:inline-block;background:var(--sd)}
+.sd-legend{margin-top:10px}
+@media(prefers-color-scheme:dark){
+  .sd-1{--sd:#f29a97;--sd-fg:#1F2329}.sd-2{--sd:#a13b39;--sd-fg:#fff}.sd-3{--sd:#93938d;--sd-fg:#1F2329}.sd-4{--sd:#3470c4;--sd-fg:#fff}.sd-5{--sd:#a8cdf5;--sd-fg:#1F2329}
+}
+
+.cs-fig{margin:0;display:grid;gap:8px}
+svg.cs{width:100%;height:auto;max-width:760px;overflow:visible;font-family:inherit}
+.cs-grid{stroke:var(--rule);stroke-width:1}.cs-lane{stroke:var(--rule);stroke-width:1;stroke-dasharray:2 3}
+.cs-tick{font-size:11px;fill:var(--ink-3);font-family:var(--mono)}.cs-axis{font-size:11px;fill:var(--ink-2)}
+.cs-gate{stroke:var(--bad-fg);stroke-width:1.5;stroke-dasharray:6 4}.cs-leader{stroke:var(--ink-3);stroke-width:.75}
+.cs-hit{fill:transparent}
+.cs-dot{fill:var(--accent-2);stroke:var(--surface);stroke-width:2}
+.cs-dot.gated{fill:var(--surface);stroke:var(--ink-3);stroke-width:1.5}
+.cs-dot.chosen{fill:var(--accent)}.cs-ring{fill:none;stroke:var(--accent);stroke-width:2}
+.cs-label{font-size:11px;fill:var(--ink-2)}.cs-label.gated{fill:var(--ink-3)}.cs-label.chosen{fill:var(--ink);font-weight:700}
+.cs-legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--ink-2)}
+.cs-legend span{display:inline-flex;align-items:center;gap:6px}
+.cs-legend i{display:inline-block;width:10px;height:10px}
+.k-dot{border-radius:50%;background:var(--accent-2)}.k-dot.gated{background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--ink-3)}
+.k-dot.chosen{background:var(--accent);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
+.k-square{border-radius:2px;background:var(--accent-2)}
+.k-floor{width:auto!important;height:auto!important;font-style:normal;color:var(--ink-3)}
+.cs-floor{fill:none;stroke:var(--ink-3);stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+.k-gate{width:18px!important;height:0!important;border-top:1.5px dashed var(--bad-fg)}
+</style></head>
+<body><div class="page">
+  <header class="run">
+    <p class="eyebrow">Agentic Evaluator · run report · protocol 0.3</p>
+    <h1>Step code · <span class="id">agb-skill-ablation</span></h1>
+    <dl class="kv">
+      <div><dt>Spec</dt><dd>tasks/agb-skill-ablation/spec.yaml · sha256 9937abad</dd></div>
+      <div><dt>Test set</dt><dd>code-v1 · 2 input(s)</dd></div>
+      <div><dt>Trial plan</dt><dd>4 candidates × 2 inputs × 1 trial = 8</dd></div>
+      <div><dt>Judge</dt><dd>openai/gpt-6.1-sol · rubric fa8dfe5f</dd></div>
+      <div><dt>Mode</dt><dd>production-realistic · cold cache</dd></div>
+      <div><dt>Run time</dt><dd>2026-11-17 18:30 → 08:59</dd></div>
+      <div><dt>Operating mode</dt><dd>highest assurance · directional · recommend sonnet-5-5-skill</dd></div>
+      <div><dt>harness</dt><dd>0.4.0 · ccd82bc2</dd></div>
+    </dl>
+  </header>
+
+  <section class="card">
+    <h2>What this evaluates</h2>
+    <p>(agb 0a8c4ee7) Does agb&#39;s Claude Code skill pack make Claude better at each agb stage? Same model and starting tree (agb&#39;s adopted output of the earlier stages), with the agb-skills plugin running /agb-&lt;stage&gt; or without any plugin. Planning steps: passes when the deliverables parse, agb&#39;s required gates are the score, pairwise judge on substance. Code: held-out acceptance tests.</p>
+    <p><b>This step (code)</b>: Build the whole planned project (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints), with or without agb&#39;s skills.</p>
+    <p class="note"><b>A pass of build-tests</b> means: First the arm: the trace must show the arm the candidate is labelled (-skill loaded agb-skills with /agb-code and acted on it; -none had no agb plugin, command, skill or CLI call), else the trial is void (evaluator error). Then the built app comes up (install, compose services, migrations, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the held-out pass rate is the score.</p>
+    
+  </section>
+
+  
+
+  <div class="verdict directional">
+    <span class="tag">directional</span>
+    <div>
+      <p class="champ-line">Recommend <b>sonnet-5-5-skill</b> <span class="mode">· highest assurance</span></p>
+      <p class="champ-facts">$10.2805 per success · required check 2/2 passed · check score 100%</p>
+      <p class="sub">3 eligible candidates tie at 1.000 (2/2) reliability and 1.000 (2/2) required-check pass rate (within the minimum meaningful difference 0.05); sonnet-5-5-skill is picked by the judge&#39;s pairwise score (sonnet-5-5-skill 67%, next opus-5-5-none 42%).</p>
+      
+      <p class="sub">The judge preferred opus-5-5-skill most (5 W 0 L 1 T of 6), which differs from the recommendation — the recommendation compares only candidates that pass the required checks, by operating mode, and does not use judge preference.</p>
+      <p class="sub">Directional only: only 2 input(s) (fewer than 6). Also sonnet-5-5-skill: required-check-pass-rate 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95; sonnet-5-5-skill: reliability 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95.</p>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>Cost and success <span class="hint">one point per candidate · up passes the required check more often, left costs less per success</span></h2>
+    <figure class="cs-fig"><svg class="cs" viewBox="0 0 640 320" role="img" aria-label="Required-check pass rate against generation cost per success, one point per candidate">
+    <line class="cs-grid" x1="52" x2="616" y1="280.0" y2="280.0"/><text class="cs-tick" x="44" y="284.0" text-anchor="end">95%</text><line class="cs-grid" x1="52" x2="616" y1="36.0" y2="36.0"/><text class="cs-tick" x="44" y="40.0" text-anchor="end">100%</text><text class="cs-tick" x="52.0" y="298" text-anchor="middle">$0.1</text><text class="cs-tick" x="240.0" y="298" text-anchor="middle">$1</text><text class="cs-tick" x="428.0" y="298" text-anchor="middle">$10</text><text class="cs-tick" x="616.0" y="298" text-anchor="middle">$100</text><line class="cs-gate" x1="52" x2="616" y1="36.0" y2="36.0"/>
+    <text class="cs-axis" x="334.0" y="316" text-anchor="middle">generation cost per success (log scale) — cheaper is left</text>
+    <g><title>opus-5-5-skill · required check 1/1 · $72.5231 per success · gated out: reliability 50.0% (1/2)</title><circle class="cs-hit" cx="589.8" cy="36.0" r="12"/><line class="cs-leader" x1="589.8" y1="36.0" x2="582.8" y2="49.0"/><circle class="cs-dot gated" cx="589.8" cy="36.0" r="5"/><text class="cs-label gated" x="580.8" y="53.0" text-anchor="end">opus-5-5-skill</text></g><g><title>opus-5-5-none · required check 2/2 · $0.9489 per success</title><circle class="cs-hit" cx="235.7" cy="36.0" r="12"/><line class="cs-leader" x1="235.7" y1="36.0" x2="242.7" y2="49.0"/><circle class="cs-dot" cx="235.7" cy="36.0" r="5"/><text class="cs-label" x="244.7" y="53.0" text-anchor="start">opus-5-5-none</text></g><g><title>sonnet-5-5-skill · required check 2/2 · $10.2805 per success · recommended</title><circle class="cs-hit" cx="430.3" cy="36.0" r="12"/><line class="cs-leader" x1="430.3" y1="36.0" x2="437.3" y2="23.0"/><circle class="cs-ring" cx="430.3" cy="36.0" r="9"/><circle class="cs-dot chosen" cx="430.3" cy="36.0" r="5"/><text class="cs-label chosen" x="439.3" y="27.0" text-anchor="start">sonnet-5-5-skill</text></g><g><title>sonnet-5-5-none · required check 2/2 · $0.3047 per success</title><circle class="cs-hit" cx="143.0" cy="36.0" r="12"/><line class="cs-leader" x1="143.0" y1="36.0" x2="150.0" y2="23.0"/><circle class="cs-dot" cx="143.0" cy="36.0" r="5"/><text class="cs-label" x="152.0" y="27.0" text-anchor="start">sonnet-5-5-none</text></g>
+  </svg>
+      <figcaption class="cs-legend"><span><i class="k-dot"></i>passed every gate</span><span><i class="k-dot gated"></i>removed by a gate</span><span><i class="k-dot chosen"></i>recommended</span><span><i class="k-square"></i>control</span><span><i class="k-gate"></i>required-check gate ≥ 100%</span></figcaption>
+    </figure>
+    <p class="note">The cost is the generation cost per success the operating mode ranks on: under &quot;lowest cost&quot; the recommendation is the leftmost filled point above the gate. A point can sit above the gate and still be hollow when another gate (reliability, pass^k) removed it; hover a point for its numbers and the gate that removed it.</p>
+  </section>
+
+  <section class="card">
+    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v4</span></h2>
+    <ol class="trace"><li><b>required-check pass rate ≥ 100%</b> — removed: nobody removed. Remaining: opus-5-5-skill, opus-5-5-none, sonnet-5-5-skill, sonnet-5-5-none.</li><li><b>reliability ≥ 100%</b> — removed: opus-5-5-skill (reliability 50.0% (1/2)). Remaining: opus-5-5-none, sonnet-5-5-skill, sonnet-5-5-none.</li></ol>
+    
+    <p class="note">Passed every gate: opus-5-5-none, sonnet-5-5-skill, sonnet-5-5-none. The judge's win rate is for reference only and takes no part in selection.</p>
+  </section>
+
+  <section class="card">
+    <h2>How sure <span class="hint">Wilson 95% intervals counted per input; exact sign test over inputs</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Gate (sonnet-5-5-skill)</th><th class="num">Passed / inputs</th><th class="num">95% interval</th><th class="num">Gate</th><th>At the low end</th></tr></thead>
+      <tbody><tr><td>required-check-pass-rate</td><td class="num">2/2</td><td class="num">0.342–1.000</td><td class="num">1</td><td class="bad">not shown</td></tr><tr><td>reliability</td><td class="num">2/2</td><td class="num">0.342–1.000</td><td class="num">1</td><td class="bad">not shown</td></tr></tbody>
+    </table></div>
+    <p class="note">Against the runner-up, input by input: sonnet-5-5-skill did better on 0, opus-5-5-none on 0, equal on 2 (exact sign test p 1.000, not significant).</p>
+    <p class="note"><b>Effective N 0 of 2.</b> Inputs that separated any two candidates on the required check; 2 every candidate passed and 0 gave everyone the same partial rate, so they cannot inform a choice. The judge preferred one candidate over another on 2. Per-input detail: items.json.</p>
+  </section>
+
+  <section class="card">
+    <h2>Candidates <span class="hint">the same inputs, paired by candidate; 1 trial(s) per cell</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th><th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
+      <tbody><tr class="gated">
+        <td class="cand"><span class="sw sw0"></span>opus-5-5-skill<span class="model">gated out</span><span class="model">anthropic/claude-opus-5.5 · cli/anthropic-subscription, cli/local-cli</span></td>
+        <td><div class="state-list"><span class="ok">1 success</span><span class="bad">0 failure</span><span class="warn">1 undetermined</span></div></td>
+        <td class="num"><span class="pill pass">1 / 1</span><span class="sub">score 96%</span></td>
+        <td class="num"><span class="bar"><span style="width:92%"></span></span>92%<span class="sub">6 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">$72.5231</td>
+        <td class="num">5195.2 s</td>
+        <td><div class="state-list"><span class="ok">2 success</span></div></td>
+      </tr><tr>
+        <td class="cand"><span class="sw sw1"></span>opus-5-5-none<span class="model">anthropic/claude-opus-5.5 · cli/anthropic-subscription, cli/local-cli</span></td>
+        <td><div class="state-list"><span class="ok">2 success</span><span class="bad">0 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill pass">2 / 2</span><span class="sub">score 100%</span></td>
+        <td class="num"><span class="bar"><span style="width:42%"></span></span>42%<span class="sub">6 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">$0.9489</td>
+        <td class="num">619.8 s</td>
+        <td><div class="state-list"><span class="ok">2 success</span></div></td>
+      </tr><tr class="chosen">
+        <td class="cand"><span class="sw sw2"></span>sonnet-5-5-skill<span class="model">recommended</span><span class="model">anthropic/claude-sonnet-5.5 · cli/anthropic-subscription</span></td>
+        <td><div class="state-list"><span class="ok">2 success</span><span class="bad">0 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill pass">2 / 2</span><span class="sub">score 100%</span></td>
+        <td class="num"><span class="bar"><span style="width:67%"></span></span>67%<span class="sub">6 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">$10.2805</td>
+        <td class="num">2610.4 s</td>
+        <td><div class="state-list"><span class="ok">2 success</span></div></td>
+      </tr><tr>
+        <td class="cand"><span class="sw sw3"></span>sonnet-5-5-none<span class="model">anthropic/claude-sonnet-5.5 · cli/anthropic-subscription</span></td>
+        <td><div class="state-list"><span class="ok">2 success</span><span class="bad">0 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill pass">2 / 2</span><span class="sub">score 100%</span></td>
+        <td class="num"><span class="bar"><span style="width:0%"></span></span>0%<span class="sub">6 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">$0.3047</td>
+        <td class="num">292.0 s</td>
+        <td><div class="state-list"><span class="ok">2 success</span></div></td>
+      </tr></tbody>
+    </table></div>
+    <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.</p>
+  </section>
+
+  
+
+  <div class="two-col">
+    <section class="card">
+      <h2>Agent activity <span class="hint">from the trace each command left (cli.trace); medians over traced trials; — where the format records nothing</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Candidate</th><th class="num">Turns p50</th><th class="num">Tool calls p50</th><th>Most-called tools</th><th class="num">Retries</th><th class="num">Denials</th><th>Ended</th></tr></thead>
+        <tbody><tr><td class="cand">opus-5-5-skill<span class="model">1 of 2 trial(s) traced</span></td>
+        <td class="num">28</td><td class="num">26</td>
+        <td><code>Bash</code> ×19, <code>ScheduleWakeup</code> ×3, <code>Read</code> ×2, <code>Grep</code> ×1, <code>Write</code> ×1</td>
+        <td class="num">0</td><td class="num">0</td>
+        <td>1 finished</td></tr><tr><td class="cand">opus-5-5-none<span class="model">1 of 2 trial(s) traced · 1 unreadable</span></td>
+        <td class="num">23</td><td class="num">23</td>
+        <td><code>Bash</code> ×22, <code>Read</code> ×1</td>
+        <td class="num">0</td><td class="num">0</td>
+        <td>1 finished</td></tr><tr><td class="cand">sonnet-5-5-skill<span class="model">2 of 2 trial(s) traced</span></td>
+        <td class="num">10</td><td class="num">8</td>
+        <td><code>Bash</code> ×21</td>
+        <td class="num">0</td><td class="num">0</td>
+        <td>2 finished</td></tr><tr><td class="cand">sonnet-5-5-none<span class="model">2 of 2 trial(s) traced</span></td>
+        <td class="num">12</td><td class="num">12</td>
+        <td><code>Bash</code> ×62, <code>Agent</code> ×1, <code>Monitor</code> ×1</td>
+        <td class="num">0</td><td class="num">0</td>
+        <td>2 finished</td></tr></tbody>
+      </table></div>
+      <p class="note">Counts per trial are in <code>agent</code> on each row of scores.jsonl; the turn list is in traces/. Nothing here enters the selection.</p>
+    </section>
+    <section class="card">
+      <h2>Evaluation coverage <span class="hint">the evaluators' own state, before any pass rate</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Evaluator</th><th>Version</th><th class="num">Expected</th><th class="num">pass / fail</th><th class="num">Not evaluated</th><th class="num">Evaluator error</th></tr></thead>
+        <tbody><tr><td>build-tests</td><td class="mono small">cmd-c0156e9f+files-ee9197e9</td>
+        <td class="num">8</td>
+        <td class="num">7 / 0</td>
+        <td class="num">0</td>
+        <td class="num"><span class="pill warn">1</span></td></tr><tr><td>pairwise-swap</td><td class="mono small">openai/gpt-6.1-sol+rubric-fa8dfe5f+tpl-1fc69c82</td>
+        <td class="num">12</td>
+        <td class="num">12 / 0</td>
+        <td class="num">0</td>
+        <td class="num">0</td></tr></tbody>
+      </table></div>
+      <ul class="gaps"><li><code>build-tests</code> opus-5-5-skill · invoice · t0: check exited with 2</li></ul>
+    </section>
+    <section class="card">
+      <h2>Cost breakdown <span class="hint">source: estimated</span></h2>
+      <div class="table-wrap"><table class="ledger"><tbody>
+        <tr><td>Candidate generation · 8 trials</td><td class="num">$95.5914</td></tr>
+        <tr><td>Pairwise judging</td><td class="num">$8.6816</td></tr>
+        <tr><td>Absolute scoring</td><td class="num">$0.0000</td></tr>
+        <tr><td>Deterministic checks</td><td class="num">$0.0000</td></tr>
+        <tr><td>Retries and recovery</td><td class="num">$0.0000</td></tr>
+        <tr class="total"><td>Total</td><td class="num">$104.2729</td></tr>
+        <tr><td>Full cost per success</td><td class="num">$14.8961</td></tr>
+      </tbody></table></div>
+      <p class="note">Evaluation spend is 0.1× generation spend.</p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Judge scores <span class="hint">pairwise win rate · not used by the recommendation</span></h2>
+    <p class="note"><b>No 1–5 scores:</b> this step's <code>methods</code> does not declare <code>absolute-1-5</code>. That was declared, not missed.</p>
+    
+    <figure class="viz">
+    <figcaption>Direction · pairwise win rate 0–100 <span class="hint">who was preferred; a tie counts 0.5</span></figcaption>
+    <div class="table-wrap"><table class="pref">
+      <thead><tr><th>Candidate</th><th class="num">correctness</th><th class="num">structure</th><th class="num">tests</th><th class="num">scope</th></tr></thead>
+      <tbody><tr><td>opus-5-5-skill</td><td class="num" style="background:rgba(42,120,214,0.597)">92</td><td class="num" style="background:rgba(42,120,214,0.700)">100</td><td class="num" style="background:rgba(42,120,214,0.080)">50</td><td class="num" style="background:rgba(201,58,57,0.287)">33</td></tr><tr><td>opus-5-5-none</td><td class="num" style="background:rgba(201,58,57,0.183)">42</td><td class="num" style="background:rgba(42,120,214,0.287)">67</td><td class="num" style="background:rgba(42,120,214,0.080)">50</td><td class="num" style="background:rgba(42,120,214,0.080)">50</td></tr><tr><td>sonnet-5-5-skill</td><td class="num" style="background:rgba(42,120,214,0.287)">67</td><td class="num" style="background:rgba(201,58,57,0.597)">8</td><td class="num" style="background:rgba(42,120,214,0.493)">83</td><td class="num" style="background:rgba(201,58,57,0.287)">33</td></tr><tr><td>sonnet-5-5-none</td><td class="num" style="background:rgba(201,58,57,0.700)">0</td><td class="num" style="background:rgba(201,58,57,0.390)">25</td><td class="num" style="background:rgba(201,58,57,0.493)">17</td><td class="num" style="background:rgba(42,120,214,0.493)">83</td></tr></tbody>
+    </table></div>
+  </figure><p class="note"><b>Pairwise win rate</b> (the table above) is a separate question: shown two outputs side by side, which did the judge prefer, 0–100, a tie counting 0.5. It only counts the matches each candidate took part in, so <code>0</code> means "lost every match", not "bad output".</p>
+  </section>
+
+  <section class="card">
+    <h2>Outputs side by side <span class="hint">every candidate's answer to the same input, first trial, exactly the text the judge saw</span></h2>
+    <details><summary>demo-todo</summary><div class="sbs"><article><header><strong>opus-5-5-skill</strong> <span class="muted">no raw output saved</span></header></article><article><header><strong>opus-5-5-none</strong> <span class="muted">no raw output saved</span></header></article><article><header><strong>sonnet-5-5-skill</strong> <span class="muted">no raw output saved</span></header></article><article><header><strong>sonnet-5-5-none</strong> <span class="muted">no raw output saved</span></header></article></div></details><details><summary>invoice</summary><div class="sbs"><article><header><strong>opus-5-5-skill</strong> <span class="muted">no raw output saved</span></header></article><article><header><strong>opus-5-5-none</strong> <span class="muted">no raw output saved</span></header></article><article><header><strong>sonnet-5-5-skill</strong> <span class="muted">no raw output saved</span></header></article><article><header><strong>sonnet-5-5-none</strong> <span class="muted">no raw output saved</span></header></article></div></details>
+  </section>
+
+  
+  <section class="card">
+    <h2>Match evidence <span class="hint">each dimension judged separately; an order disagreement is recorded as a tie by rule</span></h2>
+    
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-skill</strong> vs <strong>opus-5-5-none</strong>
+          <span class="muted">demo-todo</span>
+          <span class="chip win">opus-5-5-skill</span> 
+        </header>
+        <p class="evidence">A addresses concrete data-loss risks in TaskDetailPage.tsx that remain in B&#39;s whole-task draft synchronization, and its tests explicitly reproduce those concurrent-edit scenarios. Its additional scope is a drawback, but the stronger HTTP failure handling, shared workflow definition, and tested error recovery make A the safer implementation to merge and build on.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5-skill</span> </td><td>In TaskDetailPage.tsx, A tracks saves per field and merges only the returned field into the latest cached task; B uses one SaveState and replaces all drafts whenever task data changes, allowing one completed save to overwrite another field&#39;s unsaved input. A&#39;s api/http.ts also bounds fetching and response-body reading with a timeout and rejects empty or non-JSON successes, whereas B has no timeout and returns null as successful typed data.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s client/domain/workflow.ts reuses server/domain/taskWorkflow.ts, while B maintains separate frontend and backend transition tables and status types. A also centralizes request validation and error handling in server/src/http.ts and extracts ConfirmDialog and RetryButton, whereas B repeats manual validation in its routes and embeds the removal dialog in MembersPage.tsx.</td></tr><tr><th>tests</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s TaskDetailPage.test.tsx exercises overlapping field saves, preservation of an unrelated draft, and reconciliation after a stale-state 409; B&#39;s corresponding tests cover individual saves and transitions but not those interleavings. A additionally tests response-body failures in api/http.test.ts and successful recovery through retry controls in LoadErrorRetry.test.tsx, with no corresponding tests in B.</td></tr><tr><th>scope</th><td><span class="chip win">opus-5-5-none</span> </td><td>A adds operational facilities including a /health endpoint in server/src/index.ts, configurable proxy handling in env.ts, and destructive database rebuilding through resetDb in db.ts; B&#39;s corresponding server files stay focused on application startup, schema creation, and task/member endpoints. Although B explicitly adds an unassigned filter option, its overall change introduces fewer ancillary facilities than A.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-skill</strong> vs <strong>sonnet-5-5-skill</strong>
+          <span class="muted">demo-todo</span>
+          <span class="chip win">opus-5-5-skill</span> 
+        </header>
+        <p class="evidence">A provides stronger persistence and concurrency safeguards in server/src/routes/tasks.ts and verifies difficult client save interleavings in TaskDetailPage.test.tsx. B is shorter, but its unconditional transition updates, duplicated workflow definitions, and additional idempotency protocol make it a less reliable foundation to merge and extend.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s server/src/routes/tasks.ts validates and updates transitions inside an immediate transaction with a conditional status update; B reads the status and then updates it unconditionally outside a transaction, allowing competing database connections to invalidate that decision. A&#39;s client/src/api/http.ts also applies a timeout through response-body reading, whereas B&#39;s http.ts has no timeout and can leave requests pending indefinitely.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s client/src/domain/workflow.ts reuses server/src/domain/taskWorkflow.ts, while B separately defines workflow rules in the server domain, TransitionButtons.tsx, and TaskCard.tsx. A also separates application assembly, startup, and HTTP error handling into server/src/index.ts, main.ts, and http.ts; B combines those responsibilities in index.ts.</td></tr><tr><th>tests</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s TaskDetailPage.test.tsx deliberately holds and releases requests to test overlapping field saves and transitions without losing drafts; B&#39;s detail tests cover ordinary saves and failures but not those interleavings. A&#39;s api/http.test.ts additionally tests interrupted response bodies and body-read timeouts, while B&#39;s HTTP tests cover fetch rejection and invalid JSON without exercising stalled or interrupted bodies.</td></tr><tr><th>scope</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>B adds an Idempotency-Key protocol across NewTaskPage.tsx, api/tasks.ts, server/src/routes/tasks.ts, and a new idempotency_keys table, including replay and 422-conflict semantics. A avoids that additional persistent API feature and implements ordinary creation plus in-flight UI controls, leaving fewer new protocol rules to maintain for the task-management demonstration.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-skill</strong> vs <strong>sonnet-5-5-none</strong>
+          <span class="muted">demo-todo</span>
+          <span class="chip win">opus-5-5-skill</span> 
+        </header>
+        <p class="evidence">A&#39;s field-specific cache merging in TaskDetailPage.tsx and bounded, normalized HTTP handling address concrete data-loss and failure-state risks left in B. Its concurrency and recovery tests exercise those differences directly, making A the stronger foundation despite its larger operational scope.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s TaskDetailPage.tsx merges only the saved field or returned status into the latest cached task and tracks saving per field; B replaces whole tasks and uses one saving flag, allowing concurrent saves or transitions to overwrite newer cached values or prematurely enable fields. A&#39;s api/http.ts also normalizes response-body failures and rejects empty/non-JSON successes with a timeout, whereas B&#39;s http.ts swallows JSON-reading failures and returns null as successful data.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A centralizes server validation and error handling in server/src/http.ts and exposes reusable useMembers/useTasks hooks; B repeats query configuration in pages and constructs validation/error responses throughout both route modules. A&#39;s client workflow imports the server&#39;s transition definition, while B separately defines server TRANSITIONS and client ACTIONS, leaving the same workflow maintained in two places.</td></tr><tr><th>tests</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s TaskDetailPage.test.tsx deliberately holds requests to verify concurrent field saves, preservation of drafts, and transitions not overwriting newer titles; B&#39;s corresponding tests cover basic saves and transitions without those interleavings. A additionally tests stalled and broken HTTP response bodies in api/http.test.ts and stale-state recovery in BoardPage.test.ts, while B has no corresponding HTTP tests and its fakeServer accepts transitions without checking legality.</td></tr><tr><th>scope</th><td><span class="chip win">sonnet-5-5-none</span> </td><td>B confines its implementation largely to the task/member API, four pages, persistence, and their tests. A additionally introduces a /health endpoint, configurable proxy handling, shared CSP/security-header infrastructure, and URL-persisted board filters, adding operational and view-state machinery beyond B&#39;s smaller demonstration implementation.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-none</strong> vs <strong>sonnet-5-5-skill</strong>
+          <span class="muted">demo-todo</span>
+          <span class="chip win">sonnet-5-5-skill</span> 
+        </header>
+        <p class="evidence">B&#39;s TaskDetailPage protects unsaved edits that A&#39;s unconditional draft synchronization can discard, and its BoardPage handles member-service failures explicitly rather than misrepresenting assignments. Its stale-cache cross-page tests and additional failure/recovery tests provide stronger regression protection. A has cleaner module boundaries and tighter scope, but B&#39;s concrete improvements to data-entry correctness and failure handling outweigh those advantages.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">sonnet-5-5-skill</span> </td><td>In A&#39;s TaskDetailPage.tsx, every task-data update unconditionally resets all drafts, so a title-save response or background refetch can erase an unsaved description; B tracks previous server values and preserves dirty drafts, and disables all editing fields during a PATCH. B&#39;s BoardPage also reports member-loading failures and avoids displaying assigned tasks as unassigned, whereas A silently falls back to an empty member list and labels those tasks「未分配」.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-none</span> </td><td>A separates Express assembly into server/src/app.ts and process startup/static serving into index.ts; B puts assembly, health checks, error handling, static serving, and startup in index.ts. A also centralizes frontend transition definitions in domain/workflow.ts for both TaskCard and TransitionButtons, while B defines their transition choices separately in those components.</td></tr><tr><th>tests</th><td><span class="chip win">sonnet-5-5-skill</span> </td><td>B&#39;s renderWithProviders uses staleTime: Infinity, so its cross-page tests cannot pass merely because remounting automatically refetches; A&#39;s render helpers retain the default stale behavior. B additionally tests malformed successful HTTP responses, same-frame duplicate submissions, session-state restoration, and loading-error recovery, while A&#39;s shown tests do not cover those cases.</td></tr><tr><th>scope</th><td><span class="chip win">opus-5-5-none</span> </td><td>B adds an Idempotency-Key protocol, a persistent idempotency_keys table, a /health endpoint, and new text-length restrictions in validate.ts beyond the task-management endpoints. A implements the task/member operations without those additional protocols or product restrictions, keeping the change closer to the stated Tier S demonstration.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-none</strong> vs <strong>sonnet-5-5-none</strong>
+          <span class="muted">demo-todo</span>
+          <span class="chip win">opus-5-5-none</span> 
+        </header>
+        <p class="evidence">A is the stronger merge candidate because server/src/db.ts protects persistence invariants and server/src/routes/tasks.ts makes transition checking and updating transactional, unlike B. Its held-request tests also exercise pending-state behavior that B&#39;s immediate fake server cannot verify. Those concrete safeguards outweigh A&#39;s modest additional UI scope.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5-none</span> </td><td>In server/src/db.ts, A enables foreign keys, declares ON DELETE SET NULL, constrains task statuses, and creates missing database directories; B has neither database constraints nor directory creation. A also wraps transition validation and updating in a transaction in server/src/routes/tasks.ts, whereas B performs the read and update separately. In NewTaskPage.tsx, A displays member-loading failures, while B silently presents an unassigned-only selector after failure.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-none</span> </td><td>A puts frontend transition rules and workload calculation in client/src/domain/workflow.ts; B exports these rules from TransitionButtons.tsx and WorkloadSidebar.tsx, making TaskCard depend on another UI component for domain rules. A&#39;s server task routes use a typed Task interface and its client API modules expose reusable useTasks/useMembers hooks, whereas B uses any for server task records and repeats query setup across pages.</td></tr><tr><th>tests</th><td><span class="chip win">opus-5-5-none</span> </td><td>A&#39;s fakeApi.ts supports holding requests, and its BoardPage, NewTaskPage, and TaskDetailPage tests assert disabled/loading behavior while writes remain pending; B&#39;s fakeServer.ts only supports immediate responses and injected failures. A additionally tests unchanged-field blur avoiding PATCH, failed reassignment rollback, and failed detail transitions, none of which B&#39;s corresponding tests cover. Both add cross-page behavior tests, but A checks more observable failure and intermediate states.</td></tr><tr><th>scope</th><td><span class="chip win">sonnet-5-5-none</span> </td><td>B keeps BoardPage&#39;s assignee filter to all members or a specific member, while A adds an unassigned filter that its README explicitly describes as an extra convenience. B also keeps toast rendering within BoardPage, whereas A adds a separate Toast component with configurable duration and manual dismissal. B delivers the core behavior with fewer optional additions.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>sonnet-5-5-skill</strong> vs <strong>sonnet-5-5-none</strong>
+          <span class="muted">demo-todo</span>
+          <span class="chip win">sonnet-5-5-skill</span> 
+        </header>
+        <p class="evidence">A provides stronger failure handling and cache consistency in http.ts and api/members.ts, backed by concrete edge-case regressions in http.test.ts and auditFixes.test.tsx. Although B is narrower, its permissive HTTP parsing, stale task-detail cache after member removal, and less faithful fake server make it the weaker foundation to merge.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">sonnet-5-5-skill</span> </td><td>A&#39;s http.ts rejects malformed successful responses and checks that error messages are strings; B returns null for non-JSON success responses and accepts arbitrary error values. A also invalidates member, task-list, and task-detail caches after member removal, including failure, whereas B invalidates only members and task lists on success and can leave cached details stale.</td></tr><tr><th>structure</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>A centralizes query and mutation lifecycle handling in api/members.ts and api/tasks.ts, including task-cache updates and invalidation. B repeats useQuery setup across pages and implements separate transition/cache-update paths in BoardPage.tsx and TaskDetailPage.tsx, making those pages responsible for more persistence coordination.</td></tr><tr><th>tests</th><td><span class="chip win">sonnet-5-5-skill</span> </td><td>A adds regression tests for same-frame duplicate submission, idempotency-key reuse, member-removal 404 refresh, malformed HTTP responses, and preservation of board session state; B&#39;s tests do not cover these edges. A&#39;s fakeApi.tsx also validates transitions and PATCH fields, while B&#39;s fakeServer.ts accepts any transition target and applies PATCH with Object.assign, allowing unrealistic backend behavior to pass client tests.</td></tr><tr><th>scope</th><td><span class="chip win">sonnet-5-5-none</span> </td><td>B stays closer to the basic task-management implementation, while A additionally introduces a persistent idempotency_keys table, an Idempotency-Key protocol, a writable-database /health probe, and security-header middleware. Those additions in A&#39;s db.ts, routes/tasks.ts, and index.ts expand the implementation and maintenance surface beyond B&#39;s CRUD and workflow paths.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-skill</strong> vs <strong>opus-5-5-none</strong>
+          <span class="muted">invoice</span>
+          <span class="chip win">opus-5-5-skill</span> 
+        </header>
+        <p class="evidence">A is the safer foundation: its signed installation callback and installation check close concrete authorization gaps present in B, and its recurring scheduler handles actual send outcomes rather than only successful enqueueing. B&#39;s broader integration tests are valuable, but they do not outweigh those correctness differences or A&#39;s explicit AppDeps boundaries.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s webhook/portalInstall.ts requires a Cobo signature, and auth/session.ts rejects organizations without an installation record; B&#39;s corresponding installation handler accepts unsigned requests, and session exchange automatically creates organizations through refreshOrganization. A&#39;s schedule/recurring.ts also waits for the send pipeline and handles its failure before retrying, whereas B&#39;s generateOnce treats starting an asynchronous send as successful generation, so subsequent link or email failures bypass recurring-generation retries.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A passes database, Cobo client, clock, configuration, and job queue through AppDeps, while B&#39;s handlers depend on mutable process-wide getDb(), getCobo(), and config() state. A also centralizes repeated idempotency execution in withIdempotency; B repeats claim, replay, completion, and release orchestration in invoice/send.ts, invoice/void.ts, and settlement/create.ts.</td></tr><tr><th>tests</th><td><span class="chip win">opus-5-5-none</span> </td><td>B adds HTTP-and-database integration tests in invoice/send.test.ts, invoice/void.test.ts, settlement/create.test.ts, and platform.test.ts that exercise persistence, compensation, idempotent replay, and tenant isolation; A&#39;s supplied tests primarily cover frontend helpers and session behavior. B&#39;s ClientModal.test.tsx additionally drives actual user input and verifies invalid submissions make no request, whereas A supplies no comparable interactive form test.</td></tr><tr><th>scope</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>B embeds a mock payment application, email-address-based fault injection, and state-changing /api/__test/* routes in services/api/src, including production application registration branches in app.ts. A keeps its application assembly free of those demo and test routes and instead exposes a CoboClient dependency for substitution, leaving less auxiliary behavior inside the product server.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-skill</strong> vs <strong>sonnet-5-5-skill</strong>
+          <span class="muted">invoice</span>
+          <span class="chip tie">tie</span> 
+        </header>
+        <p class="evidence">A is the safer foundation because installation authorization and payout verification are enforced in auth/session.ts, webhook/portalInstall.ts, and webhook/settlement.ts, where B leaves concrete trust gaps. B has stronger supplied backend tests and correctly preserves historical settlement outcomes in settlement/routes.ts, unlike A&#39;s current-invoice-status lookup, but those advantages do not outweigh A&#39;s stronger authorization boundaries and shared-module structure.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>A&#39;s auth/session.ts rejects organizations without an installation record, and webhook/portalInstall.ts requires a valid signature; B&#39;s auth/session.ts permits login while creating organization snapshots, and webhook/routes.ts explicitly leaves portal-install unsigned. A also rechecks the actual payout status through Cobo in webhook/settlement.ts, whereas B&#39;s webhook/settlement.ts advances financial state directly from the callback&#39;s status.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A puts shared validation, money handling, and enums in packages/shared and exposes service methods through apps/web/src/api/index.ts; B duplicates validation and token definitions between frontend and backend, and Dashboard.tsx imports services/api/src/dashboard/range directly. A also injects the database through AppDeps and separates invoice handlers into focused files, whereas B imports a global, eagerly initialized database throughout its large invoice/routes.ts and settlement/routes.ts modules.</td></tr><tr><th>tests</th><td><span class="chip win">sonnet-5-5-skill</span> </td><td>B adds substantial API integration coverage in invoice/send.test.ts, settlement/create.test.ts, and webhook/webhook.test.ts, including a database-trigger failure that verifies payout processing rolls back atomically. A&#39;s supplied tests cover useful frontend regressions such as settlement pagination and session expiry, but include no comparable backend integration tests for its financial transitions.</td></tr><tr><th>scope</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>B introduces public auth/config and auth/demo-session endpoints plus a demo-login UI in NoPermission.tsx, while A keeps authentication to the portal exchange and supplies demonstration access through its mock portal and seed tooling. B also retains createPeriodClaimer in recurring/series.ts solely for an in-memory unit test despite production scheduling using database idempotency; A&#39;s recurring scheduler uses its database-backed claim mechanism directly.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-skill</strong> vs <strong>sonnet-5-5-none</strong>
+          <span class="muted">invoice</span>
+          <span class="chip win">opus-5-5-skill</span> 
+        </header>
+        <p class="evidence">A is the safer foundation: its installation authentication and failed-send cleanup preserve important security and payment-state boundaries that B does not. Its shared validation and calculation modules also avoid B&#39;s frontend/backend divergence. B&#39;s stronger supplied backend test coverage does not outweigh those implementation defects.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A&#39;s webhook/portalInstall.ts verifies signatures, and auth/session.ts rejects organizations not already installed; B&#39;s corresponding handlers accept unsigned installation requests and automatically create organizations during login. A&#39;s invoice/send.ts also retains Sending when link cancellation fails, whereas B&#39;s runSendJob explicitly returns to Draft even when cancellation fails, potentially leaving a payable link attached to a retryable invoice.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-skill</span> </td><td>A shares validation, constants, dates, and monetary calculations through packages/shared, including using computeInvoiceTotals in both InvoiceForm.tsx and backend invoice persistence. B duplicates validation across frontend and backend client/validate.ts and invoice/validate.ts, and implements separate frontend invoice/calc.ts and backend lib/money.ts calculations with different intermediate totals. A also separates settlement handlers into focused modules where B puts listing, estimation, creation, compensation, and detail handling together in settlement/routes.ts.</td></tr><tr><th>tests</th><td><span class="chip win">sonnet-5-5-none</span> </td><td>B adds substantial HTTP-and-database integration coverage in invoice/send.test.ts, invoice/void.test.ts, settlement/create.test.ts, and webhook/verify.test.ts, asserting persisted state, concurrent submissions, rollback, and signature tampering. A&#39;s supplied tests cover useful frontend regressions such as settlement pagination and session expiry, but include no comparable backend integration tests. B&#39;s coverage still has weaknesses, notably testing unsigned installation callbacks as successful in webhook/verify.test.ts.</td></tr><tr><th>scope</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>B leaves an empty useEffect in SettlementRequest.tsx and unused imports such as fmtDate in that file and useRef in PayerInvoice.tsx. A&#39;s corresponding settlement page performs actual selection and address synchronization, and its extracted settlementConfirm.ts and useUrlState.ts helpers are exercised by dedicated tests. These concrete leftovers make B less merge-ready on scope despite its generally shorter presentation.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-none</strong> vs <strong>sonnet-5-5-skill</strong>
+          <span class="muted">invoice</span>
+          <span class="chip tie">tie</span> 
+        </header>
+        <p class="evidence">A is the safer foundation because it preserves invoices whose payment links may still be live and does not reclaim another running instance&#39;s idempotency claims. B&#39;s stronger failure-injection tests are valuable, but they do not offset those financial-state risks or its duplicated frontend/backend validation compared with A&#39;s shared contract rules.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>B&#39;s recurring/routes.ts generateOne unconditionally deletes the generated invoice after unsuccessful sending attempts, including when runSend deliberately leaves it Sending because its live payment link could not be cancelled; A&#39;s processSend preserves that Sending record for reconciliation. B&#39;s lib/idempotency.ts also treats any owner different from BOOT_ID as a dead process and permits resumption or deletion of its claim, which is unsafe with multiple live instances; A&#39;s claimKey returns request_in_flight instead.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-none</span> </td><td>A centralizes frontend endpoint functions in api/endpoints.ts and shares domain types and validation through _contracts/shared/domain.ts; B embeds request paths throughout pages and separately defines token/status enums and form-validation rules. A also keeps dashboard range validation in the shared contract layer, whereas B&#39;s Dashboard.tsx imports it directly from services/api/src/dashboard/range.ts.</td></tr><tr><th>tests</th><td><span class="chip win">sonnet-5-5-skill</span> </td><td>B adds concrete failure-injection tests in webhook/webhook.test.ts and invoice/statusLog.test.ts that verify transaction rollback when an invoice update or status-log insert fails; A tests successful transitions and duplicate delivery but does not inject those database failures. B additionally tests abandoned webhook claims, order-ID mismatches, session expiry, and toast timer cleanup in dedicated tests, covering observable edge behavior absent from A&#39;s added tests.</td></tr><tr><th>scope</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>B adds a default-enabled demo-login API and corresponding UI through auth/session.ts and NoPermission.tsx, while A keeps demonstration access in its documented developer portal-token workflow. B also adds createPeriodClaimer in recurring/series.ts solely for a unit test even though production scheduling uses database idempotency; A&#39;s recurring tests exercise the actual claimKey mechanism instead.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5-none</strong> vs <strong>sonnet-5-5-none</strong>
+          <span class="muted">invoice</span>
+          <span class="chip win">opus-5-5-none</span> 
+        </header>
+        <p class="evidence">A is preferable primarily because webhook/settlement.ts makes terminal settlement processing atomic and invoice/send.ts avoids declaring a draft safe after unsuccessful payment-link cancellation. Its shared validation and money modules also avoid the frontend/backend calculation divergence visible in B, outweighing A&#39;s larger demo-support surface.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5-none</span> </td><td>A&#39;s webhook/settlement.ts updates the settlement request, associated invoices, and status logs in one transaction; B marks the request terminal before separately transitioning invoices, so a failure can leave invoices permanently Settling when a retry skips the terminal request. A&#39;s invoice/send.ts also preserves Sending when cancellation of a failed email&#39;s payment link fails, whereas B&#39;s runSendJob explicitly returns to Draft even when that link could remain payable.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5-none</span> </td><td>A reuses _contracts/shared/domain and _contracts/shared/money for frontend and backend validation and calculations; B maintains separate frontend invoice/calc.ts and backend lib/money.ts implementations with different definitions of displayed tax and discount totals. A also separates settlement creation, estimation, listing, and detail into focused modules, while B puts those handlers and their supporting logic together in settlement/routes.ts.</td></tr><tr><th>tests</th><td><span class="chip win">opus-5-5-none</span> </td><td>A&#39;s webhook/verify.test.ts checks an overpayment smaller than one cent using receivedTokenAmount formed by appending digits, while B&#39;s corresponding test only checks 120.00 against 100.00. A&#39;s platform.test.ts exercises cross-tenant access to an actually created settlement and rejects excessive pageSize, whereas B&#39;s invoice/create.test.ts uses the nonexistent settlement SR-NOPE for its isolation assertion.</td></tr><tr><th>scope</th><td><span class="chip win">sonnet-5-5-none</span> </td><td>B keeps services/api/src/cobo/mock.ts focused on an injectable gateway substitute. A additionally introduces mock/coboHostedPage.ts with an HTML checkout, outcome controls, self-delivered callbacks, and automatic payout settlement, plus email-substring fault injection in cobo/mock.ts; these documented demo conveniences add substantially more supporting machinery to maintain.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>sonnet-5-5-skill</strong> vs <strong>sonnet-5-5-none</strong>
+          <span class="muted">invoice</span>
+          <span class="chip win">sonnet-5-5-skill</span> 
+        </header>
+        <p class="evidence">A is the safer merge because its atomic payout callback processing, client-row locking, and recoverable webhook claims address concrete persistence and concurrency failures left open by B. Its regression tests explicitly demonstrate those guarantees, including rollback after a midway database failure. B&#39;s dependency injection and module separation are preferable structurally, but they do not outweigh these correctness gaps.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">sonnet-5-5-skill</span> </td><td>A&#39;s webhook/settlement.ts updates the settlement request and all invoice statuses in one transaction; B&#39;s webhook/settlement.ts commits the request first, so a later invoice-update failure leaves a terminal request that retries will not finish. A also locks the client row across freeze/save/send checks, whereas B checks client status separately from those writes, permitting freeze races. In authentication, B&#39;s auth/useSession.ts exchanges tokens from any postMessage origin without clearing query caches; A requires portal-token confirmation and resets cached identity data.</td></tr><tr><th>structure</th><td><span class="chip win">sonnet-5-5-none</span> </td><td>B passes a focused Deps object containing the database, Cobo client, configuration, and clock through services, while A imports a module-global database throughout its route and service modules. B also separates invoice sending, voiding, and repository serialization into invoice/send.ts, invoice/void.ts, and invoice/repo.ts, whereas A concentrates those responsibilities in invoice/routes.ts and invoice/service.ts. These boundaries make B easier to instantiate and test independently.</td></tr><tr><th>tests</th><td><span class="chip win">sonnet-5-5-skill</span> </td><td>A&#39;s webhook/webhook.test.ts injects a database-trigger failure midway through payout processing and verifies complete rollback followed by successful retry; B&#39;s payout tests cover successful and failed callbacks but not partial database failure. A additionally tests expired webhook claims, freeze/send concurrency, malformed upstream amounts, and interrupted settlement recovery in webhook/webhook.test.ts, audit.test.ts, and audit2.test.ts. Those tests exercise failure modes beyond B&#39;s predominantly acceptance-numbered happy-path and validation coverage.</td></tr><tr><th>scope</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>B adds a second monetary implementation in apps/web/src/invoice/calc.ts alongside services/api/src/lib/money.ts, while A uses the existing _contracts/money implementation from both tiers. B also introduces portal postMessage token delivery in auth/useSession.ts and local key-generation tooling in devtools/mintToken.ts; A&#39;s portal flow stays with the URL-delivered credential. A therefore introduces fewer parallel mechanisms to maintain.</td></tr></tbody></table>
+      </article>
+  </section>
+
+  
+  <section class="card">
+    <h2>Every trial <span class="hint">the averages in the standings are computed from these rows</span></h2>
+    <table>
+      <thead><tr>
+        <th>Candidate</th><th>Input</th><th class="num">#</th><th>Completion</th><th>Outcome</th>
+        <th class="num">Overall</th><th>Pairwise</th>
+        <th class="num">Output tokens</th><th class="num">Cost</th><th class="num">Duration</th>
+      </tr></thead>
+      <tbody><tr>
+        <td>opus-5-5-skill</td>
+        <td>demo-todo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>win vs opus-5-5-none; win vs sonnet-5-5-skill; win vs sonnet-5-5-none</td>
+        <td class="num">187285</td>
+        <td class="num">$15.2348</td>
+        <td class="num">5195s</td>
+      </tr><tr>
+        <td>opus-5-5-none</td>
+        <td>demo-todo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>loss vs opus-5-5-skill; loss vs sonnet-5-5-skill; win vs sonnet-5-5-none</td>
+        <td class="num">57036</td>
+        <td class="num">$1.8978</td>
+        <td class="num">620s</td>
+      </tr><tr>
+        <td>sonnet-5-5-skill</td>
+        <td>demo-todo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>loss vs opus-5-5-skill; win vs opus-5-5-none; win vs sonnet-5-5-none</td>
+        <td class="num">74293</td>
+        <td class="num">$2.1854</td>
+        <td class="num">2610s</td>
+      </tr><tr>
+        <td>sonnet-5-5-none</td>
+        <td>demo-todo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>loss vs opus-5-5-skill; loss vs opus-5-5-none; loss vs sonnet-5-5-skill</td>
+        <td class="num">33257</td>
+        <td class="num">$0.5472</td>
+        <td class="num">292s</td>
+      </tr><tr>
+        <td>opus-5-5-skill</td>
+        <td>invoice</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>undetermined</td>
+        <td class="num">—</td>
+        
+        <td>win vs opus-5-5-none; tie vs sonnet-5-5-skill; win vs sonnet-5-5-none</td>
+        <td class="num">576971</td>
+        <td class="num">$57.2883</td>
+        <td class="num">21126s</td>
+      </tr><tr>
+        <td>opus-5-5-none</td>
+        <td>invoice</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>loss vs opus-5-5-skill; tie vs sonnet-5-5-skill; win vs sonnet-5-5-none</td>
+        <td class="num">0</td>
+        <td class="num">$0.0000</td>
+        <td class="num">3370s</td>
+      </tr><tr>
+        <td>sonnet-5-5-skill</td>
+        <td>invoice</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>tie vs opus-5-5-skill; tie vs opus-5-5-none; win vs sonnet-5-5-none</td>
+        <td class="num">351399</td>
+        <td class="num">$18.3757</td>
+        <td class="num">14519s</td>
+      </tr><tr>
+        <td>sonnet-5-5-none</td>
+        <td>invoice</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>loss vs opus-5-5-skill; loss vs opus-5-5-none; loss vs sonnet-5-5-skill</td>
+        <td class="num">1044</td>
+        <td class="num">$0.0622</td>
+        <td class="num">1167s</td>
+      </tr></tbody>
+    </table>
+  </section>
+
+  
+  <section class="card">
+    <h2>Candidate outputs <span class="hint">exactly the text the judge saw</span></h2>
+    <details><summary>opus-5-5-skill · demo-todo · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>opus-5-5-none · demo-todo · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>sonnet-5-5-skill · demo-todo · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>sonnet-5-5-none · demo-todo · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>opus-5-5-skill · invoice · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>opus-5-5-none · invoice · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>sonnet-5-5-skill · invoice · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>sonnet-5-5-none · invoice · t0 <span class="muted">— this file is not in raw/</span></summary></details>
+  </section>
+
+  <section class="card">
+    <h2>Fields this run did not observe <span class="hint">GAPS.md</span></h2>
+    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: the provider reported cached prompt tokens on some calls; recorded under <code>tokens.cached</code>, no cache cost breakdown.</li><li><code>deployment_ref.region / tier</code>: who served the model is read from the command&#39;s trace (<code>cli/…</code>), from OpenRouter&#39;s upstream provider, or from the model id a direct API answered with; region and service tier are not exposed.</li><li><code>human_intervention</code>: not observed; no trace format read here says whether the agent waited on a person.</li><li><code>tool_calls</code>, turns: observed for opus-5-5-skill, opus-5-5-none, sonnet-5-5-skill, sonnet-5-5-none (not opus-5-5-skill, opus-5-5-none: no <code>cli.trace</code>, or none left) from the trace the command left; counts in <code>agent</code> per row, the turn list in traces/. 1 trace(s) were left but could not be read (<code>agent_error</code>).</li><li><code>checkpoint</code>: not observed; no trace format read here says whether the agent resumed from one.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: 1 evaluator invocation(s) failed and are recorded as evaluator_error rows (excluded from candidate rates).</li><li>absolute 1–5 scoring: **not run** — the spec declares <code>methods</code> without <code>absolute-1-5</code>. Magnitude is therefore not observed at all in this run; the empty score columns are a declaration, not a failure.</li><li>effective N: 0 of 2 inputs separated any two candidates on task success; 2 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json). The judge preferred one candidate over another on 2 of 2.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: the chosen candidate&#39;s gated rates carry Wilson 95% intervals, and a highest-assurance pick must beat the runner-up on an exact sign test over inputs (recommendation.json <code>evidence</code>). Inputs generated from one template are still treated as independent, which overstates certainty when they share a template.</li><li>**combined run**: built from agb-skill-ablation-2026-11-17T07-37-55-127Z, agb-skill-ablation-2026-11-17T18-30-51-166Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.</li></ul>
+  </section>
+
+  <section class="card">
+    <h2>Raw records</h2>
+    <details><summary>First line of scores.jsonl</summary><pre>{
+ &quot;run&quot;: &quot;agb-skill-ablation-combined-2026-11-18T08-59-55-693Z/code&quot;,
+ &quot;step&quot;: &quot;code&quot;,
+ &quot;candidate&quot;: &quot;opus-5-5-skill&quot;,
+ &quot;model_ref&quot;: &quot;anthropic/claude-opus-5.5&quot;,
+ &quot;deployment_ref&quot;: &quot;cli/anthropic-subscription&quot;,
+ &quot;input&quot;: &quot;demo-todo&quot;,
+ &quot;trial&quot;: 0,
+ &quot;trial_hash&quot;: &quot;cb5b13cd25ef23fcc4017617ed0b60e5d1c70f94da838607d026779cc2213fd4&quot;,
+ &quot;completion_state&quot;: &quot;success&quot;,
+ &quot;truncated&quot;: false,
+ &quot;task_outcome&quot;: &quot;success&quot;,
+ &quot;outcome_reasons&quot;: [
+  &quot;build-tests: pass&quot;
+ ],
+ &quot;rule_version&quot;: &quot;success-v2&quot;,
+ &quot;checks&quot;: {
+  &quot;build-tests&quot;: {
+   &quot;state&quot;: &quot;pass&quot;,
+   &quot;version&quot;: &quot;cmd-c0156e9f+files-ee9197e9&quot;,
+   &quot;evidence&quot;: &quot;arm: 3 session(s); agb-skills plugin loaded; non-builtin plugins: agb-skills; /agb-code listed; Skill calls 0 (agb-skills 0); agb pack reads 3; agb CLI calls 10 (agb run 2). held-out 23/24 (api 8/8, ui 15/16). Failed: AT-012&quot;,
+   &quot;score&quot;: 0.9583333333333334
+  }
+ },
+ &quot;judge&quot;: {
+  &quot;pairwise&quot;: [
+   {
+    &quot;vs&quot;: &quot;opus-5-5-none&quot;,
+    &quot;resolved&quot;: &quot;win&quot;
+   },
+   {
+    &quot;vs&quot;: &quot;sonnet-5-5-skill&quot;,
+    &quot;resolved&quot;: &quot;win&quot;
+   },
+   {
+    &quot;vs&quot;: &quot;sonnet-5-5-none&quot;,
+    &quot;resolved&quot;: &quot;win&quot;
+   }
+  ],
+  &quot;absolute_overall&quot;: null,
+  &quot;absolute_dimensions&quot;: null
+ },
+ &quot;cost&quot;: {
+  &quot;generation&quot;: 15.234786399999999,
+  &quot;retry&quot;: 0,
+  &quot;source&quot;: &quot;estimated&quot;
+ },
+ &quot;tokens&quot;: {
+  &quot;prompt&quot;: 46208144,
+  &quot;completion&quot;: 187285,
+  &quot;cached&quot;: 45739847
+ },
+ &quot;ms&quot;: 5195206,
+ &quot;isolation&quot;: &quot;none&quot;,
+ &quot;agent&quot;: {
+  &quot;format&quot;: &quot;claude-code&quot;,
+  &quot;turns&quot;: 28,
+  &quot;tool_calls&quot;: 26,
+  &quot;tools&quot;: {
+   &quot;Bash&quot;: 19,
+   &quot;ScheduleWakeup&quot;: 3,
+   &quot;Read&quot;: 2,
+   &quot;Grep&quot;: 1,
+   &quot;Write&quot;: 1
+  },
+  &quot;retries&quot;: 0,
+  &quot;denials&quot;: 0,
+  &quot;compactions&quot;: 0,
+  &quot;ended&quot;: &quot;finished&quot;
+ },
+ &quot;ttft_ms&quot;: null,
+ &quot;cache&quot;: null,
+ &quot;finish_reason&quot;: &quot;stop&quot;,
+ &quot;error&quot;: null,
+ &quot;legacy_status&quot;: &quot;ok&quot;,
+ &quot;legacy_check_passed&quot;: true,
+ &quot;reused_from&quot;: null
+}</pre></details>
+    <details><summary>manifest.json</summary><pre>{
+ &quot;protocol_version&quot;: &quot;0.3&quot;,
+ &quot;run_id&quot;: &quot;agb-skill-ablation-combined-2026-11-18T08-59-55-693Z/code&quot;,
+ &quot;run_name&quot;: &quot;agb-skill-ablation&quot;,
+ &quot;step&quot;: {
+  &quot;id&quot;: &quot;code&quot;,
+  &quot;version&quot;: &quot;1&quot;,
+  &quot;description&quot;: &quot;Build the whole planned project (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints), with or without agb&#39;s skills.&quot;
+ },
+ &quot;spec&quot;: {
+  &quot;path&quot;: &quot;tasks/agb-skill-ablation/spec.yaml&quot;,
+  &quot;sha256&quot;: &quot;9937abad9501ba164809428ee649b19e2eca84daa1172c5870f74199b6438209&quot;
+ },
+ &quot;description&quot;: &quot;(agb 0a8c4ee7) Does agb&#39;s Claude Code skill pack make Claude better at each agb stage? Same model and starting tree (agb&#39;s adopted output of the earlier stages), with the agb-skills plugin running /agb-&lt;stage&gt; or without any plugin. Planning steps: passes when the deliverables parse, agb&#39;s required gates are the score, pairwise judge on substance. Code: held-out acceptance tests.&quot;,
+ &quot;test_set&quot;: {
+  &quot;id&quot;: &quot;code-v1&quot;,
+  &quot;inputs&quot;: {
+   &quot;demo-todo&quot;: &quot;9ffe96cbe0dcc1fbe29ae3cac4859888f40e435c97bd51d0f01a484fef36eb55&quot;,
+   &quot;invoice&quot;: &quot;b2ac59090b12c7c4c0b566b22a57389bd0bc23fb5df71736a05c8fb9cc58b118&quot;
+  },
+  &quot;labels&quot;: null
+ },
+ &quot;candidates&quot;: {
+  &quot;opus-5-5-skill&quot;: {
+   &quot;id&quot;: &quot;opus-5-5-skill&quot;,
+   &quot;adapter&quot;: &quot;agent-cli&quot;,
+   &quot;model&quot;: &quot;anthropic/claude-opus-5.5&quot;,
+   &quot;cli&quot;: {
+    &quot;argv&quot;: [
+     &quot;node&quot;,
+     &quot;agents/claude-arm.mjs&quot;,
+     &quot;claude-opus-5-5&quot;,
+     &quot;{{max_cost_usd}}&quot;,
+     &quot;skill&quot;
+    ],
+    &quot;reports_usage&quot;: &quot;tokens&quot;,
+    &quot;trace&quot;: &quot;claude-code&quot;,
+    &quot;version_files&quot;: [
+     &quot;agents/claude-arm.mjs&quot;,
+     &quot;agents/contracts/spec.md&quot;,
+     &quot;agents/contracts/architecture.md&quot;,
+     &quot;agents/contracts/task-breakdown.md&quot;,
+     &quot;agents/contracts/test-design.md&quot;
+    ],
+    &quot;version_sha&quot;: &quot;6a0021665d13d724ca88aa09c187da16e3e226e536e27436365fa3aca8c7547d&quot;
+   }
+  },
+  &quot;opus-5-5-none&quot;: {
+   &quot;id&quot;: &quot;opus-5-5-none&quot;,
+   &quot;adapter&quot;: &quot;agent-cli&quot;,
+   &quot;model&quot;: &quot;anthropic/claude-opus-5.5&quot;,
+   &quot;cli&quot;: {
+    &quot;argv&quot;: [
+     &quot;node&quot;,
+     &quot;agents/claude-arm.mjs&quot;,
+     &quot;claude-opus-5-5&quot;,
+     &quot;{{max_cost_usd}}&quot;,
+     &quot;none&quot;
+    ],
+    &quot;reports_usage&quot;: &quot;tokens&quot;,
+    &quot;trace&quot;: &quot;claude-code&quot;,
+    &quot;version_files&quot;: [
+     &quot;agents/claude-arm.mjs&quot;,
+     &quot;agents/contracts/spec.md&quot;,
+     &quot;agents/contracts/architecture.md&quot;,
+     &quot;agents/contracts/task-breakdown.md&quot;,
+     &quot;agents/contracts/test-design.md&quot;
+    ],
+    &quot;version_sha&quot;: &quot;6a0021665d13d724ca88aa09c187da16e3e226e536e27436365fa3aca8c7547d&quot;
+   }
+  },
+  &quot;sonnet-5-5-skill&quot;: {
+   &quot;id&quot;: &quot;sonnet-5-5-skill&quot;,
+   &quot;adapter&quot;: &quot;agent-cli&quot;,
+   &quot;model&quot;: &quot;anthropic/claude-sonnet-5.5&quot;,
+   &quot;cli&quot;: {
+    &quot;argv&quot;: [
+     &quot;node&quot;,
+     &quot;agents/claude-arm.mjs&quot;,
+     &quot;claude-sonnet-5-5&quot;,
+     &quot;{{max_cost_usd}}&quot;,
+     &quot;skill&quot;
+    ],
+    &quot;reports_usage&quot;: &quot;tokens&quot;,
+    &quot;trace&quot;: &quot;claude-code&quot;,
+    &quot;version_files&quot;: [
+     &quot;agents/claude-arm.mjs&quot;,
+     &quot;agents/contracts/spec.md&quot;,
+     &quot;agents/contracts/architecture.md&quot;,
+     &quot;agents/contracts/task-breakdown.md&quot;,
+     &quot;agents/contracts/test-design.md&quot;
+    ],
+    &quot;version_sha&quot;: &quot;6a0021665d13d724ca88aa09c187da16e3e226e536e27436365fa3aca8c7547d&quot;
+   }
+  },
+  &quot;sonnet-5-5-none&quot;: {
+   &quot;id&quot;: &quot;sonnet-5-5-none&quot;,
+   &quot;adapter&quot;: &quot;agent-cli&quot;,
+   &quot;model&quot;: &quot;anthropic/claude-sonnet-5.5&quot;,
+   &quot;cli&quot;: {
+    &quot;argv&quot;: [
+     &quot;node&quot;,
+     &quot;agents/claude-arm.mjs&quot;,
+     &quot;claude-sonnet-5-5&quot;,
+     &quot;{{max_cost_usd}}&quot;,
+     &quot;none&quot;
+    ],
+    &quot;reports_usage&quot;: &quot;tokens&quot;,
+    &quot;trace&quot;: &quot;claude-code&quot;,
+    &quot;version_files&quot;: [
+     &quot;agents/claude-arm.mjs&quot;,
+     &quot;agents/contracts/spec.md&quot;,
+     &quot;agents/contracts/architecture.md&quot;,
+     &quot;agents/contracts/task-breakdown.md&quot;,
+     &quot;agents/contracts/test-design.md&quot;
+    ],
+    &quot;version_sha&quot;: &quot;6a0021665d13d724ca88aa09c187da16e3e226e536e27436365fa3aca8c7547d&quot;
+   }
+  }
+ },
+ &quot;control_candidate&quot;: null,
+ &quot;judge&quot;: {
+  &quot;model&quot;: &quot;openai/gpt-6.1-sol&quot;,
+  &quot;provider_route&quot;: &quot;openrouter&quot;,
+  &quot;methods&quot;: [
+   &quot;pairwise-swap&quot;
+  ]
+ },
+ &quot;evaluators&quot;: {
+  &quot;required_checks&quot;: [
+   &quot;build-tests&quot;
+  ],
+  &quot;check_version&quot;: &quot;cmd-c0156e9f+files-ee9197e9&quot;,
+  &quot;rubric_sha256&quot;: &quot;fa8dfe5f7245d380aa9645d1a1ce4dd150412e73be73c684c824e6c26dc640ef&quot;,
+  &quot;check_description&quot;: &quot;First the arm: the trace must show the arm the candidate is labelled (-skill loaded agb-skills with /agb-code and acted on it; -none had no agb plugin, command, skill or CLI call), else the trial is void (evaluator error). Then the built app comes up (install, compose services, migrations, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the held-out pass rate is the score.&quot;,
+  &quot;producer_template_sha256&quot;: &quot;55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6&quot;,
+  &quot;judge_template_sha256&quot;: &quot;1fc69c82db6a66ecbce049b37384f5775e6a62046dfde264ec9bac1e3abcb884&quot;,
+  &quot;score_template_sha256&quot;: &quot;f7f3161e0bad3793db0c837c3a53beb00175c7c76fda2497f6fd5b1f0f548fbc&quot;
+ },
+ &quot;prompts&quot;: null,
+ &quot;success_criteria&quot;: {
+  &quot;mandatory_checks&quot;: &quot;all&quot;
+ },
+ &quot;operating_mode&quot;: &quot;highest-assurance&quot;,
+ &quot;eligibility&quot;: {
+  &quot;minimum_reliability&quot;: 1,
+  &quot;minimum_required_check_pass_rate&quot;: 1,
+  &quot;minimum_all_trials_pass_rate&quot;: null,
+  &quot;maximum_p95_ms&quot;: null,
+  &quot;cost_ceiling_per_success_usd&quot;: null
+ },
+ &quot;minimum_meaningful_difference&quot;: 0.05,
+ &quot;execution&quot;: {
+  &quot;trials_per_case&quot;: 1,
+  &quot;concurrency&quot;: 1,
+  &quot;timeout_ms&quot;: 57600000,
+  &quot;benchmark_mode&quot;: &quot;production-realistic&quot;,
+  &quot;cache_mode&quot;: &quot;cold&quot;,
+  &quot;early_stop&quot;: false,
+  &quot;outage_wait_seconds&quot;: 600,
+  &quot;max_consecutive_provider_errors&quot;: 10,
+  &quot;max_consecutive_timeouts&quot;: 10
+ },
+ &quot;harness&quot;: {
+  &quot;name&quot;: &quot;@57block/agenteval&quot;,
+  &quot;version&quot;: &quot;0.4.0&quot;,
+  &quot;git_sha&quot;: &quot;ccd82bc2&quot;,
+  &quot;node&quot;: &quot;v24.14.0&quot;
+ },
+ &quot;started_at&quot;: &quot;2026-11-17T18:30:51.166Z&quot;,
+ &quot;finished_at&quot;: &quot;2026-11-18T08:59:55.790Z&quot;
+}</pre></details>
+  </section>
+
+  <footer><span>code/</span><span>opens offline, no external dependencies</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
+</div></body></html>

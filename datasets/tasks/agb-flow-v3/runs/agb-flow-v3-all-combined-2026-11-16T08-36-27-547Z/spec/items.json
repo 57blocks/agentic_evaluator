@@ -1,0 +1,36 @@
+{
+  "inputs": 2,
+  "effective_n": 0,
+  "judge_effective_n": 2,
+  "counts": {
+    "splits": 0,
+    "all-pass": 2,
+    "all-fail": 0,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "chessicle",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "fable-5-2": 1,
+        "opus-5-5": 1,
+        "sonnet-5-5": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "invoice",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "fable-5-2": 1,
+        "opus-5-5": 1,
+        "sonnet-5-5": 1
+      },
+      "discrimination": null
+    }
+  ]
+}

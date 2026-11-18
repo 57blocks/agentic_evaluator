@@ -1,0 +1,140 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "highest-assurance",
+  "control_candidate": null,
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 1",
+      "removed": [],
+      "remaining": [
+        "opus-5-5",
+        "sonnet-5-5"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 1",
+      "removed": [],
+      "remaining": [
+        "opus-5-5",
+        "sonnet-5-5"
+      ]
+    }
+  ],
+  "eligible": [
+    "opus-5-5",
+    "sonnet-5-5"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "opus-5-5",
+      "eligible": true,
+      "generation_cost_per_success": 45.20649,
+      "p50_ms": 15642502,
+      "p95_ms": 22740784,
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      }
+    },
+    {
+      "candidate": "sonnet-5-5",
+      "eligible": true,
+      "generation_cost_per_success": 9.181043,
+      "p50_ms": 2785320,
+      "p95_ms": 17155192,
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      }
+    }
+  ],
+  "chosen": "opus-5-5",
+  "compared_to_control": null,
+  "firmness": "directional",
+  "firmness_reasons": [
+    "2 inputs; no comparison can be significant with fewer than 6",
+    "opus-5-5: required-check-pass-rate 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5: reliability 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5 and sonnet-5-5 cannot be told apart on task success: opus-5-5 did better on 0 input(s), sonnet-5-5 on 0, equal on 2 (sign test p 1.000)"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 1,
+        "successes": 2,
+        "n": 2,
+        "low": 0.3423802239546494,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 1,
+        "successes": 2,
+        "n": 2,
+        "low": 0.3423802239546494,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": {
+      "a": "opus-5-5",
+      "b": "sonnet-5-5",
+      "basis": "task-success",
+      "compared": 2,
+      "a_better": 0,
+      "b_better": 0,
+      "same": 2,
+      "p_value": 1,
+      "significant": false
+    }
+  },
+  "reasons": [
+    "2 eligible candidates tie at 1.000 (2/2) reliability and 1.000 (2/2) required-check pass rate (within the minimum meaningful difference 0.05); opus-5-5 is picked by the required check's score counted as equal within the minimum meaningful difference 0.05 (opus-5-5 98%, sonnet-5-5 100%), then the judge's pairwise score (opus-5-5 100%, next sonnet-5-5 0%)",
+    "2 inputs; no comparison can be significant with fewer than 6",
+    "opus-5-5: required-check-pass-rate 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5: reliability 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5 and sonnet-5-5 cannot be told apart on task success: opus-5-5 did better on 0 input(s), sonnet-5-5 on 0, equal on 2 (sign test p 1.000)"
+  ],
+  "closest": null
+}

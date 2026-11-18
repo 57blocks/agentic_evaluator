@@ -1,0 +1,267 @@
+{
+  "run": "agb-skill-ablation-combined-2026-11-18T08-59-55-693Z/spec",
+  "step": "spec",
+  "inputs": [
+    "chessicle",
+    "invoice"
+  ],
+  "candidates": [
+    {
+      "candidate": "opus-5-5-skill",
+      "valid_attempts": 2,
+      "classified": 2,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_score": 1,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "completion_states": {
+        "success": 2,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 2,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 2,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 5.377194,
+      "p50_ms": 1011801,
+      "p95_ms": 1053791
+    },
+    {
+      "candidate": "opus-5-5-none",
+      "valid_attempts": 2,
+      "classified": 2,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_score": 1,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "completion_states": {
+        "success": 2,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 2,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 2,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 2.316779,
+      "p50_ms": 536214,
+      "p95_ms": 664696
+    },
+    {
+      "candidate": "sonnet-5-5-skill",
+      "valid_attempts": 2,
+      "classified": 2,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_score": 1,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "completion_states": {
+        "success": 2,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 2,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 2,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 1.299379,
+      "p50_ms": 298943,
+      "p95_ms": 457512
+    },
+    {
+      "candidate": "sonnet-5-5-none",
+      "valid_attempts": 2,
+      "classified": 2,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_score": 1,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "completion_states": {
+        "success": 2,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 2,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 2,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.479285,
+      "p50_ms": 172739,
+      "p95_ms": 177677
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "2 inputs; no comparison can be significant with fewer than 6"
+    ]
+  },
+  "integrity": {
+    "events": 64,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 1080,
+    "threshold_ms": 300000,
+    "wall_ms": 4890116,
+    "in_flight_gaps": 5
+  },
+  "judge_discrimination": {
+    "overall": {
+      "dimension": "overall",
+      "scored": 0,
+      "distinct": 0,
+      "min": null,
+      "max": null,
+      "saturated": false
+    },
+    "dimensions": [],
+    "saturated": [],
+    "discriminates": false
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "spec-gates",
+      "version": "cmd-8c285f94+files-338ae9c1",
+      "pass": 8,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    },
+    {
+      "evaluator": "pairwise-swap",
+      "version": "openai/gpt-6.1-sol+rubric-149e728f+tpl-b39c0c4b",
+      "pass": 12,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}

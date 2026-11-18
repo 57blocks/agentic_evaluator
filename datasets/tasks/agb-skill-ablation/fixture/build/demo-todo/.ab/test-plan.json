@@ -1,0 +1,179 @@
+{
+  "cases": [
+    {
+      "id": "AT-001",
+      "covers": ["AC-01"],
+      "level": "unit",
+      "title": "标题为空时创建按钮禁用，失焦后显示「标题必填」",
+      "file": "client/src/pages/NewTaskPage.test.tsx"
+    },
+    {
+      "id": "AT-002",
+      "covers": ["AC-02"],
+      "level": "integration",
+      "title": "POST /api/tasks 创建后，GET /api/tasks 能查到该任务且状态为 todo",
+      "file": "server/test/tasks.create.test.ts"
+    },
+    {
+      "id": "AT-003",
+      "covers": ["AC-02"],
+      "level": "unit",
+      "title": "提交创建表单成功后携带正确负载调用创建接口并导航回看板",
+      "file": "client/src/pages/NewTaskPage.test.tsx"
+    },
+    {
+      "id": "AT-004",
+      "covers": ["AC-02"],
+      "level": "unit",
+      "title": "待办列渲染新任务卡片，且列计数随任务数量同步增加",
+      "file": "client/src/pages/BoardPage.test.tsx"
+    },
+    {
+      "id": "AT-005",
+      "covers": ["AC-03"],
+      "level": "unit",
+      "title": "创建请求失败时停留本页，标题与描述保留，显示后端返回的失败原因",
+      "file": "client/src/pages/NewTaskPage.test.tsx"
+    },
+    {
+      "id": "AT-006",
+      "covers": ["AC-04"],
+      "level": "unit",
+      "title": "负责人下拉选项集合恰为成员名册加一项「未分配」",
+      "file": "client/src/pages/NewTaskPage.test.tsx"
+    },
+    {
+      "id": "AT-007",
+      "covers": ["AC-05"],
+      "level": "integration",
+      "title": "PATCH /api/tasks/:taskId 改派后，assigneeId 持久化且可通过 GET 查到",
+      "file": "server/test/tasks.detail.test.ts"
+    },
+    {
+      "id": "AT-008",
+      "covers": ["AC-05"],
+      "level": "unit",
+      "title": "选择负责人后立即触发保存请求（无需额外确认操作）",
+      "file": "client/src/pages/TaskDetailPage.test.tsx"
+    },
+    {
+      "id": "AT-009",
+      "covers": ["AC-05"],
+      "level": "unit",
+      "title": "改派后原负责人工作量 −1、新负责人工作量 +1",
+      "file": "client/src/components/WorkloadSidebar.test.tsx"
+    },
+    {
+      "id": "AT-010",
+      "covers": ["AC-06"],
+      "level": "unit",
+      "title": "todo 任务只渲染「开始处理」一个转移按钮；done 任务不渲染任何转移按钮",
+      "file": "client/src/components/TransitionButtons.test.tsx"
+    },
+    {
+      "id": "AT-011",
+      "covers": ["AC-07"],
+      "level": "integration",
+      "title": "任务转移到 done 后，服务端拒绝任何进一步的转移请求",
+      "file": "server/test/tasks.transitions.test.ts"
+    },
+    {
+      "id": "AT-012",
+      "covers": ["AC-07"],
+      "level": "unit",
+      "title": "点击标记完成后卡片从进行中列移动到已完成列",
+      "file": "client/src/pages/BoardPage.test.tsx"
+    },
+    {
+      "id": "AT-013",
+      "covers": ["AC-08"],
+      "level": "unit",
+      "title": "首次加载（未开启显示已完成）时页面上不存在任何 done 状态卡片",
+      "file": "client/src/pages/BoardPage.test.tsx"
+    },
+    {
+      "id": "AT-014",
+      "covers": ["AC-09"],
+      "level": "unit",
+      "title": "无任务时显示空态提示文案，且不渲染空的状态列骨架",
+      "file": "client/src/pages/BoardPage.test.tsx"
+    },
+    {
+      "id": "AT-015",
+      "covers": ["AC-10"],
+      "level": "unit",
+      "title": "工作量数字等于该成员状态属于 todo/in_progress 的任务条数",
+      "file": "client/src/components/WorkloadSidebar.test.tsx"
+    },
+    {
+      "id": "AT-016",
+      "covers": ["AC-11"],
+      "level": "unit",
+      "title": "选中负责人筛选后，可见卡片的负责人均为该成员",
+      "file": "client/src/pages/BoardPage.test.tsx"
+    },
+    {
+      "id": "AT-017",
+      "covers": ["AC-12"],
+      "level": "integration",
+      "title": "POST /api/members 重名时返回错误，名册条数不变",
+      "file": "server/test/members.routes.test.ts"
+    },
+    {
+      "id": "AT-018",
+      "covers": ["AC-12"],
+      "level": "unit",
+      "title": "重名添加失败时显示「该成员已存在」内联错误",
+      "file": "client/src/pages/MembersPage.test.tsx"
+    },
+    {
+      "id": "AT-019",
+      "covers": ["AC-13"],
+      "level": "integration",
+      "title": "DELETE /api/members/:memberId 级联将其名下任务 assigneeId 置空，任务本身仍存在",
+      "file": "server/test/members.routes.test.ts"
+    },
+    {
+      "id": "AT-020",
+      "covers": ["AC-13"],
+      "level": "unit",
+      "title": "确认移除后该成员行从列表消失",
+      "file": "client/src/pages/MembersPage.test.tsx"
+    },
+    {
+      "id": "AT-021",
+      "covers": ["AC-13"],
+      "level": "unit",
+      "title": "assigneeId 为 null 的任务卡片显示负责人为「未分配」",
+      "file": "client/src/pages/BoardPage.test.tsx"
+    },
+    {
+      "id": "AT-022",
+      "covers": ["AC-14"],
+      "level": "integration",
+      "title": "一次独立请求创建的任务，可被另一次独立请求（模拟另一设备）读取到",
+      "file": "server/test/tasks.create.test.ts"
+    },
+    {
+      "id": "AT-023",
+      "covers": [],
+      "level": "unit",
+      "title": "WF-01 转移表：合法转移全部放行，非法转移（含 done→in_progress）全部拒绝",
+      "file": "server/test/taskWorkflow.test.ts"
+    },
+    {
+      "id": "AT-024",
+      "covers": ["AC-02"],
+      "level": "integration",
+      "title": "跨页面：创建任务后导航回看板，待办列显示新任务（覆盖缓存失效/未失效的接缝）",
+      "file": "client/src/App.test.tsx"
+    },
+    {
+      "id": "AT-025",
+      "covers": ["AC-05"],
+      "level": "integration",
+      "title": "跨页面：详情页改派后导航回看板，侧栏工作量已更新（覆盖缓存失效/未失效的接缝）",
+      "file": "client/src/App.test.tsx"
+    }
+  ]
+}
