@@ -1,0 +1,114 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-flow-v3-all-combined-2026-11-16T08-36-27-547Z/task-breakdown",
+  "run_name": "agb-flow-v3",
+  "step": {
+    "id": "task-breakdown",
+    "version": "2",
+    "description": "Task breakdown: turn the PRD, design and API contracts into a task plan (.ab/tasks.json) and a UI contract."
+  },
+  "spec": {
+    "path": "tasks/agb-flow-v3/spec.yaml",
+    "sha256": "7a083b29009a9be2ac227da43c1afdc80630b151257b7eac04869192a8a306a8"
+  },
+  "description": "(agb 0a8c4ee7) Which Claude model should run each planning step of agb (spec, architecture, task breakdown, test design)? Inputs are real agb projects at the moment the step began; every candidate runs agb's own stage command through the same wrapper; a check grades with agb's gates and a judge compares candidates pairwise.",
+  "test_set": {
+    "id": "task-breakdown-v1",
+    "inputs": {
+      "demo-todo": "9ffe96cbe0dcc1fbe29ae3cac4859888f40e435c97bd51d0f01a484fef36eb55",
+      "chessicle": "b7dad749775e19deaa9105a33cbc60b8b28c56c14abe9271ae81724bdf238ed2",
+      "invoice": "b2ac59090b12c7c4c0b566b22a57389bd0bc23fb5df71736a05c8fb9cc58b118"
+    },
+    "labels": null
+  },
+  "candidates": {
+    "opus-5-5": {
+      "id": "opus-5-5",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-opus-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-opus-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "34e3600ac046967eb958dd25d87f176b2659e7e1baff16c8630cc2d78f916adc"
+      }
+    },
+    "sonnet-5-5": {
+      "id": "sonnet-5-5",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/agb-step.mjs",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "reports_usage": "tokens",
+        "trace": "claude-code",
+        "version_files": [
+          "agents/agb-step.mjs"
+        ],
+        "version_sha": "34e3600ac046967eb958dd25d87f176b2659e7e1baff16c8630cc2d78f916adc"
+      }
+    }
+  },
+  "control_candidate": null,
+  "judge": {
+    "model": "openai/gpt-6.1-sol",
+    "provider_route": "openrouter",
+    "methods": [
+      "pairwise-swap"
+    ]
+  },
+  "evaluators": {
+    "required_checks": [
+      "plan-gates"
+    ],
+    "check_version": "cmd-e1f9a9f4+files-5a66e899",
+    "rubric_sha256": "b613cd5e74225868f9763e5ece23d1c7b5b349cfb2b59bdf8f26c8b27201e9ad",
+    "check_description": "The task plan claims every page and endpoint in the design and has no cycle between domains.",
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "f111f17067aa7f79246fb342825f37eefc791b4ee57c0cefc07646a828f0571c",
+    "score_template_sha256": "e50980d9eec0b0a583fa3a4a1099a38b065f7610ee4b66cad1b23ef2e3ce61f7"
+  },
+  "prompts": null,
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": 0.05,
+  "execution": {
+    "trials_per_case": 1,
+    "concurrency": 2,
+    "timeout_ms": 3000000,
+    "benchmark_mode": "production-realistic",
+    "cache_mode": "cold",
+    "early_stop": false,
+    "outage_wait_seconds": 600,
+    "max_consecutive_provider_errors": 10
+  },
+  "harness": {
+    "name": "57b-agenteval",
+    "version": "0.3.0",
+    "git_sha": "34c2d191",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-11-13T10:23:03.124Z",
+  "finished_at": "2026-11-16T08:36:27.576Z"
+}

@@ -1,0 +1,170 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "highest-assurance",
+  "control_candidate": null,
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 1",
+      "removed": [],
+      "remaining": [
+        "opus-5-5",
+        "sonnet-5-5",
+        "fable-5-2"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 1",
+      "removed": [],
+      "remaining": [
+        "opus-5-5",
+        "sonnet-5-5",
+        "fable-5-2"
+      ]
+    }
+  ],
+  "eligible": [
+    "opus-5-5",
+    "sonnet-5-5",
+    "fable-5-2"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "opus-5-5",
+      "eligible": true,
+      "generation_cost_per_success": 5.148274,
+      "p50_ms": 824668,
+      "p95_ms": 1005335,
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      }
+    },
+    {
+      "candidate": "sonnet-5-5",
+      "eligible": true,
+      "generation_cost_per_success": 1.334571,
+      "p50_ms": 399205,
+      "p95_ms": 399751,
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      }
+    },
+    {
+      "candidate": "fable-5-2",
+      "eligible": true,
+      "generation_cost_per_success": 8.890488,
+      "p50_ms": 1024048,
+      "p95_ms": 1331772,
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      }
+    }
+  ],
+  "chosen": "opus-5-5",
+  "compared_to_control": null,
+  "firmness": "directional",
+  "firmness_reasons": [
+    "2 inputs; no comparison can be significant with fewer than 6",
+    "opus-5-5: required-check-pass-rate 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5: reliability 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5 and fable-5-2 cannot be told apart on task success: opus-5-5 did better on 0 input(s), fable-5-2 on 0, equal on 2 (sign test p 1.000)"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 1,
+        "successes": 2,
+        "n": 2,
+        "low": 0.3423802239546494,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 1,
+        "successes": 2,
+        "n": 2,
+        "low": 0.3423802239546494,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": {
+      "a": "opus-5-5",
+      "b": "fable-5-2",
+      "basis": "task-success",
+      "compared": 2,
+      "a_better": 0,
+      "b_better": 0,
+      "same": 2,
+      "p_value": 1,
+      "significant": false
+    }
+  },
+  "reasons": [
+    "3 eligible candidates tie at 1.000 (2/2) reliability and 1.000 (2/2) required-check pass rate (within the minimum meaningful difference 0.05); opus-5-5 is picked by the judge's pairwise score (opus-5-5 63%, next fable-5-2 50%)",
+    "2 inputs; no comparison can be significant with fewer than 6",
+    "opus-5-5: required-check-pass-rate 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5: reliability 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5 and fable-5-2 cannot be told apart on task success: opus-5-5 did better on 0 input(s), fable-5-2 on 0, equal on 2 (sign test p 1.000)"
+  ],
+  "closest": null
+}

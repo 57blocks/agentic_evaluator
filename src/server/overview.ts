@@ -15,6 +15,7 @@
 import { listTasks } from "../demo/catalog.js";
 import type { RunView, TaskView } from "../demo/catalog.js";
 import type { Workspace } from "../core/workspace.js";
+import { spendOf } from "../demo/spend.js";
 
 export interface StepStanding {
   step: string;
@@ -88,10 +89,7 @@ export async function buildOverview(ws: Workspace): Promise<Overview> {
   for (const run of local) for (const s of standingsOf(null, run)) consider(s);
 
   const everyRun = [...tasks.flatMap((t) => t.runs), ...local];
-  const spent = everyRun.reduce<number | null>(
-    (acc, r) => (r.totalUsd === null ? acc : (acc ?? 0) + r.totalUsd),
-    null,
-  );
+  const spent = spendOf(everyRun);
 
   const steps = [...newest.values()].sort((a, b) => (b.startedAt ?? "").localeCompare(a.startedAt ?? ""));
 

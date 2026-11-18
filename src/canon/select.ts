@@ -304,12 +304,22 @@ function pairwiseScore(s: JudgeStanding | undefined): number | null {
 
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
 
+/** How a highest-assurance reason names the check score when it broke the tie (the report reads it). */
+export const CHECK_SCORE_BREAKER = "the required check's score";
+
 /**
  * Highest reliability, then required-check pass rate. Among candidates still
- * tied on both — common: every eligible one passed everything — the judge's
- * pairwise score decides when a judge ran (the better answer among equally
+ * tied on both — common: every eligible one passed everything — the check's
+ * own score decides when the check reported one for each of them (how much
+ * of the deliverable it accepted: 41 of 44 held-out tests over 31), then the
+ * judge's pairwise score when a judge ran (the better answer among equally
  * correct ones), then cost. The reason says it was a tie and what broke it,
  * since "highest reliability" alone would hide that six were at 100%.
+ *
+ * A declared minimum meaningful difference is, in this mode, a share (0–1):
+ * at each of the three measured tiers a candidate within it of the best is
+ * kept as equal, so one test in 48 does not outrank everything after it.
+ * Undeclared, any gap counts, as it always did.
  */
 interface Pick {
   chosen: string | null;
@@ -318,21 +328,30 @@ interface Pick {
   runnerUp?: string;
 }
 
+/** Candidates within `tol` of the best on `value`; the rest are dropped. */
+function withinOfBest(pool: readonly CandidateRates[], value: (c: CandidateRates) => number, tol: number): CandidateRates[] {
+  const best = Math.max(...pool.map(value));
+  return pool.filter((c) => value(c) >= best - tol - 1e-12);
+}
+
 function pickHighestAssurance(
   eligible: readonly CandidateRates[],
   control: string | null,
   standings: readonly JudgeStanding[],
+  mmd: number | null,
 ): Pick {
   if (eligible.length === 0) {
     return { chosen: null, reason: "no eligible candidates" };
   }
+  const share = mmd !== null && mmd >= 0 && mmd <= 1 ? mmd : null;
+  const ignored = mmd !== null && share === null
+    ? `; the declared minimum meaningful difference ${mmd} is not a share (0–1), so highest-assurance ignores it`
+    : "";
+  const tol = share ?? 0;
+  const within = tol > 0 ? ` (within the minimum meaningful difference ${tol})` : "";
   const judged = new Map(standings.map((s) => [s.candidate, pairwiseScore(s)]));
-  const assurance = (a: CandidateRates, b: CandidateRates): number =>
-    rateSortValue(b.reliability) - rateSortValue(a.reliability) ||
-    rateSortValue(b.required_check_pass_rate) - rateSortValue(a.required_check_pass_rate);
-  const ranked = [...eligible].sort((a, b) => {
-    const first = assurance(a, b);
-    if (first !== 0) return first;
+  const scoreOf = (c: CandidateRates): number | null => c.required_check_score ?? null;
+  const byJudgeThenCost = (a: CandidateRates, b: CandidateRates): number => {
     const ja = judged.get(a.candidate) ?? null;
     const jb = judged.get(b.candidate) ?? null;
     if (ja !== null && jb !== null && ja !== jb) return jb - ja;
@@ -340,25 +359,52 @@ function pickHighestAssurance(
     const costB = b.generation_cost_per_success;
     if (costA !== null && costB !== null && costA !== costB) return costA - costB;
     return compareIds(a.candidate, b.candidate, control);
-  });
-  const best = ranked[0];
-  const runnerUp = ranked[1]?.candidate;
-  const tied = ranked.filter((c) => assurance(best, c) === 0);
+  };
+  const strict = (a: CandidateRates, b: CandidateRates): number =>
+    rateSortValue(b.reliability) - rateSortValue(a.reliability) ||
+    rateSortValue(b.required_check_pass_rate) - rateSortValue(a.required_check_pass_rate) ||
+    ((scoreOf(a) ?? -1) !== (scoreOf(b) ?? -1) && scoreOf(a) !== null && scoreOf(b) !== null ? (scoreOf(b) as number) - (scoreOf(a) as number) : 0) ||
+    byJudgeThenCost(a, b);
+
+  const tied = withinOfBest(withinOfBest(eligible, (c) => rateSortValue(c.reliability), tol), (c) => rateSortValue(c.required_check_pass_rate), tol);
+  const scored = tied.every((c) => scoreOf(c) !== null);
+  const kept = scored ? withinOfBest(tied, (c) => scoreOf(c) as number, tol) : tied;
+  const ordered = [...kept].sort(byJudgeThenCost);
+  const ranking = [...ordered, ...eligible.filter((c) => !kept.includes(c)).sort(strict)];
+  const best = ordered[0];
+  const runnerUp = ranking[1]?.candidate;
   const level = `${fmtRate(best.reliability)} reliability and ${fmtRate(best.required_check_pass_rate)} required-check pass rate`;
   if (tied.length === 1) {
-    return { chosen: best.candidate, runnerUp, reason: `highest assurance: ${best.candidate} alone has ${level}` };
+    return { chosen: best.candidate, runnerUp, reason: `highest assurance: ${best.candidate} alone has ${level}${within}${ignored}` };
   }
-  const next = tied[1];
-  const jBest = judged.get(best.candidate) ?? null;
-  const jNext = judged.get(next.candidate) ?? null;
-  const byJudge = jBest !== null && jNext !== null && jBest !== jNext;
-  const breaker = byJudge
-    ? `the judge's pairwise score (${best.candidate} ${pct(jBest)}, next ${next.candidate} ${pct(jNext)})`
-    : `generation cost per success, the judge not separating them${jBest === null ? " (no pairwise judging)" : ""}`;
+  // Candidates the check score put below the best: named, or the judge's reason
+  // reads as if they lost on the judge.
+  const dropped = tied.filter((c) => !kept.includes(c)).sort((a, b) => (scoreOf(b) as number) - (scoreOf(a) as number));
+  const topScore = scored ? Math.max(...tied.map((c) => scoreOf(c) as number)) : null;
+  let breaker: string;
+  if (kept.length === 1) {
+    const next = dropped[0];
+    breaker = `${CHECK_SCORE_BREAKER} (${best.candidate} ${pct(scoreOf(best) as number)}, next ${next.candidate} ${pct(scoreOf(next) as number)})`;
+  } else {
+    const next = ordered[1];
+    const afterScore = dropped.length > 0
+      ? `${CHECK_SCORE_BREAKER} first (${dropped.map((c) => `${c.candidate} ${pct(scoreOf(c) as number)}`).join(", ")} below ${pct(topScore as number)}), then `
+      : "";
+    const keptScores = scored ? [...new Set(kept.map((c) => scoreOf(c) as number))] : [];
+    const scoresEqualWithin = tol > 0 && keptScores.length > 1
+      ? `${CHECK_SCORE_BREAKER} counted as equal within the minimum meaningful difference ${tol} (${kept.map((c) => `${c.candidate} ${pct(scoreOf(c) as number)}`).join(", ")}), then `
+      : "";
+    const jBest = judged.get(best.candidate) ?? null;
+    const jNext = judged.get(next.candidate) ?? null;
+    const byJudge = jBest !== null && jNext !== null && jBest !== jNext;
+    breaker = afterScore + scoresEqualWithin + (byJudge
+      ? `the judge's pairwise score (${best.candidate} ${pct(jBest as number)}, next ${next.candidate} ${pct(jNext as number)})`
+      : `generation cost per success, the judge not separating them${jBest === null ? " (no pairwise judging)" : ""}`);
+  }
   return {
     chosen: best.candidate,
     runnerUp,
-    reason: `${tied.length} eligible candidates tie at ${level}; ${best.candidate} is picked by ${breaker}`,
+    reason: `${tied.length} eligible candidates tie at ${level}${within}; ${best.candidate} is picked by ${breaker}${ignored}`,
   };
 }
 
@@ -446,7 +492,7 @@ function pickForMode(
     case "fastest-within-cost-ceiling":
       return pickFastest(eligible, control, mmd);
     case "highest-assurance":
-      return pickHighestAssurance(eligible, control, standings);
+      return pickHighestAssurance(eligible, control, standings, mmd);
     case "judge-preference":
       return pickJudgePreference(eligible, standings, control, absoluteDiscriminates);
   }

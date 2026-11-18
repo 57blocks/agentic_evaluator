@@ -144,7 +144,10 @@ export function StepSection({ step, index, runId, root, colorOf }: Props) {
                 <TableCell className="text-right"><ScoreBar value={c.absolute} slot={slot} /></TableCell>
                 <TableCell className="text-right font-mono">{c.record.wins}–{c.record.losses}–{c.record.ties}</TableCell>
                 <TableCell className="text-right font-mono">{fmtPct(c.winRate)}</TableCell>
-                <TableCell className="text-right"><Rate ok={c.checkPass} total={c.checkExecuted} /></TableCell>
+                <TableCell className="text-right">
+                  <Rate ok={c.checkPass} total={c.checkExecuted} />
+                  {c.checkScore !== null && <span className="block font-mono text-[11px] text-muted-foreground">score {Math.round(c.checkScore * 100)}%</span>}
+                </TableCell>
                 <TableCell className="text-right"><Rate ok={c.completed.ok} total={c.completed.total} /></TableCell>
                 <TableCell className="text-right font-mono">{fmtCost(c.costPerSuccess, c.costObserved)}</TableCell>
                 <TableCell className="text-right font-mono">{fmtSec(c.p50)}</TableCell>

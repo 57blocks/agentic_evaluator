@@ -180,6 +180,8 @@ export async function combineRuns(specPath: string, runIds: readonly string[], o
       success_criteria: suite.successCriteria ?? null,
       operating_mode: suite.operatingMode ?? null,
       eligibility: resolveEligibility(suite.requiredChecks ?? [], suite.eligibility),
+      // The selector reads it from the manifest: the spec's, not the source runs'.
+      minimum_meaningful_difference: suite.mmd ?? null,
       finished_at: new Date().toISOString(),
     };
     const summary: CanonSummary = {

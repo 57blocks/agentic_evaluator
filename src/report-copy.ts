@@ -32,7 +32,7 @@ export function modeLabel(mode: string | null | undefined): string {
 const MODE_EXPLAIN: Record<string, string> = {
   "lowest-cost": "Among the candidates that pass every gate, pick the one with the lowest generation cost per success.",
   "fastest-within-cost-ceiling": "Within the cost ceiling, pick the one with the shortest median duration.",
-  "highest-assurance": "Pick the highest reliability; break ties on required-check pass rate, then on cost.",
+  "highest-assurance": "Pick the highest reliability; break ties on required-check pass rate, then on the check's score when it reports one, then on the judge's pairwise score, then on cost.",
   "judge-preference": "No deterministic check is available, so candidates are ranked by judge preference; the result can be directional at best.",
 };
 

@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agb-flow-v3-code run report</title>
+<style>
+:root{--ground:#F4F6F9;--surface:#fff;--surface-2:#FAFBFC;--ink:#2B3038;--ink-2:#6B7079;--ink-3:#919499;--rule:#E2E5EA;--accent:#1E78EE;--accent-2:#469BFF;--accent-soft:#EBF4FF;--champ:#F4F9FF;--ok-bg:#EBF9F2;--ok-fg:#1B9A6A;--bad-bg:#FFF0F0;--bad-fg:#F03B3B;--warn-bg:#FCF1D6;--warn-fg:#8A5A00;--shadow:0 2px 6px rgba(27,43,75,.08);--mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;--s1:#2A78D6;--s2:#EB6834;--s3:#1BAF7A;--s4:#EDA100}
+@media(prefers-color-scheme:dark){:root{--ground:#16191E;--surface:#1F2329;--surface-2:#272C33;--ink:#E6E8EC;--ink-2:#ABAEB2;--ink-3:#919499;--rule:#2E343C;--accent:#93C1FF;--accent-2:#469BFF;--accent-soft:rgba(70,155,255,.14);--champ:#1A2A3F;--ok-bg:#173A2C;--ok-fg:#8FE0BC;--bad-bg:#45211F;--bad-fg:#FFB9B9;--warn-bg:#3D3218;--warn-fg:#F6D58A;--shadow:0 2px 6px rgba(0,0,0,.3)}}
+body{margin:0;color:var(--ink);font:14px/1.55 "Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:44px 24px 80px;background:var(--ground)}
+.page{max-width:68rem;margin:0 auto;display:grid;gap:20px}
+.mono,td.num,code,pre,.kv dd{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.kv dd{font-size:13px}
+.small{font-size:12px}
+header.run{display:grid;gap:6px}.eyebrow{margin:0;font-size:13px;color:var(--accent);font-weight:600}
+h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.022em}h1 .id{font-family:var(--mono);font-weight:700;font-size:26px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:8px 0 0;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.kv div{display:grid;gap:2px}.kv dt{font-size:12px;color:var(--ink-3)}.kv dd{margin:0;font-size:13px;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--warn-fg);padding:16px 20px;border-radius:12px;box-shadow:var(--shadow)}
+.verdict.firm{border-left-color:var(--ok-fg)}.verdict.needs-review{border-left-color:var(--bad-fg)}
+.verdict .champ-line b{color:var(--accent)}
+.verdict .tag{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;background:var(--warn-bg);color:var(--warn-fg);padding:4px 10px;border-radius:4px;white-space:nowrap}
+.verdict.firm .tag{background:var(--ok-bg);color:var(--ok-fg)}.verdict.needs-review .tag{background:var(--bad-bg);color:var(--bad-fg)}
+.verdict p{margin:0}
+.champ-line{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}.champ-line b{font-weight:700}.champ-line .mode{color:var(--ink-2);font-weight:400}
+.trophy{font-size:18px}
+.champ-facts{margin:3px 0 6px;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}.verdict .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+section.card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 24px 22px;display:grid;gap:12px;box-shadow:var(--shadow)}
+section.card h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--ink);display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-weight:600;color:var(--ink-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:8px 13px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--surface-2)}
+th.num,td.num{text-align:right;white-space:nowrap}
+td.num .bar{margin-right:8px}td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}tr:last-child td{border-bottom:none}
+td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:var(--mono)}td.cand .prompt{display:block;font-weight:400;font-size:12px;color:var(--ink-3)}
+td .sub{display:block;font-size:11px;color:var(--ink-3)}
+tr.control td.cand::after{content:"control";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
+tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}tr.gated td{color:var(--ink-3)}
+tbody tr{transition:background .12s ease}tbody tr:hover{background:var(--accent-soft)}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:baseline}
+.sw0{background:var(--s1)}.sw1{background:var(--s2)}.sw2{background:var(--s3)}.sw3{background:var(--s4)}
+.bar{display:inline-block;width:92px;height:9px;background:var(--surface-2);border-radius:99px;vertical-align:middle;margin-right:8px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--rule)}
+.bar span{display:block;height:100%;border-radius:99px;background:var(--accent-2)}
+.pill.pass{background:var(--ok-bg);color:var(--ok-fg)}.pill.miss{background:var(--bad-bg);color:var(--bad-fg)}
+ol.trace{margin:0;padding-left:1.2em;font-size:13px;color:var(--ink-2);display:grid;gap:8px}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.state-list{font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px}.state-list .bad{color:var(--bad-fg)}.state-list .warn{color:var(--warn-fg)}.state-list .ok{color:var(--ok-fg)}
+td.ok{color:var(--ok-fg)}td.bad{color:var(--bad-fg)}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.two-col>*{min-width:0;overflow:hidden}
+.two-col .table-wrap{overflow-x:auto}
+.ledger td:first-child{color:var(--ink-2)}.ledger tr.total td{font-weight:600;border-top:2px solid var(--rule)}
+.note{font-size:12.5px;color:var(--ink-2);margin:0}code{background:var(--surface-2);padding:0 5px;border-radius:3px;font-size:12px}
+ul.gaps{margin:0;padding-left:1.1em;font-size:13px;color:var(--ink-2);display:grid;gap:4px}
+details{font-size:13px}summary{cursor:pointer;color:var(--accent);font-weight:500}
+pre{margin:8px 0 0;padding:12px;background:var(--surface-2);border-radius:6px;overflow-x:auto;font-size:12px;line-height:1.55;max-height:420px}
+.steps{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}.steps .arrow{align-self:center;color:var(--ink-3)}
+.step-card{flex:1 1 200px;min-width:0;display:grid;gap:6px;align-content:start;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.step-card.open{border-left:4px solid var(--bad-fg)}.step-card .idx{font-size:12px;color:var(--ink-2);font-weight:500}
+.step-card .pick{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);overflow-wrap:anywhere}.step-card.open .pick{font-family:inherit;color:var(--bad-fg)}
+.step-card .pill{justify-self:start}.step-card .small{color:var(--ink-2)}
+footer{font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
+@media(max-width:480px){h1{font-size:20px}.verdict{grid-template-columns:1fr}section.card{padding:14px}}
+
+.pref-high{color:var(--ok-fg);font-weight:600}.pref-low{color:var(--ink-3)}
+
+.duel{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin:10px 0}
+.duel header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.duel .evidence{margin:6px 0 10px;color:var(--ink-2)}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid var(--rule)}
+.chip.win{background:var(--ok-bg);color:var(--ok-fg);border-color:transparent}
+.chip.tie{background:var(--surface-2);color:var(--ink-2);border-color:transparent}
+.chip.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:transparent}
+pre.diff span{display:block}pre.diff .add{background:var(--ok-bg);color:var(--ok-fg)}pre.diff .del{background:var(--bad-bg);color:var(--bad-fg);text-decoration:line-through}pre.diff .same{color:var(--ink-3)}
+blockquote.system{margin:8px 0 0;padding:4px 12px;border-left:3px solid var(--ok-fg);font-size:13px}blockquote.system p{margin:2px 0 0;white-space:pre-wrap}
+.sbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:8px}.sbs article{min-width:0;border:1px solid var(--rule);border-radius:8px;padding:8px 10px}.sbs header{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.sbs pre{max-height:520px;white-space:pre-wrap;word-break:break-word}
+table.dims{width:100%}table.dims th{text-align:left;font-weight:500;white-space:nowrap;width:1%;padding-right:14px}
+details>summary{cursor:pointer;padding:6px 0;color:var(--ink-2)}
+pre.raw{max-height:460px;overflow:auto;background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-word;font-size:12px}
+.muted{color:var(--ink-3)}
+
+.viz{margin:14px 0 0;padding:0}
+.viz figcaption{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.viz-legend{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0;font-size:12px;color:var(--ink-2)}
+.viz-lg{display:inline-flex;gap:6px;align-items:center}
+.viz-flag{font-size:10px;font-weight:600;background:var(--warn-bg);color:var(--warn-fg);padding:0 5px;border-radius:3px;white-space:nowrap}
+.viz-note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+table.viz-heat{width:100%;border-collapse:separate;border-spacing:2px}
+table.viz-heat th{font-size:12px;font-weight:500;color:var(--ink-2);text-align:left;white-space:nowrap}
+table.viz-heat th.num,table.viz-heat td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.viz-cell{text-align:center;border-radius:4px;padding:8px 6px;font-variant-numeric:tabular-nums;color:var(--ink)}
+td.viz-none{background:var(--surface-2);color:var(--ink-3)}
+.viz-scale{display:flex;gap:2px;align-items:center;margin-top:8px;font-size:11px;color:var(--ink-3)}
+.viz-step{width:26px;height:8px;border-radius:2px;display:inline-block}
+.sd-1{--sd:#c93a39;--sd-fg:#fff}.sd-2{--sd:#f0a3a0;--sd-fg:#2B3038}.sd-3{--sd:#e2e1dd;--sd-fg:#2B3038}.sd-4{--sd:#8dbbf1;--sd-fg:#2B3038}.sd-5{--sd:#1c5cab;--sd-fg:#fff}
+.sd-row{display:grid;grid-template-columns:minmax(90px,160px) 1fr 44px 96px;gap:10px;align-items:center;margin:3px 0;font-size:12px}
+.sd-head{color:var(--ink-3);font-size:11px;margin-bottom:2px}
+.sd-name{font-family:var(--mono);font-size:11px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-bar{display:flex;gap:2px;height:20px;min-width:0}
+.sd-seg{flex-basis:0;min-width:2px;background:var(--sd);color:var(--sd-fg);font-size:10px;line-height:20px;text-align:center;overflow:hidden;white-space:nowrap}
+.sd-seg:first-child{border-radius:4px 0 0 4px}.sd-seg:last-child{border-radius:0 4px 4px 0}.sd-seg:only-child{border-radius:4px}
+.sd-u{background:var(--surface);color:var(--ink-3);box-shadow:inset 0 0 0 1px var(--ink-3)}
+.sd-seg.sd-u{background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 3px,var(--rule) 3px,var(--rule) 5px)}
+.sd-mean,.sd-check{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sd-sub{color:var(--ink-3)}
+.sd-key{width:12px;height:12px;border-radius:2px;display:inline-block;background:var(--sd)}
+.sd-legend{margin-top:10px}
+@media(prefers-color-scheme:dark){
+  .sd-1{--sd:#f29a97;--sd-fg:#1F2329}.sd-2{--sd:#a13b39;--sd-fg:#fff}.sd-3{--sd:#93938d;--sd-fg:#1F2329}.sd-4{--sd:#3470c4;--sd-fg:#fff}.sd-5{--sd:#a8cdf5;--sd-fg:#1F2329}
+}
+
+.cs-fig{margin:0;display:grid;gap:8px}
+svg.cs{width:100%;height:auto;max-width:760px;overflow:visible;font-family:inherit}
+.cs-grid{stroke:var(--rule);stroke-width:1}.cs-lane{stroke:var(--rule);stroke-width:1;stroke-dasharray:2 3}
+.cs-tick{font-size:11px;fill:var(--ink-3);font-family:var(--mono)}.cs-axis{font-size:11px;fill:var(--ink-2)}
+.cs-gate{stroke:var(--bad-fg);stroke-width:1.5;stroke-dasharray:6 4}.cs-leader{stroke:var(--ink-3);stroke-width:.75}
+.cs-hit{fill:transparent}
+.cs-dot{fill:var(--accent-2);stroke:var(--surface);stroke-width:2}
+.cs-dot.gated{fill:var(--surface);stroke:var(--ink-3);stroke-width:1.5}
+.cs-dot.chosen{fill:var(--accent)}.cs-ring{fill:none;stroke:var(--accent);stroke-width:2}
+.cs-label{font-size:11px;fill:var(--ink-2)}.cs-label.gated{fill:var(--ink-3)}.cs-label.chosen{fill:var(--ink);font-weight:700}
+.cs-legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--ink-2)}
+.cs-legend span{display:inline-flex;align-items:center;gap:6px}
+.cs-legend i{display:inline-block;width:10px;height:10px}
+.k-dot{border-radius:50%;background:var(--accent-2)}.k-dot.gated{background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--ink-3)}
+.k-dot.chosen{background:var(--accent);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
+.k-square{border-radius:2px;background:var(--accent-2)}
+.k-floor{width:auto!important;height:auto!important;font-style:normal;color:var(--ink-3)}
+.cs-floor{fill:none;stroke:var(--ink-3);stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+.k-gate{width:18px!important;height:0!important;border-top:1.5px dashed var(--bad-fg)}
+</style></head>
+<body><div class="page">
+  <header class="run">
+    <p class="eyebrow">Agentic Evaluator · run report · protocol 0.3</p>
+    <h1>Step code · <span class="id">agb-flow-v3-code</span></h1>
+    <dl class="kv">
+      <div><dt>Spec</dt><dd>tasks/agb-flow-v3-build/code.yaml · sha256 0836fbbc</dd></div>
+      <div><dt>Test set</dt><dd>code-v1 · 2 input(s)</dd></div>
+      <div><dt>Trial plan</dt><dd>2 candidates × 2 inputs × 1 trial = 4</dd></div>
+      <div><dt>Judge</dt><dd>openai/gpt-6.1-sol · rubric fa8dfe5f</dd></div>
+      <div><dt>Mode</dt><dd>production-realistic · cold cache</dd></div>
+      <div><dt>Run time</dt><dd>2026-11-16 05:56 → 08:36</dd></div>
+      <div><dt>Operating mode</dt><dd>highest assurance · directional · recommend opus-5-5</dd></div>
+      <div><dt>harness</dt><dd>0.3.0 · e93f0be2</dd></div>
+    </dl>
+  </header>
+
+  <section class="card">
+    <h2>What this evaluates</h2>
+    <p>(agb 0a8c4ee7) Which Claude model should code a whole project with agb, and how much does agb&#39;s orchestration add over bare claude? Each input is a planned project (PRD, design, contracts, task list, test plan) with no code yet; the candidate builds all of it; held-out acceptance tests run against the built app.</p>
+    <p><b>This step (code)</b>: agb stage 5, code: build the whole project from its adopted plan (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints).</p>
+    <p class="note"><b>A pass of build-tests</b> means: The built app comes up (install, compose services, db:fresh, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the pass rate is in the evidence.</p>
+    
+  </section>
+
+  
+
+  <div class="verdict directional">
+    <span class="tag">directional</span>
+    <div>
+      <p class="champ-line">Recommend <b>opus-5-5</b> <span class="mode">· highest assurance</span></p>
+      <p class="champ-facts">$45.2065 per success · required check 2/2 passed · check score 98%</p>
+      <p class="sub">2 eligible candidates tie at 1.000 (2/2) reliability and 1.000 (2/2) required-check pass rate (within the minimum meaningful difference 0.05); opus-5-5 is picked by the required check&#39;s score counted as equal within the minimum meaningful difference 0.05 (opus-5-5 98%, sonnet-5-5 100%), then the judge&#39;s pairwise score (opus-5-5 100%, next sonnet-5-5 0%).</p>
+      
+      <p class="sub">The judge preferred opus-5-5 most (2 W 0 L 0 T of 2), which matches the recommendation.</p>
+      <p class="sub">Directional only: only 2 input(s) (fewer than 6). Also opus-5-5: required-check-pass-rate 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95; opus-5-5: reliability 2/2 has a 95% interval down to 0.342, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95.</p>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>Cost and success <span class="hint">one point per candidate · up passes the required check more often, left costs less per success</span></h2>
+    <figure class="cs-fig"><svg class="cs" viewBox="0 0 640 320" role="img" aria-label="Required-check pass rate against generation cost per success, one point per candidate">
+    <line class="cs-grid" x1="52" x2="616" y1="280.0" y2="280.0"/><text class="cs-tick" x="44" y="284.0" text-anchor="end">95%</text><line class="cs-grid" x1="52" x2="616" y1="36.0" y2="36.0"/><text class="cs-tick" x="44" y="40.0" text-anchor="end">100%</text><text class="cs-tick" x="52.0" y="298" text-anchor="middle">$1</text><text class="cs-tick" x="334.0" y="298" text-anchor="middle">$10</text><text class="cs-tick" x="616.0" y="298" text-anchor="middle">$100</text><line class="cs-gate" x1="52" x2="616" y1="36.0" y2="36.0"/>
+    <text class="cs-axis" x="334.0" y="316" text-anchor="middle">generation cost per success (log scale) — cheaper is left</text>
+    <g><title>opus-5-5 · required check 2/2 · $45.2065 per success · recommended</title><circle class="cs-hit" cx="518.8" cy="36.0" r="12"/><line class="cs-leader" x1="518.8" y1="36.0" x2="525.8" y2="23.0"/><circle class="cs-ring" cx="518.8" cy="36.0" r="9"/><circle class="cs-dot chosen" cx="518.8" cy="36.0" r="5"/><text class="cs-label chosen" x="527.8" y="27.0" text-anchor="start">opus-5-5</text></g><g><title>sonnet-5-5 · required check 2/2 · $9.1810 per success</title><circle class="cs-hit" cx="323.5" cy="36.0" r="12"/><line class="cs-leader" x1="323.5" y1="36.0" x2="330.5" y2="23.0"/><circle class="cs-dot" cx="323.5" cy="36.0" r="5"/><text class="cs-label" x="332.5" y="27.0" text-anchor="start">sonnet-5-5</text></g>
+  </svg>
+      <figcaption class="cs-legend"><span><i class="k-dot"></i>passed every gate</span><span><i class="k-dot gated"></i>removed by a gate</span><span><i class="k-dot chosen"></i>recommended</span><span><i class="k-square"></i>control</span><span><i class="k-gate"></i>required-check gate ≥ 100%</span></figcaption>
+    </figure>
+    <p class="note">The cost is the generation cost per success the operating mode ranks on: under &quot;lowest cost&quot; the recommendation is the leftmost filled point above the gate. A point can sit above the gate and still be hollow when another gate (reliability, pass^k) removed it; hover a point for its numbers and the gate that removed it.</p>
+  </section>
+
+  <section class="card">
+    <h2>Selection <span class="hint">each eligibility gate removes candidates, the operating mode picks among the rest · rule select-v4</span></h2>
+    <ol class="trace"><li><b>required-check pass rate ≥ 100%</b> — removed: nobody removed. Remaining: opus-5-5, sonnet-5-5.</li><li><b>reliability ≥ 100%</b> — removed: nobody removed. Remaining: opus-5-5, sonnet-5-5.</li></ol>
+    
+    <p class="note">Passed every gate: opus-5-5, sonnet-5-5. The judge's win rate is for reference only and takes no part in selection.</p>
+  </section>
+
+  <section class="card">
+    <h2>How sure <span class="hint">Wilson 95% intervals counted per input; exact sign test over inputs</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Gate (opus-5-5)</th><th class="num">Passed / inputs</th><th class="num">95% interval</th><th class="num">Gate</th><th>At the low end</th></tr></thead>
+      <tbody><tr><td>required-check-pass-rate</td><td class="num">2/2</td><td class="num">0.342–1.000</td><td class="num">1</td><td class="bad">not shown</td></tr><tr><td>reliability</td><td class="num">2/2</td><td class="num">0.342–1.000</td><td class="num">1</td><td class="bad">not shown</td></tr></tbody>
+    </table></div>
+    <p class="note">Against the runner-up, input by input: opus-5-5 did better on 0, sonnet-5-5 on 0, equal on 2 (exact sign test p 1.000, not significant).</p>
+    <p class="note"><b>Effective N 0 of 2.</b> Inputs that separated any two candidates on the required check; 2 every candidate passed and 0 gave everyone the same partial rate, so they cannot inform a choice. The judge preferred one candidate over another on 2. Per-input detail: items.json.</p>
+  </section>
+
+  <section class="card">
+    <h2>Candidates <span class="hint">the same inputs, paired by candidate; 1 trial(s) per cell</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th><th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
+      <tbody><tr class="chosen">
+        <td class="cand"><span class="sw sw0"></span>opus-5-5<span class="model">recommended</span><span class="model">anthropic/claude-opus-5.5 · cli/local-cli</span></td>
+        <td><div class="state-list"><span class="ok">2 success</span><span class="bad">0 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill pass">2 / 2</span><span class="sub">score 98%</span></td>
+        <td class="num"><span class="bar"><span style="width:100%"></span></span>100%<span class="sub">2 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">$45.2065</td>
+        <td class="num">15642.5 s</td>
+        <td><div class="state-list"><span class="ok">2 success</span></div></td>
+      </tr><tr>
+        <td class="cand"><span class="sw sw1"></span>sonnet-5-5<span class="model">anthropic/claude-sonnet-5.5 · cli/local-cli</span></td>
+        <td><div class="state-list"><span class="ok">2 success</span><span class="bad">0 failure</span><span class="warn">0 undetermined</span></div></td>
+        <td class="num"><span class="pill pass">2 / 2</span><span class="sub">score 100%</span></td>
+        <td class="num"><span class="bar"><span style="width:0%"></span></span>0%<span class="sub">2 matches</span></td>
+        
+        <td class="num">—</td>
+        <td class="num">$9.1810</td>
+        <td class="num">2785.3 s</td>
+        <td><div class="state-list"><span class="ok">2 success</span></div></td>
+      </tr></tbody>
+    </table></div>
+    <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.</p>
+  </section>
+
+  
+
+  <div class="two-col">
+    
+    <section class="card">
+      <h2>Evaluation coverage <span class="hint">the evaluators' own state, before any pass rate</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Evaluator</th><th>Version</th><th class="num">Expected</th><th class="num">pass / fail</th><th class="num">Not evaluated</th><th class="num">Evaluator error</th></tr></thead>
+        <tbody><tr><td>build-tests</td><td class="mono small">cmd-c0156e9f+files-fd754c84</td>
+        <td class="num">4</td>
+        <td class="num">4 / 0</td>
+        <td class="num">0</td>
+        <td class="num">0</td></tr><tr><td>pairwise-swap</td><td class="mono small">openai/gpt-6.1-sol+rubric-fa8dfe5f+tpl-1fc69c82</td>
+        <td class="num">2</td>
+        <td class="num">2 / 0</td>
+        <td class="num">0</td>
+        <td class="num">0</td></tr></tbody>
+      </table></div>
+      <p class="note">No evaluator errors in this run.</p>
+    </section>
+    <section class="card">
+      <h2>Cost breakdown <span class="hint">source: estimated</span></h2>
+      <div class="table-wrap"><table class="ledger"><tbody>
+        <tr><td>Candidate generation · 4 trials</td><td class="num">$108.7751</td></tr>
+        <tr><td>Pairwise judging</td><td class="num">$1.6633</td></tr>
+        <tr><td>Absolute scoring</td><td class="num">$0.0000</td></tr>
+        <tr><td>Deterministic checks</td><td class="num">$0.0000</td></tr>
+        <tr><td>Retries and recovery</td><td class="num">$0.0000</td></tr>
+        <tr class="total"><td>Total</td><td class="num">$110.4384</td></tr>
+        <tr><td>Full cost per success</td><td class="num">$27.6096</td></tr>
+      </tbody></table></div>
+      <p class="note">Evaluation spend is 0.0× generation spend.</p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Judge scores <span class="hint">pairwise win rate · not used by the recommendation</span></h2>
+    <p class="note"><b>No 1–5 scores:</b> this step's <code>methods</code> does not declare <code>absolute-1-5</code>. That was declared, not missed.</p>
+    
+    <figure class="viz">
+    <figcaption>Direction · pairwise win rate 0–100 <span class="hint">who was preferred; a tie counts 0.5</span></figcaption>
+    <div class="table-wrap"><table class="pref">
+      <thead><tr><th>Candidate</th><th class="num">correctness</th><th class="num">structure</th><th class="num">tests</th><th class="num">scope</th></tr></thead>
+      <tbody><tr><td>opus-5-5</td><td class="num" style="background:rgba(42,120,214,0.700)">100</td><td class="num" style="background:rgba(42,120,214,0.700)">100</td><td class="num" style="background:rgba(42,120,214,0.080)">50</td><td class="num" style="background:rgba(201,58,57,0.390)">25</td></tr><tr><td>sonnet-5-5</td><td class="num" style="background:rgba(201,58,57,0.700)">0</td><td class="num" style="background:rgba(201,58,57,0.700)">0</td><td class="num" style="background:rgba(42,120,214,0.080)">50</td><td class="num" style="background:rgba(42,120,214,0.390)">75</td></tr></tbody>
+    </table></div>
+  </figure><p class="note"><b>Pairwise win rate</b> (the table above) is a separate question: shown two outputs side by side, which did the judge prefer, 0–100, a tie counting 0.5. It only counts the matches each candidate took part in, so <code>0</code> means "lost every match", not "bad output".</p>
+  </section>
+
+  <section class="card">
+    <h2>Outputs side by side <span class="hint">every candidate's answer to the same input, first trial, exactly the text the judge saw</span></h2>
+    <details><summary>demo-todo</summary><div class="sbs"><article><header><strong>opus-5-5</strong> <span class="muted">no raw output saved</span></header></article><article><header><strong>sonnet-5-5</strong> <span class="muted">no raw output saved</span></header></article></div></details><details><summary>invoice</summary><div class="sbs"><article><header><strong>opus-5-5</strong> <span class="muted">no raw output saved</span></header></article><article><header><strong>sonnet-5-5</strong> <span class="muted">no raw output saved</span></header></article></div></details>
+  </section>
+
+  
+  <section class="card">
+    <h2>Match evidence <span class="hint">each dimension judged separately; an order disagreement is recorded as a tie by rule</span></h2>
+    
+      <article class="duel">
+        <header>
+          <strong>opus-5-5</strong> vs <strong>sonnet-5-5</strong>
+          <span class="muted">demo-todo</span>
+          <span class="chip win">opus-5-5</span> 
+        </header>
+        <p class="evidence">A is the safer foundation despite its larger change surface: server/src/routes/tasks.ts protects state transitions against concurrent writers, and client/src/api/tasks.ts protects detail caches against overlapping saves and stale reads. Its targeted concurrency and recovery tests exercise these protections, whereas B leaves those failure modes exposed.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5</span> </td><td>In server/src/routes/tasks.ts, A performs transitions inside an immediate transaction with a conditional status update; B reads the status and later updates it unconditionally, allowing concurrent processes to overwrite intervening transitions. A&#39;s useUpdateTask also cancels stale detail queries and merges only changed fields, whereas B replaces the entire cached task, potentially overwriting another concurrent save&#39;s result.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5</span> </td><td>A&#39;s client components and server domain module reuse shared/taskWorkflow, while B separately defines workflow states and transitions in client/src/domain.ts, client/src/api/types.ts, and server/src/domain/taskWorkflow.ts. A&#39;s db.ts applies versioned migration files transactionally; B embeds schema creation and ad hoc column migrations directly in openDb.</td></tr><tr><th>tests</th><td><span class="chip win">opus-5-5</span> </td><td>A&#39;s TaskDetailPage.test.tsx explicitly holds an old GET response until after a save and verifies that it cannot restore the old title; B has no equivalent stale-response test. A&#39;s retry.test.tsx verifies that retries actually restore usable pages and member options, while several B retry tests only verify an increased request count against a fake API configured to keep failing.</td></tr><tr><th>scope</th><td><span class="chip win">sonnet-5-5</span> </td><td>B implements the presentation with a substantially smaller client/src/styles.css and keeps toast handling within BoardPage. A adds a much larger styling system, a separate toast hook, and development-security-header and proxy helper modules with dedicated tests, increasing the change surface beyond B&#39;s narrower implementation.</td></tr></tbody></table>
+      </article>
+      <article class="duel">
+        <header>
+          <strong>opus-5-5</strong> vs <strong>sonnet-5-5</strong>
+          <span class="muted">invoice</span>
+          <span class="chip win">opus-5-5</span> 
+        </header>
+        <p class="evidence">A provides the safer foundation for financial operations: settlement/recover.ts explicitly reconciles uncertain payouts, and invoice/statusLog.ts commits status changes and their logs transactionally. B has valuable backend regression tests, but its settlement/create.ts recovery gaps, floating-point money calculations, and largely untyped frontend API outweigh that testing advantage.</p>
+        <table class="dims"><tbody><tr><th>correctness</th><td><span class="chip win">opus-5-5</span> </td><td>A&#39;s invoice/totals.ts uses BigInt fixed-point arithmetic, whereas B&#39;s invoice/money.ts calculates discounted and taxed amounts with floating-point division and an EPS adjustment. A&#39;s settlement/recover.ts also reconciles unknown payouts against Cobo and recovers interrupted submissions; B&#39;s settlement/create.ts saves its attempt record only after a payout error and suppresses failures saving it, leaving a crash or database-error window without durable recovery context.</td></tr><tr><th>structure</th><td><span class="chip win">opus-5-5</span> </td><td>A supplies shared response types in api/types.ts and uses React Query for caching and invalidation; B&#39;s api/client.ts returns any for most resources and introduces a separate useFetch implementation. On the backend, A passes the database, configuration and clock through AppContext, while B&#39;s route and domain modules import a globally connected database and read configuration through process-global getters.</td></tr><tr><th>tests</th><td><span class="chip win">sonnet-5-5</span> </td><td>B&#39;s webhook/settlement.test.ts injects a status-log failure and verifies that both the settlement and invoice states roll back before a successful webhook retry; invoice/idempotency.test.ts similarly verifies that a completion-record failure does not repeat the operation. A adds substantial UI regression coverage, including InvoiceForm.test.tsx and PayerInvoice.test.tsx, but the supplied A changes contain no comparable backend persistence and transaction regression tests.</td></tr><tr><th>scope</th><td><span class="chip tie">tie</span> <span class="chip warn" title="The two orders gave opposite verdicts; recorded as a tie by rule">order disagreement: a / b</span></td><td>B&#39;s SettlementConfirm.tsx retains a removed state and rendering branch without ever calling setRemoved, and InvoiceForm.tsx declares an unused MAX_CC constant. B&#39;s cobo/auth.ts additionally fabricates an ephemeral signing key and a dev-org-token fallback when credentials or OAuth fail; A&#39;s cobo/client.ts reports missing credentials or external failures instead of introducing those substitute authentication behaviors.</td></tr></tbody></table>
+      </article>
+  </section>
+
+  
+  <section class="card">
+    <h2>Every trial <span class="hint">the averages in the standings are computed from these rows</span></h2>
+    <table>
+      <thead><tr>
+        <th>Candidate</th><th>Input</th><th class="num">#</th><th>Completion</th><th>Outcome</th>
+        <th class="num">Overall</th><th>Pairwise</th>
+        <th class="num">Output tokens</th><th class="num">Cost</th><th class="num">Duration</th>
+      </tr></thead>
+      <tbody><tr>
+        <td>opus-5-5</td>
+        <td>demo-todo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>win vs sonnet-5-5</td>
+        <td class="num">225950</td>
+        <td class="num">$19.2662</td>
+        <td class="num">15643s</td>
+      </tr><tr>
+        <td>sonnet-5-5</td>
+        <td>demo-todo</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>loss vs opus-5-5</td>
+        <td class="num">100827</td>
+        <td class="num">$3.0048</td>
+        <td class="num">2785s</td>
+      </tr><tr>
+        <td>opus-5-5</td>
+        <td>invoice</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>win vs sonnet-5-5</td>
+        <td class="num">665073</td>
+        <td class="num">$71.1468</td>
+        <td class="num">22741s</td>
+      </tr><tr>
+        <td>sonnet-5-5</td>
+        <td>invoice</td>
+        <td class="num">t0</td>
+        <td>success </td>
+        <td>success</td>
+        <td class="num">—</td>
+        
+        <td>loss vs opus-5-5</td>
+        <td class="num">323548</td>
+        <td class="num">$15.3572</td>
+        <td class="num">17155s</td>
+      </tr></tbody>
+    </table>
+  </section>
+
+  
+  <section class="card">
+    <h2>Candidate outputs <span class="hint">exactly the text the judge saw</span></h2>
+    <details><summary>opus-5-5 · demo-todo · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>sonnet-5-5 · demo-todo · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>opus-5-5 · invoice · t0 <span class="muted">— this file is not in raw/</span></summary></details><details><summary>sonnet-5-5 · invoice · t0 <span class="muted">— this file is not in raw/</span></summary></details>
+  </section>
+
+  <section class="card">
+    <h2>Fields this run did not observe <span class="hint">GAPS.md</span></h2>
+    <ul class="gaps"><li><code>ttft_ms</code>: non-streaming calls; no time to first token.</li><li><code>cache</code>: the provider reported cached prompt tokens on some calls; recorded under <code>tokens.cached</code>, no cache cost breakdown.</li><li><code>deployment_ref.region / tier</code>: who served the model is read from the command&#39;s trace (<code>cli/…</code>), from OpenRouter&#39;s upstream provider, or from the model id a direct API answered with; region and service tier are not exposed.</li><li><code>human_intervention</code>: not observed; no trace format read here says whether the agent waited on a person.</li><li><code>tool_calls</code>, turns: not observed; no candidate declared <code>cli.trace</code>, so what the agents did between input and output is not recorded.</li><li><code>checkpoint</code>: not observed; no trace format read here says whether the agent resumed from one.</li><li>transport retry: model-API calls retry transient failures (HTTP 408/409/425/429, 5xx, network) twice with exponential backoff and no jitter; per-trial retry counts are not in scores.jsonl, only retry cost.</li><li>evaluator errors: none in this run.</li><li>absolute 1–5 scoring: **not run** — the spec declares <code>methods</code> without <code>absolute-1-5</code>. Magnitude is therefore not observed at all in this run; the empty score columns are a declaration, not a failure.</li><li>effective N: 0 of 2 inputs separated any two candidates on task success; 2 every candidate passed, 0 gave everyone the same partial rate. Only the separating inputs carry evidence for a choice (items.json). The judge preferred one candidate over another on 2 of 2.</li><li>pairwise judging uses only the first successful output per (candidate, input); repeated trials feed absolute scores only. The selector reads the pairwise score only to rank judge-preference, and to break a tie on assurance in highest-assurance.</li><li>statistical uncertainty: the chosen candidate&#39;s gated rates carry Wilson 95% intervals, and a highest-assurance pick must beat the runner-up on an exact sign test over inputs (recommendation.json <code>evidence</code>). Inputs generated from one template are still treated as independent, which overstates certainty when they share a template.</li><li>**combined run**: built from agb-flow-v3-code-2026-11-16T05-56-11-141Z (later runs supersede earlier ones per trial); nothing was generated or judged for it. combined-from.json says which run each trial came from.</li></ul>
+  </section>
+
+  <section class="card">
+    <h2>Raw records</h2>
+    <details><summary>First line of scores.jsonl</summary><pre>{
+ &quot;run&quot;: &quot;agb-flow-v3-all-combined-2026-11-16T08-36-27-547Z/code&quot;,
+ &quot;step&quot;: &quot;code&quot;,
+ &quot;candidate&quot;: &quot;opus-5-5&quot;,
+ &quot;model_ref&quot;: &quot;anthropic/claude-opus-5.5&quot;,
+ &quot;deployment_ref&quot;: &quot;cli/local-cli&quot;,
+ &quot;input&quot;: &quot;demo-todo&quot;,
+ &quot;trial&quot;: 0,
+ &quot;trial_hash&quot;: &quot;ab006984a0ae2c0c3de46da4fe5221f9c24e837385bd87e31c33ec89d6df85e8&quot;,
+ &quot;completion_state&quot;: &quot;success&quot;,
+ &quot;truncated&quot;: false,
+ &quot;task_outcome&quot;: &quot;success&quot;,
+ &quot;outcome_reasons&quot;: [
+  &quot;build-tests: pass&quot;
+ ],
+ &quot;rule_version&quot;: &quot;success-v2&quot;,
+ &quot;checks&quot;: {
+  &quot;build-tests&quot;: {
+   &quot;state&quot;: &quot;pass&quot;,
+   &quot;version&quot;: &quot;cmd-c0156e9f+files-fd754c84&quot;,
+   &quot;evidence&quot;: &quot;held-out 23/24 (api 8/8, ui 15/16). Failed: AT-012&quot;,
+   &quot;score&quot;: 0.9583333333333334
+  }
+ },
+ &quot;judge&quot;: {
+  &quot;pairwise&quot;: [
+   {
+    &quot;vs&quot;: &quot;sonnet-5-5&quot;,
+    &quot;resolved&quot;: &quot;win&quot;
+   }
+  ],
+  &quot;absolute_overall&quot;: null,
+  &quot;absolute_dimensions&quot;: null
+ },
+ &quot;cost&quot;: {
+  &quot;generation&quot;: 19.2662232,
+  &quot;retry&quot;: 0,
+  &quot;source&quot;: &quot;estimated&quot;
+ },
+ &quot;tokens&quot;: {
+  &quot;prompt&quot;: 54859040,
+  &quot;completion&quot;: 225950,
+  &quot;cached&quot;: 54072421
+ },
+ &quot;ms&quot;: 15642502,
+ &quot;isolation&quot;: &quot;none&quot;,
+ &quot;agent&quot;: null,
+ &quot;ttft_ms&quot;: null,
+ &quot;cache&quot;: null,
+ &quot;finish_reason&quot;: &quot;stop&quot;,
+ &quot;error&quot;: null,
+ &quot;legacy_status&quot;: &quot;ok&quot;,
+ &quot;legacy_check_passed&quot;: true,
+ &quot;reused_from&quot;: &quot;tasks/agb-flow-v3-build/runs/agb-flow-v3-build-2026-11-13T12-17-33-932Z&quot;
+}</pre></details>
+    <details><summary>manifest.json</summary><pre>{
+ &quot;protocol_version&quot;: &quot;0.3&quot;,
+ &quot;run_id&quot;: &quot;agb-flow-v3-all-combined-2026-11-16T08-36-27-547Z/code&quot;,
+ &quot;run_name&quot;: &quot;agb-flow-v3-code&quot;,
+ &quot;step&quot;: {
+  &quot;id&quot;: &quot;code&quot;,
+  &quot;version&quot;: &quot;1&quot;,
+  &quot;description&quot;: &quot;agb stage 5, code: build the whole project from its adopted plan (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints).&quot;
+ },
+ &quot;spec&quot;: {
+  &quot;path&quot;: &quot;tasks/agb-flow-v3-build/code.yaml&quot;,
+  &quot;sha256&quot;: &quot;0836fbbcd3312995bfa6bf4b0235e9b94f6f27a3ed4eaaf3fd231e3424b4f596&quot;
+ },
+ &quot;description&quot;: &quot;(agb 0a8c4ee7) Which Claude model should code a whole project with agb, and how much does agb&#39;s orchestration add over bare claude? Each input is a planned project (PRD, design, contracts, task list, test plan) with no code yet; the candidate builds all of it; held-out acceptance tests run against the built app.&quot;,
+ &quot;test_set&quot;: {
+  &quot;id&quot;: &quot;code-v1&quot;,
+  &quot;inputs&quot;: {
+   &quot;demo-todo&quot;: &quot;9ffe96cbe0dcc1fbe29ae3cac4859888f40e435c97bd51d0f01a484fef36eb55&quot;,
+   &quot;invoice&quot;: &quot;b2ac59090b12c7c4c0b566b22a57389bd0bc23fb5df71736a05c8fb9cc58b118&quot;
+  },
+  &quot;labels&quot;: null
+ },
+ &quot;candidates&quot;: {
+  &quot;opus-5-5&quot;: {
+   &quot;id&quot;: &quot;opus-5-5&quot;,
+   &quot;adapter&quot;: &quot;agent-cli&quot;,
+   &quot;model&quot;: &quot;anthropic/claude-opus-5.5&quot;,
+   &quot;cli&quot;: {
+    &quot;argv&quot;: [
+     &quot;node&quot;,
+     &quot;agents/agb-step.mjs&quot;,
+     &quot;claude-opus-5-5&quot;,
+     &quot;{{max_cost_usd}}&quot;
+    ],
+    &quot;reports_usage&quot;: &quot;tokens&quot;,
+    &quot;version_files&quot;: [
+     &quot;agents/agb-step.mjs&quot;
+    ],
+    &quot;version_sha&quot;: &quot;d842fee9f06864b1555d2acc4a76fbe105c4c4474da1e948cddf7d8e5f374ee7&quot;
+   }
+  },
+  &quot;sonnet-5-5&quot;: {
+   &quot;id&quot;: &quot;sonnet-5-5&quot;,
+   &quot;adapter&quot;: &quot;agent-cli&quot;,
+   &quot;model&quot;: &quot;anthropic/claude-sonnet-5.5&quot;,
+   &quot;cli&quot;: {
+    &quot;argv&quot;: [
+     &quot;node&quot;,
+     &quot;agents/agb-step.mjs&quot;,
+     &quot;claude-sonnet-5-5&quot;,
+     &quot;{{max_cost_usd}}&quot;
+    ],
+    &quot;reports_usage&quot;: &quot;tokens&quot;,
+    &quot;version_files&quot;: [
+     &quot;agents/agb-step.mjs&quot;
+    ],
+    &quot;version_sha&quot;: &quot;d842fee9f06864b1555d2acc4a76fbe105c4c4474da1e948cddf7d8e5f374ee7&quot;
+   }
+  }
+ },
+ &quot;control_candidate&quot;: null,
+ &quot;judge&quot;: {
+  &quot;model&quot;: &quot;openai/gpt-6.1-sol&quot;,
+  &quot;provider_route&quot;: &quot;openrouter&quot;,
+  &quot;methods&quot;: [
+   &quot;pairwise-swap&quot;
+  ]
+ },
+ &quot;evaluators&quot;: {
+  &quot;required_checks&quot;: [
+   &quot;build-tests&quot;
+  ],
+  &quot;check_version&quot;: &quot;cmd-c0156e9f+files-fd754c84&quot;,
+  &quot;rubric_sha256&quot;: &quot;fa8dfe5f7245d380aa9645d1a1ce4dd150412e73be73c684c824e6c26dc640ef&quot;,
+  &quot;check_description&quot;: &quot;The built app comes up (install, compose services, db:fresh, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the pass rate is in the evidence.&quot;,
+  &quot;producer_template_sha256&quot;: &quot;55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6&quot;,
+  &quot;judge_template_sha256&quot;: &quot;1fc69c82db6a66ecbce049b37384f5775e6a62046dfde264ec9bac1e3abcb884&quot;,
+  &quot;score_template_sha256&quot;: &quot;f7f3161e0bad3793db0c837c3a53beb00175c7c76fda2497f6fd5b1f0f548fbc&quot;
+ },
+ &quot;prompts&quot;: null,
+ &quot;success_criteria&quot;: {
+  &quot;mandatory_checks&quot;: &quot;all&quot;
+ },
+ &quot;operating_mode&quot;: &quot;highest-assurance&quot;,
+ &quot;eligibility&quot;: {
+  &quot;minimum_reliability&quot;: 1,
+  &quot;minimum_required_check_pass_rate&quot;: 1,
+  &quot;minimum_all_trials_pass_rate&quot;: null,
+  &quot;maximum_p95_ms&quot;: null,
+  &quot;cost_ceiling_per_success_usd&quot;: null
+ },
+ &quot;minimum_meaningful_difference&quot;: 0.05,
+ &quot;execution&quot;: {
+  &quot;trials_per_case&quot;: 1,
+  &quot;concurrency&quot;: 1,
+  &quot;timeout_ms&quot;: 57600000,
+  &quot;benchmark_mode&quot;: &quot;production-realistic&quot;,
+  &quot;cache_mode&quot;: &quot;cold&quot;,
+  &quot;early_stop&quot;: false,
+  &quot;outage_wait_seconds&quot;: 600,
+  &quot;max_consecutive_provider_errors&quot;: 10,
+  &quot;max_consecutive_timeouts&quot;: 10
+ },
+ &quot;harness&quot;: {
+  &quot;name&quot;: &quot;57b-agenteval&quot;,
+  &quot;version&quot;: &quot;0.3.0&quot;,
+  &quot;git_sha&quot;: &quot;e93f0be2&quot;,
+  &quot;node&quot;: &quot;v24.14.0&quot;
+ },
+ &quot;started_at&quot;: &quot;2026-11-16T05:56:11.141Z&quot;,
+ &quot;finished_at&quot;: &quot;2026-11-16T08:36:27.588Z&quot;
+}</pre></details>
+  </section>
+
+  <footer><span>code/</span><span>opens offline, no external dependencies</span><span>trace.jsonl · evaluations.jsonl · ledger.json · summary.json · recommendation.json</span></footer>
+</div></body></html>

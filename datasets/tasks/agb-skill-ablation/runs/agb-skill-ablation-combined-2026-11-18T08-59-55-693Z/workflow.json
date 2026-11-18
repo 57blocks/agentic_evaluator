@@ -1,0 +1,166 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-skill-ablation-combined-2026-11-18T08-59-55-693Z",
+  "run_name": "agb-skill-ablation",
+  "handoff": false,
+  "steps": [
+    {
+      "id": "spec",
+      "dir": "spec",
+      "operating_mode": "highest-assurance",
+      "chosen": "opus-5-5-skill",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5-skill",
+        "opus-5-5-none",
+        "sonnet-5-5-skill",
+        "sonnet-5-5-none"
+      ],
+      "gated": [],
+      "trials": 8,
+      "ledger_total": 24.499513,
+      "ledger": {
+        "generation": 18.945274,
+        "judging": 5.554239,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 24.499513,
+        "source": "estimated",
+        "successes": 8,
+        "cost_per_success": 3.062439,
+        "cost_per_attempt": 3.062439
+      }
+    },
+    {
+      "id": "architecture",
+      "dir": "architecture",
+      "operating_mode": "highest-assurance",
+      "chosen": "opus-5-5-skill",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5-skill",
+        "opus-5-5-none",
+        "sonnet-5-5-skill",
+        "sonnet-5-5-none"
+      ],
+      "gated": [],
+      "trials": 12,
+      "ledger_total": 24.445965,
+      "ledger": {
+        "generation": 21.102928,
+        "judging": 3.343036,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 24.445965,
+        "source": "estimated",
+        "successes": 12,
+        "cost_per_success": 2.037164,
+        "cost_per_attempt": 2.037164
+      }
+    },
+    {
+      "id": "task-breakdown",
+      "dir": "task-breakdown",
+      "operating_mode": "highest-assurance",
+      "chosen": "opus-5-5-skill",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5-skill",
+        "opus-5-5-none",
+        "sonnet-5-5-skill",
+        "sonnet-5-5-none"
+      ],
+      "gated": [],
+      "trials": 12,
+      "ledger_total": 25.901145,
+      "ledger": {
+        "generation": 22.612149,
+        "judging": 3.288996,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 25.901145,
+        "source": "estimated",
+        "successes": 12,
+        "cost_per_success": 2.158429,
+        "cost_per_attempt": 2.158429
+      }
+    },
+    {
+      "id": "test-design",
+      "dir": "test-design",
+      "operating_mode": "highest-assurance",
+      "chosen": "opus-5-5-skill",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5-skill",
+        "opus-5-5-none",
+        "sonnet-5-5-skill",
+        "sonnet-5-5-none"
+      ],
+      "gated": [],
+      "trials": 12,
+      "ledger_total": 14.29616,
+      "ledger": {
+        "generation": 12.746384,
+        "judging": 1.549776,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 14.29616,
+        "source": "estimated",
+        "successes": 12,
+        "cost_per_success": 1.191347,
+        "cost_per_attempt": 1.191347
+      }
+    },
+    {
+      "id": "code",
+      "dir": "code",
+      "operating_mode": "highest-assurance",
+      "chosen": "sonnet-5-5-skill",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5-none",
+        "sonnet-5-5-skill",
+        "sonnet-5-5-none"
+      ],
+      "gated": [
+        {
+          "candidate": "opus-5-5-skill",
+          "reason": "reliability 0.500 (1/2) < 1"
+        }
+      ],
+      "trials": 8,
+      "ledger_total": 104.272907,
+      "ledger": {
+        "generation": 95.591353,
+        "judging": 8.681554,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 104.272907,
+        "source": "estimated",
+        "successes": 7,
+        "cost_per_success": 14.89613,
+        "cost_per_attempt": 13.034113
+      }
+    }
+  ],
+  "ledger": {
+    "generation": 170.998088,
+    "judging": 22.417601,
+    "scoring": 0,
+    "checks": 0,
+    "retries": 0,
+    "steps_total": 193.41569,
+    "e2e_total": 0,
+    "total": 193.41569,
+    "source": "estimated"
+  },
+  "e2e_control": null,
+  "e2e_proposed": null,
+  "e2e_validation": null
+}

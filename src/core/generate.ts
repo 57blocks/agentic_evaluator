@@ -125,6 +125,7 @@ export interface GenOutput {
   checkPassed?: boolean;
   checkOutput?: string;
   checkReason?: string;
+  checkScore?: number;
   checkState?: EvaluationState;
   checkVersion?: string;
 }
@@ -216,6 +217,7 @@ async function regradeIfChanged(
       checkPassed: graded.passed,
       checkOutput: graded.output,
       checkReason: graded.reason,
+      checkScore: graded.score,
       checkState: graded.state,
       checkVersion: graded.version,
     };
@@ -308,6 +310,7 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
     checkPassed: graded.passed,
     checkOutput: graded.output,
     checkReason: graded.reason,
+    checkScore: graded.score,
     checkState: graded.state,
     checkVersion: graded.version,
   };
@@ -543,6 +546,7 @@ function recordFromRow(row: TrialRow, text: string): RunRecord {
     checkVersion: check?.version,
     checkOutput: check?.evidence,
     checkReason: check?.reason,
+    checkScore: check?.score,
     modelRef: row.model_ref,
     deploymentRef: row.deployment_ref ?? undefined,
     trialHash: row.trial_hash,
@@ -848,6 +852,7 @@ export async function runAll(params: {
         checkPassed: g.checkPassed,
         checkOutput: g.checkOutput,
         checkReason: g.checkReason,
+        checkScore: g.checkScore,
         checkState: g.checkState,
         checkVersion: g.checkVersion,
         modelRef: modelRefOf(def),

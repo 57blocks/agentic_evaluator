@@ -10,6 +10,7 @@ import { INSTALL_ROOT } from "../src/paths.js";
 import { createDemoServer, listenDemo, underRoot } from "../src/demo/server.js";
 import { demoPage } from "../src/demo/ui.js";
 import { latestVerdict, runMeta, spendLabel } from "../src/demo/client/lib/format.js";
+import { spendOf } from "../src/demo/spend.js";
 import type { RunView, TaskView } from "../src/demo/catalog.js";
 import { buildWorkflowRecord } from "../src/canon/workflow.js";
 import { WORKFLOW_LEDGER_FIXTURE, workflowStepFixture } from "./helpers/workflow-fixture.js";
@@ -76,6 +77,23 @@ test("loadRun reads a nested workflow directory", async () => {
   assert.equal(view?.handoff, false);
   assert.equal(view?.steps[0].id, "pass-step");
   assert.equal(view?.steps[0].chosen, "fake-pass");
+});
+
+test("a multi-step run that stopped before writing workflow.json still lists its finished steps", async () => {
+  // Arrange — one finished step (a complete run dir), and no workflow.json:
+  // the run was cut off (a usage limit) before its next step finished.
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "eval-demo-cut-"));
+  await fs.cp(path.join(INSTALL_ROOT, "fixtures", "prd-w38"), path.join(tmp, "cut", "prd"), { recursive: true });
+  await fs.mkdir(path.join(tmp, "cut", "taskbreakdown"), { recursive: true }); // started, never finished
+
+  // Act
+  const view = await loadRun("cut", { runsRoot: tmp });
+
+  // Assert — listed, marked unfinished, and its spend is there to count.
+  assert.equal(view?.kind, "workflow");
+  assert.equal(view?.unfinished, true);
+  assert.deepEqual(view?.steps.map((s) => s.dir), ["run/cut/prd"]);
+  assert.notEqual(view?.totalUsd, undefined);
 });
 
 test("the demo opens a run written with the current workflow record", async () => {
@@ -226,6 +244,30 @@ test("the budget is a cap per run, so runs that each stay under it are not an ov
   // Assert
   assert.equal(spend?.over, false);
   assert.equal(spend?.text, "$167.97 over 3 runs · cap $70 per run");
+});
+
+test("a combined or re-decided run is not new spend: it neither adds to the task's total nor counts as an overrun", () => {
+  // Arrange - two real runs, and a combined run built from them (nothing generated or judged).
+  const real = (totalUsd: number) => ({ totalUsd, combinedFrom: null }) as unknown as RunView;
+  const combined = { totalUsd: 212.38, combinedFrom: ["r1", "r2"] } as unknown as RunView;
+  const runs = [combined, real(101.94), real(110.44)];
+  const task = {
+    name: "t", specPath: "tasks/t/spec.yaml", runName: "t", steps: [], files: [], definition: { spec: null, steps: [], other: [] },
+    plan: { steps: [], budgetUsd: 200, chain: null },
+    budgetUsd: 200, runs, spentUsd: spendOf(runs),
+  } as unknown as TaskView;
+
+  // Act
+  const spend = spendLabel(task);
+
+  // Assert
+  assert.equal(spendOf(runs), 212.38);
+  assert.equal(spend?.over, false, "the combined run's total was read as an overrun");
+  assert.equal(spend?.text, "$212.38 over 2 runs · cap $200 per run · 1 combined run not counted");
+});
+
+test("spendOf is unknown, not zero, when only combined runs exist", () => {
+  assert.equal(spendOf([{ totalUsd: 50, combinedFrom: ["a", "b"] } as unknown as RunView]), null);
 });
 
 test("a task that has never run says so rather than rendering blank", () => {

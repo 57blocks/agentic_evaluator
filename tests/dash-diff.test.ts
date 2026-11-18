@@ -42,7 +42,8 @@ function run(id: string, startedAt: string | null, over: Partial<RunView> = {}):
     sample: false,
     synthetic: false,
     totalUsd: null,
-    steps: [{ id: "s", dir: `run/${id}`, chosen: null, firmness: "directional", eligible: [], gated: [], operatingMode: null, ledgerTotal: null, reportHref: null }],
+    combinedFrom: null,
+    steps: [{ id: "s", dir: `run/${id}`, chosen: null, firmness: "directional", eligible: [], gated: [], operatingMode: null, ledgerTotal: null, reportHref: null, combinedFrom: null }],
     ...over,
   };
 }

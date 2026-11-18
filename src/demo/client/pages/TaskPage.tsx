@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/table";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
+import { modeLabel } from "../../../report-copy.js";
+import { isCombined } from "../../spend.js";
 import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 
 /** Whether the steps hand their output to each other, said in words. */
@@ -32,6 +34,19 @@ function handoffLabel(task: TaskView): string {
   return chained
     ? `Evaluated independently, no handoff; e2e control along ${task.steps.map((s) => s.id).join(" → ")}`
     : `${task.steps.length} independent step(s) (no handoff)`;
+}
+
+/** How the run chose: one operating mode when every step used it, else each step's. */
+function ModeCell({ run }: { run: RunView }) {
+  const modes = [...new Set(run.steps.map((s) => s.operatingMode ?? "none"))];
+  if (modes.length === 1) return <span>{modes[0] === "none" ? "—" : modeLabel(modes[0])}</span>;
+  return (
+    <span className="flex flex-col gap-0.5">
+      {run.steps.map((s, i) => (
+        <span key={`${s.id}-${i}`} className="text-[12px]"><span className="font-mono">{s.id}</span>: {s.operatingMode ? modeLabel(s.operatingMode) : "—"}</span>
+      ))}
+    </span>
+  );
 }
 
 function RunsTable({ runs }: { runs: RunView[] }) {
@@ -51,6 +66,7 @@ function RunsTable({ runs }: { runs: RunView[] }) {
         <TableRow>
           <TableHead>Run</TableHead>
           <TableHead>Cost</TableHead>
+          <TableHead>Mode</TableHead>
           <TableHead>Recommended per step</TableHead>
           <TableHead>Type</TableHead>
           <TableHead />
@@ -69,8 +85,14 @@ function RunsTable({ runs }: { runs: RunView[] }) {
               </button>
             </TableCell>
             <TableCell className="font-mono whitespace-nowrap">
-              {run.totalUsd == null ? "—" : `$${run.totalUsd.toFixed(4)}`}
+              {isCombined(run) ? (
+                <span className="flex flex-col text-muted-foreground" title={`combined from ${run.combinedFrom?.join(", ")}`}>
+                  <span>{run.totalUsd == null ? "—" : `$${run.totalUsd.toFixed(4)}`}</span>
+                  <span className="font-sans text-[11px]">combined · no new spend</span>
+                </span>
+              ) : run.totalUsd == null ? "—" : `$${run.totalUsd.toFixed(4)}`}
             </TableCell>
+            <TableCell className="whitespace-nowrap text-[13px]"><ModeCell run={run} /></TableCell>
             <TableCell>
               <span className="flex flex-wrap items-center gap-1.5">
                 {run.steps.map((s, i) => (
@@ -87,6 +109,7 @@ function RunsTable({ runs }: { runs: RunView[] }) {
             </TableCell>
             <TableCell className="whitespace-nowrap text-muted-foreground">
               {run.kind === "workflow" ? "Multi-step" : "Single step"}
+              {run.unfinished && " · unfinished"}
               {run.synthetic && " · script"}
             </TableCell>
             <TableCell className="text-right">

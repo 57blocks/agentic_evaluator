@@ -12,6 +12,7 @@ import { loadBundle } from "../report-v2.js";
 import type { Recommendation } from "../canon/select.js";
 import { planFromSuites, type TestPlan } from "../test-plan.js";
 import { attributeFiles, type DefinitionFiles } from "./definition-files.js";
+import { spendOf } from "./spend.js";
 import type { Suite } from "../types.js";
 
 export interface SpecStepView {
@@ -57,6 +58,8 @@ export interface RunStepView {
   operatingMode: string | null;
   ledgerTotal: number | null;
   reportHref: string | null;
+  /** The runs this step's trials were combined from (combined-from.json); null for a step that ran. */
+  combinedFrom: string[] | null;
 }
 
 export interface RunView {
@@ -73,6 +76,16 @@ export interface RunView {
   /** Every candidate is a scripted stand-in, not a real model: a smoke run, not evidence. */
   synthetic: boolean;
   totalUsd: number | null;
+  /**
+   * The runs a combined run (combine, or a re-decision under another mode) was
+   * built from; null for a run that generated. Its total repeats their spend.
+   */
+  combinedFrom: string[] | null;
+  /**
+   * A multi-step run that stopped before it wrote workflow.json (a usage
+   * limit, a kill): only its finished steps are here. Absent otherwise.
+   */
+  unfinished?: true;
   e2e?: {
     candidate: string;
     chain: string[];
@@ -310,7 +323,23 @@ async function stepFromDir(abs: string, artifactRel: string, stepId?: string): P
     operatingMode: bundle?.manifest.operating_mode ?? null,
     ledgerTotal: bundle?.ledger.total ?? null,
     reportHref,
+    combinedFrom: await combinedFromOf(abs),
   };
+}
+
+async function combinedFromOf(stepAbs: string): Promise<string[] | null> {
+  try {
+    const raw = JSON.parse(await fs.readFile(path.join(stepAbs, "combined-from.json"), "utf-8")) as { runs?: unknown };
+    return Array.isArray(raw.runs) ? raw.runs.filter((r): r is string => typeof r === "string") : null;
+  } catch {
+    return null;
+  }
+}
+
+/** A run is combined when every step was: then nothing in it was generated. */
+function runCombinedFrom(steps: readonly RunStepView[]): string[] | null {
+  if (steps.length === 0 || steps.some((s) => s.combinedFrom === null)) return null;
+  return [...new Set(steps.flatMap((s) => s.combinedFrom ?? []))];
 }
 
 async function listRunNames(root: string): Promise<string[]> {
@@ -441,10 +470,7 @@ export async function listTasks(
       (b.startedAt ?? "").localeCompare(a.startedAt ?? ""),
     );
     const files = await definitionFiles(path.join(tasksDir(ws), name));
-    const spent = own.reduce<number | null>(
-      (acc, r) => (r.totalUsd === null ? acc : (acc ?? 0) + r.totalUsd),
-      null,
-    );
+    const spent = spendOf(own);
     return {
       name,
       specPath: spec.path,
@@ -474,7 +500,49 @@ export async function loadRun(id: string, over?: CatalogRoots): Promise<RunView 
   const st = await fs.stat(loc.abs).catch(() => null);
   if (!st?.isDirectory()) return null;
   if (await fileExists(path.join(loc.abs, "workflow.json"))) return loadWorkflowRun(loc);
-  return loadSingleRun(loc);
+  if (await fileExists(path.join(loc.abs, "summary.json"))) return loadSingleRun(loc);
+  return loadUnfinishedWorkflowRun(loc);
+}
+
+/**
+ * A multi-step run writes workflow.json only once every step is done. One cut
+ * off before that (the subscription's usage limit, a kill) left finished
+ * steps that spent real money; listing nothing hid both the evidence and the
+ * spend. Each subdirectory with its own summary.json is a finished step.
+ */
+async function loadUnfinishedWorkflowRun(loc: RunLocation): Promise<RunView | null> {
+  const names = (await fs.readdir(loc.abs).catch(() => [] as string[])).filter(safeId).sort();
+  const found: Array<{ step: RunStepView; startedAt: string | null; runName: string | null }> = [];
+  for (const name of names) {
+    const abs = path.join(loc.abs, name);
+    if (!(await fileExists(path.join(abs, "summary.json")))) continue;
+    const manifest = JSON.parse(await fs.readFile(path.join(abs, "manifest.json"), "utf-8").catch(() => "{}")) as {
+      started_at?: string;
+      run_name?: string;
+      step?: { id?: string };
+    };
+    const step = await stepFromDir(abs, `${loc.kind}/${loc.diskId}/${name}`, manifest.step?.id ?? name);
+    found.push({ step, startedAt: manifest.started_at ?? null, runName: manifest.run_name ?? null });
+  }
+  if (found.length === 0) return null;
+  found.sort((a, b) => (a.startedAt ?? "").localeCompare(b.startedAt ?? ""));
+  const steps = found.map((f) => f.step);
+  return {
+    id: loc.id,
+    dir: `${loc.kind}/${loc.diskId}`,
+    task: loc.task,
+    kind: "workflow",
+    runName: found[0].runName?.split("/")[0] ?? loc.diskId,
+    startedAt: found[0].startedAt ?? startedAtFromId(loc.diskId),
+    handoff: false,
+    sample: loc.sample,
+    synthetic: isSynthetic(steps),
+    totalUsd: totalUsdOf(steps),
+    combinedFrom: runCombinedFrom(steps),
+    unfinished: true,
+    e2e: null,
+    steps,
+  };
 }
 
 async function loadWorkflowRun(loc: RunLocation): Promise<RunView | null> {
@@ -501,6 +569,7 @@ async function loadWorkflowRun(loc: RunLocation): Promise<RunView | null> {
     sample: loc.sample,
     synthetic: isSynthetic(steps),
     totalUsd: totalUsdOf(steps),
+    combinedFrom: runCombinedFrom(steps),
     e2e: wf.e2e_control ?? null,
     steps,
   };
@@ -536,6 +605,7 @@ async function loadSingleRun(loc: RunLocation): Promise<RunView | null> {
     sample: loc.sample,
     synthetic: isSynthetic(steps),
     totalUsd: totalUsdOf(steps),
+    combinedFrom: runCombinedFrom(steps),
     e2e: null,
     steps,
   };

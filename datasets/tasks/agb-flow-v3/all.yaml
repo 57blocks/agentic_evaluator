@@ -1,0 +1,189 @@
+# agb-flow v3: which Claude model should run each planning step of the
+# latest agb (57blocks/agb 0a8c4ee7, 2026-11-13)? opus vs sonnet on all four
+# planning steps; Fable on spec and architecture only (PLAN-v3.md).
+#
+# all.yaml = spec.yaml plus agb stage 5 (code) from ../agb-flow-v3-build/code.yaml,
+# only so `agenteval combine` can put the planning run and the build run into
+# one report. Run each part from its own spec; this one is for combining.
+
+protocol_version: "0.3"
+run_name: agb-flow-v3-all
+description: "(agb 0a8c4ee7) Which Claude model should run each step of agb? Planning (spec, architecture, task breakdown, test design): inputs are real agb projects at the moment the step began, graded by agb's gates and a pairwise judge. Code (agb stage 5: whole build of demo-todo and invoice from the adopted plan): graded by held-out acceptance tests the candidate never saw (pass rate in each check's evidence) and the same judge."
+# Counts what candidates report spending; past it no new trial starts.
+budget_usd: 200
+
+workflow:
+  steps:
+    - id: spec
+      version: "1"
+      description: "Spec: normalize the client's external document into docs/PRD.md and .ab/prd.json without rewriting it."
+      test_set:
+        id: spec-v1
+        # demo-todo has no external document: its PRD was generated.
+        inputs: [chessicle, invoice]
+        fixture_dir: fixture/spec
+      candidate_ids: &top [opus-5-5, sonnet-5-5, fable-5-2]
+      required_checks: [spec-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 30
+      judge:
+        rubric_file: rubrics/spec.md
+        methods: [pairwise-swap]
+        show: [docs/PRD.md, .ab/prd.json, .ab/questions.json]
+        dimensions: [faithful, machine, questions, buildable]
+
+    - id: architecture
+      version: "1"
+      description: "Architecture: turn the PRD into API contracts, cross-cutting decisions (docs/DESIGN.md) and components (.ab/arch.json)."
+      test_set:
+        id: architecture-v1
+        inputs: [demo-todo, chessicle, invoice]
+        fixture_dir: fixture/architecture
+      candidate_ids: *top
+      required_checks: [arch-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      max_cost_per_trial_usd: 30
+      judge:
+        rubric_file: rubrics/architecture.md
+        methods: [pairwise-swap]
+        show: [docs/DESIGN.md, "_contracts/**", .ab/arch.json, .ab/design.json]
+        dimensions: [decisions, contract, components, constraints]
+
+    - id: task-breakdown
+      version: "2"
+      description: "Task breakdown: turn the PRD, design and API contracts into a task plan (.ab/tasks.json) and a UI contract."
+      test_set:
+        id: task-breakdown-v1
+        inputs: [demo-todo, chessicle, invoice]
+        # each input is a directory as well as a text: fixture/<input>/
+        # is laid into the work dir before the candidate starts.
+        fixture_dir: fixture/task-breakdown
+      candidate_ids: [opus-5-5, sonnet-5-5]
+      required_checks: [plan-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 3000
+      # a spend cap per trial, handed to the command as {{max_cost_usd}}.
+      max_cost_per_trial_usd: 15
+      judge:
+        rubric_file: rubrics/breakdown.md
+        methods: [pairwise-swap]
+        show: [".ab/tasks.json", UI_CONTRACT.md]
+        dimensions: [granularity, ordering, clarity, domains]
+
+    - id: test-design
+      version: "2"
+      description: "Test design: write a test plan (.ab/test-plan.json) that covers every acceptance criterion of the adopted task plan."
+      test_set:
+        id: test-design-v1
+        inputs: [demo-todo, chessicle, invoice]
+        fixture_dir: fixture/test-design
+      candidate_ids: [opus-5-5, sonnet-5-5]
+      required_checks: [test-plan-gates]
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 1800
+      max_cost_per_trial_usd: 10
+      # Both plans pass the coverage gate; the judge says whose tests are better.
+      judge:
+        rubric_file: rubrics/test-plan.md
+        methods: [pairwise-swap]
+        show: [.ab/test-plan.json]
+        dimensions: [coverage, falsifiable, levels, traceable]
+
+    - id: code
+      version: "1"
+      description: "agb stage 5, code: build the whole project from its adopted plan (demo-todo: 8 tasks; invoice: 35 tasks, 31 endpoints)."
+      test_set:
+        id: code-v1
+        inputs: [demo-todo, invoice]
+        fixture_dir: ../agb-flow-v3-build/fixture/build
+      candidate_ids: [opus-5-5, sonnet-5-5]
+      required_checks: [build-tests]
+      exit_code: ignore
+      success_criteria: { mandatory_checks: all }
+      operating_mode: highest-assurance
+      eligibility: { minimum_reliability: 1.0, minimum_required_check_pass_rate: 1.0 }
+      maximum_completion_time_seconds: 57600
+      max_cost_per_trial_usd: 200
+      concurrency: 1
+      judge:
+        rubric_file: ../agb-flow-v3-build/rubrics/code.md
+        methods: [pairwise-swap]
+        show: ["apps/*/src/**", "services/*/src/**", "packages/*/src/**", "client/src/**", "server/src/**", "src/**", package.json, README.md]
+        dimensions: [correctness, structure, tests, scope]
+
+# One command for every step: agents/agb-step.mjs reads EVAL_STEP and runs the
+# matching agb stage (AGB_HOME, default ~/workspace/57b/agb-eval at 0a8c4ee7).
+# Claude models sign in with CLAUDE_CODE_OAUTH_TOKEN (the subscription).
+candidates:
+  - id: opus-5-5
+    adapter: agent-cli
+    model: anthropic/claude-opus-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-opus-5-5, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
+  - id: sonnet-5-5
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5.5
+    cli: { argv: [node, agents/agb-step.mjs, claude-sonnet-5-5, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
+  - id: fable-5-2
+    adapter: agent-cli
+    model: anthropic/claude-fable-5.2
+    cli: { argv: [node, agents/agb-step.mjs, claude-fable-5-2, "{{max_cost_usd}}"], reports_usage: tokens, trace: claude-code, version_files: [agents/agb-step.mjs] }
+
+evaluators:
+  required_checks:
+    spec-gates:
+      kind: command
+      description: "docs/PRD.md, .ab/prd.json and the source snapshot exist; no hard finding at the spec stage, and prd-id and prd-quality are clean."
+      argv: [node, checks/spec-gates.mjs]
+      version_files: [checks/spec-gates.mjs, checks/lib.mjs]
+      timeout_seconds: 600
+    arch-gates:
+      kind: command
+      description: "An API contract and docs/DESIGN.md exist; no hard finding at the arch stage, and design-closure is clean."
+      argv: [node, checks/arch-gates.mjs]
+      version_files: [checks/arch-gates.mjs, checks/lib.mjs]
+      timeout_seconds: 600
+    plan-gates:
+      kind: command
+      description: "The task plan claims every page and endpoint in the design and has no cycle between domains."
+      argv: [node, checks/plan-gates.mjs]
+      version_files: [checks/plan-gates.mjs, checks/lib.mjs]
+      timeout_seconds: 300
+    test-plan-gates:
+      kind: command
+      description: "The test plan covers every acceptance criterion of the adopted task plan."
+      argv: [node, checks/test-plan-gates.mjs]
+      version_files: [checks/test-plan-gates.mjs, checks/lib.mjs]
+      timeout_seconds: 300
+    build-tests:
+      kind: command
+      description: "The built app comes up (install, compose services, db:fresh, its dev scripts) and the held-out acceptance tests run against it; passes when it comes up, the pass rate is in the evidence."
+      argv: [node, ../agb-flow-v3-build/checks/build-tests.mjs]
+      version_files: [../agb-flow-v3-build/checks/build-tests.mjs]
+      timeout_seconds: 2400
+  # The judge's vendor must differ from every candidate's: candidates are Anthropic, the judge OpenAI
+  judge:
+    model: openai/gpt-6.1-sol
+    provider_route: openrouter
+    rubric_file: rubrics/breakdown.md
+    methods: []
+
+execution:
+  trials_per_case: 1
+  concurrency: 3
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: 0.05   # highest-assurance: rates/check scores within 5 points of the best count as equal
+
+x-harness:
+  producer: codegen
+  default_temperature: 0

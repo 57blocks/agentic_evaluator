@@ -256,6 +256,8 @@ export interface RunRecord {
   checkOutput?: string;
   /** Why the check failed, when the check said so. */
   checkReason?: string;
+  /** What share of the deliverable a command check accepted, in [0, 1], when it reported one. */
+  checkScore?: number;
 
   // ── Canonical (protocol v0.4) fields. `candidate` above holds the candidate
   // id. ──

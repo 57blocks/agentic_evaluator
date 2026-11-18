@@ -66,7 +66,12 @@ function Success({ c }: { c: CandidateRow }) {
 function Checks({ c }: { c: CandidateRow }) {
   if (c.checkExecuted === 0) return <span className="text-muted-foreground">—</span>;
   const all = c.checkPass === c.checkExecuted;
-  return <Tag tone={all ? "ok" : "bad"} className="font-mono">{c.checkPass} / {c.checkExecuted}</Tag>;
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <Tag tone={all ? "ok" : "bad"} className="font-mono">{c.checkPass} / {c.checkExecuted}</Tag>
+      {c.checkScore !== null && <span className="font-mono text-[11px] text-muted-foreground">score {Math.round(c.checkScore * 100)}%</span>}
+    </div>
+  );
 }
 
 function WinRate({ c }: { c: CandidateRow }) {

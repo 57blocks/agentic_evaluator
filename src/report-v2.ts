@@ -207,7 +207,8 @@ function renderHero(b: RunBundle, views: readonly CandidateView[], support: read
 function checkPill(v: CandidateView): string {
   if (v.checkExecuted === 0) return "—";
   const all = v.checkPass === v.checkExecuted;
-  return `<span class="pill ${all ? "pass" : "miss"}">${v.checkPass} / ${v.checkExecuted}</span>`;
+  const score = v.checkScore === null ? "" : `<span class="sub">score ${Math.round(v.checkScore * 100)}%</span>`;
+  return `<span class="pill ${all ? "pass" : "miss"}">${v.checkPass} / ${v.checkExecuted}</span>${score}`;
 }
 
 /** The legacy report's inline win-rate bar; absent when nothing was compared. */

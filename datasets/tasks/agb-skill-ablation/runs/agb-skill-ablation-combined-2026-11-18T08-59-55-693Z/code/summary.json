@@ -1,0 +1,267 @@
+{
+  "run": "agb-skill-ablation-combined-2026-11-18T08-59-55-693Z/code",
+  "step": "code",
+  "inputs": [
+    "demo-todo",
+    "invoice"
+  ],
+  "candidates": [
+    {
+      "candidate": "opus-5-5-skill",
+      "valid_attempts": 2,
+      "classified": 1,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "reliability": {
+        "value": 0.5,
+        "numerator": 1,
+        "denominator": 2
+      },
+      "evaluation_coverage": {
+        "value": 0.5,
+        "numerator": 1,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "required_check_score": 0.9583333333333334,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "completion_states": {
+        "success": 2,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 1,
+        "failure": 0,
+        "undetermined": 1
+      },
+      "check_states": {
+        "pass": 1,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 1
+      },
+      "generation_cost_per_success": 72.523056,
+      "p50_ms": 5195206,
+      "p95_ms": 21125794
+    },
+    {
+      "candidate": "opus-5-5-none",
+      "valid_attempts": 2,
+      "classified": 2,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_score": 1,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "completion_states": {
+        "success": 2,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 2,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 2,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.948883,
+      "p50_ms": 619802,
+      "p95_ms": 3369654
+    },
+    {
+      "candidate": "sonnet-5-5-skill",
+      "valid_attempts": 2,
+      "classified": 2,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_score": 1,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "completion_states": {
+        "success": 2,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 2,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 2,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 10.280549,
+      "p50_ms": 2610374,
+      "p95_ms": 14519289
+    },
+    {
+      "candidate": "sonnet-5-5-none",
+      "valid_attempts": 2,
+      "classified": 2,
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "reliability": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "required_check_score": 1,
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "completion_states": {
+        "success": 2,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 2,
+        "failure": 0,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 2,
+        "fail": 0,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.304717,
+      "p50_ms": 292015,
+      "p95_ms": 1166637
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "2 inputs; no comparison can be significant with fewer than 6"
+    ]
+  },
+  "integrity": {
+    "events": 64,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 204693,
+    "threshold_ms": 300000,
+    "wall_ms": 49844687,
+    "in_flight_gaps": 7
+  },
+  "judge_discrimination": {
+    "overall": {
+      "dimension": "overall",
+      "scored": 0,
+      "distinct": 0,
+      "min": null,
+      "max": null,
+      "saturated": false
+    },
+    "dimensions": [],
+    "saturated": [],
+    "discriminates": false
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "build-tests",
+      "version": "cmd-c0156e9f+files-ee9197e9",
+      "pass": 7,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 1
+    },
+    {
+      "evaluator": "pairwise-swap",
+      "version": "openai/gpt-6.1-sol+rubric-fa8dfe5f+tpl-1fc69c82",
+      "pass": 12,
+      "fail": 0,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}

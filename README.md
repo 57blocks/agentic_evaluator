@@ -826,6 +826,13 @@ editing the script does, without running the agents again.
 Exit `0` passes, exit `1` fails the candidate; anything else — a crash, a
 timeout — is recorded as an evaluator error, never blamed on the candidate.
 Print `{"evidence": "...", "reason": "..."}` and both are kept with the trial.
+Add `"score"` (a number from 0 to 1) when the check measures how much of the
+deliverable it accepted — held-out tests passed, requirements covered — and
+not only whether it passed: `{"evidence": "held-out 41/44", "score": 0.93}`.
+Pass/fail still decides success and the gates. The score is shown under the
+required-check column, and in `highest-assurance` it breaks a tie between
+candidates with the same pass rate, before the judge; it decides only when
+every compared candidate has one.
 `version_files` hashes the script into the check's version, so editing it
 shows up in the evidence. `kind: tsc` with `scaffold_dir: scaffold` instead
 compiles the produced TypeScript against `scaffold/tsconfig.json`.
@@ -958,7 +965,12 @@ Every verdict carries a confidence:
 
 - **firm** — all of:
   - `execution.minimum_meaningful_difference` is declared (the smallest gap
-    you consider real);
+    you consider real). Its unit follows the operating mode: in
+    `highest-assurance` it is a share (0–1) — reliability, required-check pass
+    rate and check score within it of the best count as equal, so the next
+    tier (the judge, then cost) decides; in `lowest-cost` it is dollars per
+    success and in `fastest-within-cost-ceiling` milliseconds, the saving a
+    candidate must make over the step's `control_candidate` to replace it;
   - every eligibility gate still holds at the low end of the chosen
     candidate's 95% (Wilson) interval, counted per input. 30 of 30 is
     consistent with a true rate of 0.89, so a gate of 1.0 is never firm;

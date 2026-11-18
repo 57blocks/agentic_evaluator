@@ -1,0 +1,200 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "highest-assurance",
+  "control_candidate": null,
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 1",
+      "removed": [],
+      "remaining": [
+        "opus-5-5-skill",
+        "opus-5-5-none",
+        "sonnet-5-5-skill",
+        "sonnet-5-5-none"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 1",
+      "removed": [],
+      "remaining": [
+        "opus-5-5-skill",
+        "opus-5-5-none",
+        "sonnet-5-5-skill",
+        "sonnet-5-5-none"
+      ]
+    }
+  ],
+  "eligible": [
+    "opus-5-5-skill",
+    "opus-5-5-none",
+    "sonnet-5-5-skill",
+    "sonnet-5-5-none"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "opus-5-5-skill",
+      "eligible": true,
+      "generation_cost_per_success": 4.993254,
+      "p50_ms": 1013932,
+      "p95_ms": 1113699,
+      "reliability": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    {
+      "candidate": "opus-5-5-none",
+      "eligible": true,
+      "generation_cost_per_success": 1.364363,
+      "p50_ms": 378633,
+      "p95_ms": 463133,
+      "reliability": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    {
+      "candidate": "sonnet-5-5-skill",
+      "eligible": true,
+      "generation_cost_per_success": 0.939427,
+      "p50_ms": 253236,
+      "p95_ms": 291046,
+      "reliability": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    {
+      "candidate": "sonnet-5-5-none",
+      "eligible": true,
+      "generation_cost_per_success": 0.240338,
+      "p50_ms": 86278,
+      "p95_ms": 123700,
+      "reliability": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      }
+    }
+  ],
+  "chosen": "opus-5-5-skill",
+  "compared_to_control": null,
+  "firmness": "directional",
+  "firmness_reasons": [
+    "3 inputs; no comparison can be significant with fewer than 6",
+    "opus-5-5-skill: required-check-pass-rate 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5-skill: reliability 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5-skill and opus-5-5-none cannot be told apart on task success: opus-5-5-skill did better on 0 input(s), opus-5-5-none on 0, equal on 3 (sign test p 1.000)"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 1,
+        "successes": 3,
+        "n": 3,
+        "low": 0.43850296436068037,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 1,
+        "successes": 3,
+        "n": 3,
+        "low": 0.43850296436068037,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": {
+      "a": "opus-5-5-skill",
+      "b": "opus-5-5-none",
+      "basis": "task-success",
+      "compared": 3,
+      "a_better": 0,
+      "b_better": 0,
+      "same": 3,
+      "p_value": 1,
+      "significant": false
+    }
+  },
+  "reasons": [
+    "4 eligible candidates tie at 1.000 (3/3) reliability and 1.000 (3/3) required-check pass rate (within the minimum meaningful difference 0.05); opus-5-5-skill is picked by the judge's pairwise score (opus-5-5-skill 94%, next opus-5-5-none 67%)",
+    "3 inputs; no comparison can be significant with fewer than 6",
+    "opus-5-5-skill: required-check-pass-rate 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5-skill: reliability 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5-skill and opus-5-5-none cannot be told apart on task success: opus-5-5-skill did better on 0 input(s), opus-5-5-none on 0, equal on 3 (sign test p 1.000)"
+  ],
+  "closest": null
+}

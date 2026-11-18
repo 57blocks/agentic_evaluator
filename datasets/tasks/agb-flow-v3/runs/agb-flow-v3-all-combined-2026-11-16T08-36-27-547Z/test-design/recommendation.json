@@ -1,0 +1,140 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "highest-assurance",
+  "control_candidate": null,
+  "eligibility": {
+    "minimum_reliability": 1,
+    "minimum_required_check_pass_rate": 1,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [
+    {
+      "id": "required-check-pass-rate",
+      "description": "required-check pass rate ≥ 1",
+      "removed": [],
+      "remaining": [
+        "opus-5-5",
+        "sonnet-5-5"
+      ]
+    },
+    {
+      "id": "reliability",
+      "description": "reliability ≥ 1",
+      "removed": [],
+      "remaining": [
+        "opus-5-5",
+        "sonnet-5-5"
+      ]
+    }
+  ],
+  "eligible": [
+    "opus-5-5",
+    "sonnet-5-5"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "opus-5-5",
+      "eligible": true,
+      "generation_cost_per_success": 3.229745,
+      "p50_ms": 657459,
+      "p95_ms": 728299,
+      "reliability": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      }
+    },
+    {
+      "candidate": "sonnet-5-5",
+      "eligible": true,
+      "generation_cost_per_success": 0.543725,
+      "p50_ms": 117744,
+      "p95_ms": 139065,
+      "reliability": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "required_check_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "task_success_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      },
+      "all_trials_pass_rate": {
+        "value": 1,
+        "numerator": 3,
+        "denominator": 3
+      }
+    }
+  ],
+  "chosen": "opus-5-5",
+  "compared_to_control": null,
+  "firmness": "directional",
+  "firmness_reasons": [
+    "3 inputs; no comparison can be significant with fewer than 6",
+    "opus-5-5: required-check-pass-rate 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5: reliability 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5 and sonnet-5-5 cannot be told apart on task success: opus-5-5 did better on 0 input(s), sonnet-5-5 on 0, equal on 3 (sign test p 1.000)"
+  ],
+  "evidence": {
+    "gates": [
+      {
+        "gate": "required-check-pass-rate",
+        "threshold": 1,
+        "successes": 3,
+        "n": 3,
+        "low": 0.43850296436068037,
+        "high": 1
+      },
+      {
+        "gate": "reliability",
+        "threshold": 1,
+        "successes": 3,
+        "n": 3,
+        "low": 0.43850296436068037,
+        "high": 1
+      }
+    ],
+    "versus_runner_up": {
+      "a": "opus-5-5",
+      "b": "sonnet-5-5",
+      "basis": "task-success",
+      "compared": 3,
+      "a_better": 0,
+      "b_better": 0,
+      "same": 3,
+      "p_value": 1,
+      "significant": false
+    }
+  },
+  "reasons": [
+    "2 eligible candidates tie at 1.000 (3/3) reliability and 1.000 (3/3) required-check pass rate (within the minimum meaningful difference 0.05); opus-5-5 is picked by the judge's pairwise score (opus-5-5 100%, next sonnet-5-5 0%)",
+    "3 inputs; no comparison can be significant with fewer than 6",
+    "opus-5-5: required-check-pass-rate 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5: reliability 3/3 has a 95% interval down to 0.439, below the gate 1; a gate of 1 can never be firm, declare one such as 0.95",
+    "opus-5-5 and sonnet-5-5 cannot be told apart on task success: opus-5-5 did better on 0 input(s), sonnet-5-5 on 0, equal on 3 (sign test p 1.000)"
+  ],
+  "closest": null
+}

@@ -1,0 +1,154 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "agb-flow-v3-all-combined-2026-11-16T08-36-27-547Z",
+  "run_name": "agb-flow-v3-all",
+  "handoff": false,
+  "steps": [
+    {
+      "id": "spec",
+      "dir": "spec",
+      "operating_mode": "highest-assurance",
+      "chosen": "opus-5-5",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5",
+        "sonnet-5-5",
+        "fable-5-2"
+      ],
+      "gated": [],
+      "trials": 6,
+      "ledger_total": 34.095108,
+      "ledger": {
+        "generation": 30.746666,
+        "judging": 3.348442,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 34.095108,
+        "source": "estimated",
+        "successes": 6,
+        "cost_per_success": 5.682518,
+        "cost_per_attempt": 5.682518
+      }
+    },
+    {
+      "id": "architecture",
+      "dir": "architecture",
+      "operating_mode": "highest-assurance",
+      "chosen": "fable-5-2",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5",
+        "sonnet-5-5",
+        "fable-5-2"
+      ],
+      "gated": [],
+      "trials": 9,
+      "ledger_total": 36.757115,
+      "ledger": {
+        "generation": 34.695622,
+        "judging": 2.061493,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 36.757115,
+        "source": "estimated",
+        "successes": 9,
+        "cost_per_success": 4.084124,
+        "cost_per_attempt": 4.084124
+      }
+    },
+    {
+      "id": "task-breakdown",
+      "dir": "task-breakdown",
+      "operating_mode": "highest-assurance",
+      "chosen": "opus-5-5",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5",
+        "sonnet-5-5"
+      ],
+      "gated": [],
+      "trials": 6,
+      "ledger_total": 19.439225,
+      "ledger": {
+        "generation": 18.802729,
+        "judging": 0.636496,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 19.439225,
+        "source": "estimated",
+        "successes": 6,
+        "cost_per_success": 3.239871,
+        "cost_per_attempt": 3.239871
+      }
+    },
+    {
+      "id": "test-design",
+      "dir": "test-design",
+      "operating_mode": "highest-assurance",
+      "chosen": "opus-5-5",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5",
+        "sonnet-5-5"
+      ],
+      "gated": [],
+      "trials": 6,
+      "ledger_total": 11.653018,
+      "ledger": {
+        "generation": 11.320412,
+        "judging": 0.332606,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 11.653018,
+        "source": "estimated",
+        "successes": 6,
+        "cost_per_success": 1.94217,
+        "cost_per_attempt": 1.94217
+      }
+    },
+    {
+      "id": "code",
+      "dir": "code",
+      "operating_mode": "highest-assurance",
+      "chosen": "opus-5-5",
+      "firmness": "directional",
+      "eligible": [
+        "opus-5-5",
+        "sonnet-5-5"
+      ],
+      "gated": [],
+      "trials": 4,
+      "ledger_total": 110.438371,
+      "ledger": {
+        "generation": 108.775067,
+        "judging": 1.663304,
+        "scoring": 0,
+        "checks": 0,
+        "retries": 0,
+        "total": 110.438371,
+        "source": "estimated",
+        "successes": 4,
+        "cost_per_success": 27.609593,
+        "cost_per_attempt": 27.609593
+      }
+    }
+  ],
+  "ledger": {
+    "generation": 204.340496,
+    "judging": 8.042341,
+    "scoring": 0,
+    "checks": 0,
+    "retries": 0,
+    "steps_total": 212.382837,
+    "e2e_total": 0,
+    "total": 212.382837,
+    "source": "estimated"
+  },
+  "e2e_control": null,
+  "e2e_proposed": null,
+  "e2e_validation": null
+}

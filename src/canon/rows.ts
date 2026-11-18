@@ -23,6 +23,8 @@ export interface CheckCell {
   version: string;
   evidence?: string;
   reason?: string;
+  /** The share of the deliverable the check accepted, in [0, 1], when the check reported one. */
+  score?: number;
 }
 
 export interface TrialRow {
