@@ -6,7 +6,9 @@
 
 import path from "node:path";
 import { carryOver, DEFAULT_BLAME, DEFAULT_MAX_REMOVED_LINES, DEFAULT_MIN_OWNER_SHARE, mine } from "../../code-review/mine.js";
-import { readMinedIfAny, writeMined } from "../../code-review/candidates-file.js";
+import { CandidatesError, readClean, readMined, readMinedIfAny, writeMined } from "../../code-review/candidates-file.js";
+import { build, BUILD_REPORT, writeBuild } from "../../code-review/build.js";
+import type { MinedFile } from "../../code-review/types.js";
 import { ghClient, checkRepoName } from "../../code-review/github.js";
 import { revParse, git } from "../../code-review/git.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
@@ -29,10 +31,20 @@ export const CODE_REVIEW_HELP = `agenteval code-review <mine|pick-clean|build> <
       --fix-pattern REGEX     also count subjects matching this (case-insensitive) as fixes
       --max-removed-lines N   drop fixes removing more lines of code (default ${DEFAULT_MAX_REMOVED_LINES})
       --min-owner-share F     drop fixes whose top introducer owns less (default ${DEFAULT_MIN_OWNER_SHARE})
-      --no-move-detection     blame with -w only, not -w -M -C`;
+      --no-move-detection     blame with -w only, not -w -M -C
+
+  build <repo-dir> --mined DIR [--clean DIR] --task DIR
+      One item per PR in <task>/items.jsonl and fixtures/<id>/ (repo.bundle
+      ending at the PR head, pr.json). Only candidates with
+      "confirmed": true go in; defect lines are PR-head line numbers.
+      Writes ${BUILD_REPORT} beside items.jsonl: what was skipped and why.
+      --include-unconfirmed   also unreviewed candidates (not those marked
+                              false or pre-screened not_defect); their
+                              provenance says so`;
 
 const MINE_VALUED = ["since", "until", "branch", "out", "github", "fix-pattern", "max-removed-lines", "min-owner-share"] as const;
-export const CODE_REVIEW_VALUED: readonly string[] = [...MINE_VALUED];
+const BUILD_VALUED = ["mined", "clean", "task"] as const;
+export const CODE_REVIEW_VALUED: readonly string[] = [...new Set([...MINE_VALUED, ...BUILD_VALUED])];
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -112,8 +124,53 @@ function checkRepoNameOrUsage(name: string): string {
   }
 }
 
+async function minedArg(args: ParsedArgs): Promise<MinedFile> {
+  const dir = required(args.flags, "mined", "the directory `code-review mine` wrote candidates.json to");
+  try {
+    return await readMined(path.resolve(dir));
+  } catch (err) {
+    if (err instanceof CandidatesError) throw new UsageError(err.message);
+    throw err;
+  }
+}
+
+function githubOf(mined: MinedFile) {
+  return mined.repo.github ? ghClient(mined.repo.github) : null;
+}
+
+async function cmdBuild(args: ParsedArgs, io: Io): Promise<ExitCode> {
+  rejectUnknown(args.flags, [...BUILD_VALUED, "include-unconfirmed"]);
+  const repo = await repoArg(args);
+  const mined = await minedArg(args);
+  const cleanDir = stringFlag(args.flags, "clean");
+  const clean = cleanDir ? await readClean(path.resolve(cleanDir)).catch((err: unknown) => {
+    throw err instanceof CandidatesError ? new UsageError(err.message) : err;
+  }) : null;
+  const taskDir = path.resolve(required(args.flags, "task", "the task directory items.jsonl and fixtures/ go to"));
+  const { items, report } = await build({
+    repo, mined, clean, taskDir, github: githubOf(mined),
+    includeUnconfirmed: args.flags["include-unconfirmed"] === true,
+    log: (line) => io.err(`${line}\n`),
+  });
+  await writeBuild(taskDir, items, report);
+  const escaped = items.filter((i) => i.expected.kind === "defect").length;
+  const lines = [
+    `${items.length} items (${escaped} escaped, ${items.length - escaped} clean) → ${path.join(taskDir, "items.jsonl")}`,
+    `${report.excluded.length} candidates not selected, ${report.skipped.length} skipped, ${report.unlocated.length} defect files without lines → ${path.join(taskDir, BUILD_REPORT)}`,
+    ...report.skipped.map((s) => `  skipped ${s.id}: ${s.reason}`),
+    ...report.unlocated.map((u) => `  no lines for ${u.candidate} in ${u.file}: ${u.note}`),
+    ...(report.stale_fixtures.length > 0 ? [`  fixtures/ also holds ${report.stale_fixtures.join(", ")}, not built this time`] : []),
+  ];
+  if (items.length === 0 && report.excluded.length > 0 && !args.flags["include-unconfirmed"]) {
+    lines.push('Nothing is confirmed yet: set "confirmed": true in candidates.json, or pass --include-unconfirmed.');
+  }
+  io.out(`${lines.join("\n")}\n`);
+  return EXIT.ok;
+}
+
 const SUBCOMMANDS: Record<string, (args: ParsedArgs, io: Io) => Promise<ExitCode>> = {
   mine: cmdMine,
+  build: cmdBuild,
 };
 
 export async function cmdCodeReview(args: ParsedArgs, io: Io): Promise<ExitCode> {
