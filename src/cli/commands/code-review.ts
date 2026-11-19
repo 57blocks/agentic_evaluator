@@ -8,6 +8,7 @@ import path from "node:path";
 import { carryOver, DEFAULT_BLAME, DEFAULT_MAX_REMOVED_LINES, DEFAULT_MIN_OWNER_SHARE, mine } from "../../code-review/mine.js";
 import { CandidatesError, CLEAN_JSON, readClean, readMined, readMinedIfAny, toJson, writeMined } from "../../code-review/candidates-file.js";
 import { DEFAULT_SEED, pickClean } from "../../code-review/pick-clean.js";
+import { prescreen } from "../../code-review/prescreen.js";
 import { build, BUILD_REPORT, writeBuild } from "../../code-review/build.js";
 import type { MinedFile } from "../../code-review/types.js";
 import fs from "node:fs/promises";
@@ -34,6 +35,9 @@ export const CODE_REVIEW_HELP = `agenteval code-review <mine|pick-clean|build> <
       --max-removed-lines N   drop fixes removing more lines of code (default ${DEFAULT_MAX_REMOVED_LINES})
       --min-owner-share F     drop fixes whose top introducer owns less (default ${DEFAULT_MIN_OWNER_SHARE})
       --no-move-detection     blame with -w only, not -w -M -C
+      --prescreen MODEL       ask MODEL (OpenRouter id) whether each candidate is a
+                              real defect: a first pass for the reader, never the label
+      --prescreen-limit N     screen at most N candidates not yet screened by MODEL
 
   pick-clean <repo-dir> --mined DIR --count N --out DIR
       Merged PRs (or commits) in the mined window that no scanned fix
@@ -52,7 +56,7 @@ export const CODE_REVIEW_HELP = `agenteval code-review <mine|pick-clean|build> <
                               false or pre-screened not_defect); their
                               provenance says so`;
 
-const MINE_VALUED = ["since", "until", "branch", "out", "github", "fix-pattern", "max-removed-lines", "min-owner-share"] as const;
+const MINE_VALUED = ["since", "until", "branch", "out", "github", "fix-pattern", "max-removed-lines", "min-owner-share", "prescreen", "prescreen-limit"] as const;
 const PICK_VALUED = ["mined", "count", "out", "seed", "since", "until"] as const;
 const BUILD_VALUED = ["mined", "clean", "task"] as const;
 export const CODE_REVIEW_VALUED: readonly string[] = [...new Set([...MINE_VALUED, ...PICK_VALUED, ...BUILD_VALUED])];
@@ -110,6 +114,10 @@ async function cmdMine(args: ParsedArgs, io: Io): Promise<ExitCode> {
   const minOwnerShare = numberFlag(args.flags, "min-owner-share") ?? DEFAULT_MIN_OWNER_SHARE;
   if (!(minOwnerShare > 0 && minOwnerShare <= 1)) throw new UsageError("--min-owner-share must be in (0, 1]");
   const { branch, head } = await branchOf(repo, stringFlag(args.flags, "branch"));
+  const model = stringFlag(args.flags, "prescreen");
+  const prescreenLimit = numberFlag(args.flags, "prescreen-limit");
+  if (prescreenLimit !== undefined && (!Number.isInteger(prescreenLimit) || prescreenLimit < 0)) throw new UsageError("--prescreen-limit must be a whole number");
+  if (prescreenLimit !== undefined && model === undefined) throw new UsageError("--prescreen-limit needs --prescreen MODEL");
   const github = githubName ? ghClient(checkRepoNameOrUsage(githubName)) : null;
 
   const fresh = await mine({
@@ -117,8 +125,17 @@ async function cmdMine(args: ParsedArgs, io: Io): Promise<ExitCode> {
     blame: args.flags["no-move-detection"] ? ["-w"] : DEFAULT_BLAME,
     log: (line) => io.err(`${line}\n`),
   });
-  const { mined, carried } = carryOver(fresh, await readMinedIfAny(out));
+  const kept = carryOver(fresh, await readMinedIfAny(out));
+  const carried = kept.carried;
+  let mined = kept.mined;
+  // Written before any model call, so a failed screen loses no mining.
   await writeMined(out, mined);
+  if (model !== undefined) {
+    const screened = await prescreen(mined, { repo, model, limit: prescreenLimit ?? null, log: (line) => io.err(`${line}\n`) });
+    mined = screened.mined;
+    await writeMined(out, mined);
+    io.out(`pre-screened ${screened.screened} with ${model} (USD ${screened.costUsd.toFixed(2)}): a first pass, not the label\n`);
+  }
   io.out(
     `${mined.scanned.fixes} fixes in ${mined.scanned.commits} commits → ${mined.candidates.length} candidates, ${mined.dropped.length} dropped` +
       `${carried > 0 ? ` (${carried} kept their marks from the earlier candidates.json)` : ""}\n` +
