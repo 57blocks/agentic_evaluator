@@ -187,7 +187,7 @@ export function carryOver(fresh: MinedFile, earlier: MinedFile | null): { mined:
   let carried = 0;
   const candidates = fresh.candidates.map((c) => {
     const old = before.get(`${c.fix.sha}:${c.introducing.sha}`);
-    if (!old) return c;
+    if (!old || (old.confirmed === null && !old.label && !old.prescreen)) return c;
     carried += 1;
     return { ...c, confirmed: old.confirmed, ...(old.label ? { label: old.label } : {}), ...(old.prescreen ? { prescreen: old.prescreen } : {}) };
   });
