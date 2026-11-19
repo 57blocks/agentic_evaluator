@@ -143,3 +143,20 @@ test("a branch or a GitHub merge commit that looks like an option resolves to no
   const got = await resolveRange(s.repo.dir, { kind: "pr", number: 1, title: "", merged_at: null }, evil);
   assert.deepEqual(got, { skip: `PR #1: GitHub's merge commit "--output=x" is not a commit id` });
 });
+
+test("GitHub's size hint passes over PRs whose bin is full without asking GitHub for them", async () => {
+  const s = await shop();
+  const mined = await minedShop(s);
+  let asked = 0;
+  const hinted = {
+    ...s.github,
+    mergedPulls: async (base: string, since: string, until: string | null) => (await s.github.mergedPulls(base, since, until)).map((p) => ({ ...p, changedLines: 4000 })),
+    pull: async (n: number) => {
+      asked += 1;
+      return s.github.pull(n);
+    },
+  };
+  const clean = await pickClean(options(s, mined, { github: hinted }));
+  assert.equal(clean.picked.length, 0, "every PR claims 4000 lines; the escaped one is in 1-50");
+  assert.equal(asked, 1, "only the escaped PR is resolved, to size the bins");
+});

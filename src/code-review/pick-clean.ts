@@ -79,17 +79,28 @@ export function apportion(count: number, weights: readonly number[]): number[] {
   return out;
 }
 
-async function pool(opts: PickOptions, branch: string): Promise<{ units: Unit[]; rejected: { unit: string; reason: string }[] }> {
+interface Pool {
+  units: Unit[];
+  rejected: { unit: string; reason: string }[];
+  /** GitHub's changed-line counts, to pass over a PR whose bin is full without asking for it. */
+  hints: Map<string, number>;
+}
+
+async function pool(opts: PickOptions, branch: string): Promise<Pool> {
   const rejected: { unit: string; reason: string }[] = [];
   const units: Unit[] = [];
+  const hints = new Map<string, number>();
   if (opts.github) {
     for (const p of await opts.github.mergedPulls(branch, opts.since, opts.until)) {
       const unit: Unit = { kind: "pr", number: p.number, title: p.title, merged_at: p.mergedAt };
       if (p.isBot) rejected.push({ unit: unitId(unit), reason: `bot (${p.author})` });
       else if (NOT_A_CHANGE.test(p.title.trim())) rejected.push({ unit: unitId(unit), reason: "housekeeping title" });
-      else units.push(unit);
+      else {
+        units.push(unit);
+        if (p.changedLines !== undefined) hints.set(unitId(unit), p.changedLines);
+      }
     }
-    return { units, rejected };
+    return { units, rejected, hints };
   }
   const window = [`--since=${opts.since}`, ...(opts.until ? [`--until=${opts.until}`] : [])];
   for (const c of await logCommits(opts.repo, ["--first-parent", ...window, "--end-of-options", opts.mined.repo.head])) {
@@ -98,7 +109,7 @@ async function pool(opts: PickOptions, branch: string): Promise<{ units: Unit[];
     else if (NOT_A_CHANGE.test(c.subject.trim())) rejected.push({ unit: unitId(unit), reason: "housekeeping subject" });
     else units.push(unit);
   }
-  return { units, rejected };
+  return { units, rejected, hints };
 }
 
 /** Changed lines of each escaped unit, the set clean picks are matched to. */
@@ -126,12 +137,14 @@ export async function pickClean(opts: PickOptions): Promise<CleanFile> {
   const want = apportion(opts.count, sizes.length > 0 ? weights : SIZE_EDGES.map(() => 1));
   const got = SIZE_EDGES.map(() => 0);
 
-  const { units, rejected } = await pool(opts, branch);
+  const { units, rejected, hints } = await pool(opts, branch);
   const sorted = [...units].sort((a, b) => unitId(a).localeCompare(unitId(b)));
   const picked: CleanPick[] = [];
   for (const unit of shuffled(sorted, opts.seed)) {
     if (got.every((g, b) => g >= want[b])) break;
     const id = unitId(unit);
+    const hint = hints.get(id);
+    if (hint !== undefined && hint > 0 && got[binOf(hint)] >= want[binOf(hint)]) continue;
     if (escaped.has(id)) {
       rejected.push({ unit: id, reason: "an escaped-defect candidate" });
       continue;

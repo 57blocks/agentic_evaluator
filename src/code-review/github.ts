@@ -18,6 +18,8 @@ export interface PullSummary {
   mergeCommitSha: string | null;
   author: string;
   isBot: boolean;
+  /** Additions + deletions as GitHub counts them, when the listing gives them (a hint; git decides). */
+  changedLines?: number;
 }
 
 export interface PullCommit {
@@ -76,10 +78,14 @@ const RETRY_DELAY_MS = 2000;
 /** A 404 or 422 is an answer; a dropped stream or a 5xx is worth another try. */
 const TRANSIENT = /stream error|CANCEL|timeout|timed out|connection reset|EOF|HTTP 5\d\d|HTTP 429|rate limit/i;
 
-async function ghApi(args: readonly string[]): Promise<unknown> {
+function ghApi(args: readonly string[]): Promise<unknown> {
+  return ghJson(["api", ...args]);
+}
+
+async function ghJson(args: readonly string[]): Promise<unknown> {
   for (let attempt = 1; ; attempt++) {
     try {
-      return await ghApiOnce(args);
+      return await ghOnce(args);
     } catch (err) {
       if (attempt >= ATTEMPTS || !TRANSIENT.test((err as Error).message)) throw err;
       await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt));
@@ -87,23 +93,25 @@ async function ghApi(args: readonly string[]): Promise<unknown> {
   }
 }
 
-function ghApiOnce(args: readonly string[]): Promise<unknown> {
+function ghOnce(args: readonly string[]): Promise<unknown> {
+  const what = `gh ${args.filter((a) => !a.startsWith("-")).slice(0, 3).join(" ")}`;
   return new Promise((resolve, reject) => {
-    execFile("gh", ["api", ...args], { maxBuffer: 256 * 1024 * 1024, encoding: "utf-8" }, (e, stdout, stderr) => {
+    execFile("gh", [...args], { maxBuffer: 256 * 1024 * 1024, encoding: "utf-8" }, (e, stdout, stderr) => {
       if (e) {
-        reject(new GitHubError(`gh api ${args.filter((a) => !a.startsWith("-")).join(" ")}: ${String(stderr).trim() || e.message}`));
+        reject(new GitHubError(`${what}: ${String(stderr).trim() || e.message}`));
         return;
       }
       try {
         resolve(JSON.parse(stdout));
       } catch {
-        reject(new GitHubError(`gh api ${args.join(" ")}: not JSON`));
+        reject(new GitHubError(`${what}: not JSON`));
       }
     });
   });
 }
 
 const PAGE = 100;
+const MAX_LISTED = 5000;
 
 /** The client every command uses unless a test hands in its own. */
 export function ghClient(repo: string): GitHub {
@@ -124,20 +132,29 @@ export function ghClient(repo: string): GitHub {
       return { ...summaryOf(p), body: String(p.body ?? ""), createdAt: String(p.created_at ?? ""), commitCount: Number(p.commits ?? commits.length), commits };
     },
     async mergedPulls(base, since, until) {
-      // Sorted by last update, newest first: a PR merged on or after `since`
-      // was updated on or after it too, so the first page entirely older
-      // than `since` ends the walk.
-      const out: PullSummary[] = [];
-      for (let page = 1; ; page++) {
-        const list = (await ghApi([`repos/${repo}/pulls?state=closed&base=${encodeURIComponent(base)}&sort=updated&direction=desc&per_page=${PAGE}&page=${page}`])) as Json[];
-        for (const p of list) {
-          const s = summaryOf(p);
-          if (s.mergedAt && s.mergedAt.slice(0, 10) >= since && (until === null || s.mergedAt.slice(0, 10) <= until)) out.push(s);
-        }
-        const oldest = list.at(-1)?.updated_at as string | undefined;
-        if (list.length < PAGE || oldest === undefined || oldest.slice(0, 10) < since) break;
-      }
-      return out.sort((a, b) => a.number - b.number);
+      // `gh pr list` (GraphQL) returns only the fields asked for, sizes
+      // included; the REST list returns whole PRs and dropped its stream on
+      // a slow link.
+      const list = (await ghJson([
+        "pr", "list", "-R", repo, "--state", "merged", "--base", base, "--limit", String(MAX_LISTED),
+        "--search", `merged:${since}..${until ?? "*"}`,
+        "--json", "number,title,mergedAt,baseRefName,mergeCommit,author,additions,deletions",
+      ])) as Json[];
+      if (list.length >= MAX_LISTED) throw new GitHubError(`more than ${MAX_LISTED} PRs merged in the window: narrow it with --since/--until`);
+      return list.map((p) => {
+        const author = (p.author ?? {}) as Json;
+        const login = String(author.login ?? "");
+        return {
+          number: Number(p.number),
+          title: String(p.title ?? ""),
+          mergedAt: (p.mergedAt as string | null) ?? null,
+          baseRef: String(p.baseRefName ?? ""),
+          mergeCommitSha: (((p.mergeCommit ?? null) as Json | null)?.oid as string | undefined) ?? null,
+          author: login,
+          isBot: author.is_bot === true || /\[bot\]$|-bot$|^dependabot|^renovate|^app\//i.test(login),
+          changedLines: Number(p.additions ?? 0) + Number(p.deletions ?? 0),
+        };
+      }).sort((a, b) => a.number - b.number);
     },
   };
 }
