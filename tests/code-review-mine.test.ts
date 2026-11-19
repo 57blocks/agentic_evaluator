@@ -9,7 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { carryOver, DEFAULT_BLAME, mine, type MineOptions } from "../src/code-review/mine.js";
 import { candidatesMarkdown, readMined } from "../src/code-review/candidates-file.js";
-import { blameLines } from "../src/code-review/szz.js";
+import { blameLines, NOT_CODE } from "../src/code-review/szz.js";
 import { EXIT } from "../src/cli/exit-codes.js";
 import { bufferIo } from "../src/cli/io.js";
 import { main } from "../src/cli/index.js";
@@ -142,4 +142,11 @@ test("the CLI refuses a bad date and an unknown subcommand as usage errors", asy
   const s = await shop();
   await assert.rejects(main(["code-review", "mine", s.repo.dir, "--since", "June", "--out", "/tmp/x"], bufferIo()), /--since must be YYYY-MM-DD/);
   await assert.rejects(main(["code-review", "frob"], bufferIo()), /unknown code-review subcommand "frob"/);
+});
+
+test("tests, docs, data and lockfiles are not code; MDX pages with components are", () => {
+  for (const p of ["src/a.test.ts", "tests/x.ts", "docs/a.ts", "README.md", "package.json", "pnpm-lock.yaml", "yarn.lock", "Cargo.lock", "site/locales/fr.yaml", "a/__snapshots__/x.snap", "logo.svg"]) {
+    assert.ok(NOT_CODE.test(p), p);
+  }
+  for (const p of ["src/a.ts", "src/components/BlockQuote.tsx", "src/clock.ts", "site/pages/micro-bic.mdx", "règles/salarié.publicodes", "api/server.py"]) assert.ok(!NOT_CODE.test(p), p);
 });

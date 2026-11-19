@@ -16,7 +16,7 @@ export const HOUSEKEEPING = /^(chore|style|ci)(\([^)]*\))?!?:/i;
  * Paths that are not product code: tests, docs, translations, data and
  * lockfiles, images. Their removed lines are not where a reviewer misses a bug.
  */
-export const NOT_CODE = /(^|\/)(test|tests|__tests__|__mocks__|e2e|cypress|docs?|\.github|locales?|i18n)\/|\.(test|spec)\.|\.md$|\.mdx$|\.snap$|\.json$|lock|\.ya?ml$|\.svg$|\.png$|\.jpe?g$|\.gif$|\.ico$|\.txt$|\.csv$/i;
+export const NOT_CODE = /(^|\/)(test|tests|__tests__|__mocks__|e2e|cypress|docs?|\.github|locales?|i18n)\/|\.(test|spec)\.|\.md$|\.snap$|\.json$|(^|\/)[^/]*\.lock$|-lock\.ya?ml$|\.ya?ml$|\.svg$|\.png$|\.jpe?g$|\.gif$|\.ico$|\.txt$|\.csv$/i;
 
 export const DEFAULT_BLAME = ["-w", "-M", "-C"] as const;
 
