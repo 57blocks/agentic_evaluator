@@ -1,8 +1,8 @@
 /**
  * kind: findings-match on a whole task: spec, items.jsonl with defect and
  * clean items, two free reviewer stand-ins. check-task probes it without a
- * model, a run records the matcher's measures, and changing an option
- * regrades reused trials.
+ * model, a run records the matcher's measures and the scorecard reads
+ * precision from them, and changing an option regrades reused trials.
  */
 
 import { test } from "node:test";
@@ -12,6 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { preflightTask, type PreflightReport } from "../src/core/preflight.js";
 import { runSuite } from "../src/core/execute.js";
+import { loadBundle, renderRunReport } from "../src/report-v2.js";
 import type { TrialRow } from "../src/canon/rows.js";
 
 const SPEC = `protocol_version: "0.3"
@@ -91,7 +92,7 @@ test("check-task: the oracle review passes every item and an empty answer fails,
   assert.match(report.steps.flatMap((s) => s.findings).map((f) => f.message).join("\n"), /caught llm_fallback google\/gemini-3\.1-pro-preview: provider_route openrouter needs NO_SUCH_KEY_FOR_TESTS/);
 });
 
-test("a run records the matcher's measures, and a changed option regrades reused trials", async () => {
+test("a run records the matcher's measures, the scorecard shows precision, and a changed option regrades reused trials", async () => {
   const spec = await reviewTask();
 
   const result = await runSuite(spec, false, { yes: true, onEvent: () => {} });
@@ -105,6 +106,12 @@ test("a run records the matcher's measures, and a changed option regrades reused
   assert.deepEqual(cell(rows, "noisy", "pr1").measures, { findings: 2, invalid_findings: 0, defects: 1, caught: 1, matched_deterministic: 1, matched_llm: 0, unmatched_findings: 1 });
   assert.deepEqual(cell(rows, "noisy", "pr3").measures, { findings: 1, invalid_findings: 0, defect_claims: 1 });
   assert.match(cell(rows, "sharp", "pr1").version, /^findings-match-1\+opts-/);
+
+  const html = renderRunReport(await loadBundle(result.dir));
+  // sharp: 1 of 2 findings on defect items matched; noisy: 1 of 4.
+  assert.match(html, /precision 0\.50/);
+  assert.match(html, /precision 0\.25/);
+  assert.match(html, /Precision \(findings-match\)/);
 
   // Widen the tolerance: pr2's finding, five lines off, now matches, without running the reviewers again.
   await fs.writeFile(spec, SPEC.replace("line_tolerance: 3", "line_tolerance: 5"));

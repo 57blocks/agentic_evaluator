@@ -19,6 +19,7 @@ import { trialNote } from "./canon/run-diff.js";
 import { escapeHtml } from "./html.js";
 import { fmtCost, fmtSec } from "./report-format.js";
 import { sliceMembers } from "./report-slices.js";
+import { findingsPrecision } from "./code-review/findings.js";
 
 /** Failed trials are listed open when there are at most this many for a candidate. */
 const OPEN_FAILURES = 10;
@@ -71,9 +72,15 @@ function passText(c: ScorecardCell): string {
   return `${c.pass}/${c.graded}${ci}`;
 }
 
+/** The measures line, with a code review's precision when its matcher reported the counts it is read from. */
+function measuresLine(m: MeasureStats): string {
+  const precision = findingsPrecision(m);
+  return [measureSummary(m), ...(precision === null ? [] : [`precision ${precision.toFixed(2)}`])].filter((s) => s !== "").join(" · ");
+}
+
 function passCell(c: ScorecardCell | undefined): string {
   if (!c) return `<td class="num muted">—</td>`;
-  const line = measureSummary(c.measures);
+  const line = measuresLine(c.measures);
   return `<td class="num">${passText(c)}${line ? `<span class="sub">${escapeHtml(line)}</span>` : ""}</td>`;
 }
 
@@ -109,11 +116,15 @@ function sliceTable(slices: readonly ScorecardSlice[], candidates: readonly stri
 
 export function renderScorecard(labels: InputLabels | null, trials: readonly TrialRow[], rates: readonly CandidateRates[], candidates: readonly string[]): string {
   const [all, ...slices] = scorecardSlices(labels, trials, candidates);
+  const hasPrecision = [all!, ...slices].some((s) => Object.values(s.cells).some((c) => findingsPrecision(c.measures) !== null));
+  const precisionNote = hasPrecision
+    ? `<p class="note">Precision (findings-match): matched findings over all findings on defect items — the ratio of the means of matched_deterministic + matched_llm to that plus unmatched_findings, so findings are pooled per input rather than precision averaged per item. Without an llm_fallback, ambiguous findings count as unmatched and precision is a lower bound. Defect claims per clean item is defect_claims.</p>`
+    : "";
   return `<section class="card">
     <h2>Scorecard <span class="hint">decision: scorecard · no gate applied, no candidate picked · required check and its measures, every input then each tag and split</span></h2>
     ${headTable(all!, trials, rates, candidates)}
     ${sliceTable(slices, candidates)}
-    <p class="note">The required check's 95% interval is Wilson's, counted per input, so repeated trials of one input do not narrow it. Measures are the mean over each input's graded trials, then over inputs. Cost excludes judging; p50 and p95 are over completed trials.</p>
+    <p class="note">The required check's 95% interval is Wilson's, counted per input, so repeated trials of one input do not narrow it. Measures are the mean over each input's graded trials, then over inputs. Cost excludes judging; p50 and p95 are over completed trials.</p>${precisionNote}
   </section>`;
 }
 
