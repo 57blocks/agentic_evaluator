@@ -227,7 +227,7 @@ export const SPEC_SCHEMA = {
             additionalProperties: false,
             required: ["kind"],
             properties: {
-              kind: { type: "string", enum: ["tsc", "command"] },
+              kind: { type: "string", enum: ["tsc", "command", "findings-match"] },
               /** tsc only. */
               scaffold_dir: { type: "string" },
               /** command only: program + args, run in the trial work dir. */
@@ -235,6 +235,23 @@ export const SPEC_SCHEMA = {
               /** command only: files hashed into the evaluator version. */
               version_files: { type: "array", items: { type: "string" } },
               timeout_seconds: { type: "number", exclusiveMinimum: 0 },
+              /** findings-match only: lines a finding may sit from a defect's range and still match (default 3). */
+              line_tolerance: { type: "integer", minimum: 0 },
+              /** findings-match only: a match also needs the finding's category to equal the defect's (default false). */
+              require_category: { type: "boolean" },
+              /** findings-match only: the model that decides ambiguous locations and unflagged claims. */
+              llm_fallback: {
+                type: "object",
+                additionalProperties: false,
+                required: ["model"],
+                properties: {
+                  model: { type: "string", minLength: 1 },
+                  provider_route: { type: "string", enum: ["openrouter", "anthropic", "openai", "openai-compatible"] },
+                  base_url: { type: "string", pattern: "^https?://" },
+                  api_key_env: { type: "string", pattern: "^[A-Za-z_][A-Za-z0-9_]*$" },
+                  price: PRICE_SCHEMA,
+                },
+              },
               /** What a pass means, in one sentence; the report shows it beside the pass rate. */
               description: { type: "string", minLength: 1 },
               /** Rules over the trace a command candidate leaves (`cli.trace`), judged after the check itself. */

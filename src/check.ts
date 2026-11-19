@@ -32,9 +32,10 @@ import type { AgentTrace } from "./canon/agent-trace.js";
 import { hasTraceRules, type TraceRules } from "./canon/trace-rules.js";
 import { measuresOf } from "./canon/measures.js";
 import type { CheckConfig } from "./types.js";
+import { findingsMatchVersion } from "./code-review/version.js";
 
 /** Truncate captured compiler output so records / reports stay small. */
-const MAX_OUTPUT_CHARS = 8_000;
+export const MAX_OUTPUT_CHARS = 8_000;
 const TSC_TIMEOUT_MS = 120_000;
 
 /**
@@ -107,7 +108,9 @@ export async function requiredCheckVersion(check: CheckConfig, taskRoot: string)
   const base =
     check.kind === "tsc"
       ? await checkVersion(await resolveTaskAsset(taskRoot, check.scaffoldDir))
-      : await commandCheckVersion(check.argv, check.versionFiles, taskRoot);
+      : check.kind === "findings-match"
+        ? findingsMatchVersion(check)
+        : await commandCheckVersion(check.argv, check.versionFiles, taskRoot);
   return withTraceRules(base, check.trace);
 }
 
@@ -117,7 +120,7 @@ export function withTraceRules(version: string, rules: TraceRules | undefined): 
 }
 
 /** Keys sorted at every level, so the same rules written in another order hash alike. */
-function canonicalJson(value: unknown): string {
+export function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
   if (value && typeof value === "object") {
     const o = value as Record<string, unknown>;
@@ -135,7 +138,7 @@ function canonicalJson(value: unknown): string {
  * so it fails the check rather than erroring the evaluator, and nothing is
  * written before every path has been looked at.
  */
-function placeFiles(
+export function placeFiles(
   workDir: string,
   files: readonly CheckFile[],
   version: string,
@@ -160,7 +163,7 @@ function placeFiles(
   return { placed };
 }
 
-async function writePlaced(placed: ReadonlyArray<{ dest: string; content: string }>): Promise<void> {
+export async function writePlaced(placed: ReadonlyArray<{ dest: string; content: string }>): Promise<void> {
   await Promise.all(
     placed.map(async (f) => {
       await fs.mkdir(path.dirname(f.dest), { recursive: true });
@@ -333,7 +336,7 @@ export async function commandCheckVersion(
  * elsewhere on the host, so whatever is there is removed first (the link, not
  * its target) and a fresh regular file written; the candidate has exited.
  */
-async function writeFresh(file: string, content: string): Promise<void> {
+export async function writeFresh(file: string, content: string): Promise<void> {
   await fs.rm(file, { force: true });
   await fs.writeFile(file, content, { encoding: "utf-8", flag: "wx" });
 }

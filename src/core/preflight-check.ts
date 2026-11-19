@@ -13,6 +13,8 @@ import os from "node:os";
 import path from "node:path";
 import { runCheck, runCommandCheck, type CheckFile, type CheckResult } from "../check.js";
 import { resolveTaskAsset } from "../paths.js";
+import { FINDINGS_FILE, readExpectedText, runFindingsMatchCheck } from "../code-review/findings-match.js";
+import { oracleFindings, parseExpected } from "../code-review/findings.js";
 import { fixturePath, isDir } from "./fixture.js";
 import type { Suite } from "../types.js";
 import type { Finding } from "./preflight.js";
@@ -29,6 +31,13 @@ async function runStepCheck(suite: Suite, input: { slug: string; text: string },
   const check = suite.check!;
   if (check.kind === "tsc") {
     return runCheck({ files: answer.files, scaffoldDir: await resolveTaskAsset(suite.taskRoot, check.scaffoldDir), workDir });
+  }
+  if (check.kind === "findings-match") {
+    // A probe never pays for a model: the oracle matches on location alone, and an empty answer has no review.
+    const ask = async (): Promise<string> => {
+      throw new Error("check-task never calls the llm_fallback");
+    };
+    return runFindingsMatchCheck({ check, files: answer.files, workDir, taskRoot: suite.taskRoot, step: suite.step, input: input.slug, ask });
   }
   return runCommandCheck({
     argv: check.argv,
@@ -58,6 +67,25 @@ async function filesUnder(root: string): Promise<CheckFile[]> {
     out.push({ path: path.relative(root, abs).split(path.sep).join("/"), content: await fs.readFile(abs, "utf-8") });
   }
   return out;
+}
+
+/**
+ * For findings-match the answer key is the item's `expected`, not a
+ * deliverable: the reference answer is the review a perfect reviewer would
+ * leave — each known defect as a blocking finding on its own lines, nothing
+ * on a clean item — handed over as findings.json. A key the matcher cannot
+ * read is handed over as an empty review, so the check itself reports why.
+ */
+async function findingsReference(taskRoot: string, slug: string, step: string): Promise<Answer | null> {
+  const found = await readExpectedText(taskRoot, step, slug);
+  if (found === null) return null;
+  let findings: unknown[] = [];
+  try {
+    findings = oracleFindings(parseExpected(found.text));
+  } catch {
+    // The check reads the key again and names the problem as an evaluator error.
+  }
+  return { files: [{ path: FINDINGS_FILE, content: `${JSON.stringify(findings, null, 2)}\n` }], output: "" };
 }
 
 /**
@@ -119,7 +147,9 @@ async function oracleProbe(suite: Suite, inputs: readonly { slug: string; text: 
   const rejected: string[] = [];
   let passed = 0;
   for (const input of inputs) {
-    const reference = await referenceFor(suite.taskRoot, input.slug, suite.step);
+    const reference = suite.check!.kind === "findings-match"
+      ? await findingsReference(suite.taskRoot, input.slug, suite.step)
+      : await referenceFor(suite.taskRoot, input.slug, suite.step);
     if (reference === null) {
       missing.push(input.slug);
       continue;

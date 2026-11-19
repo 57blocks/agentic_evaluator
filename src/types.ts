@@ -37,12 +37,15 @@ export type ProducerKind = "prompt" | "agent" | "codegen";
 export type JudgeMethod = "pairwise-swap" | "absolute-1-5";
 
 /**
- * The step's required check. Two kinds:
+ * The step's required check. Three kinds:
  *
- *   tsc      — compile the produced files against a scaffold tsconfig.
- *   command  — run a user-declared program in the trial's work dir. This is
- *              how a step that is not codegen gets a deterministic gate at
- *              all: without one, every trial outcome stays `undetermined`.
+ *   tsc            — compile the produced files against a scaffold tsconfig.
+ *   command        — run a user-declared program in the trial's work dir. This
+ *                    is how a step that is not codegen gets a deterministic
+ *                    gate at all: without one, every trial outcome stays
+ *                    `undetermined`.
+ *   findings-match — pair a code review's findings.json with the item's known
+ *                    defects (src/code-review/), built in.
  *
  * One per step today. A step declaring two required checks is rejected by the
  * loader rather than silently gated on one of them.
@@ -65,6 +68,17 @@ export type CheckConfig =
       /** Task-relative files hashed into the evaluator version. */
       versionFiles: string[];
       timeoutMs: number;
+      trace?: TraceRules;
+    }
+  | {
+      id: string;
+      kind: "findings-match";
+      /** Lines a finding may sit from a defect's range and still match it (default 3). */
+      lineTolerance: number;
+      /** A deterministic match also needs the finding's category to equal the defect's. */
+      requireCategory: boolean;
+      /** The model that decides ambiguous locations and unflagged claims; none: they stay undecided. */
+      llmFallback?: { model: string; endpoint: ModelEndpoint };
       trace?: TraceRules;
     };
 
