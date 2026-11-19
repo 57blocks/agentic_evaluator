@@ -19,6 +19,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { git, gitBytes } from "./git.js";
+import { overlayTree, type Pin } from "./pin.js";
 
 /** No user or system config: their pack and commit settings would change bytes. */
 const CLEAN_ENV = { GIT_CONFIG_GLOBAL: "/dev/null", GIT_CONFIG_NOSYSTEM: "1" };
@@ -59,9 +60,10 @@ async function rawCommit(repo: string, sha: string): Promise<RawCommit> {
   return { author, committer, message: split === -1 ? Buffer.alloc(0) : bytes.subarray(split + 2) };
 }
 
-async function recommit(store: string, source: string, sha: string, parent: string | null): Promise<string> {
+async function recommit(store: string, source: string, sha: string, parent: string | null, pin: Pin | null): Promise<string> {
   const raw = await rawCommit(source, sha);
-  const tree = (await git(source, ["rev-parse", "--verify", "--end-of-options", `${sha}^{tree}`])).trim();
+  const original = (await git(source, ["rev-parse", "--verify", "--end-of-options", `${sha}^{tree}`])).trim();
+  const tree = pin ? await overlayTree(store, original, pin, CLEAN_ENV) : original;
   const env = { ...CLEAN_ENV, ...identity(raw.author, "AUTHOR"), ...identity(raw.committer, "COMMITTER") };
   const args = ["commit-tree", "--no-gpg-sign", tree, ...(parent ? ["-p", parent] : [])];
   return (await git(store, args, { env, input: raw.message })).trim();
@@ -82,18 +84,19 @@ function packFrom(store: string, head: string): Promise<Buffer> {
 
 /**
  * Write `<outFile>` (a v2 bundle with one ref) holding `base`'s snapshot as
- * a root commit and `replay` on top of it.
+ * a root commit and `replay` on top of it; with a pin, every tree carries
+ * the pinned paths as the pinned commit has them (pin.ts).
  */
-export async function writeBundle(source: string, base: string, replay: readonly string[], ref: string, outFile: string): Promise<BundleResult> {
+export async function writeBundle(source: string, base: string, replay: readonly string[], ref: string, outFile: string, pin: Pin | null = null): Promise<BundleResult> {
   const store = await fs.mkdtemp(path.join(os.tmpdir(), "cr-fixture-"));
   try {
     await git(store, ["init", "-q", "--bare", "."], { env: CLEAN_ENV });
     await fs.writeFile(path.join(store, "objects", "info", "alternates"), `${await objectsDir(source)}\n`);
-    const baseSha = await recommit(store, source, base, null);
+    const baseSha = await recommit(store, source, base, null, pin);
     const commitShas: string[] = [];
     let head = baseSha;
     for (const sha of replay) {
-      head = await recommit(store, source, sha, head);
+      head = await recommit(store, source, sha, head, pin);
       commitShas.push(head);
     }
     const pack = await packFrom(store, head);

@@ -365,7 +365,8 @@ never writes to it. Item and finding shapes: [docs/design/code-review.md](docs/d
 agenteval code-review mine ~/src/app --since 2025-06-01 --github owner/app --out mined
 # read mined/candidates.md; set "confirmed": true|false in mined/candidates.json
 agenteval code-review pick-clean ~/src/app --mined mined --count 20 --out mined
-agenteval code-review build ~/src/app --mined mined --clean mined --task tasks/app-review
+agenteval code-review build ~/src/app --mined mined --clean mined --task tasks/app-review \
+  --pin-files main CLAUDE.md docs/review   # optional: the same repo rules in every fixture
 ```
 
 - **`mine`** — SZZ over the branch's first-parent history: for each fix
@@ -398,6 +399,14 @@ agenteval code-review build ~/src/app --mined mined --clean mined --task tasks/a
   `code-review-build.json`, as are defects whose lines could not be found at
   the PR head (they keep their file). Same inputs, same fixture bytes:
   fixtures are part of trial identity, so a rebuild does not re-run trials.
+  `--pin-files REV PATH...` lays those paths (files or directories), as REV
+  has them, over every tree of every fixture, base and PR commits alike. A
+  reviewer that reads repo rules (CLAUDE.md, CONTRIBUTING.md, a review
+  guide) then reads today's rules on every item, and the PR's diff is
+  unchanged. A pinned path is replaced whole, so a file REV no longer has is
+  gone from older trees too. A PR that itself edited a pinned path loses
+  that part of its diff; `code-review-build.json` lists it under
+  `pinned_edited`.
 
 ## Concepts
 

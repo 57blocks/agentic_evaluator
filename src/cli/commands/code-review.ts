@@ -13,7 +13,8 @@ import { build, BUILD_REPORT, writeBuild } from "../../code-review/build.js";
 import type { MinedFile } from "../../code-review/types.js";
 import fs from "node:fs/promises";
 import { ghClient, checkRepoName } from "../../code-review/github.js";
-import { revParse, git } from "../../code-review/git.js";
+import { revParse, git, GitError } from "../../code-review/git.js";
+import { resolvePin, type Pin } from "../../code-review/pin.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
 import { numberFlag, rejectUnknown, stringFlag, UsageError, type ParsedArgs } from "../args.js";
 import type { Io } from "../io.js";
@@ -54,11 +55,16 @@ export const CODE_REVIEW_HELP = `agenteval code-review <mine|pick-clean|build> <
       Writes ${BUILD_REPORT} beside items.jsonl: what was skipped and why.
       --include-unconfirmed   also unreviewed candidates (not those marked
                               false or pre-screened not_defect); their
-                              provenance says so`;
+                              provenance says so
+      --pin-files REV PATH... lay PATHs (files or directories) as REV has them
+                              over every tree of every fixture, so a reviewer
+                              reads the same repo rules (CLAUDE.md, review
+                              guides) on every item; the report flags PRs
+                              that edited a pinned path`;
 
 const MINE_VALUED = ["since", "until", "branch", "out", "github", "fix-pattern", "max-removed-lines", "min-owner-share", "prescreen", "prescreen-limit"] as const;
 const PICK_VALUED = ["mined", "count", "out", "seed", "since", "until"] as const;
-const BUILD_VALUED = ["mined", "clean", "task"] as const;
+const BUILD_VALUED = ["mined", "clean", "task", "pin-files"] as const;
 export const CODE_REVIEW_VALUED: readonly string[] = [...new Set([...MINE_VALUED, ...PICK_VALUED, ...BUILD_VALUED])];
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -193,9 +199,26 @@ async function cmdPickClean(args: ParsedArgs, io: Io): Promise<ExitCode> {
   return clean.picked.length < count ? EXIT.partial : EXIT.ok;
 }
 
+/** `--pin-files REV PATH...`: the revision is the flag's value, the paths the arguments after the repo. */
+async function pinArg(args: ParsedArgs, repo: string): Promise<Pin | null> {
+  const rev = stringFlag(args.flags, "pin-files");
+  const paths = args.positional.slice(2);
+  if (rev === undefined) {
+    if (paths.length > 0) throw new UsageError(`unexpected argument${paths.length > 1 ? "s" : ""} ${paths.join(" ")} (paths to pin go after --pin-files REV)`);
+    return null;
+  }
+  try {
+    return await resolvePin(repo, rev, paths);
+  } catch (err) {
+    if (err instanceof GitError) throw new UsageError(err.message);
+    throw err;
+  }
+}
+
 async function cmdBuild(args: ParsedArgs, io: Io): Promise<ExitCode> {
   rejectUnknown(args.flags, [...BUILD_VALUED, "include-unconfirmed"]);
   const repo = await repoArg(args);
+  const pin = await pinArg(args, repo);
   const mined = await minedArg(args);
   const cleanDir = stringFlag(args.flags, "clean");
   const clean = cleanDir ? await readClean(path.resolve(cleanDir)).catch((err: unknown) => {
@@ -203,7 +226,7 @@ async function cmdBuild(args: ParsedArgs, io: Io): Promise<ExitCode> {
   }) : null;
   const taskDir = path.resolve(required(args.flags, "task", "the task directory items.jsonl and fixtures/ go to"));
   const { items, report } = await build({
-    repo, mined, clean, taskDir, github: githubOf(mined),
+    repo, mined, clean, taskDir, github: githubOf(mined), pin,
     includeUnconfirmed: args.flags["include-unconfirmed"] === true,
     log: (line) => io.err(`${line}\n`),
   });
@@ -214,6 +237,8 @@ async function cmdBuild(args: ParsedArgs, io: Io): Promise<ExitCode> {
     `${report.excluded.length} candidates not selected, ${report.skipped.length} skipped, ${report.unlocated.length} defect files without lines → ${path.join(taskDir, BUILD_REPORT)}`,
     ...report.skipped.map((s) => `  skipped ${s.id}: ${s.reason}`),
     ...report.unlocated.map((u) => `  no lines for ${u.candidate} in ${u.file}: ${u.note}`),
+    ...(report.pinned ? [`pinned ${report.pinned.paths.join(", ")} from ${report.pinned.commit.slice(0, 9)} in every fixture`] : []),
+    ...(report.pinned_edited ?? []).map((e) => `  edited a pinned path: ${e.item} (${e.paths.join(", ")}); the pin hides that part of its diff`),
     ...(report.stale_fixtures.length > 0 ? [`  fixtures/ also holds ${report.stale_fixtures.join(", ")}, not built this time`] : []),
   ];
   if (items.length === 0 && report.excluded.length > 0 && !args.flags["include-unconfirmed"]) {

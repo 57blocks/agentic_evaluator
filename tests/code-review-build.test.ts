@@ -14,6 +14,7 @@ import path from "node:path";
 import { build, writeBuild, type Item } from "../src/code-review/build.js";
 import { readMined } from "../src/code-review/candidates-file.js";
 import { writeBundle } from "../src/code-review/fixture-bundle.js";
+import { resolvePin } from "../src/code-review/pin.js";
 import { locateDefect } from "../src/code-review/locate.js";
 import { DEFAULT_BLAME, mine } from "../src/code-review/mine.js";
 import { resolveRange, type PrRange } from "../src/code-review/pr-range.js";
@@ -22,7 +23,8 @@ import { readItems } from "../src/core/items.js";
 import { EXIT } from "../src/cli/exit-codes.js";
 import { bufferIo } from "../src/cli/io.js";
 import { main } from "../src/cli/index.js";
-import { buildShopRepo, CALC, ISOLATED_GIT_ENV, type ShopRepo } from "./helpers/code-review-repo.js";
+import { UsageError } from "../src/cli/args.js";
+import { buildShopRepo, CALC, ISOLATED_GIT_ENV, TestRepo, type ShopRepo } from "./helpers/code-review-repo.js";
 
 let shopPromise: Promise<ShopRepo> | undefined;
 const shop = (): Promise<ShopRepo> => (shopPromise ??= buildShopRepo());
@@ -174,6 +176,98 @@ test("fixtures are byte-identical across rebuilds and however the source clone i
     assert.deepEqual(Object.keys(t).sort(), Object.keys(trees[0]).sort());
     for (const [name, bytes] of Object.entries(trees[0])) assert.ok(bytes.equals(t[name]), `${name} differs`);
   }
+});
+
+/* ── pinned files ────────────────────────────────────────────────────────── */
+
+test("a pinned path is exactly the pinned commit's in every tree, and the PR's own diff is unchanged", async () => {
+  // Arrange: base with docs/a.md and docs/old.md; a PR that edits src/x.ts; a later commit that rewrites docs/ and adds CLAUDE.md.
+  const dir = await tmp("cr-pin-");
+  const repo = new TestRepo(dir);
+  repo.git("init", "-q", "-b", "main");
+  const base = await repo.commit("feat: start", { "docs/a.md": "old a\n", "docs/old.md": "gone later\n", "src/x.ts": "export const x = 1\n" });
+  const pr = await repo.commit("feat: two", { "src/x.ts": "export const x = 2\n" });
+  const later = await repo.commit("docs: rules", { "docs/a.md": "new a\n", "docs/old.md": null, "CLAUDE.md": "# rules\n" });
+  const pin = await resolvePin(dir, later.slice(0, 9), ["docs/", "CLAUDE.md"]);
+  const out = path.join(await tmp("cr-pin-out-"), "repo.bundle");
+  const clone = await tmp("cr-pin-clone-");
+
+  // Act
+  const built = await writeBundle(dir, base, [pr], "refs/fixtures/x", out, pin);
+  sh(clone, "init", "-q");
+  sh(clone, "fetch", "-q", out, "refs/fixtures/x");
+
+  // Assert
+  assert.equal(pin.commit, later);
+  assert.deepEqual(pin.paths, ["docs", "CLAUDE.md"]);
+  for (const rev of [built.baseSha, built.headSha]) {
+    assert.deepEqual(sh(clone, "ls-tree", "-r", "--name-only", rev).trim().split("\n"), ["CLAUDE.md", "docs/a.md", "src/x.ts"]);
+    assert.equal(sh(clone, "show", `${rev}:docs/a.md`), "new a\n");
+  }
+  assert.equal(sh(clone, "diff", "--name-only", built.baseSha, built.headSha).trim(), "src/x.ts");
+  assert.equal(sh(dir, "for-each-ref").trim().split("\n").length, 1, "nothing was written into the source repo");
+});
+
+test("a pin refuses an option-like revision, a path outside the repo, and a path the pinned commit lacks", async () => {
+  const s = await shop();
+  await assert.rejects(resolvePin(s.repo.dir, "--output=x", ["README.md"]), /must not start with "-"/);
+  await assert.rejects(resolvePin(s.repo.dir, s.sha.c17, []), /at least one path/);
+  for (const bad of ["/etc/passwd", "../x", "src/../README.md", ""]) {
+    await assert.rejects(resolvePin(s.repo.dir, s.sha.c17, [bad]), /relative path inside the repository/, bad);
+  }
+  await assert.rejects(resolvePin(s.repo.dir, s.sha.c17, ["NOPE.md"]), /NOPE\.md is not in [0-9a-f]{9}/);
+  await assert.rejects(resolvePin(s.repo.dir, "no-such-rev", ["README.md"]), /no commit no-such-rev/);
+});
+
+test("build overlays pinned files on every fixture, records the pin, flags a PR that edited a pinned path, and stays byte-identical", async () => {
+  // Arrange: PR #3 edits src/tax.ts; PR #1 does not.
+  const s = await shop();
+  const mined = await minedShop(s, confirmAll);
+  const pin = await resolvePin(s.repo.dir, s.sha.c17, ["README.md", "src/tax.ts"]);
+
+  // Act
+  const trees: Record<string, Buffer>[] = [];
+  const reports = [];
+  for (let i = 0; i < 2; i++) {
+    const task = await tmp("cr-pinned-");
+    const { items, report } = await build({ repo: s.repo.dir, mined, clean: null, taskDir: task, github: s.github, includeUnconfirmed: false, pin });
+    await writeBuild(task, items, report);
+    trees.push(await filesUnder(task));
+    reports.push(report);
+  }
+
+  // Assert
+  const report = reports[0];
+  assert.deepEqual(report.pinned, { commit: s.sha.c17, paths: ["README.md", "src/tax.ts"] });
+  assert.deepEqual(report.pinned_edited, [{ item: "pr3", paths: ["src/tax.ts"] }]);
+  for (const [name, bytes] of Object.entries(trees[0])) assert.ok(bytes.equals(trees[1][name]), `${name} differs`);
+  const pr1 = JSON.parse(trees[0][path.join("fixtures", "pr1", "pr.json")].toString("utf-8"));
+  const clone = await tmp("cr-pinned-clone-");
+  sh(clone, "init", "-q");
+  await fs.writeFile(path.join(clone, "pr1.bundle"), trees[0][path.join("fixtures", "pr1", "repo.bundle")]);
+  sh(clone, "fetch", "-q", path.join(clone, "pr1.bundle"), "refs/fixtures/pr1");
+  assert.equal(sh(clone, "show", `${pr1.baseSha}:src/tax.ts`), sh(s.repo.dir, "show", `${s.sha.c17}:src/tax.ts`));
+  assert.equal(sh(clone, "diff", "--name-only", pr1.baseSha, pr1.headSha).trim().split("\n").sort().join(","), ["src/checkout.ts", CALC].sort().join(","));
+});
+
+test("the CLI takes --pin-files REV PATH... and refuses stray arguments without it", async () => {
+  const s = await shop();
+  const mined = await tmp("cr-mined-");
+  await main(["code-review", "mine", s.repo.dir, "--since", "2025-01-01", "--branch", "main", "--out", mined], bufferIo());
+  const m = await readMined(mined);
+  await fs.writeFile(path.join(mined, "candidates.json"), JSON.stringify({ ...m, candidates: m.candidates.map((c) => ({ ...c, confirmed: c.introducing.sha === s.sha.c1 })) }));
+  const task = await tmp("cr-task-");
+
+  const io = bufferIo();
+  assert.equal(await main(["code-review", "build", s.repo.dir, "--mined", mined, "--task", task, "--pin-files", s.sha.c17, "README.md", "src/"], io), EXIT.ok, io.stderr);
+  const report = JSON.parse(await fs.readFile(path.join(task, "code-review-build.json"), "utf-8"));
+  assert.deepEqual(report.pinned, { commit: s.sha.c17, paths: ["README.md", "src"] });
+  assert.match(io.stdout, /pinned README\.md, src from [0-9a-f]{9}/);
+  assert.match(io.stdout, /edited a pinned path: c[0-9a-f]{7} \(src\/prix ünï\/calc côté\.ts\)/);
+
+  await assert.rejects(main(["code-review", "build", s.repo.dir, "--mined", mined, "--task", task, "README.md"], bufferIo()), (e: Error) => e instanceof UsageError && /after --pin-files REV/.test(e.message));
+  await assert.rejects(main(["code-review", "build", s.repo.dir, "--mined", mined, "--task", task, "--pin-files", s.sha.c17], bufferIo()), (e: Error) => e instanceof UsageError && /at least one path/.test(e.message));
+  await assert.rejects(main(["code-review", "build", s.repo.dir, "--mined", mined, "--task", task, "--pin-files", s.sha.c17, "NOPE"], bufferIo()), (e: Error) => e instanceof UsageError && /NOPE is not in/.test(e.message));
 });
 
 test("a bundle verifies with git and needs no prerequisite", async () => {

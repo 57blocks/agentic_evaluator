@@ -11,7 +11,8 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { git } from "./git.js";
+import { diffNames, git } from "./git.js";
+import { isPinned, type Pin } from "./pin.js";
 import type { GitHub, PullDetail } from "./github.js";
 import { writeBundle } from "./fixture-bundle.js";
 import { locateDefect, type Location } from "./locate.js";
@@ -29,6 +30,8 @@ export interface BuildOptions {
   taskDir: string;
   github: GitHub | null;
   includeUnconfirmed: boolean;
+  /** Paths from one commit laid over every fixture tree (`--pin-files`). */
+  pin?: Pin | null;
   log?: (line: string) => void;
 }
 
@@ -64,6 +67,10 @@ export interface BuildReport {
   relabelled: { candidate: string; field: string; was: string }[];
   /** Fixture directories already there that this build did not write. */
   stale_fixtures: string[];
+  /** With --pin-files: the commit and paths every fixture tree carries. */
+  pinned?: { commit: string; paths: string[] };
+  /** Items whose PR itself changed a pinned path: the pin hides that part of its diff. */
+  pinned_edited?: { item: string; paths: string[] }[];
 }
 
 function selected(c: Candidate, includeUnconfirmed: boolean): string | null {
@@ -123,10 +130,15 @@ async function commitMessage(repo: string, sha: string): Promise<{ headline: str
   return { headline, body: rest.join("\n").trim() };
 }
 
-async function writeFixture(opts: BuildOptions, itemId: string, unit: Unit, range: PrRange, pull: PullDetail | null): Promise<void> {
+async function writeFixture(opts: BuildOptions, itemId: string, unit: Unit, range: PrRange, pull: PullDetail | null, report: BuildReport): Promise<void> {
   const dir = path.join(opts.taskDir, "fixtures", itemId);
   await fs.rm(dir, { recursive: true, force: true });
-  const built = await writeBundle(opts.repo, range.base, range.replay, `refs/fixtures/${itemId}`, path.join(dir, "repo.bundle"));
+  const pin = opts.pin ?? null;
+  if (pin) {
+    const edited = (await diffNames(opts.repo, range.base, range.head)).filter((f) => isPinned(f, pin)).sort();
+    if (edited.length > 0) report.pinned_edited!.push({ item: itemId, paths: edited });
+  }
+  const built = await writeBundle(opts.repo, range.base, range.replay, `refs/fixtures/${itemId}`, path.join(dir, "repo.bundle"), pin);
   const commits = [];
   for (const [i, original] of range.replay.entries()) {
     const m = await commitMessage(opts.repo, original);
@@ -172,7 +184,7 @@ async function buildEscaped(opts: BuildOptions, unit: Unit, group: Candidate[], 
   if (kept.length === 0) return null;
   const defects: Defect[] = [];
   for (const c of kept) defects.push(...(await defectsOf(opts, id, c, range, report)));
-  await writeFixture(opts, id, unit, range, pull);
+  await writeFixture(opts, id, unit, range, pull, report);
   report.items.push({ id, kind: "escaped", merged_as: range.kind, commits: range.replay.length, defects: defects.length });
   return {
     id,
@@ -205,7 +217,7 @@ async function buildClean(opts: BuildOptions, pick: CleanPick, clean: CleanFile,
     report.skipped.push({ id, reason: resolved.skip });
     return null;
   }
-  await writeFixture(opts, id, pick.unit, resolved.range, resolved.pull);
+  await writeFixture(opts, id, pick.unit, resolved.range, resolved.pull, report);
   report.items.push({ id, kind: "clean", merged_as: resolved.range.kind, commits: resolved.range.replay.length });
   const window = `${clean.window.since} to ${clean.window.until ?? "the mined head"}`;
   return {
@@ -225,7 +237,10 @@ async function staleFixtures(taskDir: string, built: ReadonlySet<string>): Promi
 
 export async function build(opts: BuildOptions): Promise<{ items: Item[]; report: BuildReport }> {
   checkMinedShas(opts.mined);
-  const report: BuildReport = { items: [], excluded: [], skipped: [], unlocated: [], relabelled: [], stale_fixtures: [] };
+  const report: BuildReport = {
+    items: [], excluded: [], skipped: [], unlocated: [], relabelled: [], stale_fixtures: [],
+    ...(opts.pin ? { pinned: { commit: opts.pin.commit, paths: opts.pin.paths }, pinned_edited: [] } : {}),
+  };
   const groups = new Map<string, { unit: Unit; candidates: Candidate[] }>();
   for (const c of opts.mined.candidates) {
     const why = selected(c, opts.includeUnconfirmed);
@@ -250,6 +265,7 @@ export async function build(opts: BuildOptions): Promise<{ items: Item[]; report
   }
   items.sort((a, b) => a.id.localeCompare(b.id));
   report.items.sort((a, b) => a.id.localeCompare(b.id));
+  report.pinned_edited?.sort((a, b) => a.item.localeCompare(b.item));
   report.stale_fixtures = await staleFixtures(opts.taskDir, new Set(items.map((i) => i.id)));
   return { items, report };
 }
