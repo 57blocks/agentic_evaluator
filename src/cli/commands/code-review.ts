@@ -6,9 +6,11 @@
 
 import path from "node:path";
 import { carryOver, DEFAULT_BLAME, DEFAULT_MAX_REMOVED_LINES, DEFAULT_MIN_OWNER_SHARE, mine } from "../../code-review/mine.js";
-import { CandidatesError, readClean, readMined, readMinedIfAny, writeMined } from "../../code-review/candidates-file.js";
+import { CandidatesError, CLEAN_JSON, readClean, readMined, readMinedIfAny, toJson, writeMined } from "../../code-review/candidates-file.js";
+import { DEFAULT_SEED, pickClean } from "../../code-review/pick-clean.js";
 import { build, BUILD_REPORT, writeBuild } from "../../code-review/build.js";
 import type { MinedFile } from "../../code-review/types.js";
+import fs from "node:fs/promises";
 import { ghClient, checkRepoName } from "../../code-review/github.js";
 import { revParse, git } from "../../code-review/git.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
@@ -33,6 +35,14 @@ export const CODE_REVIEW_HELP = `agenteval code-review <mine|pick-clean|build> <
       --min-owner-share F     drop fixes whose top introducer owns less (default ${DEFAULT_MIN_OWNER_SHARE})
       --no-move-detection     blame with -w only, not -w -M -C
 
+  pick-clean <repo-dir> --mined DIR --count N --out DIR
+      Merged PRs (or commits) in the mined window that no scanned fix
+      blamed, minus bots and housekeeping, drawn with a fixed seed and
+      size-matched by changed lines to the confirmed escaped PRs. Writes
+      clean.json.
+      --seed N                default ${DEFAULT_SEED}; recorded in clean.json
+      --since/--until DATE    another window than the mined one
+
   build <repo-dir> --mined DIR [--clean DIR] --task DIR
       One item per PR in <task>/items.jsonl and fixtures/<id>/ (repo.bundle
       ending at the PR head, pr.json). Only candidates with
@@ -43,8 +53,9 @@ export const CODE_REVIEW_HELP = `agenteval code-review <mine|pick-clean|build> <
                               provenance says so`;
 
 const MINE_VALUED = ["since", "until", "branch", "out", "github", "fix-pattern", "max-removed-lines", "min-owner-share"] as const;
+const PICK_VALUED = ["mined", "count", "out", "seed", "since", "until"] as const;
 const BUILD_VALUED = ["mined", "clean", "task"] as const;
-export const CODE_REVIEW_VALUED: readonly string[] = [...new Set([...MINE_VALUED, ...BUILD_VALUED])];
+export const CODE_REVIEW_VALUED: readonly string[] = [...new Set([...MINE_VALUED, ...PICK_VALUED, ...BUILD_VALUED])];
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -138,6 +149,29 @@ function githubOf(mined: MinedFile) {
   return mined.repo.github ? ghClient(mined.repo.github) : null;
 }
 
+async function cmdPickClean(args: ParsedArgs, io: Io): Promise<ExitCode> {
+  rejectUnknown(args.flags, [...PICK_VALUED]);
+  const repo = await repoArg(args);
+  const mined = await minedArg(args);
+  const count = numberFlag(args.flags, "count");
+  if (count === undefined || !Number.isInteger(count) || count < 1) throw new UsageError("--count N is required: how many clean PRs to pick (a whole number, 1 or more)");
+  const seed = numberFlag(args.flags, "seed") ?? DEFAULT_SEED;
+  if (!Number.isInteger(seed)) throw new UsageError("--seed must be a whole number");
+  const out = path.resolve(required(args.flags, "out", "the directory clean.json goes to"));
+  const clean = await pickClean({
+    repo, mined, count, seed,
+    since: dateFlag(args.flags, "since") ?? mined.window.since,
+    until: dateFlag(args.flags, "until") ?? mined.window.until,
+    github: githubOf(mined),
+    log: (line) => io.err(`${line}\n`),
+  });
+  await fs.mkdir(out, { recursive: true });
+  await fs.writeFile(path.join(out, CLEAN_JSON), toJson(clean));
+  const bins = clean.bins.filter((b) => b.want > 0).map((b) => `${b.lo}${b.hi ? `-${b.hi}` : "+"}: ${b.got}/${b.want}`).join(", ");
+  io.out(`${clean.picked.length} of ${count} clean picked (seed ${seed}; matched to ${clean.matched_to}; ${bins}), ${clean.rejected.length} rejected\n${path.join(out, CLEAN_JSON)}\n`);
+  return clean.picked.length < count ? EXIT.partial : EXIT.ok;
+}
+
 async function cmdBuild(args: ParsedArgs, io: Io): Promise<ExitCode> {
   rejectUnknown(args.flags, [...BUILD_VALUED, "include-unconfirmed"]);
   const repo = await repoArg(args);
@@ -170,6 +204,7 @@ async function cmdBuild(args: ParsedArgs, io: Io): Promise<ExitCode> {
 
 const SUBCOMMANDS: Record<string, (args: ParsedArgs, io: Io) => Promise<ExitCode>> = {
   mine: cmdMine,
+  "pick-clean": cmdPickClean,
   build: cmdBuild,
 };
 
