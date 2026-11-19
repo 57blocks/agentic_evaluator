@@ -105,7 +105,7 @@ test("a run records the matcher's measures, the scorecard shows precision, and a
   assert.equal(cell(rows, "noisy", "pr3").state, "fail");
   assert.deepEqual(cell(rows, "noisy", "pr1").measures, { findings: 2, invalid_findings: 0, defects: 1, caught: 1, matched_deterministic: 1, matched_llm: 0, unmatched_findings: 1 });
   assert.deepEqual(cell(rows, "noisy", "pr3").measures, { findings: 1, invalid_findings: 0, defect_claims: 1 });
-  assert.match(cell(rows, "sharp", "pr1").version, /^findings-match-1\+opts-/);
+  assert.match(cell(rows, "sharp", "pr1").version, /^findings-match-2\+opts-/);
 
   const html = renderRunReport(await loadBundle(result.dir));
   // sharp: 1 of 2 findings on defect items matched; noisy: 1 of 4.

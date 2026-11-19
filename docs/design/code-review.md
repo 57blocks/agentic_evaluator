@@ -48,6 +48,11 @@ Defect item (escaped, seeded):
               "description": "…", "fix_commit": "abc1234", "fix_diff": "…"}]}
 ```
 
+A defect is one fix. `build` writes one entry per file the fix touched, so
+entries sharing a `fix_commit` are one defect with several places: the
+matcher counts it once and catches it when any place is hit. Entries without
+`fix_commit` are separate defects.
+
 Clean item: `{"kind": "clean", "note": "…"}`.
 
 Line numbers are in the PR head version of the file (what the reviewer sees).

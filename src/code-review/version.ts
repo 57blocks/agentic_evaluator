@@ -10,7 +10,7 @@ import type { CheckConfig } from "../types.js";
 import { CLAIM_SYSTEM, LLM_ATTEMPTS, MATCH_SYSTEM } from "./match.js";
 
 /** Bump when the matching rules change in code. */
-export const FINDINGS_MATCH_REVISION = "findings-match-1";
+export const FINDINGS_MATCH_REVISION = "findings-match-2";
 
 type FindingsMatchConfig = Extract<CheckConfig, { kind: "findings-match" }>;
 

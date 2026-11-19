@@ -197,6 +197,65 @@ test("an item passes only when every defect is caught; a partial catch says so",
   assert.deepEqual(r.measures, { findings: 2, invalid_findings: 0, defects: 2, caught: 1, matched_deterministic: 1, matched_llm: 0, unmatched_findings: 1 });
 });
 
+/* ── one fix, several files ───────────────────────────────────────────── */
+
+// `code-review build` writes one entry per file a fix touched: they are one defect.
+const FIX_A = { ...DEFECT, fix_commit: "aaaaaaa111" };
+const ONE_FIX_TWO_FILES = { kind: "defect", defects: [FIX_A, { ...FIX_A, file: "src/pay.ts", start_line: 10, end_line: 10 }] };
+
+test("entries sharing a fix_commit are one defect, caught when any of its places is hit", async () => {
+  const r = await grade({ expected: ONE_FIX_TWO_FILES, findings: [finding({ file: "src/pay.ts", start_line: 11 })], check: WITH_LLM, ask: NEVER });
+  assert.equal(r.state, "pass");
+  assert.equal(r.reason, "caught the defect");
+  assert.deepEqual(r.measures, { findings: 1, invalid_findings: 0, defects: 1, caught: 1, matched_deterministic: 1, matched_llm: 0, unmatched_findings: 0 });
+  assert.match(r.output, /D1 \(2 places: src\/tax\.ts:40-42, src\/pay\.ts:10\) \[calculation, high\]: caught deterministically by #1/);
+  assert.doesNotMatch(r.output, /aaaaaaa111/, "the fix is not named");
+});
+
+test("entries without a fix_commit stay separate defects; other fixes are other defects", async () => {
+  const three = { kind: "defect", defects: [
+    FIX_A, { ...FIX_A, file: "src/pay.ts", start_line: 10, end_line: 10 },
+    { ...DEFECT, file: "src/a.ts" }, { ...DEFECT, file: "src/b.ts" },
+    { ...DEFECT, file: "src/c.ts", fix_commit: "bbbbbbb222" },
+  ] };
+  const r = await grade({ expected: three, findings: [finding(), finding({ file: "src/a.ts" })] });
+  assert.equal(r.state, "fail");
+  assert.equal(r.reason, "caught 2 of 4 defects (partial)");
+  assert.deepEqual([r.measures?.defects, r.measures?.caught], [4, 2]);
+  assert.match(r.output, /D3 src\/b\.ts:40-42 \[calculation, high\]: missed/);
+});
+
+test("the fallback sees a grouped defect once, with all its places and one copy of its fix", async () => {
+  const withDiff = { kind: "defect", defects: ONE_FIX_TWO_FILES.defects.map((d) => ({ ...d, fix_diff: "--- a/x\n+++ b/x\n-FIXLINE" })) };
+  const ask = stub('{"matches":[{"finding":1,"defect":1}],"reason":"same fault"}');
+  const r = await grade({ expected: withDiff, findings: [finding({ file: undefined, start_line: undefined })], check: WITH_LLM, ask });
+  assert.equal(ask.calls.length, 1);
+  const user = ask.calls[0]!.user;
+  assert.equal(user.match(/^D\d/gm)?.length, 1);
+  assert.match(user, /^D1 src\/tax\.ts:40-42, src\/pay\.ts:10 /m);
+  assert.equal(user.match(/FIXLINE/g)?.length, 1);
+  assert.equal(r.state, "pass");
+  assert.match(r.output, /D1 \(2 places: [^)]*\) \[calculation, high\]: caught by the LLM/);
+  assert.deepEqual([r.measures?.defects, r.measures?.caught, r.measures?.matched_llm], [1, 1, 1]);
+});
+
+test("a finding off every place of a grouped defect, on one of its files, is ambiguous for the group", async () => {
+  const ask = stub('{"matches":[],"reason":"another problem"}');
+  const r = await grade({ expected: ONE_FIX_TWO_FILES, findings: [finding({ file: "src/pay.ts", start_line: 90 })], check: WITH_LLM, ask });
+  assert.equal(ask.calls.length, 1);
+  assert.equal(r.state, "fail");
+  assert.equal(r.reason, "missed the defect");
+  const d = r.decisions as { defects: Array<{ places: Array<{ file: string }>; caught_by: unknown }>; ambiguous: Array<{ finding: number; defect: number }> };
+  assert.deepEqual(d.ambiguous, [{ finding: 0, defect: 0 }]);
+  assert.deepEqual(d.defects[0]!.places.map((p) => p.file), ["src/tax.ts", "src/pay.ts"]);
+  assert.equal(d.defects[0]!.caught_by, null);
+});
+
+test("a trial with no review counts a fix's entries as one defect", async () => {
+  const r = await grade({ expected: ONE_FIX_TWO_FILES });
+  assert.deepEqual([r.measures?.defects, r.measures?.caught], [1, 0]);
+});
+
 test("precision is matched findings over all findings on defect items, from the measure means", () => {
   const s = (mean: number) => ({ mean, n: 4, trials: 12, low: null, high: null });
   const m: MeasureStats = { findings: s(5), matched_deterministic: s(1.5), matched_llm: s(0.5), unmatched_findings: s(2) };
@@ -387,7 +446,7 @@ test("the configured fallback calls the model through the repo's client, at temp
 
 test("the version carries the options, and the fallback's model and prompts", () => {
   const base = findingsMatchVersion(CHECK);
-  assert.match(base, /^findings-match-1\+opts-[0-9a-f]{8}$/);
+  assert.match(base, /^findings-match-2\+opts-[0-9a-f]{8}$/);
   assert.equal(findingsMatchVersion({ ...CHECK }), base, "stable");
   const changed = [
     { ...CHECK, lineTolerance: 5 },
@@ -401,7 +460,7 @@ test("the version carries the options, and the fallback's model and prompts", ()
 });
 
 test("the oracle review — each defect as a blocking finding — passes without the LLM; an empty answer fails", async () => {
-  for (const expected of [DEFECT_ITEM, { kind: "defect", defects: [DEFECT, { ...DEFECT, file: "src/b.ts" }] }, CLEAN_ITEM]) {
+  for (const expected of [DEFECT_ITEM, { kind: "defect", defects: [DEFECT, { ...DEFECT, file: "src/b.ts" }] }, ONE_FIX_TWO_FILES, CLEAN_ITEM]) {
     const oracle = oracleFindings(parseExpected(JSON.stringify(expected)));
     const pass = await grade({ expected, findings: oracle, check: WITH_LLM, ask: NEVER });
     assert.equal(pass.state, "pass", JSON.stringify(expected));

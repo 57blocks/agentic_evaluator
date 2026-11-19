@@ -962,6 +962,11 @@ evaluators:
   or no file, is ambiguous. Only ambiguous findings go to `llm_fallback`, in
   one call per item. Without a fallback they stay unmatched. The item passes
   when every defect is caught, and the evidence states a partial catch.
+- A defect is one fix. `code-review build` writes an entry per file a fix
+  touched, so entries that share a `fix_commit` are one defect with several
+  places. It is caught when a finding catches any place, and the fallback
+  sees it once, with all its places. Entries without a `fix_commit` are
+  separate defects.
 - On a clean item, the review passes when no finding claims a defect. A
   finding with `blocking: true` is a claim, and one with `blocking: false`
   is not. When `blocking` is absent, the fallback classifies the finding.
@@ -970,8 +975,9 @@ evaluators:
   clean review. A `findings.json` that is not JSON also fails. A missing or
   malformed `expected`, or a fallback that still fails after 3 attempts, is
   an evaluator error.
-- The evidence names each defect's location and says whether it was caught
-  on location or by the LLM, and by which finding. Every decision is also
+- The evidence names each defect's location, or its places when a fix
+  touched several, and says whether it was caught on location or by the
+  LLM, and by which finding. Every decision is also
   written to `findings-match.json` in the trial's kept work dir. The record
   keeps defect locations but never a description or fix, because a later
   trial can read `runs/`.
@@ -988,7 +994,7 @@ The check reports these measures:
 | measure | items | what it counts |
 |---|---|---|
 | `findings`, `invalid_findings` | all | valid findings, and dropped ones |
-| `defects`, `caught` | defect | known defects, and how many were caught (0 when the trial left no review) |
+| `defects`, `caught` | defect | known defects (one per fix), and how many were caught (0 when the trial left no review) |
 | `matched_deterministic`, `matched_llm` | defect | findings that matched a defect on location, or through the LLM (each finding counted once) |
 | `unmatched_findings` | defect | findings that matched no defect |
 | `defect_claims` | clean | findings that claim a defect |

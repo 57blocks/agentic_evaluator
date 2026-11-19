@@ -11,6 +11,12 @@
  *                  or PR-level (no file at all)
  *   no match       another file; or, with `requireCategory`, another category
  *
+ * A defect is a fix: `code-review build` writes one entry per file a fix
+ * touched, so entries sharing a `fix_commit` are one defect (its "places"),
+ * caught when any place is. Entries without one stay separate defects.
+ * Location is decided per place; a finding is ambiguous for a defect when it
+ * is ambiguous at some place and hits none.
+ *
  * Ambiguous pairs go to the LLM in one call per item, unless both the
  * finding and the defect are already matched deterministically: the call
  * also decides which findings count as matched for precision, so it runs
@@ -94,12 +100,35 @@ export type MatchSource = "deterministic" | "llm";
 export interface Pair {
   /** 0-based index into the findings. */
   finding: number;
-  /** 0-based index into the defects. */
+  /** 0-based index into the defects (grouped by fix; see groupDefects). */
   defect: number;
 }
 
+/** One defect: the entries of one fix (or a lone entry with no fix_commit). */
+export interface DefectGroup {
+  /** Its entries in the answer key's order. */
+  places: Defect[];
+}
+
+/** Entries sharing a fix_commit become one defect, in order of first appearance; the rest stay alone. */
+export function groupDefects(defects: readonly Defect[]): DefectGroup[] {
+  const groups: DefectGroup[] = [];
+  const byFix = new Map<string, DefectGroup>();
+  for (const d of defects) {
+    const known = d.fix_commit !== undefined ? byFix.get(d.fix_commit) : undefined;
+    if (known) {
+      known.places.push(d);
+      continue;
+    }
+    const group = { places: [d] };
+    groups.push(group);
+    if (d.fix_commit !== undefined) byFix.set(d.fix_commit, group);
+  }
+  return groups;
+}
+
 export interface DefectOutcome {
-  defect: Defect;
+  places: Defect[];
   caughtBy: MatchSource | null;
   /** 0-based findings that matched it, deterministically or by the LLM. */
   findings: number[];
@@ -131,18 +160,25 @@ export function linesOverlap(f: Finding, d: Defect, tol: number): boolean {
   return f.start_line <= d.end_line + tol && end >= d.start_line - tol;
 }
 
-/** Every finding × defect pair that is a deterministic match or ambiguous. */
-export function pairFindings(findings: readonly Finding[], defects: readonly Defect[], opts: MatchOptions): { deterministic: Pair[]; ambiguous: Pair[] } {
+type Placement = "deterministic" | "ambiguous" | null;
+
+function placeFinding(f: Finding, d: Defect, opts: MatchOptions): Placement {
+  if (!categoryAgrees(f, d, opts)) return null;
+  if (f.file === undefined) return "ambiguous";
+  if (normalizePath(f.file) !== normalizePath(d.file)) return null;
+  return linesOverlap(f, d, opts.lineTolerance) ? "deterministic" : "ambiguous";
+}
+
+/** Every finding × defect pair that is a deterministic match (at any place) or ambiguous (at some place, a match at none). */
+export function pairFindings(findings: readonly Finding[], groups: readonly DefectGroup[], opts: MatchOptions): { deterministic: Pair[]; ambiguous: Pair[] } {
   const deterministic: Pair[] = [];
   const ambiguous: Pair[] = [];
   findings.forEach((f, fi) => {
-    defects.forEach((d, di) => {
-      if (!categoryAgrees(f, d, opts)) return;
+    groups.forEach((g, di) => {
+      const placed = g.places.map((d) => placeFinding(f, d, opts));
       const pair = { finding: fi, defect: di };
-      if (f.file === undefined) ambiguous.push(pair);
-      else if (normalizePath(f.file) !== normalizePath(d.file)) return;
-      else if (linesOverlap(f, d, opts.lineTolerance)) deterministic.push(pair);
-      else ambiguous.push(pair);
+      if (placed.includes("deterministic")) deterministic.push(pair);
+      else if (placed.includes("ambiguous")) ambiguous.push(pair);
     });
   });
   return { deterministic, ambiguous };
@@ -163,13 +199,22 @@ function findingBlock(f: Finding, i: number): string {
   return `#${i + 1} ${where(f)}${tags(f.category, f.severity)}\n${f.message}`;
 }
 
-function matchPrompt(findings: readonly Finding[], defects: readonly Defect[], pending: readonly Pair[]): string {
+const unique = (xs: ReadonlyArray<string | undefined>): string[] => [...new Set(xs.filter((x): x is string => !!x))];
+
+/** A defect's places, one location each, in the answer key's order. */
+const placesText = (g: DefectGroup): string => g.places.map(where).join(", ");
+
+/** A defect's labels: one category and severity when its places agree, all of them when not. */
+const groupTags = (g: DefectGroup): string => tags(unique(g.places.map((d) => d.category)).join("/") || undefined, unique(g.places.map((d) => d.severity)).join("/") || undefined);
+
+function matchPrompt(findings: readonly Finding[], groups: readonly DefectGroup[], pending: readonly Pair[]): string {
   const ds = [...new Set(pending.map((p) => p.defect))].sort((a, b) => a - b);
   const fs = [...new Set(pending.map((p) => p.finding))].sort((a, b) => a - b);
   const defectText = ds.map((i) => {
-    const d = defects[i]!;
-    const fix = d.fix_diff ? `\nFIX DIFF:\n${d.fix_diff.slice(0, MAX_FIX_DIFF_CHARS)}` : "";
-    return `D${i + 1} ${where(d)}${tags(d.category, d.severity)}\n${d.description}${fix}`;
+    const g = groups[i]!;
+    const diffs = unique(g.places.map((d) => d.fix_diff));
+    const fix = diffs.length > 0 ? `\nFIX DIFF:\n${diffs.join("\n").slice(0, MAX_FIX_DIFF_CHARS)}` : "";
+    return `D${i + 1} ${placesText(g)}${groupTags(g)}\n${unique(g.places.map((d) => d.description)).join("\n")}${fix}`;
   });
   return [`KNOWN DEFECTS:\n\n${defectText.join("\n\n")}`, `REVIEW FINDINGS:\n\n${fs.map((i) => findingBlock(findings[i]!, i)).join("\n\n")}`].join("\n\n");
 }
@@ -220,7 +265,8 @@ function readMatches(v: Record<string, unknown>, pending: readonly Pair[]): { ma
 }
 
 export async function gradeDefects(findings: readonly Finding[], defects: readonly Defect[], opts: MatchOptions, llm?: LlmFallback): Promise<DefectGrade> {
-  const { deterministic, ambiguous } = pairFindings(findings, defects, opts);
+  const groups = groupDefects(defects);
+  const { deterministic, ambiguous } = pairFindings(findings, groups, opts);
   const detFindings = new Set(deterministic.map((p) => p.finding));
   const detDefects = new Set(deterministic.map((p) => p.defect));
   // Nothing left to learn from a pair whose finding and defect are both matched already.
@@ -228,18 +274,18 @@ export async function gradeDefects(findings: readonly Finding[], defects: readon
 
   let llmPart: DefectGrade["llm"];
   if (llm && pending.length > 0) {
-    const verdict = await decide(llm, MATCH_SYSTEM, matchPrompt(findings, defects, pending), (v) => readMatches(v, pending));
+    const verdict = await decide(llm, MATCH_SYSTEM, matchPrompt(findings, groups, pending), (v) => readMatches(v, pending));
     llmPart = { model: llm.model, ...verdict };
   }
   const llmPairs = llmPart?.matches ?? [];
   const findingSource = findings.map((_, i): MatchSource | null =>
     detFindings.has(i) ? "deterministic" : llmPairs.some((p) => p.finding === i) ? "llm" : null,
   );
-  const outcomes = defects.map((defect, di): DefectOutcome => {
+  const outcomes = groups.map((g, di): DefectOutcome => {
     const det = deterministic.filter((p) => p.defect === di).map((p) => p.finding);
     const byLlm = llmPairs.filter((p) => p.defect === di).map((p) => p.finding);
     const caughtBy: MatchSource | null = det.length > 0 ? "deterministic" : byLlm.length > 0 ? "llm" : null;
-    return { defect, caughtBy, findings: [...new Set([...det, ...byLlm])].sort((a, b) => a - b) };
+    return { places: g.places, caughtBy, findings: [...new Set([...det, ...byLlm])].sort((a, b) => a - b) };
   });
   return {
     kind: "defect",
@@ -312,7 +358,9 @@ function defectVerdict(g: DefectGrade, findings: readonly Finding[]): Verdict {
   const byLlm = g.findingSource.filter((s) => s === "llm").length;
   const unmatched = g.findingSource.map((s, i) => (s === null ? i : -1)).filter((i) => i >= 0);
   const lines = g.defects.map((d, i) => {
-    const head = `D${i + 1} ${where(d.defect)}${tags(d.defect.category, d.defect.severity)}`;
+    const group = { places: d.places };
+    const at = d.places.length === 1 ? placesText(group) : `(${d.places.length} places: ${placesText(group)})`;
+    const head = `D${i + 1} ${at}${groupTags(group)}`;
     if (d.caughtBy === null) return `${head}: missed`;
     return `${head}: caught ${d.caughtBy === "llm" ? `by the LLM (${g.llm?.model ?? "?"})` : "deterministically"} by ${nums(d.findings)}`;
   });
