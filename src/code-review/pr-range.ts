@@ -49,7 +49,10 @@ async function mergeCommitRange(repo: string, merge: string, parents: string[]):
 async function linearRange(repo: string, merge: string, pull: PullDetail): Promise<RangeResult> {
   const count = pull.commitCount;
   const tail = (await logCommits(repo, ["--first-parent", `-${count}`, "--end-of-options", merge])).reverse();
-  const rebased = tail.length === count && tail.every((c, i) => c.parents.length === 1 && c.subject === pull.commits[i]?.headline.trim());
+  // Rebased commits keep their messages; a squash keeps none of them. A
+  // message or two reworded during the rebase does not make it a squash.
+  const matched = tail.filter((c, i) => c.headline.trim() === pull.commits[i]?.headline.trim()).length;
+  const rebased = tail.length === count && tail.every((c) => c.parents.length === 1) && (matched === count || (count > 2 && matched * 2 >= count));
   if (rebased && tail[0].parents.length === 1) {
     const shas = tail.map((c) => c.sha);
     return { range: { kind: "rebase", base: tail[0].parents[0], replay: shas, members: shas, head: merge }, pull };

@@ -115,7 +115,8 @@ export async function buildShopRepo(): Promise<ShopRepo> {
   });
   // PR #1, rebase-merged: the bug (adds the rate instead of subtracting it).
   sha.c1 = await repo.commit("feat: add discount helper", { [CALC]: discount("  return total * (1 + rate)") });
-  sha.c2 = await repo.commit("feat: use the discount at checkout", {
+  // Its first paragraph runs over two lines: git's %s joins them, GitHub's headline does not.
+  sha.c2 = await repo.commit("feat: use the discount at checkout\nand in the cart", {
     "src/checkout.ts": "import { discount } from './prix ünï/calc côté'\nexport const pay = (t: number) => discount(t)\n",
   });
   // PR #2, squash-merged from three branch commits.

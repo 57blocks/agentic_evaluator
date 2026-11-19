@@ -91,16 +91,19 @@ export interface CommitInfo {
   /** ISO 8601 author date. */
   date: string;
   subject: string;
+  /** The message's first line (`subject` joins the whole first paragraph). */
+  headline: string;
   body: string;
 }
 
 const FIELD = "\x1f";
 const RECORD = "\x1e";
-const INFO_FORMAT = ["%H", "%P", "%an", "%ae", "%aI", "%s", "%b"].join("%x1f") + "%x1e";
+const INFO_FORMAT = ["%H", "%P", "%an", "%ae", "%aI", "%s", "%b", "%B"].join("%x1f") + "%x1e";
 
 function parseInfo(record: string): CommitInfo {
-  const [sha, parents, authorName, authorEmail, date, subject, body] = record.replace(/^\n/, "").split(FIELD);
-  return { sha, parents: parents ? parents.split(" ") : [], authorName, authorEmail, date, subject, body: (body ?? "").trim() };
+  const [sha, parents, authorName, authorEmail, date, subject, body, message] = record.replace(/^\n/, "").split(FIELD);
+  const headline = (message ?? "").split("\n")[0];
+  return { sha, parents: parents ? parents.split(" ") : [], authorName, authorEmail, date, subject, headline, body: (body ?? "").trim() };
 }
 
 /** Commits `git log <args>` lists, with their metadata. */

@@ -135,7 +135,7 @@ test("a fixture is the PR alone: its base as a root commit, its commits, nothing
   // Assert
   assert.deepEqual(await fs.readdir(path.join(task, "fixtures", "pr1")), ["pr.json", "repo.bundle"]);
   assert.equal(sh(clone, "rev-parse", "FETCH_HEAD").trim(), pr.headSha);
-  assert.deepEqual(sh(clone, "log", "--format=%s", "FETCH_HEAD").trim().split("\n"), ["feat: use the discount at checkout", "feat: add discount helper", "feat: initial shop"]);
+  assert.deepEqual(sh(clone, "log", "--format=%s", "FETCH_HEAD").trim().split("\n"), ["feat: use the discount at checkout and in the cart", "feat: add discount helper", "feat: initial shop"]);
   assert.equal(sh(clone, "rev-list", "--max-parents=0", "FETCH_HEAD").trim(), pr.baseSha);
   assert.equal(sh(clone, "rev-parse", "FETCH_HEAD^{tree}").trim(), sh(s.repo.dir, "rev-parse", `${s.sha.c2}^{tree}`).trim());
   assert.equal(sh(clone, "show", `FETCH_HEAD:${CALC}`).split("\n")[11], "  return total * (1 + rate)");
