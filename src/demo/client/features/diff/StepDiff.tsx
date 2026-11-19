@@ -39,7 +39,7 @@ function Pick({ pick }: { pick: { chosen: string | null; firmness: string | null
   if (pick === null) return <span className="text-muted-foreground">not recorded</span>;
   return (
     <span className="inline-flex items-center gap-1.5">
-      <b className="font-mono">{pick.chosen ?? "none"}</b>
+      <b className="font-mono">{pick.chosen ?? (pick.firmness === "scorecard" ? "no pick" : "none")}</b>
       {pick.firmness && <Tag tone={firmnessTone(pick.firmness)}>{pick.firmness}</Tag>}
     </span>
   );

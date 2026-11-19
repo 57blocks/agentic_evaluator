@@ -100,8 +100,9 @@ export async function buildOverview(ws: Workspace): Promise<Overview> {
     steps,
     unobserved: {
       tasksNeverRun: tasks.filter((t) => t.runs.length === 0).map((t) => t.name),
+      // A scorecard step picks nobody by design: not a step that could not choose.
       stepsWithNoChoice: steps
-        .filter((s) => s.chosen === null)
+        .filter((s) => s.chosen === null && s.firmness !== "scorecard")
         .map((s) => ({ step: s.step, task: s.task, runId: s.runId })),
     },
   };

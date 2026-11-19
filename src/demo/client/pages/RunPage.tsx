@@ -30,7 +30,7 @@ function StepCard({ step, runId }: { step: RunStepView; runId: string }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         <p className="text-[13px]">
-          {step.chosen ? <>Recommended <b className="font-mono text-brand">{step.chosen}</b></> : <span className="text-bad">No recommendation</span>}
+          {step.chosen ? <>Recommended <b className="font-mono text-brand">{step.chosen}</b></> : step.firmness === "scorecard" ? <span className="text-muted-foreground">No pick (scorecard)</span> : <span className="text-bad">No recommendation</span>}
         </p>
         <div className="flex flex-wrap gap-1.5">
           {[...step.eligible, ...gatedIds].map((c) => (

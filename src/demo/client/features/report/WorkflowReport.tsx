@@ -8,7 +8,7 @@
 import { Tag } from "@/components/tag";
 import type { WorkflowReport as Model } from "../../../../report-model.js";
 import type { WorkflowArm } from "../../../../canon/workflow.js";
-import { NO_PICK, plural, STEPS_NOT_VALIDATED } from "../../../../report-format.js";
+import { NO_PICK, plural, SCORECARD_PICK, STEPS_NOT_VALIDATED } from "../../../../report-format.js";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -167,7 +167,7 @@ function Advice({ rows }: { rows: NonNullable<Model["digest"]>["advice"] }) {
             <TableRow key={a.step}>
               <TableCell className="align-top font-medium">{a.step}</TableCell>
               <TableCell className="align-top">
-                {a.chosen ? <span className="font-mono font-semibold text-brand">{a.chosen}</span> : <Tag tone="bad">{NO_PICK}</Tag>}
+                {a.chosen ? <span className="font-mono font-semibold text-brand">{a.chosen}</span> : a.firmnessKey === "scorecard" ? <Tag tone="neutral">{SCORECARD_PICK}</Tag> : <Tag tone="bad">{NO_PICK}</Tag>}
               </TableCell>
               <TableCell className="align-top whitespace-nowrap">
                 <Tag tone={firmnessTone(a.firmnessKey)}>{a.firmness}</Tag>

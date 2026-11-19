@@ -491,6 +491,18 @@ trial succeeded. Use it with `trials` above 1 when one wrong answer in k is a
 wrong answer (security, compliance): a candidate right 9 times in 10 on every
 input has reliability 0.9 but pass^2 near 0.8. Off unless declared.
 
+**Scorecard** — `decision: scorecard` on a step (default `pick`) reports
+every candidate's results and picks none: no gate, no operating mode, no
+early stop. The report leads with the scorecard — per candidate, the
+required check's pass rate with its 95% interval (per input), the check's
+measures, cost and p50/p95, over every input and per tag and split — then
+the per-input comparison, then every failed trial with the check's reason.
+`recommendation.json` has `chosen: null` and `firmness: "scorecard"`, and
+every view prints "no pick (scorecard)". For a question that is not yet a
+choice: how often each prompt version catches an escaped bug, and how noisy
+it is. A scorecard step cannot be in an `input_from` chain, whose proposed
+combination needs a pick on every step.
+
 ### Calling a provider directly
 
 A candidate is more than a model id: its route, settings and prompt are part
@@ -994,6 +1006,8 @@ Every verdict carries a confidence:
   same evidence under each step's table, and `agenteval report <run>` prints
   it for a finished run.
 - **needs review** — no candidate passed the gates, so nothing was recommended.
+- **scorecard** — the step declared `decision: scorecard`: nothing was picked
+  by design, and the page compares instead of deciding.
 
 Raise `trials_per_case` to see how stable a candidate is; add inputs to see how
 general.

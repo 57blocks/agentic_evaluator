@@ -62,7 +62,7 @@ export async function cmdLs(args: ParsedArgs, io: Io): Promise<ExitCode> {
     io.out(`  ${t.name.padEnd(width)}  ${budget.padEnd(12)}  ${runs}\n`);
     const latest = t.runs[0];
     if (latest) {
-      const picks = latest.steps?.map((s) => `${s.id}:${s.chosen ?? "none"}`).join(", ") ?? "";
+      const picks = latest.steps?.map((s) => `${s.id}:${s.chosen ?? (s.firmness === "scorecard" ? "no pick (scorecard)" : "none")}`).join(", ") ?? "";
       io.out(`  ${" ".repeat(width)}  latest ${latest.id}${picks ? ` — ${picks}` : ""}\n`);
     }
   }

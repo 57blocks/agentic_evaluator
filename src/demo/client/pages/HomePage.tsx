@@ -11,7 +11,7 @@ import type { Catalog } from "@/app/useWorkspace";
 import { TaskList } from "@/features/task-list/TaskList";
 import { BrokenSpecs } from "@/features/task-list/BrokenSpecs";
 import { navigate } from "@/app/routes";
-import { NEEDS_REVIEW, SELF_CHECK } from "@/lib/copy";
+import { SELF_CHECK, stepPick } from "@/lib/copy";
 import { FIRMNESS_LABEL } from "../../../report-copy.js";
 import { runDate, runMoney } from "@/lib/format";
 import {
@@ -41,7 +41,7 @@ function StepRow({ standing }: { standing: StepStanding }) {
         {standing.chosen ? (
           <span className="font-mono text-xs font-semibold text-brand">{standing.chosen}</span>
         ) : (
-          <Tag tone="bad">{NEEDS_REVIEW}</Tag>
+          <Tag tone={standing.firmness === "scorecard" ? "neutral" : "bad"}>{stepPick(standing)}</Tag>
         )}
       </TableCell>
       <TableCell className="text-xs text-muted-foreground">{FIRMNESS_LABEL[standing.firmness as keyof typeof FIRMNESS_LABEL] ?? standing.firmness}</TableCell>

@@ -102,7 +102,7 @@ export function StepSection({ step, index, runId, root, colorOf }: Props) {
       <div className="flex flex-wrap items-center gap-2">
         <Tag tone={firmnessTone(r.verdict.firmness)}>{r.verdict.firmnessLabel}</Tag>
         <span className="text-xs">
-          {r.verdict.chosen ? <>Recommended: <b className="font-mono text-brand">{r.verdict.chosen}</b></> : "No candidate to recommend"}
+          {r.verdict.chosen ? <>Recommended: <b className="font-mono text-brand">{r.verdict.chosen}</b></> : r.verdict.firmness === "scorecard" ? "Scorecard: no pick by design" : "No candidate to recommend"}
         </span>
         <Button
           size="xs"

@@ -14,7 +14,7 @@ import { SECTION_CARD, SECTION_TITLE } from "@/components/section-style";
 import { Tag } from "@/components/tag";
 import type { TaskView } from "../../../catalog.js";
 import { navigate } from "@/app/routes";
-import { NEEDS_REVIEW, NEVER_RAN, SELF_CHECK } from "@/lib/copy";
+import { NEEDS_REVIEW, NEVER_RAN, SCORECARD_PICK, SELF_CHECK } from "@/lib/copy";
 import { isSmokeTask, latestVerdict, runDate, spendLabel } from "@/lib/format";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -55,8 +55,8 @@ function TaskRow({ task }: { task: TaskView }) {
             {chosen.map((c, i) => (
               <span key={`${c}-${i}`} className="flex items-center gap-1">
                 {i > 0 && <span className="text-muted-foreground">/</span>}
-                {c === NEEDS_REVIEW ? (
-                  <Tag tone="bad">{c}</Tag>
+                {c === NEEDS_REVIEW || c === SCORECARD_PICK ? (
+                  <Tag tone={c === NEEDS_REVIEW ? "bad" : "neutral"}>{c}</Tag>
                 ) : (
                   <span className="font-mono text-[13px]">{c}</span>
                 )}

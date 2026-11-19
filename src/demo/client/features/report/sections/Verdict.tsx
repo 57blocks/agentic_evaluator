@@ -44,7 +44,7 @@ export function Verdict({ verdict: v, eligible, total }: Props) {
 
       <div className="flex flex-col gap-1.5">
         <h2 className="text-xl font-semibold">
-          {v.chosen ? <>Recommended: <span className="font-mono font-bold text-brand">{v.chosen}</span></> : "No candidate to recommend"}
+          {v.chosen ? <>Recommended: <span className="font-mono font-bold text-brand">{v.chosen}</span></> : v.firmness === "scorecard" ? "Scorecard: no pick by design" : "No candidate to recommend"}
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">{v.text}</p>
         {v.why && (
@@ -65,7 +65,9 @@ export function Verdict({ verdict: v, eligible, total }: Props) {
             />
           </>
         ) : (
-          <Stat label="Passed every gate" value={`${eligible.length} / ${total}`} hint="candidates" />
+          v.firmness === "scorecard"
+            ? <Stat label="Candidates compared" value={String(total)} hint="no gate applied" />
+            : <Stat label="Passed every gate" value={`${eligible.length} / ${total}`} hint="candidates" />
         )}
         <Stat label="Total spend of this run" value={fmtUsd(v.spend)} hint="generation, judging and scoring" />
       </div>

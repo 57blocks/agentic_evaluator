@@ -34,7 +34,7 @@ import type { RunBundle } from "./report-v2.js";
 import type { WorkflowRecord } from "./canon/workflow.js";
 import { planFromRun, routeVia, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
-import { NO_PICK, plural, sha8 } from "./report-format.js";
+import { NO_PICK, plural, SCORECARD_PICK, sha8 } from "./report-format.js";
 import { measureSlices, sliceRows, type MeasureSliceRow, type SliceRow } from "./report-slices.js";
 import { measureStats, type MeasureStats } from "./canon/measures.js";
 import { costSuccessChart, gateNotesOf, type CostSuccessChart } from "./report-scatter.js";
@@ -687,7 +687,7 @@ export function buildStepReport(b: RunBundle): StepReport {
       { label: "Judge", value: `${m.judge.model} · rubric ${sha8(m.evaluators.rubric_sha256)}` },
       { label: "Mode", value: `${m.execution.benchmark_mode} · ${m.execution.cache_mode} cache` },
       { label: "Run time", value: `${m.started_at.slice(0, 16).replace("T", " ")} → ${(m.finished_at ?? "").slice(11, 16)}` },
-      { label: "Operating mode", value: `${modeLabel(m.operating_mode)} · ${FIRMNESS_LABEL[rec.firmness]}${rec.chosen ? ` · recommend ${rec.chosen}` : ` · ${NO_PICK}${rec.closest ? ` · closest ${rec.closest.candidate}` : ""}`}` },
+      { label: "Operating mode", value: rec.firmness === "scorecard" ? `not applied · ${SCORECARD_PICK}` : `${modeLabel(m.operating_mode)} · ${FIRMNESS_LABEL[rec.firmness]}${rec.chosen ? ` · recommend ${rec.chosen}` : ` · ${NO_PICK}${rec.closest ? ` · closest ${rec.closest.candidate}` : ""}`}` },
       { label: "Selection rule", value: rec.rule_version },
       { label: "harness", value: `${m.harness.version} · ${m.harness.git_sha ?? "—"}` },
     ],

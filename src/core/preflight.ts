@@ -23,7 +23,7 @@ import { adapterIdOf } from "../adapters/types.js";
 import { describeMissingKey, missingModelKeys } from "./model-keys.js";
 import { sha256 } from "../canon/hash.js";
 import { directionality } from "../canon/rates.js";
-import { resolveEligibility } from "../canon/select.js";
+import { resolveEligibility, stepEligibility } from "../canon/select.js";
 import { inputsToClearGate, minDetectableGap, wilson } from "../canon/stats.js";
 import { matchesShow } from "../canon/review.js";
 import { describeTraceRules, hasTraceRules } from "../canon/trace-rules.js";
@@ -106,7 +106,7 @@ function inputFindings(suite: Suite, inputs: readonly LoadedInput[]): Finding[] 
  * input has a 95% interval reaching below it, so the pick can never be firm.
  */
 function gateFindings(suite: Suite, n: number): Finding[] {
-  const e = resolveEligibility(suite.requiredChecks ?? [], suite.eligibility);
+  const e = stepEligibility(suite);
   const low = wilson(n, n)?.low ?? 0;
   const gates: Array<[string, number | null]> = [
     ["minimum_required_check_pass_rate", e.minimum_required_check_pass_rate],

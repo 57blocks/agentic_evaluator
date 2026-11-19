@@ -42,6 +42,8 @@ export interface EvalStep {
   judged_dimensions?: string[];
   success_criteria?: { mandatory_checks: "all" };
   operating_mode?: string;
+  /** "scorecard": report results per candidate and pick none (no gates, no operating mode). Default "pick". */
+  decision?: "pick" | "scorecard";
   eligibility?: EligibilityDecl;
   maximum_completion_time_seconds?: number;
   /** A spend cap per trial, handed to command candidates (they enforce it). */
@@ -283,6 +285,13 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
     }
   }
 
+  // The proposed combination is each chained step's pick; a scorecard step has none.
+  const chained = new Set(steps.flatMap((s) => (s.input_from ? [s.id, s.input_from] : [])));
+  const carded = steps.find((s) => s.decision === "scorecard" && chained.has(s.id));
+  if (carded) {
+    throw specError(specPath, `step "${carded.id}" has decision: scorecard but is in an input_from chain: the chain's proposed combination needs a pick on every chained step. Use decision: pick there, or drop input_from.`);
+  }
+
   const chain = orderControlChain(steps.map((s) => ({ id: s.id, inputFrom: s.input_from })));
   if (!chain) {
     if (steps.some((s) => s.input_from)) {
@@ -490,6 +499,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     requiredChecks,
     successCriteria: step.success_criteria,
     operatingMode: step.operating_mode,
+    ...(step.decision === "scorecard" ? { decision: "scorecard" as const } : {}),
     eligibility: step.eligibility,
     mmd: spec.execution.minimum_meaningful_difference ?? null,
     ...(spec.execution.early_stop ? { earlyStop: true } : {}),

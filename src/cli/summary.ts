@@ -15,6 +15,7 @@ import type { TrialRow } from "../canon/rows.js";
 import type { FirmnessEvidence } from "../canon/select.js";
 import type { StoppedCandidate } from "../canon/early-stop.js";
 import { certaintyLines } from "./certainty-lines.js";
+import { SCORECARD_PICK } from "../report-format.js";
 
 export interface SummaryInput {
   step: string;
@@ -155,7 +156,7 @@ export function summaryLines(input: SummaryInput): string[] {
     "",
     ...gated,
     ...stopped,
-    `  → ${input.chosen ?? `no candidate qualified${input.closest ? ` · closest ${input.closest}` : ""}`} (${input.firmness}) · total $${input.ledgerTotal.toFixed(4)} (${input.ledgerSource}${lowerBound})`,
+    `  → ${input.firmness === "scorecard" ? SCORECARD_PICK : `${input.chosen ?? `no candidate qualified${input.closest ? ` · closest ${input.closest}` : ""}`} (${input.firmness})`} · total $${input.ledgerTotal.toFixed(4)} (${input.ledgerSource}${lowerBound})`,
     ...certaintyLines({
       chosen: input.chosen,
       firmness: input.firmness,

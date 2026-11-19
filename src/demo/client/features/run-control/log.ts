@@ -8,6 +8,7 @@
  */
 
 import type { RunEvent } from "../../../../core/events.js";
+import { SCORECARD_PICK } from "../../../../report-format.js";
 
 export function eventLine(event: RunEvent): string {
   switch (event.type) {
@@ -38,7 +39,7 @@ export function eventLine(event: RunEvent): string {
     case "integrity.gaps":
       return `⚠ The trace has ${event.gaps} long gap(s); this run's durations are unreliable`;
     case "step.done":
-      return `✔ ${event.step} — ${event.trials} trial(s), ledger $${event.ledgerTotal.toFixed(4)}, recommended ${event.chosen ?? "none"} (${event.firmness})`;
+      return `✔ ${event.step} — ${event.trials} trial(s), ledger $${event.ledgerTotal.toFixed(4)}, ${event.firmness === "scorecard" ? SCORECARD_PICK : `recommended ${event.chosen ?? "none"} (${event.firmness})`}`;
     case "e2e.arm.start":
       return `▶ ${event.armId}`;
     case "e2e.arm.done":

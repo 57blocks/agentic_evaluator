@@ -127,6 +127,8 @@ export const SPEC_SCHEMA = {
                   "judge-preference",
                 ],
               },
+              /** pick (default): gates and the operating mode choose a candidate. scorecard: report every candidate's results and pick none. */
+              decision: { type: "string", enum: ["pick", "scorecard"] },
               eligibility: {
                 type: "object",
                 additionalProperties: false,

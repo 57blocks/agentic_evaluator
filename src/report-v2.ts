@@ -20,7 +20,7 @@ import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import { gapsFor, type CanonSummary } from "./canon/write.js";
 import { recommendFromCanon, type Recommendation } from "./canon/select.js";
 import { FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, promptLabel } from "./report-copy.js";
-import { NO_PICK, plural } from "./report-format.js";
+import { NO_PICK, plural, SCORECARD_PICK } from "./report-format.js";
 import {
   candidateViews, evaluatorErrorSubject, fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, judgeFavourite,
   ledgerNote, reviewGapLines, reviewSummary, sha8, stateTone, subtitleReasons, verdictFacts, verdictText,
@@ -44,6 +44,7 @@ import { measureSlices, sliceRows } from "./report-slices.js";
 import { measureLine, renderMeasures } from "./report-measures.js";
 import { COMPARE_STYLES, renderInputComparison } from "./report-compare.js";
 import { inputComparison } from "./canon/input-compare.js";
+import { renderFailedTrials, renderScorecard } from "./report-scorecard.js";
 import { SCATTER_STYLES, costSuccessChart, gateNotesOf, renderCostSuccess } from "./report-scatter.js";
 import { renderCertainty } from "./report-certainty.js";
 import { agentActivityRows, type AgentActivityRow } from "./report-model.js";
@@ -341,6 +342,23 @@ function renderAgentActivity(rows: readonly AgentActivityRow[]): string {
     </section>`;
 }
 
+/**
+ * A scorecard step's page leads with the scorecard, then the inputs side by
+ * side, then what failed and why; the candidates table and the slices follow.
+ * No verdict, gate trace or "how sure": nothing was picked.
+ */
+function scorecardTop(b: RunBundle, views: readonly CandidateView[], candidateTable: string): string {
+  const ids = views.map((v) => v.id);
+  const labels = b.about?.labels ?? null;
+  return [
+    renderScorecard(labels, b.trials, b.summary.candidates, ids),
+    renderInputComparison(inputComparison(b.trials, ids), ids, b.outputs),
+    renderFailedTrials(b.trials, ids),
+    candidateTable,
+    renderSlices(b, ids) + renderMeasures(measureSlices(labels, b.trials, ids), ids),
+  ].join("\n\n  ");
+}
+
 export function renderRunReport(b: RunBundle): string {
   const m = b.manifest;
   const rec = b.recommendation;
@@ -403,6 +421,15 @@ export function renderRunReport(b: RunBundle): string {
     })
     .join("");
 
+  const candidateTable = `<section class="card">
+    <h2>Candidates <span class="hint">the same inputs, paired by candidate; ${trialsPer} trial(s) per cell</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th>${review ? '<th class="num">Human win rate</th>' : ""}<th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
+      <tbody>${candidateRows}</tbody>
+    </table></div>
+    <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.${m.control_candidate ? ` Control candidate: ${escapeHtml(m.control_candidate)}.` : ""}</p>
+  </section>`;
+
   const led = b.ledger;
   const sampleTrial = b.trials[0] ? JSON.stringify(b.trials[0], null, 1) : "{}";
 
@@ -421,7 +448,7 @@ export function renderRunReport(b: RunBundle): string {
       <div><dt>Judge</dt><dd>${escapeHtml(m.judge.model)} · rubric ${sha8(m.evaluators.rubric_sha256)}</dd></div>
       <div><dt>Mode</dt><dd>${escapeHtml(m.execution.benchmark_mode)} · ${escapeHtml(m.execution.cache_mode)} cache</dd></div>
       <div><dt>Run time</dt><dd>${escapeHtml(m.started_at.slice(0, 16).replace("T", " "))} → ${escapeHtml((m.finished_at ?? "").slice(11, 16))}</dd></div>
-      <div><dt>Operating mode</dt><dd>${escapeHtml(modeLabel(m.operating_mode))} · ${escapeHtml(FIRMNESS_LABEL[rec.firmness])}${rec.chosen ? ` · recommend ${escapeHtml(rec.chosen)}` : ` · ${NO_PICK}${rec.closest ? ` · closest ${escapeHtml(rec.closest.candidate)}` : ""}`}</dd></div>
+      <div><dt>Operating mode</dt><dd>${rec.firmness === "scorecard" ? `not applied · ${SCORECARD_PICK}` : `${escapeHtml(modeLabel(m.operating_mode))} · ${escapeHtml(FIRMNESS_LABEL[rec.firmness])}${rec.chosen ? ` · recommend ${escapeHtml(rec.chosen)}` : ` · ${NO_PICK}${rec.closest ? ` · closest ${escapeHtml(rec.closest.candidate)}` : ""}`}`}</dd></div>
       <div><dt>harness</dt><dd>${escapeHtml(m.harness.version)} · ${escapeHtml(m.harness.git_sha ?? "—")}</dd></div>
     </dl>
   </header>
@@ -430,7 +457,7 @@ export function renderRunReport(b: RunBundle): string {
 
   ${renderPromptComparison(promptComparison)}
 
-  ${renderHero(b, views, support)}
+  ${rec.firmness === "scorecard" ? scorecardTop(b, views, candidateTable) : `${renderHero(b, views, support)}
 
   ${renderCostSuccess(costSuccessChart(
     views.map((v) => ({ ...v, isControl: m.control_candidate === v.id, gated: !rec.eligible.includes(v.id), chosen: rec.chosen === v.id })),
@@ -447,18 +474,11 @@ export function renderRunReport(b: RunBundle): string {
 
   ${renderCertainty(rec, itemStats(b.trials))}
 
-  <section class="card">
-    <h2>Candidates <span class="hint">the same inputs, paired by candidate; ${trialsPer} trial(s) per cell</span></h2>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th>${review ? '<th class="num">Human win rate</th>' : ""}<th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
-      <tbody>${candidateRows}</tbody>
-    </table></div>
-    <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.${m.control_candidate ? ` Control candidate: ${escapeHtml(m.control_candidate)}.` : ""}</p>
-  </section>
+  ${candidateTable}
 
   ${renderSlices(b, views.map((v) => v.id))}${renderMeasures(measureSlices(b.about?.labels ?? null, b.trials, views.map((v) => v.id)), views.map((v) => v.id))}
 
-  ${renderInputComparison(inputComparison(b.trials, views.map((v) => v.id)), views.map((v) => v.id), b.outputs)}
+  ${renderInputComparison(inputComparison(b.trials, views.map((v) => v.id)), views.map((v) => v.id), b.outputs)}`}
 
   <div class="two-col">
     ${renderAgentActivity(agentActivityRows(b.trials, views.map((v) => v.id)))}

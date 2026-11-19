@@ -20,6 +20,7 @@ import type { Io } from "../io.js";
 import type { ItemStats } from "../../canon/item-stats.js";
 import type { Recommendation } from "../../canon/select.js";
 import { certaintyLines } from "../certainty-lines.js";
+import { pickLabel } from "../../report-format.js";
 import { isWorkflowRun, resolveRunDir, stepRunDirs } from "../run-target.js";
 
 export const REPORT_HELP = `agenteval report <run> [options]
@@ -70,6 +71,6 @@ async function printCertainty(dir: string, io: Io, step: string | null): Promise
     evidence: rec.evidence,
     items,
   });
-  const head = `${step === null ? "" : `${step}: `}recommend ${rec.chosen ?? "none"} (${rec.firmness})`;
+  const head = `${step === null ? "" : `${step}: `}${rec.firmness === "scorecard" ? pickLabel(rec) : `recommend ${pickLabel(rec)}`}`;
   io.out(`${[head, ...lines].join("\n")}\n`);
 }

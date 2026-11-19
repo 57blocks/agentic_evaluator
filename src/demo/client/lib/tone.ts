@@ -30,5 +30,6 @@ export function evaluationTone(state: string): Tone {
 export function firmnessTone(firmness: string): Tone {
   if (firmness === "firm") return "ok";
   if (firmness === "needs-review") return "bad";
+  if (firmness === "scorecard") return "neutral";
   return "warn";
 }

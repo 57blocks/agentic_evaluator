@@ -10,7 +10,7 @@ import { Fragment } from "react";
 import { ArrowRight } from "lucide-react";
 import { Tag } from "@/components/tag";
 import type { AdviceRow, WorkflowStep } from "../../../../../workflow-report-model.js";
-import { NO_PICK } from "../../../../../report-format.js";
+import { NO_PICK, SCORECARD_PICK } from "../../../../../report-format.js";
 import { navigate } from "@/app/routes";
 import { firmnessTone } from "@/lib/tone";
 import { cn } from "@/lib/utils";
@@ -43,7 +43,9 @@ function StepCard({ index, step, row, onOpen }: { index: number; step: WorkflowS
       {row?.chosen ? (
         <span className="truncate font-mono text-base font-semibold text-brand">{row.chosen}</span>
       ) : (
-        <span className="text-base font-semibold text-bad">{row ? NO_PICK : "report unreadable"}</span>
+        row?.firmnessKey === "scorecard"
+          ? <span className="text-base font-semibold text-muted-foreground">{SCORECARD_PICK}</span>
+          : <span className="text-base font-semibold text-bad">{row ? NO_PICK : "report unreadable"}</span>
       )}
       {row && <Tag tone={firmnessTone(row.firmnessKey)}>{row.firmness}</Tag>}
       <span className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">

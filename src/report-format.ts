@@ -47,6 +47,18 @@ export const SCORE_MAX = 5;
 /** A step that ran and did not produce a recommendation — why is said where it is known. */
 export const NO_PICK = "no recommendation";
 
+/** A step that declared `decision: scorecard`: it reports, and picks nobody by design. */
+export const SCORECARD_PICK = "no pick (scorecard)";
+
+/**
+ * A recommendation in a few words, as the terminal and the pages print it:
+ * "sonnet (firm)", "none (needs-review)", or "no pick (scorecard)".
+ */
+export function pickLabel(rec: { chosen: string | null; firmness: string | null }): string {
+  if (rec.firmness === "scorecard") return SCORECARD_PICK;
+  return `${rec.chosen ?? "none"}${rec.firmness ? ` (${rec.firmness})` : ""}`;
+}
+
 /** Candidates that are local scripts: they prove the pipeline runs, not that a model is good. */
 export const SELF_CHECK = "self-check";
 
@@ -58,12 +70,15 @@ export const STEPS_NOT_VALIDATED = "Each recommendation is per step; none has be
  * needs a person. `unreadable` counts step reports that could not be read —
  * counted, never dropped, so a missing step cannot make the tally look clean.
  */
-export function stepsHeadline(steps: ReadonlyArray<{ chosen: string | null }>, unreadable = 0): string {
+export function stepsHeadline(steps: ReadonlyArray<{ chosen: string | null; firmness?: string }>, unreadable = 0): string {
   const total = steps.length + unreadable;
   const picked = steps.filter((s) => s.chosen).length;
-  const open = steps.length - picked;
-  if (open === 0 && unreadable === 0) return `Every step has a recommendation (${picked} of ${total})`;
+  // A scorecard step picks nobody by design: neither a recommendation nor a step needing review.
+  const cards = steps.filter((s) => !s.chosen && s.firmness === "scorecard").length;
+  const open = steps.length - picked - cards;
+  if (open === 0 && unreadable === 0 && cards === 0) return `Every step has a recommendation (${picked} of ${total})`;
   const tail = [
+    cards > 0 ? `${plural(cards, "scorecard")}, no pick by design` : "",
     open > 0 ? `${open} ${open === 1 ? "needs" : "need"} review` : "",
     unreadable > 0 ? `${plural(unreadable, "report")} could not be read` : "",
   ].filter(Boolean);

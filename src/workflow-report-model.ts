@@ -106,7 +106,7 @@ function judgeVsChecks(steps: readonly WorkflowStep[]): Finding[] {
       title: `The judge preferred ${fav.candidate} most, but it passed only ${pct(row.checkPass, row.checkExecuted)} of required checks`,
       body: `${fav.candidate} had the highest judge win rate on ${s.id} (${fav.wins} W ${fav.losses} L ${fav.ties} T), `
         + `yet passed ${row.checkPass}/${row.checkExecuted} required checks — the judge was swayed by output that looked good. `
-        + (chosen ? `By the checks, this step recommends ${chosen}.` : "No candidate on this step passes every gate."),
+        + (chosen ? `By the checks, this step recommends ${chosen}.` : r.verdict.firmness === "scorecard" ? "This step is a scorecard and picks no candidate." : "No candidate on this step passes every gate."),
     }];
   });
 }
@@ -177,7 +177,7 @@ export function workflowFindings(
 // ── headline ─────────────────────────────────────────────────────────────────
 
 function headlineOf(steps: readonly WorkflowStep[]): string {
-  const read = steps.filter((s) => s.report).map((s) => ({ chosen: s.report!.verdict.chosen }));
+  const read = steps.filter((s) => s.report).map((s) => ({ chosen: s.report!.verdict.chosen, firmness: s.report!.verdict.firmness }));
   return stepsHeadline(read, steps.length - read.length);
 }
 

@@ -7,6 +7,7 @@
 
 import type { Count, MeasureChange, RateChange, RateWithInterval, RunDiff } from "../canon/run-diff.js";
 import { fmtMeasureStat } from "../canon/measures.js";
+import { pickLabel } from "../report-format.js";
 
 const pct = (v: number | null): string => (v === null ? "—" : v.toFixed(2));
 const frac = (c: Count | null): string => (c === null || c.denominator === 0 ? "—" : `${c.numerator}/${c.denominator}`);
@@ -30,7 +31,7 @@ function setupLines(d: RunDiff): string[] {
 }
 
 function recommendationLine(d: RunDiff): string {
-  const show = (r: { chosen: string | null; firmness: string | null } | null) => (r === null ? "not recorded" : `${r.chosen ?? "none"}${r.firmness ? ` (${r.firmness})` : ""}`);
+  const show = (r: { chosen: string | null; firmness: string | null } | null) => (r === null ? "not recorded" : pickLabel(r));
   const { a, b, changed } = d.recommendation;
   if (a === null || b === null) return `recommendation: ${show(a)} → ${show(b)} (a run without recommendation.json cannot be compared)`;
   return changed ? `recommendation CHANGED: ${show(a)} → ${show(b)}` : `recommendation unchanged: ${show(b)}`;

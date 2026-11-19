@@ -154,6 +154,8 @@ export interface Suite {
   requiredChecks?: string[];
   successCriteria?: SuccessCriteria;
   operatingMode?: string;
+  /** Set only for a step that reports a scorecard and picks no candidate (no gates applied). */
+  decision?: "scorecard";
   /** Declared eligibility gates; resolved and frozen into the run manifest. */
   eligibility?: EligibilityDecl;
   /** Predeclared minimum meaningful difference; null/undefined → directional only. */

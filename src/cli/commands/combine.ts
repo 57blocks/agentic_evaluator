@@ -9,6 +9,7 @@ import { displayPath } from "../../paths.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
 import { rejectUnknown, UsageError, type ParsedArgs } from "../args.js";
 import type { Io } from "../io.js";
+import { SCORECARD_PICK } from "../../report-format.js";
 import { resolveTask } from "./run.js";
 
 export const COMBINE_HELP = `agenteval combine <task> <run> <run> [<run>...] [options]
@@ -31,7 +32,7 @@ export async function cmdCombine(args: ParsedArgs, io: Io): Promise<ExitCode> {
   if (runs.length < 2) throw new UsageError("name at least two runs to combine, oldest first (try `agenteval ls`)");
   const spec = await resolveTask(args);
   const result = await combineRuns(spec, runs, { html: args.flags.html === true });
-  for (const s of result.steps) io.out(`  ${s.id}: ${s.chosen ?? "no recommendation"}  (from ${s.sources.join(", ")})\n`);
+  for (const s of result.steps) io.out(`  ${s.id}: ${s.chosen ?? (s.firmness === "scorecard" ? SCORECARD_PICK : "no recommendation")}  (from ${s.sources.join(", ")})\n`);
   io.out(`✔ ${displayPath(result.dir)}\n`);
   return EXIT.ok;
 }

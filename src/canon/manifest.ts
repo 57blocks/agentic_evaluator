@@ -13,7 +13,7 @@ import type { Suite } from "../types.js";
 import { DEFAULT_MAX_PAUSE_MS } from "../transport-gate.js";
 import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS, DEFAULT_MAX_CONSECUTIVE_TIMEOUTS } from "./halt.js";
 import type { CandidateDef, EligibilityThresholds } from "./types.js";
-import { resolveEligibility } from "./select.js";
+import { stepEligibility } from "./select.js";
 import { readLabels, type InputLabels } from "./about.js";
 
 const execFileAsync = promisify(execFile);
@@ -61,6 +61,8 @@ export interface RunManifest {
   prompts?: RunPrompts | null;
   success_criteria: { mandatory_checks: "all" } | null;
   operating_mode: string | null;
+  /** Present only on a scorecard step: results per candidate, no gates, no pick. Absent means pick. */
+  decision?: "scorecard";
   /** Resolved gates actually used; frozen so a later default change cannot rewrite this run. */
   eligibility: EligibilityThresholds;
   minimum_meaningful_difference: number | null;
@@ -153,7 +155,8 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     prompts: m.prompts ?? null,
     success_criteria: suite.successCriteria ?? null,
     operating_mode: suite.operatingMode ?? null,
-    eligibility: resolveEligibility(suite.requiredChecks ?? [], suite.eligibility),
+    ...(suite.decision ? { decision: suite.decision } : {}),
+    eligibility: stepEligibility(suite),
     minimum_meaningful_difference: suite.mmd ?? null,
     execution: {
       trials_per_case: suite.trials ?? 2,
