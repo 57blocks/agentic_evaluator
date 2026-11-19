@@ -94,8 +94,11 @@ export interface EvalSpec {
     required_checks?: Record<
       string,
       {
-        kind: "tsc" | "command";
+        kind: "tsc" | "command" | "findings-match";
         scaffold_dir?: string;
+        line_tolerance?: number;
+        require_category?: boolean;
+        llm_fallback?: EndpointDecl & { model: string };
         argv?: string[];
         version_files?: string[];
         timeout_seconds?: number;
@@ -334,6 +337,8 @@ function checkE2eBlock(spec: EvalSpec, specPath: string, root: EvalStep): void {
 }
 
 const DEFAULT_CHECK_TIMEOUT_S = 120;
+/** findings-match: lines a finding may sit from a defect and still match it. */
+const DEFAULT_LINE_TOLERANCE = 3;
 const ALL_JUDGE_METHODS: JudgeMethod[] = ["pairwise-swap", "absolute-1-5"];
 
 /**
@@ -389,6 +394,11 @@ function compileCheck(
     if (r.first === r.then) throw specError(specPath, `required check "${id}": trace rule orders ${r.first} before itself`);
   }
   const trace = def.trace ? { trace: def.trace } : {};
+  const matcherOptions = (["line_tolerance", "require_category", "llm_fallback"] as const).filter((k) => def[k] !== undefined);
+  if (def.kind !== "findings-match" && matcherOptions.length > 0) {
+    throw specError(specPath, `required check "${id}" is kind: ${def.kind}; ${matcherOptions.join(", ")} belong${matcherOptions.length === 1 ? "s" : ""} to kind: findings-match`);
+  }
+  if (def.kind === "findings-match") return findingsMatchCheck(id, def, specPath, trace);
   if (def.kind === "tsc") {
     return { id, kind: "tsc", scaffoldDir: def.scaffold_dir ?? "scaffold", ...trace };
   }
@@ -401,6 +411,29 @@ function compileCheck(
     argv: [...def.argv],
     versionFiles: [...(def.version_files ?? [])],
     timeoutMs: (def.timeout_seconds ?? DEFAULT_CHECK_TIMEOUT_S) * 1000,
+    ...trace,
+  };
+}
+
+type CheckDecl = NonNullable<EvalSpec["evaluators"]["required_checks"]>[string];
+
+/** kind: findings-match, compiled: the matcher is built in, so it takes options and no program. */
+function findingsMatchCheck(id: string, def: CheckDecl, specPath: string, trace: { trace?: TraceRules }): CheckConfig {
+  const foreign = (["argv", "version_files", "scaffold_dir", "timeout_seconds"] as const).filter((k) => def[k] !== undefined);
+  if (foreign.length > 0) {
+    throw specError(specPath, `required check "${id}" is kind: findings-match, which is built in: drop ${foreign.join(", ")}`);
+  }
+  const llm = def.llm_fallback;
+  if (llm) {
+    const problem = endpointProblem(llm);
+    if (problem) throw specError(specPath, `required check "${id}" llm_fallback: ${problem}`);
+  }
+  return {
+    id,
+    kind: "findings-match",
+    lineTolerance: def.line_tolerance ?? DEFAULT_LINE_TOLERANCE,
+    requireCategory: def.require_category ?? false,
+    ...(llm ? { llmFallback: { model: llm.model, endpoint: endpointOf(llm) } } : {}),
     ...trace,
   };
 }

@@ -127,6 +127,11 @@ function checkHow(suite: Suite): Array<{ id: string; how: string }> {
   const rules = hasTraceRules(c.trace) ? `; ${describeTraceRules(c.trace)}` : "";
   if (suite.checkDescription) return [{ id: c.id, how: `${suite.checkDescription}${rules}` }];
   if (c.kind === "tsc") return [{ id: c.id, how: `compile the candidate's files with tsc --noEmit (config from ${c.scaffoldDir}/)${rules}` }];
+  if (c.kind === "findings-match") {
+    const category = c.requireCategory ? " and category" : "";
+    const llm = c.llmFallback ? `; ambiguous locations and unflagged claims decided by ${c.llmFallback.model}` : "; no LLM fallback";
+    return [{ id: c.id, how: `match findings.json to the item's known defects by file and lines (±${c.lineTolerance})${category}${llm}${rules}` }];
+  }
   return [{ id: c.id, how: `run ${c.argv.join(" ")} in the trial dir, ${Math.round(c.timeoutMs / 1000)} s timeout${rules}` }];
 }
 
