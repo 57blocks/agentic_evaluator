@@ -859,6 +859,111 @@ means in both runs.
 shows up in the evidence. `kind: tsc` with `scaffold_dir: scaffold` instead
 compiles the produced TypeScript against `scaffold/tsconfig.json`.
 
+### Code review checks (`findings.json`, `kind: findings-match`)
+
+A reviewer under test leaves `findings.json` in its work dir: an array, or
+`{"findings": [...]}`. A model candidate can deliver it as a
+```` ```file: findings.json ```` block. Each finding:
+
+```json
+{"file": "src/a.ts", "start_line": 40, "end_line": 42,
+ "category": "calculation", "severity": "high",
+ "message": "…", "blocking": true, "producer": "security-reviewer"}
+```
+
+`message` is required. No `file` makes it a PR-level finding. Lines are in
+the PR head version of the file, and `end_line` defaults to `start_line`.
+`severity` is one of critical, high, medium or low. `category` comes from
+the taxonomy below or is free text. A finding that breaks these rules is
+dropped and counted, never an error.
+
+The item's `expected` in `items.jsonl` (written to `references/<id>.txt`)
+says what the review should find:
+
+```json
+{"kind": "defect", "source": "escaped",
+ "defects": [{"file": "src/a.ts", "start_line": 40, "end_line": 42,
+              "category": "calculation", "severity": "high",
+              "description": "…", "fix_commit": "abc1234", "fix_diff": "…"}]}
+```
+
+or `{"kind": "clean", "note": "…"}`. Categories: calculation, logic, crash,
+state, data, security, privacy, accessibility, concurrency, resource, ui,
+other. Tag items `escaped`, `seeded` or `clean`, plus category and severity,
+so the report's slices read each kind separately.
+
+The matcher is built in, with no script to write:
+
+```yaml
+evaluators:
+  required_checks:
+    caught:
+      kind: findings-match
+      line_tolerance: 3          # default 3
+      require_category: false    # default false
+      llm_fallback:              # optional
+        model: google/gemini-3.1-pro-preview
+        provider_route: openrouter
+```
+
+- On a defect item, a finding catches a defect when the files are equal
+  (compared after NFC normalization, with no leading `./`) and the line
+  ranges overlap, widened by `line_tolerance` on each side. With
+  `require_category`, the categories must also be equal (case aside). A
+  finding on the defect's file but away from its lines, or one with no lines
+  or no file, is ambiguous. Only ambiguous findings go to `llm_fallback`, in
+  one call per item. Without a fallback they stay unmatched. The item passes
+  when every defect is caught, and the evidence states a partial catch.
+- On a clean item, the review passes when no finding claims a defect. A
+  finding with `blocking: true` is a claim, and one with `blocking: false`
+  is not. When `blocking` is absent, the fallback classifies the finding.
+  With no fallback it counts as a claim, and the evidence says so.
+- No `findings.json` fails the trial ("no review"). It never passes as a
+  clean review. A `findings.json` that is not JSON also fails. A missing or
+  malformed `expected`, or a fallback that still fails after 3 attempts, is
+  an evaluator error.
+- The evidence names each defect and says whether it was caught on location
+  or by the LLM, and by which finding. Every decision is also written to
+  `findings-match.json` in the trial's kept work dir.
+- The version covers the options and the fallback's model, route and
+  prompts. Changing any of them regrades reused trials on `--reuse`, from the
+  `findings.json` each trial left.
+- `check-task` hands the check the review a perfect reviewer would leave:
+  each known defect becomes a blocking finding on its own lines, and a clean
+  item gets `[]`. The check must pass that review and fail an empty one, and
+  neither probe calls the fallback.
+
+The check reports these measures:
+
+| measure | items | what it counts |
+|---|---|---|
+| `findings`, `invalid_findings` | all | valid findings, and dropped ones |
+| `defects`, `caught` | defect | known defects, and how many were caught |
+| `matched_deterministic`, `matched_llm` | defect | findings that matched a defect on location, or through the LLM (each finding counted once) |
+| `unmatched_findings` | defect | findings that matched no defect |
+| `defect_claims` | clean | findings that claim a defect |
+
+Catch rate per category and severity is the pass rate, or `caught` over
+`defects`, on that tag's slice. Defect claims per clean item is
+`defect_claims`. Precision is matched findings over all findings on defect
+items. The scorecard (`decision: scorecard`) shows it next to the measures
+as `precision`: the sum of the `matched_*` means over the sum of all three
+means, which pools findings per input instead of averaging precision per
+item. Elsewhere, compute it from the measures table the same way. Use the
+three defect-only measures, not `findings`, because clean items report
+`findings` too. Without a fallback, precision is a lower bound.
+
+The fallback's calls do not count toward the run's cost or `budget_usd`.
+`agenteval calibrate` cannot yet check the fallback against human labels.
+It calibrates the absolute judge's 1–5 scores, and refuses a run without
+them. Its labels are per answer, while the fallback decides per finding
+and defect pair. Three things are missing to enforce the ≥ 90% agreement
+gate before the fallback is trusted:
+
+- labels per finding and defect pair;
+- a calibrate mode that reads the decisions in `findings-match.json`;
+- a gate that uses the result.
+
 ### Saying what a task evaluates
 
 A report opens with what was evaluated, so a reader who never saw the spec
