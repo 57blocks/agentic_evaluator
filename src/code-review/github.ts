@@ -70,7 +70,24 @@ function summaryOf(p: Json): PullSummary {
   };
 }
 
-function ghApi(args: readonly string[]): Promise<unknown> {
+const ATTEMPTS = 3;
+const RETRY_DELAY_MS = 2000;
+
+/** A 404 or 422 is an answer; a dropped stream or a 5xx is worth another try. */
+const TRANSIENT = /stream error|CANCEL|timeout|timed out|connection reset|EOF|HTTP 5\d\d|HTTP 429|rate limit/i;
+
+async function ghApi(args: readonly string[]): Promise<unknown> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await ghApiOnce(args);
+    } catch (err) {
+      if (attempt >= ATTEMPTS || !TRANSIENT.test((err as Error).message)) throw err;
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt));
+    }
+  }
+}
+
+function ghApiOnce(args: readonly string[]): Promise<unknown> {
   return new Promise((resolve, reject) => {
     execFile("gh", ["api", ...args], { maxBuffer: 256 * 1024 * 1024, encoding: "utf-8" }, (e, stdout, stderr) => {
       if (e) {
