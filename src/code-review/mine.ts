@@ -181,8 +181,8 @@ export async function mine(opts: MineOptions): Promise<MinedFile> {
  * `confirmed` mark, the label, and the pre-screen. A pair whose introducer
  * changed is a new pair and starts unreviewed.
  */
-export function carryOver(fresh: MinedFile, earlier: MinedFile | null): { mined: MinedFile; carried: number } {
-  if (!earlier) return { mined: fresh, carried: 0 };
+export function carryOver(fresh: MinedFile, earlier: MinedFile | null): { mined: MinedFile; carried: number; lost: string[] } {
+  if (!earlier) return { mined: fresh, carried: 0, lost: [] };
   const before = new Map(earlier.candidates.map((c) => [`${c.fix.sha}:${c.introducing.sha}`, c]));
   let carried = 0;
   const candidates = fresh.candidates.map((c) => {
@@ -191,5 +191,10 @@ export function carryOver(fresh: MinedFile, earlier: MinedFile | null): { mined:
     carried += 1;
     return { ...c, confirmed: old.confirmed, ...(old.label ? { label: old.label } : {}), ...(old.prescreen ? { prescreen: old.prescreen } : {}) };
   });
-  return { mined: { ...fresh, candidates }, carried };
+  // Marks on pairs this mine no longer finds (other flags, a moved branch).
+  const now = new Set(fresh.candidates.map((c) => `${c.fix.sha}:${c.introducing.sha}`));
+  const lost = earlier.candidates
+    .filter((c) => (c.confirmed !== null || c.label) && !now.has(`${c.fix.sha}:${c.introducing.sha}`))
+    .map((c) => c.id);
+  return { mined: { ...fresh, candidates }, carried, lost };
 }

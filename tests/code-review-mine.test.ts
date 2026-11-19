@@ -150,3 +150,21 @@ test("tests, docs, data and lockfiles are not code; MDX pages with components ar
   }
   for (const p of ["src/a.ts", "src/components/BlockQuote.tsx", "src/clock.ts", "site/pages/micro-bic.mdx", "règles/salarié.publicodes", "api/server.py"]) assert.ok(!NOT_CODE.test(p), p);
 });
+
+test("re-mining with other flags warns about marked pairs it no longer finds, and keeps the earlier file", async () => {
+  // Arrange
+  const s = await shop();
+  const out = await fs.mkdtemp(path.join(os.tmpdir(), "cr-mined-"));
+  await main(["code-review", "mine", s.repo.dir, "--since", "2025-01-01", "--branch", "main", "--out", out], bufferIo());
+  const first = await readMined(out);
+  await fs.writeFile(path.join(out, "candidates.json"), JSON.stringify({ ...first, candidates: first.candidates.map((c) => ({ ...c, confirmed: true })) }));
+  const io = bufferIo();
+
+  // Act: a stricter share drops every pair.
+  await main(["code-review", "mine", s.repo.dir, "--since", "2025-01-01", "--branch", "main", "--min-owner-share", "1", "--max-removed-lines", "0", "--out", out], io);
+
+  // Assert
+  assert.match(io.stderr, new RegExp(`no longer finds ${first.candidates.length} candidates a person had marked`));
+  const kept = JSON.parse(await fs.readFile(path.join(out, "candidates.previous.json"), "utf-8"));
+  assert.ok(kept.candidates.every((c: { confirmed: boolean }) => c.confirmed === true));
+});

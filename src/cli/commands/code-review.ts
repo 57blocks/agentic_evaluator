@@ -127,6 +127,10 @@ async function cmdMine(args: ParsedArgs, io: Io): Promise<ExitCode> {
   });
   const kept = carryOver(fresh, await readMinedIfAny(out));
   const carried = kept.carried;
+  if (kept.lost.length > 0) {
+    await fs.copyFile(path.join(out, "candidates.json"), path.join(out, "candidates.previous.json"));
+    io.err(`warning: this mine no longer finds ${kept.lost.length} candidates a person had marked (${kept.lost.join(", ")}); the earlier file is kept as candidates.previous.json\n`);
+  }
   let mined = kept.mined;
   // Written before any model call, so a failed screen loses no mining.
   await writeMined(out, mined);

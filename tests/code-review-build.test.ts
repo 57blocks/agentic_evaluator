@@ -18,6 +18,7 @@ import { locateDefect } from "../src/code-review/locate.js";
 import { DEFAULT_BLAME, mine } from "../src/code-review/mine.js";
 import { resolveRange, type PrRange } from "../src/code-review/pr-range.js";
 import type { MinedFile } from "../src/code-review/types.js";
+import { readItems } from "../src/core/items.js";
 import { EXIT } from "../src/cli/exit-codes.js";
 import { bufferIo } from "../src/cli/io.js";
 import { main } from "../src/cli/index.js";
@@ -260,4 +261,45 @@ test("the CLI says how to proceed when nothing is confirmed", async () => {
   const io = bufferIo();
   assert.equal(await main(["code-review", "build", s.repo.dir, "--mined", mined, "--task", await tmp("cr-task-")], io), EXIT.ok);
   assert.match(io.stdout, /Nothing is confirmed yet/);
+});
+
+test("agenteval's own items loader reads what build writes", async () => {
+  const s = await shop();
+  const task = await tmp("cr-task-");
+  const { items, report } = await build({ repo: s.repo.dir, mined: await minedShop(s, confirmAll), clean: null, taskDir: task, github: s.github, includeUnconfirmed: false });
+  await writeBuild(task, items, report);
+  const loaded = readItems(task, "items.jsonl");
+  assert.deepEqual(loaded.map((i) => [i.id, i.input, i.tags[0]]), [["pr1", "pr1\n", "escaped"], ["pr3", "pr3\n", "escaped"]]);
+  assert.equal(JSON.parse(loaded[0].expected!).defects[0].file, CALC);
+});
+
+test("at GitHub's 250-commit cap, a range whose base still belongs to the PR is skipped", async () => {
+  // Arrange: a root commit, then 250 commits a PR rebased onto it.
+  const { GITHUB_COMMIT_CAP } = await import("../src/code-review/pr-range.js");
+  const dir = await tmp("cr-cap-");
+  sh(dir, "init", "-q", "-b", "main");
+  const stream = Array.from({ length: GITHUB_COMMIT_CAP + 1 }, (_, i) => [
+    "commit refs/heads/main", `mark :${i + 1}`, `committer A <a@example.com> ${1735725600 + i} +0000`,
+    `data ${`c${i}`.length}`, `c${i}`, ...(i > 0 ? [`from :${i}`] : []), `M 644 inline f.txt`, `data ${String(i).length}`, String(i), "",
+  ].join("\n")).join("\n");
+  execFileSync("git", ["fast-import", "--quiet"], { cwd: dir, input: stream, env: { ...process.env, ...ISOLATED_GIT_ENV } });
+  const tip = sh(dir, "rev-parse", "main").trim();
+  const root = sh(dir, "rev-list", "--max-parents=0", "main").trim();
+  const summary = { number: 9, title: "Big", mergedAt: "2025-01-02T00:00:00Z", baseRef: "main", mergeCommitSha: tip, author: "a", isBot: false };
+  const commits = Array.from({ length: GITHUB_COMMIT_CAP }, (_, i) => ({ sha: "f".repeat(40), headline: `c${i + 1}` }));
+  const github = (rootIsInPr: boolean) => ({
+    repo: "o/r",
+    pullsForCommit: async (sha: string) => (sha === root && rootIsInPr ? [summary] : []),
+    pull: async () => ({ ...summary, body: "", createdAt: "", commitCount: GITHUB_COMMIT_CAP, commits }),
+    mergedPulls: async () => [],
+  });
+  const unit = { kind: "pr" as const, number: 9, title: "Big", merged_at: null };
+
+  // Act
+  const fits = await resolveRange(dir, unit, github(false));
+  const longer = await resolveRange(dir, unit, github(true));
+
+  // Assert
+  assert.ok("range" in fits && fits.range.kind === "rebase" && fits.range.base === root && fits.range.replay.length === GITHUB_COMMIT_CAP, JSON.stringify(fits).slice(0, 200));
+  assert.deepEqual(longer, { skip: `PR #9 has more than the ${GITHUB_COMMIT_CAP} commits GitHub lists: its base is unknown` });
 });
