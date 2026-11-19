@@ -378,7 +378,8 @@ agenteval code-review build ~/src/app --mined mined --clean mined --task tasks/a
   with `gh api`; without it each commit is its own unit. Writes
   `candidates.json` (every blamed commit, and a reason per dropped fix) and
   `candidates.md`, a table to read while confirming. Mining again keeps
-  `confirmed` marks. `--prescreen MODEL` (`--prescreen-limit N`) asks a model
+  `confirmed` marks (a marked pair it no longer finds is reported, and the
+  earlier file kept as `candidates.previous.json`). `--prescreen MODEL` (`--prescreen-limit N`) asks a model
   whether each candidate is a real defect: a first pass for the reader, never
   the label.
 - **`pick-clean`** — merged PRs in the mined window that no scanned fix
