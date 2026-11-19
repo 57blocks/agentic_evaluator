@@ -12,6 +12,7 @@
  */
 
 import { changedLines, logCommits } from "./git.js";
+import { checkMinedShas } from "./candidates-file.js";
 import type { GitHub } from "./github.js";
 import { resolveRange } from "./pr-range.js";
 import { unitId, type CleanFile, type CleanPick, type MinedFile, type Unit } from "./types.js";
@@ -91,7 +92,7 @@ async function pool(opts: PickOptions, branch: string): Promise<{ units: Unit[];
     return { units, rejected };
   }
   const window = [`--since=${opts.since}`, ...(opts.until ? [`--until=${opts.until}`] : [])];
-  for (const c of await logCommits(opts.repo, ["--first-parent", ...window, opts.mined.repo.head])) {
+  for (const c of await logCommits(opts.repo, ["--first-parent", ...window, "--end-of-options", opts.mined.repo.head])) {
     const unit: Unit = { kind: "commit", sha: c.sha, title: c.subject };
     if (/\bbot\b|\[bot\]/i.test(`${c.authorName} ${c.authorEmail}`)) rejected.push({ unit: unitId(unit), reason: `bot (${c.authorName})` });
     else if (NOT_A_CHANGE.test(c.subject.trim())) rejected.push({ unit: unitId(unit), reason: "housekeeping subject" });
@@ -115,6 +116,7 @@ async function escapedSizes(opts: PickOptions): Promise<{ sizes: number[]; match
 }
 
 export async function pickClean(opts: PickOptions): Promise<CleanFile> {
+  checkMinedShas(opts.mined);
   const branch = opts.mined.repo.branch;
   const introducers = new Set(opts.mined.introducers);
   const escaped = new Set(opts.mined.candidates.map((c) => unitId(c.introducing.unit)));

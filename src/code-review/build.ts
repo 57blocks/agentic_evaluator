@@ -16,7 +16,7 @@ import type { GitHub, PullDetail } from "./github.js";
 import { writeBundle } from "./fixture-bundle.js";
 import { locateDefect, type Location } from "./locate.js";
 import { resolveRange, type PrRange } from "./pr-range.js";
-import { toJson } from "./candidates-file.js";
+import { checkMinedShas, toJson } from "./candidates-file.js";
 import { CATEGORIES, SEVERITIES, unitId, type Candidate, type CleanFile, type CleanPick, type MinedFile, type Unit } from "./types.js";
 
 export const MAX_FIX_DIFF = 6000;
@@ -101,10 +101,10 @@ function labelOf(c: Candidate, report: BuildReport): { category: string; severit
 }
 
 async function defectsOf(opts: BuildOptions, itemId: string, c: Candidate, range: PrRange, report: BuildReport): Promise<Defect[]> {
-  const fixParent = (await git(opts.repo, ["rev-parse", `${c.fix.sha}^1`])).trim();
+  const fixParent = (await git(opts.repo, ["rev-parse", "--verify", "--end-of-options", `${c.fix.sha}^1`])).trim();
   const locations: Location[] = await locateDefect(opts.repo, fixParent, range.head, c.blamed, new Set(range.members));
   const label = labelOf(c, report);
-  const fixDiff = clip(await git(opts.repo, ["show", "--format=", "--no-color", "--no-ext-diff", c.fix.sha, "--", ...c.files]));
+  const fixDiff = clip(await git(opts.repo, ["show", "--format=", "--no-color", "--no-ext-diff", "--end-of-options", c.fix.sha, "--", ...c.files]));
   return locations.map((loc) => {
     if (loc.note) report.unlocated.push({ item: itemId, candidate: c.id, file: loc.file, note: loc.note });
     return {
@@ -118,7 +118,7 @@ async function defectsOf(opts: BuildOptions, itemId: string, c: Candidate, range
 }
 
 async function commitMessage(repo: string, sha: string): Promise<{ headline: string; body: string }> {
-  const msg = await git(repo, ["show", "-s", "--format=%B", sha]);
+  const msg = await git(repo, ["show", "-s", "--format=%B", "--end-of-options", sha]);
   const [headline, ...rest] = msg.split("\n");
   return { headline, body: rest.join("\n").trim() };
 }
@@ -133,7 +133,7 @@ async function writeFixture(opts: BuildOptions, itemId: string, unit: Unit, rang
     commits.push({ oid: built.commitShas[i], messageHeadline: m.headline, messageBody: m.body });
   }
   const first = await commitMessage(opts.repo, range.replay[0]);
-  const authored = (await git(opts.repo, ["show", "-s", "--format=%aI", range.replay[0]])).trim();
+  const authored = (await git(opts.repo, ["show", "-s", "--format=%aI", "--end-of-options", range.replay[0]])).trim();
   const pr = {
     repo: opts.mined.repo.github ?? path.basename(opts.repo),
     number: unit.kind === "pr" ? unit.number : null,
@@ -224,6 +224,7 @@ async function staleFixtures(taskDir: string, built: ReadonlySet<string>): Promi
 }
 
 export async function build(opts: BuildOptions): Promise<{ items: Item[]; report: BuildReport }> {
+  checkMinedShas(opts.mined);
   const report: BuildReport = { items: [], excluded: [], skipped: [], unlocated: [], relabelled: [], stale_fixtures: [] };
   const groups = new Map<string, { unit: Unit; candidates: Candidate[] }>();
   for (const c of opts.mined.candidates) {

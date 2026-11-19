@@ -9,6 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { apportion, binOf, pickClean, shuffled, type PickOptions } from "../src/code-review/pick-clean.js";
 import { build } from "../src/code-review/build.js";
+import { resolveRange } from "../src/code-review/pr-range.js";
 import { DEFAULT_BLAME, mine } from "../src/code-review/mine.js";
 import type { CleanFile, MinedFile } from "../src/code-review/types.js";
 import { EXIT } from "../src/cli/exit-codes.js";
@@ -115,4 +116,30 @@ test("the CLI picks commits when the mine had no GitHub, and exits partial when 
   assert.match(clean.matched_to, /unreviewed escaped \(none confirmed yet\) commits/);
   assert.match(io.stdout, /clean picked \(seed 20261119;/);
   await assert.rejects(main(["code-review", "pick-clean", s.repo.dir, "--mined", minedDir, "--out", out], bufferIo()), /--count N is required/);
+});
+
+test("a commit id from a file that git would read as an option is refused before any git call", async () => {
+  // Arrange: a tampered candidates.json whose head is an option.
+  const s = await shop();
+  const minedDir = await fs.mkdtemp(path.join(os.tmpdir(), "cr-mined-"));
+  const out = await fs.mkdtemp(path.join(os.tmpdir(), "cr-clean-"));
+  const mined = await minedShop(s, false);
+  const planted = path.join(out, "planted");
+  await fs.writeFile(path.join(minedDir, "candidates.json"), JSON.stringify({ ...mined, repo: { ...mined.repo, head: `--output=${planted}` } }));
+
+  // Act + Assert
+  await assert.rejects(main(["code-review", "pick-clean", s.repo.dir, "--mined", minedDir, "--count", "1", "--out", out], bufferIo()), /repo\.head is not a commit id: "--output=/);
+  await assert.rejects(main(["code-review", "build", s.repo.dir, "--mined", minedDir, "--task", out], bufferIo()), /repo\.head is not a commit id/);
+  await assert.rejects(pickClean(options(s, { ...mined, repo: { ...mined.repo, head: "--output=x" } })), /not a commit id/);
+  const blamed = { ...mined.candidates[0], blamed: [{ ...mined.candidates[0].blamed[0], sha: "--all" }] };
+  await assert.rejects(build({ repo: s.repo.dir, mined: { ...mined, candidates: [blamed] }, clean: null, taskDir: out, github: null, includeUnconfirmed: true }), /blamed is not a commit id/);
+  await assert.rejects(fs.access(planted));
+});
+
+test("a branch or a GitHub merge commit that looks like an option resolves to nothing", async () => {
+  const s = await shop();
+  await assert.rejects(main(["code-review", "mine", s.repo.dir, "--since", "2025-01-01", "--branch", "--output=x", "--out", "/tmp/never"], bufferIo()), /no branch --output=x/);
+  const evil = { ...s.github, pull: async (n: number) => ({ ...(await s.github.pull(n)), mergeCommitSha: "--output=x" }) };
+  const got = await resolveRange(s.repo.dir, { kind: "pr", number: 1, title: "", merged_at: null }, evil);
+  assert.deepEqual(got, { skip: `PR #1: GitHub's merge commit "--output=x" is not a commit id` });
 });

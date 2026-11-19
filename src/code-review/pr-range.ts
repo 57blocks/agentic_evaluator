@@ -10,7 +10,7 @@
  *   commit   no PR: the commit alone
  */
 
-import { git, gitMaybe, parentsOf, logCommits } from "./git.js";
+import { git, gitMaybe, parentsOf, logCommits, SHA } from "./git.js";
 import type { GitHub, PullDetail } from "./github.js";
 import type { Unit } from "./types.js";
 
@@ -34,8 +34,8 @@ async function commitRange(repo: string, sha: string): Promise<RangeResult> {
 }
 
 async function mergeCommitRange(repo: string, merge: string, parents: string[]): Promise<RangeResult> {
-  const base = (await git(repo, ["merge-base", parents[0], parents[1]])).trim();
-  const members = (await logCommits(repo, ["--reverse", "--topo-order", `${base}..${parents[1]}`]));
+  const base = (await git(repo, ["merge-base", "--end-of-options", parents[0], parents[1]])).trim();
+  const members = (await logCommits(repo, ["--reverse", "--topo-order", "--end-of-options", `${base}..${parents[1]}`]));
   if (members.length === 0) return { skip: `merge commit ${merge.slice(0, 9)} brought no commits` };
   // A branch that merged its base in has no straight line of its own to
   // replay; its whole change becomes one commit, the branch tip.
@@ -48,7 +48,7 @@ async function mergeCommitRange(repo: string, merge: string, parents: string[]):
 
 async function linearRange(repo: string, merge: string, pull: PullDetail): Promise<RangeResult> {
   const count = pull.commitCount;
-  const tail = (await logCommits(repo, ["--first-parent", `-${count}`, merge])).reverse();
+  const tail = (await logCommits(repo, ["--first-parent", `-${count}`, "--end-of-options", merge])).reverse();
   const rebased = tail.length === count && tail.every((c, i) => c.parents.length === 1 && c.subject === pull.commits[i]?.headline.trim());
   if (rebased && tail[0].parents.length === 1) {
     const shas = tail.map((c) => c.sha);
@@ -63,8 +63,10 @@ export async function resolveRange(repo: string, unit: Unit, github: GitHub | nu
   if (!github) return { skip: `PR #${unit.number} needs GitHub to resolve (the candidates were mined with --github)` };
   const pull = await github.pull(unit.number);
   if (!pull.mergedAt || !pull.mergeCommitSha) return { skip: `PR #${unit.number} was not merged` };
+  if (!SHA.test(pull.mergeCommitSha)) return { skip: `PR #${unit.number}: GitHub's merge commit ${JSON.stringify(pull.mergeCommitSha)} is not a commit id` };
+  if (!Number.isInteger(pull.commitCount) || pull.commitCount < 1) return { skip: `PR #${unit.number}: GitHub gives no commit count` };
   const merge = pull.mergeCommitSha;
-  if ((await gitMaybe(repo, ["cat-file", "-e", `${merge}^{commit}`])) === null) {
+  if ((await gitMaybe(repo, ["cat-file", "-e", "--end-of-options", `${merge}^{commit}`])) === null) {
     return { skip: `PR #${unit.number}'s merge commit ${merge.slice(0, 9)} is not in this clone (fetch it)` };
   }
   if (pull.commits.length < pull.commitCount) {

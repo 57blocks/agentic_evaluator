@@ -3,7 +3,7 @@
  * which commits blame names for them. Read-only on the repository.
  */
 
-import { git } from "./git.js";
+import { assertNotOption, git } from "./git.js";
 import type { BlamedLine } from "./types.js";
 
 /** Conventional-commit fixes: `fix:`, `fix(scope):`, `fix!:`. */
@@ -34,7 +34,7 @@ const HUNK = /^@@ -(\d+)(?:,(\d+))? \+\d+(?:,\d+)? @@/;
 
 /** Line ranges of `parent:file` that `parent..fix` removed or changed. */
 export async function removedRanges(repo: string, parent: string, fix: string, file: string): Promise<Range[]> {
-  const diff = await git(repo, ["diff", "-U0", "--no-color", "--no-ext-diff", "--no-renames", parent, fix, "--", file]);
+  const diff = await git(repo, ["diff", "-U0", "--no-color", "--no-ext-diff", "--no-renames", "--end-of-options", parent, fix, "--", file]);
   const out: Range[] = [];
   for (const line of diff.split("\n")) {
     const m = HUNK.exec(line);
@@ -48,7 +48,7 @@ export async function removedRanges(repo: string, parent: string, fix: string, f
 
 /** Files a fix removed lines from, minus the ones that are not code. */
 export async function fixedFiles(repo: string, parent: string, fix: string): Promise<string[]> {
-  const raw = await git(repo, ["diff", "--name-only", "-z", "--no-renames", "--diff-filter=MD", parent, fix]);
+  const raw = await git(repo, ["diff", "--name-only", "-z", "--no-renames", "--diff-filter=MD", "--end-of-options", parent, fix]);
   return raw.split("\0").filter((p) => p !== "" && !NOT_CODE.test(p)).sort();
 }
 
@@ -59,6 +59,9 @@ export async function fixedFiles(repo: string, parent: string, fix: string): Pro
  */
 export async function blameLines(repo: string, rev: string, file: string, ranges: readonly Range[], opts: readonly string[]): Promise<BlamedLine[]> {
   if (ranges.length === 0) return [];
+  // blame misreads --end-of-options (it then takes the path for a revision),
+  // so the revision is checked instead.
+  assertNotOption(rev, "blame revision");
   const args = ["blame", "--porcelain", ...opts, ...ranges.flatMap((r) => ["-L", `${r.start},${r.end}`]), rev, "--", file];
   const raw = await git(repo, args);
   const out: BlamedLine[] = [];

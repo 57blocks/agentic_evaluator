@@ -151,7 +151,7 @@ export async function mine(opts: MineOptions): Promise<MinedFile> {
     infos: new Map(),
   };
   const window = [`--since=${opts.since}`, ...(opts.until ? [`--until=${opts.until}`] : [])];
-  const commits = await logCommits(opts.repo, ["--first-parent", ...window, opts.head]);
+  const commits = await logCommits(opts.repo, ["--first-parent", ...window, "--end-of-options", opts.head]);
   const fixes = commits.filter((c) => isFix(c.subject, c.body, c.parents.length > 1, ctx.extra));
   opts.log?.(`${commits.length} commits on ${opts.branch} in the window, ${fixes.length} fixes`);
 

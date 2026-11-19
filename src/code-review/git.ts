@@ -13,6 +13,21 @@ const MAX_BUFFER = 512 * 1024 * 1024;
 
 export class GitError extends Error {}
 
+/** A full or abbreviated object id: what a commit field read from a file must be. */
+export const SHA = /^[0-9a-f]{7,64}$/i;
+
+/** Refuse a value read from a file that is not an object id (it could be an option). */
+export function assertSha(value: unknown, what: string): string {
+  if (typeof value !== "string" || !SHA.test(value)) throw new GitError(`${what} is not a commit id: ${JSON.stringify(value)}`);
+  return value;
+}
+
+/** Refuse a revision that git would parse as an option. */
+export function assertNotOption(value: string, what: string): string {
+  if (value.startsWith("-")) throw new GitError(`${what} must not start with "-": ${JSON.stringify(value)}`);
+  return value;
+}
+
 export interface GitOptions {
   /** Extra environment, merged over process.env. */
   env?: Record<string, string>;
@@ -60,11 +75,11 @@ export async function gitMaybe(repo: string, args: readonly string[]): Promise<s
 }
 
 export async function revParse(repo: string, rev: string): Promise<string> {
-  return (await git(repo, ["rev-parse", "--verify", "--quiet", `${rev}^{commit}`])).trim();
+  return (await git(repo, ["rev-parse", "--verify", "--quiet", "--end-of-options", `${rev}^{commit}`])).trim();
 }
 
 export async function parentsOf(repo: string, sha: string): Promise<string[]> {
-  const line = (await git(repo, ["show", "-s", "--format=%P", sha])).trim();
+  const line = (await git(repo, ["show", "-s", "--format=%P", "--end-of-options", sha])).trim();
   return line === "" ? [] : line.split(" ");
 }
 
@@ -95,14 +110,14 @@ export async function logCommits(repo: string, args: readonly string[]): Promise
 }
 
 export async function commitInfo(repo: string, sha: string): Promise<CommitInfo> {
-  const [info] = await logCommits(repo, ["-1", "--no-walk", sha]);
+  const [info] = await logCommits(repo, ["-1", "--no-walk", "--end-of-options", sha]);
   if (!info) throw new GitError(`no commit ${sha}`);
   return info;
 }
 
 /** A file's bytes at a revision, split into lines (1-based index = line - 1); null when absent. */
 export async function fileLines(repo: string, rev: string, file: string): Promise<string[] | null> {
-  const text = await gitMaybe(repo, ["show", `${rev}:${file}`]);
+  const text = await gitMaybe(repo, ["show", "--end-of-options", `${rev}:${file}`]);
   if (text === null) return null;
   const lines = text.split("\n");
   if (lines.at(-1) === "") lines.pop();
@@ -111,13 +126,13 @@ export async function fileLines(repo: string, rev: string, file: string): Promis
 
 /** Paths a diff touches, NUL-separated so any byte in a name survives. */
 export async function diffNames(repo: string, from: string, to: string, extra: readonly string[] = []): Promise<string[]> {
-  const raw = await git(repo, ["diff", "--name-only", "-z", "--no-renames", ...extra, from, to]);
+  const raw = await git(repo, ["diff", "--name-only", "-z", "--no-renames", ...extra, "--end-of-options", from, to]);
   return raw.split("\0").filter((p) => p !== "");
 }
 
 /** Added + deleted lines between two revisions (binary files count 0). */
 export async function changedLines(repo: string, from: string, to: string): Promise<{ lines: number; files: number }> {
-  const raw = await git(repo, ["diff", "--numstat", "-z", "--no-renames", from, to]);
+  const raw = await git(repo, ["diff", "--numstat", "-z", "--no-renames", "--end-of-options", from, to]);
   let lines = 0;
   let files = 0;
   for (const rec of raw.split("\0")) {
@@ -130,5 +145,5 @@ export async function changedLines(repo: string, from: string, to: string): Prom
 }
 
 export async function isAncestor(repo: string, a: string, b: string): Promise<boolean> {
-  return git(repo, ["merge-base", "--is-ancestor", a, b]).then(() => true, () => false);
+  return git(repo, ["merge-base", "--is-ancestor", "--end-of-options", a, b]).then(() => true, () => false);
 }

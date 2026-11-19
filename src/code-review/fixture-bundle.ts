@@ -50,7 +50,7 @@ function identity(line: string, who: "AUTHOR" | "COMMITTER"): Record<string, str
 }
 
 async function rawCommit(repo: string, sha: string): Promise<RawCommit> {
-  const bytes = await gitBytes(repo, ["cat-file", "commit", sha]);
+  const bytes = await gitBytes(repo, ["cat-file", "commit", "--end-of-options", sha]);
   const split = bytes.indexOf("\n\n");
   const headers = bytes.subarray(0, split).toString("utf-8").split("\n");
   const author = headers.find((h) => h.startsWith("author "));
@@ -61,7 +61,7 @@ async function rawCommit(repo: string, sha: string): Promise<RawCommit> {
 
 async function recommit(store: string, source: string, sha: string, parent: string | null): Promise<string> {
   const raw = await rawCommit(source, sha);
-  const tree = (await git(source, ["rev-parse", `${sha}^{tree}`])).trim();
+  const tree = (await git(source, ["rev-parse", "--verify", "--end-of-options", `${sha}^{tree}`])).trim();
   const env = { ...CLEAN_ENV, ...identity(raw.author, "AUTHOR"), ...identity(raw.committer, "COMMITTER") };
   const args = ["commit-tree", "--no-gpg-sign", tree, ...(parent ? ["-p", parent] : [])];
   return (await git(store, args, { env, input: raw.message })).trim();

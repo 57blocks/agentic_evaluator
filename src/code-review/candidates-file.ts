@@ -6,6 +6,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { assertSha, GitError } from "./git.js";
 import type { Candidate, CleanFile, MinedFile, Unit } from "./types.js";
 
 export const CANDIDATES_JSON = "candidates.json";
@@ -32,10 +33,38 @@ async function readJson<T>(file: string, what: string): Promise<T> {
   }
 }
 
+function checkUnit(unit: Unit | undefined, where: string): void {
+  if (unit?.kind === "commit") assertSha(unit.sha, `${where} unit sha`);
+  else if (unit?.kind === "pr" && !Number.isInteger(unit.number)) throw new GitError(`${where}: PR number ${JSON.stringify(unit.number)} is not a whole number`);
+}
+
+/**
+ * Every commit id in a mined file reaches git as an argument: a value that is
+ * not an id (say, "--output=x") is refused before any git call.
+ */
+export function checkMinedShas(mined: MinedFile): void {
+  assertSha(mined.repo?.head, "repo.head");
+  mined.introducers.forEach((s, i) => assertSha(s, `introducers[${i}]`));
+  for (const c of mined.candidates) {
+    assertSha(c.fix?.sha, `${c.id}: fix.sha`);
+    assertSha(c.introducing?.sha, `${c.id}: introducing.sha`);
+    checkUnit(c.fix?.unit, `${c.id}: fix`);
+    checkUnit(c.introducing?.unit, `${c.id}: introducing`);
+    for (const o of c.others ?? []) assertSha(o.sha, `${c.id}: others`);
+    for (const b of c.blamed ?? []) assertSha(b.sha, `${c.id}: blamed`);
+  }
+}
+
 export async function readMined(dir: string): Promise<MinedFile> {
   const mined = await readJson<MinedFile>(path.join(dir, CANDIDATES_JSON), "candidates.json (from `code-review mine`)");
   if (mined.version !== 1 || !Array.isArray(mined.candidates) || !Array.isArray(mined.introducers)) {
     throw new CandidatesError(`${path.join(dir, CANDIDATES_JSON)} is not a candidates file written by \`code-review mine\``);
+  }
+  try {
+    checkMinedShas(mined);
+  } catch (err) {
+    if (err instanceof GitError) throw new CandidatesError(`${path.join(dir, CANDIDATES_JSON)}: ${err.message}`);
+    throw err;
   }
   for (const c of mined.candidates) {
     if (c.confirmed !== null && typeof c.confirmed !== "boolean") {
@@ -52,6 +81,12 @@ export async function readMinedIfAny(dir: string): Promise<MinedFile | null> {
 export async function readClean(dir: string): Promise<CleanFile> {
   const clean = await readJson<CleanFile>(path.join(dir, CLEAN_JSON), "clean.json (from `code-review pick-clean`)");
   if (clean.version !== 1 || !Array.isArray(clean.picked)) throw new CandidatesError(`${path.join(dir, CLEAN_JSON)} is not written by \`code-review pick-clean\``);
+  try {
+    clean.picked.forEach((p, i) => checkUnit(p.unit, `picked[${i}]`));
+  } catch (err) {
+    if (err instanceof GitError) throw new CandidatesError(`${path.join(dir, CLEAN_JSON)}: ${err.message}`);
+    throw err;
+  }
   return clean;
 }
 
