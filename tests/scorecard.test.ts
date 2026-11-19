@@ -209,3 +209,20 @@ test("combine under a scorecard spec records the scorecard", async () => {
   assert.equal(rec.firmness, "scorecard");
   assert.equal(JSON.parse(await fs.readFile(path.join(stepDir, "manifest.json"), "utf-8")).decision, "scorecard");
 });
+
+test("diff from a run that picked to one that is a scorecard names the change of decision", async () => {
+  // Arrange — the same step, run once picking and once as a scorecard.
+  const { spec } = await task();
+  const picked = await runSuite(spec, false, { yes: true, onEvent: () => {} });
+  await fs.writeFile(spec, SCORECARD(await fs.readFile(spec, "utf-8")));
+  await new Promise((r) => setTimeout(r, 20));
+  const carded = await runSuite(spec, false, { yes: true, onEvent: () => {} });
+
+  // Act
+  const d = diffRuns(await loadRunSide(picked!.dir), await loadRunSide(carded!.dir));
+  const text = diffLines(d).join("\n");
+
+  // Assert
+  assert.deepEqual(d.setup.find((c) => c.what === "decision"), { what: "decision", a: "pick", b: "scorecard" });
+  assert.match(text, /recommendation CHANGED: careful \(directional\) → no pick \(scorecard\)/);
+});

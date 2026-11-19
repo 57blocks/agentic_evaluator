@@ -698,7 +698,7 @@ export function buildStepReport(b: RunBundle): StepReport {
       inputs,
       chosen: rec.chosen,
       operatingMode: rec.operating_mode,
-      modeLabel: modeLabel(rec.operating_mode),
+      modeLabel: rec.firmness === "scorecard" ? "not applied (scorecard)" : modeLabel(rec.operating_mode),
       facts: verdictFacts(rec, chosenView),
       text: verdictText(b),
       why: verdictWhy(b),

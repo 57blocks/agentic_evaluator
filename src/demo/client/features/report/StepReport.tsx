@@ -54,8 +54,13 @@ export function StepReport({ report: r }: { report: Model }) {
           <Note>{costSuccessNote(r.costSuccess)}</Note>
         </Section>
       )}
-      <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />
-      <Certainty certainty={r.certainty} />
+      {/* A scorecard applies no gate and makes no pick: nothing to trace or to be sure of. */}
+      {r.verdict.firmness !== "scorecard" && (
+        <>
+          <Gates gates={r.gates} eligible={r.eligible} chosen={r.verdict.chosen} modeLabel={r.verdict.modeLabel} />
+          <Certainty certainty={r.certainty} />
+        </>
+      )}
       <Profile absoluteRan={r.absoluteRan} distribution={r.distribution} scoreSummary={r.scoreSummary} preference={r.preference} candidates={r.candidates} />
       <CoverageAndLedger
         coverage={r.coverage}

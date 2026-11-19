@@ -101,8 +101,13 @@ test("no trials, no section", () => {
 });
 
 test("a run's report carries the per-input comparison", async () => {
-  const bundle = await loadBundle(path.join(INSTALL_ROOT, "fixtures", "prd-w38"));
+  const bundle = await loadBundle(path.join(INSTALL_ROOT, "fixtures", "codegen-w38"));
   const html = renderRunReport(bundle);
-  assert.match(html, /Per input/);
+  assert.match(html, /<h2>Per input/);
   assert.match(html, /<details class="cmp-row/);
+});
+
+test("a step with no required check (judge only) has no per-input comparison", async () => {
+  const bundle = await loadBundle(path.join(INSTALL_ROOT, "fixtures", "prd-w38"));
+  assert.doesNotMatch(renderRunReport(bundle), /<h2>Per input/);
 });

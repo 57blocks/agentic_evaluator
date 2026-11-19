@@ -40,6 +40,8 @@ export interface DiffManifest {
   evaluators?: { check_version?: string; producer_template_sha256?: string | null };
   execution?: { trials_per_case?: number };
   operating_mode?: string | null;
+  /** "scorecard" on a step that picks nobody; absent means pick. */
+  decision?: string;
   eligibility?: unknown;
   judge?: { model?: string };
   candidates?: Record<string, unknown>;
@@ -219,6 +221,8 @@ function setupChanges(a: RunSide, b: RunSide): SetupChange[] {
     ["prompt template", (s) => s.manifest.evaluators?.producer_template_sha256?.slice(0, 12)],
     ["trials per input", (s) => (s.manifest.execution?.trials_per_case === undefined ? undefined : String(s.manifest.execution.trials_per_case))],
     ["operating mode", (s) => s.manifest.operating_mode ?? undefined],
+    // Absent is pick: a run from before scorecards and one that picks read the same.
+    ["decision", (s) => s.manifest.decision ?? "pick"],
     ["judge", (s) => s.manifest.judge?.model],
     ["selection rule", (s) => s.recommendation?.rule_version],
   ];

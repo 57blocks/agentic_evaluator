@@ -61,7 +61,9 @@ function rowHtml(r: CompareRow, outputs: OutputsByKey): string {
 }
 
 export function renderInputComparison(rows: readonly CompareRow[], candidates: readonly string[], outputs: readonly RawOutput[]): string {
-  if (rows.length === 0) return "";
+  // No required check ran anywhere (a judge-only step): there is nothing per input to compare.
+  const checked = rows.some((r) => r.cells.some((c) => c.trials.some((t) => t.checks.length > 0)));
+  if (!checked) return "";
   const byKey: OutputsByKey = new Map(outputs.map((o) => [keyOf(o.candidate, o.input, o.trial), o]));
   const differing = rows.filter((r) => r.differs).length;
   return `<section class="card">
