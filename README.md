@@ -354,6 +354,50 @@ open datasets/tasks/*/runs/*/report.html   # or open the reports directly
 [`datasets/README.md`](datasets/README.md) says what each set evaluates, where
 its answers come from, and what its run found.
 
+## Code review
+
+`agenteval code-review` builds a dataset for evaluating code reviewers from a
+repository's own history: PRs that shipped a bug a later commit fixed
+(escaped), and PRs no fix traced a bug to (clean). It reads the clone and
+never writes to it. Item and finding shapes: [docs/design/code-review.md](docs/design/code-review.md).
+
+```bash
+agenteval code-review mine ~/src/app --since 2025-06-01 --github owner/app --out mined
+# read mined/candidates.md; set "confirmed": true|false in mined/candidates.json
+agenteval code-review pick-clean ~/src/app --mined mined --count 20 --out mined
+agenteval code-review build ~/src/app --mined mined --clean mined --task tasks/app-review
+```
+
+- **`mine`** — SZZ over the branch's first-parent history: for each fix
+  commit (`fix:`, `fix(scope):`, or `--fix-pattern`), the lines it removed
+  from code files (not tests, docs, data or lockfiles) are blamed at its
+  parent with `-w -M -C`. A pair is kept when the fix removed at most
+  `--max-removed-lines` (40), one commit owns at least `--min-owner-share`
+  (0.6) of the blamed lines, that commit is not `chore`/`style`/`ci`, and it
+  landed through a different PR than the fix. `--github` maps commits to PRs
+  with `gh api`; without it each commit is its own unit. Writes
+  `candidates.json` (every blamed commit, and a reason per dropped fix) and
+  `candidates.md`, a table to read while confirming. Mining again keeps
+  `confirmed` marks. `--prescreen MODEL` (`--prescreen-limit N`) asks a model
+  whether each candidate is a real defect: a first pass for the reader, never
+  the label.
+- **`pick-clean`** — merged PRs in the mined window that no scanned fix
+  blamed, minus bots, housekeeping and escaped PRs, drawn with a seed
+  (`--seed`, recorded in `clean.json`) and size-matched by changed lines to
+  the confirmed escaped PRs. Clean means only "no fix traced a bug to it":
+  read its measure as defect claims per clean PR, not a false-positive rate.
+- **`build`** — one item per PR in `<task>/items.jsonl` and
+  `<task>/fixtures/<id>/`: `repo.bundle` (the PR's base as a root commit plus
+  its commits, nothing after its head, so the fix is out of reach) and
+  `pr.json`. Only `"confirmed": true` goes in; `--include-unconfirmed` adds
+  unreviewed ones (not those pre-screened `not_defect`) and says so in their
+  provenance. Defect lines are line numbers in the PR head. Rebase, squash and
+  merge-commit PRs are handled; a PR GitHub lists only part of, or whose
+  commits lack the introducer, is skipped with the reason in
+  `code-review-build.json`, as are defects whose lines could not be found at
+  the PR head (they keep their file). Same inputs, same fixture bytes:
+  fixtures are part of trial identity, so a rebuild does not re-run trials.
+
 ## Concepts
 
 - **Workspace** — a directory with a `tasks/` folder. Commands find it by
@@ -394,6 +438,7 @@ Every command takes `--help`.
 | `agenteval diff <before> <after>` | did the conclusion change between two runs: the pick, who entered or left the gates, each pass rate split into shared and new inputs, and which shared inputs flipped — same answer graded differently, or a new answer (`--step`, `--json`); in the dashboard, Compare on a run or task page | no |
 | `agenteval calibrate <run> --labels FILE` | does the judge's 1–5 score separate answers a person called right from the ones they called wrong: AUC with an input-resampled 95% interval, per judged dimension and per label group, and how often the labels overrule the check | no |
 | `agenteval replay <run>...` | decide finished runs again under baseline rules (leaderboard, weighted cost, within q of best) and with grader errors blamed on the model; names the gate each pick fails | no |
+| `agenteval code-review mine\|pick-clean\|build` | build a code-review dataset from a repo's history: PRs that shipped a bug a later fix traced back to, size-matched clean PRs, and their fixtures ([Code review](#code-review)) | only for `mine --prescreen` |
 | `agenteval install-skill` | add the `/agenteval-new-task` skill for Claude Code to this workspace | no |
 | `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
 
