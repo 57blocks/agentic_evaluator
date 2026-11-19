@@ -833,6 +833,16 @@ Pass/fail still decides success and the gates. The score is shown under the
 required-check column, and in `highest-assurance` it breaks a tie between
 candidates with the same pass rate, before the judge; it decides only when
 every compared candidate has one.
+Add `"measures"` to report counts that are neither a verdict nor a share —
+comments a review posted, claims it made: `{"evidence": "...", "measures":
+{"comments": 3, "defect_claims": 1}}`. Names are lower snake case (up to 40
+characters), values finite numbers; anything else is dropped, never an
+error. Measures are descriptive only: no gate, mode or score reads them.
+The report shows them per candidate, over every input and per tag and split:
+the mean over each input's graded trials, then the mean over inputs, with a
+95% t-interval over the per-input means. A measure only some inputs report
+is averaged over those inputs. `agenteval diff` prints each candidate's
+means in both runs.
 `version_files` hashes the script into the check's version, so editing it
 shows up in the evidence. `kind: tsc` with `scaffold_dir: scaffold` instead
 compiles the produced TypeScript against `scaffold/tsconfig.json`.

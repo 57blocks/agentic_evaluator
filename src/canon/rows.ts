@@ -25,6 +25,8 @@ export interface CheckCell {
   reason?: string;
   /** The share of the deliverable the check accepted, in [0, 1], when the check reported one. */
   score?: number;
+  /** Named counts the check reported beside its verdict (canon/measures.ts); absent when it reported none. */
+  measures?: Record<string, number>;
 }
 
 export interface TrialRow {

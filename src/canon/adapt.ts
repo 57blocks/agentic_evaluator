@@ -82,6 +82,7 @@ function checkCells(input: AdaptInput, r: RunRecord): Record<string, CheckCell> 
       evidence: r.checkOutput ? r.checkOutput.slice(0, EVIDENCE_CHARS) : undefined,
       ...(r.checkReason ? { reason: r.checkReason } : {}),
       ...(r.checkScore !== undefined ? { score: r.checkScore } : {}),
+      ...(r.checkMeasures !== undefined ? { measures: r.checkMeasures } : {}),
     },
   };
 }

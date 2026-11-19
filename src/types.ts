@@ -258,6 +258,8 @@ export interface RunRecord {
   checkReason?: string;
   /** What share of the deliverable a command check accepted, in [0, 1], when it reported one. */
   checkScore?: number;
+  /** Named counts a command check reported beside its verdict (canon/measures.ts), when it reported any. */
+  checkMeasures?: Record<string, number>;
 
   // ── Canonical (protocol v0.4) fields. `candidate` above holds the candidate
   // id. ──

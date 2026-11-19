@@ -35,7 +35,8 @@ import type { WorkflowRecord } from "./canon/workflow.js";
 import { planFromRun, routeVia, type PlanStep } from "./test-plan.js";
 import type { WorkflowDigest } from "./workflow-report-model.js";
 import { NO_PICK, plural, sha8 } from "./report-format.js";
-import { sliceRows, type SliceRow } from "./report-slices.js";
+import { measureSlices, sliceRows, type MeasureSliceRow, type SliceRow } from "./report-slices.js";
+import { measureStats, type MeasureStats } from "./canon/measures.js";
 import { costSuccessChart, gateNotesOf, type CostSuccessChart } from "./report-scatter.js";
 import type { RunAbout } from "./canon/about.js";
 import type { CandidateDef } from "./canon/types.js";
@@ -56,6 +57,8 @@ export interface CandidateView {
   checkExecuted: number;
   /** Mean score the required check reported (0–1); null when it reports none. */
   checkScore: number | null;
+  /** The check's measures over this candidate's graded trials, input as the unit; empty when it reported none. */
+  checkMeasures: MeasureStats;
   winRate: number | null;
   comparisons: number;
   absolute: number | null;
@@ -247,6 +250,7 @@ export function candidateViews(b: RunBundle): CandidateView[] {
       checkPass: c.check_states.pass,
       checkExecuted: c.check_states.pass + c.check_states.fail,
       checkScore: c.required_check_score ?? null,
+      checkMeasures: measureStats(own, c.candidate),
       winRate: duel.rate,
       comparisons: duel.comparisons,
       absolute: abs.length ? abs.reduce((s, v) => s + v, 0) / abs.length : null,
@@ -577,6 +581,8 @@ export interface StepReport {
   tested: PlanStep;
   /** Required-check results per input tag and split; empty when the task labels no inputs. */
   slices: SliceRow[];
+  /** The check's measures per candidate, over all inputs then per tag and split; empty when the check reported none. */
+  measures: MeasureSliceRow[];
   /** What this step's candidates do (the step's description); null when the spec gives none. */
   stepDescription: string | null;
   facts: Array<{ label: string; value: string }>;
@@ -673,6 +679,7 @@ export function buildStepReport(b: RunBundle): StepReport {
     tested: planFromRun(b),
     stepDescription: b.about?.stepDescription ?? null,
     slices: sliceRows(b.about?.labels ?? null, b.trials, views.map((v) => v.id), m.evaluators.required_checks[0] ?? null),
+    measures: measureSlices(b.about?.labels ?? null, b.trials, views.map((v) => v.id)),
     facts: [
       { label: "Spec", value: `${m.spec.path ?? "—"} · sha256 ${sha8(m.spec.sha256)}` },
       { label: "Test set", value: `${m.test_set.id ?? "—"} · ${inputs} input(s)` },

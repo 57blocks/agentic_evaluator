@@ -53,6 +53,34 @@ export function wilson(successes: number, trials: number, z = Z_95): Interval | 
   return { low: Math.max(0, center - half), high: Math.min(1, center + half) };
 }
 
+/** Student's t, two-sided 95%, for 1–30 degrees of freedom. */
+const T_95 = [
+  12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228,
+  2.201, 2.179, 2.16, 2.145, 2.131, 2.12, 2.11, 2.101, 2.093, 2.086,
+  2.08, 2.074, 2.069, 2.064, 2.06, 2.056, 2.052, 2.048, 2.045, 2.042,
+];
+
+/** The t critical value: the table up to 30 df, a Cornish–Fisher expansion beyond (within 0.001). */
+function tCritical95(df: number): number {
+  if (df <= T_95.length) return T_95[df - 1]!;
+  const z = Z_95;
+  return z + (z ** 3 + z) / (4 * df) + (5 * z ** 5 + 16 * z ** 3 + 3 * z) / (96 * df * df);
+}
+
+/**
+ * 95% t-interval for the mean of `values` (each one an input's own mean, so
+ * the input is the unit). Null for fewer than two values: one input has no
+ * spread to estimate from.
+ */
+export function tInterval95(values: readonly number[]): Interval | null {
+  const n = values.length;
+  if (n < 2) return null;
+  const mean = values.reduce((s, v) => s + v, 0) / n;
+  const sd = Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / (n - 1));
+  const half = tCritical95(n - 1) * (sd / Math.sqrt(n));
+  return { low: mean - half, high: mean + half };
+}
+
 /** P(X ≤ k) for X ~ Binomial(n, 1/2). */
 function binomialHalfCdf(k: number, n: number): number {
   let term = Math.pow(0.5, n);

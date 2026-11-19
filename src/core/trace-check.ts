@@ -32,6 +32,8 @@ export interface GradedCheck {
   reason?: string;
   /** The command check's own score (0–1), carried through untouched: trace rules judge the path, not how much of the deliverable was accepted. */
   score?: number;
+  /** The command check's measures, carried through untouched like its score. */
+  measures?: Record<string, number>;
 }
 
 export interface TraceSubject {

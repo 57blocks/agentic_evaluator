@@ -40,7 +40,8 @@ import { PAGE_STYLE } from "./report-style.js";
 import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
 import { CHART_STYLES, renderScoreDistribution, renderScoreSummary } from "./report-charts.js";
 import { aboutOfRun, promptsOfRun, type RunAbout, type RunPromptsAbout } from "./canon/about.js";
-import { sliceRows } from "./report-slices.js";
+import { measureSlices, sliceRows } from "./report-slices.js";
+import { measureLine, renderMeasures } from "./report-measures.js";
 import { SCATTER_STYLES, costSuccessChart, gateNotesOf, renderCostSuccess } from "./report-scatter.js";
 import { renderCertainty } from "./report-certainty.js";
 import { agentActivityRows, type AgentActivityRow } from "./report-model.js";
@@ -208,7 +209,7 @@ function checkPill(v: CandidateView): string {
   if (v.checkExecuted === 0) return "—";
   const all = v.checkPass === v.checkExecuted;
   const score = v.checkScore === null ? "" : `<span class="sub">score ${Math.round(v.checkScore * 100)}%</span>`;
-  return `<span class="pill ${all ? "pass" : "miss"}">${v.checkPass} / ${v.checkExecuted}</span>${score}`;
+  return `<span class="pill ${all ? "pass" : "miss"}">${v.checkPass} / ${v.checkExecuted}</span>${score}${measureLine(v.checkMeasures)}`;
 }
 
 /** The legacy report's inline win-rate bar; absent when nothing was compared. */
@@ -453,7 +454,7 @@ export function renderRunReport(b: RunBundle): string {
     <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.${m.control_candidate ? ` Control candidate: ${escapeHtml(m.control_candidate)}.` : ""}</p>
   </section>
 
-  ${renderSlices(b, views.map((v) => v.id))}
+  ${renderSlices(b, views.map((v) => v.id))}${renderMeasures(measureSlices(b.about?.labels ?? null, b.trials, views.map((v) => v.id)), views.map((v) => v.id))}
 
   <div class="two-col">
     ${renderAgentActivity(agentActivityRows(b.trials, views.map((v) => v.id)))}

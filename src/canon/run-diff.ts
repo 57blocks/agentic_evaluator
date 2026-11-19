@@ -12,6 +12,8 @@
  *                   one has: 57/60 → 92/100 mixes the two
  *   flips           shared inputs whose outcome moved, and whether the answer
  *                   itself changed or the same answer was graded differently
+ *   measures        each candidate's check measures in both runs (descriptive,
+ *                   canon/measures.ts), counted from the rows
  *
  * "Shared" means the same input content (the manifest's input hash), not the
  * same name. "Same answer" needs proof — the later trial reused the earlier
@@ -23,6 +25,7 @@
 
 import { INFRA_COMPLETION_STATES } from "./states.js";
 import { wilson } from "./stats.js";
+import { measureNames, measureStats, type MeasureStat } from "./measures.js";
 import type { Rate } from "./rates.js";
 import type { Recommendation } from "./select.js";
 import type { TrialRow } from "./rows.js";
@@ -84,6 +87,14 @@ export interface RateChange {
   /** Counted on the inputs that run does not share: only it has them, or their content changed. Null when there are none. */
   onlyA: Count | null;
   onlyB: Count | null;
+}
+
+/** One check measure of one candidate, in each run; null where that run's graded trials did not report it. */
+export interface MeasureChange {
+  candidate: string;
+  measure: string;
+  a: MeasureStat | null;
+  b: MeasureStat | null;
 }
 
 export type FlipCause = "same-answer" | "new-answer" | "unknown";
@@ -151,6 +162,8 @@ export interface RunDiff {
   flipGroups: FlipGroup[];
   /** Shared inputs a candidate has on both sides but that did not run, or was not graded, on one of them. */
   notCompared: number;
+  /** Each candidate's check measures on both sides; empty when neither run's check reported any. */
+  measures: MeasureChange[];
 }
 
 export const trialKey = (candidate: string, input: string, trial: number): string => `${candidate}\0${input}\0${trial}`;
@@ -180,7 +193,19 @@ export function diffRuns(a: RunSide, b: RunSide): RunDiff {
     flips: compared.flatMap((x) => x.flips),
     flipGroups: groupFlips(compared.flatMap((x) => x.flips), setup.find((s) => s.what === "check version") ?? null),
     notCompared: compared.reduce((s, x) => s + x.notCompared, 0),
+    measures: candidates.flatMap((c) => measureChanges(c, a, b)),
   };
+}
+
+/* ── measures ────────────────────────────────────────────────────────────── */
+
+function measureChanges(candidate: string, a: RunSide, b: RunSide): MeasureChange[] {
+  const own = (s: RunSide) => s.rows.filter((r) => r.candidate === candidate);
+  const names = measureNames([...own(a), ...own(b)]);
+  if (names.length === 0) return [];
+  const sa = measureStats(a.rows, candidate);
+  const sb = measureStats(b.rows, candidate);
+  return names.map((measure) => ({ candidate, measure, a: sa[measure] ?? null, b: sb[measure] ?? null }));
 }
 
 /* ── setup ───────────────────────────────────────────────────────────────── */

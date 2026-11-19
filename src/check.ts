@@ -30,6 +30,7 @@ import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
 import type { AgentTrace } from "./canon/agent-trace.js";
 import { hasTraceRules, type TraceRules } from "./canon/trace-rules.js";
+import { measuresOf } from "./canon/measures.js";
 import type { CheckConfig } from "./types.js";
 
 /** Truncate captured compiler output so records / reports stay small. */
@@ -67,6 +68,8 @@ export interface CheckResult {
    * candidates the verdict alone cannot.
    */
   score?: number;
+  /** Named counts a command check reported (`{"measures": {"comments": 3}}`); descriptive only (canon/measures.ts). */
+  measures?: Record<string, number>;
 }
 
 let cachedTscVersion: string | undefined;
@@ -271,8 +274,9 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
  *   stdout       optional JSON {"evidence": "...", "reason": "...", "score": 0.93};
  *                plain text is kept verbatim as the evidence instead. `score`
  *                (a number in [0, 1]: held-out tests passed, requirements
- *                covered) is kept beside the verdict; anything else there is
- *                ignored, never an evaluator error
+ *                covered) is kept beside the verdict, and so is `measures`
+ *                ({"comments": 3}: named finite numbers, canon/measures.ts);
+ *                anything else there is ignored, never an evaluator error
  *
  * The command runs on this host with the caller's privileges. Until the
  * Docker sandbox lands, only declare checks you would run yourself.
@@ -339,17 +343,19 @@ function scoreOf(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1 ? value : undefined;
 }
 
-/** Pull evidence (and a score, when reported) out of the check's stdout, JSON or not. */
-function evidenceOf(stdout: string): { evidence: string; reason?: string; score?: number } {
+/** Pull evidence (and a score and measures, when reported) out of the check's stdout, JSON or not. */
+function evidenceOf(stdout: string): { evidence: string; reason?: string; score?: number; measures?: Record<string, number> } {
   const text = stdout.trim();
   if (!text.startsWith("{")) return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
   try {
-    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown; score?: unknown };
+    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown; score?: unknown; measures?: unknown };
     const score = scoreOf(parsed.score);
+    const measures = measuresOf(parsed.measures);
     return {
       evidence: typeof parsed.evidence === "string" ? parsed.evidence.slice(0, MAX_OUTPUT_CHARS) : text.slice(0, MAX_OUTPUT_CHARS),
       ...(typeof parsed.reason === "string" ? { reason: parsed.reason } : {}),
       ...(score === undefined ? {} : { score }),
+      ...(measures === undefined ? {} : { measures }),
     };
   } catch {
     return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
@@ -427,8 +433,8 @@ export async function runCommandCheck(params: {
     const why = e.code === "ENOENT" ? `check program not found: ${program}` : `check could not start: ${e.message}`;
     return { state: "evaluator_error", passed: false, exitCode: -1, output: why, version, reason: why };
   }
-  const { evidence, reason, score } = evidenceOf(ran.stdout);
-  const scored = score === undefined ? {} : { score };
+  const { evidence, reason, score, measures } = evidenceOf(ran.stdout);
+  const scored = { ...(score === undefined ? {} : { score }), ...(measures === undefined ? {} : { measures }) };
   const errText = ran.stderr.trim().slice(0, MAX_OUTPUT_CHARS);
   if (!ran.timedOut && ran.exitCode === COMMAND_EXIT_PASS) {
     return { state: "pass", passed: true, exitCode: COMMAND_EXIT_PASS, output: evidence, version, ...(reason ? { reason } : {}), ...scored };

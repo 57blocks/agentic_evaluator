@@ -1,10 +1,12 @@
 /**
  * A run diff (src/canon/run-diff.ts) as terminal lines: what changed in the
  * setup, then whether the conclusion moved, who crossed a gate, how each
- * rate moved, and which shared inputs flipped and why.
+ * rate moved, the check's measures in each run, and which shared inputs
+ * flipped and why.
  */
 
-import type { Count, RateChange, RateWithInterval, RunDiff } from "../canon/run-diff.js";
+import type { Count, MeasureChange, RateChange, RateWithInterval, RunDiff } from "../canon/run-diff.js";
+import { fmtMeasureStat } from "../canon/measures.js";
 
 const pct = (v: number | null): string => (v === null ? "—" : v.toFixed(2));
 const frac = (c: Count | null): string => (c === null || c.denominator === 0 ? "—" : `${c.numerator}/${c.denominator}`);
@@ -50,6 +52,16 @@ function rateLines(d: RunDiff): string[] {
   return ["task success rate, as recorded [95% interval]", ...table([head, ...d.rates.map(row)])];
 }
 
+/** Each candidate's check measures before and after; nothing when neither run reported any. */
+function measureLines(d: RunDiff): string[] {
+  if (d.measures.length === 0) return [];
+  const side = (m: MeasureChange["a"]) => (m === null ? "—" : fmtMeasureStat(m));
+  const arrow = (m: MeasureChange) => `${m.a === null ? "—" : m.a.mean.toFixed(2)} → ${m.b === null ? "—" : m.b.mean.toFixed(2)}`;
+  const head = ["candidate", "measure", "mean", "before [95% interval]", "after [95% interval]"];
+  const rows = d.measures.map((m) => [m.candidate, m.measure, arrow(m), side(m.a), side(m.b)]);
+  return ["check measures, mean per input over graded trials", ...table([head, ...rows]), ""];
+}
+
 /** Per flipped input and trial, what the check said before and after (`--why`). */
 function whyLines(d: RunDiff, g: RunDiff["flipGroups"][number]): string[] {
   const flips = d.flips.filter((f) => f.candidate === g.candidate && f.direction === g.direction && f.cause === g.cause);
@@ -87,6 +99,7 @@ export function diffLines(d: RunDiff, opts: { why?: boolean } = {}): string[] {
     "",
     ...rateLines(d),
     "",
+    ...measureLines(d),
     ...flipLines(d, opts.why === true),
   ];
 }
