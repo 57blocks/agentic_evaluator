@@ -15,7 +15,7 @@
  * from items.jsonl), read from the run's private copy while references/ is
  * hidden. Invalid findings are dropped and counted. The decisions — which
  * finding matched which defect, and how — are written to findings-match.json
- * beside the evidence.
+ * beside the evidence, without the answer key's text.
  */
 
 import fs from "node:fs/promises";
@@ -24,8 +24,8 @@ import { referencesCopyFor } from "../core/answer-key.js";
 import { complete } from "../llm.js";
 import { MAX_OUTPUT_CHARS, placeFiles, writeFresh, writePlaced, type CheckFile, type CheckResult } from "../check.js";
 import type { CheckConfig } from "../types.js";
-import { ExpectedError, parseExpected, parseFindings, type Expected } from "./findings.js";
-import { gradeItem, LlmFallbackError, verdictOfGrade, type Ask, type LlmFallback } from "./match.js";
+import { ExpectedError, parseExpected, parseFindings, type Expected, type Finding, type InvalidFinding } from "./findings.js";
+import { gradeItem, LlmFallbackError, verdictOfGrade, type Ask, type CleanGrade, type DefectGrade, type LlmFallback } from "./match.js";
 import { findingsMatchVersion } from "./version.js";
 
 export type FindingsMatchConfig = Extract<CheckConfig, { kind: "findings-match" }>;
@@ -66,7 +66,7 @@ type Read<T> = { ok: true; value: T } | { ok: false; result: CheckResult };
 
 async function readFindingsFile(workDir: string, version: string): Promise<Read<string>> {
   const file = path.join(workDir, FINDINGS_FILE);
-  const fail = (why: string, reason = why): Read<string> => ({ ok: false, result: { state: "fail", passed: false, exitCode: EXIT_FAIL, output: why, version, reason, measures: { findings: 0, invalid_findings: 0 } } });
+  const fail = (why: string, reason = why): Read<string> => ({ ok: false, result: { state: "fail", passed: false, exitCode: EXIT_FAIL, output: why, version, reason } });
   const stat = await fs.lstat(file).catch(() => null);
   if (stat === null) return fail(`the candidate left no ${FINDINGS_FILE}`, "no review");
   // A link could point anywhere on the host; the check reads in-process.
@@ -95,6 +95,48 @@ async function readExpected(taskRoot: string, step: string | undefined, input: s
   }
 }
 
+/**
+ * What findings-match.json keeps: the candidate's findings and, per defect,
+ * only where it is and how it was matched. Never a defect's description or
+ * fix: the work dir is kept under runs/, which a later trial could read, and
+ * the fix must stay out of a reviewer's reach. The LLM's reason is left out
+ * for the same reason; it is in the evidence.
+ */
+function decisionRecord(version: string, findings: readonly Finding[], invalid: readonly InvalidFinding[], grade: DefectGrade | CleanGrade): unknown {
+  const base = { version, kind: grade.kind, findings, invalid };
+  if (grade.kind === "clean") {
+    return { ...base, bases: grade.bases, claims: grade.claims, ...(grade.llm ? { llm: { model: grade.llm.model, claims: grade.llm.claims } } : {}) };
+  }
+  return {
+    ...base,
+    defects: grade.defects.map((d) => ({ file: d.defect.file, start_line: d.defect.start_line, end_line: d.defect.end_line, caught_by: d.caughtBy, findings: d.findings })),
+    finding_source: grade.findingSource,
+    ambiguous: grade.ambiguous,
+    judged: grade.judged,
+    ...(grade.llm ? { llm: { model: grade.llm.model, matches: grade.llm.matches } } : {}),
+  };
+}
+
+/**
+ * A review that never came still counts against the item: zero caught of
+ * its defects, so `caught` over `defects` includes the trial. Best effort —
+ * the answer key is not needed to fail it, and an empty answer fails on an
+ * input without one.
+ */
+async function noReviewMeasures(params: { taskRoot: string; step?: string; input: string }): Promise<Record<string, number>> {
+  const base = { findings: 0, invalid_findings: 0 };
+  try {
+    const found = await readExpectedText(params.taskRoot, params.step, params.input);
+    if (found === null) return base;
+    const expected = parseExpected(found.text);
+    return expected.kind === "clean"
+      ? { ...base, defect_claims: 0 }
+      : { ...base, defects: expected.defects.length, caught: 0, matched_deterministic: 0, matched_llm: 0, unmatched_findings: 0 };
+  } catch {
+    return base;
+  }
+}
+
 export async function runFindingsMatchCheck(params: {
   check: FindingsMatchConfig;
   /** The candidate's parsed files, placed in the work dir first. */
@@ -119,9 +161,9 @@ export async function runFindingsMatchCheck(params: {
 
   // No review is decided before the answer key is read: an empty answer fails on any item.
   const raw = await readFindingsFile(workDir, version);
-  if (!raw.ok) return raw.result;
+  if (!raw.ok) return { ...raw.result, measures: await noReviewMeasures(params) };
   const parsed = parseFindings(raw.value);
-  if (!parsed.ok) return { state: "fail", passed: false, exitCode: EXIT_FAIL, output: parsed.why, version, reason: "unreadable review", measures: { findings: 0, invalid_findings: 0 } };
+  if (!parsed.ok) return { state: "fail", passed: false, exitCode: EXIT_FAIL, output: parsed.why, version, reason: "unreadable review", measures: await noReviewMeasures(params) };
 
   const expected = await readExpected(params.taskRoot, params.step, params.input, version);
   if (!expected.ok) return expected.result;
@@ -142,7 +184,7 @@ export async function runFindingsMatchCheck(params: {
     ? [`${parsed.invalid.length} invalid finding(s) dropped: ${parsed.invalid.slice(0, 5).map((f) => `#${f.index} ${f.why}`).join("; ")}${parsed.invalid.length > 5 ? "; …" : ""}`]
     : [];
   const head = `${expected.value.kind} item: ${parsed.findings.length} finding(s)`;
-  const recorded = await writeFresh(path.join(workDir, DECISIONS_FILE), `${JSON.stringify({ version, expected: expected.value, findings: parsed.findings, invalid: parsed.invalid, grade }, null, 2)}\n`)
+  const recorded = await writeFresh(path.join(workDir, DECISIONS_FILE), `${JSON.stringify(decisionRecord(version, parsed.findings, parsed.invalid, grade), null, 2)}\n`)
     .then(() => [] as string[], (err: unknown) => [`(${DECISIONS_FILE} not written: ${err instanceof Error ? err.message : String(err)})`]);
   const output = [head, ...invalid, verdict.evidence, ...recorded].filter((l) => l !== "").join("\n").slice(0, MAX_OUTPUT_CHARS);
   return {

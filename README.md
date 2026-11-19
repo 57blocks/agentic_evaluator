@@ -862,8 +862,10 @@ compiles the produced TypeScript against `scaffold/tsconfig.json`.
 ### Code review checks (`findings.json`, `kind: findings-match`)
 
 A reviewer under test leaves `findings.json` in its work dir: an array, or
-`{"findings": [...]}`. A model candidate can deliver it as a
-```` ```file: findings.json ```` block. Each finding:
+`{"findings": [...]}`. A command candidate writes the file itself. A model
+candidate on a `codegen` step returns it as a ```` ```file: findings.json ````
+block. A `prompt` step yields only text, so it has no `findings.json`. Each
+finding:
 
 ```json
 {"file": "src/a.ts", "start_line": 40, "end_line": 42,
@@ -922,9 +924,11 @@ evaluators:
   clean review. A `findings.json` that is not JSON also fails. A missing or
   malformed `expected`, or a fallback that still fails after 3 attempts, is
   an evaluator error.
-- The evidence names each defect and says whether it was caught on location
-  or by the LLM, and by which finding. Every decision is also written to
-  `findings-match.json` in the trial's kept work dir.
+- The evidence names each defect's location and says whether it was caught
+  on location or by the LLM, and by which finding. Every decision is also
+  written to `findings-match.json` in the trial's kept work dir. The record
+  keeps defect locations but never a description or fix, because a later
+  trial can read `runs/`.
 - The version covers the options and the fallback's model, route and
   prompts. Changing any of them regrades reused trials on `--reuse`, from the
   `findings.json` each trial left.
@@ -938,7 +942,7 @@ The check reports these measures:
 | measure | items | what it counts |
 |---|---|---|
 | `findings`, `invalid_findings` | all | valid findings, and dropped ones |
-| `defects`, `caught` | defect | known defects, and how many were caught |
+| `defects`, `caught` | defect | known defects, and how many were caught (0 when the trial left no review) |
 | `matched_deterministic`, `matched_llm` | defect | findings that matched a defect on location, or through the LLM (each finding counted once) |
 | `unmatched_findings` | defect | findings that matched no defect |
 | `defect_claims` | clean | findings that claim a defect |

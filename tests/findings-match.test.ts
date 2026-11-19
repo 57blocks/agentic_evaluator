@@ -48,7 +48,7 @@ async function grade(opts: {
   check?: FindingsMatchConfig;
   ask?: Ask;
   input?: string;
-}): Promise<CheckResult & { decisions?: unknown }> {
+}): Promise<CheckResult & { decisions?: unknown; workText: string }> {
   const task = await fs.mkdtemp(path.join(os.tmpdir(), "eval-fm-task-"));
   const work = await fs.mkdtemp(path.join(os.tmpdir(), "eval-fm-work-"));
   const input = opts.input ?? "pr1";
@@ -63,7 +63,9 @@ async function grade(opts: {
     }
     const result = await runFindingsMatchCheck({ check: opts.check ?? CHECK, files: [], workDir: work, taskRoot: task, step: "review", input, ...(opts.ask ? { ask: opts.ask } : {}) });
     const decisions = await fs.readFile(path.join(work, DECISIONS_FILE), "utf-8").then((t) => JSON.parse(t) as unknown, () => undefined);
-    return { ...result, ...(decisions === undefined ? {} : { decisions }) };
+    const names = await fs.readdir(work);
+    const workText = (await Promise.all(names.map((n) => fs.readFile(path.join(work, n), "utf-8")))).join("\n");
+    return { ...result, workText, ...(decisions === undefined ? {} : { decisions }) };
   } finally {
     await fs.rm(task, { recursive: true, force: true });
     await fs.rm(work, { recursive: true, force: true });
@@ -328,10 +330,59 @@ test("an unreadable verdict is asked again; a fallback that keeps failing is an 
 
 test("every decision is written to findings-match.json beside the evidence", async () => {
   const r = await grade({ expected: DEFECT_ITEM, findings: [finding(), finding({ start_line: 80 })], check: WITH_LLM, ask: stub('{"matches":[],"reason":"r"}') });
-  const d = r.decisions as { version: string; grade: { findingSource: unknown[]; llm: { model: string } } };
+  const d = r.decisions as { version: string; finding_source: unknown[]; defects: Array<{ caught_by: string }>; llm: { model: string } };
   assert.equal(d.version, r.version);
-  assert.deepEqual(d.grade.findingSource, ["deterministic", null]);
-  assert.equal(d.grade.llm.model, "google/gemini-3.1-pro-preview");
+  assert.deepEqual(d.finding_source, ["deterministic", null]);
+  assert.equal(d.defects[0]?.caught_by, "deterministic");
+  assert.equal(d.llm.model, "google/gemini-3.1-pro-preview");
+});
+
+test("nothing the check leaves in the work dir carries a defect's description or fix", async () => {
+  const secret = { ...DEFECT, description: "SECRET-DESCRIPTION", fix_commit: "SECRETCOMMIT", fix_diff: "--- a\n+++ b\n-SECRET-DIFF" };
+  for (const findings of [[finding()], [finding({ start_line: 90 })]]) {
+    const r = await grade({ expected: { kind: "defect", defects: [secret] }, findings, check: WITH_LLM, ask: stub('{"matches":[],"reason":"no"}') });
+    assert.ok(r.decisions, "the record was written");
+    assert.doesNotMatch(r.workText, /SECRET/);
+    assert.doesNotMatch(r.output, /SECRET/);
+  }
+});
+
+test("a trial with no review still reports the item's defects as not caught, so caught over defects counts it", async () => {
+  const defect = await grade({ expected: DEFECT_ITEM });
+  assert.deepEqual(defect.measures, { findings: 0, invalid_findings: 0, defects: 1, caught: 0, matched_deterministic: 0, matched_llm: 0, unmatched_findings: 0 });
+  const unreadable = await grade({ expected: DEFECT_ITEM, findings: "nope" });
+  assert.equal(unreadable.measures?.defects, 1);
+  const clean = await grade({ expected: CLEAN_ITEM });
+  assert.deepEqual(clean.measures, { findings: 0, invalid_findings: 0, defect_claims: 0 });
+  const noKey = await grade({});
+  assert.deepEqual(noKey.measures, { findings: 0, invalid_findings: 0 });
+});
+
+test("the configured fallback calls the model through the repo's client, at temperature 0", async () => {
+  const realFetch = globalThis.fetch;
+  const savedKey = process.env.OPENROUTER_API_KEY;
+  const bodies: Array<Record<string, unknown>> = [];
+  process.env.OPENROUTER_API_KEY = "or-key";
+  globalThis.fetch = (async (_url: string | URL, init?: RequestInit) => {
+    bodies.push(JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>);
+    const content = '{"matches":[{"finding":1,"defect":1}],"reason":"same fault"}';
+    return new Response(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content } }], usage: { prompt_tokens: 10, completion_tokens: 5, cost: 0.001 } }), { status: 200 });
+  }) as typeof fetch;
+  try {
+    const r = await grade({ expected: DEFECT_ITEM, findings: [finding({ start_line: 90 })], check: WITH_LLM });
+    assert.equal(r.state, "pass");
+    assert.equal(bodies.length, 1);
+    assert.equal(bodies[0]!.model, "google/gemini-3.1-pro-preview");
+    assert.equal(bodies[0]!.temperature, 0);
+    const messages = bodies[0]!.messages as Array<{ role: string; content: string }>;
+    assert.equal(messages[0]?.role, "system");
+    assert.match(messages[0]!.content, /whether code review findings point at known defects/);
+    assert.match(messages[1]!.content, /KNOWN DEFECTS/);
+  } finally {
+    globalThis.fetch = realFetch;
+    if (savedKey === undefined) delete process.env.OPENROUTER_API_KEY;
+    else process.env.OPENROUTER_API_KEY = savedKey;
+  }
 });
 
 test("the version carries the options, and the fallback's model and prompts", () => {
