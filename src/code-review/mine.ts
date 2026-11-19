@@ -75,9 +75,12 @@ async function blameFix(ctx: Context, fix: CommitInfo, parent: string): Promise<
   const ranges = await Promise.all(files.map((f) => removedRanges(ctx.repo, parent, fix.sha, f)));
   const removed = ranges.flat().reduce((n, r) => n + r.end - r.start + 1, 0);
   if (removed === 0) return "removed no lines of code";
-  if (removed > ctx.maxRemovedLines) return `removed ${removed} lines of code (more than ${ctx.maxRemovedLines})`;
+  // Blamed even when the fix is too large to be a candidate: every commit a
+  // fix blamed is kept out of the clean set.
   const kept = files.filter((_, i) => ranges[i].length > 0);
   const blamed = (await Promise.all(kept.map((f) => blameLines(ctx.repo, parent, f, ranges[files.indexOf(f)], ctx.blame)))).flat();
+  for (const b of blamed) ctx.introducers.add(b.sha);
+  if (removed > ctx.maxRemovedLines) return `removed ${removed} lines of code (more than ${ctx.maxRemovedLines})`;
   if (blamed.length === 0) return "blame named no commit";
   return { files: kept, removed, blamed };
 }
@@ -101,7 +104,6 @@ async function examine(ctx: Context, fix: CommitInfo): Promise<Outcome> {
   if (typeof blamed === "string") return drop(blamed);
 
   const counts = tally(blamed.blamed);
-  for (const c of counts) ctx.introducers.add(c.sha);
   const total = blamed.blamed.length;
   const top = await introducer(ctx, counts[0].sha, counts[0].lines, total);
   if (top.share < ctx.minOwnerShare) return drop(`top introducer owns ${Math.round(top.share * 100)}% of blamed lines (under ${Math.round(ctx.minOwnerShare * 100)}%)`, top.sha);
