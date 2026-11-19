@@ -382,7 +382,8 @@ function flipsOf(candidate: string, a: RunSide, b: RunSide, shared: readonly str
   return { flips, notCompared };
 }
 
-function trialNote(r: DiffRow): TrialNote {
+/** One trial as every view prints it; also the per-input comparison's (canon/input-compare.ts). */
+export function trialNote(r: DiffRow): TrialNote {
   const checks = Object.entries(r.checks).map(([id, c]) => ({
     id,
     state: c.state,

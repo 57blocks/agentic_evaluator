@@ -1010,6 +1010,10 @@ Every run prints the directory it wrote, `tasks/<task>/runs/<runId>/`. Open
    number that removed them, and who was left. *Gated* means removed by a gate.
 3. **Candidates** — per candidate: trials that succeeded, checks passed,
    pairwise record, cost per success, median time.
+   **Per input** below it puts the candidates side by side on each input:
+   required-check passes k/n and the check's measures, inputs where the
+   candidates differ first; open a row for its trials, with what the check
+   said and the opening of each answer.
 4. **Judge** — what the judge preferred, per dimension, with its reasons. It is
    reported beside the recommendation, not inside it: unless the mode is
    `judge-preference`, the judge does not choose, and the report says when it

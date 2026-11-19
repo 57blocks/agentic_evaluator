@@ -9,21 +9,23 @@ import { escapeHtml } from "./html.js";
 import { fmtMeasure, measureSummary, type MeasureStat, type MeasureStats } from "./canon/measures.js";
 import type { MeasureSliceRow } from "./report-slices.js";
 
-function cell(s: MeasureStat | undefined): string {
+/** Mean, then its interval on the same line; n only when fewer inputs reported it than the slice holds. */
+function cell(s: MeasureStat | undefined, sliceInputs: number): string {
   if (!s) return `<td class="num muted">—</td>`;
-  const ci = s.low === null || s.high === null ? "" : `<span class="sub">95% ${fmtMeasure(s.low)}–${fmtMeasure(s.high)}</span>`;
-  return `<td class="num">${fmtMeasure(s.mean)}${ci}<span class="sub">${s.n} input${s.n === 1 ? "" : "s"}</span></td>`;
+  const ci = s.low === null || s.high === null ? "" : ` <span class="muted small">[${fmtMeasure(s.low)}–${fmtMeasure(s.high)}]</span>`;
+  const n = s.n < sliceInputs ? ` <span class="muted small">· ${s.n} input${s.n === 1 ? "" : "s"}</span>` : "";
+  return `<td class="num">${fmtMeasure(s.mean)}${ci}${n}</td>`;
 }
 
 function candidateTable(candidate: string, rows: readonly MeasureSliceRow[]): string {
   const names = [...new Set(rows.flatMap((r) => Object.keys(r.byCandidate[candidate] ?? {})))].sort();
   if (names.length === 0) return `<h3>${escapeHtml(candidate)}</h3><p class="muted">No graded trial reported a measure.</p>`;
   const body = rows
-    .map((r) => `<tr><td class="mono">${escapeHtml(r.label)}</td><td class="num">${r.inputs}</td>${names.map((n) => cell(r.byCandidate[candidate]?.[n])).join("")}</tr>`)
+    .map((r) => `<tr><td class="mono">${escapeHtml(r.label)}</td><td class="num">${r.inputs}</td>${names.map((n) => cell(r.byCandidate[candidate]?.[n], r.inputs)).join("")}</tr>`)
     .join("");
   return `<h3>${escapeHtml(candidate)}</h3>
     <div class="table-wrap"><table>
-      <thead><tr><th>Slice</th><th class="num">Inputs</th>${names.map((n) => `<th class="num">${escapeHtml(n)}</th>`).join("")}</tr></thead>
+      <thead><tr><th>Slice</th><th class="num">Inputs</th>${names.map((n) => `<th class="num">${escapeHtml(n)} <span class="hint">mean [95%]</span></th>`).join("")}</tr></thead>
       <tbody>${body}</tbody>
     </table></div>`;
 }
