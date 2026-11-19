@@ -399,6 +399,10 @@ agenteval code-review build ~/src/app --mined mined --clean mined --task tasks/a
   `code-review-build.json`, as are defects whose lines could not be found at
   the PR head (they keep their file). Same inputs, same fixture bytes:
   fixtures are part of trial identity, so a rebuild does not re-run trials.
+  `pr.json` takes the PR's title, body, creation time and base branch from
+  GitHub as they are when you build. Someone editing the PR's title or body
+  later changes the fixture on the next build, and its trials then run
+  again. Keep the built `fixtures/` rather than rebuilding when that matters.
   `--pin-files REV PATH...` lays those paths (files or directories), as REV
   has them, over every tree of every fixture, base and PR commits alike. A
   reviewer that reads repo rules (CLAUDE.md, CONTRIBUTING.md, a review

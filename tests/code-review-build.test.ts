@@ -270,6 +270,28 @@ test("the CLI takes --pin-files REV PATH... and refuses stray arguments without 
   await assert.rejects(main(["code-review", "build", s.repo.dir, "--mined", mined, "--task", task, "--pin-files", s.sha.c17, "NOPE"], bufferIo()), (e: Error) => e instanceof UsageError && /NOPE is not in/.test(e.message));
 });
 
+test("pr.json is fixed by what GitHub says of the PR: the same answers give the same bytes, an edited title new ones", async () => {
+  // Arrange
+  const s = await shop();
+  const mined = await minedShop(s, confirmAll);
+  const edited: typeof s.github = { ...s.github, pull: async (n) => ({ ...(await s.github.pull(n)), title: "Discount helper (edited after merge)" }) };
+  const prJson = async (github: typeof s.github): Promise<{ pr: Buffer; bundle: Buffer }> => {
+    const task = await tmp("cr-prjson-");
+    await build({ repo: s.repo.dir, mined, clean: null, taskDir: task, github, includeUnconfirmed: false });
+    const dir = path.join(task, "fixtures", "pr1");
+    return { pr: await fs.readFile(path.join(dir, "pr.json")), bundle: await fs.readFile(path.join(dir, "repo.bundle")) };
+  };
+
+  // Act
+  const [a, b, c] = [await prJson(s.github), await prJson(s.github), await prJson(edited)];
+
+  // Assert
+  assert.ok(a.pr.equals(b.pr));
+  assert.ok(!a.pr.equals(c.pr), "an edited title is a different fixture, so a different trial identity");
+  assert.ok(a.bundle.equals(c.bundle), "the repository does not depend on GitHub's text");
+  assert.deepEqual(Object.keys(JSON.parse(a.pr.toString("utf-8"))), ["repo", "number", "title", "body", "createdAt", "baseRefName", "baseSha", "headSha", "commits"]);
+});
+
 test("a bundle verifies with git and needs no prerequisite", async () => {
   const s = await shop();
   const out = path.join(await tmp("cr-bundle-"), "repo.bundle");
