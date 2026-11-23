@@ -240,4 +240,9 @@ function explainKyc() {
   return out;
 }
 
-process.stdout.write(JSON.stringify({ ...explainClaims(), ...explainKyc() }, null, 1));
+export { explainKycItem };
+
+// Run as a script; imported (by explain_v3.mjs), only export.
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  process.stdout.write(JSON.stringify({ ...explainClaims(), ...explainKyc() }, null, 1));
+}
