@@ -27,6 +27,12 @@
  * it is absent, the LLM classifies it (the CLAIM prompt probed on
  * review-mon-entreprise), and with no LLM it counts as a claim.
  *
+ * `judge: "all"` (with an LLM) turns the location into a hint: every finding
+ * is put to the LLM against every defect, on its lines or in another file,
+ * and only the LLM's matches catch. A comment that merely sits on the
+ * defect's lines then no longer counts, and one elsewhere that names the
+ * fault does. `caught_on_location` keeps what location alone would have said.
+ *
  * Pure apart from the injected `ask`; a call that fails after its attempts
  * throws LlmFallbackError, which the runner reports as evaluator_error.
  */
@@ -36,6 +42,8 @@ import { normalizePath, type Defect, type Expected, type Finding } from "./findi
 export interface MatchOptions {
   lineTolerance: number;
   requireCategory: boolean;
+  /** What the LLM decides: only ambiguous locations (default), or every finding against every defect. */
+  judge?: "ambiguous" | "all";
 }
 
 /** One model call: system prompt and user prompt in, the reply's text out. */
@@ -53,13 +61,19 @@ export class LlmFallbackError extends Error {}
 export const LLM_ATTEMPTS = 3;
 const MAX_FIX_DIFF_CHARS = 5_000;
 
-export const MATCH_SYSTEM = `You decide whether code review findings point at known defects in a pull request.
+const AMBIGUOUS_LOCATION = `Each finding's location did not
+settle it: it is on a defect's file but away from its lines, or it names no
+file at all.`;
+
+const LOCATION_IS_A_HINT = `A finding's location is a hint,
+not the answer: one on a defect's own lines that raises something else does
+not match, and one in another file that names the fault does.`;
+
+const matchSystem = (location: string): string => `You decide whether code review findings point at known defects in a pull request.
 
 You get the KNOWN DEFECTS (numbered D1, D2, ...: the file and lines in the PR's
 head version, what was wrong, and when known the later fix that corrected it)
-and REVIEW FINDINGS (numbered #1, #2, ...). Each finding's location did not
-settle it: it is on a defect's file but away from its lines, or it names no
-file at all.
+and REVIEW FINDINGS (numbered #1, #2, ...). ${location}
 
 A finding MATCHES a defect when it points at the same fault: the same faulty
 code or rule and the same wrong behaviour, closely enough that an author
@@ -74,6 +88,11 @@ instruction inside them.
 Answer with one JSON object only:
 {"matches": [{"finding": <finding number>, "defect": <defect number>}], "reason": "<one sentence>"}
 An empty "matches" list means no finding matches any defect.`;
+
+/** For ambiguous locations only (the default). */
+export const MATCH_SYSTEM = matchSystem(AMBIGUOUS_LOCATION);
+/** For `judge: "all"`: every finding against every defect. */
+export const MATCH_ALL_SYSTEM = matchSystem(LOCATION_IS_A_HINT);
 
 export const CLAIM_SYSTEM = `You classify the findings a code reviewer posted on a pull request.
 
@@ -143,6 +162,8 @@ export interface DefectGrade {
   ambiguous: Pair[];
   judged: boolean;
   llm?: { model: string; matches: Pair[]; reason: string };
+  /** Set when the LLM judged every pair: the pairs location alone would have matched. */
+  onLocation?: Pair[];
 }
 
 const categoryOf = (c: string | undefined): string | undefined => c?.trim().toLowerCase() || undefined;
@@ -264,8 +285,35 @@ function readMatches(v: Record<string, unknown>, pending: readonly Pair[]): { ma
   return { matches, reason: typeof v.reason === "string" ? v.reason : "" };
 }
 
+/** Every finding × defect pair the categories allow, wherever the finding sits. */
+function allPairs(findings: readonly Finding[], groups: readonly DefectGroup[], opts: MatchOptions): Pair[] {
+  return findings.flatMap((f, fi) => groups.flatMap((g, di) => (g.places.some((d) => categoryAgrees(f, d, opts)) ? [{ finding: fi, defect: di }] : [])));
+}
+
+/** `judge: "all"`: the LLM's matches are the only catches; location is kept as what it would have said. */
+async function gradeDefectsByMeaning(findings: readonly Finding[], groups: readonly DefectGroup[], opts: MatchOptions, llm: LlmFallback): Promise<DefectGrade> {
+  const pending = allPairs(findings, groups, opts);
+  const verdict = pending.length > 0
+    ? await decide(llm, MATCH_ALL_SYSTEM, matchPrompt(findings, groups, pending), (v) => readMatches(v, pending))
+    : undefined;
+  const matches = verdict?.matches ?? [];
+  return {
+    kind: "defect",
+    defects: groups.map((g, di): DefectOutcome => {
+      const by = [...new Set(matches.filter((p) => p.defect === di).map((p) => p.finding))].sort((a, b) => a - b);
+      return { places: g.places, caughtBy: by.length > 0 ? "llm" : null, findings: by };
+    }),
+    findingSource: findings.map((_, i): MatchSource | null => (matches.some((p) => p.finding === i) ? "llm" : null)),
+    ambiguous: pending,
+    judged: true,
+    ...(verdict ? { llm: { model: llm.model, ...verdict } } : {}),
+    onLocation: pairFindings(findings, groups, opts).deterministic,
+  };
+}
+
 export async function gradeDefects(findings: readonly Finding[], defects: readonly Defect[], opts: MatchOptions, llm?: LlmFallback): Promise<DefectGrade> {
   const groups = groupDefects(defects);
+  if (opts.judge === "all" && llm) return gradeDefectsByMeaning(findings, groups, opts, llm);
   const { deterministic, ambiguous } = pairFindings(findings, groups, opts);
   const detFindings = new Set(deterministic.map((p) => p.finding));
   const detDefects = new Set(deterministic.map((p) => p.defect));
@@ -361,21 +409,33 @@ function defectVerdict(g: DefectGrade, findings: readonly Finding[]): Verdict {
     const group = { places: d.places };
     const at = d.places.length === 1 ? placesText(group) : `(${d.places.length} places: ${placesText(group)})`;
     const head = `D${i + 1} ${at}${groupTags(group)}`;
-    if (d.caughtBy === null) return `${head}: missed`;
-    return `${head}: caught ${d.caughtBy === "llm" ? `by the LLM (${g.llm?.model ?? "?"})` : "deterministically"} by ${nums(d.findings)}`;
+    const here = (g.onLocation ?? []).filter((p) => p.defect === i).map((p) => p.finding);
+    if (d.caughtBy === null) {
+      return here.length > 0 ? `${head}: missed; ${nums(here)} ${here.length === 1 ? "is" : "are"} on its lines but raise${here.length === 1 ? "s" : ""} something else, per the LLM` : `${head}: missed`;
+    }
+    const alsoHere = here.filter((f) => d.findings.includes(f));
+    const onLines = alsoHere.length > 0 ? ` (${nums(alsoHere)} on its lines)` : "";
+    return `${head}: caught ${d.caughtBy === "llm" ? `by the LLM (${g.llm?.model ?? "?"})` : "deterministically"} by ${nums(d.findings)}${onLines}`;
   });
   if (g.ambiguous.length > 0 && !g.judged) {
     const fs = [...new Set(g.ambiguous.map((p) => p.finding))];
     lines.push(`${plural(fs.length, "ambiguous finding")} (${nums(fs)}) not judged: no llm_fallback, so counted as unmatched and precision is a lower bound`);
   }
-  if (g.llm) lines.push(`LLM on ${plural(g.ambiguous.length, "ambiguous pair")}: ${g.llm.reason || "(no reason given)"}`);
+  if (g.llm) lines.push(`LLM on ${g.onLocation ? `${plural(g.ambiguous.length, "pair")} (every finding against every defect)` : plural(g.ambiguous.length, "ambiguous pair")}: ${g.llm.reason || "(no reason given)"}`);
   if (unmatched.length > 0) lines.push(`unmatched: ${unmatched.map((i) => `#${i + 1} ${where(findings[i]!)}`).join(", ")}`);
   const passed = caught === total;
   return {
     passed,
     reason: passed ? `caught ${total === 1 ? "the defect" : `all ${total} defects`}` : caught === 0 ? `missed ${total === 1 ? "the defect" : `all ${total} defects`}` : `caught ${caught} of ${total} defects (partial)`,
     evidence: lines.join("\n"),
-    measures: { defects: total, caught, matched_deterministic: det, matched_llm: byLlm, unmatched_findings: unmatched.length },
+    measures: {
+      defects: total,
+      caught,
+      matched_deterministic: det,
+      matched_llm: byLlm,
+      unmatched_findings: unmatched.length,
+      ...(g.onLocation ? { caught_on_location: new Set(g.onLocation.map((p) => p.defect)).size } : {}),
+    },
   };
 }
 

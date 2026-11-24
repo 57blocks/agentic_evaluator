@@ -250,6 +250,8 @@ export const SPEC_SCHEMA = {
                   base_url: { type: "string", pattern: "^https?://" },
                   api_key_env: { type: "string", pattern: "^[A-Za-z_][A-Za-z0-9_]*$" },
                   price: PRICE_SCHEMA,
+                  /** "all": judge every finding against every defect; location is only a hint (default "ambiguous"). */
+                  judge: { type: "string", enum: ["ambiguous", "all"] },
                 },
               },
               /** What a pass means, in one sentence; the report shows it beside the pass rate. */

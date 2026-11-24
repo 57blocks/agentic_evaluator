@@ -409,6 +409,18 @@ test("a findings-match check takes its options and an LLM fallback endpoint", as
   });
 });
 
+test("llm_fallback.judge: all is kept on the check, and any other value is refused", async () => {
+  const withJudge = (judge: string): Promise<{ spec: unknown; sha: string }> =>
+    parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      llm_fallback: { model: google/gemini-3.1-pro-preview, judge: ${judge} }`]]) as Promise<{ spec: unknown; sha: string }>;
+  const { spec, sha } = await parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      llm_fallback: { model: google/gemini-3.1-pro-preview, judge: all }`]]);
+  const check = compileSpec(spec, "x.yaml", sha, TASK_ROOT).check;
+  assert.equal(check?.kind === "findings-match" ? check.llmFallback?.judge : undefined, "all");
+  const dflt = await parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      llm_fallback: { model: google/gemini-3.1-pro-preview, judge: ambiguous }`]]);
+  const plain = compileSpec(dflt.spec, "x.yaml", dflt.sha, TASK_ROOT).check;
+  assert.equal(plain?.kind === "findings-match" ? plain.llmFallback?.judge : "unset", undefined);
+  await assert.rejects(withJudge("everything"), SpecError);
+});
+
 test("findings-match is built in: a program, scaffold or timeout on it is rejected", async () => {
   for (const extra of ["argv: [node, checks/x.mjs]", "version_files: [checks/x.mjs]", "scaffold_dir: scaffold", "timeout_seconds: 10"]) {
     const { spec, sha } = await parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      ${extra}`]]);

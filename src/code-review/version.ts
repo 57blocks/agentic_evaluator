@@ -7,7 +7,7 @@
 
 import { sha256, short } from "../canon/hash.js";
 import type { CheckConfig } from "../types.js";
-import { CLAIM_SYSTEM, LLM_ATTEMPTS, MATCH_SYSTEM } from "./match.js";
+import { CLAIM_SYSTEM, LLM_ATTEMPTS, MATCH_ALL_SYSTEM, MATCH_SYSTEM } from "./match.js";
 
 /** Bump when the matching rules change in code. */
 export const FINDINGS_MATCH_REVISION = "findings-match-2";
@@ -28,6 +28,8 @@ export function findingsMatchVersion(check: FindingsMatchConfig): string {
           attempts: LLM_ATTEMPTS,
           match_prompt: sha256(MATCH_SYSTEM),
           claim_prompt: sha256(CLAIM_SYSTEM),
+          // Only when set, so the default's version stays what it was.
+          ...(llm.judge === "all" ? { judge: "all", match_all_prompt: sha256(MATCH_ALL_SYSTEM) } : {}),
         }
       : null,
   });

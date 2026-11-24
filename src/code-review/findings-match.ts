@@ -115,6 +115,7 @@ function decisionRecord(version: string, findings: readonly Finding[], invalid: 
     ambiguous: grade.ambiguous,
     judged: grade.judged,
     ...(grade.llm ? { llm: { model: grade.llm.model, matches: grade.llm.matches } } : {}),
+    ...(grade.onLocation ? { on_location: grade.onLocation } : {}),
   };
 }
 
@@ -146,8 +147,10 @@ export async function runFindingsMatchCheck(params: {
   taskRoot: string;
   step?: string;
   input: string;
-  /** Overrides the configured fallback's model call (tests; check-task, which must never call one). */
+  /** Overrides the configured fallback's model call (tests). */
   ask?: Ask;
+  /** Grade without the LLM, on location alone (check-task, which must never call a model). */
+  locationOnly?: boolean;
 }): Promise<CheckResult> {
   const { check, workDir } = params;
   const version = findingsMatchVersion(check);
@@ -169,12 +172,12 @@ export async function runFindingsMatchCheck(params: {
   const expected = await readExpected(params.taskRoot, params.step, params.input, version);
   if (!expected.ok) return expected.result;
 
-  const llm: LlmFallback | undefined = check.llmFallback
+  const llm: LlmFallback | undefined = check.llmFallback && !params.locationOnly
     ? { model: check.llmFallback.model, ask: params.ask ?? askOf(check.llmFallback) }
     : undefined;
   let grade;
   try {
-    grade = await gradeItem(expected.value, parsed.findings, { lineTolerance: check.lineTolerance, requireCategory: check.requireCategory }, llm);
+    grade = await gradeItem(expected.value, parsed.findings, { lineTolerance: check.lineTolerance, requireCategory: check.requireCategory, judge: check.llmFallback?.judge }, llm);
   } catch (err) {
     if (!(err instanceof LlmFallbackError)) throw err;
     return evaluatorError(`llm_fallback failed: ${err.message}`, "llm fallback failed", version);

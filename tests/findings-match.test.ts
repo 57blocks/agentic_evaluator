@@ -485,3 +485,73 @@ test("candidate files are placed in the work dir first, so a model candidate can
     await fs.rm(work, { recursive: true, force: true });
   }
 });
+
+/* ── judge: all — the location is a hint, the meaning decides ─────────────── */
+
+const JUDGE_ALL: FindingsMatchConfig = { ...WITH_LLM, llmFallback: { ...WITH_LLM.llmFallback!, judge: "all" } };
+
+test("with judge: all, a finding on the defect's own lines that raises something else does not catch it", async () => {
+  // Arrange
+  const ask = stub('{"matches": [], "reason": "a naming nit, not the double rate"}');
+
+  // Act
+  const r = await grade({ expected: DEFECT_ITEM, findings: [finding({ message: "nit: rename this variable" })], check: JUDGE_ALL, ask });
+
+  // Assert
+  assert.equal(r.state, "fail");
+  assert.equal(ask.calls.length, 1);
+  assert.match(ask.calls[0]!.system, /location is a hint/);
+  assert.match(r.output, /D1 src\/tax\.ts:40-42 \[calculation, high\]: missed; #1 is on its lines but raises something else, per the LLM/);
+  assert.deepEqual([r.measures?.caught, r.measures?.caught_on_location, r.measures?.matched_deterministic, r.measures?.unmatched_findings], [0, 1, 0, 1]);
+});
+
+test("with judge: all, a finding on the lines that names the fault catches it, and the evidence says both", async () => {
+  const ask = stub('{"matches": [{"finding": 1, "defect": 1}], "reason": "same double rate"}');
+  const r = await grade({ expected: DEFECT_ITEM, findings: [finding()], check: JUDGE_ALL, ask });
+  assert.equal(r.state, "pass");
+  assert.match(r.output, /caught by the LLM \(google\/gemini-3\.1-pro-preview\) by #1 \(#1 on its lines\)/);
+  assert.deepEqual([r.measures?.caught, r.measures?.caught_on_location, r.measures?.matched_llm], [1, 1, 1]);
+});
+
+test("with judge: all, a finding on another file reaches the LLM and can catch the defect", async () => {
+  const ask = stub('{"matches": [{"finding": 1, "defect": 1}], "reason": "the caller doubles the rate"}');
+  const r = await grade({ expected: DEFECT_ITEM, findings: [finding({ file: "src/other.ts" })], check: JUDGE_ALL, ask });
+  assert.equal(r.state, "pass");
+  assert.match(ask.calls[0]!.user, /#1 src\/other\.ts:41/);
+  assert.deepEqual([r.measures?.caught, r.measures?.caught_on_location], [1, 0]);
+});
+
+test("with judge: all, every finding is put to the LLM against every defect in one call, and none when there is no finding", async () => {
+  const two = { kind: "defect", defects: [DEFECT, { ...DEFECT, file: "src/b.ts", description: "Rounding is done before the sum." }] };
+  const ask = stub('{"matches": [{"finding": 2, "defect": 2}], "reason": "r"}');
+  const r = await grade({ expected: two, findings: [finding(), finding({ file: "src/c.ts" })], check: JUDGE_ALL, ask });
+  assert.equal(ask.calls.length, 1);
+  assert.match(ask.calls[0]!.user, /D1 [\s\S]*D2 [\s\S]*#1 [\s\S]*#2 /);
+  assert.equal(r.reason, "caught 1 of 2 defects (partial)");
+  const none = await grade({ expected: DEFECT_ITEM, findings: [], check: JUDGE_ALL, ask: NEVER });
+  assert.equal(none.state, "fail");
+});
+
+test("with judge: all, a probe that may not call a model grades on location alone", async () => {
+  // Arrange
+  const task = await fs.mkdtemp(path.join(os.tmpdir(), "eval-fm-task-"));
+  const work = await fs.mkdtemp(path.join(os.tmpdir(), "eval-fm-work-"));
+  await fs.mkdir(path.join(task, "references"));
+  await fs.writeFile(path.join(task, "references", "pr1.txt"), JSON.stringify(DEFECT_ITEM));
+  await fs.writeFile(path.join(work, "findings.json"), JSON.stringify(oracleFindings(parseExpected(JSON.stringify(DEFECT_ITEM)))));
+
+  // Act
+  const r = await runFindingsMatchCheck({ check: JUDGE_ALL, files: [], workDir: work, taskRoot: task, step: "review", input: "pr1", locationOnly: true });
+
+  // Assert
+  assert.equal(r.state, "pass");
+  assert.match(r.output, /caught deterministically by #1/);
+  await fs.rm(task, { recursive: true, force: true });
+  await fs.rm(work, { recursive: true, force: true });
+});
+
+test("judge: all is a different check version, and leaves the default's version as it was", () => {
+  const explicit: FindingsMatchConfig = { ...WITH_LLM, llmFallback: { ...WITH_LLM.llmFallback!, judge: "ambiguous" } };
+  assert.equal(findingsMatchVersion(explicit), findingsMatchVersion(WITH_LLM));
+  assert.notEqual(findingsMatchVersion(JUDGE_ALL), findingsMatchVersion(WITH_LLM));
+});

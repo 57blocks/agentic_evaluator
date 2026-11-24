@@ -34,10 +34,7 @@ async function runStepCheck(suite: Suite, input: { slug: string; text: string },
   }
   if (check.kind === "findings-match") {
     // A probe never pays for a model: the oracle matches on location alone, and an empty answer has no review.
-    const ask = async (): Promise<string> => {
-      throw new Error("check-task never calls the llm_fallback");
-    };
-    return runFindingsMatchCheck({ check, files: answer.files, workDir, taskRoot: suite.taskRoot, step: suite.step, input: input.slug, ask });
+    return runFindingsMatchCheck({ check, files: answer.files, workDir, taskRoot: suite.taskRoot, step: suite.step, input: input.slug, locationOnly: true });
   }
   return runCommandCheck({
     argv: check.argv,

@@ -78,7 +78,12 @@ export type CheckConfig =
       /** A deterministic match also needs the finding's category to equal the defect's. */
       requireCategory: boolean;
       /** The model that decides ambiguous locations and unflagged claims; none: they stay undecided. */
-      llmFallback?: { model: string; endpoint: ModelEndpoint };
+      llmFallback?: {
+        model: string;
+        endpoint: ModelEndpoint;
+        /** "all": it judges every finding against every defect, and location is only a hint. Absent: ambiguous locations only. */
+        judge?: "ambiguous" | "all";
+      };
       trace?: TraceRules;
     };
 

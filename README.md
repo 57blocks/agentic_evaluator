@@ -971,6 +971,7 @@ evaluators:
       llm_fallback:              # optional
         model: google/gemini-3.1-pro-preview
         provider_route: openrouter
+        judge: ambiguous         # default; `all` makes location a hint (below)
 ```
 
 - On a defect item, a finding catches a defect when the files are equal
@@ -981,6 +982,14 @@ evaluators:
   or no file, is ambiguous. Only ambiguous findings go to `llm_fallback`, in
   one call per item. Without a fallback they stay unmatched. The item passes
   when every defect is caught, and the evidence states a partial catch.
+- `llm_fallback.judge: all` puts every finding to the fallback against every
+  defect, still in one call per item, and only its matches catch. A comment
+  that merely sits on the defect's lines no longer counts (a naming nit on
+  the faulty line is not a catch), and one in another file that names the
+  fault does. Use it when defect ranges are wide, as mined ones are: a fix's
+  lines can span a whole rule. The `caught_on_location` measure keeps what
+  location alone would have said, so the two readings can be compared. The
+  grade then rests on the fallback: calibrate it before trusting the rate.
 - A defect is one fix. `code-review build` writes an entry per file a fix
   touched, so entries that share a `fix_commit` are one defect with several
   places. It is caught when a finding catches any place, and the fallback
@@ -1015,6 +1024,7 @@ The check reports these measures:
 | `findings`, `invalid_findings` | all | valid findings, and dropped ones |
 | `defects`, `caught` | defect | known defects (one per fix), and how many were caught (0 when the trial left no review) |
 | `matched_deterministic`, `matched_llm` | defect | findings that matched a defect on location, or through the LLM (each finding counted once) |
+| `caught_on_location` | defect, with `judge: all` | defects some finding sits on, whatever it says |
 | `unmatched_findings` | defect | findings that matched no defect |
 | `defect_claims` | clean | findings that claim a defect |
 

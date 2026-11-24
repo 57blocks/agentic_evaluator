@@ -98,7 +98,7 @@ export interface EvalSpec {
         scaffold_dir?: string;
         line_tolerance?: number;
         require_category?: boolean;
-        llm_fallback?: EndpointDecl & { model: string };
+        llm_fallback?: EndpointDecl & { model: string; judge?: "ambiguous" | "all" };
         argv?: string[];
         version_files?: string[];
         timeout_seconds?: number;
@@ -433,7 +433,7 @@ function findingsMatchCheck(id: string, def: CheckDecl, specPath: string, trace:
     kind: "findings-match",
     lineTolerance: def.line_tolerance ?? DEFAULT_LINE_TOLERANCE,
     requireCategory: def.require_category ?? false,
-    ...(llm ? { llmFallback: { model: llm.model, endpoint: endpointOf(llm) } } : {}),
+    ...(llm ? { llmFallback: { model: llm.model, endpoint: endpointOf(llm), ...(llm.judge === "all" ? { judge: "all" as const } : {}) } } : {}),
     ...trace,
   };
 }
