@@ -38,6 +38,7 @@
  */
 
 import { normalizePath, type Defect, type Expected, type Finding } from "./findings.js";
+import type { CheckPart } from "../canon/parts.js";
 
 export interface MatchOptions {
   lineTolerance: number;
@@ -394,6 +395,39 @@ export interface Verdict {
   reason: string;
   evidence: string;
   measures: Record<string, number>;
+  /** One per defect, caught or not (canon/parts.ts); none on a clean item. */
+  parts?: CheckPart[];
+}
+
+const PART_LABEL_CHARS = 200;
+
+/**
+ * The defects as check parts — D1, D2 … in the answer key's order, each with
+ * what it is and where, tagged with its category, severity and, when
+ * the key says, whether a reviewer could have known — and the two measures
+ * the knowable catch rate is read from. A fix's entries share its labels, so
+ * the first one speaks for the defect. The label carries the description: it
+ * goes where the check's evidence goes (the trial's row), which already
+ * holds the LLM's reason, and not into the work dir's findings-match.json.
+ */
+export function defectParts(groups: readonly DefectGroup[], caught: readonly boolean[]): { parts: CheckPart[]; measures: Record<string, number> } {
+  const parts = groups.map((g, i): CheckPart => {
+    const d = g.places[0]!;
+    const known = d.knowable === undefined ? [] : [d.knowable ? "knowable" : "not-knowable"];
+    return {
+      id: `D${i + 1}`,
+      pass: caught[i] === true,
+      // What it is first: a fix across several files has places long enough to crowd it out.
+      label: `${d.description} (${placesText(g)})`.slice(0, PART_LABEL_CHARS),
+      tags: [...(categoryOf(d.category) ? [categoryOf(d.category)!] : []), ...(d.severity ? [d.severity] : []), ...known],
+    };
+  });
+  const said = groups.some((g) => g.places[0]!.knowable !== undefined);
+  const knowable = groups.map((g, i) => ({ g, i })).filter(({ g }) => g.places[0]!.knowable === true);
+  return {
+    parts,
+    measures: said ? { knowable_defects: knowable.length, knowable_caught: knowable.filter(({ i }) => caught[i] === true).length } : {},
+  };
 }
 
 const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? "" : "s"}`;
@@ -424,8 +458,10 @@ function defectVerdict(g: DefectGrade, findings: readonly Finding[]): Verdict {
   if (g.llm) lines.push(`LLM on ${g.onLocation ? `${plural(g.ambiguous.length, "pair")} (every finding against every defect)` : plural(g.ambiguous.length, "ambiguous pair")}: ${g.llm.reason || "(no reason given)"}`);
   if (unmatched.length > 0) lines.push(`unmatched: ${unmatched.map((i) => `#${i + 1} ${where(findings[i]!)}`).join(", ")}`);
   const passed = caught === total;
+  const byDefect = defectParts(g.defects.map((d) => ({ places: d.places })), g.defects.map((d) => d.caughtBy !== null));
   return {
     passed,
+    parts: byDefect.parts,
     reason: passed ? `caught ${total === 1 ? "the defect" : `all ${total} defects`}` : caught === 0 ? `missed ${total === 1 ? "the defect" : `all ${total} defects`}` : `caught ${caught} of ${total} defects (partial)`,
     evidence: lines.join("\n"),
     measures: {
@@ -435,6 +471,7 @@ function defectVerdict(g: DefectGrade, findings: readonly Finding[]): Verdict {
       matched_llm: byLlm,
       unmatched_findings: unmatched.length,
       ...(g.onLocation ? { caught_on_location: new Set(g.onLocation.map((p) => p.defect)).size } : {}),
+      ...byDefect.measures,
     },
   };
 }

@@ -331,3 +331,29 @@ test("diff of runs without measures says nothing about them", () => {
   assert.deepEqual(d.measures, []);
   assert.doesNotMatch(diffLines(d, { why: false }).join("\n"), /measures/);
 });
+
+test("a scorecard run of a command check that declares a report leads with its headlines, and lists the spec's caveats", async () => {
+  // Arrange — the check declares what to lead with; the spec says what to keep in mind.
+  const spec = await measuredTask();
+  const yaml = (await fs.readFile(spec, "utf-8"))
+    .replace("      operating_mode: lowest-cost\n", "      operating_mode: lowest-cost\n      decision: scorecard\n")
+    .replace(/^run_name: (.*)$/m, "run_name: $1\ncaveats:\n  - The check counts lines, not whether they are true.")
+    .replace("      kind: command\n", "      kind: command\n      report:\n        headline:\n          - { label: Bullets among lines, measure: bullets, of: lines }\n          - { label: Lines per answer, measure: lines }\n");
+  await fs.writeFile(spec, yaml);
+
+  // Act
+  const result = await runSuite(spec, false, { yes: true, onEvent: () => {} });
+
+  // Assert
+  assert.ok(result);
+  const bundle = await loadBundle(result.dir);
+  const html = renderRunReport(bundle);
+  assert.match(html, /<th class="num wrap">Bullets among lines<\/th><th class="num wrap">Lines per answer<\/th>/);
+  assert.match(html, /\d+\/\d+ · <b>\d+%<\/b>/);
+  assert.doesNotMatch(html, /<span class="sub">bullets \d/, "the scorecard no longer lists every measure on a line");
+  assert.match(html, /<h3>Read these numbers with care<\/h3>\s*<ul class="gaps"><li>The check counts lines, not whether they are true\.<\/li><\/ul>/);
+  assert.doesNotMatch(html, /predates these caveats/, "this run froze them itself");
+  const model = buildStepReport(bundle);
+  assert.deepEqual(model.headline.map((h) => h.decl.label), ["Bullets among lines", "Lines per answer"]);
+  assert.deepEqual(model.caveats, ["The check counts lines, not whether they are true."]);
+});

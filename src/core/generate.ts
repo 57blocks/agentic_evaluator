@@ -35,6 +35,7 @@ import type { CandidateDef, CostSource, EvaluationState,
   Isolation,
 } from "../canon/types.js";
 import type { TrialRow } from "../canon/rows.js";
+import type { CheckPart } from "../canon/parts.js";
 import type { ProducerKind, RunRecord, Suite } from "../types.js";
 
 /** A task's input text. Every task owns its inputs; there is no shared pool. */
@@ -127,6 +128,7 @@ export interface GenOutput {
   checkReason?: string;
   checkScore?: number;
   checkMeasures?: Record<string, number>;
+  checkParts?: CheckPart[];
   checkState?: EvaluationState;
   checkVersion?: string;
 }
@@ -230,6 +232,7 @@ async function regradeIfChanged(
       checkReason: graded.reason,
       checkScore: graded.score,
       checkMeasures: graded.measures,
+      checkParts: graded.parts,
       checkState: graded.state,
       checkVersion: graded.version,
     };
@@ -333,6 +336,7 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
     checkReason: graded.reason,
     checkScore: graded.score,
     checkMeasures: graded.measures,
+      checkParts: graded.parts,
     checkState: graded.state,
     checkVersion: graded.version,
   };
@@ -570,6 +574,7 @@ function recordFromRow(row: TrialRow, text: string): RunRecord {
     checkReason: check?.reason,
     checkScore: check?.score,
     checkMeasures: check?.measures,
+    checkParts: check?.parts,
     modelRef: row.model_ref,
     deploymentRef: row.deployment_ref ?? undefined,
     trialHash: row.trial_hash,
@@ -877,6 +882,7 @@ export async function runAll(params: {
         checkReason: g.checkReason,
         checkScore: g.checkScore,
         checkMeasures: g.checkMeasures,
+        checkParts: g.checkParts,
         checkState: g.checkState,
         checkVersion: g.checkVersion,
         modelRef: modelRefOf(def),

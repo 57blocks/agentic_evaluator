@@ -44,6 +44,8 @@ export interface Defect {
   description: string;
   fix_commit: string;
   fix_diff: string;
+  /** The label's `knowable`, when it says. */
+  knowable?: boolean;
 }
 
 export interface Item {
@@ -120,6 +122,7 @@ async function defectsOf(opts: BuildOptions, itemId: string, c: Candidate, range
       ...label,
       fix_commit: c.fix.sha.slice(0, 10),
       fix_diff: fixDiff,
+      ...(c.label?.knowable !== undefined ? { knowable: c.label.knowable } : {}),
     };
   });
 }

@@ -45,7 +45,8 @@ Defect item (escaped, seeded):
 {"kind": "defect", "source": "escaped" | "seeded",
  "defects": [{"file": "…", "start_line": 10, "end_line": 12,
               "category": "calculation", "severity": "high",
-              "description": "…", "fix_commit": "abc1234", "fix_diff": "…"}]}
+              "description": "…", "fix_commit": "abc1234", "fix_diff": "…",
+              "knowable": true}]}
 ```
 
 A defect is one fix. `build` writes one entry per file the fix touched, so
@@ -56,12 +57,31 @@ matcher counts it once and catches it when any place is hit. Entries without
 Clean item: `{"kind": "clean", "note": "…"}`.
 
 Line numbers are in the PR head version of the file (what the reviewer sees).
-Tags carry `escaped` / `seeded` / `clean` plus category and severity, so the
-report's slices give "per category and severity, never one blended score".
-An escaped item whose labels say so also carries `knowable`, `not-knowable`
-or `partly-knowable`: a real fix a reviewer could not have known to ask for
-(a business rule that later changed its mind, a regulation outside the repo)
-is kept, and read as its own slice.
+Tags carry `escaped` / `seeded` / `clean` plus category and severity, for
+filtering. An escaped item whose labels say so also carries `knowable`,
+`not-knowable` or `partly-knowable`, and each defect its own `knowable`: a
+real fix a reviewer could not have known to ask for (a business rule that
+later changed its mind, a regulation outside the repo) is kept, and read
+apart. The report's "per category and severity, never one blended score" is
+read per defect, not from these tags (see "What the report leads with").
+
+## What the report leads with
+
+`findings-match` carries its own check report (`src/code-review/check-report.ts`,
+the generic mechanism is `canon/headline.ts`): knowable defects caught,
+defects caught, defect claims per clean item, precision on defect items,
+findings per review; defects caught and defect claims by source.
+
+The item's tags count every defect of an item under each tag, so category,
+severity and knowability are read per defect instead: the matcher reports
+each defect as a check part (`canon/parts.ts`), with those as its tags, and
+`build` writes a label's `knowable` onto each defect. The report's "Every
+known defect" section is the defect × candidate grid and the catch rate per
+tag. The per-input table is split into defect items and clean items, each
+under what a pass means there.
+
+Not done yet: the noisiest false alarms. A clean item's claims are a count
+(`defect_claims`); which findings they were is only in `findings-match.json`.
 
 ## Defect taxonomy (category)
 

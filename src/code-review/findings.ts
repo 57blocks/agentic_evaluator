@@ -6,13 +6,12 @@
  *   finding   {file?, start_line?, end_line?, category?, severity?, message,
  *              blocking?, producer?}   — no file: a PR-level finding
  *   expected  {kind: "defect", source?, defects: [{file, start_line, end_line?,
- *              category?, severity?, description, fix_commit?, fix_diff?}]}
+ *              category?, severity?, description, fix_commit?, fix_diff?, knowable?}]}
  *             | {kind: "clean", note?}
  *
  * Line numbers are in the PR head version of the file. Pure: no fs.
  */
 
-import type { MeasureStats } from "../canon/measures.js";
 
 export const SEVERITIES = ["critical", "high", "medium", "low"] as const;
 export type Severity = (typeof SEVERITIES)[number];
@@ -40,6 +39,8 @@ export interface Defect {
   description: string;
   fix_commit?: string;
   fix_diff?: string;
+  /** Whether a reviewer could have known from the PR alone; absent when nobody said. */
+  knowable?: boolean;
 }
 
 export type Expected =
@@ -120,7 +121,8 @@ export class ExpectedError extends Error {}
 function parseDefect(raw: unknown, i: number): Defect {
   const where = `defects[${i}]`;
   if (!isRecord(raw)) throw new ExpectedError(`${where} is not an object`);
-  const { file, start_line, end_line, category, severity, description, fix_commit, fix_diff } = raw;
+  const { file, start_line, end_line, category, severity, description, fix_commit, fix_diff, knowable } = raw;
+  if (given(knowable) && typeof knowable !== "boolean") throw new ExpectedError(`${where}.knowable is not true or false`);
   if (typeof file !== "string" || file.trim() === "") throw new ExpectedError(`${where}.file is missing`);
   if (!isLine(start_line)) throw new ExpectedError(`${where}.start_line is not a positive integer`);
   if (given(end_line) && (!isLine(end_line) || end_line < start_line)) throw new ExpectedError(`${where}.end_line is not a line at or after start_line`);
@@ -135,6 +137,7 @@ function parseDefect(raw: unknown, i: number): Defect {
     description,
     ...(text(fix_commit) ? { fix_commit: text(fix_commit) } : {}),
     ...(text(fix_diff) ? { fix_diff: text(fix_diff) } : {}),
+    ...(typeof knowable === "boolean" ? { knowable } : {}),
   };
 }
 
@@ -176,20 +179,4 @@ export function oracleFindings(expected: Expected): Finding[] {
       blocking: true,
     };
   });
-}
-
-/**
- * Precision on defect items, from the matcher's measures: matched findings
- * over all valid findings, as a ratio of the per-input means (so a ratio of
- * sums weighted by input, not a mean of per-item precision). The three
- * measures are reported together on defect items only, so they share their
- * inputs. Null when they are absent or no finding was made.
- */
-export function findingsPrecision(m: MeasureStats): number | null {
-  const det = m.matched_deterministic;
-  const llm = m.matched_llm;
-  const unmatched = m.unmatched_findings;
-  if (!det || !llm || !unmatched) return null;
-  const all = det.mean + llm.mean + unmatched.mean;
-  return all > 0 ? (det.mean + llm.mean) / all : null;
 }

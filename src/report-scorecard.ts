@@ -5,6 +5,9 @@
  * and then every failed trial with the check's reason. Nothing is picked and
  * no gate is drawn: the reader compares.
  *
+ * A check with a report of its own (canon/headline.ts) leads with its
+ * headline numbers instead: a column each, who differs, and its slices.
+ *
  * The pass-rate interval is Wilson's, counted per input as the selector's
  * gate intervals are (select.ts): repeated trials of one input do not narrow
  * it as if they were new inputs.
@@ -19,7 +22,8 @@ import { trialNote } from "./canon/run-diff.js";
 import { escapeHtml } from "./html.js";
 import { fmtCost, fmtSec } from "./report-format.js";
 import { sliceMembers } from "./report-slices.js";
-import { findingsPrecision } from "./code-review/findings.js";
+import { headlineBoard, type CheckReport, type HeadlineEntry } from "./canon/headline.js";
+import { headlineCell, headlineHeads, renderDifferences, renderHeadlineSlices } from "./report-headline.js";
 
 /** Failed trials are listed open when there are at most this many for a candidate. */
 const OPEN_FAILURES = 10;
@@ -72,59 +76,67 @@ function passText(c: ScorecardCell): string {
   return `${c.pass}/${c.graded}${ci}`;
 }
 
-/** The measures line, with a code review's precision when its matcher reported the counts it is read from. */
-function measuresLine(m: MeasureStats): string {
-  const precision = findingsPrecision(m);
-  return [measureSummary(m), ...(precision === null ? [] : [`precision ${precision.toFixed(2)}`])].filter((s) => s !== "").join(" · ");
-}
-
-function passCell(c: ScorecardCell | undefined): string {
+/** The required check's count and interval; every measure on a line beneath it unless the check's headlines already lead. */
+function passCell(c: ScorecardCell | undefined, withMeasures: boolean): string {
   if (!c) return `<td class="num muted">—</td>`;
-  const line = measuresLine(c.measures);
+  const line = withMeasures ? measureSummary(c.measures) : "";
   return `<td class="num">${passText(c)}${line ? `<span class="sub">${escapeHtml(line)}</span>` : ""}</td>`;
 }
 
-function headTable(all: ScorecardSlice, trials: readonly TrialRow[], rates: readonly CandidateRates[], candidates: readonly string[]): string {
+function headTable(all: ScorecardSlice, trials: readonly TrialRow[], rates: readonly CandidateRates[], candidates: readonly string[], board: readonly HeadlineEntry[]): string {
   const byId = new Map(rates.map((r) => [r.candidate, r]));
   const rows = candidates
     .map((c) => {
       const r = byId.get(c);
       // A trial whose spend nobody saw makes the cost unknown, not cheaper.
       const observed = trials.filter((t) => t.candidate === c).every((t) => t.cost.source !== "none");
-      return `<tr><td class="cand">${escapeHtml(c)}</td>${passCell(all.cells[c])}
+      return `<tr><td class="cand">${escapeHtml(c)}</td>${board.map((h) => headlineCell(h.all[c])).join("")}${passCell(all.cells[c], board.length === 0)}
         <td class="num">${r ? fmtCost(r.generation_cost_per_success, observed) : "—"}</td>
         <td class="num">${fmtSec(r?.p50_ms ?? null)}</td><td class="num">${fmtSec(r?.p95_ms ?? null)}</td></tr>`;
     })
     .join("");
-  return `<div class="table-wrap"><table>
-    <thead><tr><th>Candidate</th><th class="num">Required check <span class="hint">passed/graded · 95% per input</span></th><th class="num">Generation cost per success</th><th class="num">p50</th><th class="num">p95</th></tr></thead>
+  return `<div class="table-wrap"><table${board.length > 0 ? ` class="tight"` : ""}>
+    <thead><tr><th>Candidate</th>${headlineHeads(board)}<th class="num wrap">Required check <span class="hint">passed/graded · 95% per input</span></th><th class="num wrap">Generation cost per success</th><th class="num">p50</th><th class="num">p95</th></tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 }
 
-function sliceTable(slices: readonly ScorecardSlice[], candidates: readonly string[]): string {
+/** The required check per slice; folded under the headlines' own slices when the check has them. */
+function sliceTable(slices: readonly ScorecardSlice[], candidates: readonly string[], folded: boolean): string {
   if (slices.length === 0) return "";
   const body = slices
-    .map((s) => `<tr><td class="mono">${escapeHtml(s.label)}</td><td class="num">${s.inputs}</td>${candidates.map((c) => passCell(s.cells[c])).join("")}</tr>`)
+    .map((s) => `<tr><td class="mono">${escapeHtml(s.label)}</td><td class="num">${s.inputs}</td>${candidates.map((c) => passCell(s.cells[c], !folded)).join("")}</tr>`)
     .join("");
-  return `<h3>By input tag and split</h3>
-    <div class="table-wrap"><table>
+  const table = `<div class="table-wrap"><table>
       <thead><tr><th>Slice</th><th class="num">Inputs</th>${candidates.map((c) => `<th class="num">${escapeHtml(c)}</th>`).join("")}</tr></thead>
       <tbody>${body}</tbody>
     </table></div>`;
+  return folded ? `<details><summary>Required check, by input tag and split</summary>${table}</details>` : `<h3>By input tag and split</h3>\n    ${table}`;
 }
 
-export function renderScorecard(labels: InputLabels | null, trials: readonly TrialRow[], rates: readonly CandidateRates[], candidates: readonly string[]): string {
+/**
+ * `report`: what the required check leads with (canon/headline.ts). With
+ * one, its headline numbers take the columns and the slices, and every other
+ * measure is left to the measures section; without, each cell lists them all.
+ */
+export function renderScorecard(labels: InputLabels | null, trials: readonly TrialRow[], rates: readonly CandidateRates[], candidates: readonly string[], report: CheckReport | null = null): string {
   const [all, ...slices] = scorecardSlices(labels, trials, candidates);
-  const hasPrecision = [all!, ...slices].some((s) => Object.values(s.cells).some((c) => findingsPrecision(c.measures) !== null));
-  const precisionNote = hasPrecision
-    ? `<p class="note">Precision (findings-match): matched findings over all findings on defect items — the ratio of the means of matched_deterministic + matched_llm to that plus unmatched_findings, so findings are pooled per input rather than precision averaged per item. Without an llm_fallback, ambiguous findings count as unmatched and precision is a lower bound. Defect claims per clean item is defect_claims.</p>`
-    : "";
+  const board = headlineBoard(report, labels, trials, candidates);
+  if (board.length > 0) {
+    return `<section class="card">
+    <h2>Scorecard <span class="hint">decision: scorecard · no gate applied, no candidate picked</span></h2>
+    ${headTable(all!, trials, rates, candidates, board)}
+    <p class="note">n is the inputs a number is over. A share is counted over graded trials (three trials of one defect are three chances); its 95% interval is Wilson's, counted per input, so repeated trials of one input do not narrow it. A plain number is the mean over inputs of each input's mean, with a t-interval. The required check passes a trial only when everything it asks for holds. Cost excludes judging; p50 and p95 are over completed trials.</p>
+    ${renderDifferences(board)}
+    ${renderHeadlineSlices(board, candidates)}
+    ${sliceTable(slices, candidates, true)}
+  </section>`;
+  }
   return `<section class="card">
     <h2>Scorecard <span class="hint">decision: scorecard · no gate applied, no candidate picked · required check and its measures, every input then each tag and split</span></h2>
-    ${headTable(all!, trials, rates, candidates)}
-    ${sliceTable(slices, candidates)}
-    <p class="note">The required check's 95% interval is Wilson's, counted per input, so repeated trials of one input do not narrow it. Measures are the mean over each input's graded trials, then over inputs. Cost excludes judging; p50 and p95 are over completed trials.</p>${precisionNote}
+    ${headTable(all!, trials, rates, candidates, board)}
+    ${sliceTable(slices, candidates, false)}
+    <p class="note">The required check's 95% interval is Wilson's, counted per input, so repeated trials of one input do not narrow it. Measures are the mean over each input's graded trials, then over inputs. Cost excludes judging; p50 and p95 are over completed trials.</p>
   </section>`;
 }
 

@@ -17,6 +17,30 @@ export const PROTOCOL_VERSION = "0.3";
 const PATH_SAFE = "^(?!\\.\\.?$)[^/\\\\]+$";
 
 /** USD per million tokens, on a candidate or the judge. */
+/** A check measure's name (canon/measures.ts MEASURE_NAME), or several of them. */
+const MEASURE_PATTERN = "^[a-z][a-z0-9_]{0,39}$";
+const MEASURE_REF = {
+  anyOf: [
+    { type: "string", pattern: MEASURE_PATTERN },
+    { type: "array", minItems: 1, uniqueItems: true, items: { type: "string", pattern: MEASURE_PATTERN } },
+  ],
+};
+
+/** Tags under titles, in the order a report lists them. */
+const TAG_GROUPS = {
+  type: "array",
+  minItems: 1,
+  items: {
+    type: "object",
+    additionalProperties: false,
+    required: ["title", "tags"],
+    properties: {
+      title: { type: "string", minLength: 1 },
+      tags: { type: "array", minItems: 1, uniqueItems: true, items: { type: "string", minLength: 1 } },
+    },
+  },
+};
+
 const PRICE_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -43,6 +67,8 @@ export const SPEC_SCHEMA = {
     run_name: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{1,63}$" },
     /** What this evaluation decides and tests, in a few sentences; the report opens with it. */
     description: { type: "string", minLength: 1 },
+    /** What to read the numbers with (an uncalibrated judge, labels nobody confirmed); the report lists them under the description. */
+    caveats: { type: "array", minItems: 1, items: { type: "string", minLength: 1 } },
     // Strictly positive: a zero ceiling would start a run that skips every call.
     budget_usd: { type: "number", exclusiveMinimum: 0 },
     workflow: {
@@ -256,6 +282,52 @@ export const SPEC_SCHEMA = {
               },
               /** What a pass means, in one sentence; the report shows it beside the pass rate. */
               description: { type: "string", minLength: 1 },
+              /** Which of the check's measures a scorecard leads with, and how its slices are grouped (canon/headline.ts). */
+              report: {
+                type: "object",
+                additionalProperties: false,
+                required: ["headline"],
+                properties: {
+                  headline: {
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["label", "measure"],
+                      properties: {
+                        label: { type: "string", minLength: 1 },
+                        /** A measure the check reports, or several summed. */
+                        measure: MEASURE_REF,
+                        /** Makes it a share: `measure` out of this measure, or of these summed. */
+                        of: MEASURE_REF,
+                        /** Only the inputs carrying this tag. */
+                        tag: { type: "string", minLength: 1 },
+                        by_slice: { type: "boolean" },
+                      },
+                    },
+                  },
+                  slice_groups: TAG_GROUPS,
+                  /** The per-input table under titles: inputs carrying `tag`, and what a pass means for them. */
+                  input_groups: {
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["tag", "title", "pass"],
+                      properties: { tag: { type: "string", minLength: 1 }, title: { type: "string", minLength: 1 }, pass: { type: "string", minLength: 1 } },
+                    },
+                  },
+                  /** For a check that reports parts: the section's title, and how the parts' tags are grouped. */
+                  parts: {
+                    type: "object",
+                    additionalProperties: false,
+                    required: ["title"],
+                    properties: { title: { type: "string", minLength: 1 }, tag_groups: TAG_GROUPS },
+                  },
+                },
+              },
               /** Rules over the trace a command candidate leaves (`cli.trace`), judged after the check itself. */
               trace: {
                 type: "object",

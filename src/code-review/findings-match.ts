@@ -25,7 +25,7 @@ import { complete } from "../llm.js";
 import { MAX_OUTPUT_CHARS, placeFiles, writeFresh, writePlaced, type CheckFile, type CheckResult } from "../check.js";
 import type { CheckConfig } from "../types.js";
 import { ExpectedError, parseExpected, parseFindings, type Expected, type Finding, type InvalidFinding } from "./findings.js";
-import { gradeItem, groupDefects, LlmFallbackError, verdictOfGrade, type Ask, type CleanGrade, type DefectGrade, type LlmFallback } from "./match.js";
+import { defectParts, gradeItem, groupDefects, LlmFallbackError, verdictOfGrade, type Ask, type CleanGrade, type DefectGrade, type LlmFallback } from "./match.js";
 import { findingsMatchVersion } from "./version.js";
 
 export type FindingsMatchConfig = Extract<CheckConfig, { kind: "findings-match" }>;
@@ -125,17 +125,19 @@ function decisionRecord(version: string, findings: readonly Finding[], invalid: 
  * the answer key is not needed to fail it, and an empty answer fails on an
  * input without one.
  */
-async function noReviewMeasures(params: { taskRoot: string; step?: string; input: string }): Promise<Record<string, number>> {
+async function noReviewMeasures(params: { taskRoot: string; step?: string; input: string }): Promise<Pick<CheckResult, "measures" | "parts">> {
   const base = { findings: 0, invalid_findings: 0 };
   try {
     const found = await readExpectedText(params.taskRoot, params.step, params.input);
-    if (found === null) return base;
+    if (found === null) return { measures: base };
     const expected = parseExpected(found.text);
-    return expected.kind === "clean"
-      ? { ...base, defect_claims: 0 }
-      : { ...base, defects: groupDefects(expected.defects).length, caught: 0, matched_deterministic: 0, matched_llm: 0, unmatched_findings: 0 };
+    if (expected.kind === "clean") return { measures: { ...base, defect_claims: 0 } };
+    const groups = groupDefects(expected.defects);
+    // Every defect is a missed part, so the trial stays in each defect's count.
+    const missed = defectParts(groups, groups.map(() => false));
+    return { measures: { ...base, defects: groups.length, caught: 0, matched_deterministic: 0, matched_llm: 0, unmatched_findings: 0, ...missed.measures }, parts: missed.parts };
   } catch {
-    return base;
+    return { measures: base };
   }
 }
 
@@ -165,9 +167,9 @@ export async function runFindingsMatchCheck(params: {
 
   // No review is decided before the answer key is read: an empty answer fails on any item.
   const raw = await readFindingsFile(workDir, version);
-  if (!raw.ok) return { ...raw.result, measures: await noReviewMeasures(params) };
+  if (!raw.ok) return { ...raw.result, ...(await noReviewMeasures(params)) };
   const parsed = parseFindings(raw.value);
-  if (!parsed.ok) return { state: "fail", passed: false, exitCode: EXIT_FAIL, output: parsed.why, version, reason: "unreadable review", measures: await noReviewMeasures(params) };
+  if (!parsed.ok) return { state: "fail", passed: false, exitCode: EXIT_FAIL, output: parsed.why, version, reason: "unreadable review", ...(await noReviewMeasures(params)) };
 
   const expected = await readExpected(params.taskRoot, params.step, params.input, version);
   if (!expected.ok) return expected.result;
@@ -199,5 +201,6 @@ export async function runFindingsMatchCheck(params: {
     version,
     reason: verdict.reason,
     measures: { findings: parsed.findings.length, invalid_findings: parsed.invalid.length, ...verdict.measures },
+    ...(verdict.parts ? { parts: verdict.parts } : {}),
   };
 }

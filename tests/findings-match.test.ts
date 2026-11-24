@@ -11,10 +11,9 @@ import os from "node:os";
 import path from "node:path";
 import { runFindingsMatchCheck, DECISIONS_FILE, type FindingsMatchConfig } from "../src/code-review/findings-match.js";
 import { findingsMatchVersion } from "../src/code-review/version.js";
-import { findingsPrecision, normalizePath, oracleFindings, parseExpected, parseFindings } from "../src/code-review/findings.js";
+import { normalizePath, oracleFindings, parseExpected, parseFindings } from "../src/code-review/findings.js";
 import { linesOverlap, type Ask } from "../src/code-review/match.js";
 import type { CheckResult } from "../src/check.js";
-import type { MeasureStats } from "../src/canon/measures.js";
 
 const CHECK: FindingsMatchConfig = { id: "caught", kind: "findings-match", lineTolerance: 3, requireCategory: false };
 const WITH_LLM: FindingsMatchConfig = { ...CHECK, llmFallback: { model: "google/gemini-3.1-pro-preview", endpoint: { route: "openrouter" } } };
@@ -256,12 +255,40 @@ test("a trial with no review counts a fix's entries as one defect", async () => 
   assert.deepEqual([r.measures?.defects, r.measures?.caught], [1, 0]);
 });
 
-test("precision is matched findings over all findings on defect items, from the measure means", () => {
-  const s = (mean: number) => ({ mean, n: 4, trials: 12, low: null, high: null });
-  const m: MeasureStats = { findings: s(5), matched_deterministic: s(1.5), matched_llm: s(0.5), unmatched_findings: s(2) };
-  assert.equal(findingsPrecision(m), 0.5);
-  assert.equal(findingsPrecision({ findings: s(2), defect_claims: s(1) }), null, "clean items alone have no precision");
-  assert.equal(findingsPrecision({ matched_deterministic: s(0), matched_llm: s(0), unmatched_findings: s(0) }), null);
+test("each defect is reported as a part, tagged with its category, severity and whether a reviewer could have known", async () => {
+  // Arrange — two fixes: a knowable calculation bug in tax.ts, and one nobody could have known in pay.ts.
+  const expected = {
+    kind: "defect",
+    defects: [
+      { ...FIX_A, knowable: true },
+      { file: "src/pay.ts", start_line: 10, category: "logic", description: "the rule later changed", fix_commit: "bbbbbbb222", knowable: false },
+    ],
+  };
+
+  // Act — the review sits on the first only.
+  const r = await grade({ expected, findings: [finding({ file: "src/tax.ts", start_line: 41 })] });
+
+  // Assert
+  assert.equal(r.state, "fail");
+  assert.deepEqual(r.parts, [
+    { id: "D1", pass: true, label: `${FIX_A.description} (src/tax.ts:40-42)`, tags: ["calculation", "high", "knowable"] },
+    { id: "D2", pass: false, label: "the rule later changed (src/pay.ts:10)", tags: ["logic", "not-knowable"] },
+  ]);
+  assert.equal(r.measures?.knowable_defects, 1);
+  assert.equal(r.measures?.knowable_caught, 1);
+
+  // No review at all: every defect is a missed part, so each stays in every candidate's count.
+  const none = await grade({ expected });
+  assert.deepEqual(none.parts?.map((p) => [p.id, p.pass]), [["D1", false], ["D2", false]]);
+  assert.deepEqual([none.measures?.knowable_defects, none.measures?.knowable_caught], [1, 0]);
+
+  // An answer key that does not say: no knowable tag, no knowable measures.
+  const unsaid = await grade({ expected: ONE_FIX_TWO_FILES, findings: [finding({ file: "src/pay.ts", start_line: 11 })] });
+  assert.deepEqual(unsaid.parts?.map((p) => p.tags), [["calculation", "high"]]);
+  assert.equal(unsaid.measures?.knowable_defects, undefined);
+  const bad = await grade({ expected: { kind: "defect", defects: [{ ...FIX_A, knowable: "yes" }] }, findings: [] });
+  assert.equal(bad.state, "evaluator_error");
+  assert.match(bad.output, /knowable/);
 });
 
 /* ── clean items ─────────────────────────────────────────────────────────── */
@@ -446,7 +473,7 @@ test("the configured fallback calls the model through the repo's client, at temp
 
 test("the version carries the options, and the fallback's model and prompts", () => {
   const base = findingsMatchVersion(CHECK);
-  assert.match(base, /^findings-match-2\+opts-[0-9a-f]{8}$/);
+  assert.match(base, /^findings-match-3\+opts-[0-9a-f]{8}$/);
   assert.equal(findingsMatchVersion({ ...CHECK }), base, "stable");
   const changed = [
     { ...CHECK, lineTolerance: 5 },

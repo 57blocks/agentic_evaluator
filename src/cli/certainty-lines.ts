@@ -46,7 +46,7 @@ function itemsLine(items: ItemStats): string[] {
   if (items.inputs === 0) return [];
   const allFail = items.items.filter((i) => i.class === "all-fail").map((i) => i.input);
   const listed = allFail.slice(0, MAX_LISTED).join(", ") + (allFail.length > MAX_LISTED ? ", …" : "");
-  const fail = allFail.length === 0 ? "" : ` · every candidate failed ${allFail.length} (check those for a harness bug): ${listed}`;
+  const fail = allFail.length === 0 ? "" : ` · every candidate failed ${allFail.length} (expected on a hard set; otherwise check those for a harness bug): ${listed}`;
   const judge = items.judge_effective_n == null ? "" : `; the judge separated ${items.judge_effective_n}`;
   return [`  effective N ${items.effective_n} of ${items.inputs} inputs separated the candidates on the required check${judge}${fail}`];
 }

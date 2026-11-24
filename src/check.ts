@@ -31,6 +31,7 @@ import type { EvaluationState } from "./canon/types.js";
 import type { AgentTrace } from "./canon/agent-trace.js";
 import { hasTraceRules, type TraceRules } from "./canon/trace-rules.js";
 import { measuresOf } from "./canon/measures.js";
+import { partsOf, type CheckPart } from "./canon/parts.js";
 import type { CheckConfig } from "./types.js";
 import { findingsMatchVersion } from "./code-review/version.js";
 
@@ -71,6 +72,8 @@ export interface CheckResult {
   score?: number;
   /** Named counts a command check reported (`{"measures": {"comments": 3}}`); descriptive only (canon/measures.ts). */
   measures?: Record<string, number>;
+  /** What a check looked for, each passed or not (`{"parts": [{"id": "D1", "pass": true}]}`); descriptive only (canon/parts.ts). */
+  parts?: CheckPart[];
 }
 
 let cachedTscVersion: string | undefined;
@@ -347,18 +350,20 @@ function scoreOf(value: unknown): number | undefined {
 }
 
 /** Pull evidence (and a score and measures, when reported) out of the check's stdout, JSON or not. */
-function evidenceOf(stdout: string): { evidence: string; reason?: string; score?: number; measures?: Record<string, number> } {
+function evidenceOf(stdout: string): { evidence: string; reason?: string; score?: number; measures?: Record<string, number>; parts?: CheckPart[] } {
   const text = stdout.trim();
   if (!text.startsWith("{")) return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
   try {
-    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown; score?: unknown; measures?: unknown };
+    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown; score?: unknown; measures?: unknown; parts?: unknown };
     const score = scoreOf(parsed.score);
     const measures = measuresOf(parsed.measures);
+    const parts = partsOf(parsed.parts);
     return {
       evidence: typeof parsed.evidence === "string" ? parsed.evidence.slice(0, MAX_OUTPUT_CHARS) : text.slice(0, MAX_OUTPUT_CHARS),
       ...(typeof parsed.reason === "string" ? { reason: parsed.reason } : {}),
       ...(score === undefined ? {} : { score }),
       ...(measures === undefined ? {} : { measures }),
+      ...(parts === undefined ? {} : { parts }),
     };
   } catch {
     return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
@@ -436,8 +441,8 @@ export async function runCommandCheck(params: {
     const why = e.code === "ENOENT" ? `check program not found: ${program}` : `check could not start: ${e.message}`;
     return { state: "evaluator_error", passed: false, exitCode: -1, output: why, version, reason: why };
   }
-  const { evidence, reason, score, measures } = evidenceOf(ran.stdout);
-  const scored = { ...(score === undefined ? {} : { score }), ...(measures === undefined ? {} : { measures }) };
+  const { evidence, reason, score, measures, parts } = evidenceOf(ran.stdout);
+  const scored = { ...(score === undefined ? {} : { score }), ...(measures === undefined ? {} : { measures }), ...(parts === undefined ? {} : { parts }) };
   const errText = ran.stderr.trim().slice(0, MAX_OUTPUT_CHARS);
   if (!ran.timedOut && ran.exitCode === COMMAND_EXIT_PASS) {
     return { state: "pass", passed: true, exitCode: COMMAND_EXIT_PASS, output: evidence, version, ...(reason ? { reason } : {}), ...scored };

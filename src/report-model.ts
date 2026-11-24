@@ -37,6 +37,8 @@ import type { WorkflowDigest } from "./workflow-report-model.js";
 import { NO_PICK, plural, SCORECARD_PICK, sha8 } from "./report-format.js";
 import { measureSlices, sliceRows, type MeasureSliceRow, type SliceRow } from "./report-slices.js";
 import { measureStats, type MeasureStats } from "./canon/measures.js";
+import { headlineBoard, type HeadlineEntry } from "./canon/headline.js";
+import { partBoard, type PartBoard } from "./canon/parts.js";
 import { costSuccessChart, gateNotesOf, type CostSuccessChart } from "./report-scatter.js";
 import type { RunAbout } from "./canon/about.js";
 import type { CandidateDef } from "./canon/types.js";
@@ -583,6 +585,12 @@ export interface StepReport {
   slices: SliceRow[];
   /** The check's measures per candidate, over all inputs then per tag and split; empty when the check reported none. */
   measures: MeasureSliceRow[];
+  /** The required check's headline numbers per candidate, who differs, and their slices; empty when the check has no report (canon/headline.ts). */
+  headline: HeadlineEntry[];
+  /** The spec's caveats: what to read the numbers with. */
+  caveats: string[];
+  /** Every part the check reported across candidates, and the pass rate per part tag; null when it reported none (canon/parts.ts). */
+  parts: PartBoard | null;
   /** What this step's candidates do (the step's description); null when the spec gives none. */
   stepDescription: string | null;
   facts: Array<{ label: string; value: string }>;
@@ -680,6 +688,9 @@ export function buildStepReport(b: RunBundle): StepReport {
     stepDescription: b.about?.stepDescription ?? null,
     slices: sliceRows(b.about?.labels ?? null, b.trials, views.map((v) => v.id), m.evaluators.required_checks[0] ?? null),
     measures: measureSlices(b.about?.labels ?? null, b.trials, views.map((v) => v.id)),
+    headline: headlineBoard(b.about?.checkReport ?? null, b.about?.labels ?? null, b.trials, views.map((v) => v.id)),
+    caveats: b.about?.caveats ?? [],
+    parts: partBoard(b.about?.checkReport?.parts, b.trials, views.map((v) => v.id)),
     facts: [
       { label: "Spec", value: `${m.spec.path ?? "—"} · sha256 ${sha8(m.spec.sha256)}` },
       { label: "Test set", value: `${m.test_set.id ?? "—"} · ${inputs} input(s)` },

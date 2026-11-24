@@ -341,6 +341,10 @@ test("a label's knowable becomes the item's tag, and a label never tags what it 
   // Assert
   assert.deepEqual(items.map((i) => [i.id, i.tags]), [["pr1", ["escaped", "logic", "low", "not-knowable"]], ["pr3", ["escaped", "logic", "low", "knowable"]]]);
   assert.deepEqual(unsaid.items.map((i) => i.tags), [["escaped", "logic", "low"], ["escaped", "logic", "low"]]);
+  // Each defect says it too, so a PR holding both kinds can be read defect by defect.
+  const knowableOfDefects = (list: typeof items) => list.map((i) => (i.expected as { defects: Array<{ knowable?: boolean }> }).defects.map((d) => d.knowable));
+  assert.deepEqual(knowableOfDefects(items).map((ds) => [...new Set(ds)]), [[false], [true]]);
+  assert.deepEqual(knowableOfDefects(unsaid.items).map((ds) => [...new Set(ds)]), [[undefined], [undefined]]);
 });
 
 test("a confirmation a label attributes to something other than a person is not called human-confirmed", async () => {

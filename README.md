@@ -560,7 +560,8 @@ input has reliability 0.9 but pass^2 near 0.8. Off unless declared.
 every candidate's results and picks none: no gate, no operating mode, no
 early stop. The report leads with the scorecard — per candidate, the
 required check's pass rate with its 95% interval (per input), the check's
-measures, cost and p50/p95, over every input and per tag and split — then
+measures (or its headline numbers, when it declares a `report`), cost and
+p50/p95, over every input and per tag and split — then
 the per-input comparison, then every failed trial with the check's reason.
 `recommendation.json` has `chosen: null` and `firmness: "scorecard"`, and
 every view prints "no pick (scorecard)". For a question that is not yet a
@@ -920,6 +921,62 @@ the mean over each input's graded trials, then the mean over inputs, with a
 95% t-interval over the per-input means. A measure only some inputs report
 is averaged over those inputs. `agenteval diff` prints each candidate's
 means in both runs.
+Add `"parts"` when the verdict is made of several things the check looked
+for, each passed or not — the fields of a form, the known defects of a PR:
+`{"parts": [{"id": "deadline", "pass": false, "label": "the appeal
+deadline", "tags": ["hard"]}]}`. An `id` names the same part on every trial
+of that input; `label` and `tags` are optional. Parts are descriptive too.
+The report lists every part with each candidate's passes over graded
+trials, and gives a pass rate per part tag, with a 95% interval counted per
+part. An input's tags cannot give that: an input holding two kinds of part
+would count both under each of its tags.
+
+A check with more than a few measures can say which ones a scorecard leads
+with, in a `report` block:
+
+```yaml
+evaluators:
+  required_checks:
+    triage-check:
+      kind: command
+      report:
+        headline:
+          - { label: Fields right, measure: fields_right, of: fields, by_slice: true }
+          - { label: Notes per answer, measure: notes }
+        slice_groups:
+          - { title: Difficulty, tags: [normal, hard] }
+        parts:
+          title: Every field
+          tag_groups:
+            - { title: Difficulty, tags: [normal, hard] }
+        input_groups:
+          - { tag: claim, title: Claims, pass: every field right }
+          - { tag: empty, title: Empty forms, pass: nothing invented }
+```
+
+Each headline becomes a column of the scorecard, in place of every measure
+on one line (they all stay in the measures section):
+
+- With `of`, it is a share: the measure summed over graded trials, out of
+  the other measure summed, shown as `13/39 · 33%`. Its 95% interval is
+  Wilson's, counted per input.
+- Without `of`, it is the mean over inputs, with its t-interval.
+- `measure` and `of` each take one name, or a list that is summed.
+- `tag` keeps only the inputs carrying that tag. A headline no candidate
+  has a value for (a tag the test set does not use) is left out.
+- `by_slice: true` adds a table of that headline per tag and split.
+  `slice_groups` orders those tags under titles; tags in no group are
+  folded under "Other slices".
+
+- `parts` titles the parts section and orders the parts' tags in groups.
+- `input_groups` splits the per-input table by tag, each table under what
+  a pass means there. Use it when a pass is not the same thing on every
+  kind of input.
+
+Under the columns, the scorecard says for each headline whether any two
+candidates differ: an exact two-sided sign test over inputs at 0.05, not
+adjusted for the number of pairs. "No difference shown" means the test set
+could not show one, not that there is none.
 `version_files` hashes the script into the check's version, so editing it
 shows up in the evidence. `kind: tsc` with `scaffold_dir: scaffold` instead
 compiles the produced TypeScript against `scaffold/tsconfig.json`.
@@ -1026,17 +1083,36 @@ The check reports these measures:
 | `matched_deterministic`, `matched_llm` | defect | findings that matched a defect on location, or through the LLM (each finding counted once) |
 | `caught_on_location` | defect, with `judge: all` | defects some finding sits on, whatever it says |
 | `unmatched_findings` | defect | findings that matched no defect |
+| `knowable_defects`, `knowable_caught` | defect, when the answer key says | defects a reviewer could have known, and how many of those were caught |
 | `defect_claims` | clean | findings that claim a defect |
 
-Catch rate per category and severity is the pass rate, or `caught` over
-`defects`, on that tag's slice. Defect claims per clean item is
-`defect_claims`. Precision is matched findings over all findings on defect
-items. The scorecard (`decision: scorecard`) shows it next to the measures
-as `precision`: the sum of the `matched_*` means over the sum of all three
-means, which pools findings per input instead of averaging precision per
-item. Elsewhere, compute it from the measures table the same way. Use the
-three defect-only measures, not `findings`, because clean items report
-`findings` too. Without a fallback, precision is a lower bound.
+`findings-match` has a `report` of its own (declare one to replace it). A
+scorecard (`decision: scorecard`) leads with these numbers per candidate:
+
+- **Knowable defects caught**: `knowable_caught` out of
+  `knowable_defects`. Left out when no defect says whether it was knowable.
+- **Defects caught**: `caught` out of `defects`, over every trial.
+- **Defect claims per clean item**: the mean of `defect_claims`.
+- **Precision on defect items**: matched findings (`matched_*`) out of
+  those plus `unmatched_findings`. It uses the defect-only measures, not
+  `findings`, because clean items report `findings` too. Without a
+  fallback, it is a lower bound.
+- **Findings per review**: the mean of `findings`.
+
+Defects caught and defect claims are also shown by source (escaped,
+seeded, clean).
+
+The check reports each defect as a part (`D1`, `D2` … in the answer key's
+order), tagged with its category, severity and, when the answer key says,
+`knowable` or `not-knowable`. **Every known defect** in the report lists
+them all with each candidate's catches over its trials, and gives the catch
+rate per category, severity and knowability from the defects themselves.
+The item's own tags would count an item's every defect under each tag, so
+they stay folded under "Other slices".
+
+The per-input table is split in two, because a pass means different
+things: on a defect item, every known defect caught; on a clean item, no
+finding claims a defect.
 
 The fallback's calls do not count toward the run's cost or `budget_usd`.
 `agenteval calibrate` cannot yet check the fallback against human labels.
@@ -1070,13 +1146,17 @@ evaluators:
       description: "Root cause, next action and deadline match the answer key."
 ```
 
+Add `caveats`, a list at the top of the spec, for what a reader must keep
+in mind (a judge nobody calibrated, labels no person confirmed). The report
+lists them under the description as **Read these numbers with care**.
+
 `description` heads the report as **What it evaluates**; a step's
 `description` stands beside the step's id wherever it appears (a workflow's
 step cards, a step's report), so name steps for what they do and say it there;
 a check's `description` replaces its version hash under **How success is
 decided**; with `labels_file`, the report adds **Results by input tag**: the
-required check's passes per candidate for each tag and split. All four are
-frozen into the run's `manifest.json`. `agenteval report` on a run made before they existed
+required check's passes per candidate for each tag and split. All of these
+and a check's `report` are frozen into the run's `manifest.json`. `agenteval report` on a run made before they existed
 reads them from the task's current spec and says so on the page.
 
 ### A test set as one file

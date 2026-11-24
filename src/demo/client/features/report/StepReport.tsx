@@ -15,6 +15,7 @@ import { AgentActivity } from "./sections/AgentActivity";
 import { Gates } from "./sections/Gates";
 import { Certainty } from "./sections/Certainty";
 import { Slices } from "./sections/Slices";
+import { Headline } from "./sections/Headline";
 import { CoverageAndLedger } from "./sections/CoverageAndLedger";
 import { Profile } from "./sections/Profile";
 import { Duels, judgedFirst } from "./sections/Duels";
@@ -44,6 +45,7 @@ export function StepReport({ report: r }: { report: Model }) {
       {r.promptComparison && <PromptComparison comparison={r.promptComparison} />}
       <PlanStepCard step={r.tested} title="What was tested" sharedModel={r.promptComparison ? { model: r.promptComparison.model, via: r.promptComparison.via } : undefined} />
       <Verdict verdict={r.verdict} eligible={r.eligible} total={r.candidates.length} />
+      <Headline headline={r.headline} caveats={r.caveats} parts={r.parts} candidates={r.candidates.map((c) => c.id)} />
       <Candidates candidates={r.candidates} control={r.control} promptVariants={r.promptVariants} stepPromptFile={r.stepPromptFile} />
       <SideBySide outputs={r.outputs} candidates={r.candidates} open={r.promptComparison !== null} />
       <AgentActivity agentActivity={r.agentActivity} />

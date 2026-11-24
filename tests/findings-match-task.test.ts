@@ -13,6 +13,7 @@ import path from "node:path";
 import { preflightTask, type PreflightReport } from "../src/core/preflight.js";
 import { runSuite } from "../src/core/execute.js";
 import { loadBundle, renderRunReport } from "../src/report-v2.js";
+import { buildStepReport } from "../src/report-model.js";
 import type { TrialRow } from "../src/canon/rows.js";
 
 const SPEC = `protocol_version: "0.3"
@@ -105,13 +106,37 @@ test("a run records the matcher's measures, the scorecard shows precision, and a
   assert.equal(cell(rows, "noisy", "pr3").state, "fail");
   assert.deepEqual(cell(rows, "noisy", "pr1").measures, { findings: 2, invalid_findings: 0, defects: 1, caught: 1, matched_deterministic: 1, matched_llm: 0, unmatched_findings: 1 });
   assert.deepEqual(cell(rows, "noisy", "pr3").measures, { findings: 1, invalid_findings: 0, defect_claims: 1 });
-  assert.match(cell(rows, "sharp", "pr1").version, /^findings-match-2\+opts-/);
+  assert.match(cell(rows, "sharp", "pr1").version, /^findings-match-3\+opts-/);
 
-  const html = renderRunReport(await loadBundle(result.dir));
-  // sharp: 1 of 2 findings on defect items matched; noisy: 1 of 4.
-  assert.match(html, /precision 0\.50/);
-  assert.match(html, /precision 0\.25/);
-  assert.match(html, /Precision \(findings-match\)/);
+  const bundle = await loadBundle(result.dir);
+  const html = renderRunReport(bundle);
+  // The matcher's own headlines lead: both caught 1 of 2 defects; sharp matched 1 of 2 findings on defect items, noisy 1 of 4.
+  assert.match(html, /<th class="num wrap">Defects caught<\/th><th class="num wrap">Defect claims per clean item<\/th><th class="num wrap">Precision on defect items<\/th>/);
+  assert.match(html, /1\/2 · <b>50%<\/b>/);
+  assert.match(html, /1\/4 · <b>25%<\/b>/);
+  assert.match(html, /Defects caught, by slice/);
+  assert.doesNotMatch(html, /matched_deterministic \d\.\d\d · matched_llm/, "no cell lists every measure on one line");
+  assert.match(html, /<h2>Check measures/, "they are all in the measures section");
+  assert.match(html, /<span class="sub">Defects caught 1\/1<\/span>/, "an input's cell says what was caught there");
+  assert.match(html, /<span class="sub">Defect claims per clean item 1\.00<\/span>/);
+  const model = buildStepReport(bundle);
+  assert.deepEqual(model.headline.map((h) => h.decl.label), ["Defects caught", "Defect claims per clean item", "Precision on defect items", "Findings per review"]); // no item is tagged knowable here, so that headline is left out
+  assert.deepEqual(model.caveats, []);
+
+  // Each defect is a part on its row, and the report lists every one across the candidates.
+  assert.deepEqual(cell(rows, "sharp", "pr2").parts, [{ id: "D1", pass: false, label: "off by one (src/pay.ts:10)", tags: ["logic"] }]);
+  assert.equal(cell(rows, "sharp", "pr3").parts, undefined, "a clean item has no part");
+  assert.deepEqual(model.parts?.rows.map((r) => [r.input, r.id, r.cells.sharp, r.cells.noisy]), [
+    ["pr1", "D1", { pass: 1, graded: 1 }, { pass: 1, graded: 1 }],
+    ["pr2", "D1", { pass: 0, graded: 1 }, { pass: 0, graded: 1 }],
+  ]);
+  assert.match(html, /<h2>Every known defect/);
+  assert.match(html, /rate applied twice \(src\/tax\.ts:40-42\)/);
+  // Catch rate per category, from the defects themselves.
+  assert.deepEqual(model.parts?.groups.map((g) => [g.title, g.rows.map((r) => r.label)]), [["Category", ["calculation", "logic"]], ["Severity", ["high"]]]);
+  // The per-input table says what a pass means on each kind of item.
+  assert.match(html, /<h3>Escaped-defect items <span class="hint">a pass: every known defect caught<\/span><\/h3>/);
+  assert.match(html, /<h3>Clean items <span class="hint">a pass: no finding claims a defect<\/span><\/h3>/);
 
   // Widen the tolerance: pr2's finding, five lines off, now matches, without running the reviewers again.
   await fs.writeFile(spec, SPEC.replace("line_tolerance: 3", "line_tolerance: 5"));

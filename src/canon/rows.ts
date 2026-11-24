@@ -10,6 +10,7 @@
 
 import type { Winner } from "../types.js";
 import type { AgentActivity } from "./agent-trace.js";
+import type { CheckPart } from "./parts.js";
 import type {
   CompletionState,
   CostSource,
@@ -27,6 +28,8 @@ export interface CheckCell {
   score?: number;
   /** Named counts the check reported beside its verdict (canon/measures.ts); absent when it reported none. */
   measures?: Record<string, number>;
+  /** What the check looked for on this trial, each passed or not (canon/parts.ts); absent when it reported none. */
+  parts?: CheckPart[];
 }
 
 export interface TrialRow {

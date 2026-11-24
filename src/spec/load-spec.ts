@@ -21,6 +21,7 @@ import { sha256 } from "../canon/hash.js";
 import { endpointOf, endpointProblem, type EndpointDecl } from "../providers/index.js";
 import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
 import { hasTraceRules, type TraceRules } from "../canon/trace-rules.js";
+import type { CheckReport } from "../canon/headline.js";
 import type { CheckConfig, JudgeMethod } from "../types.js";
 import { workspaceForSpec, type Workspace } from "../core/workspace.js";
 import { labelsOfItems, materializeItems, readItems } from "../core/items.js";
@@ -77,6 +78,7 @@ export interface EvalSpec {
   protocol_version: string;
   run_name: string;
   description?: string;
+  caveats?: string[];
   budget_usd?: number;
   workflow: {
     control_candidate?: string;
@@ -103,6 +105,7 @@ export interface EvalSpec {
         version_files?: string[];
         timeout_seconds?: number;
         description?: string;
+        report?: CheckReport;
         trace?: TraceRules;
       }
     >;
@@ -557,6 +560,10 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     ...(requiredChecks[0] && spec.evaluators.required_checks?.[requiredChecks[0]]?.description
       ? { checkDescription: spec.evaluators.required_checks[requiredChecks[0]].description }
       : {}),
+    ...(requiredChecks[0] && spec.evaluators.required_checks?.[requiredChecks[0]]?.report
+      ? { checkReport: spec.evaluators.required_checks[requiredChecks[0]].report }
+      : {}),
+    ...(spec.caveats ? { caveats: [...spec.caveats] } : {}),
     ...(step.test_set.labels_file ? { labelsFile: step.test_set.labels_file } : {}),
   };
 }

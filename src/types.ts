@@ -9,6 +9,8 @@
 import type { AgentActivity } from "./canon/agent-trace.js";
 import type { TraceRules } from "./canon/trace-rules.js";
 import type { InputLabels } from "./canon/about.js";
+import type { CheckReport } from "./canon/headline.js";
+import type { CheckPart } from "./canon/parts.js";
 import type {
   CandidateDef,
   CompletionState,
@@ -235,6 +237,10 @@ export interface Suite {
   checkDescription?: string;
   /** The step's own `description`: what its candidates do. */
   stepDescription?: string;
+  /** The step's required check's `report`: the measures a scorecard leads with. */
+  checkReport?: CheckReport;
+  /** spec `caveats`: what to read the numbers with. */
+  caveats?: string[];
   /** `test_set.labels_file`, task-relative: tags and split per input. */
   labelsFile?: string;
   /** Tags and split per input, read from `test_set.items_file` when the spec was loaded. */
@@ -281,6 +287,8 @@ export interface RunRecord {
   checkScore?: number;
   /** Named counts a command check reported beside its verdict (canon/measures.ts), when it reported any. */
   checkMeasures?: Record<string, number>;
+  /** What the check looked for on this trial, each passed or not (canon/parts.ts), when it reported any. */
+  checkParts?: CheckPart[];
 
   // ── Canonical (protocol v0.4) fields. `candidate` above holds the candidate
   // id. ──
