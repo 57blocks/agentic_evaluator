@@ -82,7 +82,7 @@ function selected(c: Candidate, includeUnconfirmed: boolean): string | null {
 }
 
 function provenanceLabel(c: Candidate): string {
-  if (c.confirmed === true) return "human-confirmed";
+  if (c.confirmed === true) return c.label?.confirmed_by ? `confirmed by ${c.label.confirmed_by}` : "human-confirmed";
   return c.prescreen ? `unconfirmed (included with --include-unconfirmed; pre-screen ${c.prescreen.verdict})` : "unconfirmed (included with --include-unconfirmed; not pre-screened)";
 }
 
@@ -167,6 +167,22 @@ function tagsOf(kind: string, defects: readonly Defect[]): string[] {
   return [...set];
 }
 
+/** What the item's labels say of knowability; nothing when none says. */
+function knowableTag(group: readonly Candidate[]): string[] {
+  const said = new Set(group.map((c) => c.label?.knowable).filter((k) => k !== undefined));
+  if (said.size === 0) return [];
+  if (said.size === 2) return ["partly-knowable"];
+  return [said.has(true) ? "knowable" : "not-knowable"];
+}
+
+/** "human-confirmed" only when every candidate was confirmed, and none by something other than a person. */
+function itemProvenanceLabel(group: readonly Candidate[]): string {
+  if (!group.every((c) => c.confirmed === true)) return "includes unconfirmed candidates";
+  const by = [...new Set(group.map((c) => c.label?.confirmed_by).filter((b) => b !== undefined))];
+  if (by.length === 0) return "human-confirmed";
+  return group.every((c) => c.label?.confirmed_by) ? `confirmed by ${by.join(", ")}` : `confirmed by a person and ${by.join(", ")}`;
+}
+
 async function buildEscaped(opts: BuildOptions, unit: Unit, group: Candidate[], report: BuildReport): Promise<Item | null> {
   const id = unitId(unit);
   const resolved = await resolveRange(opts.repo, unit, opts.github);
@@ -190,13 +206,13 @@ async function buildEscaped(opts: BuildOptions, unit: Unit, group: Candidate[], 
     id,
     input: id,
     expected: { kind: "defect", source: "escaped", defects },
-    tags: tagsOf("escaped", defects),
+    tags: [...tagsOf("escaped", defects), ...knowableTag(kept)],
     split: "dev",
     provenance: {
       built_by: "agenteval code-review build",
       unit,
       merged_as: range.kind,
-      label: kept.every((c) => c.confirmed === true) ? "human-confirmed" : "includes unconfirmed candidates",
+      label: itemProvenanceLabel(kept),
       candidates: kept.map((c) => ({
         id: c.id,
         fix: c.fix.sha,

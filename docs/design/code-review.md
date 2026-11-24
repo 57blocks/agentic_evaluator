@@ -58,6 +58,10 @@ Clean item: `{"kind": "clean", "note": "…"}`.
 Line numbers are in the PR head version of the file (what the reviewer sees).
 Tags carry `escaped` / `seeded` / `clean` plus category and severity, so the
 report's slices give "per category and severity, never one blended score".
+An escaped item whose labels say so also carries `knowable`, `not-knowable`
+or `partly-knowable`: a real fix a reviewer could not have known to ask for
+(a business rule that later changed its mind, a regulation outside the repo)
+is kept, and read as its own slice.
 
 ## Defect taxonomy (category)
 

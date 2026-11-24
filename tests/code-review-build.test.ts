@@ -323,6 +323,67 @@ test("only confirmed candidates go in unless --include-unconfirmed, and a false 
   assert.deepEqual(loose.report.excluded.map((e) => e.reason), ["a person marked it not a defect"]);
 });
 
+test("a label's knowable becomes the item's tag, and a label never tags what it does not say", async () => {
+  // Arrange
+  const s = await shop();
+  const knowableOf = (pr1: boolean | undefined, pr3: boolean | undefined) => (m: MinedFile): MinedFile => ({
+    ...m,
+    candidates: m.candidates.map((c) => {
+      const knowable = c.introducing.unit.kind === "pr" && c.introducing.unit.number === 1 ? pr1 : pr3;
+      return { ...c, confirmed: true, label: { category: "logic", severity: "low", ...(knowable === undefined ? {} : { knowable }) } };
+    }),
+  });
+
+  // Act
+  const { items } = await build({ repo: s.repo.dir, mined: await minedShop(s, knowableOf(false, true)), clean: null, taskDir: await tmp("cr-t-"), github: s.github, includeUnconfirmed: false });
+  const unsaid = await build({ repo: s.repo.dir, mined: await minedShop(s, knowableOf(undefined, undefined)), clean: null, taskDir: await tmp("cr-t-"), github: s.github, includeUnconfirmed: false });
+
+  // Assert
+  assert.deepEqual(items.map((i) => [i.id, i.tags]), [["pr1", ["escaped", "logic", "low", "not-knowable"]], ["pr3", ["escaped", "logic", "low", "knowable"]]]);
+  assert.deepEqual(unsaid.items.map((i) => i.tags), [["escaped", "logic", "low"], ["escaped", "logic", "low"]]);
+});
+
+test("a confirmation a label attributes to something other than a person is not called human-confirmed", async () => {
+  // Arrange
+  const s = await shop();
+  const mined = await minedShop(s, (m) => ({
+    ...m,
+    candidates: m.candidates.map((c) => ({
+      ...c,
+      confirmed: true,
+      ...(c.introducing.unit.kind === "pr" && c.introducing.unit.number === 1 ? { label: { confirmed_by: "model review 2026-11-24" } } : {}),
+    })),
+  }));
+
+  // Act
+  const { items } = await build({ repo: s.repo.dir, mined, clean: null, taskDir: await tmp("cr-t-"), github: s.github, includeUnconfirmed: false });
+
+  // Assert
+  const [pr1, pr3] = items.map((i) => i.provenance as { label: string; candidates: { label: string }[] });
+  assert.equal(pr1.label, "confirmed by model review 2026-11-24");
+  assert.equal(pr1.candidates[0].label, "confirmed by model review 2026-11-24");
+  assert.equal(pr3.label, "human-confirmed");
+  assert.equal(pr3.candidates[0].label, "human-confirmed");
+});
+
+test("a label whose knowable is not a boolean, or whose confirmed_by is not text, is refused by name", async () => {
+  // Arrange
+  const s = await shop();
+  const dir = await tmp("cr-m-");
+  const write = async (label: unknown): Promise<void> => {
+    const mined = await minedShop(s, (m) => ({ ...m, candidates: m.candidates.map((c) => ({ ...c, confirmed: true, label: label as MinedFile["candidates"][number]["label"] })) }));
+    await fs.writeFile(path.join(dir, "candidates.json"), JSON.stringify(mined));
+  };
+
+  // Act + Assert
+  await write({ knowable: "no" });
+  await assert.rejects(readMined(dir), /"label\.knowable" must be true or false, got "no"/);
+  await write({ confirmed_by: "" });
+  await assert.rejects(readMined(dir), /"label\.confirmed_by" must be non-empty text, got ""/);
+  await write({ knowable: false, confirmed_by: "model review" });
+  assert.equal((await readMined(dir)).candidates[0].label?.knowable, false);
+});
+
 test("a candidate whose introducer is not in its PR's range is skipped with the reason", async () => {
   const s = await shop();
   const mined = await minedShop(s, (m) => confirmAll({

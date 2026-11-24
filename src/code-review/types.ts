@@ -63,6 +63,10 @@ export interface Label {
   category?: string;
   severity?: string;
   description?: string;
+  /** Whether a reviewer could have known from the PR alone; `build` turns it into the item's knowable / not-knowable tag. */
+  knowable?: boolean;
+  /** Who set `confirmed`, when it was not a person (e.g. a model review); `build` then never writes "human-confirmed". */
+  confirmed_by?: string;
 }
 
 export interface Candidate {

@@ -393,7 +393,13 @@ agenteval code-review build ~/src/app --mined mined --clean mined --task tasks/a
   its commits, nothing after its head, so the fix is out of reach) and
   `pr.json`. Only `"confirmed": true` goes in; `--include-unconfirmed` adds
   unreviewed ones (not those pre-screened `not_defect`) and says so in their
-  provenance. Defect lines are line numbers in the PR head. Rebase, squash and
+  provenance. A candidate's `label` may also say `"knowable": true|false`
+  (could a reviewer have known from the PR alone?), which tags the item
+  `knowable`, `not-knowable` or, when its defects differ, `partly-knowable`,
+  so the report slices them apart; and `"confirmed_by": "<who>"` when
+  something other than a person set `confirmed`, so the item's provenance
+  reads "confirmed by <who>" and not "human-confirmed". Defect lines are line
+  numbers in the PR head. Rebase, squash and
   merge-commit PRs are handled; a PR GitHub lists only part of, or whose
   commits lack the introducer, is skipped with the reason in
   `code-review-build.json`, as are defects whose lines could not be found at

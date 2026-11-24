@@ -70,6 +70,13 @@ export async function readMined(dir: string): Promise<MinedFile> {
     if (c.confirmed !== null && typeof c.confirmed !== "boolean") {
       throw new CandidatesError(`${c.id}: "confirmed" must be true, false or null, got ${JSON.stringify(c.confirmed)}`);
     }
+    const { knowable, confirmed_by: confirmedBy } = c.label ?? {};
+    if (knowable !== undefined && typeof knowable !== "boolean") {
+      throw new CandidatesError(`${c.id}: "label.knowable" must be true or false, got ${JSON.stringify(knowable)}`);
+    }
+    if (confirmedBy !== undefined && (typeof confirmedBy !== "string" || confirmedBy.trim() === "")) {
+      throw new CandidatesError(`${c.id}: "label.confirmed_by" must be non-empty text, got ${JSON.stringify(confirmedBy)}`);
+    }
   }
   return mined;
 }
