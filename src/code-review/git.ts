@@ -8,6 +8,7 @@
  */
 
 import { execFile, spawn } from "node:child_process";
+import { readFile } from "node:fs/promises";
 
 const MAX_BUFFER = 512 * 1024 * 1024;
 
@@ -76,6 +77,19 @@ export async function gitMaybe(repo: string, args: readonly string[]): Promise<s
 
 export async function revParse(repo: string, rev: string): Promise<string> {
   return (await git(repo, ["rev-parse", "--verify", "--quiet", "--end-of-options", `${rev}^{commit}`])).trim();
+}
+
+/**
+ * The commits a shallow clone was cut at (empty for a full clone). History
+ * before them is missing, so blame credits them with every older line.
+ */
+export async function shallowBoundary(repo: string): Promise<Set<string>> {
+  const file = (await git(repo, ["rev-parse", "--path-format=absolute", "--git-path", "shallow"])).trim();
+  const text = await readFile(file, "utf-8").catch((err: NodeJS.ErrnoException) => {
+    if (err.code === "ENOENT") return "";
+    throw new GitError(`cannot read ${file}: ${err.message}`);
+  });
+  return new Set(text.split("\n").map((l) => l.trim()).filter((l) => l !== ""));
 }
 
 export async function parentsOf(repo: string, sha: string): Promise<string[]> {

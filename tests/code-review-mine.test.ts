@@ -168,3 +168,23 @@ test("re-mining with other flags warns about marked pairs it no longer finds, an
   const kept = JSON.parse(await fs.readFile(path.join(out, "candidates.previous.json"), "utf-8"));
   assert.ok(kept.candidates.every((c: { confirmed: boolean }) => c.confirmed === true));
 });
+
+test("in a shallow clone, a fix whose blame stops at the boundary commit is dropped, not pinned on it", async () => {
+  // Arrange: a clone cut after the buggy commit, so blame credits the cut point with the bug's line.
+  const s = await shop();
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "cr-shallow-"));
+  const { execFileSync } = await import("node:child_process");
+  execFileSync("git", ["clone", "--quiet", "--depth", "12", "--branch", "main", `file://${s.repo.dir}`, dir]);
+  const boundary = (await fs.readFile(path.join(dir, ".git", "shallow"), "utf-8")).trim().split("\n");
+  assert.ok(!boundary.includes(s.sha.c1), "the buggy commit is outside the clone");
+
+  // Act
+  const mined = await mine(options(s, { repo: dir }));
+
+  // Assert
+  const drop = mined.dropped.find((d) => d.fix === s.sha.c8);
+  assert.ok(drop, "the discount fix is dropped");
+  assert.match(drop.reason, /shallow clone/);
+  assert.ok(boundary.includes(drop.introducing ?? ""));
+  assert.ok(!mined.candidates.some((c) => boundary.includes(c.introducing.sha)));
+});

@@ -7,6 +7,7 @@
 import type { PartBoard, PartRow } from "./canon/parts.js";
 import { escapeHtml } from "./html.js";
 import { headlineCell } from "./report-headline.js";
+import { renderPartStrip } from "./report-headline-charts.js";
 
 /** Parts are listed open up to this many; beyond it the grid is folded. */
 const OPEN_PARTS = 40;
@@ -51,6 +52,7 @@ export function renderParts(board: PartBoard | null, candidates: readonly string
   if (!board) return "";
   return `<section class="card">
     <h2>${escapeHtml(board.title)} <span class="hint">each one across candidates · passes / graded trials</span></h2>
+    ${renderPartStrip(board, candidates)}
     ${tagTable(board, candidates)}
     ${grid(board, candidates)}
   </section>`;

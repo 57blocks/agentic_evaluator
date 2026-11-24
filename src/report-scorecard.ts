@@ -24,6 +24,7 @@ import { fmtCost, fmtSec } from "./report-format.js";
 import { sliceMembers } from "./report-slices.js";
 import { headlineBoard, type CheckReport, type HeadlineEntry } from "./canon/headline.js";
 import { headlineCell, headlineHeads, renderDifferences, renderHeadlineSlices } from "./report-headline.js";
+import { renderHeadlineChart } from "./report-headline-charts.js";
 
 /** Failed trials are listed open when there are at most this many for a candidate. */
 const OPEN_FAILURES = 10;
@@ -125,6 +126,7 @@ export function renderScorecard(labels: InputLabels | null, trials: readonly Tri
   if (board.length > 0) {
     return `<section class="card">
     <h2>Scorecard <span class="hint">decision: scorecard · no gate applied, no candidate picked</span></h2>
+    ${renderHeadlineChart(board, candidates)}
     ${headTable(all!, trials, rates, candidates, board)}
     <p class="note">n is the inputs a number is over. A share is counted over graded trials (three trials of one defect are three chances); its 95% interval is Wilson's, counted per input, so repeated trials of one input do not narrow it. A plain number is the mean over inputs of each input's mean, with a t-interval. The required check passes a trial only when everything it asks for holds. Cost excludes judging; p50 and p95 are over completed trials.</p>
     ${renderDifferences(board)}

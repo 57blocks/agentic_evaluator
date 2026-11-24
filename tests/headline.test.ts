@@ -255,3 +255,56 @@ test("inputs are listed under the check's groups, each saying what a pass means 
   assert.deepEqual(inputGroups(null, decl), []);
   assert.doesNotMatch(renderInputComparison(inputComparison(trials, ["a", "b"]), ["a", "b"], []), /Other inputs/, "no groups: one table, as before");
 });
+
+/* ── the charts ──────────────────────────────────────────────────────────── */
+
+import { headlineScale } from "../src/canon/headline.js";
+import { renderHeadlineChart, renderPartStrip } from "../src/report-headline-charts.js";
+import { partBoard } from "../src/canon/parts.js";
+
+test("a headline's axis runs 0–100% for a share, and from 0 to a round number above the widest interval for a mean", () => {
+  const board = headlineBoard(REPORT, LABELS, BOARD_ROWS, ["a", "b"]);
+
+  const share = headlineScale(board[0]!);
+  assert.deepEqual([share.max, share.ticks], [1, [0, 0.25, 0.5, 0.75, 1]]);
+  assert.equal(share.format(0.25), "25%");
+
+  const mean = headlineScale({ ...board[1]!, all: { a: { kind: "mean", value: 1.2, inputs: 3, low: 0.4, high: 2.3 }, b: { kind: "mean", value: 0.5, inputs: 3, low: null, high: null } } });
+  assert.equal(mean.max, 2.5);
+  assert.deepEqual(mean.ticks, [0, 0.5, 1, 1.5, 2, 2.5]);
+  assert.equal(mean.format(1.5), "1.5");
+});
+
+test("the interval chart draws one panel per headline: a dot and its 95% interval per candidate, on that headline's own axis", () => {
+  const board = headlineBoard(REPORT, LABELS, BOARD_ROWS, ["a", "b"]);
+
+  const html = renderHeadlineChart(board, ["a", "b"]);
+
+  assert.equal((html.match(/class="iv-panel"/g) ?? []).length, 2);
+  // a caught 1 of 2: the dot sits at 50% of a 0–100% axis, in the first candidate's colour, with the number beside it in ink.
+  assert.match(html, /class="iv-dot" style="left:50\.0%;background:var\(--s1\)"/);
+  assert.match(html, /class="iv-dot" style="left:0\.0%;background:var\(--s2\)"/);
+  assert.match(html, /<span class="iv-val">1\/2 · 50%<\/span>/);
+  assert.match(html, /class="iv-bar" style="left:[\d.]+%;width:[\d.]+%/);
+  assert.match(html, /title="a: 1\/2 · 50%, 95% \d+%–\d+%, n 2"/);
+  assert.equal(renderHeadlineChart([], ["a"]), "");
+});
+
+test("the part strip is a row per candidate and a cell per part, tinted by how often it passed, with the count in the cell", () => {
+  const D = (id: string, pass: boolean, tags: string[]) => ({ id, pass, label: `${id} what`, tags });
+  const rows = [
+    { candidate: "a", input: "pr1", trial: 0, checks: { c: { state: "fail", parts: [D("D1", true, ["knowable"]), D("D2", false, ["not-knowable"])] } } },
+    { candidate: "a", input: "pr1", trial: 1, checks: { c: { state: "pass", parts: [D("D1", true, ["knowable"]), D("D2", true, ["not-knowable"])] } } },
+    { candidate: "b", input: "pr1", trial: 0, checks: { c: { state: "fail", parts: [D("D1", false, ["knowable"]), D("D2", false, ["not-knowable"])] } } },
+  ] as unknown as TrialRow[];
+  const board = partBoard({ title: "Every known defect", tag_groups: [{ title: "Known", tags: ["knowable", "not-knowable"] }] }, rows, ["a", "b"]);
+
+  const html = renderPartStrip(board, ["a", "b"]);
+
+  assert.equal((html.match(/class="ps-cell/g) ?? []).length, 4);
+  assert.match(html, /class="ps-cell ps-hi" style="background:color-mix\(in srgb,var\(--s1\) 85%,var\(--surface\)\)" title="a · pr1 D1 what: 2\/2">2<\/span>/);
+  assert.match(html, /class="ps-cell ps-zero" title="b · pr1 D1 what: 0\/1">0<\/span>/);
+  // The first tag group splits the columns, each block under its tag.
+  assert.ok(html.indexOf('"ps-title">knowable ') > 0 && html.indexOf('"ps-title">knowable ') < html.indexOf('"ps-title">not-knowable '));
+  assert.equal(renderPartStrip(null, ["a"]), "");
+});

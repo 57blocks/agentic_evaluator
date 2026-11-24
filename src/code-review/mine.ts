@@ -9,7 +9,7 @@
  * confirm; nothing here decides that a defect is real.
  */
 
-import { commitInfo, logCommits, type CommitInfo } from "./git.js";
+import { commitInfo, logCommits, shallowBoundary, type CommitInfo } from "./git.js";
 import { landedThrough, type GitHub } from "./github.js";
 import { blameLines, DEFAULT_BLAME, fixedFiles, HOUSEKEEPING, isFix, removedRanges } from "./szz.js";
 import { unitId, type BlamedLine, type Candidate, type Dropped, type Introducer, type MinedFile, type Unit } from "./types.js";
@@ -42,6 +42,8 @@ type Outcome = { candidate: Candidate } | { dropped: Dropped };
 interface Context extends MineOptions {
   extra: RegExp | null;
   introducers: Set<string>;
+  /** Where a shallow clone was cut: blame names these for lines older than the clone. */
+  boundary: Set<string>;
   units: Map<string, Promise<Unit>>;
   infos: Map<string, Promise<CommitInfo>>;
 }
@@ -106,6 +108,7 @@ async function examine(ctx: Context, fix: CommitInfo): Promise<Outcome> {
   const counts = tally(blamed.blamed);
   const total = blamed.blamed.length;
   const top = await introducer(ctx, counts[0].sha, counts[0].lines, total);
+  if (ctx.boundary.has(top.sha)) return drop("blame stops at the shallow clone's boundary commit (the real introducer is older than the clone)", top.sha);
   if (top.share < ctx.minOwnerShare) return drop(`top introducer owns ${Math.round(top.share * 100)}% of blamed lines (under ${Math.round(ctx.minOwnerShare * 100)}%)`, top.sha);
   if (HOUSEKEEPING.test(top.subject)) return drop("introducer is chore/style/ci", top.sha);
 
@@ -147,6 +150,7 @@ export async function mine(opts: MineOptions): Promise<MinedFile> {
     ...opts,
     extra: opts.fixPattern ? new RegExp(opts.fixPattern, "i") : null,
     introducers: new Set(),
+    boundary: await shallowBoundary(opts.repo),
     units: new Map(),
     infos: new Map(),
   };
@@ -154,6 +158,7 @@ export async function mine(opts: MineOptions): Promise<MinedFile> {
   const commits = await logCommits(opts.repo, ["--first-parent", ...window, "--end-of-options", opts.head]);
   const fixes = commits.filter((c) => isFix(c.subject, c.body, c.parents.length > 1, ctx.extra));
   opts.log?.(`${commits.length} commits on ${opts.branch} in the window, ${fixes.length} fixes`);
+  if (ctx.boundary.size > 0) opts.log?.("shallow clone: fixes of code older than the clone are dropped");
 
   let done = 0;
   const outcomes = await mapPool(fixes, opts.concurrency ?? DEFAULT_CONCURRENCY, async (fix) => {

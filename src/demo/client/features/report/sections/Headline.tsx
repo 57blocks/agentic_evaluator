@@ -8,6 +8,7 @@
 import type { StepReport } from "../../../../../report-model.js";
 import type { HeadlineDifference, HeadlineEntry, HeadlineValue } from "../../../../../canon/headline.js";
 import { Note, Section } from "../Section";
+import { IntervalChart, PartStrip } from "../charts/HeadlineCharts";
 
 type Props = Pick<StepReport, "headline" | "caveats" | "parts"> & { candidates: string[] };
 
@@ -64,6 +65,8 @@ export function Headline({ headline, caveats, parts, candidates }: Props) {
       )}
       {headline.length > 0 && (
         <Section title="Headline numbers" hint="What the required check leads with, per candidate. A share is counted over graded trials; n is the inputs it is over.">
+          <IntervalChart headline={headline} candidates={candidates} />
+          <Note>A dot is the value, the line its 95% interval; each panel has its own axis. Intervals that overlap are not a difference.</Note>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -92,6 +95,8 @@ export function Headline({ headline, caveats, parts, candidates }: Props) {
       )}
       {parts && (
         <Section title={parts.title} hint="Each one across candidates: passes / graded trials. Per tag, a part is counted under its own tags only; n is the parts.">
+          <PartStrip parts={parts} candidates={candidates} />
+          <Note>A column is one part, a row one candidate; the number is the trials that passed it, and the tint deepens with it. Hover a cell for what the part is.</Note>
           {parts.groups.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

@@ -237,6 +237,33 @@ export function headlineBoard(report: CheckReport | null, labels: InputLabels | 
   return entries.filter((h) => Object.values(h.all).some((v) => v !== null));
 }
 
+/** The axis one headline is drawn on: from 0 to `max`, with these ticks. */
+export interface HeadlineScale {
+  max: number;
+  ticks: number[];
+  format: (v: number) => string;
+}
+
+const TICK_STEPS = [0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10, 20, 25, 50, 100];
+const MAX_TICK_INTERVALS = 5;
+
+/**
+ * A share is drawn on 0–100%. A mean is drawn from 0 to the first round
+ * number at or above its widest interval, so every candidate's interval
+ * fits and the axis reads in steps a person would choose.
+ */
+export function headlineScale(entry: Pick<HeadlineEntry, "all">): HeadlineScale {
+  const values = Object.values(entry.all).filter((v): v is HeadlineValue => v !== null);
+  if (values.some((v) => v.kind === "share")) {
+    return { max: 1, ticks: [0, 0.25, 0.5, 0.75, 1], format: (v) => `${Math.round(v * 100)}%` };
+  }
+  const top = Math.max(0, ...values.map((v) => v.high ?? v.value));
+  const step = TICK_STEPS.find((s) => Math.ceil(top / s) <= MAX_TICK_INTERVALS) ?? Math.max(1, top / MAX_TICK_INTERVALS);
+  const intervals = Math.max(1, Math.ceil(top / step));
+  const round = (v: number): number => Number(v.toFixed(2));
+  return { max: round(intervals * step), ticks: Array.from({ length: intervals + 1 }, (_, i) => round(i * step)), format: (v) => String(round(v)) };
+}
+
 /** The report a check leads with: what the run froze from its spec, else what its kind has built in, else none. */
 export function checkReportFor(declared: CheckReport | null | undefined, checkVersion: string | null | undefined): CheckReport | null {
   if (declared) return declared;

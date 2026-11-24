@@ -47,6 +47,7 @@ import { headlineValue, inputGroups, type CheckReport } from "./canon/headline.j
 import { partBoard } from "./canon/parts.js";
 import { renderParts } from "./report-parts.js";
 import { headlineNote } from "./report-headline.js";
+import { HEADLINE_CHART_STYLES } from "./report-headline-charts.js";
 import { inputComparison } from "./canon/input-compare.js";
 import { renderFailedTrials, renderScorecard } from "./report-scorecard.js";
 import { SCATTER_STYLES, costSuccessChart, gateNotesOf, renderCostSuccess } from "./report-scatter.js";
@@ -463,7 +464,7 @@ export function renderRunReport(b: RunBundle): string {
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(m.run_name)} run report</title>
-<style>${PAGE_STYLE}${EVIDENCE_STYLES}${CHART_STYLES}${SCATTER_STYLES}${COMPARE_STYLES}</style></head>
+<style>${PAGE_STYLE}${EVIDENCE_STYLES}${CHART_STYLES}${SCATTER_STYLES}${COMPARE_STYLES}${HEADLINE_CHART_STYLES}</style></head>
 <body><div class="page">
   <header class="run">
     <p class="eyebrow">Agentic Evaluator · run report · protocol ${escapeHtml(m.protocol_version)}</p>
