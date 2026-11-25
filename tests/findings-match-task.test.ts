@@ -134,6 +134,10 @@ test("a run records the matcher's measures, the scorecard shows precision, and a
   assert.match(html, /rate applied twice \(src\/tax\.ts:40-42\)/);
   // Catch rate per category, from the defects themselves.
   assert.deepEqual(model.parts?.groups.map((g) => [g.title, g.rows.map((r) => r.label)]), [["Category", ["calculation", "logic"]], ["Severity", ["high"]]]);
+  // The noisy reviewer's blocking nit on the clean PR is listed as a defect claim, with what it said.
+  assert.deepEqual(model.claims.map((r) => [r.input, r.counts]), [["pr3", { sharp: 0, noisy: 1 }]]);
+  assert.match(html, /<h2>Defect claims on clean items/);
+  assert.match(html, /noisy · t0 · src\/style\.ts:1<\/span><div>nit: rename/);
   // The per-input table says what a pass means on each kind of item.
   assert.match(html, /<h3>Escaped-defect items <span class="hint">a pass: every known defect caught<\/span><\/h3>/);
   assert.match(html, /<h3>Clean items <span class="hint">a pass: no finding claims a defect<\/span><\/h3>/);

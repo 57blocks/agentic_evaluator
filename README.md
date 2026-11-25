@@ -1110,6 +1110,13 @@ rate per category, severity and knowability from the defects themselves.
 The item's own tags would count an item's every defect under each tag, so
 they stay folded under "Other slices".
 
+**Defect claims on clean items** ranks the clean items by how many claims
+they drew and, on opening a row, shows the comments that were counted. It
+is read from the `findings-match.json` each trial leaves, so it needs
+`checks/` beside the run. Clean means no later fix traced a bug to the PR,
+not that it has none, so read the noisiest ones before calling them false
+alarms.
+
 The per-input table is split in two, because a pass means different
 things: on a defect item, every known defect caught; on a clean item, no
 finding claims a defect.

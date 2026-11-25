@@ -80,8 +80,9 @@ known defect" section is the defect × candidate grid and the catch rate per
 tag. The per-input table is split into defect items and clean items, each
 under what a pass means there.
 
-Not done yet: the noisiest false alarms. A clean item's claims are a count
-(`defect_claims`); which findings they were is only in `findings-match.json`.
+The noisiest false alarms (`src/code-review/claims.ts`) are read by the
+report from each trial's `findings-match.json`, not carried on the row: the
+record already says which findings a clean item's claims were.
 
 ## Defect taxonomy (category)
 

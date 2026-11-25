@@ -39,6 +39,7 @@ import { measureSlices, sliceRows, type MeasureSliceRow, type SliceRow } from ".
 import { measureStats, type MeasureStats } from "./canon/measures.js";
 import { headlineBoard, type HeadlineEntry } from "./canon/headline.js";
 import { partBoard, type PartBoard } from "./canon/parts.js";
+import { claimBoard, type ClaimRow } from "./code-review/claims.js";
 import { costSuccessChart, gateNotesOf, type CostSuccessChart } from "./report-scatter.js";
 import type { RunAbout } from "./canon/about.js";
 import type { CandidateDef } from "./canon/types.js";
@@ -591,6 +592,8 @@ export interface StepReport {
   caveats: string[];
   /** Every part the check reported across candidates, and the pass rate per part tag; null when it reported none (canon/parts.ts). */
   parts: PartBoard | null;
+  /** A code review's clean items by how many defect claims they drew, with what was said; empty for any other check. */
+  claims: ClaimRow[];
   /** What this step's candidates do (the step's description); null when the spec gives none. */
   stepDescription: string | null;
   facts: Array<{ label: string; value: string }>;
@@ -691,6 +694,7 @@ export function buildStepReport(b: RunBundle): StepReport {
     headline: headlineBoard(b.about?.checkReport ?? null, b.about?.labels ?? null, b.trials, views.map((v) => v.id)),
     caveats: b.about?.caveats ?? [],
     parts: partBoard(b.about?.checkReport?.parts, b.trials, views.map((v) => v.id)),
+    claims: claimBoard(b.claims ?? [], views.map((v) => v.id)),
     facts: [
       { label: "Spec", value: `${m.spec.path ?? "—"} · sha256 ${sha8(m.spec.sha256)}` },
       { label: "Test set", value: `${m.test_set.id ?? "—"} · ${inputs} input(s)` },

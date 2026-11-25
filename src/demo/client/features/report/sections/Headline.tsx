@@ -10,7 +10,10 @@ import type { HeadlineDifference, HeadlineEntry, HeadlineValue } from "../../../
 import { Note, Section } from "../Section";
 import { IntervalChart, PartStrip } from "../charts/HeadlineCharts";
 
-type Props = Pick<StepReport, "headline" | "caveats" | "parts"> & { candidates: string[] };
+type Props = Pick<StepReport, "headline" | "caveats" | "parts" | "claims"> & { candidates: string[] };
+
+/** Characters of a claimed comment shown; the whole of it is in the trial's findings.json. */
+const CLAIM_CHARS = 600;
 
 const pct = (v: number): string => `${Math.round(v * 100)}%`;
 const num = (v: number): string => v.toFixed(2);
@@ -51,8 +54,8 @@ function partTone(pass: number, graded: number): string {
   return pass === graded ? "text-ok" : pass === 0 ? "text-bad" : "";
 }
 
-export function Headline({ headline, caveats, parts, candidates }: Props) {
-  if (headline.length === 0 && caveats.length === 0 && !parts) return null;
+export function Headline({ headline, caveats, parts, claims, candidates }: Props) {
+  if (headline.length === 0 && caveats.length === 0 && !parts && claims.length === 0) return null;
   const differences = headline.map(difference).filter((d): d is string => d !== null);
   return (
     <>
@@ -148,6 +151,33 @@ export function Headline({ headline, caveats, parts, candidates }: Props) {
               </tbody>
             </table>
           </div>
+        </Section>
+      )}
+      {claims.length > 0 && (
+        <Section title="Defect claims on clean items" hint="The findings the matcher counted as claiming a defect, over every trial; most claimed first. Open a row for what was said.">
+          <div className="flex flex-col">
+            <div className="flex gap-4 border-b py-1.5 text-sm text-muted-foreground">
+              <span className="w-40 flex-none font-medium">Input</span>
+              {candidates.map((c) => <span key={c} className="w-28 flex-none font-mono font-medium">{c}</span>)}
+            </div>
+            {claims.map((r) => (
+              <details key={r.input} className="border-b last:border-0">
+                <summary className="flex cursor-pointer gap-4 py-1.5 text-sm">
+                  <span className="w-40 flex-none font-mono">{r.input}</span>
+                  {candidates.map((c) => <span key={c} className="w-28 flex-none tabular-nums">{r.counts[c] ?? 0}</span>)}
+                </summary>
+                <div className="flex flex-col gap-2 pb-3 pl-4 text-sm">
+                  {r.claims.map((c, i) => (
+                    <div key={i}>
+                      <span className="font-mono text-xs text-muted-foreground">{c.candidate} · t{c.trial} · {c.where}</span>
+                      <div className="whitespace-pre-wrap">{c.message.length > CLAIM_CHARS ? `${c.message.slice(0, CLAIM_CHARS)} …` : c.message}</div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+          <Note>Clean means no later fix traced a bug to the PR, not that it has none: a claim here may be a real bug nobody fixed.</Note>
         </Section>
       )}
     </>

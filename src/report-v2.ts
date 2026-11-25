@@ -48,6 +48,7 @@ import { partBoard } from "./canon/parts.js";
 import { renderParts } from "./report-parts.js";
 import { headlineNote } from "./report-headline.js";
 import { HEADLINE_CHART_STYLES } from "./report-headline-charts.js";
+import { claimBoard, loadDefectClaims, renderClaims, type DefectClaim } from "./code-review/claims.js";
 import { inputComparison } from "./canon/input-compare.js";
 import { renderFailedTrials, renderScorecard } from "./report-scorecard.js";
 import { SCATTER_STYLES, costSuccessChart, gateNotesOf, renderCostSuccess } from "./report-scatter.js";
@@ -74,6 +75,8 @@ export interface RunBundle {
   recommendation: Recommendation;
   gaps: string;
   outputs: RawOutput[];
+  /** A code review's defect claims on clean items, from each trial's decision record (code-review/claims.ts); empty for any other check. */
+  claims?: DefectClaim[];
   /**
    * Human verdicts from reviews/*.jsonl, latest per (reviewer, pair). Kept apart
    * from `evaluations` so nothing that selects a candidate can read them.
@@ -107,6 +110,7 @@ export async function loadBundle(dir: string): Promise<RunBundle> {
     dir,
     manifest,
     outputs: await loadRawOutputs(dir, trials),
+    claims: await loadDefectClaims(dir, trials),
     trials,
     evaluations: await readJsonl<EvaluationRow>(path.join(dir, "evaluations.jsonl")),
     ledger: await read<CostLedger>("ledger.json"),
@@ -380,6 +384,7 @@ function scorecardTop(b: RunBundle, views: readonly CandidateView[], candidateTa
   return [
     renderScorecard(labels, b.trials, b.summary.candidates, ids, report),
     renderParts(partBoard(report?.parts, b.trials, ids), ids),
+    renderClaims(claimBoard(b.claims ?? [], ids), ids),
     renderInputComparison(inputComparison(b.trials, ids), ids, b.outputs, report ? headlineNotes(report, b.trials, labels) : undefined, inputGroups(labels, report?.input_groups)),
     renderFailedTrials(b.trials, ids),
     candidateTable,
