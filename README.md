@@ -1121,6 +1121,13 @@ The per-input table is split in two, because a pass means different
 things: on a defect item, every known defect caught; on a clean item, no
 finding claims a defect.
 
+The fallback reads text written by the reviewer it is grading. Each finding
+reaches it as one JSON object on one line, so a comment cannot pose as the
+answer key, a verdict or another finding, and a message is cut at 4,000
+characters. This narrows what a reviewer can do to the grader; it does not
+make an LLM immune to being talked round, which is one more reason to
+calibrate it against people.
+
 The fallback's calls do not count toward the run's cost or `budget_usd`.
 `agenteval calibrate` cannot yet check the fallback against human labels.
 It calibrates the absolute judge's 1–5 scores, and refuses a run without
