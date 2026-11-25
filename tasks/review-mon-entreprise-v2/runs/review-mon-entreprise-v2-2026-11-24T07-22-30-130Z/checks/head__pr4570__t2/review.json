@@ -1,0 +1,33 @@
+{
+ "pr": 4570,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 76,
+   "start_line": 70,
+   "body": "Cette liste est recréée à chaque rendu et typée string[], donc id n’est pas vérifié contre elle. Je la verrais plutôt en constante de module avec satisfies, comme nextSteps plus haut. Et includes(id) serait plus lisible que indexOf(id) > -1.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 24,
+   "start_line": null,
+   "body": "Le déplacement des deux avertissements existants (Avertissements/ vers indépendant/components/, export nommé, Body intégré) n’a pas de lien avec #4044. Je le mettrais dans un commit refactor séparé, voire une autre PR, pour garder le diff de la feature lisible. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4044: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.16087429999999997,
+  "final_text": "J'ai posté deux commentaires inline sur la PR 4570 et aucun commentaire global. Les vérifications de la PR (`gh pr checks`) sont au vert. Je n'ai pas exécuté le code.\n\n- **Liste des simulateurs concernés** (`IndépendantBase.tsx`, lignes 70 à 76) : le tableau est recréé à chaque rendu et typé `string[]`, donc `id` n'est pas vérifié contre lui. Je propose une constante de module avec `satisfies`, comme `nextSteps`, et `includes(id)` à la place de `indexOf(id) > -1`.\n- **Déplacement des avertissements existants** (ligne 24) : le passage de `Avertissements/` vers `indépendant/components/` n'a pas de lien avec l'issue #4044. Je suggère un commit `refactor` séparé, voire une autre PR.\n\nJe n'ai pas pu lire l'issue #4044 (l'API a répondu « Not Found »)."
+ }
+}

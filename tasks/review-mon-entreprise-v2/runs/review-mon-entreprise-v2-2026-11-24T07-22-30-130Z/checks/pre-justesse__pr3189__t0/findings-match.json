@@ -1,0 +1,46 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+      "start_line": 177,
+      "end_line": 177,
+      "message": "Les nouveaux taux (3,25 % jusqu'à 40 % du PASS, 9,75 % jusqu'à 110 %) n'ont aucune référence sur la règle. Pourrais-tu ajouter un bloc `références:` pointant vers la page Urssaf ou le texte qui les fixe ? Ça permettra de les revérifier à la prochaine revalorisation."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+          "start_line": 166,
+          "end_line": 177
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ]
+}

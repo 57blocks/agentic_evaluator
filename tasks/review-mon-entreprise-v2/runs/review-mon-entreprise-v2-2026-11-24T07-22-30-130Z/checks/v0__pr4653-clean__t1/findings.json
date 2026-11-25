@@ -1,0 +1,5 @@
+[
+ {
+  "message": "Je n'ai rien trouvé à redire : plus aucune référence à `cmg` ni au complément transitoire dans le code, les chemins ou les traductions (hors `base-stats.json`, des statistiques historiques), et le découpage en trois commits est clair.\n\nUne question que je n'ai pas pu trancher : je ne vois pas de fichier de redirections dans le dépôt, donc je ne sais pas comment les anciennes URL `/assistants/cmg` (et son équivalent iframe) se comportent après la suppression. Est-ce que le 404 / la page d'erreur actuelle te convient, ou faut-il rediriger vers une page existante (par exemple la liste des assistants) ?\n\nJe n'ai pas lancé le build ni les tests ; je m'en remets à `gh pr checks`."
+ }
+]

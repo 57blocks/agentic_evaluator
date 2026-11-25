@@ -1,0 +1,17 @@
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1962,
+  "message": "La traduction anglaise générée est cassée : elle contient des `&lt;/0>`, `&lt;/3>` et `&lt;/6>` échappés, et « male and female auto-entrepreneurs ». Ces balises s’afficheraient telles quelles aux usagers anglophones, et le lien vers le simulateur auto-entrepreneur disparaîtrait. Je corrigerais la valeur à la main, par exemple `<0></0> This simulator <3>does not apply to auto-entrepreneurs</3>, who have their own dedicated <6>income simulator</6>.` Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 97,
+  "end_line": 97,
+  "message": "nit: `includes` est plus lisible que `indexOf(id) > -1`. Ce tableau pourrait aussi sortir du composant, en constante de module, plutôt que d’être recréé à chaque rendu."
+ },
+ {
+  "message": "Le déplacement des deux avertissements existants (Année et Double régime) vers `indépendant/components/`, avec l’ajout du `Body` dans chacun, n’est pas nécessaire pour ce ticket. Il aurait pu faire l’objet d’un commit séparé, voire d’une PR à part, pour garder celle-ci centrée sur le nouvel avertissement."
+ }
+]

@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+  "start_line": 559,
+  "end_line": 559,
+  "message": "Je me demande si ce changement ne modifie pas le calcul bien au-delà de Mayotte : avant, avec Acre **et** invalidité (sans exonération âge), l'abattement sur l'invalidité-décès était nul ; maintenant le taux Acre s'applique. Le test supprimé (« est nulle lorsqu'il y a à la fois Acre et invalidité mais pas d'exonération âge ») documentait ce comportement, et aucun test ne couvre plus ce cas.\n\nEst-ce voulu ? Si oui, quelle source (texte de loi / site Urssaf) le justifie ? Je n'ai pas pu la vérifier dans le dépôt, et CONTRIBUTING.md demande de ne pas poser de règle métier sans source. Je verrais bien un test qui fixe le nouveau comportement (Acre + invalidité) et une référence sur la règle. Sinon, peut-être faut-il restreindre le changement au cas Mayotte ?"
+ },
+ {
+  "message": "Synthèse :\n- La PR est présentée comme des tests pour Mayotte, mais elle modifie aussi une règle (cotisations.publicodes) et refactore les clés du fichier de test. Je me demande si trois commits (refactor EXONÉRATIONS, correction de la règle, nouveaux tests) faciliteraient la relecture : le commit unique est de type tests: alors qu'il change un calcul.\n- nit: les it.each comparent Mayotte à la métropole plutôt qu'à une valeur attendue ; si les deux dérivent ensemble (comme pour l'invalidité-décès), ils passent quand même. Le motif est répété trois fois : un helper type mêmeCotisationQuEnMétropole(règle, exonérations) limiterait la duplication.\n- Je n'ai pas exécuté les tests (hors de mon périmètre) ni vérifié la source métier de la modification de règle : voir mon commentaire inline."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4567,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "line": 559,
+   "start_line": null,
+   "body": "Je me demande si ce changement ne modifie pas le calcul bien au-delà de Mayotte : avant, avec Acre **et** invalidité (sans exonération âge), l'abattement sur l'invalidité-décès était nul ; maintenant le taux Acre s'applique. Le test supprimé (« est nulle lorsqu'il y a à la fois Acre et invalidité mais pas d'exonération âge ») documentait ce comportement, et aucun test ne couvre plus ce cas.\n\nEst-ce voulu ? Si oui, quelle source (texte de loi / site Urssaf) le justifie ? Je n'ai pas pu la vérifier dans le dépôt, et CONTRIBUTING.md demande de ne pas poser de règle métier sans source. Je verrais bien un test qui fixe le nouveau comportement (Acre + invalidité) et une référence sur la règle. Sinon, peut-être faut-il restreindre le changement au cas Mayotte ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- La PR est présentée comme des tests pour Mayotte, mais elle modifie aussi une règle (cotisations.publicodes) et refactore les clés du fichier de test. Je me demande si trois commits (refactor EXONÉRATIONS, correction de la règle, nouveaux tests) faciliteraient la relecture : le commit unique est de type tests: alors qu'il change un calcul.\n- nit: les it.each comparent Mayotte à la métropole plutôt qu'à une valeur attendue ; si les deux dérivent ensemble (comme pour l'invalidité-décès), ils passent quand même. Le motif est répété trois fois : un helper type mêmeCotisationQuEnMétropole(règle, exonérations) limiterait la duplication.\n- Je n'ai pas exécuté les tests (hors de mon périmètre) ni vérifié la source métier de la modification de règle : voir mon commentaire inline."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.1640817,
+  "final_text": "J'ai posté la revue sur la PR #4567 : un commentaire inline et une synthèse. Je n'ai exécuté ni les tests ni le build, et je n'ai pas pu vérifier la source métier de la règle modifiée.\n\n- **Remarque principale (inline, `cotisations.publicodes:559`)** : le changement `invalidité = non` → `sinon` agit aussi hors Mayotte. Avec Acre et invalidité sans exonération âge, l'abattement sur l'invalidité-décès passe de nul à taux Acre. Le test qui documentait l'ancien comportement a été supprimé et rien ne fixe le nouveau. J'ai demandé s'il est voulu, avec quelle source, et suggéré un test ou une restriction à Mayotte.\n- **Synthèse** :\n  - La PR mélange un refactor des clés de test, une modification de règle et de nouveaux tests dans un seul commit de type `tests:`. J'ai suggéré de les séparer.\n  - Les `it.each` comparent Mayotte à la métropole plutôt qu'à une valeur attendue, et ce motif est répété trois fois. J'ai proposé un helper ou des valeurs explicites."
+ }
+}
+
+```

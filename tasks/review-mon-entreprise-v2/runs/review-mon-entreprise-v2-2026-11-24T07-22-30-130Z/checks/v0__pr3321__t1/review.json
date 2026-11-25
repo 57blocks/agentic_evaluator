@@ -1,0 +1,27 @@
+{
+ "pr": 3321,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/hooks/useBarèmeLodeom.ts",
+   "line": 7,
+   "start_line": null,
+   "body": "Je me demande si le renommage est bien protégé par le typage : sans `as const`, `barèmes` est de type `string[]`, donc `BarèmeLodeom` vaut `string`. Les comparaisons de `WarningSalaireTrans.tsx` (`currentBarème === 'compétitivité'`) compilent quelle que soit la valeur, et un oubli lors d'un prochain renommage ne serait détecté ni par `yarn test:type` ni par les tests. Avec `] as const`, TypeScript signalerait toute comparaison à une valeur qui n'existe plus. Au passage, `barèmes` ne semble plus utilisé que pour dériver le type (je n'ai pas cherché de lecture ailleurs) : qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Une remarque sur `rules-en.yaml` : outre les clés renommées, le diff contient des modifications de traductions sans lien avec le renommage (« 50 million euros » ↔ « €50 million », « does not » ↔ « does not apply » dans les descriptions de `barème renforcé` et `innovation et croissance`). Cela ressemble à du bruit de régénération par `i18n:translate` ; je n'ai pas vérifié leur origine, mais je me demande si ça vaut le coup de les écarter pour garder le commit centré sur le renommage. À l'inverse, la `question` ajoutée côté `innovation et croissance` semble légitime, elle suit celle déjà présente dans le publicodes.\n\nHistorique : les deux commits sont logiques et séparés (déplacement, puis renommage), c'est lisible. Je n'ai pas pu vérifier le rendu en simulateur."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1149876,
+  "final_text": "J'ai posté deux commentaires sur la PR #3321 : un inline et une synthèse. Je n'ai rien exécuté (ni build, ni tests, ni rendu du simulateur).\n\n- **Typage (inline, `useBarèmeLodeom.ts:7`)** : `barèmes` n'a pas de `as const`, donc `BarèmeLodeom` vaut `string`. Les comparaisons de `WarningSalaireTrans.tsx` compilent donc avec n'importe quelle valeur, et un renommage oublié ne serait pas détecté. J'ai proposé `as const`.\n- **Traductions (synthèse)** : `rules-en.yaml` contient des changements sans rapport avec le renommage, comme « 50 million euros » ↔ « €50 million ». Je n'ai pas vérifié leur origine. La `question` ajoutée pour `innovation et croissance` me semble légitime, puisqu'elle suit celle du publicodes.\n- **Historique git (synthèse)** : les deux commits sont logiques et séparés, donc rien à redire."
+ }
+}

@@ -1,0 +1,5 @@
+[
+ {
+  "message": "Suppression propre : je ne trouve plus de référence à `cmg` ni à `useGetPath` dans `pages`, `components`, `cypress` ni les locales, et les trois commits sont chacun cohérents.\n\nUne question : je ne vois aucune redirection pour `/assistants/cmg` (et `/en/assistants/cmg`) dans `site/netlify.base.toml`. Les anciennes URLs (liens externes, favoris, référencement) vont donc tomber sur une 404. Est-ce voulu ? Une redirection vers la page des assistants ou des simulateurs serait peut-être plus utile à l'usager. Qu'en penses-tu ?\n\nJe n'ai pas exécuté le code ; je m'appuie sur `gh pr checks` pour lint, types et tests."
+ }
+]

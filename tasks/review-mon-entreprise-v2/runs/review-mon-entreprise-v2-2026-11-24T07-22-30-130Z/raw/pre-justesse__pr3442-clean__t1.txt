@@ -1,0 +1,66 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) utilisent le même code DSAR. Est-ce voulu ? Si le formulaire officiel prévoit deux cases distinctes, je me demande si l'un des deux codes n'est pas erroné ; sinon l'usager verrait deux montants différents à reporter dans la même case."
+ },
+ {
+  "file": "modele-social/CHANGELOG.md",
+  "start_line": 7,
+  "end_line": 7,
+  "message": "nit: la section « Breaking changes » apparaît deux fois sous « next ». Le renommage des règles PAMC pourrait rejoindre la liste existante, juste au-dessus."
+ },
+ {
+  "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+  "start_line": 152,
+  "end_line": 152,
+  "message": "nit: t('Bénéfice', 'Bénéfice') et t('Déficit', 'Déficit') n'ont pas de clé hiérarchique, contrairement aux autres textes du fichier (pages.assistants.declaration-revenus-pamc.resultats.label.N). Même remarque pour les occurrences de « Bénéfice » plus bas."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3442,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 208,
+   "start_line": null,
+   "body": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) utilisent le même code DSAR. Est-ce voulu ? Si le formulaire officiel prévoit deux cases distinctes, je me demande si l'un des deux codes n'est pas erroné ; sinon l'usager verrait deux montants différents à reporter dans la même case.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/CHANGELOG.md",
+   "line": 7,
+   "start_line": null,
+   "body": "nit: la section « Breaking changes » apparaît deux fois sous « next ». Le renommage des règles PAMC pourrait rejoindre la liste existante, juste au-dessus.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 152,
+   "start_line": null,
+   "body": "nit: t('Bénéfice', 'Bénéfice') et t('Déficit', 'Déficit') n'ont pas de clé hiérarchique, contrairement aux autres textes du fichier (pages.assistants.declaration-revenus-pamc.resultats.label.N). Même remarque pour les occurrences de « Bénéfice » plus bas.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.1847047,
+  "final_text": "J'ai relu la PR #3442 et posté trois commentaires inline sur GitHub. Je n'ai exécuté ni build ni tests. Le workflow « Vérification PR » est au vert d'après `gh pr checks`.\n\n- **Code `DSAR` en double** (`Résultats.tsx`, ligne 208) : les lignes « Dont cotisations facultatives… » pour l'activité conventionnée et pour les autres activités non salariées portent le même code. Je l'ai posé en question : c'est peut-être une erreur de code, et sinon l'usager verrait deux montants pour la même case. C'est le seul point qui peut tromper un usager.\n- **Clés de traduction sans hiérarchie** (`Résultats.tsx`, ligne 152) : `t('Bénéfice', 'Bénéfice')` et `t('Déficit', 'Déficit')` ne suivent pas la convention de clés hiérarchiques du fichier. C'est un nit.\n- **`modele-social/CHANGELOG.md`, ligne 7** : la section « Breaking changes » apparaît deux fois sous « next ». C'est un nit.\n\nJe n'ai pas vérifié les règles Publicodes ni les codes de cases du formulaire officiel. Je n'ai pas posté de commentaire global."
+ }
+}
+
+```

@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 107,
+  "end_line": 107,
+  "message": "Je pense qu'il manque une espace après la virgule : en JSX, le retour à la ligne entre `</Code>,` et `<Code>modele-ti</Code>` est supprimé, donc le rendu devrait être « modele-as,modele-ti ». Un `{' '}` en fin de ligne réglerait ça, comme tu l'as fait plus bas (je n'ai pas pu vérifier le rendu dans le navigateur)."
+ },
+ {
+  "message": "Un point qui ne se rattache pas à une ligne du diff : le paragraphe « Utilisation » parle toujours du paquet `modele-social` seul (« paramétrer le moteur avec les règles du paquet `modele-social` »), alors que la page présente maintenant trois paquets. Je me demande si une formulation neutre (« le paquet de votre choix ») éviterait de laisser croire que `modele-social` est le seul à utiliser, d'autant que l'exemple CodeSandbox ne couvre que lui. Qu'en penses-tu ?\n\nJe n'ai pas pu vérifier le rendu visuel de la page ni les traductions anglaises générées."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": 107,
+   "body": "Je pense qu'il manque une espace après la virgule : en JSX, le retour à la ligne entre `</Code>,` et `<Code>modele-ti</Code>` est supprimé, donc le rendu devrait être « modele-as,modele-ti ». Un `{' '}` en fin de ligne réglerait ça, comme tu l'as fait plus bas (je n'ai pas pu vérifier le rendu dans le navigateur).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Un point qui ne se rattache pas à une ligne du diff : le paragraphe « Utilisation » parle toujours du paquet `modele-social` seul (« paramétrer le moteur avec les règles du paquet `modele-social` »), alors que la page présente maintenant trois paquets. Je me demande si une formulation neutre (« le paquet de votre choix ») éviterait de laisser croire que `modele-social` est le seul à utiliser, d'autant que l'exemple CodeSandbox ne couvre que lui. Qu'en penses-tu ?\n\nJe n'ai pas pu vérifier le rendu visuel de la page ni les traductions anglaises générées."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1091772,
+  "final_text": "J'ai relu la PR #4606 et posté deux remarques sur GitHub. Je n'ai ni lancé le code ni vu le rendu de la page.\n\n- **Commentaire inline** (`Library.tsx:107`) : il manque probablement une espace après la virgule dans « `modele-as`,`modele-ti` ». En JSX, le retour à la ligne entre `</Code>,` et `<Code>` est supprimé, donc le texte s'affichera collé.\n- **Synthèse** : le paragraphe « Utilisation » ne parle encore que de `modele-social`, alors que la page en présente maintenant trois. J'ai suggéré une formulation neutre, car l'exemple CodeSandbox ne couvre aussi que `modele-social`.\n\nLa synthèse précise aussi que je n'ai pas pu vérifier le rendu visuel ni les traductions anglaises générées."
+ }
+}
+
+```

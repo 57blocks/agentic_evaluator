@@ -1,0 +1,31 @@
+{
+ "pr": 3266,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/utils/réductionDeCotisations.ts",
+   "line": 267,
+   "start_line": null,
+   "body": "Le champ s'appelle encore `réductionGénérale` alors que `MonthState` expose maintenant `réduction` : ce `réductionGénérale: { value: 0, … }` ajoute une propriété inconnue du type et laisse `réduction` à sa valeur précédente. Quand l'usager vide toute sa rémunération, les montants de réduction des mois restent donc affichés. Je pense qu'il s'agit de `réduction`, et que `tsc` ne le signale pas parce que le spread élargit le type. Est-ce que tu confirmes ?\n```suggestion\n\t\t\t\tréduction: {\n```",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/lodeom/simulationConfig.ts",
+   "line": 3,
+   "start_line": null,
+   "body": "nit: `configRéductionGénérale` (ici et dans `config.ts`, ainsi que `RéductionGénéraleSimulation` importé depuis `./Lodeom`) porte le nom de la réduction générale alors que ce fichier configure le Lodeom, ce qui prête à confusion. `configLodeom` / `LodeomSimulation` ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.16354619999999997,
+  "final_text": "J'ai relu la PR #3266 et posté deux commentaires inline sur GitHub. Je n'ai pas lancé le code, comme les consignes l'indiquent. `gh pr checks` est au vert.\n\n- **Défaut probable** (`site/source/utils/réductionDeCotisations.ts:267`) : le cas « rémunération totale nulle » écrit `réductionGénérale: {…}` alors que `MonthState` expose désormais `réduction`. Dans ce cas, la réduction des mois n'est donc pas remise à zéro. J'ai posé la remarque en question et proposé un bloc `suggestion`.\n- **Nit** (`site/source/pages/simulateurs/lodeom/simulationConfig.ts:3`) : `configRéductionGénérale` et `RéductionGénéraleSimulation` portent le nom de la réduction générale dans les fichiers du Lodeom. J'ai proposé `configLodeom` et `LodeomSimulation`.\n\nJe n'ai pas relu le reste du diff : composants React, Goals, tests Cypress et traductions."
+ }
+}

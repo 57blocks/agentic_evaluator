@@ -1,0 +1,25 @@
+{
+ "pr": 4567,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "line": 559,
+   "start_line": null,
+   "body": "Ce commit est un commit de tests, mais il change aussi une règle : l’Acre s’applique désormais à l’invalidité-décès même quand l’exonération invalidité est présente (avant, la condition `exonérations . invalidité = non` l’en écartait, et le test « est nulle lorsqu’il y a à la fois Acre et invalidité » le vérifiait). Ce test est supprimé sans remplaçant. Quelle est la source de ce changement de règle (texte de loi ou page Urssaf) ? Si elle existe, je la verrais bien en référence de la règle, avec un test qui couvre le cas Acre + invalidité, et le changement dans son propre commit (`fix(modele-social)` par exemple) plutôt que mêlé aux tests.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4411: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1362016,
+  "final_text": "J'ai relu la PR #4567 et posté un seul commentaire inline, sur `cotisations.publicodes:559`.\n\nLe commit s'intitule « tests », mais il change aussi une règle métier. L'Acre s'applique désormais à l'invalidité-décès même quand l'exonération invalidité est présente. Le test qui vérifiait l'ancien comportement a été supprimé sans remplaçant. Je demande la source du changement. Je propose aussi un test pour le cas Acre + invalidité et un commit séparé pour la règle.\n\nLe reste de la PR est le refactoring des tests avec la constante `EXONÉRATIONS` et les nouveaux cas Mayotte. Il ne m'a pas paru mériter de remarque. Le workflow « Vérification PR » est au vert. L'issue #4411 renvoie un 404, donc je n'ai pas pu la lire."
+ }
+}

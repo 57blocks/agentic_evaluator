@@ -1,0 +1,35 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/storage/sanitizePersistedSituation.ts",
+      "start_line": 14,
+      "end_line": 14,
+      "message": "Je me demande si le `else if` sans `else` ne risque pas de supprimer silencieusement des valeurs légitimes : une expression Publicodes valide qui n'est ni chaîne, ni nombre, ni `{ valeur, unité }` (ex. `{ somme: [...] }`, `null` pour une valeur non applicable) disparaît de la situation restaurée, sans trace. Je n'ai pas vérifié si ces formes peuvent être persistées aujourd'hui ; si non, un test qui fige ce choix (\"les formes inconnues sont écartées\") le rendrait explicite. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/domaine/searchParams.ts",
+      "start_line": 37,
+      "end_line": 37,
+      "message": "Le `try/catch` avec `console.error` est retiré et les valeurs non encodables sont maintenant ignorées sans signal. Pour un paramètre d'URL perdu, ça peut être difficile à diagnostiquer. Est-ce voulu ? Sinon un log (ou un retour explicite des clés écartées) garderait l'information."
+    },
+    {
+      "message": "Deux remarques inline (écarts silencieux dans `sanitizePersistedSituation` et `getSearchParamsFromSituation`). Le reste m'a l'air propre : tests ajoutés, commits atomiques, CI verte. Je n'ai pas exécuté le code ni testé manuellement la restauration depuis un ancien localStorage."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

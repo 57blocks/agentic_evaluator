@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "nit: les apostrophes typographiques (’) du texte d'origine sont devenues des apostrophes droites (') dans ce titre et dans les messages réécrits (l. 37, 46, 56). Les remettre garderait la typographie des autres textes du site, et éviterait de faire diverger les clés/valeurs par défaut de `Trans` de celles déjà traduites."
+ },
+ {
+  "file": "site/source/components/EngineValue/Condition.tsx",
+  "start_line": 27,
+  "end_line": 27,
+  "message": "Je me demande si ce TODO a sa place dans le code : le suivi est déjà dans #4323, et le commentaire ne dit pas ce qu'on attend de la personne qui le lira. Je le retirerais, quitte à garder la référence dans le commentaire de `DetailsRowCards` qui contourne le bug."
+ }
+]

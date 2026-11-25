@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/Simulation/SimulationGoal.tsx",
+  "start_line": 85,
+  "end_line": 85,
+  "message": "Je me demande si ce `useCallback` joue son rôle : `evaluation` est recalculé à chaque rendu (`engine.evaluate`), donc `evaluation.missingVariables` change de référence à chaque fois, et `RuleInputWrapper` aussi. Or il est utilisé comme *type* de composant (`<ChampSaisie />` dans `ObjectifSaisissableDeSimulation`) : React démonte/remonte alors le champ à chaque rendu, avec un risque de perte du focus et de la position du curseur pendant la saisie. Je n'ai pas pu le vérifier en conditions réelles. Une piste : garder une render prop (`rendreChampSaisie({ id, aria })`) plutôt qu'un composant défini dans le composant. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Deux points : (1) je ne trouve aucun élément d'id `questionHeader` dans `site/source`, donc ce repli ne pointe vers rien et le groupe n'a pas de nom accessible quand `aria.labelledby` est absent. (2) `aria-labelledby` sur un `div` sans rôle n'est pas toujours exposé par les technologies d'assistance ; je me demande si garder `role=\"group\"` ne serait pas plus sûr (je n'ai pas testé avec un lecteur d'écran). Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/components/conversation/OuiNonInput.tsx",
+  "start_line": 47,
+  "end_line": 47,
+  "message": "nit: `aria-label=\"\"` ressemble à un contournement du warning React Aria (même chose dans `CardChoiceGroup`). Si c'est volontaire, un mot d'explication aiderait le prochain lecteur."
+ },
+ {
+  "message": "Synthèse : trois remarques inline (remontage possible du champ dans `SimulationGoal`, repli `questionHeader` introuvable dans `ChoixMultiple`, `aria-label=\"\"`). Le découpage en commits est lisible. Je n'ai pas pu vérifier le rendu dans les devtools ni avec un lecteur d'écran, ni mesurer les warnings React Aria mentionnés dans la description. Le commit `ObjectifSaisissableDeSimulation` mélange aussi un refactor (render prop vers composant, import `effect/Option`) avec le correctif a11y : je me demande s'il ne gagnerait pas à être séparé."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4164,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/Simulation/SimulationGoal.tsx",
+   "line": 85,
+   "start_line": null,
+   "body": "Je me demande si ce `useCallback` joue son rôle : `evaluation` est recalculé à chaque rendu (`engine.evaluate`), donc `evaluation.missingVariables` change de référence à chaque fois, et `RuleInputWrapper` aussi. Or il est utilisé comme *type* de composant (`<ChampSaisie />` dans `ObjectifSaisissableDeSimulation`) : React démonte/remonte alors le champ à chaque rendu, avec un risque de perte du focus et de la position du curseur pendant la saisie. Je n'ai pas pu le vérifier en conditions réelles. Une piste : garder une render prop (`rendreChampSaisie({ id, aria })`) plutôt qu'un composant défini dans le composant. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+   "line": 40,
+   "start_line": null,
+   "body": "Deux points : (1) je ne trouve aucun élément d'id `questionHeader` dans `site/source`, donc ce repli ne pointe vers rien et le groupe n'a pas de nom accessible quand `aria.labelledby` est absent. (2) `aria-labelledby` sur un `div` sans rôle n'est pas toujours exposé par les technologies d'assistance ; je me demande si garder `role=\"group\"` ne serait pas plus sûr (je n'ai pas testé avec un lecteur d'écran). Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/OuiNonInput.tsx",
+   "line": 47,
+   "start_line": null,
+   "body": "nit: `aria-label=\"\"` ressemble à un contournement du warning React Aria (même chose dans `CardChoiceGroup`). Si c'est volontaire, un mot d'explication aiderait le prochain lecteur.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse : trois remarques inline (remontage possible du champ dans `SimulationGoal`, repli `questionHeader` introuvable dans `ChoixMultiple`, `aria-label=\"\"`). Le découpage en commits est lisible. Je n'ai pas pu vérifier le rendu dans les devtools ni avec un lecteur d'écran, ni mesurer les warnings React Aria mentionnés dans la description. Le commit `ObjectifSaisissableDeSimulation` mélange aussi un refactor (render prop vers composant, import `effect/Option`) avec le correctif a11y : je me demande s'il ne gagnerait pas à être séparé."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.17634010000000003,
+  "final_text": "J'ai posté la revue sur la PR 4164 : trois commentaires inline et une synthèse. Je n'ai rien exécuté ni testé en conditions réelles. Les points viennent de la lecture du code.\n\n- **`SimulationGoal.tsx:85`** : `RuleInputWrapper` est un composant défini dans le composant et recréé à chaque rendu. `engine.evaluate` renvoie un nouvel objet `missingVariables` à chaque rendu, ce qui invalide le `useCallback`. React pourrait alors remonter le champ à chaque rendu, avec une perte de focus pendant la saisie. J'ai proposé de garder une render prop.\n- **`ChoixMultiple.tsx:40`** : le repli `'questionHeader'` ne correspond à aucun id dans `site/source`. Sans `aria.labelledby`, le groupe n'a donc pas de nom accessible. J'ai aussi demandé si retirer `role=\"group\"` est sûr, car `aria-labelledby` sur un `div` sans rôle n'est pas toujours exposé.\n- **`OuiNonInput.tsx:47`** : `aria-label=\"\"` semble contourner un warning React Aria (la même chose existe dans `CardChoiceGroup`). J'ai posté cette remarque comme un nit.\n\nLa synthèse relève aussi que le commit de `ObjectifSaisissableDeSimulation` mélange un refactor et le correctif a11y. Elle précise que je n'ai pas pu vérifier le rendu dans les devtools, ni avec un lecteur d'écran, ni les warnings React Aria."
+ }
+}
+
+```

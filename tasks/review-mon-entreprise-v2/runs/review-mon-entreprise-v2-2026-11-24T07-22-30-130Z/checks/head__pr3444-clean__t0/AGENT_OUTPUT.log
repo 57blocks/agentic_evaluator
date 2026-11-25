@@ -1,0 +1,19 @@
+{
+ "pr": 3444,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Le titre et l'issue parlent des définitions des rubriques retraite, mais la PR embarque aussi le renommage Pôle emploi → France Travail (règles, textes SEO, page intégration), la refonte des logos de `References.tsx` et le passage de leur `alt` à `\"\"`. Je me demande si ces sujets ne gagneraient pas à avoir leur propre PR : ils se relisent et se reviennent (ou se revert) indépendamment, et ici ils noient les ~540 lignes de `protection-sociale.publicodes`. Sinon, une mention dans la description suffirait à les rendre visibles."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1210156,
+  "final_text": "J'ai relu la PR #3444 et posté un seul commentaire global, sur son périmètre. Je n'ai pas lu en détail les ~540 lignes de `protection-sociale.publicodes`.\n\nLa PR annonce la précision des définitions des rubriques retraite, mais elle embarque aussi :\n- le renommage Pôle emploi → France Travail (règles, textes SEO, page intégration) ;\n- la refonte des logos de `References.tsx` ;\n- le passage de leur `alt` à `\"\"`.\n\nJe me suis demandé si ces sujets ne seraient pas mieux dans leur propre PR, ou au moins mentionnés dans la description.\n\nJe n'ai pas trouvé de défaut de code à commenter en ligne. J'ai vérifié que les clés retirées de la table des logos (`pole-emploi.fr`, `senat.fr`, `ladocumentationfrançaise.fr`, `gouv.fr`) ne sont plus utilisées par aucune référence des règles, et qu'aucune image supprimée n'est encore importée côté `site`, sauf `pole-emploi.png`, toujours utilisée par `Iframe.tsx` et donc conservée. `gh pr checks` est au vert."
+ }
+}

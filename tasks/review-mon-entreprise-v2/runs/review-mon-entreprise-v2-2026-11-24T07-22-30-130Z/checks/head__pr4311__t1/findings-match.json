@@ -1,0 +1,76 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+      "start_line": 54,
+      "end_line": 54,
+      "message": "Je me demande si cette résolution maison des chemins relatifs est équivalente à celle de react-router : `.pathname` ne garde ni la query ni le hash de `to`, donc `getHref(\"?page=2\")` ou `getHref(\"#ancre\")` renverrait le chemin nu. Est-ce voulu ? Sinon `resolvePath` de react-router ferait ce travail."
+    },
+    {
+      "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+      "start_line": 31,
+      "end_line": 31,
+      "message": "Cette couche (`onNavigate`, `getHref`, `matchPath`) porte de la logique sans aucun test. Un test du provider (notification uniquement après un vrai changement de location et pas au premier rendu, `getHref` relatif) protégerait la future bascule vers Next.js. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/lib/navigation/NavigationAPI.ts",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "file": "site/source/lib/navigation/providers/MockNavigationProvider.tsx",
+          "start_line": 43,
+          "end_line": 98
+        },
+        {
+          "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+          "start_line": 5,
+          "end_line": 88
+        },
+        {
+          "file": "site/source/pages/integration/Iframe.tsx",
+          "start_line": 59,
+          "end_line": 89
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "Je me demande si le remplacement de `next` par `main` ici est voulu : il change le comportement (une branche `next` passe de production à staging, avec Sentry, Plausible et les URLs que cela implique), alors que le sujet est de déplacer la config dans l'adaptateur. Si c'est intentionnel, je le verrais dans un commit à part avec son explication ; sinon, `['master', 'next']` à conserver ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.12342979999999999,
+  "final_text": "J'ai relu la PR #4575 et posté un seul commentaire inline, sur `site/vite.config.ts:208`. Le remplacement de `next` par `main` dans `isProductionBranch` change le comportement : une branche `next` passerait de production à staging. Je demande si c'est voulu. Le reste de la PR ne m'a pas paru mériter de remarque, et le workflow « Vérification PR » est au vert."
+ }
+}

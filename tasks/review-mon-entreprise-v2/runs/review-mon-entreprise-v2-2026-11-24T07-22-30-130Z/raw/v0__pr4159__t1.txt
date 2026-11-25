@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "Deux remarques, sans avoir pu lancer le code (pas de build ni de test de mon côté).\n\n**Test de non-régression** : le bug (retour à la première question en répondant « non ») ne semble couvert par aucun test ajouté. Les modifs de `salarié.yaml` et du snapshot API ne font que suivre le renommage. Je me demande si un test sur la séquence de questions du simulateur, ou une situation avec `emploi franc: non` qui vérifie que `emploi franc . montant` est non applicable, ne fixerait pas ce comportement. Il serait écrit avant le fix, comme le demande CONTRIBUTING.\n\n**Renommage de l'entrée API** : `aides . emploi franc . éligible` disparaît au profit de `aides . emploi franc`, et le snapshot e2e de l'API change en conséquence. Si des intégrateurs de l'API passent `éligible` dans leur situation, leur calcul changera sans erreur, et l'aide sera ignorée. Est-ce un cas que vous acceptez, ou faut-il le mentionner dans la PR ? Je n'ai pas vérifié si une règle de migration existe pour ce type de renommage dans le dépôt.\n\nHistorique : un seul commit, cohérent."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4159,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Deux remarques, sans avoir pu lancer le code (pas de build ni de test de mon côté).\n\n**Test de non-régression** : le bug (retour à la première question en répondant « non ») ne semble couvert par aucun test ajouté. Les modifs de `salarié.yaml` et du snapshot API ne font que suivre le renommage. Je me demande si un test sur la séquence de questions du simulateur, ou une situation avec `emploi franc: non` qui vérifie que `emploi franc . montant` est non applicable, ne fixerait pas ce comportement. Il serait écrit avant le fix, comme le demande CONTRIBUTING.\n\n**Renommage de l'entrée API** : `aides . emploi franc . éligible` disparaît au profit de `aides . emploi franc`, et le snapshot e2e de l'API change en conséquence. Si des intégrateurs de l'API passent `éligible` dans leur situation, leur calcul changera sans erreur, et l'aide sera ignorée. Est-ce un cas que vous acceptez, ou faut-il le mentionner dans la PR ? Je n'ai pas vérifié si une règle de migration existe pour ce type de renommage dans le dépôt.\n\nHistorique : un seul commit, cohérent."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1094251,
+  "final_text": "J'ai relu la PR #4159 et posté une synthèse sur GitHub. Elle contient deux remarques et rien n'a été lancé (ni build, ni tests).\n\n- **Test de non-régression :** aucun test n'est ajouté pour le bug lui-même. Les modifications de `salarié.yaml` et du snapshot API ne font que suivre le renommage. Je propose un test avec `emploi franc: non`.\n- **Renommage de l'entrée API :** `aides . emploi franc . éligible` devient `aides . emploi franc`. Un intégrateur de l'API qui passe encore l'ancien nom verrait l'aide ignorée sans erreur. Je n'ai pas cherché de mécanisme de migration dans le dépôt.\n\nJe n'ai posté aucun commentaire inline. L'historique est correct : un seul commit cohérent."
+ }
+}
+
+```

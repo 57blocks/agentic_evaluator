@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "modele-ti/règles/indépendant/revenus/dividendes.publicodes",
+  "start_line": 23,
+  "end_line": 36,
+  "message": "Je me demande comment l'usager sait où classer ses dividendes avec cette séparation : avant, le modèle calculait la part au-dessus de 10 % du capital à partir du capital social (ou du bénéfice N-1 pour une EI) ; maintenant, c'est à l'usager de faire ce partage lui-même, et les deux questions (capital social et bénéfice net de l'exercice précédent) ont disparu. Une erreur de saisie déplace directement des dividendes entre prélèvements sociaux et cotisations, donc change le résultat affiché. Est-ce un choix assumé côté produit ? Si oui, je verrais bien la description de chaque champ rappeler comment calculer le seuil (10 % du capital social, ou du bénéfice net de l'exercice précédent pour une EI, sans oublier le compte courant d'associé de la famille), car ces précisions sont parties avec la question supprimée. Je n'ai pas pu vérifier le rendu dans le simulateur."
+ },
+ {
+  "message": "Synthèse (je n'ai relu en détail que le dernier commit, `fix(dividendes)` ; la PR fait 250 commits et 576 fichiers, je n'ai pas pu la relire en entier) :\n\n- La PR est très volumineuse : la réforme de l'assiette, les exonérations Acre/invalidité, la mise à jour IR 2026, la navigation et la suppression de domaine inutilisé se relisent difficilement ensemble. Je me demande si un découpage en PR par thème serait possible, au moins pour les mises à jour de snapshots de régression, qui noient le reste.\n- Historique : plusieurs commits `fix: erreurs de rebase`, `lint: fix`, `fix: type and lint` pourraient être fusionnés dans les commits d'origine, pour que chaque commit reste vert comme demandé dans CONTRIBUTING.\n- Le workflow « Vérification PR » est vert.\n- Non vérifié : le rendu des objectifs dividendes dans les simulateurs indépendant et cessation d'activité (`Objectifs.tsx`, `Goals.tsx`)."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4160,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/revenus/dividendes.publicodes",
+   "line": 36,
+   "start_line": 23,
+   "body": "Je me demande comment l'usager sait où classer ses dividendes avec cette séparation : avant, le modèle calculait la part au-dessus de 10 % du capital à partir du capital social (ou du bénéfice N-1 pour une EI) ; maintenant, c'est à l'usager de faire ce partage lui-même, et les deux questions (capital social et bénéfice net de l'exercice précédent) ont disparu. Une erreur de saisie déplace directement des dividendes entre prélèvements sociaux et cotisations, donc change le résultat affiché. Est-ce un choix assumé côté produit ? Si oui, je verrais bien la description de chaque champ rappeler comment calculer le seuil (10 % du capital social, ou du bénéfice net de l'exercice précédent pour une EI, sans oublier le compte courant d'associé de la famille), car ces précisions sont parties avec la question supprimée. Je n'ai pas pu vérifier le rendu dans le simulateur.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse (je n'ai relu en détail que le dernier commit, `fix(dividendes)` ; la PR fait 250 commits et 576 fichiers, je n'ai pas pu la relire en entier) :\n\n- La PR est très volumineuse : la réforme de l'assiette, les exonérations Acre/invalidité, la mise à jour IR 2026, la navigation et la suppression de domaine inutilisé se relisent difficilement ensemble. Je me demande si un découpage en PR par thème serait possible, au moins pour les mises à jour de snapshots de régression, qui noient le reste.\n- Historique : plusieurs commits `fix: erreurs de rebase`, `lint: fix`, `fix: type and lint` pourraient être fusionnés dans les commits d'origine, pour que chaque commit reste vert comme demandé dans CONTRIBUTING.\n- Le workflow « Vérification PR » est vert.\n- Non vérifié : le rendu des objectifs dividendes dans les simulateurs indépendant et cessation d'activité (`Objectifs.tsx`, `Goals.tsx`)."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.14033980000000001,
+  "final_text": "J'ai posté deux commentaires sur la PR 4160, mais je n'ai relu en détail que le dernier commit (`fix(dividendes)`). La PR compte 250 commits et 576 fichiers, donc le reste n'a pas été relu.\n\n- **Commentaire inline** sur `modele-ti/règles/indépendant/revenus/dividendes.publicodes`, lignes 23 à 36. Le modèle ne calcule plus la part des dividendes au-dessus de 10 % du capital social. L'usager doit désormais faire ce partage lui-même, et les questions sur le capital social et le bénéfice de l'exercice précédent ont disparu. Je demande si c'est un choix assumé et je suggère de rappeler le mode de calcul du seuil dans les descriptions.\n- **Synthèse** sur la PR, avec trois points :\n  - la PR est trop volumineuse pour être relue d'un bloc ;\n  - plusieurs commits (`fix: erreurs de rebase`, `lint: fix`, `fix: type and lint`) pourraient être fusionnés dans leurs commits d'origine ;\n  - le workflow « Vérification PR » est vert.\n\nJe n'ai pas pu vérifier le rendu des objectifs dividendes dans les simulateurs indépendant et cessation d'activité. Je n'ai pas non plus trouvé de référence restante aux règles supprimées dans le code du dépôt."
+ }
+}
+
+```

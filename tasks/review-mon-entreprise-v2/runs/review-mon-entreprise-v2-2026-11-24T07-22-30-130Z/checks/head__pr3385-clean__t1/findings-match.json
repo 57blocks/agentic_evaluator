@@ -1,0 +1,30 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/components/conversation/AnswerList.tsx",
+      "start_line": 321,
+      "end_line": 321,
+      "message": "Cette ligne commentée ressemble à un reste de test local. Si on veut afficher les suggestions dans cette modale, je supprimerais la ligne plutôt que de la laisser en commentaire ; sinon, peut-être à remettre. Ce changement modifie aussi le comportement de toutes les modales « Modifier mes réponses », pas seulement celle des charges : c’est voulu ?"
+    },
+    {
+      "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+      "start_line": 71,
+      "end_line": 71,
+      "message": "Je me demande si on peut éviter ce `cy.wait(500)` (et le `eslint-disable`) : une assertion sur la valeur attendue du champ juste avant de taper dans le premier input permettrait d’attendre l’état stable sans délai fixe, qui rend le test fragile. Qu’en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

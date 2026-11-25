@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "J'ai bien relu, ça me paraît bon à merger."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4159,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.10587849999999999,
+  "final_text": "J'ai relu la PR #4159 et n'ai trouvé aucune remarque à poster. J'ai donc publié un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger. »\n\n- **Vérifications :** `gh pr checks` est au vert.\n- **Ce que j'ai lu :** le diff, hors fichiers de traduction, et la description de la PR (`Closes #4157`).\n- **Ce que je n'ai pas lu :** l'issue #4157 elle-même, la commande ayant été refusée.\n- **Vérifié :** la règle `emploi franc` porte maintenant la question et les conditions, et le montant passe dans `emploi franc . montant`. J'ai relu cette partie de la règle sans y voir de défaut.\n- **Absent de la PR :** aucun test ne couvre le retour à la première question en répondant « non ». Je n'ai pas jugé que cela justifiait une remarque."
+ }
+}
+
+```

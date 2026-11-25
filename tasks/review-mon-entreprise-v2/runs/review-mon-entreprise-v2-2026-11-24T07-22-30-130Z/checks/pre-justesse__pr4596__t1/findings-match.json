@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-commun/règles/base.publicodes",
+      "start_line": 18,
+      "end_line": 18,
+      "message": "Le message du commit parle de « PASS métropole » et la règle voisine déclare `acronyme: PASS` (ligne 35), mais le titre est « PSS métropole » (idem ligne 29). Je me demande si « PASS » ne serait pas plus cohérent pour les usagers. Qu’en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+          "start_line": 85,
+          "end_line": 116
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

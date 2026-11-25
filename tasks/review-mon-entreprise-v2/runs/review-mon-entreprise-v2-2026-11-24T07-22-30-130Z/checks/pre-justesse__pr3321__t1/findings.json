@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/hooks/useBarèmeLodeom.ts",
+  "start_line": 8,
+  "end_line": 13,
+  "message": "Je me demande si on ne devrait pas ajouter `as const` à ce tableau : sans lui, `(typeof barèmes)[number]` vaut `string`, donc `BarèmeLodeom` ne protège pas les comparaisons de `WarningSalaireTrans.tsx`. Un renommage comme celui-ci (ou une faute de frappe) y passerait sans erreur de `tsc`, alors que le message d'avertissement disparaîtrait silencieusement. Qu'en penses-tu ?"
+ }
+]

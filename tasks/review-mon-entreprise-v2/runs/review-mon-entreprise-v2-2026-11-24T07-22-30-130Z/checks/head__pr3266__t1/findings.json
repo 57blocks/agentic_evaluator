@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Cette clé `réductionGénérale` ne correspond plus au type `MonthState` (le champ s’appelle désormais `réduction`) : le renommage a l’air incomplet. Comme `...monthData` est répandu juste avant, l’ancienne `réduction` est conservée. Quand la rémunération totale retombe à 0 (par exemple en vidant le dernier mois renseigné), les mois gardent donc leur réduction précédente, et ce champ en trop est ignoré sans erreur de type. Je verrais bien :\n```suggestion\n\t\t\t\tréduction: {\n```"
+ }
+]

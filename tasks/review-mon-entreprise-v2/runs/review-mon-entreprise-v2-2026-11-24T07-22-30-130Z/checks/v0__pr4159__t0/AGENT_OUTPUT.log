@@ -1,0 +1,19 @@
+{
+ "pr": 4159,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Le déplacement de la question sur la règle parente me semble une bonne façon de régler le retour à la première question : la règle n'est plus non applicable quand on répond « non ».\n\nDeux points, que je n'ai pas pu vérifier sans exécuter le code :\n\n- Je ne vois pas de test qui reproduise le bug de #4157 : les modifications de tests sont le snapshot E2E et le YAML de régression, qui ne font que suivre le renommage. Qu'en penses-tu d'un test qui répond « non » à la question emploi franc et vérifie que la simulation continue sur la question suivante ? Il échouerait avant le correctif.\n- Je me demande si les noms `salarié . coût total employeur . aides . emploi franc` (booléen d'éligibilité) et `… emploi franc . montant` sont stables pour les intégrations externes (API, iframes), qui pourraient référencer l'ancien `… emploi franc . éligible` ou lire `emploi franc` comme un montant. Je n'ai pas cherché de consommateur externe.\n\nLe commit unique est cohérent, et les traductions `rules-en.yaml` sont régénérées avec le code."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1038951,
+  "final_text": "J'ai relu la PR #4159 et posté un seul commentaire de synthèse. Je n'ai pas posté de commentaire inline, car aucune remarque ne se rattachait à une ligne précise du diff. Je n'ai pas exécuté le code.\n\nLe commentaire dit que déplacer la question sur la règle parente me semble une bonne façon de corriger le retour à la première question. Il contient deux remarques ouvertes :\n\n- **Test manquant :** aucun test ne reproduit le bug de #4157. Le snapshot E2E et le YAML de régression suivent seulement le renommage. Je propose un test qui répond « non » à la question emploi franc et vérifie que la simulation continue sur la question suivante.\n- **Renommage des règles :** `emploi franc` devient le booléen d'éligibilité et `emploi franc . montant` porte le calcul. Je me demande si des intégrations externes (API, iframes) référencent l'ancien nom `emploi franc . éligible`. Je n'ai pas cherché de consommateur externe, et le commentaire le précise.\n\nLe commit unique est cohérent et les traductions de `rules-en.yaml` sont régénérées avec le code."
+ }
+}

@@ -1,0 +1,20 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Je n'ai plus trouvé de référence résiduelle à `cmg` ni à `useGetPath` dans le dépôt (hors `base-stats.json`, des données historiques). Les trois commits sont chacun un changement logique cohérent.\n\nUne question : les anciennes URLs (`/assistants/cmg`, et l'iframe `simulateurs.cmg` si des sites tiers l'intègrent) tomberont désormais sur la 404. Est-ce voulu, ou faut-il une redirection vers une page d'explication ? Je n'ai pas pu le vérifier côté Netlify ni les intégrations externes.\n\nJe n'ai pas vérifié `gh pr checks` en détail, ni les traductions générées (`i18n:translate`) au-delà de la suppression des clés."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

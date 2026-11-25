@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "Je n'ai pas pu relire en profondeur une PR de 250 commits et ~580 fichiers (règles, snapshots de régression, traductions, UI) : mon avis ne porte que sur le dernier commit (séparation des dividendes en deux champs), où je n'ai rien relevé de bloquant, et les vérifications passent. Je me demande si découper cette réforme en PR plus petites (règles modele-ti, puis UI, puis mises à jour des régressions) ne la rendrait pas plus relisible par l'équipe, notamment pour valider les écarts de snapshots un par un."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4160,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Je n'ai pas pu relire en profondeur une PR de 250 commits et ~580 fichiers (règles, snapshots de régression, traductions, UI) : mon avis ne porte que sur le dernier commit (séparation des dividendes en deux champs), où je n'ai rien relevé de bloquant, et les vérifications passent. Je me demande si découper cette réforme en PR plus petites (règles modele-ti, puis UI, puis mises à jour des régressions) ne la rendrait pas plus relisible par l'équipe, notamment pour valider les écarts de snapshots un par un."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1108352,
+  "final_text": "J'ai posté un seul commentaire global sur la PR 4160. Je n'ai pas relu la PR en entier : elle compte 250 commits et environ 580 fichiers, et je me suis limité au dernier commit.\n\n- **Dernier commit :** la séparation du champ dividendes en deux (`soumis à prélèvements sociaux` et `soumis à cotisations sociales`). Je n'y ai rien relevé de bloquant.\n- **Vérifications :** `gh pr checks` est au vert.\n- **Commentaire posté :** il précise que mon avis ne couvre que ce dernier commit. Il propose aussi de découper la réforme en PR plus petites (règles `modele-ti`, UI, mises à jour de régressions), pour pouvoir valider les écarts de snapshots un par un.\n\nJe n'ai posté aucun commentaire inline."
+ }
+}
+
+```

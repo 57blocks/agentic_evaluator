@@ -1,0 +1,17 @@
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1962,
+  "message": "La traduction anglaise générée est cassée : les balises sont échappées (`&lt;/3>`, `&lt;/6>`) et « male and female auto-entrepreneurs » est une traduction littérale de « auto-entrepreneurs et auto-entrepreneuses ». Affichée telle quelle, la page EN montrerait des balises en clair et le lien ne serait pas rendu. Je verrais bien une relecture manuelle de cette entrée, par exemple : `<0></0> This simulator <3>does not apply to micro-entrepreneurs</3>, who have their own <6>income simulator</6>.` (à vérifier avec le vocabulaire déjà utilisé ailleurs dans `ui-en.yaml`). Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 70,
+  "end_line": 70,
+  "message": "nit: cette liste est une règle d’affichage propre à ce composant, recréée à chaque rendu et nommée de façon un peu opaque. Je verrais bien une constante de module avec un nom plus explicite, et `.includes(id)` plutôt que `indexOf(id) > -1`. Ne pourrait-on pas aussi porter cette information dans la config du simulateur (comme `warning`), pour ne pas lister les ids à la main ici ?"
+ },
+ {
+  "message": "Le déplacement des avertissements vers `indépendant/components/` avec des exports nommés suit bien les conventions. Je n’ai pas pu vérifier le rendu visuel de l’avertissement ni le lien vers le simulateur auto-entrepreneur. Aucun test n’accompagne le changement : un test de rendu vérifiant que l’avertissement apparaît pour les 4 simulateurs concernés (et pas pour les autres) me semblerait utile. Côté historique, le déplacement/réécriture des deux composants existants est mélangé à la nouvelle fonctionnalité dans un seul commit ; deux commits auraient facilité la relecture."
+ }
+]

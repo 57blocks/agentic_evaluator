@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1962,
+  "message": "La traduction anglaise générée est cassée : `&lt;/3>` et `&lt;/6>` sont échappés au lieu d’être des balises fermantes, et « male and female auto-entrepreneurs » est une traduction littérale peu naturelle de « auto-entrepreneurs et auto-entrepreneuses ». Les usagers anglophones verront du balisage brut ou un lien qui ne se ferme pas. Peux-tu corriger la valeur (par ex. `<0></0> This simulator <3>does not apply to auto-entrepreneurs (micro-entrepreneurs)</3>, who have their own dedicated <6>income simulator</6>.`) ? Je me demande aussi si la relance de `i18n:translate` ne la réécrira pas à l’identique : à vérifier."
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 97,
+  "end_line": 97,
+  "message": "nit: `includes` plutôt que `indexOf(id) > -1`, et la liste `confusionAEPossible` pourrait être une constante de module (elle est recréée à chaque rendu)."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4570,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/locales/ui-en.yaml",
+   "line": 1962,
+   "start_line": 1962,
+   "body": "La traduction anglaise générée est cassée : `&lt;/3>` et `&lt;/6>` sont échappés au lieu d’être des balises fermantes, et « male and female auto-entrepreneurs » est une traduction littérale peu naturelle de « auto-entrepreneurs et auto-entrepreneuses ». Les usagers anglophones verront du balisage brut ou un lien qui ne se ferme pas. Peux-tu corriger la valeur (par ex. `<0></0> This simulator <3>does not apply to auto-entrepreneurs (micro-entrepreneurs)</3>, who have their own dedicated <6>income simulator</6>.`) ? Je me demande aussi si la relance de `i18n:translate` ne la réécrira pas à l’identique : à vérifier.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 97,
+   "start_line": null,
+   "body": "nit: `includes` plutôt que `indexOf(id) > -1`, et la liste `confusionAEPossible` pourrait être une constante de module (elle est recréée à chaque rendu).",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.12565910000000002,
+  "final_text": "J'ai relu la PR 4570 et posté deux commentaires inline sur GitHub. Je n'ai rien posté d'autre : le workflow « Vérification PR » est au vert.\n\n- **`site/source/locales/ui-en.yaml:1962` :** la traduction anglaise générée est cassée. Les balises fermantes sont échappées en `&lt;/3>` et `&lt;/6>`, et « male and female auto-entrepreneurs » est une traduction littérale peu naturelle. Je propose une formulation corrigée. Je demande aussi si une nouvelle exécution de `i18n:translate` réécrirait la même valeur.\n- **`IndépendantBase.tsx:97` :** c'est un `nit:`. Je suggère `includes` à la place de `indexOf(id) > -1`, et de sortir `confusionAEPossible` en constante de module pour qu'elle ne soit plus recréée à chaque rendu.\n\nJe n'ai pas pu lire l'issue #4044 : la commande `gh issue view` a demandé une approbation. Je n'ai donc pas vérifié que la PR couvre tout ce que l'issue demande."
+ }
+}
+
+```

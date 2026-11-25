@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Je pense que cette clé est un reste de l'ancien nommage : `MonthState` porte `réduction`, pas `réductionGénérale`. Du coup, quand la rémunération annuelle retombe à 0, `...monthData` conserve l'ancienne `réduction` de chaque mois (seule la régularisation est remise à zéro) et l'usager continue de voir un montant de réduction alors qu'il n'a plus de rémunération. TypeScript ne le signale pas, car l'objet retourné par le `map` n'est pas contraint à `MonthState`. Peut-être `réduction:` ici, et typer le retour du `map` ?\n```suggestion\n\t\t\t\tréduction: {\n```"
+ }
+]

@@ -1,0 +1,63 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 34,
+      "end_line": 34,
+      "message": "Les `navigate(...)` sont appelés pendant le rendu (ici et ligne 38, ainsi que dans `Déclarations`, `NonÉligible` et `Résultat`). React Router signale cet appel comme un effet de bord hors `useEffect`, et le composant continue de rendre avec une situation invalide le temps de la redirection. Je verrais bien un `<Navigate replace to=... />` retourné, ou un `useEffect`. Un petit hook ou composant de garde partagé éviterait de répéter ce bloc dans les quatre pages. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 80,
+      "end_line": 80,
+      "message": "`key={index}` sur une liste dont on peut supprimer un élément du milieu : après suppression, les états locaux des champs (saisie en cours dans `MontantField`, `DateField`…) restent associés à la position et peuvent se retrouver sur un autre enfant. Est-ce qu'un identifiant stable par enfant est envisageable ?"
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 17,
+      "end_line": 17,
+      "message": "nit: `CONTRIBUTING.md` demande des exports nommés plutôt que `export default` ; c'est le cas pour les pages et composants de `cmg/` (`Enfants`, `EnfantInput`, `QuestionsAeeH`, `Navigation`…)."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/cmg/components/Navigation.tsx",
+          "start_line": 6,
+          "end_line": 35
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

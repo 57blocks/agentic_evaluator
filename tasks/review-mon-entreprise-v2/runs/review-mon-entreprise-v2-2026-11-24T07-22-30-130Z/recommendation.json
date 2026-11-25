@@ -1,0 +1,110 @@
+{
+  "rule_version": "select-v4",
+  "operating_mode": "highest-assurance",
+  "control_candidate": "v0",
+  "eligibility": {
+    "minimum_reliability": null,
+    "minimum_required_check_pass_rate": null,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "filters": [],
+  "eligible": [
+    "v0",
+    "pre-justesse",
+    "head"
+  ],
+  "tradeoffs": [
+    {
+      "candidate": "v0",
+      "eligible": true,
+      "generation_cost_per_success": 0.512708,
+      "p50_ms": 33254,
+      "p95_ms": 57122,
+      "reliability": {
+        "value": 0.3020833333333333,
+        "numerator": 29,
+        "denominator": 96
+      },
+      "required_check_pass_rate": {
+        "value": 0.3020833333333333,
+        "numerator": 29,
+        "denominator": 96
+      },
+      "task_success_rate": {
+        "value": 0.3020833333333333,
+        "numerator": 29,
+        "denominator": 96
+      },
+      "all_trials_pass_rate": {
+        "value": 0.15625,
+        "numerator": 5,
+        "denominator": 32
+      }
+    },
+    {
+      "candidate": "pre-justesse",
+      "eligible": true,
+      "generation_cost_per_success": 0.479785,
+      "p50_ms": 24332,
+      "p95_ms": 42558,
+      "reliability": {
+        "value": 0.2916666666666667,
+        "numerator": 28,
+        "denominator": 96
+      },
+      "required_check_pass_rate": {
+        "value": 0.2916666666666667,
+        "numerator": 28,
+        "denominator": 96
+      },
+      "task_success_rate": {
+        "value": 0.2916666666666667,
+        "numerator": 28,
+        "denominator": 96
+      },
+      "all_trials_pass_rate": {
+        "value": 0.21875,
+        "numerator": 7,
+        "denominator": 32
+      }
+    },
+    {
+      "candidate": "head",
+      "eligible": true,
+      "generation_cost_per_success": 0.727929,
+      "p50_ms": 24458,
+      "p95_ms": 45533,
+      "reliability": {
+        "value": 0.19791666666666666,
+        "numerator": 19,
+        "denominator": 96
+      },
+      "required_check_pass_rate": {
+        "value": 0.19791666666666666,
+        "numerator": 19,
+        "denominator": 96
+      },
+      "task_success_rate": {
+        "value": 0.19791666666666666,
+        "numerator": 19,
+        "denominator": 96
+      },
+      "all_trials_pass_rate": {
+        "value": 0.03125,
+        "numerator": 1,
+        "denominator": 32
+      }
+    }
+  ],
+  "chosen": null,
+  "compared_to_control": null,
+  "firmness": "scorecard",
+  "firmness_reasons": [],
+  "evidence": null,
+  "reasons": [
+    "scorecard: this step reports every candidate's results and picks none (decision: scorecard); no gate or operating mode was applied"
+  ],
+  "closest": null
+}

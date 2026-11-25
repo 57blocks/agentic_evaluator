@@ -1,0 +1,35 @@
+{
+ "pr": 3746,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+   "line": 31,
+   "start_line": null,
+   "body": "Je me demande si le `getOrElse(montantCT, () => euros(0))` ne va pas faire apparaître brièvement « 0 € » à l'usager avant la redirection (l'effet s'exécute après le premier rendu). Pour un résultat affiché à un usager, ça peut prêter à confusion. Une piste : garder le `return null` quand `montantCT` est absent ou nul (l'effet de navigation reste inchangé), plutôt que de fabriquer un montant. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Déclarations.tsx",
+   "line": 40,
+   "start_line": null,
+   "body": "nit: les `eslint-disable react-hooks/exhaustive-deps` avec `[]` (ici, dans NonÉligible et Résultat) masquent le fait que l'effet ne se rejoue pas si la situation change. Ça convient sans doute pour une garde à l'arrivée sur la page, mais je me demande si lister les dépendances (`navigate`, `situation`, …) ne serait pas plus sûr : la redirection est idempotente (`replace: true`). Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Pas de test ajouté pour ce correctif de navigation en iframe : un test de composant (rendu avec un routeur en mémoire, vérification de la redirection sans appel de `navigate` pendant le rendu) protégerait contre une régression. Je n'ai pas pu vérifier le comportement en iframe lui-même (rendu manuel). Dans `Enfants.tsx`, après une redirection l'effet appelle encore `set.nouvelEnfant()` si la liste est vide ; c'était déjà le cas avant, mais un `return` après `navigate` éviterait de modifier la situation d'une page qu'on quitte."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1161483,
+  "final_text": "J'ai posté ma revue de la PR 3746 sur GitHub : deux commentaires inline et une synthèse. Je n'ai ni exécuté le code ni testé le comportement en iframe.\n\n- **`Résultat.tsx`** : avec `getOrElse(montantCT, () => euros(0))`, l'usager risque de voir « 0 € » le temps de la redirection. Je propose de garder un `return null` tant que `montantCT` est absent ou nul.\n- **`Déclarations.tsx`** : les `eslint-disable react-hooks/exhaustive-deps` avec `[]` masquent le fait que l'effet ne se rejoue pas si la situation change. La même remarque vaut pour `NonÉligible.tsx` et `Résultat.tsx`. Je l'ai posté comme « nit ».\n- **Synthèse** :\n  - La PR n'ajoute aucun test pour ce correctif.\n  - Dans `Enfants.tsx`, `set.nouvelEnfant()` s'exécute encore après une redirection. C'était déjà le cas avant la PR."
+ }
+}

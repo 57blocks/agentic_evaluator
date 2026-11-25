@@ -1,0 +1,31 @@
+{
+ "pr": 4164,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/Simulation/SimulationGoal.tsx",
+   "line": 85,
+   "start_line": null,
+   "body": "Je me demande si ce composant défini via `useCallback` ne va pas poser problème : dès qu'une dépendance change (`evaluation.missingVariables` est recalculé à chaque évaluation, donc probablement à chaque frappe), React voit un nouveau type de composant, démonte puis remonte `RuleInput`, et le champ risque de perdre le focus pendant la saisie. Avant, `rendreChampSaisie` retournait un élément, donc pas de remontage. Qu'en penses-tu de garder une fonction de rendu qui reçoit `{ id, aria }` et retourne l'élément, ou de sortir le composant du rendu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/OuiNonInput.tsx",
+   "line": 47,
+   "start_line": null,
+   "body": "Je me demande pourquoi `aria-label=\"\"` : c'est sans doute pour faire taire React Aria, mais un label vide est un attribut sans effet utile pour les lecteurs d'écran, et il va à l'encontre de l'objectif de simplifier le nom accessible. Est-ce que le choix mériterait au moins un commentaire, ou une autre façon de contenter React Aria ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.15987610000000002,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline sur GitHub. Je n'ai rien exécuté. La vérification de la PR (`gh pr checks`) est au vert.\n\n- **`SimulationGoal.tsx`, ligne 85** : `RuleInputWrapper` est un composant créé avec `useCallback`. Quand une de ses dépendances change, React démonte puis remonte `RuleInput`, et le champ risque de perdre le focus pendant la frappe. `evaluation.missingVariables` est probablement recalculé à chaque évaluation, donc à chaque frappe. Je n'ai pas testé ce comportement en conditions réelles, donc je l'ai posé en question. Je propose de garder une fonction de rendu qui retourne un élément, comme avant avec `rendreChampSaisie`.\n- **`OuiNonInput.tsx`, ligne 47** : `aria-label=\"\"` est sans doute là pour faire taire React Aria. Mais un label vide n'apporte rien aux lecteurs d'écran et va à l'encontre de l'objectif de la PR. Je demande s'il faut un commentaire ou une autre solution."
+ }
+}

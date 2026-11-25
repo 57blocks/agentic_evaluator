@@ -1,0 +1,27 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+      "start_line": 559,
+      "end_line": 559,
+      "message": "Je me demande si ce changement ne modifie pas le calcul bien au-delà de Mayotte : avant, avec Acre **et** invalidité (sans exonération âge), l'abattement sur l'invalidité-décès était nul ; maintenant le taux Acre s'applique. Le test supprimé (« est nulle lorsqu'il y a à la fois Acre et invalidité mais pas d'exonération âge ») documentait ce comportement, et aucun test ne couvre plus ce cas.\n\nEst-ce voulu ? Si oui, quelle source (texte de loi / site Urssaf) le justifie ? Je n'ai pas pu la vérifier dans le dépôt, et CONTRIBUTING.md demande de ne pas poser de règle métier sans source. Je verrais bien un test qui fixe le nouveau comportement (Acre + invalidité) et une référence sur la règle. Sinon, peut-être faut-il restreindre le changement au cas Mayotte ?"
+    },
+    {
+      "message": "Synthèse :\n- La PR est présentée comme des tests pour Mayotte, mais elle modifie aussi une règle (cotisations.publicodes) et refactore les clés du fichier de test. Je me demande si trois commits (refactor EXONÉRATIONS, correction de la règle, nouveaux tests) faciliteraient la relecture : le commit unique est de type tests: alors qu'il change un calcul.\n- nit: les it.each comparent Mayotte à la métropole plutôt qu'à une valeur attendue ; si les deux dérivent ensemble (comme pour l'invalidité-décès), ils passent quand même. Le motif est répété trois fois : un helper type mêmeCotisationQuEnMétropole(règle, exonérations) limiterait la duplication.\n- Je n'ai pas exécuté les tests (hors de mon périmètre) ni vérifié la source métier de la modification de règle : voir mon commentaire inline."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

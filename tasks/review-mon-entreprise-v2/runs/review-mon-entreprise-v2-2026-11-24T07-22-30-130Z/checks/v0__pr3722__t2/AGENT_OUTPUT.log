@@ -1,0 +1,38 @@
+{
+ "pr": 3722,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Historique : `fix(cmg): corrige le scroll (?)` laisse entendre que le correctif est incertain, et `i18n: fix fichier de trad` pourrait être fusionné avec le commit qui introduit les textes (un commit = traductions à jour avec le code). Je n'ai pas pu vérifier le rendu visuel de la checkbox ni le comportement du scroll."
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/hooks/useCMG.ts",
+   "line": 144,
+   "start_line": null,
+   "body": "Je me demande si `moisIdentiques` ne peut pas se désynchroniser de `salariées`. `set.salariéesGED` (juste au-dessus) retire via `A.filter(auMoinsUneDéclaration)` les salariées sans aucune déclaration, mais `moisIdentiques.GED` n'est pas filtré de la même façon. Si on vide les déclarations d'une salariée qui n'est pas la dernière, les indices suivants se décalent : la case « mois identiques » de la salariée 2 pourrait se retrouver sur la 1. Pour la dernière, `moisIdentiques.GED[index]` vaut `undefined` (passé à une prop `boolean`). Je l'ai déduit à la lecture, sans l'exécuter. Même question pour AMA.\n\nQu'en penses-tu de porter l'info « mois identiques » dans la salariée elle-même (ou de la dériver, par ex. avril et mai égaux à mars) plutôt que de maintenir un tableau parallèle à garder aligné ? Cela supprimerait aussi les mises à jour dans `nouvelleGED`, `onSalariéeDelete`, etc.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+   "line": 3,
+   "start_line": null,
+   "body": "nit: il existe déjà `ScrollToTop.tsx` dans ce dossier, avec le même `window.scroll` et le même fallback (et il remonte aussi les parents scrollables). Je verrais bien `<ScrollToTop />` plutôt qu'un nouveau hook qui duplique la logique. Le `export default` s'écarte aussi de la convention d'exports nommés.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 8,
+  "refused": [
+   "api --method POST repos/betagouv/mon-entreprise/pulls/3722/comments: cannot read /tmp/b1.txt for field body",
+   "api --method POST repos/betagouv/mon-entreprise/pulls/3722/comments: cannot read /tmp/b2.txt for field body"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.179932,
+  "final_text": "J'ai posté ma revue sur la PR 3722 : deux commentaires inline et une synthèse. Je n'ai exécuté ni le code ni les tests, et les vérifications de la PR sont au vert.\n\n- **`useCMG.ts` ligne 144 :** je soupçonne que `moisIdentiques` peut se décaler par rapport aux salariées. `set.salariéesGED` retire les salariées sans déclaration, mais le tableau `moisIdentiques.GED` n'est pas filtré de la même façon. Je l'ai déduit à la lecture du code, sans l'exécuter. Je propose de porter l'information « mois identiques » dans la salariée elle-même, ou de la dériver.\n- **`useScrollToTop.tsx` ligne 3 :** il existe déjà `ScrollToTop.tsx` dans le même dossier, qui fait la même chose. Le nouveau hook utilise aussi `export default`, contre la convention d'exports nommés.\n- **Synthèse :** le message du commit « corrige le scroll (?) » laisse entendre que le correctif est incertain. Le commit `i18n` pourrait aussi être fusionné avec celui qui introduit les textes. Je n'ai pas pu vérifier le rendu de la checkbox ni le comportement du scroll.\n\nMes deux premiers essais de publication ont échoué : une commande bloquée, puis des fichiers temporaires absents. Les commentaires inline ont été postés au troisième essai, et la synthèse l'a été une seule fois."
+ }
+}

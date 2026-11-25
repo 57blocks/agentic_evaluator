@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/components/Simulation/SimulationGoal.tsx",
+  "start_line": 85,
+  "end_line": 85,
+  "message": "Je me demande si ce `useCallback` joue son rôle : `evaluation` est recalculé à chaque rendu (`engine.evaluate`), donc `evaluation.missingVariables` change de référence à chaque fois, et `RuleInputWrapper` aussi. Or il est utilisé comme *type* de composant (`<ChampSaisie />` dans `ObjectifSaisissableDeSimulation`) : React démonte/remonte alors le champ à chaque rendu, avec un risque de perte du focus et de la position du curseur pendant la saisie. Je n'ai pas pu le vérifier en conditions réelles. Une piste : garder une render prop (`rendreChampSaisie({ id, aria })`) plutôt qu'un composant défini dans le composant. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Deux points : (1) je ne trouve aucun élément d'id `questionHeader` dans `site/source`, donc ce repli ne pointe vers rien et le groupe n'a pas de nom accessible quand `aria.labelledby` est absent. (2) `aria-labelledby` sur un `div` sans rôle n'est pas toujours exposé par les technologies d'assistance ; je me demande si garder `role=\"group\"` ne serait pas plus sûr (je n'ai pas testé avec un lecteur d'écran). Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/components/conversation/OuiNonInput.tsx",
+  "start_line": 47,
+  "end_line": 47,
+  "message": "nit: `aria-label=\"\"` ressemble à un contournement du warning React Aria (même chose dans `CardChoiceGroup`). Si c'est volontaire, un mot d'explication aiderait le prochain lecteur."
+ },
+ {
+  "message": "Synthèse : trois remarques inline (remontage possible du champ dans `SimulationGoal`, repli `questionHeader` introuvable dans `ChoixMultiple`, `aria-label=\"\"`). Le découpage en commits est lisible. Je n'ai pas pu vérifier le rendu dans les devtools ni avec un lecteur d'écran, ni mesurer les warnings React Aria mentionnés dans la description. Le commit `ObjectifSaisissableDeSimulation` mélange aussi un refactor (render prop vers composant, import `effect/Option`) avec le correctif a11y : je me demande s'il ne gagnerait pas à être séparé."
+ }
+]

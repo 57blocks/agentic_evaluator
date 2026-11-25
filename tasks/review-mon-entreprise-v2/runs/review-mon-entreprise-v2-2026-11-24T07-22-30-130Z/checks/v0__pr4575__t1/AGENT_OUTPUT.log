@@ -1,0 +1,31 @@
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "Je me demande si le passage de `next` à `main` est voulu ici. Ça change le comportement de `IS_PRODUCTION`/`IS_STAGING` (donc Sentry, domaine Plausible, etc.) pour les builds de la branche `next`, qui deviendraient « staging ». Si c'est intentionnel, je le mettrais dans un commit séparé avec une explication ; sinon je le retirerais de cette PR. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/services/environnement/environnement.ts",
+   "line": 3,
+   "start_line": null,
+   "body": "nit: chaque valeur répète le même `sousVite ? import.meta.env.VITE_X : process.env.NEXT_PUBLIC_X`, soit une quinzaine de duplications. Je verrais bien un petit helper pour réduire ça, sauf si tu veux garder l'accès statique à chaque variable (Next n'inline `process.env.NEXT_PUBLIC_*` que sur un accès littéral, donc un helper prenant le nom en paramètre ne marcherait pas côté Next, je n'ai pas vérifié côté Vite). Peut-être aussi un test de l'adaptateur (valeurs par défaut du domaine Plausible selon `déployé`), car la PR n'en ajoute aucun.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.11862750000000001,
+  "final_text": "J'ai posté deux commentaires inline sur la PR 4575. Je n'ai pas lancé le code, et je n'ai pas lu les résultats de `gh pr checks`.\n\n- **`site/vite.config.ts:208`**: `isProductionBranch` passe de `['master', 'next']` à `['master', 'main']`. Un build de la branche `next` deviendrait « staging », ce qui change Sentry et le domaine Plausible. Je demande si c'est voulu, et je propose de l'isoler dans un commit à part ou de le retirer de cette PR.\n- **`site/source/services/environnement/environnement.ts:3`** (nit): le motif `sousVite ? import.meta.env.VITE_X : process.env.NEXT_PUBLIC_X` est répété une quinzaine de fois. Je suggère un helper, sauf si l'accès littéral est gardé exprès. Je n'ai pas vérifié si Vite inline les variables avec un nom passé en paramètre. Je note aussi que la PR n'ajoute aucun test de l'adaptateur, par exemple pour le domaine Plausible par défaut selon `déployé`.\n\nJe n'ai pas posté de synthèse. L'historique git, avec ses quatre commits, ne me pose pas de problème."
+ }
+}

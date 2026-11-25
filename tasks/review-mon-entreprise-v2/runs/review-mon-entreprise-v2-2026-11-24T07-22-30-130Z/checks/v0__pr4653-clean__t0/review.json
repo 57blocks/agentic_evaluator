@@ -1,0 +1,19 @@
+{
+ "pr": 4653,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Suppression propre : je ne trouve plus de référence à `cmg` ni à `useGetPath` dans `pages`, `components`, `cypress` ni les locales, et les trois commits sont chacun cohérents.\n\nUne question : je ne vois aucune redirection pour `/assistants/cmg` (et `/en/assistants/cmg`) dans `site/netlify.base.toml`. Les anciennes URLs (liens externes, favoris, référencement) vont donc tomber sur une 404. Est-ce voulu ? Une redirection vers la page des assistants ou des simulateurs serait peut-être plus utile à l'usager. Qu'en penses-tu ?\n\nJe n'ai pas exécuté le code ; je m'appuie sur `gh pr checks` pour lint, types et tests."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.11604410000000001,
+  "final_text": "J'ai relu la PR #4653 et posté une synthèse sur GitHub. Elle ne contient aucun commentaire inline.\n\n- **Suppression propre :** je ne trouve plus de référence à `cmg` ni à `useGetPath` dans `pages`, `components`, `cypress` ni les locales. Chacun des trois commits est cohérent.\n- **Redirection manquante :** `site/netlify.base.toml` n'a pas de redirection pour `/assistants/cmg` (ni pour `/en/assistants/cmg`). Les anciennes URLs devraient donc tomber sur une 404. J'ai demandé à l'auteur si c'était voulu et proposé une redirection vers la page des assistants ou des simulateurs. Je n'ai pas vérifié ce que Netlify renvoie en pratique.\n- **Non vérifié :** je n'ai pas exécuté le code et je n'ai pas lu `gh pr checks`. La synthèse renvoie donc au workflow pour le lint, les types et les tests."
+ }
+}

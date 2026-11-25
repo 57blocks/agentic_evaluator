@@ -1,0 +1,5 @@
+[
+ {
+  "message": "Deux remarques, sans avoir pu lancer le code (pas de build ni de test de mon côté).\n\n**Test de non-régression** : le bug (retour à la première question en répondant « non ») ne semble couvert par aucun test ajouté. Les modifs de `salarié.yaml` et du snapshot API ne font que suivre le renommage. Je me demande si un test sur la séquence de questions du simulateur, ou une situation avec `emploi franc: non` qui vérifie que `emploi franc . montant` est non applicable, ne fixerait pas ce comportement. Il serait écrit avant le fix, comme le demande CONTRIBUTING.\n\n**Renommage de l'entrée API** : `aides . emploi franc . éligible` disparaît au profit de `aides . emploi franc`, et le snapshot e2e de l'API change en conséquence. Si des intégrateurs de l'API passent `éligible` dans leur situation, leur calcul changera sans erreur, et l'aide sera ignorée. Est-ce un cas que vous acceptez, ou faut-il le mentionner dans la PR ? Je n'ai pas vérifié si une règle de migration existe pour ce type de renommage dans le dépôt.\n\nHistorique : un seul commit, cohérent."
+ }
+]

@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "Ce hook duplique le `useEffect` de `ScrollToTop.tsx` (même `window.scroll` avec son `try/catch`), à côté duquel il est posé : les deux vont diverger. Je me demande si `<ScrollToTop />` dans `cmg/index.tsx` ne ferait pas le même travail sans nouveau fichier. Sinon, `ScrollToTop` pourrait s'appuyer sur ce hook. Et `export default` : on préfère les exports nommés (CONTRIBUTING)."
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/components/GED/GED.tsx",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "Je me demande si `moisIdentiques` ne devrait pas rester une propriété de la salariée (ou être déduit de l'égalité des trois mois) plutôt qu'un tableau parallèle dans le contexte. Aujourd', `moisIdentiques.GED[index]` doit rester aligné avec `salariéesGED` : l'ajout (`useCMG`) et la suppression (ici) le font à la main, et `salariéesGED(...)` remplacé via `set.salariéesGED` (ex. une réinitialisation) peut les désynchroniser, `moisIdentiques.GED[index]` valant alors `undefined` alors que `GEDInput` attend un `boolean`. Qu'en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3722,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+   "line": 3,
+   "start_line": null,
+   "body": "Ce hook duplique le `useEffect` de `ScrollToTop.tsx` (même `window.scroll` avec son `try/catch`), à côté duquel il est posé : les deux vont diverger. Je me demande si `<ScrollToTop />` dans `cmg/index.tsx` ne ferait pas le même travail sans nouveau fichier. Sinon, `ScrollToTop` pourrait s'appuyer sur ce hook. Et `export default` : on préfère les exports nommés (CONTRIBUTING).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/components/GED/GED.tsx",
+   "line": 32,
+   "start_line": null,
+   "body": "Je me demande si `moisIdentiques` ne devrait pas rester une propriété de la salariée (ou être déduit de l'égalité des trois mois) plutôt qu'un tableau parallèle dans le contexte. Aujourd', `moisIdentiques.GED[index]` doit rester aligné avec `salariéesGED` : l'ajout (`useCMG`) et la suppression (ici) le font à la main, et `salariéesGED(...)` remplacé via `set.salariéesGED` (ex. une réinitialisation) peut les désynchroniser, `moisIdentiques.GED[index]` valant alors `undefined` alors que `GEDInput` attend un `boolean`. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1463925,
+  "final_text": "J'ai posté deux commentaires inline sur la PR 3722. Je n'ai ni lancé le code ni les tests. J'ai relu le diff de GED, du contexte, du hook de scroll et de `Checkbox`, mais pas le diff du côté AMA.\n\n- **`useScrollToTop.tsx`** : le hook recopie le `useEffect` de `ScrollToTop.tsx` (le même `window.scroll` avec son `try/catch`) et il est posé juste à côté. Je me demande si `<ScrollToTop />` suffirait, ou si `ScrollToTop` devrait s'appuyer sur le hook. J'ai aussi signalé le `export default`, alors que CONTRIBUTING demande des exports nommés.\n- **`GED.tsx`** : `moisIdentiques` est un tableau parallèle à `salariéesGED`, aligné à la main à l'ajout et à la suppression. Si `set.salariéesGED` remplace la liste sans toucher `moisIdentiques`, `moisIdentiques.GED[index]` vaut `undefined` alors que `GEDInput` attend un `boolean`. Je propose de le ranger dans la salariée ou de le déduire de l'égalité des trois mois. Ce second point est une question : je n'ai pas cherché de chemin qui remplace la liste en pratique.\n\nLe contrôle « Vérification PR » est vert.\n\nUn des deux commentaires affiche « Aujourd', » : une apostrophe a sauté à l'envoi du texte. Je ne l'ai pas corrigé."
+ }
+}
+
+```

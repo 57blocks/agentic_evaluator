@@ -1,0 +1,61 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+      "start_line": 170,
+      "end_line": 177,
+      "message": "Les seuils (40 %, 110 % du PSS) et les taux (3,25 %, 9,75 %) n'ont aucune source dans la règle. Pourrais-tu ajouter une `références` (article du code de la sécurité sociale ou page Urssaf), comme `indépendant.publicodes` avec l'article D621-2 ?"
+    },
+    {
+      "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+      "start_line": 177,
+      "end_line": 177,
+      "message": "Je ne vois que des snapshots modifiés, pas de test qui cible ce comportement. Un cas explicite par tranche (sous 40 % du PSS, entre 40 % et 110 %, au-delà de 110 %) rendrait le taux lisible et protégerait d'une régression. Au-delà de 110 %, le taux effectif redescend puisque la dernière tranche est plafonnée : est-ce voulu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+          "start_line": 166,
+          "end_line": 177
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ]
+}

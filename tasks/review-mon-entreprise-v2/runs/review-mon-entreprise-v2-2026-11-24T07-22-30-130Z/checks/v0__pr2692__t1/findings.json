@@ -1,0 +1,23 @@
+[
+ {
+  "message": "Synthèse : la PR mélange le cache Redis, la mise à jour des dépendances api/server/prettier et le reformatage de ~90 fichiers de `site` (ordre des imports). Séparer ces changements dans des PR distinctes, ou au moins des commits distincts, rendrait la revue du cache bien plus simple. Je n'ai pas pu vérifier l'exécution (pas de run du code). nit: `ioredis-mock` est en `dependencies` alors qu'il ne sert qu'en dev/test ; je me demande si `devDependencies` ne suffirait pas, en important dynamiquement le mock hors production."
+ },
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 28,
+  "end_line": 28,
+  "message": "Je me demande ce qui se passe si Redis est indisponible : avec `enableOfflineQueue: false`, `redis.get` et `redis.set` rejettent immédiatement quand la connexion est coupée, et l'erreur remonte du middleware. J'ai l'impression qu'une panne du cache rendrait `/evaluate` indisponible, alors que le cache est une optimisation. Qu'en penses-tu d'un `try/catch` autour des accès Redis qui retombe sur `await next()` ? Je n'ai pas vérifié le comportement réel de `ioredis` en panne, c'est une hypothèse."
+ },
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Deux points à vérifier : (1) `responseCachedAt` n'est ajouté que dans la valeur stockée, donc la première réponse n'a pas ce champ et les suivantes l'ont : le contrat de l'API diffère selon le cas. Est-ce voulu ? (2) La clé est le JSON brut du body, sans version des règles : après un déploiement avec de nouvelles règles, les réponses jusqu'à 2h resteraient celles de l'ancien modèle, ce qui compte pour un simulateur officiel. Un préfixe incluant la version de `modele-social` me semblerait utile, qu'en penses-tu ?"
+ },
+ {
+  "file": "api/source/index.ts",
+  "start_line": 50,
+  "end_line": 50,
+  "message": "Le cache est placé avant `plausibleMiddleware` et répond sans appeler `next()` : les requêtes servies depuis le cache ne seront plus comptées dans Plausible. Est-ce voulu ? Sinon, remettre `plausibleMiddleware` avant le cache préserverait les statistiques. Par ailleurs `koaBody()` consomme le body ici et je n'ai pas vérifié que `publicodesAPI` sait encore le lire ensuite ; la PR n'ajoute aucun test, un test sur deux appels `/evaluate` identiques couvrirait ça."
+ }
+]

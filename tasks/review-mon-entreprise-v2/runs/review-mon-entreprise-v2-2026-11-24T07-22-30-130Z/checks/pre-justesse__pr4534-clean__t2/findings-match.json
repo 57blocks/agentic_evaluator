@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-as/règles/cotisations/exonérations/acre.publicodes",
+      "start_line": 57,
+      "end_line": 57,
+      "message": "Je me demande si la condition `date < 01/2026` est la bonne : l'Acre dépend de la date de création de l'entreprise (et de la période de 12 mois d'exonération), pas de la date de simulation. Un simulateur positionné en 2026 pour une entreprise créée en 2025 serait ainsi calculé avec le taux réformé. Le bloc patronal ligne 38 fait-il le même choix ? Si oui, c'est cohérent, mais peut-être vaut-il la peine de le confirmer. Au passage, les 25 % viennent-ils d'une source citée dans les références (page Urssaf de 2026 ?) ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

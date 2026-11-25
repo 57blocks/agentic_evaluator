@@ -1,0 +1,17 @@
+[
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 54,
+  "end_line": 54,
+  "message": "Je me demande si `.pathname` ne perd pas la query et le hash : `getHref(\"?page=2\")` ou `getHref(\"#ancre\")` renverrait le chemin courant sans eux, alors que `useHref` de react-router les conserve. Je n ai pas vérifié les appelants actuels, donc c est peut-être sans effet aujourd hui, mais le contrat `getHref(to: string)` est ambigu. Un test sur ce cas (ou `.pathname + .search + .hash`) lèverait le doute. Qu en penses-tu ?"
+ },
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 68,
+  "end_line": 68,
+  "message": "Tout passe par un seul contexte dont la valeur change à chaque navigation, changement de search param ou de hash. Tous les consommateurs de `useNavigation()` (même ceux qui ne veulent que `navigate` ou `matchPath`) se re-rendent donc à chaque changement d URL. Je me demande si ça vaut le coup de séparer les parties stables (`navigate`, `generatePath`, `onNavigate`) de celles qui dépendent de la location. Je n ai pas mesuré l impact, c est peut-être négligeable ici."
+ },
+ {
+  "message": "Synthèse :\n\n- **Tests** : aucun test pour `lib/navigation` (provider react-router, `getHref`, `matchPath`, `onNavigate`, `MockNavigationProvider` de 109 lignes), alors que tout le reste en dépend. Des tests de comportement seraient précieux avant la migration Next.\n- **Historique / taille** : la PR mêle l adaptateur (64 fichiers) à des changements sans lien : typo `Embeded`, pagination des statistiques (deux `fix`), et `useNavigationOrigin` qui remplace `location.state` par un stockage persistant (changement de comportement). Je verrais bien ces parties dans des PR séparées, plus faciles à relire et à revert. Certains commits corrigent aussi des commits précédents de la PR (`fix: ajoute ReactRouterNavigationProvider pour le SSR`, `fix: ajoute le slash final...`) : un fixup les rendrait autonomes.\n- **API** : `Link` accepte `To` de react-router (objet possible), difficile à satisfaire côté Next. `locationState` et `navigate(..., { state })` ont-ils encore des usages après `useNavigationOrigin` ? Sinon ils pourraient sortir de l API (juste ce qu il faut).\n- Je n ai pas vérifié le rendu ni la CI en détail."
+ }
+]

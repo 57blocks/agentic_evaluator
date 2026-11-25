@@ -1,0 +1,25 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+      "start_line": 145,
+      "end_line": 145,
+      "message": "Les clés `'Bénéfice'` et `'Déficit'` ne sont pas hiérarchiques, alors que le reste du fichier utilise `pages.assistants.declaration-revenus-pamc.resultats.label.N`. CONTRIBUTING demande une clé hiérarchique avec valeur par défaut en français. Ces clés sont de plus utilisées 2 fois chacune (l. 145/152 et 166/173) : qu'en penses-tu de les aligner sur le schéma existant (`...resultats.label.bénéfice` / `...label.déficit`) ? Une clé aussi générique risque aussi de collisionner avec une autre traduction du site."
+    },
+    {
+      "message": "Synthèse :\n- Historique : l'ordre feat/fix/refactor reste lisible, mais la PR est grosse (règles Publicodes, domaine TS, UI, traductions). Le commit `fix: mise en forme de la doc` n'a pas de scope et le commit `refactor: aligne les labels d'input Radio` touche le design-system (`Radio.tsx`) au milieu de changements métier PAM : je les aurais isolés dans une PR à part.\n- `AssistantGoal` reçoit une prop `label` avec `label || rule.title` : `??` serait plus précis si une chaîne vide n'est pas voulue (nit).\n- Non vérifié : je n'ai pas relu le contenu métier des règles Publicodes (taux, codes de cases fiscales DSxx) ni le rendu visuel ; je n'ai pas non plus consulté les résultats de la CI."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim",
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

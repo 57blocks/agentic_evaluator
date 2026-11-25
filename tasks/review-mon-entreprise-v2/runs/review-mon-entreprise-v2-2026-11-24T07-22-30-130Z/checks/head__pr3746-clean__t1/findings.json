@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+  "start_line": 31,
+  "end_line": 31,
+  "message": "Quand `montantCT` est absent ou nul (arrivée directe sur la page), le composant affiche maintenant un résultat de « 0 € » le temps que l'effet redirige, alors qu'avant il ne rendait rien. Je me demande si on ne devrait pas garder un `return null` (ou un `<Navigate>`) tant que le montant n'est pas valide, pour ne jamais montrer un montant inventé à l'usager. Qu'en penses-tu ?"
+ }
+]

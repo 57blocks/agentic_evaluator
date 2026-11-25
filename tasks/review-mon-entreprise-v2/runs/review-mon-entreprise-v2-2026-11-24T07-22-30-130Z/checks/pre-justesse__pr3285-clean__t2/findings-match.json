@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+      "start_line": 629,
+      "end_line": 629,
+      "message": "Je me demande si les identifiants Légifrance ne sont pas croisés : la description de la PR associe l'article D632-1 à `LEGIARTI000036471466`, alors qu'ici ce même identifiant est libellé D632-2 et D632-1 pointe vers `LEGIARTI000041966755`. Peux-tu vérifier que chaque lien mène bien à l'article annoncé ? (même question pour la ligne 148)"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

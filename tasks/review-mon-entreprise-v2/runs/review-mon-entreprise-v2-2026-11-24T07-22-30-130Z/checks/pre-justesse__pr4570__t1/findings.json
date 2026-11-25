@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1962,
+  "message": "La traduction anglaise générée est cassée : `&lt;/3>` et `&lt;/6>` sont échappés au lieu d’être des balises fermantes, et « male and female auto-entrepreneurs » est une traduction littérale peu naturelle de « auto-entrepreneurs et auto-entrepreneuses ». Les usagers anglophones verront du balisage brut ou un lien qui ne se ferme pas. Peux-tu corriger la valeur (par ex. `<0></0> This simulator <3>does not apply to auto-entrepreneurs (micro-entrepreneurs)</3>, who have their own dedicated <6>income simulator</6>.`) ? Je me demande aussi si la relance de `i18n:translate` ne la réécrira pas à l’identique : à vérifier."
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 97,
+  "end_line": 97,
+  "message": "nit: `includes` plutôt que `indexOf(id) > -1`, et la liste `confusionAEPossible` pourrait être une constante de module (elle est recréée à chaque rendu)."
+ }
+]

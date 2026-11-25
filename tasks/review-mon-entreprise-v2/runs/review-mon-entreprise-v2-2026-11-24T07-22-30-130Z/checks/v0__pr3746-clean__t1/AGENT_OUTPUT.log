@@ -1,0 +1,31 @@
+{
+ "pr": 3746,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 45,
+   "start_line": null,
+   "body": "Je me demande si le `set.nouvelEnfant()` ne s'exécute pas aussi quand on redirige juste au-dessus (informations invalides ou inéligibilité) : on ajouterait un enfant à une situation qu'on quitte. Un `return` après chaque `navigate` l'éviterait. Par ailleurs, avec `[]` la redirection ne se rejoue qu'au montage : si `raisonsInéligibilité` change pendant que la page est affichée, on ne redirige plus, alors qu'avant le test était évalué à chaque rendu. Est-ce voulu ? Un `<Navigate replace />` conditionnel au rendu éviterait de gérer les dépendances. Je n'ai pas pu vérifier le rendu en iframe.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+   "line": 31,
+   "start_line": null,
+   "body": "nit: `O.getOrElse(montantCT, () => euros(0))` affiche brièvement « 0 € » avant la redirection quand il n'y a pas de montant, soit un résultat factice montré à l'usager. Je verrais plutôt un `return null` (ou `<Navigate replace />`) quand le montant est absent. Ça éviterait aussi les `useEffect` avec `eslint-disable react-hooks/exhaustive-deps` répétés dans 3 des 4 pages. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.12573349999999997,
+  "final_text": "J'ai posté deux commentaires inline sur la PR #3746. Je n'ai pas exécuté le code ni testé le rendu en iframe. Le workflow « Vérification PR » est au vert.\n\n- **`Enfants.tsx`, ligne 45** : l'effet appelle `set.nouvelEnfant()` même quand il vient de rediriger, donc il ajoute un enfant à une situation qu'on quitte. De plus, avec `[]` comme dépendances, la redirection ne se rejoue qu'au montage, alors qu'avant elle était testée à chaque rendu. J'ai suggéré un `return` après chaque `navigate`, ou un `<Navigate replace />` conditionnel.\n- **`Résultat.tsx`, ligne 31** : `O.getOrElse(montantCT, () => euros(0))` affiche brièvement « 0 € » avant la redirection quand il n'y a pas de montant. J'ai proposé un `return null` ou un `<Navigate>` à la place. Ça éviterait aussi les trois `eslint-disable react-hooks/exhaustive-deps` répétés dans les pages.\n\nJe n'ai pas posté de synthèse : le commit est unique, au format Conventional Commits, et il n'y avait rien de transverse à ajouter."
+ }
+}

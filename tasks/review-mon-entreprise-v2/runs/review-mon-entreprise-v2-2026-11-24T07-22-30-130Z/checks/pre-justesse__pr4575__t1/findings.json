@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/vite.config.ts",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Le remplacement de `next` par `main` dans les branches de production passe inaperçu dans une PR qui parle d’environnement : est-ce voulu ? Une build sur la branche `next` passerait de `production` à `staging` (Sentry, domaine Plausible, affichage de la branche en console) et `main` n’a pas l’air d’exister dans ce dépôt. Si c’est intentionnel, je le mettrais dans un commit à part avec son explication ; sinon je le retirerais."
+ }
+]

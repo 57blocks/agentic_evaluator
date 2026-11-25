@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "Question sur le dernier commit (`sépare le champ dividendes en 2`) : le simulateur ne calcule plus lui-même la part des dividendes au-delà de 10 % du capital social (suppression de `entreprise . capital social`, `bénéfice net de l'exercice précédent` et du plafond). C'est désormais à l'usager de ventiler ses dividendes entre les deux champs, alors que ce seuil est justement le point difficile (capital + primes d'émission + comptes courants d'associés de la famille, ou bénéfice N-1 pour les EI). Je me demande si, pour quelqu'un qui connaît son capital mais pas le découpage, le risque n'est pas de saisir toute la somme dans le premier champ et d'obtenir des cotisations sous-estimées. C'est peut-être un choix délibéré (retour usagers ?) ; dans ce cas, une aide dans la description des deux champs (comment calculer le seuil) limiterait ce risque. Qu'en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4160,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Question sur le dernier commit (`sépare le champ dividendes en 2`) : le simulateur ne calcule plus lui-même la part des dividendes au-delà de 10 % du capital social (suppression de `entreprise . capital social`, `bénéfice net de l'exercice précédent` et du plafond). C'est désormais à l'usager de ventiler ses dividendes entre les deux champs, alors que ce seuil est justement le point difficile (capital + primes d'émission + comptes courants d'associés de la famille, ou bénéfice N-1 pour les EI). Je me demande si, pour quelqu'un qui connaît son capital mais pas le découpage, le risque n'est pas de saisir toute la somme dans le premier champ et d'obtenir des cotisations sous-estimées. C'est peut-être un choix délibéré (retour usagers ?) ; dans ce cas, une aide dans la description des deux champs (comment calculer le seuil) limiterait ce risque. Qu'en penses-tu ?"
+  }
+ ],
+ "gh": {
+  "calls": 9,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.1666451,
+  "final_text": "J'ai relu la PR en détail sur son dernier commit (`fix(dividendes): sépare le champ dividendes en 2`) et posté un seul commentaire global, sous forme de question. Le reste de la PR, très volumineux (nouveaux paquets `modele-as`, `modele-commun`, nombreuses refactorisations), n'a pas été relu fichier par fichier. Le check « Vérification PR » est vert et il n'y avait pas de commentaires existants.\n\nLe commentaire porte sur la suppression de `entreprise . capital social`, de `bénéfice net de l'exercice précédent` et du plafond de 10 %. L'usager doit maintenant répartir lui-même ses dividendes entre « soumis à prélèvements sociaux » et « soumis à cotisations sociales ». S'il saisit tout dans le premier champ, les cotisations seront sous-estimées. J'ai demandé si c'était un choix voulu et suggéré d'expliquer dans la description des deux champs comment calculer le seuil.\n\nJe n'ai trouvé aucun usage restant des règles supprimées dans le code ou les tests. Les mentions de « capital social » encore présentes (`indépendant.publicodes`, `SeoExplanations.tsx`) sont de simples textes explicatifs. Les écrans `Objectifs.tsx` et `Goals.tsx` ont bien été mis à jour avec les deux nouveaux champs."
+ }
+}
+
+```

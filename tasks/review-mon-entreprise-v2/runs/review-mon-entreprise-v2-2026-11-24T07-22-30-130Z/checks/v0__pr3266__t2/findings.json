@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Je me demande si cette clé `réductionGénérale` n'est pas un reste de l'ancien code : le type `MonthState` n'a que `réduction` et `régularisation`. Du coup, quand la rémunération annuelle est nulle, `réduction` n'est pas remise à zéro, et les montants d'un calcul précédent pourraient rester affichés (je n'ai pas rejoué le cas). Ne faudrait-il pas `réduction: { value: 0, répartition: emptyRépartition }` ? Un test sur ce cas limite le verrouillerait."
+ },
+ {
+  "file": "site/source/pages/simulateurs/lodeom/config.ts",
+  "start_line": 14,
+  "end_line": 14,
+  "message": "nit: « Éxonération » (aussi ligne 20 et 18, et dans `ui-fr.yaml`) s'écrit « Exonération ». C'est visible dans le titre et les métadonnées de la page."
+ },
+ {
+  "file": "site/source/pages/simulateurs/lodeom/config.ts",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "nit: le composant importé s'appelle `RéductionGénéraleSimulation` et la config `configRéductionGénérale`, alors qu'on est dans le Lodeom (reste d'un copier-coller). Renommer en `LodeomSimulation` / `configLodeom` éviterait la confusion."
+ },
+ {
+  "message": "Synthèse :\n- La factorisation vers `utils/réductionDeCotisations.ts` va dans le bon sens. En revanche, ce module de 667 lignes mêle calculs métier et dispatch Redux (`updateRémunérationBruteAnnuelle`). Je me demande si, dans un second temps, la partie calcul pourrait vivre dans un module de domaine sans Redux.\n- La PR est grosse (refonte de la réduction générale, nouveau simulateur, règle Publicodes, cypress). La découper en deux (refactor, puis Lodeom) la rendrait plus facile à relire.\n- Je n'ai pas vérifié le contenu des règles Publicodes (taux, coefficients), seulement leur structure, ni le rendu visuel."
+ }
+]

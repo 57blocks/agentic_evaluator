@@ -1,0 +1,17 @@
+[
+ {
+  "file": "site/source/lib/navigation/providers/MockNavigationProvider.tsx",
+  "start_line": 19,
+  "end_line": 19,
+  "message": "Je ne trouve aucun usage de `MockNavigationProvider` dans le dépôt en dehors de son export (les tests de `useSetSimulationFromSearchParams` construisent leur propre objet `NavigationAPI`). Il duplique aussi `getHref`/`matchPath` du provider react-router, avec le risque que les deux divergent. Je me demande si on ne devrait pas l'introduire avec le premier test ou story qui l'utilise, plutôt que d'avance. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/lib/navigation/NavigationAPI.ts",
+  "start_line": 18,
+  "end_line": 18,
+  "message": "`locationState` n'est lu nulle part hors de `lib/navigation` (et le mock ne le met jamais à jour dans `navigate`, qui ignore `state`). Je le retirerais de l'API tant qu'aucun consommateur n'en a besoin, comme tu l'as fait pour `routeParams`."
+ },
+ {
+  "message": "Les deux derniers commits (`fix(statistiques)` sur la pagination, et les typos `Embeded` → `Embedded`) ne portent pas sur l'adaptateur de navigation. Je me demande si ce ne serait pas plus lisible en PR séparée, pour garder celle-ci centrée sur le refactoring."
+ }
+]

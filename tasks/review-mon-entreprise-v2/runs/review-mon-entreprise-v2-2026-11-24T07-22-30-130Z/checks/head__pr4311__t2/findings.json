@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+  "start_line": 74,
+  "end_line": 74,
+  "message": "Le paramètre vient maintenant de l’URL, donc d’une saisie libre : avec `?page-open=abc` on obtient `NaN` (`slice(NaN, NaN)` donne une liste vide), et avec `?page-open=-1` ou `?page-open=99` une page vide sans que le bouton de page actuelle ne soit marqué. Je verrais bien un repli sur 0 quand la valeur n’est pas un entier dans `[0, nombre de pages[`. Qu’en penses-tu ?"
+ }
+]

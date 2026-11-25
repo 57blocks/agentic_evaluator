@@ -1,0 +1,23 @@
+{
+ "pr": 3266,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/utils/réductionDeCotisations.ts",
+   "line": 267,
+   "start_line": null,
+   "body": "Cette clé `réductionGénérale` ne correspond à aucun champ de `MonthState` (le champ s’appelle `réduction`, et il est partagé avec le Lodeom désormais). Quand la rémunération annuelle est nulle, `réduction` garde donc l’ancienne valeur au lieu d’être remise à 0. Ça vient de l’existant, mais comme le code est déplacé et généralisé ici, je verrais bien le corriger : `réduction: { value: 0, répartition: emptyRépartition }`. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.15225389999999997,
+  "final_text": "J'ai relu la PR et posté un commentaire inline. Il porte sur la clé `réductionGénérale` de `site/source/utils/réductionDeCotisations.ts`, ligne 267. Cette clé ne correspond à aucun champ de `MonthState`, donc `réduction` n'est pas remise à 0 quand la rémunération annuelle est nulle.\n\nJe n'ai pas relu les composants ni les tests Cypress en détail. Le check « Vérification PR » est au vert.\n\nJ'avais prévu un second commentaire, un nit sur la duplication entre les branches `progressive` et `annuelle`. Il n'est pas parti : mon premier appel `gh api` a été refusé et je n'ai pas relancé ce second commentaire, dont je n'avais pas la ligne exacte."
+ }
+}

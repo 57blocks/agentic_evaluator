@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+  "start_line": 27,
+  "end_line": 27,
+  "message": "Le `useEffect` avec `[]` + `eslint-disable` se retrouve ici, dans `Déclarations` et dans `NonÉligible`. Avec des dépendances vides, la redirection ne se déclenche qu au montage : si `montantCT` passe à `None` ou à 0 après le premier rendu, l usager reste sur une page sans résultat. Je me demande si on ne gagnerait pas à déclarer les vraies dépendances (`[montantCT, navigate]`), ce qui évite aussi de désactiver la règle. Qu en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 42,
+  "end_line": 42,
+  "message": "Après une redirection (infos invalides ou inéligibilité), on enchaîne quand même sur `set.nouvelEnfant()`, qui modifie la situation d un usager qu on est en train de renvoyer ailleurs. Un `return` après chaque `navigate` serait peut-être plus sûr ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3746,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+   "line": 27,
+   "start_line": null,
+   "body": "Le `useEffect` avec `[]` + `eslint-disable` se retrouve ici, dans `Déclarations` et dans `NonÉligible`. Avec des dépendances vides, la redirection ne se déclenche qu au montage : si `montantCT` passe à `None` ou à 0 après le premier rendu, l usager reste sur une page sans résultat. Je me demande si on ne gagnerait pas à déclarer les vraies dépendances (`[montantCT, navigate]`), ce qui évite aussi de désactiver la règle. Qu en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 42,
+   "start_line": null,
+   "body": "Après une redirection (infos invalides ou inéligibilité), on enchaîne quand même sur `set.nouvelEnfant()`, qui modifie la situation d un usager qu on est en train de renvoyer ailleurs. Un `return` après chaque `navigate` serait peut-être plus sûr ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1171565,
+  "final_text": "J'ai relu la PR #3746 et posté deux commentaires inline sur GitHub. Le workflow « Vérification PR » est au vert.\n\n- **`Résultat.tsx`**: avec un tableau de dépendances vide, la redirection ne se déclenche qu'au montage. Si `montantCT` change ensuite, l'usager reste sur une page sans résultat. Le même motif, avec `eslint-disable`, se retrouve dans `Déclarations.tsx` et `NonÉligible.tsx`. Je propose de déclarer les vraies dépendances.\n- **`Enfants.tsx`**: après une redirection, l'effet appelle quand même `set.nouvelEnfant()`. Je propose un `return` après chaque `navigate`.\n\nJe n'ai pas exécuté le code ni les tests."
+ }
+}
+
+```

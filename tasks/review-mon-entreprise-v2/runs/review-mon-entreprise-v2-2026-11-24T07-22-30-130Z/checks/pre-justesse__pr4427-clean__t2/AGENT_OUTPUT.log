@@ -1,0 +1,23 @@
+{
+ "pr": 4427,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/storage/sanitizePersistedSituation.ts",
+   "line": 14,
+   "start_line": null,
+   "body": "Je me demande si on ne perd pas des données en silence ici : toute valeur qui n’est ni une chaîne, ni un nombre, ni `{ valeur, unité }` (une expression `{ somme: … }`, un booléen, `null`…) est supprimée de la situation restaurée, sans trace. Si l’usager avait une telle réponse enregistrée, elle disparaît au rechargement et il ne sait pas pourquoi. Est-ce qu’on est certain qu’aucune situation légitime n’a d’autre forme ? Sinon, un `console.warn`/log Sentry sur les clés écartées aiderait au moins à le détecter.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.11449150000000002,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `site/source/storage/sanitizePersistedSituation.ts` (ligne 14).\n\nLe commentaire pose une question. Toute valeur qui n'est ni une chaîne, ni un nombre, ni `{ valeur, unité }` est supprimée sans trace de la situation restaurée. Je cite en exemple `{ somme: … }`, un booléen ou `null`, sans avoir vérifié que de telles valeurs existent dans les situations enregistrées. Si l'usager en avait une, elle disparaîtrait au rechargement. Je propose un `console.warn` ou un log Sentry sur les clés écartées.\n\nLe point de départ était le correctif de #4300, mais je n'ai pas pu lire l'issue : la commande `gh issue view` a été refusée. Je n'ai pas vérifié que la PR la traite en entier.\n\n`gh pr checks` est au vert."
+ }
+}

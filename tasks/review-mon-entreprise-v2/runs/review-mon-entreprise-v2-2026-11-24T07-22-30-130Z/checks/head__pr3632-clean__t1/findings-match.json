@@ -1,0 +1,30 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 31,
+      "end_line": 31,
+      "message": "Avant, les guides Urssaf n'étaient affichés que si `language === 'fr'`. Ce garde-fou a disparu, et les fichiers de `external-links/` (ex. `servicePAM.ts`, avec son `// TODO: gérer les traductions`) contiennent des textes français en dur. Un usager sur la version anglaise verra donc des cartes en français, qui renvoient vers des services urssaf.fr uniquement en français. Je verrais bien conserver le filtre sur la langue pour ces liens, ou les traduire via `t()` avant de les exposer. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 23,
+      "end_line": 23,
+      "message": "nit: `NextSteps` (et `ExternalLinkCard`) passent en `export default`, alors que la convention du projet est l'export nommé, et que `IframeIntegrationCard` et `SimulatorRessourceCard` du même dossier le sont. Ce changement oblige aussi à modifier l'import dans `SimulateurOrAssistantPage.tsx`."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

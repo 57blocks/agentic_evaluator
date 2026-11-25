@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+  "start_line": 74,
+  "end_line": 74,
+  "message": "Le paramètre d'URL est lu sans validation : avec `?page-open=abc`, `currentPage` vaut `NaN`, `items.slice(NaN, NaN)` renvoie une liste vide et aucun bouton n'est « actuel ». Idem pour `-1` ou une page au-delà du dernier index. Auparavant l'état venait de `location.state`, que l'usager ne pouvait pas saisir. Je verrais bien un repli sur 0 quand la valeur n'est pas un entier dans `[0, nombre de pages[`. Qu'en penses-tu ?"
+ }
+]

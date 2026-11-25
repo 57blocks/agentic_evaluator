@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/contextes/cmg/domaine/calcul.ts",
+  "start_line": 58,
+  "end_line": 58,
+  "message": "Le `3` (nombre de mois de référence) est écrit en dur ici, à la ligne 41 et dans `éligibilité.ts:365`. Je verrais bien une constante nommée dans `constantes.ts` (à côté de `NOMBRE_MIN_MOIS_EMPLOYEUREUSE`) : si la période de référence change, les trois endroits risquent de diverger. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/contextes/cmg/domaine/calcul.ts",
+  "start_line": 88,
+  "end_line": 88,
+  "message": "nit: ce `reduce` mute son accumulateur, alors que le domaine est censé rester immuable. Un `Array.filter`/`findLast` sur les paliers dont le seuil est ≤ au nombre d'enfants donnerait le TEH et l'index sans mutation, et se lirait plus directement."
+ }
+]

@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/locales/rules-as-en.yaml",
+      "start_line": 2507,
+      "end_line": 2510,
+      "message": "nit: les traductions automatiques « PSS Metropolitan Area » et « PSS Metropolitan Division N-1 » sont approximatives (« Division » n’a pas de sens ici). Je verrais bien une traduction manuelle, par exemple « Mainland France SSC » / « Mainland France SSC N-1 » (PSS est déjà le terme utilisé ailleurs pour le plafond ?), à valider selon le vocabulaire déjà employé dans les fichiers en."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+          "start_line": 85,
+          "end_line": 116
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

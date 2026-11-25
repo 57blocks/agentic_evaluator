@@ -1,0 +1,14 @@
+[
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 174,
+  "end_line": 177,
+  "message": "Je me demande ce qui se passe au-delà de 110 % du PASS : la dernière tranche est plafonnée, donc la part d'assiette au-delà ne serait pas taxée et le taux moyen décroîtrait. Les snapshots à 300 000 € et 400 000 € de CA (médecin) montrent des cotisations qui continuent de monter, mais je n'ai pas pu vérifier que c'est bien le comportement voulu. Le texte prévoit-il une tranche supérieure (ou un taux constant) ?"
+ },
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 170,
+  "end_line": 170,
+  "message": "Les nouveaux taux (9,75 %) et seuils (40 % / 110 % du PASS) n'ont pas de source dans la règle : pourrais-tu ajouter une `références:` (texte ou page Urssaf), comme pour l'assiette CPAM juste au-dessus ? Cela permettrait aussi de vérifier que le taux progressif s'applique bien sur `assiette des cotisations` et non sur la différence avec l'assiette CPAM."
+ }
+]

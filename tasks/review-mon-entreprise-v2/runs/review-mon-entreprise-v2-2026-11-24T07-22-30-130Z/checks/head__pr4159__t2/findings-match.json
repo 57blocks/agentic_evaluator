@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/salarié/aides-employeur.publicodes",
+      "start_line": 56,
+      "end_line": 56,
+      "message": "Je me demande si le renommage de `emploi franc . éligible` (devenu `emploi franc`) ne casse pas des appelants de l'API ou des URLs de simulation partagées qui passent cette situation : la clé `éligible` serait alors ignorée ou rejetée sans bruit, et l'aide disparaîtrait du résultat. Est-ce voulu / déjà vérifié ? Et je ne vois pas de test qui reproduise le retour à la première question (seuls les snapshots et la régression sont renommés) : un test sur l'ordre des questions suivantes protégerait ce correctif. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/salarié/simulationConfig.ts",
+          "start_line": 23,
+          "end_line": 23
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

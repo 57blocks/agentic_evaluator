@@ -1,0 +1,23 @@
+{
+ "pr": 3280,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/locales/ui-fr.yaml",
+   "line": 256,
+   "start_line": null,
+   "body": "La règle `délai d'attente` de `modele-social/règles/protection-sociale.publicodes` (lignes 628, 630 et 632) dit toujours 10 mois, et sa traduction dans `rules-en.yaml` aussi (lignes ~7084-7094). Les usagers verraient donc 6 mois dans le comparateur et 10 mois dans la description de la règle. Est-ce voulu, ou faut-il aligner la règle (puis rebuilder `modele-social` et relancer `i18n:translate`) dans cette PR ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1088279,
+  "final_text": "J'ai posté un commentaire inline sur la PR : la règle Publicodes `délai d'attente` (`modele-social/règles/protection-sociale.publicodes`, lignes 628 à 632) indique toujours 10 mois d'affiliation. Sa traduction dans `rules-en.yaml` aussi.\n\nLa PR ne change que le texte du comparateur (`Détails.tsx`) et ses traductions, qui passent à 6 mois. Les usagers verraient donc 6 mois dans le comparateur et 10 mois dans la description de la règle. J'ai demandé à l'auteur si c'est voulu ou s'il faut aligner la règle dans cette PR.\n\nJe n'ai pas vérifié la valeur de 6 mois dans le texte de loi cité. Les vérifications de la PR sont au vert."
+ }
+}

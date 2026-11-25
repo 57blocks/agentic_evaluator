@@ -1,0 +1,19 @@
+{
+ "pr": 4490,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Une question sur le nouveau flux : `algolia-data.json` est produit par le workflow `pull_request`, donc par du code que l'auteur de la PR contrôle (y compris pour une PR depuis un fork), puis poussé dans Algolia avec `ALGOLIA_ADMIN_KEY` par `pr-deploy`. Avant, ce job reconstruisait les données depuis le code de la branche par défaut. Le contenu de l'artefact est maintenant non fiable, et `env_name` (donc le préfixe d'index) vient déjà d'un artefact de la même façon. Est-ce que `pr-deploy` est volontairement limité aux PR non issues de forks, ou est-ce qu'une validation du préfixe / du schéma du JSON avant le push te semblerait utile ?"
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.12618229999999997,
+  "final_text": "J'ai relu la PR et posté un seul commentaire global, sous forme de question, sur la sécurité du nouveau flux. Je n'ai posté aucun commentaire inline, car je n'ai rien trouvé d'autre qui vaille d'être signalé.\n\nLe point soulevé : `algolia-data.json` est produit par le workflow `pull_request`, donc par du code que l'auteur de la PR contrôle, y compris depuis un fork. `pr-deploy` le pousse ensuite dans Algolia avec `ALGOLIA_ADMIN_KEY`. Avant ce découpage, ce job reconstruisait les données depuis le code de la branche par défaut. J'ai demandé si `pr-deploy` est volontairement limité aux PR hors fork, ou si une validation du préfixe d'index et du schéma du JSON serait utile avant le push.\n\nLa vérification « Vérification PR » est au vert. Dans `pr-check`, l'export a lieu après le build, qui a déjà généré `simulation-data.json`, donc l'ordre est bon."
+ }
+}

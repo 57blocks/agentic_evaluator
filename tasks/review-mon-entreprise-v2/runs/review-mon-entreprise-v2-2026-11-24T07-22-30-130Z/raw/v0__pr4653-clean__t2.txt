@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "Je n'ai plus trouvé de référence résiduelle à `cmg` ni à `useGetPath` dans le dépôt (hors `base-stats.json`, des données historiques). Les trois commits sont chacun un changement logique cohérent.\n\nUne question : les anciennes URLs (`/assistants/cmg`, et l'iframe `simulateurs.cmg` si des sites tiers l'intègrent) tomberont désormais sur la 404. Est-ce voulu, ou faut-il une redirection vers une page d'explication ? Je n'ai pas pu le vérifier côté Netlify ni les intégrations externes.\n\nJe n'ai pas vérifié `gh pr checks` en détail, ni les traductions générées (`i18n:translate`) au-delà de la suppression des clés."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4653,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Je n'ai plus trouvé de référence résiduelle à `cmg` ni à `useGetPath` dans le dépôt (hors `base-stats.json`, des données historiques). Les trois commits sont chacun un changement logique cohérent.\n\nUne question : les anciennes URLs (`/assistants/cmg`, et l'iframe `simulateurs.cmg` si des sites tiers l'intègrent) tomberont désormais sur la 404. Est-ce voulu, ou faut-il une redirection vers une page d'explication ? Je n'ai pas pu le vérifier côté Netlify ni les intégrations externes.\n\nJe n'ai pas vérifié `gh pr checks` en détail, ni les traductions générées (`i18n:translate`) au-delà de la suppression des clés."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1030183,
+  "final_text": "J'ai relu la PR #4653 et posté une seule synthèse sur GitHub, sans commentaire inline.\n\n- **Références résiduelles :** je n'ai trouvé aucune référence à `cmg` ni à `useGetPath` dans le dépôt, hors `site/source/public/data/base-stats.json`, qui contient des données historiques.\n- **Historique git :** les trois commits sont chacun un changement logique cohérent.\n- **Question posée :** les anciennes URLs (`/assistants/cmg`, et l'iframe `simulateurs.cmg` si des sites tiers l'intègrent) tomberont désormais sur la 404. Je ne sais pas si c'est voulu ou s'il faut une redirection, et je n'ai pas pu le vérifier côté Netlify ni pour les intégrations externes.\n- **Non vérifié :** je n'ai pas lu le détail de `gh pr checks`, ni les traductions générées au-delà de la suppression des clés."
+ }
+}
+
+```

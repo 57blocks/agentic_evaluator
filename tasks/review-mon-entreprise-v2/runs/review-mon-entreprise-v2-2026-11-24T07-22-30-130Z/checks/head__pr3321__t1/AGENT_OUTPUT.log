@@ -1,0 +1,19 @@
+{
+ "pr": 3321,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger"
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.142459,
+  "final_text": "Je n'ai trouvé aucun défaut dans la PR #3321, donc je n'ai laissé aucun commentaire inline. J'ai posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger ».\n\n- **Renommage des valeurs de `barèmes` :** les valeurs de `barèmes` dans `lodeom.publicodes`, le hook `useBarèmeLodeom.ts` et les comparaisons de `WarningSalaireTrans.tsx` sont cohérentes entre elles. Je n'ai trouvé aucun autre usage TypeScript des anciennes valeurs.\n- **Noms de règles :** les règles `barème compétitivité`, `barème innovation et croissance` et les autres gardent leur nom. `simulationConfig.ts` les référence toujours et reste valide.\n- **Vérifications :** `gh pr checks` est au vert. Je n'ai pas exécuté le code.\n\nDans `rules-en.yaml`, quelques phrases anglaises ont changé sans rapport avec le renommage (par exemple « €50 million » devenu « 50 million euros »). Cela vient de la régénération des traductions, je n'ai rien relevé là-dessus."
+ }
+}

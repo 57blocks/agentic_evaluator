@@ -1,0 +1,30 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 43,
+      "end_line": 43,
+      "message": "Je me demande si les gardes de redirection ne doivent pas rester réactives : avant, elles étaient réévaluées à chaque rendu, alors qu’avec `[]` elles ne le sont qu’au montage (ici et dans `Déclarations`, `NonÉligible`, `Résultat`, avec un `eslint-disable`). Si `raisonsInéligibilité` ou `montantCT` change pendant que l’usager est sur la page (modification d’un enfant, par exemple), il ne sera plus redirigé. Ne serait-il pas plus simple de déclarer les vraies dépendances (`situation`, `raisonsInéligibilité`, `navigate`…) ? Ici, il faudrait alors sortir `set.nouvelEnfant()` dans un effet séparé, pour ne pas le rejouer. Qu’en penses-tu ?"
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+      "start_line": 31,
+      "end_line": 31,
+      "message": "nit: `euros(0)` sert uniquement à contenter le typage pendant la redirection, et afficherait « 0 € » le temps d’un rendu. Retourner `null` tant que `montantCT` n’est pas disponible éviterait ce montant factice."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

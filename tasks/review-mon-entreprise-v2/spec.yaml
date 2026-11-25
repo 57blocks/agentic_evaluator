@@ -1,0 +1,127 @@
+# Review Pack demo, v2: replay mon-entreprise's own AI PR reviewer on bugs that
+# escaped review, and ask whether its prompt changes made it catch more.
+#
+# betagouv/mon-entreprise runs Claude Code (claude-code-action) on every PR
+# with an in-repo prompt, .github/ai-review/instructions.md, that the team has
+# edited 17 times since it went live on 2026-09-11. The dataset is built by
+# `agenteval code-review mine | pick-clean | build` (mining/, items.jsonl,
+# fixtures/): each input is one PR rebuilt as a standalone repo ending at its
+# head, so the fix is out of reach; gh is a stub that serves the PR from the
+# fixture and records what the reviewer posts (agents/review.mjs, agents/bin/gh).
+#
+# Candidates are the same reviewer (same model, tools, turns, reading grid)
+# with three versions of the prompt; only instructions.md differs:
+#   v0            2026-09-11, as it went live
+#   pre-justesse  2026-10-01, just before "Justesse" (correctness) was added
+#   head          2026-11-17, current master
+#
+# Inputs, tagged and read separately (never as one rate):
+#   escaped  a PR that shipped one or more defects a later commit fixed;
+#            pass = every defect caught (the `caught` / `defects` measures
+#            count partial catches)
+#     knowable         a reviewer could see it from the PR alone
+#     not-knowable     a real fix, but nothing in the PR said it was wrong
+#     partly-knowable  the PR holds both kinds
+#   clean    a size-matched PR no later fix traced a bug to; pass = no
+#            finding claims a defect (clean is not proven, so this is
+#            "defect claims per clean PR", not false positives)
+#
+# Grading is `kind: findings-match` with `judge: all`: one judge call per
+# item reads every comment against every defect, and only a comment that
+# names the fault is a catch; where it sits is a hint (`caught_on_location`
+# keeps what location alone would have said).
+#
+# Labels: a model review (mining/label-review.json, 2026-11-24) over an LLM
+# pre-screen, not human-confirmed. The judge is not calibrated. PRs predate
+# the model's cutoff, so absolute recall is inflated; the comparison between
+# arms is what this is for.
+
+protocol_version: "0.3"
+run_name: review-mon-entreprise-v2
+description: "Would mon-entreprise's AI reviewer have caught the bugs that escaped review? Their own Claude Code reviewer, replayed on PRs that later needed a fix, with three historical versions of its prompt (go-live, before correctness was added, current). Escaped PRs are graded by whether its comments land on the known defects; size-matched clean PRs by whether any comment claims a defect."
+caveats:
+  - "The matcher's LLM (google/gemini-3.1-pro-preview) decides every catch and every defect claim, and has not been calibrated against people."
+  - "Defect labels were confirmed by a model review (mining/label-review.json), not by a person; six are flagged there for a human."
+  - "These PRs predate the reviewer model's training cutoff, so it may have seen the fixes: read the catch rate as an upper bound."
+  - "With 18 defect PRs and 14 clean ones, only a difference of about 20 points between prompts could show."
+budget_usd: 60
+
+workflow:
+  control_candidate: v0
+  steps:
+    - id: review
+      version: "1"
+      description: "Review one historical PR the way the production workflow does; the check pairs the posted comments with the defects that later had to be fixed."
+      test_set:
+        id: me-escaped-v2
+        items_file: items.jsonl
+        fixture_dir: fixtures
+      candidate_ids: [v0, pre-justesse, head]
+      required_checks: [caught]
+      success_criteria: { mandatory_checks: all }
+      # A scorecard, not a pick: the question is how each prompt version does
+      # on escaped and clean PRs, read separately.
+      decision: scorecard
+      operating_mode: highest-assurance
+      # Recall on escaped bugs is low for every reviewer; the gate is not the
+      # point, the paired difference between prompt versions is.
+      eligibility: { minimum_reliability: 0.5, minimum_required_check_pass_rate: 0.0 }
+      maximum_completion_time_seconds: 900
+      max_cost_per_trial_usd: 2
+
+candidates:
+  - id: v0
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5.5
+    cli:
+      argv: [node, agents/review.mjs, prompts/v0-2026-09-11.md, claude-sonnet-5-5, "{{max_cost_usd}}"]
+      trace: claude-code
+      version_files: [agents/review.mjs, agents/bin/gh, prompts/v0-2026-09-11.md]
+      env: { CLAUDE_CODE_OAUTH_TOKEN: "${CLAUDE_CODE_OAUTH_TOKEN}" }
+  - id: pre-justesse
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5.5
+    cli:
+      argv: [node, agents/review.mjs, prompts/pre-justesse-2026-10-01.md, claude-sonnet-5-5, "{{max_cost_usd}}"]
+      trace: claude-code
+      version_files: [agents/review.mjs, agents/bin/gh, prompts/pre-justesse-2026-10-01.md]
+      env: { CLAUDE_CODE_OAUTH_TOKEN: "${CLAUDE_CODE_OAUTH_TOKEN}" }
+  - id: head
+    adapter: agent-cli
+    model: anthropic/claude-sonnet-5.5
+    cli:
+      argv: [node, agents/review.mjs, prompts/head-2026-11-17.md, claude-sonnet-5-5, "{{max_cost_usd}}"]
+      trace: claude-code
+      version_files: [agents/review.mjs, agents/bin/gh, prompts/head-2026-11-17.md]
+      env: { CLAUDE_CODE_OAUTH_TOKEN: "${CLAUDE_CODE_OAUTH_TOKEN}" }
+
+evaluators:
+  required_checks:
+    caught:
+      kind: findings-match
+      description: "One judge call per PR (google/gemini-3.1-pro-preview) reads every posted comment against every known defect: a comment that names the fault catches it, wherever it sits. On a clean PR, the same judge says which comments claim a defect."
+      line_tolerance: 3
+      llm_fallback:
+        model: google/gemini-3.1-pro-preview
+        provider_route: openrouter
+        # Mined defect ranges are wide (a fix's lines can span a whole rule), so a
+        # comment on those lines is not a catch by itself: the judge reads every
+        # comment against every defect, wherever it sits.
+        judge: all
+  # No rubric judge: the score is the check. methods: [] makes no judge call.
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/unused.md
+    methods: []
+
+execution:
+  trials_per_case: 3
+  concurrency: 4
+  benchmark_mode: production-realistic
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: codegen
+  default_temperature: 0

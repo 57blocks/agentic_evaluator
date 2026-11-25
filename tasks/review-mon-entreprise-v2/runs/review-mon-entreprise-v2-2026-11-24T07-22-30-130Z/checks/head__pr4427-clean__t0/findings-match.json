@@ -1,0 +1,31 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/storage/sanitizePersistedSituation.ts",
+      "start_line": 15,
+      "end_line": 15,
+      "message": "Je me demande si on ne perd pas des données en silence ici : toute valeur qui n’est ni une chaîne, ni un nombre, ni `{ valeur, unité }` est supprimée de la situation restaurée (par exemple une expression Publicodes objet comme `{ somme: [...] }` ou `{ variations: ... }`, ou un booléen). Pour l’usager, une réponse déjà saisie disparaît sans trace et sans log, alors que le `console.error` de `searchParams.ts` avait au moins l’avantage de signaler le cas. Est-ce qu’on sait que ces formes ne peuvent pas se trouver dans une situation persistée ? Sinon, je garderais ces valeurs telles quelles et ne transformerais que le cas ciblé."
+    },
+    {
+      "file": "site/source/storage/persistCompanySituation.ts",
+      "start_line": 32,
+      "end_line": 32,
+      "message": "Le contenu du localStorage est une entrée externe : si `JSON.parse` renvoie `null` (valeur `\"null\"` stockée) ou un tableau, `Object.entries` plante ou produit des clés `0`, `1`… Le typage de `sanitizePersistedSituation` laisse croire que l’entrée est déjà un `Record`. Qu’en penses-tu de valider la forme (objet non nul) à cette frontière, et pareil dans `deserialize` de `serializeSimulation.ts` ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 54,
+  "end_line": 54,
+  "message": "Je me demande si cette résolution maison des chemins relatifs est équivalente à celle de react-router : `.pathname` ne garde ni la query ni le hash de `to`, donc `getHref(\"?page=2\")` ou `getHref(\"#ancre\")` renverrait le chemin nu. Est-ce voulu ? Sinon `resolvePath` de react-router ferait ce travail."
+ },
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 31,
+  "end_line": 31,
+  "message": "Cette couche (`onNavigate`, `getHref`, `matchPath`) porte de la logique sans aucun test. Un test du provider (notification uniquement après un vrai changement de location et pas au premier rendu, `getHref` relatif) protégerait la future bascule vers Next.js. Qu'en penses-tu ?"
+ }
+]

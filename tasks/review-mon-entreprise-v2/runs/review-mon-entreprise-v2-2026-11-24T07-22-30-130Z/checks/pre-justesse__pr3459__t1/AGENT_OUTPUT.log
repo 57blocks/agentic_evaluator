@@ -1,0 +1,39 @@
+{
+ "pr": 3459,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+   "line": 18,
+   "start_line": null,
+   "body": "`cotisations.ts` importe ce module et celui-ci réimporte `DEFAULTS` depuis `cotisations.ts` : c’est un import circulaire. Ça marche aujourd’hui parce que `DEFAULTS` n’est lu qu’à l’appel, mais ça casse dès qu’une valeur est lue à l’évaluation du module. Je verrais bien `DEFAULTS` dans `constantes.ts`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+   "line": 24,
+   "start_line": null,
+   "body": "Le plafond (77 700 €), les taux (47,42 % / 48,72 %) et l’abattement de 60 % sont désormais codés en dur en TypeScript, alors que les règles Publicodes qui les portaient sont supprimées dans cette PR. Peut-on citer la source (texte de loi ou page officielle) en commentaire ? Je me demande aussi comment ces valeurs suivront les changements annuels, puisqu’elles sortent du modèle versionné par année.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-micro-entreprise.ts",
+   "line": 5,
+   "start_line": null,
+   "body": "Le domaine importe ici `engineSingleton` : un module de domaine dépend directement de Publicodes, alors que la PR vise à les découpler. Je verrais plutôt l’évaluation injectée (un port dont Publicodes est l’adaptateur), ce qui permettrait aussi de tester ces fonctions sans moteur. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 12,
+  "cost_usd": 0.2606095,
+  "final_text": "J'ai relu la PR #3459 et posté trois commentaires inline, tous dans le domaine « location de meublé » :\n\n- **Import circulaire** : `régime-général.ts` réimporte `DEFAULTS` depuis `cotisations.ts`, qui importe lui-même `régime-général.ts`. Je propose de déplacer `DEFAULTS` dans `constantes.ts`.\n- **Valeurs métier en dur** : le plafond de 77 700 €, les taux de 47,42 % et 48,72 % et l'abattement de 60 % sont maintenant codés en TypeScript. Je demande leur source et comment elles suivront les changements annuels.\n- **Dépendance à Publicodes** : `régime-micro-entreprise.ts` importe `engineSingleton`, donc le domaine dépend directement de Publicodes. Je propose une évaluation injectée.\n\nLa PR fait 472 fichiers et mon budget était limité, donc je n'ai pas relu tout le reste. Les vérifications de la PR (`gh pr checks`) sont au vert. Je n'ai pas posté de commentaire global."
+ }
+}

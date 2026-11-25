@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 44,
+  "end_line": 44,
+  "message": "Les redirections sont maintenant dans l'effet, ce qui règle bien le problème de navigation pendant le rendu. En revanche, je remarque que pour `Enfants` le tableau de dépendances est vide sans le `eslint-disable` utilisé dans les trois autres fichiers : `yarn lint` passe, mais je me demande si ce n'est pas une incohérence (le `eslint-disable` était-il présent avant ? à l'inverse, la règle est-elle active ici ?). Plus largement, trois `eslint-disable react-hooks/exhaustive-deps` avec `[]` signifient que la garde ne se réévalue jamais : si `situation` ou `raisonsInéligibilité` change pendant que la page est affichée (par ex. un état Redux restauré après le premier rendu), l'usager n'est pas redirigé. Qu'en penses-tu de déclarer les vraies dépendances (`[situation, raisonsInéligibilité, navigate]`) ? `replace: true` rend les redirections répétées inoffensives. Une autre piste serait un petit hook `useRedirectionSi(condition, chemin)` pour ne pas dupliquer ce motif dans 4 pages.\n\nAutre point : ici `navigate` vers '/assistants/cmg' puis éventuellement vers '/inéligible' sont appelés à la suite, la dernière redirection l'emporte ; un `else if` rendrait l'intention plus claire (idem dans `Déclarations`)."
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+  "start_line": 31,
+  "end_line": 31,
+  "message": "nit: `O.getOrElse(montantCT, () => euros(0))` fait afficher brièvement « 0 € » juste avant la redirection quand il n'y a pas de montant, et ça ne couvre pas le cas `Some` avec valeur falsy testé dans l'effet. Je me demande si retourner `null` tant que `montantCT` n'est pas exploitable (en gardant l'effet pour la redirection) éviterait ce flash d'un résultat faux, ce qui compte pour un montant affiché à un usager. Qu'en penses-tu ?"
+ }
+]

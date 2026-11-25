@@ -1,0 +1,31 @@
+{
+ "pr": 3746,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+   "line": 31,
+   "start_line": null,
+   "body": "Je me demande si le `euros(0)` de repli est souhaitable : tant que l'effet n'a pas redirigé (ou si la navigation tarde), la page rend un montant de 0 € qui peut être lu comme un résultat réel par l'usager, alors que le cas « pas de montant » signifie « inéligible ». Qu'en penses-tu de retourner `null` (ou `<Navigate to=\"/assistants/cmg/inéligible\" replace />`) dans ce cas, plutôt que d'afficher un montant fabriqué ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Déclarations.tsx",
+   "line": 41,
+   "start_line": null,
+   "body": "Les mêmes gardes de redirection avec `useEffect(..., [])` + `eslint-disable react-hooks/exhaustive-deps` sont dupliquées dans 4 pages. Je verrais bien `<Navigate replace />` de react-router (retourné quand la situation est invalide), qui est précisément fait pour ça, évite le désactivage du lint et le rendu de la page avec une situation invalide en attendant l'effet. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1120035,
+  "final_text": "J'ai posté deux commentaires inline sur la PR 3746. Les vérifications de la PR sont au vert.\n\n- **`Résultat.tsx`** : le repli `euros(0)` affiche un montant de 0 € tant que la redirection n'a pas eu lieu. Un usager inéligible pourrait le lire comme un vrai résultat. Je propose de rendre `null` ou `<Navigate />` à la place.\n- **`Déclarations.tsx`** : les mêmes redirections en `useEffect(..., [])` avec `eslint-disable react-hooks/exhaustive-deps` sont répétées dans 4 pages. Je propose `<Navigate replace />` de react-router, qui évite le `eslint-disable` et le rendu avec une situation invalide.\n\nJe n'ai rien exécuté, c'est une relecture du diff seulement."
+ }
+}

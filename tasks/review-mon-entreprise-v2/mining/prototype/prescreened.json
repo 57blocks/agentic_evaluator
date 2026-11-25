@@ -1,0 +1,3991 @@
+[
+ {
+  "fix": "ce1385ce9d0812dabfed173ec3bb73e213b7f059",
+  "date": "2026-11-09",
+  "subject": "fix(dividendes): corrige la description de l'imposition au barème des dividendes",
+  "files": [
+   "modele-ti/règles/indépendant/revenus/dividendes.publicodes"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "df19127818a7c9433a78a244a2c6f0ddcc888009",
+    "date": "2025-12-23",
+    "subject": "feat(modele-ti): ajoute les dividendes au calcul des revenus",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "merged": "2026-11-13",
+   "n": 4734,
+   "t": "[Indépendants] Corriger l'imposition des dividendes au barème"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "content",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "The description of the progressive-scale (barème progressif) option wrongly says dividends get the 10% professional-expenses deduction and leaves out the deductible CSG.",
+   "file": "modele-ti/règles/indépendant/revenus/dividendes.publicodes",
+   "confidence": 0.6,
+   "reason": "The fix only rewrites explanatory help text. The `imposables` rule already computed the amount correctly (40% abattement minus deductible CSG, no 10% deduction), so no amount was ever wrong; this is a wording inaccuracy, not a behavioural defect.",
+   "cost_usd": 0.02474
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "d3a88c094fe95b15ea9fe769d35cabbc7a3bb797",
+  "date": "2026-10-26",
+  "subject": "fix(lodeom): corrige la valeur du coefficient T pour St Barthélémy et St Martin",
+  "files": [
+   "modele-social/règles/salarié/exonérations/exonérations.publicodes"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "c98957fce48cf81784f73029e9bd8d994fde9036",
+    "date": "2025-01-17",
+    "subject": "refactor(salarié): déplace les exonérations dans un dossier et des fichiers dédiés",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-01-20",
+   "n": 3321,
+   "t": "Refactor : Lodeom"
+  },
+  "fix_pr": {
+   "merged": "2026-11-12",
+   "n": 4716,
+   "t": "[Lodeom] Bug quand on accède aux pages de documentation"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "The zone-deux coefficient T sums the full maladie and allocations familiales employer rates instead of capping them at the reduced rates.",
+   "file": "modele-social/règles/salarié/exonérations/exonérations.publicodes",
+   "confidence": 0.6,
+   "reason": "The introducing commit is a pure refactor that moved existing exonération rules into dedicated files, so the zone-deux T formula was carried over rather than introduced. The fix landed much later and may reflect a regulatory clarification for St Barthélemy and St Martin, not a regression from this move.",
+   "cost_usd": 0.021752
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "6a6c48f6aefc88887f4d9b6d8c32c961abbedc4f",
+  "date": "2026-10-22",
+  "subject": "fix(mayotte): corrige le calcul de l'assiette sociale",
+  "files": [
+   "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes"
+  ],
+  "removed_lines": 5,
+  "introducing": [
+   {
+    "sha": "c14ee26d0c67bab90354db32ff1f51879ea3c5e8",
+    "date": "2026-07-06",
+    "subject": "fix: n'applique pas de plancher ni de plafond à l'abattement sur l'assiette à Mayotte",
+    "lines": 4
+   },
+   {
+    "sha": "6c9846a9326e72282e4f89dbea95d6f6cc1cfefa",
+    "date": "2026-07-07",
+    "subject": "doc(TI): précise que les plancher et plafond de l'abattement de l'assiette ne concernent pas Mayotte",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-07-09",
+   "n": 4596,
+   "t": "[Mayotte] Retours métier"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-11-03",
+   "n": 4720,
+   "t": "[Mayotte][TI] Corrige le calcul de l'assiette sociale (abattement)"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "For Mayotte, the floor and ceiling on the 26% CSG-CRDS base abatement are switched off entirely, when they should still apply, bounded by the general PSS (plafond de la sécurité sociale).",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+   "confidence": 0.65,
+   "reason": "The fix removes the Mayotte 'non applicable si' exclusions and restores the floor and ceiling based on 'plafond sécurité sociale . cas général'. This shows the introducing change wrongly dropped the bounds, giving a wrong CSG-CRDS base for Mayotte independents.",
+   "cost_usd": 0.018476
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "741a8e3925fcaea65307ba37d782992bc7ff9c0d",
+  "date": "2026-09-22",
+  "subject": "fix(tracking): corrige le chargement du tracking avec service worker",
+  "files": [
+   "site/source/components/PianoAnalytics/PianoTrackerProvider.tsx"
+  ],
+  "removed_lines": 28,
+  "introducing": [
+   {
+    "sha": "d8b7cc4708955d400e43b27936c494ad34d8dcfb",
+    "date": "2025-01-14",
+    "subject": "refactor(piano-analytics): extrait TrackingProvider dans un fichier éponyme",
+    "lines": 19
+   },
+   {
+    "sha": "0a280a77d764c5249451f1fa707c6f2438c55472",
+    "date": "2025-01-16",
+    "subject": "perf: optimisation de l’injection du script piano-analytics",
+    "lines": 7
+   },
+   {
+    "sha": "1097c74d0c50843734a92efaa07c9e24478c4a1a",
+    "date": "2026-01-20",
+    "subject": "fix: corrige l'erreur Sentry 'Can't find variable: requestIdleCallback'",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-01-22",
+   "n": 3303,
+   "t": "fix: Piano Analytics ne se charge pas une fois le Service Worker en place"
+  },
+  "fix_pr": {
+   "merged": "2026-09-28",
+   "n": 4642,
+   "t": "Rebuild home page with Next"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "logic",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "Script injection is gated on `navigator.serviceWorker.ready`, which never resolves when no service worker is registered or activated, so the Piano Analytics script may never load.",
+   "file": "site/source/components/PianoAnalytics/PianoTrackerProvider.tsx",
+   "confidence": 0.55,
+   "reason": "The fix removes the wait on `serviceWorker.ready` and always injects the script via `scheduleWhenIdle`, pointing to a real case where tracking failed to load. The blamed commit is a refactor that moved this code, so the faulty logic most likely came from the same PR but is not visible in this diff.",
+   "cost_usd": 0.019544
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "c015aa66a771d231ecea3a1de2b429e80616eda6",
+  "date": "2026-09-18",
+  "subject": "fix(lodeom): corrige des id non uniques",
+  "files": [
+   "site/source/pages/simulateurs/lodeom/components/MonthOptions.tsx"
+  ],
+  "removed_lines": 6,
+  "introducing": [
+   {
+    "sha": "d6fff647f1e9c1833bd2e75a123d686847aca268",
+    "date": "2026-06-15",
+    "subject": "refactor: remplace HelpButtonWithPopover par InfoButton ou HelpButton",
+    "lines": 4
+   },
+   {
+    "sha": "08b90703a235d45e6a50efde0943cc40964d4d74",
+    "date": "2024-12-06",
+    "subject": "feat(rgcp): ajout de champs pour gérer les mois incomplets",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-06-18",
+   "n": 4553,
+   "t": "[Refonte UX] Remplacer les boutons \"Info\" par des \"i\""
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-24",
+   "n": 4683,
+   "t": "[Lodeom] Impossible de voir le nombre d'heures supplémentaires renseignées"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "not_defect",
+   "category": "accessibility",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Label ids in MonthOptions are not unique per month, so aria-labelledby is ambiguous when several months render.",
+   "file": "site/source/pages/simulateurs/lodeom/components/MonthOptions.tsx",
+   "confidence": 0.85,
+   "reason": "The static, non-unique ids were already there before this commit: `rémunération-etp-label` and `rémunération-primes-label` were template literals with no variable. The refactor only turned them into plain string literals and moved `aria-labelledby` into the `aria` prop, so it did not introduce the duplicate-id defect.",
+   "cost_usd": 0.0251
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "4f430d1cc105a598b9106647512bc3f4c1bc786f",
+  "date": "2026-09-17",
+  "subject": "fix(lodeom): masque le bouton de partage",
+  "files": [
+   "site/source/components/Simulation/index.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "f45389bcb21eac6b5a0cdc96fae29b1df073fbc5",
+    "date": "2026-03-12",
+    "subject": "feat(conseillers-entreprises): différencie les iframes selon les simulateurs (#3209)",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-23",
+   "n": 4396,
+   "t": "feat(conseillers-entreprises): différencie les iframes selon les simulateurs"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-24",
+   "n": 4682,
+   "t": "[Lodeom] Supprimer les boutons \"retrouver ma simulation précédente\" et \"lien de partage\""
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The introducing PR left the share button always enabled in Simulation; the fix later lets the Lodeom simulator hide it.",
+   "file": "site/source/components/Simulation/index.tsx",
+   "confidence": 0.88,
+   "reason": "The fix adds a new option to hide the share button for Lodeom, which is a new product requirement. The introducing commit only refactored the Conseillers-Entreprises variant, and the `share` line was blamed only because it sat next to that change.",
+   "cost_usd": 0.01282
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "0e053ea4e77b3bdbe6445a678634201f489cf773",
+  "date": "2026-09-17",
+  "subject": "fix(lodeom): masque le bouton 'retrouver ma simulation précédente'",
+  "files": [
+   "site/source/components/Simulation/index.tsx"
+  ],
+  "removed_lines": 4,
+  "introducing": [
+   {
+    "sha": "182f17edcfd624a951bcc2e33d58554947e1f356",
+    "date": "2026-03-17",
+    "subject": "fix: supprime les boutons sous le simulateur location de meublé",
+    "lines": 4
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-24",
+   "n": 4682,
+   "t": "[Lodeom] Supprimer les boutons \"retrouver ma simulation précédente\" et \"lien de partage\""
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "`{!entrepriseSelection && questionsPublicodes?.length && (...)}` makes React render a stray literal `0` when `questionsPublicodes` is an empty array; the length needs to be coerced to a boolean.",
+   "file": "site/source/components/Simulation/index.tsx",
+   "confidence": 0.55,
+   "reason": "The fix coerces exactly these blamed conditions with `!!`, which addresses the classic `0 &&` JSX pitfall the introducing diff added. The fix's main purpose (hiding the banner for lodeom) is a new requirement, and it is unclear whether any simulator actually passed an empty array at merge time, hence the moderate confidence.",
+   "cost_usd": 0.024184
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "cd46ba5fdb9431d339d98fc96ac592d1957997d0",
+  "date": "2026-09-08",
+  "subject": "fix(lodeom): supprime la question sur la convention collective",
+  "files": [
+   "site/source/pages/simulateurs/lodeom/simulationConfig.ts"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "2b3de4c2aab620fc4c3861e317287304f78556b0",
+    "date": "2024-12-20",
+    "subject": "feat(lodeom): ajout du simulateur lodem (zone un - barème compétitivité)",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-01-20",
+   "n": 3266,
+   "t": "Feat(Lodeom) : Simulateur cas zone 1 + barème compétitivité"
+  },
+  "fix_pr": {
+   "merged": "2026-09-10",
+   "n": 4665,
+   "t": "[Lodeom] Divers bug"
+  },
+  "screen": {
+   "verdict": "unsure",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "The Lodeom simulator still asks the 'salarié . convention collective' question (as non-prioritaire), which can trigger a bug in this simulator.",
+   "file": "site/source/pages/simulateurs/lodeom/simulationConfig.ts",
+   "confidence": 0.35,
+   "reason": "The fix blacklists the convention collective question because it 'provoque un bug', and the introducing commit is where that question was added. But the line was copied from a config that works elsewhere, and the fix came almost two years later, so the bug may come from later changes rather than from the original config.",
+   "cost_usd": 0.016972
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "d7d9d6071fb7d689719bbec6a21c97536ff9d08e",
+  "date": "2026-09-04",
+  "subject": "fix(TI): permet de calculer un calcul à partir de dividendes sans rémunération brute",
+  "files": [
+   "modele-ti/règles/indépendant/revenus/rémunération.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "3817094ef1e7cfc55bebacbf4bd7b8475346f12a",
+    "date": "2026-05-12",
+    "subject": "fix(modele-ti): ajoute un lien entre CA/charges (IR) et rémunération brute (IS)",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-02",
+   "n": 4635,
+   "t": "Rendre le comparateur de statuts multi-modèle (MVP)"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-07",
+   "n": 4660,
+   "t": "[Indépendant.e] Aucun résultat affiché si on indique seulement un montant de dividendes"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The new IS-branch default `par défaut: CA - charges` for `rémunération brute` also applies when the user enters only dividends, so a dividend-only scenario silently gets a gross salary equal to CA minus charges instead of 0.",
+   "file": "modele-ti/règles/indépendant/revenus/rémunération.publicodes",
+   "confidence": 0.65,
+   "reason": "The fix changes exactly the added default so it is 0 when dividends are positive. That shows the introduced default produced wrong results when computing from dividends without a gross salary. It is possible, though less likely, that dividend-only input was a later feature.",
+   "cost_usd": 0.016356
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "c1ca8b4f4ec7db03607649efcfbf5400332dd705",
+  "date": "2026-09-04",
+  "subject": "fix(SASU): corrige l'unité des exonérations de cotisations dans la fiche de paie",
+  "files": [
+   "site/source/components/simulationExplanation/FicheDePaie/CotisationLine.tsx"
+  ],
+  "removed_lines": 12,
+  "introducing": [
+   {
+    "sha": "ca9b091beed2c7fb0b353437266d0425d7b75ea1",
+    "date": "2024-07-25",
+    "subject": "refactor(salarié): Déplace le composant Cotisation dans son propre fichier",
+    "lines": 10
+   },
+   {
+    "sha": "6de725ece52dbd82c2d312afb78ae83d4a449c8d",
+    "date": "2026-04-14",
+    "subject": "feat(sasu): ajoute la fiche de paie",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-08-15",
+   "n": 3042,
+   "t": "Fix(salarié): Supprime une ligne en double dans l'aperçu fiche de paie"
+  },
+  "fix_pr": {
+   "merged": "2026-09-07",
+   "n": 4659,
+   "t": "[SASU] Dans la fiche de paie, les exonérations et allégements de cotisations sont indiquées en montant annuel"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Cotisation amounts are evaluated without forcing the '€/mois' unit, so lines whose rule has another unit (e.g. SASU exonérations) could show the wrong unit or value.",
+   "file": "site/source/components/simulationExplanation/FicheDePaie/CotisationLine.tsx",
+   "confidence": 0.7,
+   "reason": "The introducing commit is a pure refactor that moved the existing evaluate logic into its own file without changing behaviour. The unit problem only showed up with SASU exonération rules in another unit, which most likely arrived later, two years before the fix.",
+   "cost_usd": 0.014268
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "0285dbdbc4eb4b9db0489111f90cb466045fb0b0",
+  "date": "2026-09-01",
+  "subject": "fix(metadata): corrige et uniformise la description de chaque simulateur",
+  "files": [
+   "site/source/pages/simulateurs/artiste-auteur/metadata.ts",
+   "site/source/pages/simulateurs/auto-entrepreneur/metadata.ts",
+   "site/source/pages/simulateurs/auxiliaire-médical/metadata.ts",
+   "site/source/pages/simulateurs/chirurgien-dentiste/metadata.ts",
+   "site/source/pages/simulateurs/cipav/metadata.ts",
+   "site/source/pages/simulateurs/comparaison-statuts/metadata.ts",
+   "site/source/pages/simulateurs/cout-creation-entreprise/metadata.ts",
+   "site/source/pages/simulateurs/eirl/metadata.ts",
+   "site/source/pages/simulateurs/entreprise-individuelle/metadata.ts",
+   "site/source/pages/simulateurs/eurl/metadata.ts",
+   "site/source/pages/simulateurs/impot-societe/metadata.ts",
+   "site/source/pages/simulateurs/indépendant/metadata.ts",
+   "site/source/pages/simulateurs/lodeom/metadata.ts",
+   "site/source/pages/simulateurs/médecin/metadata.ts",
+   "site/source/pages/simulateurs/pamc/metadata.ts",
+   "site/source/pages/simulateurs/pharmacien/metadata.ts",
+   "site/source/pages/simulateurs/profession-libérale/metadata.ts",
+   "site/source/pages/simulateurs/sage-femme/metadata.ts",
+   "site/source/pages/simulateurs/sasu/metadata.ts"
+  ],
+  "removed_lines": 19,
+  "introducing": [
+   {
+    "sha": "14741fc87ce43ec65613743b50bb3373aaf13723",
+    "date": "2026-07-22",
+    "subject": "refactor(simulateurs): extrait les métadonnées pures de chaque config dans un fichier metadata.ts et déplace l'Open Graph hors du bloc meta",
+    "lines": 19
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-08-06",
+   "n": 4611,
+   "t": "Refactor la configuration des simulateurs"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-28",
+   "n": 4642,
+   "t": "Rebuild home page with Next"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "not_defect",
+   "category": "content",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Meta description strings for simulators were imprecise or missing punctuation (e.g. the EURL description talks about salary rather than revenue).",
+   "file": "site/source/pages/simulateurs/eurl/metadata.ts",
+   "confidence": 0.88,
+   "reason": "The fix only rewords SEO meta description strings and changes one icon. The refactor moved these texts over unchanged, so this is a wording/content update, not a functional defect.",
+   "cost_usd": 0.06036
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "0e01bbfe0dc7be32f126dca99b5a8a65d93cdfcd",
+  "date": "2026-09-01",
+  "subject": "fix(modele-ti): renomme dépassements d'honoraire en dépassements d'honoraires",
+  "files": [
+   "modele-ti/règles/indépendant/professions-libérales/PAMC.publicodes"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "f948b7955a678c4ec2fdac11923dbe23da1040de",
+    "date": "2026-03-06",
+    "subject": "fix: corrige le calcul de la cotisation maladie pour les PAMC",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-28",
+   "n": 4642,
+   "t": "Rebuild home page with Next"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "not_defect",
+   "category": "content",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "Rule named 'dépassements d'honoraire' instead of grammatically correct 'dépassements d'honoraires'.",
+   "file": "modele-ti/règles/indépendant/professions-libérales/PAMC.publicodes",
+   "confidence": 0.9,
+   "reason": "The fix only renames the rule and its single reference to correct the spelling. The original name was used consistently, so the computation was unaffected.",
+   "cost_usd": 0.031808
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "701add7924a860357b4d088e10168ce8b3a3893a",
+  "date": "2026-08-04",
+  "subject": "fix: corrige les balises utilisées pour les QuestionFournie",
+  "files": [
+   "site/source/components/Simulateur/Questions/ComposantQuestionFournie.tsx",
+   "site/source/components/Simulateur/Questions/QuestionCourante.tsx",
+   "site/source/hooks/useQuestionsEditorialisees.ts"
+  ],
+  "removed_lines": 24,
+  "introducing": [
+   {
+    "sha": "a6f9e3a9a1ab97ccfe8e6dd7373a45b46e0e84c0",
+    "date": "2026-06-02",
+    "subject": "feat(comparateur): nouvelle mise en page",
+    "lines": 19
+   },
+   {
+    "sha": "bfd4d83ed3f85c2abdcbfd3a236dc4125be8bf92",
+    "date": "2026-06-16",
+    "subject": "refactor: supprime la propriété 'répondue' des questions éditorialisées",
+    "lines": 3
+   },
+   {
+    "sha": "5e4ec570abbc92262fdf239f61f7e9098d2b837b",
+    "date": "2026-06-30",
+    "subject": "fix(comparateur): corrige mauvais layout des questions principales",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-06-18",
+   "n": 4528,
+   "t": "[Refonte UX][Comparateur] Modifier la disposition du simulateur"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-02",
+   "n": 4635,
+   "t": "Rendre le comparateur de statuts multi-modèle (MVP)"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "unsure",
+   "category": "accessibility",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "QuestionFournie questions are always wrapped in a <fieldset>/<legend>, even when they hold a single input rather than a radio group, which leaves the input without a proper associated label.",
+   "file": "site/source/components/Simulateur/Questions/QuestionCourante.tsx",
+   "confidence": 0.35,
+   "reason": "The fix changes markup semantics so that fieldset/legend is used only for radio groups (via typeRadioGroup); otherwise the question gets a label. That points to a modest accessibility issue, but the introducing diff shown for these files is empty, so I cannot confirm the layout commit introduced the always-fieldset markup.",
+   "cost_usd": 0.0241
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "bd10fa8ff95c96c9caa334342d82f36da0a108d9",
+  "date": "2026-08-03",
+  "subject": "fix: corrige l'unité du capital orphelin",
+  "files": [
+   "modele-social/règles/protection-sociale.publicodes",
+   "modele-ti/règles/protection-sociale/invalidité-décès.publicodes"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "485cc6fbff54da09a9877e03c70515d91cdd620d",
+    "date": "2026-02-10",
+    "subject": "refactor: protection sociale",
+    "lines": 2
+   },
+   {
+    "sha": "0d0491bd1770c59a1410353d135b4ae2b88c89eb",
+    "date": "2023-01-26",
+    "subject": "✨ Rework du comparateur de statut (#2442)",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-09-02",
+   "n": 4635,
+   "t": "Rendre le comparateur de statuts multi-modèle (MVP)"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "not_defect",
+   "category": "content",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "Capital orphelin is expressed as '5% * PSS * 1 an / 1 enfant', giving a €/enfant unit instead of a plain € amount.",
+   "file": "modele-ti/règles/protection-sociale/invalidité-décès.publicodes",
+   "confidence": 0.6,
+   "reason": "The refactor copied the existing expression from modele-social unchanged, so behaviour did not change when it merged. The fix only changes the unit from €/enfant to €; the numeric amount is the same, and €/enfant is arguably correct for a per-child capital.",
+   "cost_usd": 0.02706
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "275a30e507da7ba71013727948e178571c6b35d8",
+  "date": "2026-07-31",
+  "subject": "fix: centre le bouton de suggestion",
+  "files": [
+   "site/source/components/Feedback/Feedback.tsx"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "5912f450ced5e10f346a2acc13305e74691dd1a5",
+    "date": "2024-02-29",
+    "subject": "feat: ask for feedback just before simulation explanation",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-03-01",
+   "n": 2904,
+   "t": "Ask for feedback before showing explanation on every simulator"
+  },
+  "fix_pr": {
+   "merged": "2026-08-03",
+   "n": 4623,
+   "t": "Bouton Faire une suggestion n'est pas centré"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "The suggestion button is centered with an inline `textAlign: 'center'` wrapper, which may not center a block or flex button.",
+   "file": "site/source/components/Feedback/Feedback.tsx",
+   "confidence": 0.9,
+   "reason": "The fix only swaps an inline text-align wrapper for a flex-centered styled div. This is a styling/layout alignment tweak, not a functional defect.",
+   "cost_usd": 0.01376
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "9785735cb574d19437a33a2621f1d8e9b395b9bf",
+  "date": "2026-07-28",
+  "subject": "fix(design-system): Switch génère son id avec useId",
+  "files": [
+   "site/source/design-system/switch/Switch.tsx"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "cf8b626739e1a378bf27a0e1cdb44d940816df1a",
+    "date": "2025-03-14",
+    "subject": "refactor(security): replace generateUuid by uuid.v4",
+    "lines": 2
+   },
+   {
+    "sha": "80be3f92290e14e8180dfe5201a6595eeb70d109",
+    "date": "2022-03-03",
+    "subject": "#2007 add yes no switch (#2037)",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-05-06",
+   "n": 3475,
+   "t": "A11y / réusinage des Switch, notamment celui du dark mode"
+  },
+  "fix_pr": {
+   "merged": "2026-08-07",
+   "n": 4617,
+   "t": "Feat/next header footer"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "accessibility",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "Switch generates a fresh random id on every render (uuidv4 in the render body) instead of a stable useId, so the label/input id changes on each render and mismatches on hydration.",
+   "file": "site/source/design-system/switch/Switch.tsx",
+   "confidence": 0.6,
+   "reason": "The introducing commit only swapped generateUuid() for uuidv4(), and both produce a new id on every render. The unstable-id problem predates this commit, so this is a behavior-preserving refactor rather than the change that introduced the defect.",
+   "cost_usd": 0.017768
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "1021f45b2d07c73f0e8c18f81a5040c383dd0e15",
+  "date": "2026-07-24",
+  "subject": "fix(navigation): rend la 404 en place au lieu de rediriger vers /404",
+  "files": [
+   "site/source/pages/simulateurs/index.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "1292785b083e61f3b99b48fd53e90e85969846c3",
+    "date": "2023-06-21",
+    "subject": "Redirect /simulateur/* to 404",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-08-02",
+   "n": 2561,
+   "t": "Assistant choix statut"
+  },
+  "fix_pr": {
+   "merged": "2026-08-06",
+   "n": 4611,
+   "t": "Refactor la configuration des simulateurs"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "Unknown /simulateurs/* paths redirect to /404 instead of rendering the 404 page in place, which loses the original URL.",
+   "file": "site/source/pages/simulateurs/index.tsx",
+   "confidence": 0.6,
+   "reason": "The introducing change deliberately sent unknown simulator paths to a 404, and users still saw a not-found page. The fix three years later is a UX/SEO refinement (keeping the URL and rendering in place), not a correction of wrong behaviour.",
+   "cost_usd": 0.013808
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "444617869caaac511bb48596272fd92586138f9b",
+  "date": "2026-07-24",
+  "subject": "fix(api): adapte le tracking aux nouveaux endpoints",
+  "files": [
+   "api/source/analytics.ts"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "9ac81d595700feef2bfab58f924b79bf1be8e2ff",
+    "date": "2023-11-24",
+    "subject": "move tracking of API to ATInternet",
+    "lines": 3
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-11-24",
+   "n": 2834,
+   "t": "move tracking of API to ATInternet"
+  },
+  "fix_pr": {
+   "merged": "2026-07-27",
+   "n": 4604,
+   "t": "Rendre `modele-ti` et `modele-as` accessibles par l'API"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "other",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Path parsing assumed /api/vX/page structure; new /modeles/ endpoints were added later.",
+   "file": "api/source/analytics.ts",
+   "confidence": 0.82,
+   "reason": "The fix adapts tracking to new endpoints ('adapte le tracking aux nouveaux endpoints') added after the introducing commit. For the paths that existed when it merged, the original parsing was correct, so this is a new requirement rather than a shipped defect.",
+   "cost_usd": 0.010772
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "5f780fc4e77025eec16586789e0d75246c1a301c",
+  "date": "2026-07-24",
+  "subject": "fix(api): applique le middleware unitéAdapter aux endpoints des modèles TI et AS",
+  "files": [
+   "api/source/v1unitéAdapterMiddleware.ts"
+  ],
+  "removed_lines": 13,
+  "introducing": [
+   {
+    "sha": "94d56d1c78c35435be043f90923cf25daf74fc07",
+    "date": "2023-12-20",
+    "subject": "update: use publicodes 1.0.0-rc.3",
+    "lines": 8
+   },
+   {
+    "sha": "49dac893cc352178bd20fb11da161445a64c5d27",
+    "date": "2023-12-14",
+    "subject": "fix: remove space in unité",
+    "lines": 5
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-12-20",
+   "n": 2847,
+   "t": "Update publicodes"
+  },
+  "fix_pr": {
+   "merged": "2026-07-27",
+   "n": 4604,
+   "t": "Rendre `modele-ti` et `modele-as` accessibles par l'API"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The unité adapter middleware only covered /evaluate and not per-model evaluate endpoints.",
+   "file": "api/source/v1unitéAdapterMiddleware.ts",
+   "confidence": 0.8,
+   "reason": "The per-model `/modeles/{nom}/evaluate` endpoints (TI and AS) were added long after the 2023 introducing commit. Extending the middleware to them is a follow-up for new endpoints, not a flaw that shipped with the original change.",
+   "cost_usd": 0.01398
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "1a294df5b37bbc192194b1856fc5001147a977e5",
+  "date": "2026-07-22",
+  "subject": "fix(environnement): n'évalue plus process.env sous Vite, ce qui faisait planter le serveur de dev au chargement (ReferenceError: process is not defined)",
+  "files": [
+   "site/source/services/environnement/environnement.ts"
+  ],
+  "removed_lines": 13,
+  "introducing": [
+   {
+    "sha": "0bc466ee00f8664465f8e0bb064ec45b36824025",
+    "date": "2026-06-23",
+    "subject": "feat(environnement): fait passer toute la config de production par l'adaptateur (Algolia, URLs, features, Sentry)",
+    "lines": 10
+   },
+   {
+    "sha": "581b4d9e15452df2f8d9433aea7a53495961df29",
+    "date": "2026-06-23",
+    "subject": "feat(environnement): ajoute un adaptateur d'environnement portable Vite/Next",
+    "lines": 3
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-07-06",
+   "n": 4575,
+   "t": "Adaptateur Environnement Vite/Next.js"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-07-23",
+   "n": 4609,
+   "t": "Le site plante en dev local"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "crash",
+   "severity": "high",
+   "visible_in_introducing_diff": true,
+   "defect": "Under Vite, when the ENVIRONNEMENT, BRANCH_NAME or SENTRY_RELEASE_NAME globals are not defined, the new `typeof X !== 'undefined'` guards fall through to `process.env.*`, which throws `ReferenceError: process is not defined` in the browser.",
+   "file": "site/source/services/environnement/environnement.ts",
+   "confidence": 0.85,
+   "reason": "The introducing commit replaced the `sousVite` guard with `typeof GLOBAL` checks for déployé, branche and sentryRelease. Under Vite, a missing define now evaluates `process.env` and crashes the dev server at load; the fix restores the `sousVite` guard on exactly these lines.",
+   "cost_usd": 0.024224
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "8df08736dfa3a3ba778cb0fed10d645573b03fb1",
+  "date": "2026-07-09",
+  "subject": "fix(location-de-meublé): retire un appel de hook non importé dans la doc micro-BIC",
+  "files": [
+   "site/source/pages/simulateurs/location-de-meublé/documentation/micro-bic.fr.mdx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "cf9701dbf1ec1a0790e8a45245d8a5e6fcdea2b2",
+    "date": "2025-06-11",
+    "subject": "feat: introduit la documentation éditorialisée MDX",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2026-07-13",
+   "n": 4561,
+   "t": "Simulateur de cotisations pour les frontaliers suisses"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "crash",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The `ExempleCalculDynamique` component in the micro-BIC MDX doc calls `useEconomieCollaborative()` without importing it, so rendering it throws a ReferenceError.",
+   "file": "site/source/pages/simulateurs/location-de-meublé/documentation/micro-bic.fr.mdx",
+   "confidence": 0.7,
+   "reason": "Calling an undeclared identifier inside an MDX-exported component fails at render time and would crash the documentation page. The `situation` value was not even used, so the fix simply removes the call.",
+   "cost_usd": 0.014128
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "c14ee26d0c67bab90354db32ff1f51879ea3c5e8",
+  "date": "2026-07-06",
+  "subject": "fix: n'applique pas de plancher ni de plafond à l'abattement sur l'assiette à Mayotte",
+  "files": [
+   "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "081510b6b8732670c05d38bf17f632139ad94c37",
+    "date": "2025-12-01",
+    "subject": "fix: correction des cotisations en cas de DFE",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "merged": "2026-07-09",
+   "n": 4596,
+   "t": "[Mayotte] Retours métier"
+  },
+  "screen": {
+   "verdict": "unsure",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The 26% abattement on the CSG-CRDS / assiette sociale always applies the floor (1.76% PASS) and ceiling (130% PASS), even for Mayotte, where no floor or ceiling should apply.",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+   "confidence": 0.45,
+   "reason": "The fix adds a Mayotte exception to the floor and ceiling that the introducing commit defined unconditionally, so Mayotte calculations would have been wrong if that rule already applied when it merged. However, the fix landed seven months later and may reflect newly added Mayotte support or a later legal clarification rather than an original error.",
+   "cost_usd": 0.024668
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "8b87a43a13cd82ab510687b0ec527de652a72ab1",
+  "date": "2026-07-06",
+  "subject": "fix(mayotte): supprime la CSG-CRDS",
+  "files": [
+   "modele-ti/règles/indépendant/cotisations-et-contributions/CSG-CRDS.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "7f93f320eb8ff2ff0d075847a6abcb5aa61a4325",
+    "date": "2025-10-09",
+    "subject": "refactor(modele-ti): réorganisation des règles des indépendants",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "merged": "2026-07-09",
+   "n": 4596,
+   "t": "[Mayotte] Retours métier"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "CSG-CRDS for independent workers is not excluded for establishments in Mayotte.",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/CSG-CRDS.publicodes",
+   "confidence": 0.55,
+   "reason": "The introducing commit is a refactor that moved the existing CSG-CRDS rule with its single foreign-domicile condition; nothing shows it dropped a Mayotte exclusion. The fix, about nine months later, most likely adds Mayotte-specific handling that came with later Mayotte support rather than repairing something the refactor broke.",
+   "cost_usd": 0.023292
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "89b953e02cfc545caf200084f1e928977de2dd78",
+  "date": "2026-06-30",
+  "subject": "fix(design-system): vider un champ date n'est plus une erreur de format",
+  "files": [
+   "site/source/design-system/molecules/field/DateField.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "b15f718260b8f763d9f4c0565c96bca84b638b8b",
+    "date": "2026-05-22",
+    "subject": "feat(cessation activité): affiche un message d'erreur en cas de date trop ancienne",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-06-02",
+   "n": 4464,
+   "t": "[Cessation d'activité] Le simulateur ne doit pas être utilisé en cas de date de cessation antérieure à l'année en cours"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-07-13",
+   "n": 4561,
+   "t": "Simulateur de cotisations pour les frontaliers suisses"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Clearing the date field shows a format error because the condition `isChangeOnce && selected === undefined` does not check for empty input.",
+   "file": "site/source/design-system/molecules/field/DateField.tsx",
+   "confidence": 0.85,
+   "reason": "The faulty condition `isChangeOnce && selected === undefined` existed before this PR. The introducing commit only wrapped it in parentheses behind a new `props.errorMessage ??` fallback, which does not change its behaviour, so the bug predates this change.",
+   "cost_usd": 0.012464
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "1f338ce7c47c67a63ed7ae1a3b62910388938446",
+  "date": "2026-06-25",
+  "subject": "fix(TI): sort Emoji du composant Trans",
+  "files": [
+   "site/source/pages/simulateurs/indépendant/components/AvertissementAutoEntrepreneur.tsx"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "1ffdde60c7a49e0c1b3e3917b52c69d88183662e",
+    "date": "2026-06-19",
+    "subject": "feat(indépendant): ajoute un avertissement pour les auto-entrepreneureuses",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-06-23",
+   "n": 4570,
+   "t": "[Indépendant.e] Informer que les simulateur pour indépendant.e, professions libérale et entreprise individuelle ne sont pas pour les auto-entrepreneurs.euses"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-06-25",
+   "n": 4577,
+   "t": "[TI] Les simulateurs indépendant, EI et profession libérale sont inacessibles en version anglaise : page d'erreur"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "Placing the <Emoji> component inside <Trans> turns it into an indexed placeholder in the i18n string, so the warning emoji may not render correctly (or may be lost) in translated output.",
+   "file": "site/source/pages/simulateurs/indépendant/components/AvertissementAutoEntrepreneur.tsx",
+   "confidence": 0.5,
+   "reason": "The fix moves the Emoji out of Trans, which suggests it rendered incorrectly through react-i18next interpolation. This is a minor display glitch, and the exact symptom cannot be confirmed from the diff alone.",
+   "cost_usd": 0.019536
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "085e3027ce46c19fcfa6223f490413a19a0a0dd1",
+  "date": "2026-06-25",
+  "subject": "fix(comparateur): corrige l'imposition de l'EI",
+  "files": [
+   "site/source/domaine/IndépendantContexte.ts"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "54d49accd1c5cfbd923d63aad61e1e5ab760c4bd",
+    "date": "2024-03-07",
+    "subject": "refactor: rassemble la gestion des questions dans Redux",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-09-10",
+   "n": 2963,
+   "t": "refactor: rassemble la gestion des questions dans Redux"
+  },
+  "fix_pr": {
+   "merged": "2026-07-06",
+   "n": 4579,
+   "t": "[Refonte UX][Comparateur] Éléments du simulateur spécifiques au comparateur"
+  },
+  "screen": {
+   "verdict": "unsure",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "The comparator's independent (EI) context forces 'entreprise . imposition' to 'IS', so the EI is simulated under corporate tax instead of its default income-tax regime.",
+   "file": "site/source/domaine/IndépendantContexte.ts",
+   "confidence": 0.35,
+   "reason": "The fix removes a real miscalculation, but the blamed commit is a Redux refactor whose diff for this file is empty. That suggests the line was only moved or reformatted, so the wrong IS setting likely predates this PR or reflected an earlier product choice.",
+   "cost_usd": 0.016932
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "f960484dad65e9a131eb979f0c6e36245f24c37b",
+  "date": "2026-06-25",
+  "subject": "fix(api): empêche une panne de Redis de bloquer les requêtes (#4572)",
+  "files": [
+   "api/source/redis-cache.ts"
+  ],
+  "removed_lines": 7,
+  "introducing": [
+   {
+    "sha": "ccaaea27149cca06a9d37655e7469f04d7fd4bca",
+    "date": "2023-06-15",
+    "subject": "Ajoute un cache redis de 2h sur l'api /evaluate",
+    "lines": 6
+   },
+   {
+    "sha": "c93a558e0c436a9b0f27c8f703e30fb8d36328e5",
+    "date": "2023-06-20",
+    "subject": "Add cacheExpiresAt to the response of api",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-06-15",
+   "n": 2692,
+   "t": "Ajouter un cache redis à l'api rest"
+  },
+  "fix_pr": {
+   "merged": "2026-06-26",
+   "n": 4574,
+   "t": "API résiliente aux pannes Redis"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "crash",
+   "severity": "high",
+   "visible_in_introducing_diff": true,
+   "defect": "redis.get/set are awaited without error handling, and with enableOfflineQueue: false any Redis outage or disconnect rejects immediately, so /evaluate requests fail instead of falling back to an uncached computation.",
+   "file": "api/source/redis-cache.ts",
+   "confidence": 0.85,
+   "reason": "The introducing commit sets enableOfflineQueue:false, so commands reject when Redis isn't connected, and the uncaught rejection turns a cache failure into an API error on /evaluate. The fix adds .catch on exactly those unguarded calls.",
+   "cost_usd": 0.012312
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "baecfb40416c8672b175c11b889e8701dc3cdf88",
+  "date": "2026-06-23",
+  "subject": "fix(comparateur): corrige l'espace entre les éléments du bloc 'Montants'",
+  "files": [
+   "site/source/pages/simulateurs/comparaison-statuts/components/MontantsÀSaisir.tsx"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "a6f9e3a9a1ab97ccfe8e6dd7373a45b46e0e84c0",
+    "date": "2026-06-02",
+    "subject": "feat(comparateur): nouvelle mise en page",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-06-18",
+   "n": 4528,
+   "t": "[Refonte UX][Comparateur] Modifier la disposition du simulateur"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-07-06",
+   "n": 4579,
+   "t": "[Refonte UX][Comparateur] Éléments du simulateur spécifiques au comparateur"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "The 'Montants' block renders its children in a fragment with no spacing between PeriodSwitch and the SimulationGoal inputs.",
+   "file": "site/source/pages/simulateurs/comparaison-statuts/components/MontantsÀSaisir.tsx",
+   "confidence": 0.88,
+   "reason": "The fix only wraps the elements in a flex column with a row-gap to adjust spacing. That is a styling/layout change, not a functional defect.",
+   "cost_usd": 0.01074
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "de3c9480f82c89f2fe4327a1fc4b8bf7ac1953ae",
+  "date": "2026-06-22",
+  "subject": "fix: corrige la position d'infobulle par rapport au choix de période de calcul",
+  "files": [
+   "site/source/design-system/tooltip/Tooltip.tsx"
+  ],
+  "removed_lines": 11,
+  "introducing": [
+   {
+    "sha": "fce64737fd5bed35794a18b63bf15fa154e45ac8",
+    "date": "2023-09-22",
+    "subject": "Remove react-tooltip",
+    "lines": 7
+   },
+   {
+    "sha": "0d0491bd1770c59a1410353d135b4ae2b88c89eb",
+    "date": "2023-01-26",
+    "subject": "✨ Rework du comparateur de statut (#2442)",
+    "lines": 2
+   },
+   {
+    "sha": "fd65963a9fa536c96e2e26e1685eca26a150c08d",
+    "date": "2024-11-15",
+    "subject": "feat: enlève la flèche sur les tooltip",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-09-22",
+   "n": 2818,
+   "t": "Johan fix"
+  },
+  "fix_pr": {
+   "merged": "2026-06-25",
+   "n": 4559,
+   "t": "[Refonte UX] Correctifs divers"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Tooltip positioning via inline style (position/top/left from floating-ui) could be ineffective in some contexts, misplacing the tooltip.",
+   "file": "site/source/design-system/tooltip/Tooltip.tsx",
+   "confidence": 0.6,
+   "reason": "The introducing code uses the standard floating-ui inline-style positioning pattern, which works. The fix, nearly three years later, only moves the same values into styled-component props for one specific later context (the calculation-period picker), most likely a newer layout or CSP issue rather than a bug shipped by the original change.",
+   "cost_usd": 0.025148
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "889b0d274f027068398c0ca2f1330d25765c2a10",
+  "date": "2026-06-19",
+  "subject": "fix: corrige la hauteur de BêtaChip et PublicodesDateChip",
+  "files": [
+   "site/source/design-system/chip/index.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "b8bf9e0ae469b883396c703bcc1ba6f73c8b6f3b",
+    "date": "2022-12-13",
+    "subject": "Ajoute le composant Chip au design system",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2022-12-19",
+   "n": 2422,
+   "t": "🎨 Bandeau beta "
+  },
+  "fix_pr": {
+   "merged": "2026-06-25",
+   "n": 4568,
+   "t": "[Version bêta] Déplacer l'avertissement dans le bloc \"avant de commencer\""
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Chip lacks a line-height reset, so its height varies with the inherited line-height.",
+   "file": "site/source/design-system/chip/index.tsx",
+   "confidence": 0.88,
+   "reason": "The fix adds `line-height: initial` to correct the chip's height, which is a styling/layout adjustment rather than a functional defect. The blamed `text-align` line was only moved, not changed.",
+   "cost_usd": 0.012316
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "31ef6c2b7869ea84e17922771eeb698b07964b3d",
+  "date": "2026-06-19",
+  "subject": "fix(modele-ti): corrige l'applicabilité des cotisations forfaitaires aux 2 premières années",
+  "files": [
+   "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/début-activité.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "7f93f320eb8ff2ff0d075847a6abcb5aa61a4325",
+    "date": "2025-10-09",
+    "subject": "refactor(modele-ti): réorganisation des règles des indépendants",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "merged": "2026-06-25",
+   "n": 4565,
+   "t": "[Mayotte] Exonération 24 mois"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The `applicable si: entreprise . date de création >= période . début d'année` condition limits the flat-rate start-of-activity contributions to the creation year only, while the rule (and the law) covers the first two years of activity.",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/début-activité.publicodes",
+   "confidence": 0.6,
+   "reason": "The condition contradicts the rule's own description (\"deux premières années\"), so second-year independents get no flat-rate base; the fix replaces it with `durée d'activité < 2 an`. Confidence is limited because this was a refactor commit and the condition may have been moved unchanged from an older file.",
+   "cost_usd": 0.022836
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "3bea4c34e192ed9105cde0ba39bf80c98cdeee5e",
+  "date": "2026-06-18",
+  "subject": "fix: largeur des objectifs",
+  "files": [
+   "site/source/components/PeriodSwitch.tsx",
+   "site/source/components/Simulation/ObjectifDeSimulation.tsx",
+   "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "600758d9892b3b306cce3d087bbd7b486fd1e115",
+    "date": "2025-08-01",
+    "subject": "fix(a11y): propose un nouvel affichage des simulateurs",
+    "lines": 2
+   },
+   {
+    "sha": "19db745d1d086cbbcc1823b9399679e1e57a2b14",
+    "date": "2025-09-05",
+    "subject": "refactor: correction d'une erreur de type de prop",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-08-06",
+   "n": 3889,
+   "t": "Propose une nouvelle façon d'afficher les simulateurs"
+  },
+  "fix_pr": {
+   "merged": "2026-06-25",
+   "n": 4559,
+   "t": "[Refonte UX] Correctifs divers"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "Grid column ratio 1.25fr/1fr for simulation objectives was later tweaked to 1.15fr/1fr.",
+   "file": "site/source/components/Simulation/ObjectifDeSimulation.tsx",
+   "confidence": 0.9,
+   "reason": "The fix only adjusts a CSS grid column proportion, which is a styling/layout tweak rather than a functional defect.",
+   "cost_usd": 0.022588
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "f5829a33982f32cbdd5e16ff04c77baad09d3236",
+  "date": "2026-06-16",
+  "subject": "fix: corrige l'apparence des boutons en mobile",
+  "files": [
+   "site/source/design-system/buttons/Button.tsx"
+  ],
+  "removed_lines": 4,
+  "introducing": [
+   {
+    "sha": "82050636a182a0631f9d383c7ef75c76b5f6d5a8",
+    "date": "2021-11-30",
+    "subject": "Merge pull request #1788 from betagouv/charte-urssaf-bootstrap",
+    "lines": 4
+   }
+  ],
+  "intro_pr": {
+   "merged": "2021-11-30",
+   "n": 1788,
+   "t": "Nouveau design system"
+  },
+  "fix_pr": {
+   "merged": "2026-06-18",
+   "n": 4528,
+   "t": "[Refonte UX][Comparateur] Modifier la disposition du simulateur"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Buttons are forced to full width under the sm breakpoint, which changes how they look on mobile.",
+   "file": "site/source/design-system/buttons/Button.tsx",
+   "confidence": 0.85,
+   "reason": "The fix removes a deliberate mobile full-width style rule, which is a styling/layout choice rather than a functional defect. The introducing diff for this file is also empty.",
+   "cost_usd": 0.007196
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "bb7a539e3df3d7a6eb653a21cc93103f8b487aa7",
+  "date": "2026-06-10",
+  "subject": "fix(salarié): déduction forfaitaire pour heures supplémentaires non liée à la RGDU",
+  "files": [
+   "modele-social/règles/salarié/exonérations/exonérations.publicodes"
+  ],
+  "removed_lines": 4,
+  "introducing": [
+   {
+    "sha": "c98957fce48cf81784f73029e9bd8d994fde9036",
+    "date": "2025-01-17",
+    "subject": "refactor(salarié): déplace les exonérations dans un dossier et des fichiers dédiés",
+    "lines": 3
+   },
+   {
+    "sha": "f0df08a43db0f35d7a27cdf58d7fa2a32e294b55",
+    "date": "2026-01-27",
+    "subject": "feat(salarié): implémentation de la réforme RGDU",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-01-20",
+   "n": 3321,
+   "t": "Refactor : Lodeom"
+  },
+  "fix_pr": {
+   "merged": "2026-06-11",
+   "n": 4543,
+   "t": "fix(salarié): déduction forfaitaire pour heures supplémentaires non liée à la RGDU"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "The fix removes an `exonérations . RGDU > 0` condition that does not exist in the introducing commit, which only moved the existing heures supplémentaires rules.",
+   "file": "modele-social/règles/salarié/exonérations/exonérations.publicodes",
+   "confidence": 0.85,
+   "reason": "The introducing refactor's applicability condition was effectif < 250 plus heures supplémentaires > 0. The faulty RGDU dependency removed by the fix was added by a later change, so the blame points to the wrong commit.",
+   "cost_usd": 0.018676
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "51af7e34f81f876ed253116c7d0091ea5e609b1c",
+  "date": "2026-06-08",
+  "subject": "fix(PLR): corrige le montant des cotisations recouvrées par l'Urssaf",
+  "files": [
+   "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "7f93f320eb8ff2ff0d075847a6abcb5aa61a4325",
+    "date": "2025-10-09",
+    "subject": "refactor(modele-ti): réorganisation des règles des indépendants",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "merged": "2026-06-10",
+   "n": 4538,
+   "t": "[Indépendant.e] Pour les professions libérales réglementées (PLR), erreur dans le montant de cotisations recouvrées par l'Urssaf"
+  },
+  "screen": {
+   "verdict": "unsure",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "The 'Urssaf' sub-rule removes only optional contributions (cotisations facultatives) from the total. It does not remove pension contributions collected by the regulated liberal professions' own retirement funds, so it may overstate the amount collected by the Urssaf for those professions.",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+   "confidence": 0.35,
+   "reason": "The introducing commit is a refactor that moved existing rules. The fix targets regulated liberal professions (PLR) and lands about eight months later, so it most likely followed later work that routed their retirement-fund contributions into this total. The diff does not show whether 'profession libérale . cotisations caisse de retraite' was already counted in 'cotisations' when the refactor merged.",
+   "cost_usd": 0.024196
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "0cbbf720d67369dde8104215413935c8272d2b5d",
+  "date": "2026-06-05",
+  "subject": "fix(simulateur): enlève l'espace sous l'avertissement",
+  "files": [
+   "site/source/pages/assistants/cmg/pages/Accueil.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "1ff47a88e6d16f7f97b00833169fd3f624cb2af8",
+    "date": "2025-06-13",
+    "subject": "feat(cmg): retours de mise en forme et textes",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3670,
+   "t": "CMGR-L ODIL"
+  },
+  "fix_pr": {
+   "merged": "2026-06-18",
+   "n": 4528,
+   "t": "[Refonte UX][Comparateur] Modifier la disposition du simulateur"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Replacing Navigation with a bare Button left no spacing between the warning block and the start button.",
+   "file": "site/source/pages/assistants/cmg/pages/Accueil.tsx",
+   "confidence": 0.9,
+   "reason": "The fix only adds a Spacing component between the warning and the button. That is a layout/styling adjustment, not a functional defect.",
+   "cost_usd": 0.009712
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "45b2385078e23cef2ec84c277562cf83fc404d5a",
+  "date": "2026-06-04",
+  "subject": "fix(stats): bump recharts 2.3.2 → 3.8.1 (compat React 19)",
+  "files": [
+   "site/source/pages/statistiques/_components/Chart.tsx",
+   "site/source/pages/statistiques/_components/PagesCharts.tsx"
+  ],
+  "removed_lines": 6,
+  "introducing": [
+   {
+    "sha": "ddc4190573507e0282ffa118ebb0e4ed02aee256",
+    "date": "2021-09-28",
+    "subject": "🎨 Corrige la lisibilité du charte d'usage des simulateurs (#1743)",
+    "lines": 4
+   },
+   {
+    "sha": "ce0e957a3565abc7c37fcbca7d73fcb07a3c8c23",
+    "date": "2021-03-15",
+    "subject": "Ajoute la repartition des visites par page",
+    "lines": 1
+   },
+   {
+    "sha": "3745f32f0ac225d21458c417e2f3cc933cb332cc",
+    "date": "2022-01-12",
+    "subject": "Fix typecheck",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2021-09-28",
+   "n": 1743,
+   "t": "🎨 Corrige la lisibilité du graphique d'usage des simulateurs"
+  },
+  "fix_pr": {
+   "merged": "2026-06-10",
+   "n": 4526,
+   "t": "[Next 5] Adaptation provider Redux"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "build",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "No defect: the fix adapts the code to the recharts 3 API (TooltipContentProps, removal of the Bar layout prop) after a dependency bump for React 19.",
+   "file": "site/source/pages/statistiques/_components/Chart.tsx",
+   "confidence": 0.95,
+   "reason": "The fix is a dependency-upgrade compatibility change, not a correction of wrong behavior shipped by the 2021 chart-readability PR.",
+   "cost_usd": 0.01066
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "374ea2e478e2920990e783b1bfc5d5a970df2034",
+  "date": "2026-06-03",
+  "subject": "fix(storybook): désactive @vitejs/plugin-legacy en mode Storybook (force build.target=chrome64 incompatible avec les literals BigInt de Storybook 8)",
+  "files": [
+   "site/vite.config.ts"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "e6e2ec2c9ec4f593e85c37c53ab7d12ad88ce84f",
+    "date": "2021-12-28",
+    "subject": "Ajoute plugin-legacy pour les anciens navigateurs",
+    "lines": 3
+   }
+  ],
+  "intro_pr": {
+   "merged": "2022-01-31",
+   "n": 1861,
+   "t": "Remplace Webpack par ViteJS"
+  },
+  "fix_pr": {
+   "merged": "2026-06-10",
+   "n": 4526,
+   "t": "[Next 5] Adaptation provider Redux"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "build",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Adding @vitejs/plugin-legacy unconditionally forces a legacy build target that later breaks Storybook 8 builds.",
+   "file": "site/vite.config.ts",
+   "confidence": 0.88,
+   "reason": "The fix responds to a later dependency upgrade (Storybook 8, years later) whose BigInt literals conflict with the legacy plugin's target. In 2021 the plugin config was correct and no Storybook 8 existed, so the introducing change shipped no defect.",
+   "cost_usd": 0.010184
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "9a90ce11e55f88dd5149dc1cd49f31665db6dc09",
+  "date": "2026-05-28",
+  "subject": "fix(cessation activité): réinitialisation de la date de cessation",
+  "files": [
+   "site/source/design-system/molecules/field/DateField.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "7aca42393184a28defb7ffc6bdf72978a4ea5e20",
+    "date": "2023-04-26",
+    "subject": "Replace popper by floating-ui; add aria label",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-04-28",
+   "n": 2542,
+   "t": "🛠️Correctifs post audit RGAA"
+  },
+  "fix_pr": {
+   "merged": "2026-06-02",
+   "n": 4464,
+   "t": "[Cessation d'activité] Le simulateur ne doit pas être utilisé en cas de date de cessation antérieure à l'année en cours"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The handleDaySelect callback's dependency array omits `locale`, so it could use a stale locale if the language changed.",
+   "file": "site/source/design-system/molecules/field/DateField.tsx",
+   "confidence": 0.6,
+   "reason": "The only blamed line is a missing `locale` in a hook dependency array, which is a lint-level stale-closure issue with no realistic user impact. The actual fix adds a reset of the input when `defaultSelected` becomes undefined, which the new 'cessation activité' flow needs three years later; nothing shows the introducing commit caused that bug.",
+   "cost_usd": 0.015728
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "4071b8fedb2a80224d0e8edacfb2f65e83808832",
+  "date": "2026-05-21",
+  "subject": "fix(salarié): corrige la branche de salarié . cotisations . AGS",
+  "files": [
+   "modele-social/règles/salarié/cotisations.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "9f63ffdb7dcecb691e1c6ea792658c541c99718b",
+    "date": "2022-05-24",
+    "subject": "Refacto des règles salarié",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2022-09-15",
+   "n": 2143,
+   "t": "Refacto règles salarié"
+  },
+  "fix_pr": {
+   "merged": "2026-05-22",
+   "n": 4470,
+   "t": "[SASU] La fiche de paie a disparu"
+  },
+  "screen": {
+   "verdict": "unsure",
+   "category": "calculation",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "AGS cotisation is tagged with branche 'assurance chômage' instead of 'chômage', so it may be dropped or misgrouped in the per-branch breakdown of cotisations.",
+   "file": "modele-social/règles/salarié/cotisations.publicodes",
+   "confidence": 0.35,
+   "reason": "The fix corrects a branch label, which points to a real misclassification. But the introducing diff for this file is not shown, and the refacto may only have moved or renamed lines. The valid branch values may also have changed later, so it is unclear the value was wrong when it merged.",
+   "cost_usd": 0.019896
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "bb40ba9dad9861fceadc791b7b120f4a765c466d",
+  "date": "2026-05-13",
+  "subject": "fix(simulation): omet la règle fautive plutôt que vider toute la situation engine quand une saisie company ou config est invalide",
+  "files": [
+   "site/source/hooks/useSetupSafeSituation.tsx"
+  ],
+  "removed_lines": 14,
+  "introducing": [
+   {
+    "sha": "20caa2015cc419cb71d700a6f78f0cbb7c06bb09",
+    "date": "2025-11-04",
+    "subject": "refactor(engine): utilise un modèle de règles par simulateur",
+    "lines": 10
+   },
+   {
+    "sha": "81a5c737d02ea474b23b32c97903eefba8de478a",
+    "date": "2022-10-10",
+    "subject": "Amelioration de la detection d'erreur lors du set situation",
+    "lines": 2
+   },
+   {
+    "sha": "213cd68c5bd25df3c5274b3bb332d903096d5189",
+    "date": "2025-10-24",
+    "subject": "refactor: actions du store - supprime actions inutilisées - renomme actions - réordonne liste actions",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "merged": "2026-05-18",
+   "n": 4509,
+   "t": "Fix/saisie sans effet sur simulation"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "state",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "With one rule model per simulator, the shared company or config situation can hold rules that are missing from a given simulator's model; such a rule is not in simulatorSituation, so the hook throws and the whole engine situation is emptied instead of just dropping that rule.",
+   "file": "site/source/hooks/useSetupSafeSituation.tsx",
+   "confidence": 0.5,
+   "reason": "The per-simulator model refactor plausibly made company/config entries invalid for some simulators, which turned the existing throw path into a user-visible wipe of all inputs. The fix replaces that throw with omitting only the faulty rule. The introducing diff for this file is empty, though, so the causal link is inferred rather than confirmed.",
+   "cost_usd": 0.020456
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "3670b6d6f65cd71ef82ef25f857e9a13513d68da",
+  "date": "2026-05-04",
+  "subject": "fix(modele-social): corrige le calcul de l'IR auto-entrepreneur (#4105)",
+  "files": [
+   "modele-social/règles/dirigeant/auto-entrepreneur/impôt.publicodes"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "0ac69f7fbaebcce2d61259ff9fd8ac5c0b61fd61",
+    "date": "2025-03-14",
+    "subject": "refactor(auto-entrepreneur): découpe les règles AE en plusieurs fichiers",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-03-27",
+   "n": 3479,
+   "t": "Fix: erreur cotisation Cipav"
+  },
+  "fix_pr": {
+   "merged": "2026-05-04",
+   "n": 4494,
+   "t": "fix(modele-social): corrige le calcul de l'IR auto-entrepreneur (#4105)"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "high",
+   "visible_in_introducing_diff": false,
+   "defect": "The `rend non applicable: revenu imposable` on `versement libératoire` disrupts evaluation of the AE taxable income in some contexts, so the computed income tax comes out wrong (about a third of the correct amount).",
+   "file": "modele-social/règles/dirigeant/auto-entrepreneur/impôt.publicodes",
+   "confidence": 0.55,
+   "reason": "The introducing commit is a pure refactor that split the AE rules into several files. The `rend non applicable` mechanism was most likely carried over unchanged from the original file. The wrong result surfaced over a year later as a publicodes evaluation-chain quirk, so it is not clearly a behaviour change shipped by this refactor.",
+   "cost_usd": 0.024304
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "bfabc74a8d3e894b824085fb8f4a8e89a0c7d34f",
+  "date": "2026-04-27",
+  "subject": "fix(algolia): catch et log les erreurs du script de cleanup",
+  "files": [
+   "site/scripts/search/clean.js"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "a14f2bb75b42dcb3aac62f4f3e00c76fc86042cb",
+    "date": "2021-09-22",
+    "subject": "🤖 Supprime les index Algolia temporaires lorsque les PR sont fermées (#1742)",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2021-09-22",
+   "n": 1742,
+   "t": "🤖 Supprime les index Algolia temporaires lorsque les PR sont fermées"
+  },
+  "fix_pr": {
+   "merged": "2026-04-27",
+   "n": 4486,
+   "t": "fix(algolia): catch et log les erreurs du script de cleanup"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "build",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Calls to index.delete() in the cleanup script are not awaited or caught, so Algolia errors surface only as unhandled rejections with no useful log.",
+   "file": "site/scripts/search/clean.js",
+   "confidence": 0.65,
+   "reason": "The fix mainly adds error logging and observability to a CI cleanup script, which is not a user-facing behavioural defect. The temporary indexes were still deleted in normal operation, so the original code worked as intended.",
+   "cost_usd": 0.0144
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "a2e3c9f341826ae22eb8460b330162353c98c208",
+  "date": "2026-04-17",
+  "subject": "fix(SSR): corrige le FOUC causé par navigator global de Node 24",
+  "files": [
+   "site/source/design-system/root.tsx"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "3a1cf338f53e8723655b6eb61435033a5bbfb236",
+    "date": "2022-06-22",
+    "subject": "Fix CSS for Netlify prerender",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2022-06-23",
+   "n": 2176,
+   "t": "Fix CSS for Netlify prerender"
+  },
+  "fix_pr": {
+   "merged": "2026-04-19",
+   "n": 4478,
+   "t": "fix(SSR): corrige le FOUC causé par navigator global de Node 24"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "build",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Uses `typeof navigator !== 'undefined'` to detect the browser, which later breaks once Node exposes a global `navigator`.",
+   "file": "site/source/design-system/root.tsx",
+   "confidence": 0.8,
+   "reason": "In 2022, Node (16/18) had no global `navigator`, so the check behaved correctly during SSR and prerender. The bug only appeared after a later runtime upgrade to Node 21+, which added `navigator.userAgent`, so it is an environment change rather than a defect at merge time.",
+   "cost_usd": 0.013748
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "c107c8586ef22ec622f058b8c4c9df69d9f2fba6",
+  "date": "2026-04-10",
+  "subject": "fix(lodeom): supprime la condition de CA car règle inadapté",
+  "files": [
+   "modele-social/règles/salarié/exonérations/lodeom.publicodes"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "c98957fce48cf81784f73029e9bd8d994fde9036",
+    "date": "2025-01-17",
+    "subject": "refactor(salarié): déplace les exonérations dans un dossier et des fichiers dédiés",
+    "lines": 3
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-01-20",
+   "n": 3321,
+   "t": "Refactor : Lodeom"
+  },
+  "fix_pr": {
+   "merged": "2026-05-18",
+   "n": 4472,
+   "t": "Remplacer la liste automatique des questions par une liste éditorialisée"
+  },
+  "screen": {
+   "verdict": "unsure",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "The Lodeom renforcée / innovation et croissance applicability conditions use `entreprise . chiffre d'affaires < 50000000`, which in the salarié context is derived from the entered salary instead of being asked, so the turnover criterion is not really evaluated.",
+   "file": "modele-social/règles/salarié/exonérations/lodeom.publicodes",
+   "confidence": 0.4,
+   "reason": "The introducing commit is a file-move refactor that likely carried over an existing condition rather than introducing it. Because the derived turnover is almost always below 50M€, the condition is effectively always true, so the practical impact on computed amounts is unclear.",
+   "cost_usd": 0.05008
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "ae86a7320424e2d28486a7be97f78d99b664026b",
+  "date": "2026-04-02",
+  "subject": "fix(impôt): corrige la valeur de situation de famille",
+  "files": [
+   "modele-ti/règles/indépendant/revenus/rémunération.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "7605bae12540db1c65259eec6d19990add526210",
+    "date": "2026-03-02",
+    "subject": "fix(TI): situation de famille couple en cas de conjoint collaborateur",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-04-07",
+   "n": 4449,
+   "t": "[Indépendant.es] La question sur la situation maritale a disparu"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The contextual override targets `impôt . foyer fiscal . situation de famille` instead of `paramètres . impôt . foyer fiscal . situation de famille`, so the 'couple' family situation is not applied to the tax computation when there is a conjoint collaborateur.",
+   "file": "modele-ti/règles/indépendant/revenus/rémunération.publicodes",
+   "confidence": 0.85,
+   "reason": "The sibling overrides in the same block use the `paramètres . impôt . …` namespace, and the fix only corrects this path. The original reference therefore pointed at the wrong rule, and income tax was computed without the couple situation.",
+   "cost_usd": 0.015952
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "2b8978cca25bc6c23aaf5489836a90748e75dfff",
+  "date": "2026-04-02",
+  "subject": "fix(TI): corrige le calcul des cotisations de début d'activité au régime micro-fiscal",
+  "files": [
+   "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/début-activité.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "c07e9f694117d864290b63beb0d7f7a85d73d25a",
+    "date": "2025-12-09",
+    "subject": "feat(modele-ti): cotisations forfaitaires de début d'activité",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "merged": "2026-04-07",
+   "n": 4450,
+   "t": "[PAM] Erreur en cas d'entreprise au micro-fiscal créée cette année"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "The context forces 'cotisations facultatives: non' unconditionally, which miscomputes start-of-activity contributions under the micro-fiscal regime.",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/début-activité.publicodes",
+   "confidence": 0.65,
+   "reason": "The introducing commit only moved the existing 'cotisations facultatives: non' line below the new Cipav override; it did not create or change that behaviour. The micro-fiscal issue predates this change or comes from later interactions, so the blame match is only incidental.",
+   "cost_usd": 0.019524
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "9417442fc682f7f99c022ecc9e4646d2a3999bfb",
+  "date": "2026-04-02",
+  "subject": "fix(iframe): corrige la régression du scroll dans l'assistant choix-du-statut en iframe",
+  "files": [
+   "site/source/pages/assistants/choix-du-statut/home.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "702a0038f02f98aeba526bcc45a54d50bbd10eb2",
+    "date": "2025-10-20",
+    "subject": "refactor(entreprise): remplace useEngine par companySirenSelector",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "merged": "2026-04-02",
+   "n": 4452,
+   "t": "fix(iframe): corrige la régression du scroll dans l'assistant choix-du-statut en iFrame"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "state",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "This refactor silently swaps relativeSitePaths for absoluteSitePaths. The 'Trouver le bon statut' button then navigates to an absolute /assistants/... path that leaves the /iframes/ prefix, which turns off iframe mode and breaks scrolling in the embedded assistant.",
+   "file": "site/source/pages/assistants/choix-du-statut/home.tsx",
+   "confidence": 0.88,
+   "reason": "The diff explicitly changes relativeSitePaths to absoluteSitePaths, undoing a prior fix (PR #4398) during a rebase. This caused a user-visible regression in iframe navigation, and the fix commit reverts exactly that line.",
+   "cost_usd": 0.013548
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "a6bc84b7b87d5452163a9245281ee832fee85e2c",
+  "date": "2026-03-31",
+  "subject": "fix(TI): calcul avec Acre au régime micro-fiscal",
+  "files": [
+   "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/exonérations/Acre.publicodes"
+  ],
+  "removed_lines": 18,
+  "introducing": [
+   {
+    "sha": "96032c052df3329728f30747a08eb826d3cdc5cb",
+    "date": "2026-03-06",
+    "subject": "feat: supprime les exonérations en cas de cumul Acre et invalidité",
+    "lines": 11
+   },
+   {
+    "sha": "212c2dc07ef886449bc590e4d71c8ad24b161480",
+    "date": "2026-03-05",
+    "subject": "fix: corrige le calcul de l'Acre",
+    "lines": 5
+   },
+   {
+    "sha": "53a4da476de67672d6eaebcaee27c93f9ef6b908",
+    "date": "2026-03-06",
+    "subject": "refactor: supprime les 'remplace' des cotisations PAMC",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-31",
+   "n": 4436,
+   "t": "[TI] Erreur lors d'activation de l'Acre au régime micro-fiscal"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "high",
+   "visible_in_introducing_diff": true,
+   "defect": "The maladie-maternité abattement `variations` mixes a €/an amount (Acre montant) with a % rate (invalidité taux) without explicit units. Publicodes unit inference can then mis-apply one branch, giving a wrong maladie-maternité contribution, notably with Acre.",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "confidence": 0.65,
+   "reason": "The fix rewrites exactly these blamed lines: it adds explicit `unité: €/an` and `unité: '%'` to each branch and restructures the abattement. It also changes the Acre montant to use `avant abattements`. Together this shows the introduced mixed-unit abattement produced wrong Acre calculations.",
+   "cost_usd": 0.029264
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "f6e4a7216d7cd60d856f59a728a3fadcd7e4a42f",
+  "date": "2026-03-30",
+  "subject": "fix: erreurs de rebase",
+  "files": [
+   "site/source/domaine/estPasQuestionEnListeNoire.ts"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "a374231211316a2ebd38080946afac628b940337",
+    "date": "2026-03-12",
+    "subject": "fix: enlève les questions liste noire de la liste des questions répondues",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-20",
+   "n": 4386,
+   "t": "[auto-entrepreneur] Questions fantômes lorsqu'on choisit une activité mixte"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-30",
+   "n": 4431,
+   "t": "[Réforme] Sépare le champ dividendes en 2"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "not_defect",
+   "category": "build",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The DottedName type is imported from 'modele-social' instead of the local './publicodes/DottedName' module.",
+   "file": "site/source/domaine/estPasQuestionEnListeNoire.ts",
+   "confidence": 0.85,
+   "reason": "The fix only changes a type import path after a rebase. The original import was valid when it merged, and since it is type-only it has no runtime effect.",
+   "cost_usd": 0.007984
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "d88ef1a11cc4fec5241da9bdafec70dba0635562",
+  "date": "2026-03-27",
+  "subject": "fix(iframe): corrige la prévisualisation d'iframe en local",
+  "files": [
+   "site/source/lib/navigation/NavigationAPI.ts",
+   "site/source/lib/navigation/providers/MockNavigationProvider.tsx",
+   "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+   "site/source/pages/integration/Iframe.tsx"
+  ],
+  "removed_lines": 23,
+  "introducing": [
+   {
+    "sha": "09f9128700b5884bf63382d302154427fd31f56f",
+    "date": "2026-02-11",
+    "subject": "refactor(navigation): centralise tous les hooks react-router dans useNavigation()",
+    "lines": 22
+   },
+   {
+    "sha": "fc933854ea2dfc10e0af4ac3c35e260a5dc1cbd1",
+    "date": "2026-02-17",
+    "subject": "fix: ajoute le slash final à l'URL localhost dans getHref",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-09",
+   "n": 4311,
+   "t": "refactor(navigation): adaptateur de navigation pour préparer la migration Next.js"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-04-09",
+   "n": 4415,
+   "t": "[iFrame] Sur urssaf.fr, impossible de laisser un commentaire via le bouton \"Faire une suggestion\" si celui-ci est en bas de l'iframe"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "The new getHref returns absolute paths unchanged instead of resolving them through react-router's useHref, so the router basename is dropped and the integration page's iframe src points to the wrong URL.",
+   "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+   "confidence": 0.8,
+   "reason": "Before the refactor, Iframe.tsx used useHref('/iframes/...'), which prepends the router basename. The replacement getHref short-circuits any path starting with '/', which breaks the iframe preview in local dev; the fix restores rrUseHref.",
+   "cost_usd": 0.037384
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "30835babc49350f5ad446a6886639fb3e477a4e9",
+  "date": "2026-03-20",
+  "subject": "fix: met en liste noire les champs du simulateur TI",
+  "files": [
+   "site/source/pages/simulateurs/indépendant/simulationConfig.ts"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "5bdbeb40389de405c9f9df46acd2929a47510431",
+    "date": "2024-08-27",
+    "subject": "fix: il ne faut pas poser la question du régime d’imposition dans le simulateur indépendant",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-09-10",
+   "n": 2963,
+   "t": "refactor: rassemble la gestion des questions dans Redux"
+  },
+  "fix_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Adding 'entreprise . imposition' to the excluded questions did not introduce a bug; the fix only reorders that entry and blacklists additional remuneration and dividend fields.",
+   "file": "site/source/pages/simulateurs/indépendant/simulationConfig.ts",
+   "confidence": 0.85,
+   "reason": "The blamed line was only moved within the 'liste noire' array, which is a reorder, not a behaviour change. The actual fix blacklists other objective fields, which is unrelated to what the introducing commit changed.",
+   "cost_usd": 0.0124
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "4d624bd13f37c92f20cf1c6c389e07e09121c559",
+  "date": "2026-03-13",
+  "subject": "fix: corrige la navigation entre simulateurs indépendant",
+  "files": [
+   "site/source/hooks/useSimulationConfig.ts"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "6ea18b42fbd149a02e064ed5f0d088c1f0659430",
+    "date": "2021-02-18",
+    "subject": ":bug: corrige le bug de la simulation vide lors du retour depuis une page de doc",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2021-02-18",
+   "n": 1421,
+   "t": ":bug: corrige le bug de la simulation vide lors du retour depuis une …"
+  },
+  "fix_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Simulation is only reconfigured when the config object changes, so switching between simulators that share a config but have different keys keeps the stale simulation.",
+   "file": "site/source/hooks/useSimulationConfig.ts",
+   "confidence": 0.6,
+   "reason": "The 2021 config-identity check fixed the empty-simulation bug when returning from a documentation page. The fix, five years later, adds a check on the simulation key, which is likely tied to later 'indépendant' simulators sharing one config object. That scenario probably did not exist when the introducing change merged.",
+   "cost_usd": 0.015324
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "a374231211316a2ebd38080946afac628b940337",
+  "date": "2026-03-12",
+  "subject": "fix: enlève les questions liste noire de la liste des questions répondues",
+  "files": [
+   "site/source/components/conversation/AnswersList.tsx",
+   "site/source/domaine/estQuestionEnListeNoire.ts"
+  ],
+  "removed_lines": 13,
+  "introducing": [
+   {
+    "sha": "0d8c3163e31615e8e553eeef7fbe218299b7d194",
+    "date": "2024-05-30",
+    "subject": "fix: La conversation repasse sur les questions des objectifs",
+    "lines": 10
+   },
+   {
+    "sha": "6300c2086d070c6b8eb290bbba713be005148f5c",
+    "date": "2023-02-02",
+    "subject": "[cout de création] Amélioration suite retour Urssaf",
+    "lines": 2
+   },
+   {
+    "sha": "b0e14f9bae0f09d71b8e466aba9444dfaa888f55",
+    "date": "2023-02-02",
+    "subject": "Répare quelques bugs sur le simulateur cout de création",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-09-10",
+   "n": 2963,
+   "t": "refactor: rassemble la gestion des questions dans Redux"
+  },
+  "fix_pr": {
+   "merged": "2026-03-20",
+   "n": 4386,
+   "t": "[auto-entrepreneur] Questions fantômes lorsqu'on choisit une activité mixte"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "No defect in the blamed helper: estQuestionEnListeNoire correctly matches blacklisted prefixes; the bug is that AnswersList never filtered blacklisted questions.",
+   "file": "site/source/domaine/estQuestionEnListeNoire.ts",
+   "confidence": 0.75,
+   "reason": "The fix deletes the helper only as a refactor, swapping it for an estPasQuestionEnListeNoire variant. The actual bug, missing filtering in AnswersList.tsx, is not in the blamed lines, and nothing shows the introducing commit caused it.",
+   "cost_usd": 0.019012
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "a3acffcc97e61c554d7baafd9e7fa5d8a903ad46",
+  "date": "2026-03-11",
+  "subject": "fix(comparateur): corrige l'unité du revenu cotisé retraite de base (#4361)",
+  "files": [
+   "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "70e9893b456b9f94e58f8da32b7baaa2d3887300",
+    "date": "2026-02-24",
+    "subject": "feat(comparateur): harmonise les unités pour trimestres et points acquis/an",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-02-24",
+   "n": 4324,
+   "t": "Fix/4268 supprimer projections retraite"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-03-12",
+   "n": 4393,
+   "t": "fix(comparateur): corrige l'unité du revenu cotisé retraite de base"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "Changing the `unit` prop from \"€/an\" to \"€ cotisés par an\" passes an unparseable unit to publicodes, so the SASU value is no longer converted from €/mois to €/an and the monthly amount is shown as an annual one.",
+   "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "confidence": 0.92,
+   "reason": "The introducing diff put a display label into the `unit` prop, which drives the publicodes unit conversion. The SASU contributed income is computed per month, so the comparator showed that figure as if it were per year. The fix restores `unit=\"€/an\"` and moves the label into `displayedUnit`.",
+   "cost_usd": 0.013128
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "fef72133ab58d9f9b5594cb621dc88546c32d422",
+  "date": "2026-02-27",
+  "subject": "fix(rgdu): correction de la formule",
+  "files": [
+   "modele-social/règles/salarié/exonérations/réduction-générale.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "f0df08a43db0f35d7a27cdf58d7fa2a32e294b55",
+    "date": "2026-01-27",
+    "subject": "feat(salarié): implémentation de la réforme RGDU",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-02-09",
+   "n": 4285,
+   "t": "[Salarié⋅e] Réforme des allègements de cotisations patronales"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-02-27",
+   "n": 4364,
+   "t": "fix(rgdu): correction de la formule"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "high",
+   "visible_in_introducing_diff": true,
+   "defect": "The RGDU coefficient applies the 1/2 factor outside the exponent (0.5 * (3*SMIC/R - 1)^P) instead of inside it ([0.5 * (3*SMIC/R - 1)]^P) as the regulatory formula requires.",
+   "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "confidence": 0.93,
+   "reason": "The official RGDU formula is Tmin + Tdelta × [½ × (3·SMIC/R − 1)]^1.75. With the 0.5 outside the power, the coefficient is overstated for salaries between the SMIC and 3 SMIC (e.g. at 2 SMIC the factor is 0.149 instead of 0.088), so the computed employer reduction is wrong.",
+   "cost_usd": 0.024092
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "af5b246d092fd51c9f914ba6bbd680844f067a88",
+  "date": "2026-02-22",
+  "subject": "fix: supprime l'objectif retraite de base de la config comparateur",
+  "files": [
+   "site/source/pages/simulateurs/comparaison-statuts/simulationConfig.ts"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "307e3500022f5a81cf69cdffa3b145a1850cded7",
+    "date": "2022-12-01",
+    "subject": "Revoie les montants affiché pour la retraite dans le comparateur",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2022-12-02",
+   "n": 2410,
+   "t": "Meilleure retraite comparateur + correction bug"
+  },
+  "fix_pr": {
+   "merged": "2026-02-24",
+   "n": 4324,
+   "t": "Fix/4268 supprimer projections retraite"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "other",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Adding 'protection sociale . retraite . base' to the comparator objectives was not wrong when it merged; it was removed later after the display changed.",
+   "file": "site/source/pages/simulateurs/comparaison-statuts/simulationConfig.ts",
+   "confidence": 0.88,
+   "reason": "The fix only drops an objective that the comparator no longer displays, so it is a cleanup after a later UI change. When the 2022 commit merged, the base retirement amount was presumably shown, which made the objective correct.",
+   "cost_usd": 0.008824
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "0441ade1fa09a9f0f8cac28a0039a2cd0a5abc11",
+  "date": "2026-02-06",
+  "subject": "fix: ajoute la date aux questions liste noire",
+  "files": [
+   "site/source/store/selectors/listeNoire.selector.ts"
+  ],
+  "removed_lines": 4,
+  "introducing": [
+   {
+    "sha": "5e09b2ed8bdaeb775579bae47dc30106dec2de1d",
+    "date": "2025-07-01",
+    "subject": "refactor(questions): crée un sélecteur de questions en liste noire",
+    "lines": 4
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-07-03",
+   "n": 3799,
+   "t": "Régression : les raccourcis ont disparu du bloc questions des simulateurs"
+  },
+  "fix_pr": {
+   "merged": "2026-02-09",
+   "n": 4304,
+   "t": "[Indépendant.e et auto-entrepreneur.euse] Apparition d'une \"question fantome \"quand on choisit de faire une simulation dans une année antérieure (2025, 2024...)"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The new liste noire selector does not exclude the 'date' question from those asked in simulators.",
+   "file": "site/source/store/selectors/listeNoire.selector.ts",
+   "confidence": 0.6,
+   "reason": "The introducing commit was a faithful refactor that pulled the config blacklist into a selector. The fix, seven months later, adds 'date' to the blacklist, which most likely answers a 'date' rule becoming askable through later changes rather than a regression in this refactor.",
+   "cost_usd": 0.012828
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "61eaaa7ef88d664b9db4e951653a02b66dacab87",
+  "date": "2026-01-30",
+  "subject": "fix(salarié): ajout de la CET dans la base de l'exonération des heures supplémentaires",
+  "files": [
+   "modele-social/règles/salarié/exonérations/exonérations.publicodes"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "c98957fce48cf81784f73029e9bd8d994fde9036",
+    "date": "2025-01-17",
+    "subject": "refactor(salarié): déplace les exonérations dans un dossier et des fichiers dédiés",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-01-20",
+   "n": 3321,
+   "t": "Refactor : Lodeom"
+  },
+  "fix_pr": {
+   "merged": "2026-02-06",
+   "n": 4296,
+   "t": "fix(salarié): ajout de la CET dans la base de l'exonération des heures supplémentaires"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The reduced-contribution rate for the overtime exemption leaves out the CET; this line was carried over unchanged by a file-move refactor.",
+   "file": "modele-social/règles/salarié/exonérations/exonérations.publicodes",
+   "confidence": 0.8,
+   "reason": "The introducing commit only moved the existing exemption rules into a dedicated file without changing the formula. The missing CET in the overtime reduction base predates it, so this refactor did not introduce the defect.",
+   "cost_usd": 0.019876
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "9b9a4eae8edb46eb20bc276681d1cf5b7b8d070d",
+  "date": "2026-01-29",
+  "subject": "fix(questions): corrige la question en cours en cas de nouvelle question prioritaire",
+  "files": [
+   "site/source/hooks/useQuestions.ts"
+  ],
+  "removed_lines": 5,
+  "introducing": [
+   {
+    "sha": "4e83740991463f0bd13438b0fef9ed8e31a454e8",
+    "date": "2025-05-16",
+    "subject": "refactor: migre la logique d’orchestration des questions dans `useQuestions`",
+    "lines": 5
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2026-03-31",
+   "n": 4160,
+   "t": "Réforme de l'assiette des cotisations TI-PAM"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "state",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The active question is only reset when it stops being applicable, and then it jumps back to idsDesQuestions[0], even if that question is already answered; a newly applicable higher-priority unanswered question inserted before the current one is never shown and gets skipped by index-based navigation.",
+   "file": "site/source/hooks/useQuestions.ts",
+   "confidence": 0.6,
+   "reason": "The effect in the introducing hook ignores whether questions are answered and never re-targets when a new earlier question appears. Publicodes' ordering of next questions can change dynamically, so this regresses the conversation flow. The fix replaces this logic with targeting the first unanswered question.",
+   "cost_usd": 0.03098
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "5e17902719ef39ac12d3ea5fd46b285f1f7aaedd",
+  "date": "2026-01-27",
+  "subject": "fix(PAMC): corrige la saisie du taux Urssaf pour les chirurgiens-dentistes",
+  "files": [
+   "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "97076fba873116b72d9a5a485efa7dfd42b7d4aa",
+    "date": "2022-12-19",
+    "subject": "Mise à jour cotisation maladie indépendant 2023 et ajout de CIPAV",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-02-17",
+   "n": 2436,
+   "t": "Taux maladie indep 2023"
+  },
+  "fix_pr": {
+   "merged": "2026-01-27",
+   "n": 4283,
+   "t": "[Chirurgien.ne-dentiste] La réponse apportée à la question sur le taux Urssaf ne s'affiche pas"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "The chirurgien-dentiste 'taux Urssaf' question is declared unitless (unité: '', par défaut: 1), so a user who types a percentage (e.g. 30) gets 30 instead of 30%, inflating the participation base.",
+   "file": "modele-social/règles/dirigeant/PAMC.yaml",
+   "confidence": 0.45,
+   "reason": "The unitless declaration makes percentage input be read as a raw multiplier, which yields wrong amounts. The introducing commit appears to have only moved these lines while splitting dirigeant.yaml (its diff for this file is empty), so the defect may predate it.",
+   "cost_usd": 0.020992
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "dc21af13536d59ce916575a791f0a5ad1461e7b6",
+  "date": "2026-01-27",
+  "subject": "fix(dividendes): corrige le taux de la flat tax en description",
+  "files": [
+   "site/source/pages/simulateurs/dividendes/Dividendes.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "81d10c820b6c444c777207196629abe743845c3d",
+    "date": "2023-02-02",
+    "subject": "Big refacto metadata",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-02-09",
+   "n": 2495,
+   "t": "Big refacto sur les metadata"
+  },
+  "fix_pr": {
+   "merged": "2026-01-27",
+   "n": 4281,
+   "t": "[Dividendes] Corrige le taux de la flat tax dans le texte sous le simulateur"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "content",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "SEO explanation text states the flat tax is 30%, which later became outdated when the rate was raised to 31.4%.",
+   "file": "site/source/pages/simulateurs/dividendes/Dividendes.tsx",
+   "confidence": 0.9,
+   "reason": "The 30% flat tax was correct in 2023. The fix reflects a later legal change: the CSG increase to 31.4% in 2026. The introducing refactor only moved the text.",
+   "cost_usd": 0.007908
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "deec0537ccf8feb4e30b6b4ee0718da2fff32df9",
+  "date": "2026-01-21",
+  "subject": "fix(design-system): affiche le badge Bêta sur une nouvelle ligne dans les cartes",
+  "files": [
+   "site/source/components/SimulateurCard.tsx"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "b1ac475871f19acacf2056f24580fc0001f92b27",
+    "date": "2023-07-27",
+    "subject": "Implémentation de la page résultat",
+    "lines": 3
+   }
+  ],
+  "intro_pr": {
+   "merged": "2023-08-02",
+   "n": 2561,
+   "t": "Assistant choix statut"
+  },
+  "fix_pr": {
+   "merged": "2026-01-22",
+   "n": 4263,
+   "t": "fix(économie-collaborative): met à jour la vignette du simulateur de location de meublé dans la liste des outils"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The Bêta chip is rendered inline next to the card title rather than on its own line.",
+   "file": "site/source/components/SimulateurCard.tsx",
+   "confidence": 0.92,
+   "reason": "The fix only wraps the Bêta chip in a div so it sits on a new line. That is a styling/layout change, not a functional defect.",
+   "cost_usd": 0.012148
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "4acd0538b39f4c7b6b6a551856506e862d390f0d",
+  "date": "2026-01-21",
+  "subject": "fix(économie-collaborative): met à jour la vignette dans la liste des outils",
+  "files": [
+   "site/source/pages/simulateurs/location-de-meublé/config.ts"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "e8b88f2a91c36b813250b65f03b03d9869bd6c80",
+    "date": "2025-02-05",
+    "subject": "feat(économie-collaborative): ajoute une description au simulateur",
+    "lines": 2
+   },
+   {
+    "sha": "956addbaa844e83f33e1f881084a47c85aac5ceb",
+    "date": "2025-02-03",
+    "subject": "feat(économie-collaborative): ajoute le simulateur de location de meublé",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-02-13",
+   "n": 3384,
+   "t": "Feat/simulateur location meuble courte duree"
+  },
+  "fix_pr": {
+   "merged": "2026-01-22",
+   "n": 4263,
+   "t": "fix(économie-collaborative): met à jour la vignette du simulateur de location de meublé dans la liste des outils"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "content",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "The meta description says the simulator helps optimise taxation (fiscalité), while it actually determines social-security affiliation and regimes.",
+   "file": "site/source/pages/simulateurs/location-de-meublé/config.ts",
+   "confidence": 0.8,
+   "reason": "The fix only rewrites SEO meta description wording and the short name. This is a content/copy correction, not a functional defect.",
+   "cost_usd": 0.011612
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "34bb4f5d9a9eeaab8be2e8edc566a5d05c0ffc5b",
+  "date": "2026-01-20",
+  "subject": "fix(cessation-activité): précise que la rémunération inclut cotisations et contributions",
+  "files": [
+   "modele-social/règles/dirigeant/dirigeant.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "20aa9aea7ef8e3fc1793ec3d360b0ba205854e5b",
+    "date": "2025-02-11",
+    "subject": "fix(sasu): correction de la rémunération avec Acre",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-02-21",
+   "n": 3414,
+   "t": "Fix : comparateur de statut SASU avec Acre"
+  },
+  "fix_pr": {
+   "merged": "2026-01-28",
+   "n": 4262,
+   "t": "fix(cessation-activité): précise que la rémunération inclut cotisations et contributions"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "content",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The introducing commit only changed apostrophes in the résumé text; the fix rewords that summary to clarify that contributions are included, which is a wording change.",
+   "file": "modele-social/règles/dirigeant/dirigeant.publicodes",
+   "confidence": 0.95,
+   "reason": "The fix only edits the 'résumé' wording, a content clarification. The blamed line was a typographic apostrophe change, not a behavioral defect.",
+   "cost_usd": 0.019576
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "7b5404bfa71f196505269501345b071f92e06064",
+  "date": "2026-01-20",
+  "subject": "fix(location-meublé): masque temporairement le bouton Documentation",
+  "files": [
+   "site/source/pages/simulateurs/location-de-meublé/LocationDeMeublé.tsx"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "cf9701dbf1ec1a0790e8a45245d8a5e6fcdea2b2",
+    "date": "2025-06-11",
+    "subject": "feat: introduit la documentation éditorialisée MDX",
+    "lines": 2
+   },
+   {
+    "sha": "8a034fa01f2a6384144fdc516f8d0538e79836cb",
+    "date": "2025-12-18",
+    "subject": "feat(économie-collaborative): désactive le cas \"chambre d'hôtes\" avec un message explicatif",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2026-01-20",
+   "n": 4134,
+   "t": "[Économie collaborative] Choix du régime social pour la location de meublé"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "content",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The fix only hides the Documentation button because the documentation content later became outdated; the button did nothing wrong when it was introduced.",
+   "file": "site/source/pages/simulateurs/location-de-meublé/LocationDeMeublé.tsx",
+   "confidence": 0.85,
+   "reason": "The fix temporarily hides the button after the docs drifted out of date, seven months after the introducing commit. That is a later content or product decision, not a defect in the introducing change.",
+   "cost_usd": 0.02534
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "4f95f8cffffc043d4480c2d376ba8c39b7a52c57",
+  "date": "2026-01-15",
+  "subject": "fix: corrige la saisie des objectifs de simulation",
+  "files": [
+   "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+   "site/source/components/Simulation/SimulationGoal.tsx",
+   "site/source/pages/simulateurs/location-de-meublé/objectifs/ObjectifRecettes.tsx"
+  ],
+  "removed_lines": 31,
+  "introducing": [
+   {
+    "sha": "05bb94e1438aea30f2d0559674b8ba24bc92997e",
+    "date": "2026-01-01",
+    "subject": "fix(a11y): passer les props d'accessibilité au champ de saisie dans ObjectifSaisissableDeSimulation",
+    "lines": 22
+   },
+   {
+    "sha": "4e83740991463f0bd13438b0fef9ed8e31a454e8",
+    "date": "2025-05-16",
+    "subject": "refactor: migre la logique d’orchestration des questions dans `useQuestions`",
+    "lines": 4
+   },
+   {
+    "sha": "d44c233551fe0c460436bd34446a1d31c81c954e",
+    "date": "2025-04-08",
+    "subject": "refactor(économie-collaborative): découple l’objectif de simulation de l’engine Publicodes",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-01-01",
+   "n": 4164,
+   "t": "A11y / Simplify accessible name of inputs"
+  },
+  "fix_pr": {
+   "add": null,
+   "del": null,
+   "merged": "2026-01-15",
+   "n": 4241,
+   "t": "Quand on saisit un montant, il faut recliquer sur le champ de saisie pour chaque nouveau chiffre"
+  },
+  "escaped": true,
+  "screen": {
+   "verdict": "defect",
+   "category": "state",
+   "severity": "high",
+   "visible_in_introducing_diff": true,
+   "defect": "`RuleInputWrapper` is recreated by `useCallback` whenever its deps change (e.g. `evaluation.missingVariables`, `currentUnit`), and it is rendered as a component type (`<ChampSaisie />`). React therefore unmounts and remounts the input on every situation update, losing focus and the value being typed.",
+   "file": "site/source/components/Simulation/SimulationGoal.tsx",
+   "confidence": 0.82,
+   "reason": "Passing a dynamically created component as `ChampSaisie` changes its type identity on each re-evaluation, so the input remounts while the user types. The fix ('corrige la saisie des objectifs') goes back to a render function, which avoids the remounts.",
+   "cost_usd": 0.039412
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "588f3796c19261afa68c7c4a2b209580d7da4ebb",
+  "date": "2026-01-12",
+  "subject": "fix(salarié): remet la règle emploi franc . éligible",
+  "files": [
+   "site/source/pages/simulateurs/salarié/simulationConfig.ts"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "9ea8b55a00b6c0dd50a16687d506fe6098c9f97c",
+    "date": "2025-12-15",
+    "subject": "fix(salarié): corrige le retour au début en répondant à emploi franc",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-12-16",
+   "n": 4159,
+   "t": "[Salarié.e] Retour à la première question quand on répond \"non\" à la question sur l'emploi franc"
+  },
+  "fix_pr": {
+   "merged": "2026-01-12",
+   "n": 4216,
+   "t": "fix(salarié): remet la règle emploi franc . éligible"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "logic",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The 'Emploi franc' question entry was repointed from the boolean rule '… emploi franc . éligible' to the parent rule '… aides . emploi franc', so the question config no longer targets the rule that actually holds the yes/no answer.",
+   "file": "site/source/pages/simulateurs/salarié/simulationConfig.ts",
+   "confidence": 0.5,
+   "reason": "The fix reverts exactly this line and says it restores the 'éligible' rule, which suggests the introducing workaround broke how the emploi franc question is asked or recorded. It is possible, though, that this was a deliberate change in approach together with model changes not shown here.",
+   "cost_usd": 0.018892
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "cbfc1822b819c9cef2ed91d90f18df995fa928bb",
+  "date": "2026-01-06",
+  "subject": "fix(impôt): n’affiche la notification de domiciliation fiscale à l'étranger que pour les salariés",
+  "files": [
+   "modele-social/règles/impôt.publicodes"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "a710d1162e566ea1c3528a141979fb88fa697adf",
+    "date": "2021-01-04",
+    "subject": ":hammer: Rétabli l'impot sur le revenu pour les non-résident",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2021-01-05",
+   "n": 1337,
+   "t": "Change la question sur le secteur banque / assurance par une question plus large"
+  },
+  "fix_pr": {
+   "merged": "2026-01-06",
+   "n": 4106,
+   "t": "fix(cessation): supprime les questions liées à l’impôt sur le revenu"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The 'domiciliation étranger non implémentée' notification fires for any user with foreign tax residence, not only salariés.",
+   "file": "modele-social/règles/impôt.publicodes",
+   "confidence": 0.55,
+   "reason": "In 2021 the foreign-tax-residence question was most likely asked only in the salarié flow. The fix five years later most likely follows later extensions of that question or of the implemented regimes to other statuses. The introducing diff for this file is also empty, so the blamed lines cannot be tied to a bug that existed when it merged.",
+   "cost_usd": 0.01342
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "9ea8b55a00b6c0dd50a16687d506fe6098c9f97c",
+  "date": "2025-12-15",
+  "subject": "fix(salarié): corrige le retour au début en répondant à emploi franc",
+  "files": [
+   "modele-social/règles/salarié/aides-employeur.publicodes",
+   "site/source/pages/simulateurs/salarié/simulationConfig.ts"
+  ],
+  "removed_lines": 19,
+  "introducing": [
+   {
+    "sha": "c00ec711e630b95f7f3dae1a33725c1917b6c7f5",
+    "date": "2022-05-24",
+    "subject": "Réorganise la base de règle salariés",
+    "lines": 15
+   },
+   {
+    "sha": "e8f2aaf07899bed80367c91de22e5b5be9913b84",
+    "date": "2022-10-31",
+    "subject": "Refacto des configs des simulateurs",
+    "lines": 2
+   },
+   {
+    "sha": "d9e8a742f2a4422f3054f21e28fe15e2087e4b9f",
+    "date": "2022-09-14",
+    "subject": "Change le titre des règles suite à la refacto publicodes",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2022-09-15",
+   "n": 2143,
+   "t": "Refacto règles salarié"
+  },
+  "fix_pr": {
+   "merged": "2025-12-16",
+   "n": 4159,
+   "t": "[Salarié.e] Retour à la première question quand on répond \"non\" à la question sur l'emploi franc"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The 2022 namespace reorganisation carried over the 'emploi franc . éligible' sub-rule pattern; the 2025 fix restructures it to repair a flow reset.",
+   "file": "modele-social/règles/salarié/aides-employeur.publicodes",
+   "confidence": 0.6,
+   "reason": "The bug is the simulator jumping back to the start when the emploi franc question is answered. It depends on a simulationConfig.ts entry pointing at 'emploi franc . éligible', which most likely came with a much later UI change, and the introducing diff shows no relevant faulty lines. The 2022 refactor most likely only moved the rule, so the regression comes from later code interacting with an existing rule structure.",
+   "cost_usd": 0.022624
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "d86a66d1671a18e8d75cefed9c81fe5eafac29db",
+  "date": "2025-10-17",
+  "subject": "fix(apprentis): exonération de CSG-CRDS pour les apprentis",
+  "files": [
+   "modele-social/règles/salarié/contrat.publicodes",
+   "modele-social/règles/salarié/cotisations.publicodes"
+  ],
+  "removed_lines": 10,
+  "introducing": [
+   {
+    "sha": "0419d2137e925664c958b6acfa8edc636a42bdee",
+    "date": "2025-03-25",
+    "subject": "feat(salarié): mise à jour de la CSG-CRDS pour les apprentis",
+    "lines": 9
+   },
+   {
+    "sha": "1e02bca6ec333dd971322cb2df1711ae6b086dbf",
+    "date": "2023-12-14",
+    "subject": "chore: update to publicodes 1.0-rfc.1",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-03-31",
+   "n": 3532,
+   "t": "Feat : Mises à jour LFSS 2025"
+  },
+  "fix_pr": {
+   "merged": "2025-10-23",
+   "n": 4041,
+   "t": "MEP sprint Ingénieure"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "high",
+   "visible_in_introducing_diff": true,
+   "defect": "The apprentice CSG-CRDS replacement targets references to `cotisations . assiette` inside `salarié . cotisations . CSG-CRDS`. The real CSG-CRDS base goes through `assiette de base`, which uses `cotisations . assiette . sans prévoyance` and the 98.25% abatement, so the 50%-of-SMIC exemption is not applied to the right base.",
+   "file": "modele-social/règles/salarié/contrat.publicodes",
+   "confidence": 0.75,
+   "reason": "The fix rewires the replacement onto `CSG-CRDS . assiette de base` and applies the 50% SMIC abatement inside the `sans prévoyance` context. It also adds the rule that pay below 50% of SMIC is fully exempt, including the employer's mutuelle share. This shows the original rule computed apprentice CSG-CRDS incorrectly.",
+   "cost_usd": 0.027608
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "25c2fab9985e3429b676b9ea4fcfd644b3a430bc",
+  "date": "2025-10-17",
+  "subject": "fix(médecin): correction du taux maladie pour médecins S2",
+  "files": [
+   "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes"
+  ],
+  "removed_lines": 15,
+  "introducing": [
+   {
+    "sha": "6685d59458859d78cf36aabac7262ab0990ce670",
+    "date": "2024-10-28",
+    "subject": "fix: corrige le taux de cotisation maladie pour les PAMC",
+    "lines": 11
+   },
+   {
+    "sha": "97076fba873116b72d9a5a485efa7dfd42b7d4aa",
+    "date": "2022-12-19",
+    "subject": "Mise à jour cotisation maladie indépendant 2023 et ajout de CIPAV",
+    "lines": 3
+   },
+   {
+    "sha": "7a23c24e55dba10326b295091a7845336a3c5af7",
+    "date": "2025-03-17",
+    "subject": "fix(pam): correction de la contribution maladie additionnelle",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-10-29",
+   "n": 3189,
+   "t": "fix: corrige le taux de cotisation maladie pour les PAMC"
+  },
+  "fix_pr": {
+   "merged": "2025-10-23",
+   "n": 4041,
+   "t": "MEP sprint Ingénieure"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The new progressive rate (3.25% up to 40% PASS, rising to 9.75% at 110% PASS) is applied to every PAMC, including secteur 2 doctors, who should keep a flat 3.25% on non-conventionné income.",
+   "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "confidence": 0.6,
+   "reason": "The fix adds a specific S2 exception that the introducing commit missed when it replaced the flat 3.25% with the progressive rate. This overcharges S2 doctors' contribution additionnelle. It appears to be an omission rather than a later legal change, but the timing of the S2 rule is not fully certain.",
+   "cost_usd": 0.020924
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "81504e07ca6752eaffe4dccd24ff65f6786f15f4",
+  "date": "2025-10-14",
+  "subject": "fix(une possibilité): masque les options non applicables pour UnePossibilité",
+  "files": [
+   "site/source/components/conversation/getOnePossibilityOptions.tsx"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "c44b97b7aab01f8565ba422dc3b538b8e0c77cb4",
+    "date": "2025-04-24",
+    "subject": "refactor: amélioration le typage et découple les composants de saisie",
+    "lines": 3
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2025-10-23",
+   "n": 4041,
+   "t": "MEP sprint Ingénieure"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Options of 'une possibilité' are filtered only on nodeValue !== null, so options that are not applicable are not hidden.",
+   "file": "site/source/components/conversation/getOnePossibilityOptions.tsx",
+   "confidence": 0.65,
+   "reason": "The introducing commit is a decoupling refactor that appears to have moved existing getOnePossibilityOptions logic into a new file without changing it, so the null-only filter predates it. The later fix adds an extra 'est applicable' check, which reads more like a behaviour refinement than a regression shipped by this refactor.",
+   "cost_usd": 0.016276
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "ba3fd26a90a3a9ac5123e2185991facd70c93c90",
+  "date": "2025-09-02",
+  "subject": "fix(quantité): ajout d'un encodeur de quantité pour Publicodes",
+  "files": [
+   "site/source/domaine/Quantité.ts",
+   "site/source/domaine/engine/PublicodesAdapter.ts",
+   "site/source/domaine/engine/QuantitéAdapter.ts"
+  ],
+  "removed_lines": 20,
+  "introducing": [
+   {
+    "sha": "c08b9ce85b473afa514a6b7a1399f89e5ece13a2",
+    "date": "2025-06-27",
+    "subject": "feat: ajout de décimales à QuantitéField",
+    "lines": 15
+   },
+   {
+    "sha": "76d6626915a1e706e6894eef148f99ec0db00d7f",
+    "date": "2025-05-31",
+    "subject": "fix: corrige les clics sur les suggestions et applique les frontières de modules",
+    "lines": 4
+   },
+   {
+    "sha": "51aff0ec137384c220f79faf727b768bfbc006a1",
+    "date": "2025-07-05",
+    "subject": "fix(quantité-field): unités de quantité - ajout de heures/semaine - refacto - correction de la sérialisation",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-07-29",
+   "n": 3810,
+   "t": "Régression visuelle - Il manque le «par an» dans la question sur les autres revenus imposables"
+  },
+  "fix_pr": {
+   "merged": "2025-09-11",
+   "n": 3943,
+   "t": "Mise à jour `master`"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "other",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "No defect in the blamed lines: the added isUnitéQuantité type guard is a correct helper listing the quantity units.",
+   "file": "site/source/domaine/Quantité.ts",
+   "confidence": 0.7,
+   "reason": "The fix corrects how quantities are encoded for Publicodes: PublicodesAdapter returned a {valeur, unité} object instead of a valid expression string. Removing isUnitéQuantité is incidental cleanup of a helper unrelated to that encoding bug.",
+   "cost_usd": 0.019132
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "5832f805564e963d9081e265b04fd1a245d6769a",
+  "date": "2025-08-29",
+  "subject": "fix(comparaison-statuts): affiche les bonnes valeurs d'option AE",
+  "files": [
+   "site/source/hooks/useStatefulRulesEdit.ts",
+   "site/source/pages/simulateurs/comparaison-statuts/components/ModifierOptions.tsx"
+  ],
+  "removed_lines": 21,
+  "introducing": [
+   {
+    "sha": "90c5a47b988da1f18415f5d291419a67c070d1ec",
+    "date": "2024-06-26",
+    "subject": "refactor: revamp ModifierOptions.tsx",
+    "lines": 13
+   },
+   {
+    "sha": "4e83740991463f0bd13438b0fef9ed8e31a454e8",
+    "date": "2025-05-16",
+    "subject": "refactor: migre la logique d’orchestration des questions dans `useQuestions`",
+    "lines": 6
+   },
+   {
+    "sha": "a643a660960769449a317fa355e976af54d7b8ca",
+    "date": "2025-08-29",
+    "subject": "refactor(comparateur-statuts): création et utilisation d'un composant OuiNonSwitch",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-09-10",
+   "n": 2963,
+   "t": "refactor: rassemble la gestion des questions dans Redux"
+  },
+  "fix_pr": {
+   "merged": "2025-09-11",
+   "n": 3943,
+   "t": "Mise à jour `master`"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "state",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "The refactor reads the AE-only options (versement libératoire, ACRE eligibility for auto-entreprise) from the shared engine, which is not in the auto-entrepreneur context, instead of from the AE engine as before. The options drawer therefore shows wrong default values and can write them back on confirm.",
+   "file": "site/source/hooks/useStatefulRulesEdit.ts",
+   "confidence": 0.8,
+   "reason": "Previously `defaultValueVersementLiberatoire` came from `autoEntrepreneurEngine`; the new hook calls `engine.evaluate(rule)` with no AE context, so AE rules come back null or wrong. The fix adds `contexte { 'dirigeant . auto-entrepreneur': 'oui' }` to restore the correct values.",
+   "cost_usd": 0.04246
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "dd3e9ce9260eb43e8627b6764983e0135f9c4b69",
+  "date": "2025-08-29",
+  "subject": "fix(comparateur-statuts): correction de l'activation de l'Acre",
+  "files": [
+   "site/source/hooks/useStatefulRulesEdit.ts"
+  ],
+  "removed_lines": 10,
+  "introducing": [
+   {
+    "sha": "90c5a47b988da1f18415f5d291419a67c070d1ec",
+    "date": "2024-06-26",
+    "subject": "refactor: revamp ModifierOptions.tsx",
+    "lines": 8
+   },
+   {
+    "sha": "4e83740991463f0bd13438b0fef9ed8e31a454e8",
+    "date": "2025-05-16",
+    "subject": "refactor: migre la logique d’orchestration des questions dans `useQuestions`",
+    "lines": 1
+   },
+   {
+    "sha": "76d6626915a1e706e6894eef148f99ec0db00d7f",
+    "date": "2025-05-31",
+    "subject": "fix: corrige les clics sur les suggestions et applique les frontières de modules",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-09-10",
+   "n": 2963,
+   "t": "refactor: rassemble la gestion des questions dans Redux"
+  },
+  "fix_pr": {
+   "merged": "2025-09-11",
+   "n": 3943,
+   "t": "Mise à jour `master`"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "The `set` handler stores the raw `newValue`, but this only became wrong after a later refactor wrapped stored values in Option.",
+   "file": "site/source/hooks/useStatefulRulesEdit.ts",
+   "confidence": 0.65,
+   "reason": "In the introducing commit, `set` stored plain values and `read`/`confirm` used them unwrapped through `RèglePublicodeAdapter`, so the hook was consistent. The Acre bug appeared once a later refactor made the stored values `Option`s (read through `O.getOrUndefined`) without updating `set`, so the fault lies in that later change.",
+   "cost_usd": 0.020972
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "17175511b1be4410d844451111ba788d0cd68c62",
+  "date": "2025-08-25",
+  "subject": "fix(salarié): correction unité suggestions",
+  "files": [
+   "site/source/design-system/molecules/field/MontantField.tsx"
+  ],
+  "removed_lines": 6,
+  "introducing": [
+   {
+    "sha": "76d6626915a1e706e6894eef148f99ec0db00d7f",
+    "date": "2025-05-31",
+    "subject": "fix: corrige les clics sur les suggestions et applique les frontières de modules",
+    "lines": 5
+   },
+   {
+    "sha": "7391b81679cb46fa5e3f02477a16b2c53e9ad564",
+    "date": "2025-07-05",
+    "subject": "refacto: UnitéQuantité et UnitéMonétaire",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2025-09-11",
+   "n": 3943,
+   "t": "Mise à jour `master`"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "Suggestions are mapped to their raw `valeur` with no conversion to the field's recurring unit, so a €/an suggestion shown in a €/mois field would be wrong.",
+   "file": "site/source/design-system/molecules/field/MontantField.tsx",
+   "confidence": 0.55,
+   "reason": "In the introducing commit, suggestions are typed `Montant<U>`, the same unit as the field, so passing `valeur` straight through is consistent. The fix adds a new optional `unitéRécurrenteCible` prop for the salarié simulator's period toggle, which looks like a later requirement rather than a flaw shipped by this PR.",
+   "cost_usd": 0.028032
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "e20eab37466072461ed2ae7e115db5213b77fd10",
+  "date": "2025-07-29",
+  "subject": "fix(rgcp/lodeom): conserve les données lors du changement de type de régularisation",
+  "files": [
+   "site/source/utils/réductionDeCotisations.ts"
+  ],
+  "removed_lines": 10,
+  "introducing": [
+   {
+    "sha": "1dd4a65b904a530f7004d3d2d0b4b1cbbdb2da52",
+    "date": "2025-01-22",
+    "subject": "fix(lodeom): correction du bug Lodeom zone 2 (répartition)",
+    "lines": 6
+   },
+   {
+    "sha": "3c9e66b5eb560fafd9d24222e12f597c253794e3",
+    "date": "2025-01-27",
+    "subject": "refactor(rgcp/lodeom): suppression des conditions négatives",
+    "lines": 2
+   },
+   {
+    "sha": "4f93c72324ead9e6cc34905f614fe1e23d2652f1",
+    "date": "2024-12-20",
+    "subject": "refactor(lodeom): factorise le code commun avec RGCP",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-01-22",
+   "n": 3325,
+   "t": "Fix(rgcp/lodeom) : correction des erreurs de calcul avec régularisation annuelle"
+  },
+  "fix_pr": {
+   "merged": "2025-09-11",
+   "n": 3943,
+   "t": "Mise à jour `master`"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "The early return that resets month-by-month data to initial values when the situation is empty discards user-entered data when the régularisation type changes.",
+   "file": "site/source/utils/réductionDeCotisations.ts",
+   "confidence": 0.75,
+   "reason": "The early return on an empty situation existed before this commit. The introducing change only added the withRépartition argument to that existing call, so the data-loss behaviour the fix removes was not introduced here.",
+   "cost_usd": 0.02194
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "401bc6ba5f16f8d982b9e03baa6ce1449b67c42b",
+  "date": "2025-07-07",
+  "subject": "fix(auto-entrepreneur): CA activité mixte en €/mois",
+  "files": [
+   "site/source/components/ChiffreAffairesActivitéMixte.tsx",
+   "site/source/domaine/Montant.ts"
+  ],
+  "removed_lines": 12,
+  "introducing": [
+   {
+    "sha": "875d0d0fd93d1664398a77a1709cb18a8e1a096e",
+    "date": "2025-06-12",
+    "subject": "fix(auto-entrepreneureuse): impossible de saisir une activité mixte",
+    "lines": 9
+   },
+   {
+    "sha": "4e83740991463f0bd13438b0fef9ed8e31a454e8",
+    "date": "2025-05-16",
+    "subject": "refactor: migre la logique d’orchestration des questions dans `useQuestions`",
+    "lines": 1
+   },
+   {
+    "sha": "fa4a62fd07009ba0cc65f7e1e0b772c45f0299cb",
+    "date": "2022-11-24",
+    "subject": "Fix react 18 asynchrone bug on activité mixte",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2025-09-11",
+   "n": 3943,
+   "t": "Mise à jour `master`"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "calculation",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "useAdjustProportions sums CA amounts without converting them to a common unit, so when the simulator is in €/mois the entered value (€/mois) is added to the engine-evaluated values of other activities (€/an), giving a wrong total and wrong proportions.",
+   "file": "site/source/components/ChiffreAffairesActivitéMixte.tsx",
+   "confidence": 0.8,
+   "reason": "The introducing rewrite replaced engine-based summation, which handled units, with a raw `M.somme` that blindly adds `valeur` across differing units. It also reduces an empty array with no initial value, which throws when no amounts are present. The fix adds unit conversion and a unit check in `somme`.",
+   "cost_usd": 0.025748
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "936ded7601ec8dfe501dcee17c5aa0dd7ecae0cf",
+  "date": "2025-06-23",
+  "subject": "fix(cmg): L’option mois identiques reste active entre deux simulations",
+  "files": [
+   "site/source/contextes/cmg/hooks/CMGContext.tsx"
+  ],
+  "removed_lines": 4,
+  "introducing": [
+   {
+    "sha": "e83efc9a511e693b00e1af42f67e26509a0f5465",
+    "date": "2025-06-16",
+    "subject": "feat(cmg): ajoute la checkbox mois identiques",
+    "lines": 4
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-22",
+   "n": 3722,
+   "t": "[CMG] Option \"mois identiques\""
+  },
+  "fix_pr": {
+   "merged": "2025-06-24",
+   "n": 3762,
+   "t": "fix(cmg): L’option mois identiques reste active entre deux simulations"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "state",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "The new moisIdentiques state lives in the CMG context but is never reset when a new simulation starts, so the 'mois identiques' checkboxes stay checked from the previous simulation.",
+   "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+   "confidence": 0.72,
+   "reason": "The introducing commit added moisIdentiques state with no reset path. The fix adds resetMoisIdentiques because the option persisted between simulations, a stale-state bug present from the start.",
+   "cost_usd": 0.013772
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "201f75601252990ffb88e0f1483b50accc4780a8",
+  "date": "2025-06-23",
+  "subject": "fix(cmg): La raison d’inégibilité ne s’affiche pas en iFrame",
+  "files": [
+   "site/source/pages/assistants/cmg/pages/Déclarations.tsx",
+   "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "site/source/pages/assistants/cmg/pages/NonÉligible.tsx",
+   "site/source/pages/assistants/cmg/pages/Résultat.tsx"
+  ],
+  "removed_lines": 9,
+  "introducing": [
+   {
+    "sha": "16d8a37ebe0a931363224e945a6291d9da1f3510",
+    "date": "2025-06-13",
+    "subject": "fix(cmg): corrige l'historique de navigation",
+    "lines": 6
+   },
+   {
+    "sha": "3778896bb428e0dafbb11704be82cf861eb8e28b",
+    "date": "2025-06-07",
+    "subject": "refactor(cmg): suppression du 1er enfant dans la situation initiale",
+    "lines": 1
+   },
+   {
+    "sha": "6f072448dabf8f776f118f963b89408c6f66a539",
+    "date": "2025-06-07",
+    "subject": "refactor(cmg): modifie le retour de la fonction éligibilité",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3727,
+   "t": "[CMG] Responsive"
+  },
+  "fix_pr": {
+   "merged": "2025-06-23",
+   "n": 3760,
+   "t": "fix(cmg): utilise `useGetPath` pour corriger les liens de navigation"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Redirects use hardcoded '/assistants/cmg' paths instead of useGetPath, which loses the iframe context.",
+   "file": "site/source/pages/assistants/cmg/pages/Déclarations.tsx",
+   "confidence": 0.8,
+   "reason": "The introducing commit only added `{ replace: true }` to existing navigate calls. The hardcoded paths that break iframe redirects were already there before it, so the blamed change did not introduce the bug.",
+   "cost_usd": 0.022552
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "4a3b026236b2cad1711ed0eb3555a7058ef8d9b8",
+  "date": "2025-06-22",
+  "subject": "fix(cmg): corrige les id de checkbox",
+  "files": [
+   "site/source/contextes/cmg/domaine/Mois.ts",
+   "site/source/contextes/cmg/domaine/éligibilité.ts",
+   "site/source/pages/assistants/cmg/components/AMA/AMA.tsx",
+   "site/source/pages/assistants/cmg/components/AMA/DéclarationAMAInput.tsx",
+   "site/source/pages/assistants/cmg/components/AMA/EnfantsGardésInput.tsx",
+   "site/source/pages/assistants/cmg/components/GED/GED.tsx",
+   "site/source/pages/assistants/cmg/components/GED/GEDInput.tsx"
+  ],
+  "removed_lines": 25,
+  "introducing": [
+   {
+    "sha": "aa4b0a55f91078837ed6bf8c69096e6b27cff1cb",
+    "date": "2025-06-02",
+    "subject": "feat(cmg): ajout des champs GED et AMA",
+    "lines": 16
+   },
+   {
+    "sha": "7733187da2da5257081be2d9d408932ef5c42338",
+    "date": "2025-06-22",
+    "subject": "fix(cmg): Lorsque l’on renseigne la déclaration pour une AMA, impossible de cocher les enfants gardés sur avril et mai",
+    "lines": 6
+   },
+   {
+    "sha": "80bd2dbc59d1738a9258119570f46cb7dc28d595",
+    "date": "2025-05-30",
+    "subject": "refactor(cmg): modifie les interfaces",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3670,
+   "t": "CMGR-L ODIL"
+  },
+  "fix_pr": {
+   "merged": "2025-06-22",
+   "n": 3722,
+   "t": "[CMG] Option \"mois identiques\""
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "accessibility",
+   "severity": "low",
+   "visible_in_introducing_diff": true,
+   "defect": "GED and AMA both pass `idSuffix={`${index}`}` to their per-employee inputs, so the first GED employee and the first AMA employee get identical ids for the hours, pay and CMG fields of each month (e.g. `0-mars`), producing duplicate DOM ids.",
+   "file": "site/source/pages/assistants/cmg/components/AMA/AMA.tsx",
+   "confidence": 0.8,
+   "reason": "Both components use the same index-only suffix, which collides when both sections are rendered on the same page. The fix prefixes the suffixes with `AMA-` and `GED-` to make the ids unique.",
+   "cost_usd": 0.04276
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "7733187da2da5257081be2d9d408932ef5c42338",
+  "date": "2025-06-22",
+  "subject": "fix(cmg): Lorsque l’on renseigne la déclaration pour une AMA, impossible de cocher les enfants gardés sur avril et mai",
+  "files": [
+   "site/source/pages/assistants/cmg/components/AMA/AMAInput.tsx",
+   "site/source/pages/assistants/cmg/components/AMA/DéclarationAMAInput.tsx",
+   "site/source/pages/assistants/cmg/components/AMA/EnfantsGardésInput.tsx"
+  ],
+  "removed_lines": 21,
+  "introducing": [
+   {
+    "sha": "aa4b0a55f91078837ed6bf8c69096e6b27cff1cb",
+    "date": "2025-06-02",
+    "subject": "feat(cmg): ajout des champs GED et AMA",
+    "lines": 18
+   },
+   {
+    "sha": "550b9af6969e3ed6f74c98b6f1e78755c63fba72",
+    "date": "2025-06-13",
+    "subject": "feat(cmg): rend la page déclarations mobile friendly",
+    "lines": 1
+   },
+   {
+    "sha": "3337a9f2dc13f3f749240c9a41a25062560155d9",
+    "date": "2025-06-13",
+    "subject": "feat(cmg): ajoute des espaces avant les mois en version mobile",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3670,
+   "t": "CMGR-L ODIL"
+  },
+  "fix_pr": {
+   "merged": "2025-06-22",
+   "n": 3757,
+   "t": "fix(cmg): Lorsque l’on renseigne la déclaration pour une AMA, impossible de cocher les enfants gardés sur avril et mai"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "accessibility",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "No defect in this commit: the checkboxes here pass no explicit id; the duplicated `checkbox-enfant-${index}` id across months came from a later commit.",
+   "file": "site/source/pages/assistants/cmg/components/AMA/EnfantsGardésInput.tsx",
+   "confidence": 0.7,
+   "reason": "The fix's real change replaces the hard-coded `checkbox-enfant-${index}` id, which does not appear in this introducing diff; here the Checkbox gets no id at all. The blamed lines here (the `Object.keys` map and `month: string`) are only touched by the fix as a typing refactor.",
+   "cost_usd": 0.034828
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "ce66697a3f88cf47367c4d466e4e0fd3a33332c4",
+  "date": "2025-06-21",
+  "subject": "fix(cmg): navigation instable en iframe",
+  "files": [
+   "site/source/pages/assistants/cmg/components/Navigation.tsx"
+  ],
+  "removed_lines": 7,
+  "introducing": [
+   {
+    "sha": "3154374474b83364991051d5f855861c20007fe7",
+    "date": "2025-06-03",
+    "subject": "feat(cmg): ajoute la navigation entre les pages",
+    "lines": 5
+   },
+   {
+    "sha": "487edbe0199cf09bcf17d3b3ef0bc640015383e6",
+    "date": "2025-06-12",
+    "subject": "i18n(cmg): ajoute la traduction des boutons de navigation",
+    "lines": 1
+   },
+   {
+    "sha": "92ade3dcd7750dd3482a6f56c0f0f787800f565a",
+    "date": "2025-06-07",
+    "subject": "feat(cmg): désactive les boutons suivants lorsque la situation est incomplète",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3670,
+   "t": "CMGR-L ODIL"
+  },
+  "fix_pr": {
+   "merged": "2025-06-22",
+   "n": 3755,
+   "t": "fix(cmg): navigation instable en iframe"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "state",
+   "severity": "medium",
+   "visible_in_introducing_diff": true,
+   "defect": "Navigation builds links from absoluteSitePaths (/assistants/cmg/*), so inside the iframe route (/iframes/cmg/*) clicking Précédent/Suivant leaves the iframe route tree, remounts CMGProvider and loses the data already entered.",
+   "file": "site/source/pages/assistants/cmg/components/Navigation.tsx",
+   "confidence": 0.6,
+   "reason": "The fix replaces exactly these absolute links with context-aware paths to stop data loss on first navigation in the iframe. The PR targets an embedded (ODIL) integration, so the iframe context was likely in scope, but it is not certain the CMG iframe route existed when this commit merged.",
+   "cost_usd": 0.020868
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "ed2af5b13c2e7e053cf8817ede5f3071be31368c",
+  "date": "2025-06-17",
+  "subject": "fix(PAM): l’assistant PAM plante à l’affichae des résultats",
+  "files": [
+   "site/source/pages/assistants/declaration-revenus-pamc/components/LigneImpôts.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "17e324501bf4f7166b1e030e79d9a3a1806fa417",
+    "date": "2025-05-09",
+    "subject": "refactor: modernisation de l'architecture des questions et des composants de saisie",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2025-06-17",
+   "n": 3745,
+   "t": "fix(PAM): l’assistant PAM plante à l’affichae des résultats"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "crash",
+   "severity": "high",
+   "visible_in_introducing_diff": true,
+   "defect": "Removing toOuiNon passes a raw boolean as `arrondi` to engine.evaluate, which Publicodes cannot parse, so the PAMC assistant crashes when displaying results.",
+   "file": "site/source/pages/assistants/declaration-revenus-pamc/components/LigneImpôts.tsx",
+   "confidence": 0.9,
+   "reason": "The introducing diff replaced `toOuiNon(arrondi)` with the raw boolean. The fix restores the 'oui'/'non' conversion, and its commit message says the assistant crashed on the results display.",
+   "cost_usd": 0.01098
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "302975a6aae293962bed90563b7269b3abfffcf0",
+  "date": "2025-06-13",
+  "subject": "fix(persistence): incrémente les versions des clés de stockage local",
+  "files": [
+   "site/source/storage/persistCompanySituation.ts",
+   "site/source/storage/persistSimulation.ts"
+  ],
+  "removed_lines": 2,
+  "introducing": [
+   {
+    "sha": "61db7d33f7532e8f52732a0d84cc6e57b40bff1e",
+    "date": "2022-10-06",
+    "subject": "Met à jour la version du cache local storage pour éviter les crashs",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2022-10-06",
+   "n": 2308,
+   "t": "Passage de `modele-social` en 1.0.0 🎉"
+  },
+  "fix_pr": {
+   "merged": "2025-06-13",
+   "n": 3729,
+   "t": "fix/impossible_d_acceder_au_simulateur_independant"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "Version bump of local storage keys; the later bump responds to new schema changes years later, not a flaw in this change.",
+   "file": "site/source/storage/persistSimulation.ts",
+   "confidence": 0.95,
+   "reason": "The introducing commit correctly bumped cache versions to avoid crashes. The fix commit in 2025 is another bump for a later incompatible change, so the blamed lines are not a defect.",
+   "cost_usd": 0.010348
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "d988456bf947689b80d46e10f149bf16514a460f",
+  "date": "2025-06-13",
+  "subject": "fix(lodeom): questions localisation et barèmes posées en double",
+  "files": [
+   "site/source/hooks/useQuestions.ts"
+  ],
+  "removed_lines": 3,
+  "introducing": [
+   {
+    "sha": "cf9701dbf1ec1a0790e8a45245d8a5e6fcdea2b2",
+    "date": "2025-06-11",
+    "subject": "feat: introduit la documentation éditorialisée MDX",
+    "lines": 3
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2025-06-13",
+   "n": 3721,
+   "t": "fix(lodeom): questions localisation et barèmes posées en double"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "Answered Publicodes questions are not filtered by the config blacklist, so LODEOM localisation and barème questions appear twice.",
+   "file": "site/source/hooks/useQuestions.ts",
+   "confidence": 0.72,
+   "reason": "The introducing commit only wrapped the existing question merging in useMemo and captured the original callbacks; the lack of blacklist filtering on answered questions predates it. The fix also needed new LODEOM blacklist entries, so the blamed lines are a refactor rather than the cause.",
+   "cost_usd": 0.023432
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "98ce2eeaeb6bfb83c573dcf73de2eacc22131891",
+  "date": "2025-06-13",
+  "subject": "fix: la situation en search params ne fonctionne pas",
+  "files": [
+   "site/source/hooks/useSearchParamsSimulationSharing.ts"
+  ],
+  "removed_lines": 18,
+  "introducing": [
+   {
+    "sha": "5e1c1a2aa3f0437f9657a9bfae8d8082ca6de534",
+    "date": "2022-04-06",
+    "subject": "Ajout du bouton de partage",
+    "lines": 12
+   },
+   {
+    "sha": "49dac893cc352178bd20fb11da161445a64c5d27",
+    "date": "2023-12-14",
+    "subject": "fix: remove space in unité",
+    "lines": 3
+   },
+   {
+    "sha": "40fbb99026c6b27068e1ecf6d5a19c8f835c68f9",
+    "date": "2021-01-07",
+    "subject": "Partage de la situation via URL (#1241)",
+    "lines": 2
+   }
+  ],
+  "intro_pr": {
+   "merged": "2022-04-20",
+   "n": 2057,
+   "t": "Nouvelle version assistant déclaration indépendant"
+  },
+  "fix_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "No defect at merge time: the 2022 search-params parsing produced the string/object situation values the engine accepted then.",
+   "file": "site/source/hooks/useSearchParamsSimulationSharing.ts",
+   "confidence": 0.8,
+   "reason": "The 2025 fix adapts the parsing to the later ValeurPublicodes/Option-based situation model through a new SearchParamsAdapter. The break most likely came from that later refactor, not from the 2022 share-button code that the script blamed.",
+   "cost_usd": 0.014276
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "9429090d4bada157bd43a402204faf325a2cbbe8",
+  "date": "2025-06-12",
+  "subject": "fix(montant-field): corrige le bug des centimes dans les champs Montant",
+  "files": [
+   "site/source/design-system/molecules/field/MontantField.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "da8e6513ef00721e5485ffff716fa0cf50b24980",
+    "date": "2025-05-26",
+    "subject": "refactor(design-system): découple le composant `InputSuggestions`",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "fix_pr": {
+   "merged": "2025-06-13",
+   "n": 3670,
+   "t": "CMGR-L ODIL"
+  },
+  "screen": {
+   "verdict": "defect",
+   "category": "ui",
+   "severity": "low",
+   "visible_in_introducing_diff": false,
+   "defect": "When `avecCentimes` is true, setting `minimumFractionDigits: 2` makes the react-aria NumberField always force two decimal places, which breaks how amounts with cents are entered and displayed in the Montant field.",
+   "file": "site/source/design-system/molecules/field/MontantField.tsx",
+   "confidence": 0.55,
+   "reason": "The fix commit's message names this exact line as the cents bug and changes only `minimumFractionDigits`, which points to a functional input defect rather than a product change. Confidence is limited because the introducing diff provided for this file is empty, so the blame attribution to the introducing commit cannot be checked.",
+   "cost_usd": 0.017168
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ },
+ {
+  "fix": "db6b6ec79316c0a6f6e8d8b8d297e44a946ab815",
+  "date": "2025-06-12",
+  "subject": "fix(dividendes): impossible de choisir le mode d’imposition",
+  "files": [
+   "site/source/pages/simulateurs/dividendes/Dividendes.tsx"
+  ],
+  "removed_lines": 1,
+  "introducing": [
+   {
+    "sha": "54d49accd1c5cfbd923d63aad61e1e5ab760c4bd",
+    "date": "2024-03-07",
+    "subject": "refactor: rassemble la gestion des questions dans Redux",
+    "lines": 1
+   }
+  ],
+  "intro_pr": {
+   "merged": "2024-09-10",
+   "n": 2963,
+   "t": "refactor: rassemble la gestion des questions dans Redux"
+  },
+  "fix_pr": {
+   "merged": "2025-06-13",
+   "n": 3459,
+   "t": "Découple les simulateurs de Publicodes pour permettre de finir le simulateur d’économie collaborative"
+  },
+  "screen": {
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "medium",
+   "visible_in_introducing_diff": false,
+   "defect": "Dispatching enregistreLaRéponse with a manually quoted value `'${value}'` may double-quote the answer if the action serialises values itself.",
+   "file": "site/source/pages/simulateurs/dividendes/Dividendes.tsx",
+   "confidence": 0.6,
+   "reason": "The introducing commit only renamed updateSituation to enregistreLaRéponse and kept the quoting that worked with the old action. The fix came about 15 months later, most likely after enregistreLaRéponse started quoting values itself, which turned the manual quoting into a double-quote bug.",
+   "cost_usd": 0.016716
+  },
+  "screen_model": "anthropic/claude-opus-5.5"
+ }
+]

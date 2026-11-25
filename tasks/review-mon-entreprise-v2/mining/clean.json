@@ -1,0 +1,275 @@
+{
+ "version": 1,
+ "seed": 20261119,
+ "repo": {
+  "github": "betagouv/mon-entreprise",
+  "branch": "master"
+ },
+ "window": {
+  "since": "2025-06-01",
+  "until": null
+ },
+ "matched_to": "the review-mon-entreprise prototype's 14 clean PRs (select_clean.py, seed 20261119: merged 2025-01-01 to 2026-09-10, rebase-merged, size-matched to its escaped PRs)",
+ "bins": [
+  {
+   "lo": 1,
+   "hi": 200,
+   "escaped": 0,
+   "want": 4,
+   "got": 4
+  },
+  {
+   "lo": 200,
+   "hi": 1000,
+   "escaped": 0,
+   "want": 6,
+   "got": 6
+  },
+  {
+   "lo": 1000,
+   "hi": 5000,
+   "escaped": 0,
+   "want": 3,
+   "got": 3
+  },
+  {
+   "lo": 5000,
+   "hi": 20000,
+   "escaped": 0,
+   "want": 1,
+   "got": 1
+  }
+ ],
+ "picked": [
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 4609,
+    "title": "Le site plante en dev local",
+    "merged_at": "2026-07-23T22:14:28Z"
+   },
+   "lines": 29,
+   "files": 2,
+   "commits": 2,
+   "bin": "1-200"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 3280,
+    "title": "Prestations maternité : ajustement durée affiliation",
+    "merged_at": "2025-01-09T11:12:38Z"
+   },
+   "lines": 6,
+   "files": 3,
+   "commits": 2,
+   "bin": "1-200"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 3285,
+    "title": "[Indépendants] Correction de l'assiette plancher pour la cotisation \"Invalidité et Décès\"",
+    "merged_at": "2025-01-09T12:50:58Z"
+   },
+   "lines": 76,
+   "files": 4,
+   "commits": 1,
+   "bin": "1-200"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 3746,
+    "title": "[CMG] FIX bug de navigation en iframe",
+    "merged_at": "2025-06-18T14:34:32Z"
+   },
+   "lines": 62,
+   "files": 4,
+   "commits": 1,
+   "bin": "1-200"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 4534,
+    "title": "[SAS(U)] La réforme de l'ACRE n'est pas appliquée pour les cotisations salariales",
+    "merged_at": "2026-06-10T08:08:23Z"
+   },
+   "lines": 219,
+   "files": 4,
+   "commits": 1,
+   "bin": "200-1000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 4567,
+    "title": "[Mayotte] Exonérations Acre, invalidité, incapacité et âge",
+    "merged_at": "2026-06-29T08:25:36Z"
+   },
+   "lines": 230,
+   "files": 2,
+   "commits": 1,
+   "bin": "200-1000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 4606,
+    "title": "Documentation des paquets `modele-as` et `modele-ti`",
+    "merged_at": "2026-07-16T11:32:28Z"
+   },
+   "lines": 407,
+   "files": 3,
+   "commits": 1,
+   "bin": "200-1000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 3385,
+    "title": "[TI/EI] expliciter la rubrique \"Charges\"",
+    "merged_at": "2025-02-06T08:35:26Z"
+   },
+   "lines": 527,
+   "files": 9,
+   "commits": 4,
+   "bin": "200-1000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 4427,
+    "title": "fix(SearchParams): gérer les expressions Publicodes non taguées dans l’encodage URL",
+    "merged_at": "2026-03-31T15:20:20Z"
+   },
+   "lines": 211,
+   "files": 7,
+   "commits": 2,
+   "bin": "200-1000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 4490,
+    "title": "Feat/algolia export push",
+    "merged_at": "2026-04-28T21:31:43Z"
+   },
+   "lines": 417,
+   "files": 8,
+   "commits": 4,
+   "bin": "200-1000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 3444,
+    "title": "[AE] Préciser les définitions des rubriques retraite",
+    "merged_at": "2025-03-11T10:46:15Z"
+   },
+   "lines": 1869,
+   "files": 33,
+   "commits": 5,
+   "bin": "1000-5000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 3632,
+    "title": "[Assistant PAM] Rajouter des ressources pour aider à remplir sa déclaration fiscale et sociale",
+    "merged_at": "2025-05-17T21:13:07Z"
+   },
+   "lines": 1077,
+   "files": 48,
+   "commits": 5,
+   "bin": "1000-5000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 3442,
+    "title": "[PAM] Ajout du régime réel à l'assitant de déclaration",
+    "merged_at": "2025-03-04T16:53:37Z"
+   },
+   "lines": 1976,
+   "files": 13,
+   "commits": 11,
+   "bin": "1000-5000"
+  },
+  {
+   "unit": {
+    "kind": "pr",
+    "number": 4653,
+    "title": "feat(cmg): supprime l'assistant complément transitoire",
+    "merged_at": "2026-09-01T14:02:27Z"
+   },
+   "lines": 5601,
+   "files": 62,
+   "commits": 3,
+   "bin": "5000-20000"
+  }
+ ],
+ "rejected": [
+  {
+   "unit": "pr4436",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr3727",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4380",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr3268",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4509",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4018",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4597",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4470",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr3479",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4059",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4612",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4561",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr3290",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr4513",
+   "reason": "a later fix blamed it"
+  },
+  {
+   "unit": "pr3943",
+   "reason": "a later fix blamed it"
+  }
+ ]
+}

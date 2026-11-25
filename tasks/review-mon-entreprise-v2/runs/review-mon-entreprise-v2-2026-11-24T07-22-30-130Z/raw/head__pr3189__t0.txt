@@ -1,0 +1,54 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 177,
+  "end_line": 177,
+  "message": "Je ne vois nulle part la source de ces taux (3,25 % jusqu'à 40 % du PASS, 9,75 % jusqu'à 110 %). Pourrais-tu ajouter une `références` (texte de loi ou fiche Urssaf) sur la règle, comme pour la cotisation maladie générale dans `indépendant.publicodes` ? Cela permettrait aussi de vérifier que ces taux valent pour toutes les années simulables, ou s'il faut une `variations` sur la date."
+ },
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 166,
+  "end_line": 170,
+  "message": "Je me demande si le taux obtenu est le bon : `taux progressif` calcule un taux moyen sur `assiette des cotisations`, mais il est ensuite multiplié par `assiette des cotisations - assiette participation CPAM`, une base plus petite pour un médecin secteur 1. Un taux moyen appliqué à une autre base ne donne pas le même montant qu'un barème appliqué à la base réellement concernée. Est-ce bien ce que prévoit le texte ? Si oui, une note dans la règle l'expliquerait. Par ailleurs, les snapshots montrent des hausses fortes (médecin à 300 k€ : +4 k€ de cotisations) : un test dédié avec des valeurs calculées à la main aux seuils (40 % et 110 % du PASS, et au-delà) donnerait plus de confiance que les seuls snapshots."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3189,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "line": 177,
+   "start_line": null,
+   "body": "Je ne vois nulle part la source de ces taux (3,25 % jusqu'à 40 % du PASS, 9,75 % jusqu'à 110 %). Pourrais-tu ajouter une `références` (texte de loi ou fiche Urssaf) sur la règle, comme pour la cotisation maladie générale dans `indépendant.publicodes` ? Cela permettrait aussi de vérifier que ces taux valent pour toutes les années simulables, ou s'il faut une `variations` sur la date.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "line": 170,
+   "start_line": 166,
+   "body": "Je me demande si le taux obtenu est le bon : `taux progressif` calcule un taux moyen sur `assiette des cotisations`, mais il est ensuite multiplié par `assiette des cotisations - assiette participation CPAM`, une base plus petite pour un médecin secteur 1. Un taux moyen appliqué à une autre base ne donne pas le même montant qu'un barème appliqué à la base réellement concernée. Est-ce bien ce que prévoit le texte ? Si oui, une note dans la règle l'expliquerait. Par ailleurs, les snapshots montrent des hausses fortes (médecin à 300 k€ : +4 k€ de cotisations) : un test dédié avec des valeurs calculées à la main aux seuils (40 % et 110 % du PASS, et au-delà) donnerait plus de confiance que les seuls snapshots.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/3176: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 11,
+  "cost_usd": 0.19964890000000002,
+  "final_text": "J'ai posté deux commentaires inline sur la PR #3189, tous deux sur `PAMC.publicodes`. Je n'ai pas posté de commentaire global.\n\n- **Source des taux (ligne 177)** : je n'ai trouvé aucune `références` pour les taux 3,25 % jusqu'à 40 % du PASS et 9,75 % jusqu'à 110 %. Je demande aussi si ces taux valent pour toutes les années simulables, ou s'il faut une condition sur la date.\n- **Base du calcul (lignes 166-170)** : `taux progressif` calcule un taux moyen sur `assiette des cotisations`, puis ce taux est appliqué à `assiette des cotisations - assiette participation CPAM`, une base plus petite pour un médecin secteur 1. Je demande si le texte prévoit bien cela. Je demande aussi un test dédié aux seuils (40 % et 110 % du PASS, et au-delà), car les snapshots montrent des hausses fortes (médecin à 300 k€ : environ +4 k€ de cotisations).\n\nJe n'ai pas pu lire l'issue #3176 : l'API renvoie 404, donc je n'ai pas vérifié ce que la PR devait traiter. Le workflow « Vérification PR » est au vert."
+ }
+}
+
+```

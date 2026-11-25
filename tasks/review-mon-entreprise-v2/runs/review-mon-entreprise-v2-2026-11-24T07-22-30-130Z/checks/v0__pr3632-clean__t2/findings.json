@@ -1,0 +1,29 @@
+[
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 36,
+  "end_line": 36,
+  "message": "Je me demande si cette condition de sortie ne laisse pas passer un cas : avant, on testait `guidesUrssaf.length` (liste déjà filtrée par les règles), maintenant on teste `externalLinks` (liste brute). Sur un simulateur qui n'a que des liens conditionnés dont aucune règle n'est vraie, on afficherait le titre « Ressources utiles » avec une grille vide. Tester `relevantExternalLinks?.length` me semblerait plus sûr. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 59,
+  "end_line": 59,
+  "message": "Le test `language === 'fr'` de l'ancienne version a disparu : les guides Urssaf (en français uniquement, cf. les TODO de traduction dans `external-links/*`) vont donc s'afficher aussi en anglais. Est-ce voulu ? Sinon je verrais bien un filtre sur la langue, ou la traduction des textes avant de les exposer.\n\nnit: `key={index}` → `key={externalLink.url}` serait plus stable."
+ },
+ {
+  "file": "site/source/external-links/premiersMoisUrssaf.ts",
+  "start_line": 4,
+  "end_line": 4,
+  "message": "Dans l'ancienne liste, ce lien avait une `associatedRule` (auto-entrepreneur ou `dirigeant . indépendant . PL`). Ici elle a disparu, alors que le lien est utilisé dans le simulateur indépendant (et médecin, avocat, EI…) : il sera donc affiché à tous les indépendants, y compris hors professions libérales. Même question pour `embaucherGérerSalariés` et `nouvelEmployeur` (conditions sur `dirigeant = non` et artiste-auteur retirées ; correct sur le simulateur salarié, mais je n'ai pas vérifié les autres usages). Je n'ai pas pu vérifier le périmètre éditorial voulu : est-ce un choix assumé ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+  "start_line": 23,
+  "end_line": 23,
+  "message": "Je n'ai pas trouvé de clé hiérarchique ici, alors que CONTRIBUTING demande `t('cle.hierarchique', 'défaut fr')`. Idem pour « En savoir plus » plus bas. Peut-être existe-t-il des clés équivalentes à réutiliser (l'ancienne `GuideURSSAFCard` en avait) ?\n\nnit: `export default` ici et sur `NextSteps`, alors que la convention est l'export nommé."
+ },
+ {
+  "message": "Synthèse :\n- Direction claire : la décision éditoriale passe dans les configs, et `NextSteps` s'allège nettement.\n- Je ne vois aucun test ajouté ou modifié (filtrage par règle, section vide, langue). Un test sur la liste filtrée me semblerait utile vu les régressions possibles ci-dessus.\n- Les fichiers `external-links/*` portent des TODO de traduction : CONTRIBUTING demande que tout texte affiché passe par `t()`. À traiter ici ou en suite assumée ?\n- Je n'ai pas pu vérifier le rendu visuel ni les parcours E2E.\n- Historique : un commit `fix(tests)` corrige l'e2e cassé par un commit précédent de la PR ; un fixup dans le commit fautif garderait chaque commit vert."
+ }
+]

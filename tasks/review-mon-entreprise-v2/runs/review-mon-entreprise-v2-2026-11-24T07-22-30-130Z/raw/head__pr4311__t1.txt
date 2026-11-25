@@ -1,0 +1,54 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 54,
+  "end_line": 54,
+  "message": "Je me demande si cette résolution maison des chemins relatifs est équivalente à celle de react-router : `.pathname` ne garde ni la query ni le hash de `to`, donc `getHref(\"?page=2\")` ou `getHref(\"#ancre\")` renverrait le chemin nu. Est-ce voulu ? Sinon `resolvePath` de react-router ferait ce travail."
+ },
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 31,
+  "end_line": 31,
+  "message": "Cette couche (`onNavigate`, `getHref`, `matchPath`) porte de la logique sans aucun test. Un test du provider (notification uniquement après un vrai changement de location et pas au premier rendu, `getHref` relatif) protégerait la future bascule vers Next.js. Qu'en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4311,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+   "line": 54,
+   "start_line": null,
+   "body": "Je me demande si cette résolution maison des chemins relatifs est équivalente à celle de react-router : `.pathname` ne garde ni la query ni le hash de `to`, donc `getHref(\"?page=2\")` ou `getHref(\"#ancre\")` renverrait le chemin nu. Est-ce voulu ? Sinon `resolvePath` de react-router ferait ce travail.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+   "line": 31,
+   "start_line": null,
+   "body": "Cette couche (`onNavigate`, `getHref`, `matchPath`) porte de la logique sans aucun test. Un test du provider (notification uniquement après un vrai changement de location et pas au premier rendu, `getHref` relatif) protégerait la future bascule vers Next.js. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4214: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.15762020000000002,
+  "final_text": "J'ai relu la PR #4311 et posté deux commentaires inline, tous les deux sur `ReactRouterNavigationProvider.tsx`. Le workflow « Vérification PR » est au vert et je n'ai exécuté aucun code.\n\n- **Ligne 54, `getHref`** : je demande si la résolution maison des chemins relatifs est voulue. Avec `.pathname`, la query et le hash de `to` sont perdus, donc `getHref(\"?page=2\")` ou `getHref(\"#ancre\")` renverrait le chemin nu. J'ai suggéré `resolvePath` de react-router comme piste.\n- **Ligne 31, tests** : la couche de navigation (`onNavigate`, `getHref`, `matchPath`) n'a aucun test. J'en propose pour le provider react-router : notification seulement après un vrai changement de location, et `getHref` relatif.\n\nJe n'ai pas pu lire l'issue #4214 : l'API renvoie 404. Je n'ai donc pas pu vérifier ce que la PR devait traiter.\n\nJe n'ai posté aucun commentaire global."
+ }
+}
+
+```

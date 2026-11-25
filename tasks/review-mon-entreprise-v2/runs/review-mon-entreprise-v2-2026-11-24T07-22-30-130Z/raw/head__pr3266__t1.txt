@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Cette clé `réductionGénérale` ne correspond plus au type `MonthState` (le champ s’appelle désormais `réduction`) : le renommage a l’air incomplet. Comme `...monthData` est répandu juste avant, l’ancienne `réduction` est conservée. Quand la rémunération totale retombe à 0 (par exemple en vidant le dernier mois renseigné), les mois gardent donc leur réduction précédente, et ce champ en trop est ignoré sans erreur de type. Je verrais bien :\n```suggestion\n\t\t\t\tréduction: {\n```"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3266,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/utils/réductionDeCotisations.ts",
+   "line": 267,
+   "start_line": null,
+   "body": "Cette clé `réductionGénérale` ne correspond plus au type `MonthState` (le champ s’appelle désormais `réduction`) : le renommage a l’air incomplet. Comme `...monthData` est répandu juste avant, l’ancienne `réduction` est conservée. Quand la rémunération totale retombe à 0 (par exemple en vidant le dernier mois renseigné), les mois gardent donc leur réduction précédente, et ce champ en trop est ignoré sans erreur de type. Je verrais bien :\n```suggestion\n\t\t\t\tréduction: {\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1377195,
+  "final_text": "J'ai relu la PR et posé un seul commentaire inline. Il porte sur `site/source/utils/réductionDeCotisations.ts`, ligne 267.\n\nQuand la rémunération totale retombe à 0, la fonction `reevaluateRéductionMoisParMois` renvoie un objet avec la clé `réductionGénérale`. Le type `MonthState` n'a plus que `réduction`, donc le renommage semble incomplet. Comme `...monthData` est répandu juste avant, l'ancienne réduction est conservée. TypeScript ne signale pas la clé en trop. Par exemple, si l'on vide le dernier mois renseigné, les mois gardent leur réduction précédente. J'ai proposé de renommer la clé en `réduction`.\n\nJ'ai lu ce fichier et les checks de la PR, qui passent. Je n'ai pas relu les autres fichiers du diff, notamment les composants et la configuration du simulateur Lodeom. Je n'ai rien exécuté, donc l'effet décrit vient de la lecture du code."
+ }
+}
+
+```

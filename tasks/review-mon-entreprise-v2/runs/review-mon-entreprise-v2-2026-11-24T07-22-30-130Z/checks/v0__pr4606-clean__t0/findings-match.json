@@ -1,0 +1,27 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/integration/Library.tsx",
+      "start_line": 107,
+      "end_line": 107,
+      "message": "Il me semble qu’il manque une espace après la virgule : JSX supprime le retour à la ligne, donc le rendu serait « modele-as,modele-ti » (visible aussi dans `ui-fr.yaml` : `<3>modele-as</3>,<5>modele-ti</5>`). Peut-être ajouter `{' '}` après la virgule, comme tu l’as fait ailleurs ?"
+    },
+    {
+      "message": "Une piste, que je n'ai pas pu vérifier visuellement : le paragraphe « Utilisation » et l'exemple CodeSandbox restent centrés sur `modele-social`. Je me demande si une phrase sur l'adaptation de l'import pour `modele-as` / `modele-ti` serait utile, puisque l'avertissement indique que les règles AS/TI de `modele-social` ne sont plus maintenues."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

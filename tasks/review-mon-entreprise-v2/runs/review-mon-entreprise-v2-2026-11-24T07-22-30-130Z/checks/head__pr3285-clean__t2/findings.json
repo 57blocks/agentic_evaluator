@@ -1,0 +1,11 @@
+[
+ {
+  "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+  "start_line": 148,
+  "end_line": 148,
+  "message": "La description de la PR cite D632-1 avec l’identifiant LEGIARTI000036471466, alors qu’ici cet identifiant sert pour D632-2 (lignes 629-630) et D632-1 pointe vers LEGIARTI000041966755. Un des liens est-il inversé ? Je n’ai pas pu le vérifier de mon côté."
+ },
+ {
+  "message": "Dans `indépendant.publicodes` (ligne 172, hors diff), la règle `assiette minimale . retraite . en 2022` remplace les références à `assiette minimale . retraite` « sauf dans » `cotisations et contributions . invalidité et décès`. Maintenant que cette dernière référence `assiette minimale . invalidité et décès`, ce `sauf dans` ne protège plus rien. Je me demande si on ne devrait pas le retirer dans cette PR, pour ne pas laisser une exception trompeuse. Qu’en penses-tu ?"
+ }
+]

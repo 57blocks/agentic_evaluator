@@ -1,0 +1,63 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+      "start_line": 3,
+      "end_line": 3,
+      "message": "Ce hook duplique le corps de `ScrollToTop.tsx` (même `window.scroll` avec le même repli), qui est déjà utilisé dans `pages/assistants/index.tsx` et `choix-du-statut/index.tsx`. Je me demande si on ne pourrait pas simplement rendre `<ScrollToTop />` dans `cmg/index.tsx`, pour ne pas avoir deux implémentations qui divergeront. Il y a aussi un souci de cohérence : ici c'est un `export default` alors que la convention est l'export nommé. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/components/GED/GED.tsx",
+      "start_line": 28,
+      "end_line": 34,
+      "message": "La règle « mois identiques = avril et mai recopient mars » est écrite ici, puis réécrite dans `GEDInput.onDéclarationChange`, et sans doute une troisième fois côté AMA. C'est de la logique métier dans des composants. Je verrais bien une fonction pure dans `contextes/cmg/domaine` (par ex. `appliquerMoisIdentiques(salariée)`) que GED et AMA appellent, et que l'on puisse tester sans React. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+      "start_line": 16,
+      "end_line": 16,
+      "message": "`moisIdentiques` est un tableau parallèle à `situation.salariées.GED/AMA`, qu'il faut maintenir à la main : ajout dans `useCMG`, suppression dans `GED.tsx`, et probablement à chaque autre endroit qui modifie la liste des salariées. Si un des chemins l'oublie, les index se décalent et la case se retrouve cochée sur la mauvaise salariée, ou `undefined` passé à `moisIdentiques: boolean`. Je me demande si ce booléen ne pourrait pas faire partie de la salariée elle-même (ou être déduit de l'égalité des trois mois), ce qui supprimerait la synchronisation. Je ne vois par ailleurs pas de test sur ce nouveau comportement : en as-tu prévu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+          "start_line": 28,
+          "end_line": 31
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

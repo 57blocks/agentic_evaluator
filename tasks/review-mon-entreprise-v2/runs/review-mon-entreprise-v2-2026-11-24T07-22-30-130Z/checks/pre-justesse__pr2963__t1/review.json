@@ -1,0 +1,31 @@
+{
+ "pr": 2963,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 32,
+   "start_line": 29,
+   "body": "Je me demande si ces quatre `let` au niveau du module sont une bonne idée : le cache (dernière simulation, dernière config, moteurs) est partagé entre toutes les instances du middleware, ce qui le rend fragile à tester (état qui fuit d’un test à l’autre, d’où le reset sur `SET_SIMULATION`) et couplé à l’ordre des actions. Une piste : les déclarer dans la closure de `prendLaProchaineQuestionMiddleware(engine)`, ainsi chaque store a son propre état. Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/exonérations/ACRE.publicodes",
+   "line": 40,
+   "start_line": null,
+   "body": "Question : l’ancienne règle exigeait aussi `entreprise . durée d’activité < 3 ans` pour un auto-entrepreneur créé avant 04/2020, et cette condition n’apparaît plus ici. Est-ce voulu (source à l’appui) ? Sinon, un auto-entrepreneur créé en 2019 avec plus de 3 ans d’activité pourrait se voir appliquer l’ACRE.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 11,
+  "cost_usd": 0.18501089999999998,
+  "final_text": "J'ai posté deux commentaires inline sur la PR #2963. Je n'ai pas relu les 134 fichiers modifiés : j'ai lu en entier le middleware `prendLaProchaineQuestion` et le diff des règles Publicodes (`modele-social`).\n\n- **Middleware `prendLaProchaineQuestion`** (lignes 29 à 32) : les quatre `let` au niveau du module (dernière simulation, dernière config, moteurs) sont partagés entre tous les stores et fragiles à tester. Je propose de les déclarer dans la closure du middleware.\n- **Règle `ACRE.publicodes`** (ligne 40) : la condition `entreprise . durée d'activité < 3 ans` de l'ancienne règle a disparu pour les auto-entrepreneurs créés avant 04/2020. J'ai posé la question de savoir si c'est voulu et sourcé, sans l'affirmer comme un bug.\n\nLe workflow « Vérification PR » est au vert. Je n'ai pas posté de commentaire global."
+ }
+}

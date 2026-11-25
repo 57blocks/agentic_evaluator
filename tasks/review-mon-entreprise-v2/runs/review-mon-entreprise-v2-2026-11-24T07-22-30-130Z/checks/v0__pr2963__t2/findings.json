@@ -1,0 +1,11 @@
+[
+ {
+  "file": "site/source/domaine/updateSituationMulti.ts",
+  "start_line": 41,
+  "end_line": 41,
+  "message": "Je me demande si ce `filter` ne fait pas l’inverse de ce qui est voulu. Il garde les entrées de la situation dont la règle est dans `règlesExclusives`, donc dès qu’un objectif exclusif est ajusté, toutes les autres réponses de la situation disparaissent (et pas seulement les autres objectifs exclusifs). Dans `updateSituation`, la logique est de retirer les objectifs exclusifs *autres* que celui qui est saisi.\n\nJe verrais plutôt quelque chose comme : retirer de `currentSituation` les règles de `objectifsExclusifs` (celles qui ne sont pas dans `règlesExclusives`). Par ailleurs `keepFirstEntry` écarte silencieusement les autres objectifs exclusifs passés ensemble : c’est voulu ?\n\nJe n’ai pas exécuté le code, mais `simulation.reducer.spec.ts` ne teste `AJUSTE_LA_SITUATION` qu’avec `objectifs exclusifs: []`, donc ce cas n’est pas couvert. Un test avec un objectif exclusif et une autre réponse déjà en situation le révélerait. Qu’en penses-tu ?"
+ },
+ {
+  "message": "Synthèse : PR très large (134 fichiers, 24 commits) qui mélange refonte Redux, renommage `domain`→`domaine`, perf (un moteur par contexte), a11y et correctifs ACRE/Publicodes. Je n’ai relu en détail que le reducer et les fonctions `updateSituation*` ; le reste (middleware, composants, règles ACRE, rendu visuel, navigation) n’a pas été vérifié. Le découpage en plusieurs PR (déplacement de dossier, ACRE, refonte des questions) faciliterait la relecture. Il y a aussi `updateSituationMulti` et `updateSituation` qui portent la même règle des objectifs exclusifs avec deux implémentations : je me demande si l’une ne pourrait pas s’appuyer sur l’autre."
+ }
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 45,
+  "end_line": 45,
+  "message": "Je me demande si le `set.nouvelEnfant()` ne s'exécute pas aussi quand on redirige juste au-dessus (informations invalides ou inéligibilité) : on ajouterait un enfant à une situation qu'on quitte. Un `return` après chaque `navigate` l'éviterait. Par ailleurs, avec `[]` la redirection ne se rejoue qu'au montage : si `raisonsInéligibilité` change pendant que la page est affichée, on ne redirige plus, alors qu'avant le test était évalué à chaque rendu. Est-ce voulu ? Un `<Navigate replace />` conditionnel au rendu éviterait de gérer les dépendances. Je n'ai pas pu vérifier le rendu en iframe."
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+  "start_line": 31,
+  "end_line": 31,
+  "message": "nit: `O.getOrElse(montantCT, () => euros(0))` affiche brièvement « 0 € » avant la redirection quand il n'y a pas de montant, soit un résultat factice montré à l'usager. Je verrais plutôt un `return null` (ou `<Navigate replace />`) quand le montant est absent. Ça éviterait aussi les `useEffect` avec `eslint-disable react-hooks/exhaustive-deps` répétés dans 3 des 4 pages. Qu'en penses-tu ?"
+ }
+]

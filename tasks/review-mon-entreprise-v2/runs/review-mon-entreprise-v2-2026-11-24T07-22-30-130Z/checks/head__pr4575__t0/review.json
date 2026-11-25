@@ -1,0 +1,23 @@
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "Je vois que `'next'` est remplacé par `'main'` dans la liste des branches de production, alors que le commit ne parle que d'adaptateur d'environnement. Si une branche `next` est encore déployée en production, elle passerait en `staging` (Sentry, Plausible sur `dev.mon-entreprise.fr`, logs de branche). Est-ce voulu ? Si oui, je le mettrais dans son propre commit avec une explication.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1209651,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `site/vite.config.ts`. Il porte sur `isProductionBranch`, où `'next'` est remplacé par `'main'` sans lien avec l'adaptateur d'environnement.\n\nJ'ai demandé si c'était voulu. Si une branche `next` est encore déployée en production, elle passerait en `staging`. Sentry, Plausible et les logs de branche seraient alors configurés comme en staging. Si le changement est voulu, je suggère de le mettre dans son propre commit.\n\nLe reste de la diff ne m'a pas paru mériter de remarque. Le workflow « Vérification PR » est au vert. Je n'ai exécuté ni build ni tests."
+ }
+}

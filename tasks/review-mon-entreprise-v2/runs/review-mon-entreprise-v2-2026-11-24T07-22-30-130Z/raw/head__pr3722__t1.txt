@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/contextes/cmg/hooks/useCMG.ts",
+  "start_line": 142,
+  "end_line": 142,
+  "message": "Je me demande si `moisIdentiques` (un tableau de booléens indexé comme `salariées.GED`/`AMA`) ne risque pas de se désaligner de la situation. `set.salariéesGED` (et `salariéesAMA`) filtre les salariées sans aucune déclaration (`A.filter(auMoinsUneDéclaration)`) sans toucher à `moisIdentiques`. Exemple : deux salariées GED, la 2ᵉ avec « mois identiques » coché ; on vide les déclarations de la 1ʳᵉ → elle disparaît de la situation, mais `moisIdentiques.GED` garde ses deux entrées, et la nouvelle 1ʳᵉ salariée (l’ancienne 2ᵉ) hérite de la valeur `false` de l’ancienne 1ʳᵉ. Qu’en penses-tu de porter le booléen sur la salariée elle-même, ou de dériver « mois identiques » des déclarations (avril et mai égales à mars), pour qu’il n’y ait qu’une source de vérité ?"
+ },
+ {
+  "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "nit: export nommé plutôt que `export default`, comme le demande CONTRIBUTING.md."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3722,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/hooks/useCMG.ts",
+   "line": 142,
+   "start_line": null,
+   "body": "Je me demande si `moisIdentiques` (un tableau de booléens indexé comme `salariées.GED`/`AMA`) ne risque pas de se désaligner de la situation. `set.salariéesGED` (et `salariéesAMA`) filtre les salariées sans aucune déclaration (`A.filter(auMoinsUneDéclaration)`) sans toucher à `moisIdentiques`. Exemple : deux salariées GED, la 2ᵉ avec « mois identiques » coché ; on vide les déclarations de la 1ʳᵉ → elle disparaît de la situation, mais `moisIdentiques.GED` garde ses deux entrées, et la nouvelle 1ʳᵉ salariée (l’ancienne 2ᵉ) hérite de la valeur `false` de l’ancienne 1ʳᵉ. Qu’en penses-tu de porter le booléen sur la salariée elle-même, ou de dériver « mois identiques » des déclarations (avril et mai égales à mars), pour qu’il n’y ait qu’une source de vérité ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+   "line": 3,
+   "start_line": null,
+   "body": "nit: export nommé plutôt que `export default`, comme le demande CONTRIBUTING.md.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.144392,
+  "final_text": "J'ai relu la PR #3722 et posté deux commentaires inline sur GitHub. Le workflow « Vérification PR » est au vert.\n\n- **`useCMG.ts:142`** : le tableau `moisIdentiques` est indexé comme les salariées, mais `set.salariéesGED` et `set.salariéesAMA` retirent les salariées sans déclaration sans le mettre à jour. Les index se décalent alors, et une salariée peut hériter de la case « mois identiques » d'une autre. Je propose une source de vérité unique.\n- **`useScrollToTop.tsx:3`** : nit sur l'`export default`, alors que CONTRIBUTING.md demande des exports nommés.\n\nJe n'ai exécuté ni le code ni les tests."
+ }
+}
+
+```

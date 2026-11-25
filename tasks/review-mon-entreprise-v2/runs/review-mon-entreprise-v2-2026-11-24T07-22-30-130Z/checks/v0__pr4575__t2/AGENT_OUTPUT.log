@@ -1,0 +1,35 @@
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "Ce changement (`next` → `main` dans les branches de production) modifie le comportement : une build sur la branche `next` passerait de production à staging (Sentry, Plausible, bannière de branche). Est-ce voulu ? Si oui, je le verrais dans un commit séparé avec une explication, car il n'a pas de rapport évident avec l'adaptateur. Je n'ai pas vérifié si la CI/Netlify déploie encore `next`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/services/environnement/environnement.ts",
+   "line": 17,
+   "start_line": null,
+   "body": "Le test `sousVite ? import.meta.env.VITE_X : process.env.NEXT_PUBLIC_X` est répété une quinzaine de fois, et chaque variable doit être déclarée deux fois dans `.env.template`. Je me demande si un petit helper (ou un objet `source` choisi une seule fois) éviterait cette duplication. Attention : Next n'inline `process.env.NEXT_PUBLIC_*` que pour un accès littéral, donc le helper ne pourrait pas prendre le nom en paramètre pour la branche Next. Qu'en penses-tu ?\n\nPar ailleurs, ce module n'a pas de test (valeurs par défaut Plausible selon `déployé`, parsing des booléens). Un test sur ces défauts me semblerait utile, vu que `CONTRIBUTING.md` demande des tests avec le nouveau comportement.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Remarque transverse : la PR mêle l'adaptateur d'environnement et la suppression du client Fabrique Social (code, fixtures, tests, `VITE_COMPANY_SEARCH_HOST`). Ce sont deux changements logiques ; les commits sont déjà séparés, donc c'est surtout à garder en tête pour la taille de la PR. Je n'ai pas pu vérifier le comportement sous Next (build non exécutée)."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1326017,
+  "final_text": "J'ai relu la PR 4575 et posté deux commentaires inline et une synthèse sur GitHub. Je n'ai pas exécuté la build ni les tests, donc le comportement sous Next n'est pas vérifié.\n\n- **`site/vite.config.ts`, ligne 208 :** `isProductionBranch` passe de `['master', 'next']` à `['master', 'main']`. Une build sur la branche `next` serait alors traitée comme du staging (Sentry, Plausible, bannière de branche). Je demande si c'est voulu, et je suggère un commit séparé si oui. Je n'ai pas vérifié si la CI ou Netlify déploie encore `next`.\n- **`site/source/services/environnement/environnement.ts`, ligne 17 :**\n  - Le test `sousVite ? import.meta.env.VITE_X : process.env.NEXT_PUBLIC_X` est répété une quinzaine de fois, et chaque variable est déclarée deux fois dans `.env.template`. Je propose de voir si un helper l'éviterait, en rappelant que Next n'inline que les accès littéraux à `process.env.NEXT_PUBLIC_*`.\n  - Ce module n'a pas de test, notamment pour les valeurs par défaut de Plausible selon l'environnement et la lecture des booléens.\n- **Synthèse :** la PR mêle l'adaptateur d'environnement et la suppression du client Fabrique Social. Les commits sont déjà séparés, donc c'est surtout une remarque sur la taille de la PR."
+ }
+}

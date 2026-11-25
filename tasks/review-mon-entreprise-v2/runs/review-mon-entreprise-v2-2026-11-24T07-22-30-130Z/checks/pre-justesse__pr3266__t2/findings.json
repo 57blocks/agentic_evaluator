@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Le champ s'appelle encore `réductionGénérale` alors que `MonthState` expose maintenant `réduction` : ce `réductionGénérale: { value: 0, … }` ajoute une propriété inconnue du type et laisse `réduction` à sa valeur précédente. Quand l'usager vide toute sa rémunération, les montants de réduction des mois restent donc affichés. Je pense qu'il s'agit de `réduction`, et que `tsc` ne le signale pas parce que le spread élargit le type. Est-ce que tu confirmes ?\n```suggestion\n\t\t\t\tréduction: {\n```"
+ },
+ {
+  "file": "site/source/pages/simulateurs/lodeom/simulationConfig.ts",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "nit: `configRéductionGénérale` (ici et dans `config.ts`, ainsi que `RéductionGénéraleSimulation` importé depuis `./Lodeom`) porte le nom de la réduction générale alors que ce fichier configure le Lodeom, ce qui prête à confusion. `configLodeom` / `LodeomSimulation` ?"
+ }
+]

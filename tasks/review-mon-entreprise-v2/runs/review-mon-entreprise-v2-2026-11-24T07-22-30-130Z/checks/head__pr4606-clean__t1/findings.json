@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 107,
+  "end_line": 107,
+  "message": "JSX supprime le retour à la ligne entre `</Code>,` et `<Code>` : le rendu sera « modele-as,modele-ti » sans espace. Il faudrait un `{' '}` après la virgule.\n```suggestion\n\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{' '}\n```"
+ }
+]

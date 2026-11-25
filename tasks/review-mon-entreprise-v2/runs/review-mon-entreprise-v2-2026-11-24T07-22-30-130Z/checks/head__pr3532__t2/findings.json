@@ -1,0 +1,20 @@
+[
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 219,
+  "end_line": 222,
+  "message": "Je me demande si ce remplacement atteint bien l'assiette de la CSG-CRDS : `CSG-CRDS . assiette de base . assiette abattue` s'appuie sur `cotisations . assiette . sans prévoyance` (cotisations.publicodes:497), pas sur `cotisations . assiette`. Si Publicodes ne remplace que les références exactes à `cotisations . assiette`, l'abattement de 50 % du Smic (et le `sinon: 0`) ne s'appliquerait pas, et les apprentis paieraient la CSG-CRDS sur l'assiette entière, y compris avant mars 2025. As-tu un test (ou le snapshot) qui montre l'effet sur la CSG d'un apprenti ? Un test ciblé avant/après le 01/03/2025 lèverait aussi ton doute sur l'assiette avec ou sans prévoyance santé."
+ },
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 210,
+  "end_line": 210,
+  "message": "Ici (et ligne 228) `date >= 03/2025` porte sur la date de la simulation, alors que le texte vise les contrats conclus depuis le 1er mars 2025. Un apprenti dont le contrat date de 2024 et qui est simulé en 2026 passera donc à 50 % au lieu de 79 %. Cela me paraît pouvoir tromper l'usager sur un cas courant ; je verrais bien soit la question sur la date de début de contrat que tu évoquais, soit au minimum de le dire explicitement dans la description. Qu'en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Cette modification de la taxe sur les salaires n'est pas annoncée dans les commits ni le changelog. Elle change aussi l'assiette pour les cas hors apprentis : `assiette de base` retire les heures supplémentaires défiscalisées, ce que l'ancienne somme ne faisait pas. C'est voulu ? Si oui, un commit dédié avec sa source me semblerait plus lisible."
+ }
+]

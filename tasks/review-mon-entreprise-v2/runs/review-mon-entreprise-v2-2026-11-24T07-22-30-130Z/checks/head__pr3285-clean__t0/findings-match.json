@@ -1,0 +1,30 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+      "start_line": 629,
+      "end_line": 629,
+      "message": "Je me demande si l'identifiant Légifrance est le bon : la description de la PR présente `LEGIARTI000036471466` comme l'article D632-1, alors qu'ici il est libellé D632-2 (et D632-1 pointe vers `LEGIARTI000041966755`). Peux-tu vérifier la correspondance libellé/lien ?"
+    },
+    {
+      "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+      "start_line": 142,
+      "end_line": 142,
+      "message": "nit: la description de cette règle est celle, générique, d'`assiette minimale` (« certaines cotisations seront portées à un montant minimum »). Je verrais bien une phrase propre à cette règle, par exemple l'assiette plancher de 11,5 % du PASS pour la cotisation invalidité-décès, d'autant qu'elle est reprise telle quelle dans la traduction."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

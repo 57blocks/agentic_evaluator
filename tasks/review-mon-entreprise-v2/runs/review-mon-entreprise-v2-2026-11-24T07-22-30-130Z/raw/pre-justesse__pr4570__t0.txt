@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1964,
+  "message": "La traduction anglaise est cassée : `&lt;/3>` et `&lt;/6>` remplacent les balises fermantes, et « does not apply to male and female auto-entrepreneurs » est une traduction littérale de « auto-entrepreneurs et auto-entrepreneuses ». Les balises ne seront pas interprétées par `Trans` : l’usager anglophone verrait du texte brut avec des `&lt;`. Je verrais bien une version corrigée à la main, par exemple : `<0></0> This simulator <3>does not apply to auto-entrepreneurs (micro-entrepreneurs)</3>, who have their own dedicated <6>income simulator</6>.` Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 70,
+  "end_line": 70,
+  "message": "nit: cette liste est une constante sans lien avec le rendu ; la sortir du composant (avec `satisfies SimulateurId[]`, comme `nextSteps` plus haut) et utiliser `.includes(id)` plutôt que `indexOf(id) > -1` la rendrait plus lisible. Un nom qui dit pourquoi elle existe (simulateurs concernés par la confusion avec l’auto-entrepreneur) aiderait aussi."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4570,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/locales/ui-en.yaml",
+   "line": 1964,
+   "start_line": 1962,
+   "body": "La traduction anglaise est cassée : `&lt;/3>` et `&lt;/6>` remplacent les balises fermantes, et « does not apply to male and female auto-entrepreneurs » est une traduction littérale de « auto-entrepreneurs et auto-entrepreneuses ». Les balises ne seront pas interprétées par `Trans` : l’usager anglophone verrait du texte brut avec des `&lt;`. Je verrais bien une version corrigée à la main, par exemple : `<0></0> This simulator <3>does not apply to auto-entrepreneurs (micro-entrepreneurs)</3>, who have their own dedicated <6>income simulator</6>.` Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 70,
+   "start_line": null,
+   "body": "nit: cette liste est une constante sans lien avec le rendu ; la sortir du composant (avec `satisfies SimulateurId[]`, comme `nextSteps` plus haut) et utiliser `.includes(id)` plutôt que `indexOf(id) > -1` la rendrait plus lisible. Un nom qui dit pourquoi elle existe (simulateurs concernés par la confusion avec l’auto-entrepreneur) aiderait aussi.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1380205,
+  "final_text": "J'ai relu la PR #4570 et posté deux commentaires inline sur GitHub. Les vérifications de la PR passent.\n\n- **`site/source/locales/ui-en.yaml`, lignes 1962 à 1964** : la traduction anglaise du nouvel avertissement est cassée. Les balises fermantes apparaissent sous la forme `&lt;/3>` et `&lt;/6>`, et « male and female auto-entrepreneurs » est une traduction littérale. J'ai proposé une version corrigée à la main.\n- **`site/source/pages/simulateurs/indépendant/IndépendantBase.tsx`, ligne 70** (nit) : sortir la liste `confusionAEPossible` du composant, la typer avec `satisfies SimulateurId[]`, utiliser `.includes(id)` et lui donner un nom plus explicite.\n\nJe n'ai pas posté de commentaire global."
+ }
+}
+
+```

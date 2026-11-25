@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Ici la clé est `réductionGénérale`, alors que `MonthState` porte `réduction`. Comme on étale `...monthData`, TypeScript ne le signale pas et l’ancienne `réduction` est conservée. Si l’utilisateur remet toutes les rémunérations à 0 après une saisie, je crois que les montants précédents resteraient affichés. Il s’agit peut-être d’un reste du renommage depuis la réduction générale. Qu’en penses-tu ?\n```suggestion\n\t\t\t\tréduction: {\n```"
+ }
+]

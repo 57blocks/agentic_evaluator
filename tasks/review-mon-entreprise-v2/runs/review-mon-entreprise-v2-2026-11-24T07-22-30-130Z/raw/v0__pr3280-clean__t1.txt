@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "Je viens de relire la PR. Le changement du texte dans `Détails.tsx` et dans les fichiers de traduction est cohérent.\n\nUne chose me gêne : la règle Publicodes `protection sociale . maladie . maternité paternité adoption . délai d'attente` (`modele-social/règles/protection-sociale.publicodes`, lignes 628, 630 et 632) dit toujours \"10 mois\", dans la description et dans `valeur: 10 mois`. Ces lignes ne sont pas dans le diff, donc je ne peux pas les commenter en inline. Je n'ai pas vérifié où cette règle est lue ni affichée (description dans l'explication des règles, ou valeur utilisée dans un calcul). Je me demande si elle devrait passer à 6 mois dans cette PR. Sinon, le simulateur affichera 6 mois à un endroit et 10 mois à un autre. Dans ce cas, `rules-en.yaml` serait à régénérer avec `yarn workspace modele-social build` puis `i18n:translate`. Qu'en penses-tu ?\n\nnit : les deux commits touchent au même changement logique. Le commit `i18n: traduction` sépare les fichiers YAML du code, alors que CONTRIBUTING.md demande qu'ils fassent partie du même commit. Un squash serait plus conforme. Le premier commit n'est pas au format Conventional Commits non plus : par exemple `fix(comparateur): durée d'affiliation maternité de 6 mois`.\n\nJe n'ai pas pu vérifier le rendu dans le navigateur. Les sources légales citées dans la description me semblent adaptées, mais je n'ai pas relu leur contenu."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3280,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Je viens de relire la PR. Le changement du texte dans `Détails.tsx` et dans les fichiers de traduction est cohérent.\n\nUne chose me gêne : la règle Publicodes `protection sociale . maladie . maternité paternité adoption . délai d'attente` (`modele-social/règles/protection-sociale.publicodes`, lignes 628, 630 et 632) dit toujours \"10 mois\", dans la description et dans `valeur: 10 mois`. Ces lignes ne sont pas dans le diff, donc je ne peux pas les commenter en inline. Je n'ai pas vérifié où cette règle est lue ni affichée (description dans l'explication des règles, ou valeur utilisée dans un calcul). Je me demande si elle devrait passer à 6 mois dans cette PR. Sinon, le simulateur affichera 6 mois à un endroit et 10 mois à un autre. Dans ce cas, `rules-en.yaml` serait à régénérer avec `yarn workspace modele-social build` puis `i18n:translate`. Qu'en penses-tu ?\n\nnit : les deux commits touchent au même changement logique. Le commit `i18n: traduction` sépare les fichiers YAML du code, alors que CONTRIBUTING.md demande qu'ils fassent partie du même commit. Un squash serait plus conforme. Le premier commit n'est pas au format Conventional Commits non plus : par exemple `fix(comparateur): durée d'affiliation maternité de 6 mois`.\n\nJe n'ai pas pu vérifier le rendu dans le navigateur. Les sources légales citées dans la description me semblent adaptées, mais je n'ai pas relu leur contenu."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.11165040000000001,
+  "final_text": "J'ai posté un commentaire de synthèse sur la PR #3280. Il n'y a aucun commentaire inline, car le principal point porte sur des lignes absentes du diff.\n\n- **Règle Publicodes restée à 10 mois :** `protection sociale . maladie . maternité paternité adoption . délai d'attente` dit toujours « 10 mois », dans la description (lignes 628 et 630) et dans `valeur: 10 mois` (ligne 632). J'ai demandé si elle devait passer à 6 mois dans cette PR. Je n'ai pas vérifié où cette règle est lue ni affichée.\n- **Historique git :** les fichiers de traduction sont dans un commit `i18n: traduction` séparé du code, alors que CONTRIBUTING.md les veut dans le même commit. Le premier commit n'est pas non plus au format Conventional Commits. J'ai proposé un squash, avec par exemple `fix(comparateur): durée d'affiliation maternité de 6 mois`.\n- **Non vérifié :** le rendu dans le navigateur, et le contenu des deux sources légales citées dans la description de la PR.\n\nLe changement de texte dans `Détails.tsx` et dans les fichiers de traduction est cohérent."
+ }
+}
+
+```

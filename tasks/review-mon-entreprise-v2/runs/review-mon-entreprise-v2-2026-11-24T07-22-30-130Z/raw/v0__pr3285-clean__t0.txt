@@ -1,0 +1,59 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+  "start_line": 148,
+  "end_line": 148,
+  "message": "Les liens Légifrance ne me semblent pas cohérents avec la description de la PR : celle-ci donne l'article D632-1 sous l'identifiant `LEGIARTI000036471466`, alors qu'ici cet identifiant est étiqueté D632-2 (et D632-1 pointe vers `LEGIARTI000041966755`). Je n'ai pas pu ouvrir Légifrance pour vérifier lequel est correct. Peux-tu confirmer les étiquettes ? Comme la même paire apparaît aux deux endroits, une erreur serait dupliquée."
+ },
+ {
+  "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+  "start_line": 139,
+  "end_line": 139,
+  "message": "nit: la description est copiée de la règle parente et de `maladie`, elle ne dit rien de spécifique à l'invalidité-décès (plancher de 11,5 % du PASS). Une phrase propre à cette règle aiderait celui qui consulte l'explication du calcul."
+ },
+ {
+  "message": "Je ne vois pas de test dédié au nouveau plancher : seuls des snapshots changent (écarts d'1 € dus à l'arrondi). Un cas de test sur un revenu inférieur à 11,5 % du PASS, qui vérifie la cotisation invalidité-décès, documenterait la correction mieux que ces snapshots. Je n'ai pas pu vérifier le rendu dans le simulateur."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/indépendant.publicodes",
+   "line": 148,
+   "start_line": null,
+   "body": "Les liens Légifrance ne me semblent pas cohérents avec la description de la PR : celle-ci donne l'article D632-1 sous l'identifiant `LEGIARTI000036471466`, alors qu'ici cet identifiant est étiqueté D632-2 (et D632-1 pointe vers `LEGIARTI000041966755`). Je n'ai pas pu ouvrir Légifrance pour vérifier lequel est correct. Peux-tu confirmer les étiquettes ? Comme la même paire apparaît aux deux endroits, une erreur serait dupliquée.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/indépendant.publicodes",
+   "line": 139,
+   "start_line": null,
+   "body": "nit: la description est copiée de la règle parente et de `maladie`, elle ne dit rien de spécifique à l'invalidité-décès (plancher de 11,5 % du PASS). Une phrase propre à cette règle aiderait celui qui consulte l'explication du calcul.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Je ne vois pas de test dédié au nouveau plancher : seuls des snapshots changent (écarts d'1 € dus à l'arrondi). Un cas de test sur un revenu inférieur à 11,5 % du PASS, qui vérifie la cotisation invalidité-décès, documenterait la correction mieux que ces snapshots. Je n'ai pas pu vérifier le rendu dans le simulateur."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 4,
+  "cost_usd": 0.1153611,
+  "final_text": "J'ai relu la PR #3285 et posté trois commentaires sur GitHub : deux inline et une synthèse. Je n'ai pas pu ouvrir Légifrance ni le simulateur, donc je n'ai vérifié ni les articles de loi ni le rendu.\n\n- **Liens Légifrance (inline, ligne 148)** : l'identifiant `LEGIARTI000036471466` est donné comme D632-1 dans la description de la PR. Dans le code, il est étiqueté D632-2, et D632-1 pointe vers `LEGIARTI000041966755`. Cette même paire apparaît dans les deux règles modifiées. J'ai demandé au contributeur de confirmer les étiquettes.\n- **Description de la nouvelle règle (inline, ligne 139, préfixée `nit:`)** : elle est copiée de la règle parente et de `maladie`, et ne mentionne pas le plancher de 11,5 % du PASS.\n- **Tests (synthèse)** : seuls des snapshots changent, avec des écarts d'1 € dus à l'arrondi. J'ai suggéré un cas de test dédié sur un revenu inférieur à 11,5 % du PASS.\n\nJe n'ai pas lancé `gh pr checks`, donc je ne sais pas si la CI passe."
+ }
+}
+
+```

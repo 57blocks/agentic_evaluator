@@ -1,0 +1,21 @@
+{
+ "pr": 4653,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger : je ne trouve plus de référence à l'assistant dans le code, et les vérifications sont au vert. Une question hors diff : les anciennes URLs `/assistants/cmg/*` (et `/en/assistants/cmg`) vont maintenant tomber sur la 404 ; est-ce voulu, ou préfères-tu une redirection dans `site/netlify.base.toml` vers la page des simulateurs ?"
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4620: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.12325550000000002,
+  "final_text": "J'ai terminé la revue de la PR 4653 et posté un seul commentaire global sur GitHub.\n\n- **Résultat :** je n'ai rien trouvé à redire dans le diff. Il ne reste aucune référence à l'assistant CMG dans le code, et les vérifications de la PR sont au vert.\n- **Question posée à l'auteur :** les anciennes URLs `/assistants/cmg/*` vont désormais tomber sur la 404. J'ai demandé si c'était voulu ou s'il fallait une redirection dans `site/netlify.base.toml`.\n- **Limite :** je n'ai pas pu lire l'issue #4620 (l'API renvoie « Not Found »). Je n'ai donc pas pu vérifier ce que la PR devait traiter."
+ }
+}

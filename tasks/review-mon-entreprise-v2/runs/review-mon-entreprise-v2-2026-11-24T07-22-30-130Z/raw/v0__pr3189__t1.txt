@@ -1,0 +1,47 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 169,
+  "end_line": 177,
+  "message": "Quelques questions sur cette règle, que je n'ai pas pu vérifier (je ne vois pas la source des taux dans la PR) :\n\n- Je ne vois pas de `références` vers le texte ou la page Urssaf qui donne 3,25 % / 9,75 % et les seuils 40 % / 110 % du PASS. Pourrait-on en ajouter une, comme sur la règle voisine `assiette participation CPAM` ? Cela permettrait de relire les valeurs.\n- Le taux progressif est calculé sur `assiette des cotisations` entière, puis appliqué à `assiette des cotisations - assiette participation CPAM`. Est-ce bien ce que prévoit le texte ? J'aurais pu imaginer les tranches appliquées directement à la part non conventionnée : un taux moyen appliqué à une autre assiette donne un résultat différent.\n- La dernière tranche a un `plafond: 110%`. Au-delà (par exemple 400 k€ de CA dans le snapshot « médecin 4 »), je me demande comment publicodes traite la part restante. Je n'ai pas vérifié ; si le taux doit rester à 9,75 % sans limite, omettre le plafond de la dernière tranche serait plus explicite.\n- Les snapshots bougent de 4 à 10 k€ de cotisations sur les gros revenus : un test ciblé avec un calcul fait à la main (un cas sous 40 %, un entre 40 % et 110 %, un au-dessus) donnerait plus de confiance que le seul snapshot de régression. Qu'en penses-tu ?"
+ },
+ {
+  "message": "Historique : un commit, un changement logique, rien à redire. Je n'ai pas pu vérifier les valeurs métier ni le comportement de publicodes au-delà de la dernière tranche (voir le commentaire inline)."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3189,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "line": 177,
+   "start_line": 169,
+   "body": "Quelques questions sur cette règle, que je n'ai pas pu vérifier (je ne vois pas la source des taux dans la PR) :\n\n- Je ne vois pas de `références` vers le texte ou la page Urssaf qui donne 3,25 % / 9,75 % et les seuils 40 % / 110 % du PASS. Pourrait-on en ajouter une, comme sur la règle voisine `assiette participation CPAM` ? Cela permettrait de relire les valeurs.\n- Le taux progressif est calculé sur `assiette des cotisations` entière, puis appliqué à `assiette des cotisations - assiette participation CPAM`. Est-ce bien ce que prévoit le texte ? J'aurais pu imaginer les tranches appliquées directement à la part non conventionnée : un taux moyen appliqué à une autre assiette donne un résultat différent.\n- La dernière tranche a un `plafond: 110%`. Au-delà (par exemple 400 k€ de CA dans le snapshot « médecin 4 »), je me demande comment publicodes traite la part restante. Je n'ai pas vérifié ; si le taux doit rester à 9,75 % sans limite, omettre le plafond de la dernière tranche serait plus explicite.\n- Les snapshots bougent de 4 à 10 k€ de cotisations sur les gros revenus : un test ciblé avec un calcul fait à la main (un cas sous 40 %, un entre 40 % et 110 %, un au-dessus) donnerait plus de confiance que le seul snapshot de régression. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Historique : un commit, un changement logique, rien à redire. Je n'ai pas pu vérifier les valeurs métier ni le comportement de publicodes au-delà de la dernière tranche (voir le commentaire inline)."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": [
+   "api --method POST repos/betagouv/mon-entreprise/pulls/3189/comments: cannot read .review-body1.md for field body"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 11,
+  "cost_usd": 0.1846459,
+  "final_text": "J'ai posté la revue sur la PR #3189 : un commentaire inline sur `PAMC.publicodes` et une courte synthèse. Je n'ai ni exécuté les tests ni lu `gh pr checks`.\n\nLe commentaire inline porte sur la règle `contribution additionnelle`, lignes 169 à 177. Il pose quatre questions :\n- **Source :** aucune `références` ne justifie les taux (3,25 % et 9,75 %) ni les seuils (40 % et 110 % du PASS).\n- **Assiette :** le taux progressif est calculé sur l'assiette entière puis appliqué à la part non conventionnée. Je demande si c'est bien ce que prévoit le texte.\n- **Dernière tranche :** son `plafond: 110%` laisse un doute sur le traitement du revenu au-delà. Je n'ai pas vérifié le comportement de Publicodes dans ce cas.\n- **Tests :** les snapshots bougent de 4 à 10 k€ de cotisations sur les gros revenus. Je propose un test ciblé calculé à la main, en plus du snapshot de régression.\n\nLa synthèse indique que l'historique est propre, avec un seul commit pour un seul changement logique. Elle précise aussi que je n'ai pas pu vérifier les valeurs métier.\n\nLes écritures de fichiers dans le répertoire de travail ont été refusées, j'ai donc passé les corps de commentaire directement en argument à `gh`."
+ }
+}
+
+```

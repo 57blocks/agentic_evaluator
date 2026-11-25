@@ -1,0 +1,42 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 36,
+      "end_line": 36,
+      "message": "Je me demande si la garde ne devrait pas porter sur `relevantExternalLinks` plutôt que sur `externalLinks`. Avec un simulateur dont tous les liens ont une `associatedRule` fausse (ex. un indépendant hors PL, sans `nextSteps` ni `iframePath`), la liste filtrée est vide mais on passe la garde : le `<H2>` « Ressources utiles » s’affiche sans aucune carte. Avant, le test portait sur `guidesUrssaf.length`, donc le cas était couvert. Peut-être `!relevantExternalLinks?.length`, qu’en penses-tu ?"
+    },
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 23,
+      "end_line": 23,
+      "message": "nit: la convention du projet est l’export nommé plutôt que `export default` (idem pour `ExternalLinkCard`)."
+    },
+    {
+      "file": "site/source/external-links/embaucherGérerSalariés.ts",
+      "start_line": 3,
+      "end_line": 3,
+      "message": "Je vois deux conséquences à ce `TODO` sur les traductions. (1) Dans l’ancien `NextSteps`, les guides Urssaf étaient conditionnés par `language === 'fr'`, et cette condition a disparu : ces cartes (titres et descriptions en français brut, sans `t()`) vont maintenant s’afficher aussi en anglais. (2) `CONTRIBUTING.md` demande que tout texte affiché passe par `t()` avec une clé hiérarchique. Je verrais bien soit de garder le filtre par langue pour ces liens, soit de les traduire dans cette PR. Tu avais peut-être prévu l’un des deux ? Ça vaut pour tous les fichiers de `external-links/`."
+    },
+    {
+      "message": "Sur la question de fond (chevauchement des périmètres) : mettre les `associatedRule` dans des constantes partagées de `external-links/` me paraît un compromis raisonnable. Les liens restent déclarés dans les configs, et la condition suit le lien. Je n’ai pas vérifié chaque config un par un pour voir si une règle manque quand un lien est repris d’un simulateur à l’autre. Je n’ai pas non plus vu de test sur le filtrage : un test unitaire de la sélection des liens pertinents (règle vraie/fausse, liste vide) aiderait à sécuriser le point sur la garde. Rendu visuel non vérifié."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim",
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      2
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 210,
+  "end_line": 210,
+  "message": "Les descriptions parlent des « contrats conclus depuis le 1er mars 2025 », mais la condition porte sur `date` (la date de simulation). Un contrat conclu avant mars 2025 et simulé aujourd'hui passera à 50% au lieu de 79%, et à une exonération partielle de CSG-CRDS au lieu de totale. Tu évoques l'idée d'une question sur la date de début du contrat : je pense qu'elle est nécessaire pour que le résultat soit juste pour ces usagers. Qu'en penses-tu ? Si tu préfères la différer, peut-être le signaler dans la description et le CHANGELOG ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 228,
+  "end_line": 228,
+  "message": "Sur ta question : je n'ai pas pu vérifier si l'abattement de 50% du Smic s'applique à l'assiette de CSG avec ou sans la prévoyance employeur. Ici `cotisations . assiette` est remplacée dans toutes les règles de `CSG-CRDS`, y compris `assiette de base` (qui ajoute `prévoyances . employeur` à l'assiette abattue). Une confirmation auprès de l'Urssaf me semblerait utile. Par ailleurs, je ne vois pas de test ciblant un apprenti avant/après mars 2025 : les snapshots modifiés viennent surtout des plafonds. Un test dédié aiderait à valider ces seuils."
+ },
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Je me demande si ce changement est voulu : `assiette de base` est dans `CSG-CRDS`, donc avec le `remplace` du nouveau bloc apprentissage, la taxe sur les salaires d'un apprenti serait calculée sur une assiette abattue de 50% du Smic, ce qui ne me semble pas correspondre à son assiette. Je n'ai pas vérifié l'effet sur un cas concret. Peux-tu confirmer l'intention et la source ? Il n'est pas non plus mentionné dans le CHANGELOG, et il est dans le commit CSG-CRDS alors qu'il concerne un autre sujet."
+ },
+ {
+  "message": "Synthèse : 3 remarques inline, la principale concerne la date de conclusion du contrat versus la date de simulation pour les apprentis. Les commits sont bien découpés, sauf le changement sur la taxe sur les salaires, mêlé au commit CSG-CRDS. Je n'ai ni exécuté les règles ni vérifié les valeurs légales (2,25 et 3,3 × Smic, 50%) contre leurs sources."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3532,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/contrat.publicodes",
+   "line": 210,
+   "start_line": null,
+   "body": "Les descriptions parlent des « contrats conclus depuis le 1er mars 2025 », mais la condition porte sur `date` (la date de simulation). Un contrat conclu avant mars 2025 et simulé aujourd'hui passera à 50% au lieu de 79%, et à une exonération partielle de CSG-CRDS au lieu de totale. Tu évoques l'idée d'une question sur la date de début du contrat : je pense qu'elle est nécessaire pour que le résultat soit juste pour ces usagers. Qu'en penses-tu ? Si tu préfères la différer, peut-être le signaler dans la description et le CHANGELOG ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/contrat.publicodes",
+   "line": 228,
+   "start_line": null,
+   "body": "Sur ta question : je n'ai pas pu vérifier si l'abattement de 50% du Smic s'applique à l'assiette de CSG avec ou sans la prévoyance employeur. Ici `cotisations . assiette` est remplacée dans toutes les règles de `CSG-CRDS`, y compris `assiette de base` (qui ajoute `prévoyances . employeur` à l'assiette abattue). Une confirmation auprès de l'Urssaf me semblerait utile. Par ailleurs, je ne vois pas de test ciblant un apprenti avant/après mars 2025 : les snapshots modifiés viennent surtout des plafonds. Un test dédié aiderait à valider ces seuils.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/salarié.publicodes",
+   "line": 521,
+   "start_line": null,
+   "body": "Je me demande si ce changement est voulu : `assiette de base` est dans `CSG-CRDS`, donc avec le `remplace` du nouveau bloc apprentissage, la taxe sur les salaires d'un apprenti serait calculée sur une assiette abattue de 50% du Smic, ce qui ne me semble pas correspondre à son assiette. Je n'ai pas vérifié l'effet sur un cas concret. Peux-tu confirmer l'intention et la source ? Il n'est pas non plus mentionné dans le CHANGELOG, et il est dans le commit CSG-CRDS alors qu'il concerne un autre sujet.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse : 3 remarques inline, la principale concerne la date de conclusion du contrat versus la date de simulation pour les apprentis. Les commits sont bien découpés, sauf le changement sur la taxe sur les salaires, mêlé au commit CSG-CRDS. Je n'ai ni exécuté les règles ni vérifié les valeurs légales (2,25 et 3,3 × Smic, 50%) contre leurs sources."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.16049529999999998,
+  "final_text": "J'ai posté ma revue sur la PR #3532 : trois commentaires inline et une synthèse. Je n'ai exécuté ni les règles ni les tests. Je n'ai pas non plus comparé les valeurs légales (2,25 et 3,3 × Smic, 50 % du Smic) à leurs sources.\n\n- **Date du contrat (`contrat.publicodes`, ligne 210)** : la condition `date >= 03/2025` porte sur la date de simulation, alors que les descriptions parlent de la date de conclusion du contrat. Un contrat antérieur à mars 2025 serait donc calculé avec les nouvelles règles. J'ai appuyé l'idée d'une question sur la date de début du contrat, ou au moins de signaler la limite dans la description et le CHANGELOG.\n- **Assiette de CSG-CRDS des apprentis (`contrat.publicodes`, ligne 228)** : je n'ai pas pu trancher la question de l'autrice sur l'assiette avec ou sans prévoyance. Je suggère de la poser à l'Urssaf. J'ai aussi noté l'absence de test ciblant un apprenti avant et après mars 2025.\n- **Taxe sur les salaires (`salarié.publicodes`, ligne 521)** : l'assiette passe à `CSG-CRDS . assiette de base`, qui est touchée par le nouveau remplacement pour les apprentis. Leur taxe serait alors calculée sur une assiette abattue de 50 % du Smic. Je n'ai pas vérifié l'effet sur un cas concret. Ce changement est absent du CHANGELOG et mêlé au commit sur la CSG-CRDS des apprentis.\n- **Historique git** : les commits sont bien découpés, à cette exception près."
+ }
+}
+
+```

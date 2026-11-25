@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/contextes/cmg/domaine/calcul.ts",
+  "start_line": 41,
+  "end_line": 41,
+  "message": "Je me demande si la division par 3 reste juste quand l’usager ne déclare que 2 mois : `NOMBRE_MIN_MOIS_EMPLOYEUREUSE` vaut 2 et `toutesLesDéclarations` ne garde que les mois renseignés (`A.getSomes`). Dans ce cas, la moyenne (CMG perçus comme CMGR linéarisés) serait tirée vers le bas et le complément transitoire pourrait s’en trouver faussé. Ce 3 est aussi dupliqué ligne 58. Est-ce que le nombre de mois ne devrait pas plutôt venir des déclarations, ou d’une constante nommée si 3 est bien voulu ?"
+ },
+ {
+  "file": "site/source/contextes/cmg/domaine/déclaration-de-garde.ts",
+  "start_line": 67,
+  "end_line": 67,
+  "message": "nit: le cast `as DéclarationDeGardeGED` contourne le typage strict pour réutiliser la validation GED. Un type commun `Pick<DéclarationDeGarde, \"heuresDeGarde\" | \"rémunération\">` en paramètre de la fonction partagée éviterait le cast."
+ }
+]

@@ -1,0 +1,23 @@
+{
+ "pr": 3442,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 208,
+   "start_line": null,
+   "body": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) portent le même code `DSAR`. Est-ce voulu ? Si les deux cases existent sur la déclaration, je m'attendrais à deux codes distincts ; sinon l'usager risque de reporter le mauvais montant dans la case.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1372658,
+  "final_text": "J'ai posté un commentaire inline sur la PR #3442. Il porte sur `Résultats.tsx:208`, où deux lignes de résultat utilisent le même code `DSAR`. J'ai posé cela en question, car je ne peux pas vérifier les codes de la déclaration.\n\nJe n'ai rien d'autre à signaler après lecture de la partie TypeScript du diff. Je n'ai pas relu les fichiers Publicodes ni les traductions. Le workflow « Vérification PR » est au vert."
+ }
+}

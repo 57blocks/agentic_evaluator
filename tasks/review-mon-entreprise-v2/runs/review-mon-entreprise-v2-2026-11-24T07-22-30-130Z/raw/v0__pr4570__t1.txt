@@ -1,0 +1,59 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1964,
+  "message": "La traduction anglaise générée me semble cassée : `&lt;/3>`, `&lt;/6>` et « does not apply to male » (issu de « auto-entrepreneureuses » ?) s'afficheront tels quels à l'usager anglophone, et les balises seront mal fermées. Je me demande si le `<Emoji>` en tête et les balises dans le `<Trans>` ne perturbent pas la traduction automatique. Qu'en penses-tu de sortir l'emoji du `<Trans>` et de corriger la valeur EN à la main ? Je n'ai pas pu vérifier le rendu."
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 70,
+  "end_line": 70,
+  "message": "nit: la liste est recréée à chaque rendu et `indexOf(id) > -1` se lit moins bien que `includes`. Elle est aussi déconnectée de la config des simulateurs, qui porte déjà `warning` par simulateur : je me demande si l'avertissement ne serait pas plus naturel dans la config (ou une constante de module typée `SimulateurId[]`, pour que le compilateur signale un id renommé). Je n'ai pas vérifié que `cipav` est bien un id servi par `IndépendantBase` : peux-tu confirmer ?"
+ },
+ {
+  "message": "Le déplacement des deux avertissements existants vers `indépendant/components/` (avec ajout du `<Body>` dans chacun) me semble cohérent, mais il est sans rapport direct avec le ticket : un commit `refactor` séparé rendrait le diff de la feature plus lisible. Il manque aussi un test (par exemple : avertissement affiché pour `indépendant`, absent pour `eurl`). Rendu visuel et lien vers le simulateur auto-entrepreneur non vérifiés."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4570,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/locales/ui-en.yaml",
+   "line": 1964,
+   "start_line": 1962,
+   "body": "La traduction anglaise générée me semble cassée : `&lt;/3>`, `&lt;/6>` et « does not apply to male » (issu de « auto-entrepreneureuses » ?) s'afficheront tels quels à l'usager anglophone, et les balises seront mal fermées. Je me demande si le `<Emoji>` en tête et les balises dans le `<Trans>` ne perturbent pas la traduction automatique. Qu'en penses-tu de sortir l'emoji du `<Trans>` et de corriger la valeur EN à la main ? Je n'ai pas pu vérifier le rendu.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 70,
+   "start_line": null,
+   "body": "nit: la liste est recréée à chaque rendu et `indexOf(id) > -1` se lit moins bien que `includes`. Elle est aussi déconnectée de la config des simulateurs, qui porte déjà `warning` par simulateur : je me demande si l'avertissement ne serait pas plus naturel dans la config (ou une constante de module typée `SimulateurId[]`, pour que le compilateur signale un id renommé). Je n'ai pas vérifié que `cipav` est bien un id servi par `IndépendantBase` : peux-tu confirmer ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Le déplacement des deux avertissements existants vers `indépendant/components/` (avec ajout du `<Body>` dans chacun) me semble cohérent, mais il est sans rapport direct avec le ticket : un commit `refactor` séparé rendrait le diff de la feature plus lisible. Il manque aussi un test (par exemple : avertissement affiché pour `indépendant`, absent pour `eurl`). Rendu visuel et lien vers le simulateur auto-entrepreneur non vérifiés."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.1517746,
+  "final_text": "J'ai relu la PR #4570 et posté sur GitHub deux commentaires inline et une synthèse. Je n'ai ni lancé le code ni vu le rendu à l'écran.\n\n- **`ui-en.yaml`, lignes 1962-1964 :** la traduction anglaise générée semble cassée. On y trouve `&lt;/3>`, `&lt;/6>` et « does not apply to male ». Le commentaire suggère de sortir l'emoji du `<Trans>` et de corriger la valeur à la main.\n- **`IndépendantBase.tsx`, ligne 70 (nit) :**\n  - La liste `confusionAEPossible` est recréée à chaque rendu.\n  - `indexOf(id) > -1` se lit moins bien que `includes`.\n  - La liste est déconnectée de la config des simulateurs, qui porte déjà `warning`.\n  - Je n'ai pas vérifié que `cipav` est un id servi par ce composant.\n- **Synthèse :**\n  - Le déplacement des deux avertissements existants vers `indépendant/components/` devrait être un commit `refactor` séparé.\n  - Il n'y a aucun test pour le nouvel avertissement.\n  - Le rendu et le lien vers le simulateur auto-entrepreneur ne sont pas vérifiés.\n\nJe n'ai pas lu les résultats de `gh pr checks`."
+ }
+}
+
+```

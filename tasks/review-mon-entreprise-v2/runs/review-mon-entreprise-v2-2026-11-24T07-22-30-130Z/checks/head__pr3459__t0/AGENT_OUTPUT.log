@@ -1,0 +1,31 @@
+{
+ "pr": 3459,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/SearchParamsAdapter.ts",
+   "line": 44,
+   "start_line": null,
+   "body": "Les regex n'acceptent pas de signe `-` : un montant ou une quantité négatifs encodés par `encode` (ex. `-100€`) ne sont pas reconnus au décodage. `parseFloat(\"-100€\")` donne `-100` mais `valeur.trim() === nombre.toString()` échoue, donc la valeur revient en `string` brute et finit dans la situation Publicodes à la place d'un montant. Est-ce un cas qui peut arriver dans les simulateurs (déficit, résultat négatif, etc.) ? Si oui, un `-?` en tête des deux regex et un test aller-retour `decode(encode(x))` couvriraient le cas.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/SearchParamsAdapter.ts",
+   "line": 19,
+   "start_line": null,
+   "body": "nit: cet adaptateur dépend de `domaine/Montant` et `domaine/Quantité` et n'est utilisé que par `hooks/useSearchParamsSimulationSharing.ts`. À la racine de `site/source`, il se retrouve à côté de rien d'autre ; `domaine/engine/` (où vivent déjà `MontantAdapter` et `PublicodesAdapter`) ou `hooks/` me paraîtraient plus cohérents. Dans le hook, le `as ValeurPublicodes` après `decode` masque aussi que `ValeurDomaine` n'est pas la même chose : un passage par `PublicodesAdapter` rendrait la conversion explicite.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.19134800000000002,
+  "final_text": "J'ai posté deux commentaires inline sur `site/source/SearchParamsAdapter.ts`. Je n'ai relu en détail que cet adaptateur, issu du dernier commit. Les 472 autres fichiers du diff n'ont été relus que par leur liste de fichiers. Ma revue ne couvre donc pas toute la PR.\n\n- **Valeurs négatives (ligne 44)** : les regex de `decode` n'acceptent pas le signe `-`. Un montant ou une quantité négatifs, par exemple `-100€`, reviendrait en `string` brute au lieu d'un montant. J'ai posé la question de savoir si le cas peut arriver, et suggéré un `-?` en tête des regex avec un test aller-retour `decode(encode(x))`.\n- **Emplacement et cast (ligne 19, en `nit:`)** : l'adaptateur est à la racine de `site/source`. `domaine/engine/` ou `hooks/` seraient plus cohérents avec `MontantAdapter` et `PublicodesAdapter`. Le `as ValeurPublicodes` dans le hook masque aussi la conversion.\n\nLa vérification PR est au vert d'après `gh pr checks`. Je n'ai pas posté de commentaire global."
+ }
+}

@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/storage/sanitizePersistedSituation.ts",
+  "start_line": 15,
+  "end_line": 15,
+  "message": "Je me demande si on ne perd pas des données en silence ici : toute valeur qui n’est ni une chaîne, ni un nombre, ni `{ valeur, unité }` est supprimée de la situation restaurée (par exemple une expression Publicodes objet comme `{ somme: [...] }` ou `{ variations: ... }`, ou un booléen). Pour l’usager, une réponse déjà saisie disparaît sans trace et sans log, alors que le `console.error` de `searchParams.ts` avait au moins l’avantage de signaler le cas. Est-ce qu’on sait que ces formes ne peuvent pas se trouver dans une situation persistée ? Sinon, je garderais ces valeurs telles quelles et ne transformerais que le cas ciblé."
+ },
+ {
+  "file": "site/source/storage/persistCompanySituation.ts",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "Le contenu du localStorage est une entrée externe : si `JSON.parse` renvoie `null` (valeur `\"null\"` stockée) ou un tableau, `Object.entries` plante ou produit des clés `0`, `1`… Le typage de `sanitizePersistedSituation` laisse croire que l’entrée est déjà un `Record`. Qu’en penses-tu de valider la forme (objet non nul) à cette frontière, et pareil dans `deserialize` de `serializeSimulation.ts` ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4427,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/storage/sanitizePersistedSituation.ts",
+   "line": 15,
+   "start_line": null,
+   "body": "Je me demande si on ne perd pas des données en silence ici : toute valeur qui n’est ni une chaîne, ni un nombre, ni `{ valeur, unité }` est supprimée de la situation restaurée (par exemple une expression Publicodes objet comme `{ somme: [...] }` ou `{ variations: ... }`, ou un booléen). Pour l’usager, une réponse déjà saisie disparaît sans trace et sans log, alors que le `console.error` de `searchParams.ts` avait au moins l’avantage de signaler le cas. Est-ce qu’on sait que ces formes ne peuvent pas se trouver dans une situation persistée ? Sinon, je garderais ces valeurs telles quelles et ne transformerais que le cas ciblé.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/storage/persistCompanySituation.ts",
+   "line": 32,
+   "start_line": null,
+   "body": "Le contenu du localStorage est une entrée externe : si `JSON.parse` renvoie `null` (valeur `\"null\"` stockée) ou un tableau, `Object.entries` plante ou produit des clés `0`, `1`… Le typage de `sanitizePersistedSituation` laisse croire que l’entrée est déjà un `Record`. Qu’en penses-tu de valider la forme (objet non nul) à cette frontière, et pareil dans `deserialize` de `serializeSimulation.ts` ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1189549,
+  "final_text": "J'ai posté deux commentaires inline sur la PR #4427 et aucun commentaire global. La vérification PR est au vert. Je n'ai pas exécuté le code ni les tests.\n\n- **`sanitizePersistedSituation.ts:15` :** la fonction supprime sans trace toute valeur qui n'est ni une chaîne, ni un nombre, ni `{ valeur, unité }`. Un usager peut donc perdre une réponse déjà saisie, par exemple une expression Publicodes objet ou un booléen. J'ai demandé si ces formes peuvent se trouver dans une situation persistée.\n- **`persistCompanySituation.ts:32` :** le contenu du localStorage est une entrée externe. Si `JSON.parse` renvoie `null` ou un tableau, `Object.entries` plante ou produit des clés `0`, `1`… J'ai proposé de valider la forme (objet non nul) à cette frontière, et dans `deserialize` de `serializeSimulation.ts`."
+ }
+}
+
+```

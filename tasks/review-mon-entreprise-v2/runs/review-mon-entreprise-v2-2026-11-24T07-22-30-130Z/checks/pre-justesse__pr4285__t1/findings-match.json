@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/AvertissementRéformeRGDUNonImplémentée.tsx",
+      "start_line": 12,
+      "end_line": 12,
+      "message": "Le simulateur de réduction générale (`RéductionGénérale.tsx`, ligne 31) affiche toujours cet avertissement « La RGDU n'est pas encore implémentée sur ce simulateur » dans un `Message type=\"error\"`, alors que la PR implémente la RGDU dans `modele-social` (et que ce simulateur s'appuie sur ces règles). Les usagers vont lire qu'un résultat est faux alors qu'il ne l'est plus. Est-ce voulu (le simulateur dédié n'est pas encore adapté) ? Sinon, je verrais bien supprimer le composant et ses clés de traduction, comme pour le simulateur salarié."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+          "start_line": 32,
+          "end_line": 32
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

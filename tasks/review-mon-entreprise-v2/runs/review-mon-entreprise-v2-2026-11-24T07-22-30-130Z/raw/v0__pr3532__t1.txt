@@ -1,0 +1,59 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Je me demande si ce changement d’assiette est voulu : `CSG-CRDS . assiette de base` applique l’abattement de 1,75 % (`assiette abattue`, cotisations.publicodes l.495-502) et déduit les heures supplémentaires défiscalisées, ce que l’ancienne somme `cotisations . assiette` + prévoyance employeur ne faisait pas. La base de la taxe sur les salaires baisse donc pour tous les salariés concernés, pas seulement les apprentis. Je n’ai pas vérifié ce que dit la source sur l’assiette de cette taxe. Cette modification ne figure ni dans le message du commit `feat(salarié): … CSG-CRDS pour les apprentis`, ni dans le CHANGELOG. Est-ce un effet de bord du retrait de `cotisations . CSG-CRDS` des règles rendues non applicables ? Si oui, un commit dédié avec sa référence (et un test) serait plus lisible ; sinon, quelle source justifie cette assiette ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 210,
+  "end_line": 210,
+  "message": "Les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », mais la condition porte sur `date` (la date de la simulation), pas sur la date de début de contrat. Une simulation en 2026 d’un contrat signé en 2024 appliquerait donc 50 % au lieu de 79 % (et la CSG-CRDS ne serait plus exonérée en totalité). Tu mentionnes dans la PR avoir hésité à ajouter une question sur la date de début : je pense qu’elle est nécessaire pour que le résultat affiché soit fiable, sinon le comportement ne correspond pas à la description. Qu’en penses-tu ? Pour ta question sur l’assiette de la CSG-CRDS (avec ou sans prévoyance santé), je ne peux pas la trancher sans source ; si la page Urssaf citée ne la précise pas, une question à l’Urssaf me semble préférable à un choix par défaut."
+ },
+ {
+  "message": "Synthèse : outre les deux remarques inline, je n’ai pas vu de tests ajoutés pour les nouveaux cas (apprenti avant/après mars 2025, plafonds 2,25 / 3,3 SMIC) : seuls des snapshots sont mis à jour, ce qui ne documente pas le comportement attendu. L’historique par commit est lisible. Je n’ai pas vérifié les valeurs elles-mêmes (taux, plafonds) contre les textes."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3532,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/salarié.publicodes",
+   "line": 521,
+   "start_line": null,
+   "body": "Je me demande si ce changement d’assiette est voulu : `CSG-CRDS . assiette de base` applique l’abattement de 1,75 % (`assiette abattue`, cotisations.publicodes l.495-502) et déduit les heures supplémentaires défiscalisées, ce que l’ancienne somme `cotisations . assiette` + prévoyance employeur ne faisait pas. La base de la taxe sur les salaires baisse donc pour tous les salariés concernés, pas seulement les apprentis. Je n’ai pas vérifié ce que dit la source sur l’assiette de cette taxe. Cette modification ne figure ni dans le message du commit `feat(salarié): … CSG-CRDS pour les apprentis`, ni dans le CHANGELOG. Est-ce un effet de bord du retrait de `cotisations . CSG-CRDS` des règles rendues non applicables ? Si oui, un commit dédié avec sa référence (et un test) serait plus lisible ; sinon, quelle source justifie cette assiette ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/contrat.publicodes",
+   "line": 210,
+   "start_line": null,
+   "body": "Les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », mais la condition porte sur `date` (la date de la simulation), pas sur la date de début de contrat. Une simulation en 2026 d’un contrat signé en 2024 appliquerait donc 50 % au lieu de 79 % (et la CSG-CRDS ne serait plus exonérée en totalité). Tu mentionnes dans la PR avoir hésité à ajouter une question sur la date de début : je pense qu’elle est nécessaire pour que le résultat affiché soit fiable, sinon le comportement ne correspond pas à la description. Qu’en penses-tu ? Pour ta question sur l’assiette de la CSG-CRDS (avec ou sans prévoyance santé), je ne peux pas la trancher sans source ; si la page Urssaf citée ne la précise pas, une question à l’Urssaf me semble préférable à un choix par défaut.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse : outre les deux remarques inline, je n’ai pas vu de tests ajoutés pour les nouveaux cas (apprenti avant/après mars 2025, plafonds 2,25 / 3,3 SMIC) : seuls des snapshots sont mis à jour, ce qui ne documente pas le comportement attendu. L’historique par commit est lisible. Je n’ai pas vérifié les valeurs elles-mêmes (taux, plafonds) contre les textes."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 14,
+  "cost_usd": 0.2221311,
+  "final_text": "J'ai posté la revue sur la PR #3532 : deux commentaires inline et une synthèse. Je n'ai ni lancé les tests ni vérifié les taux et plafonds contre les textes.\n\n- **Assiette de la taxe sur les salaires** (`salarié.publicodes:521`) : elle passe à `CSG-CRDS . assiette de base`, qui applique l'abattement de 1,75 % et déduit les heures supplémentaires défiscalisées. Cela baisse la base pour tous les salariés, pas seulement les apprentis. Je n'ai pas vérifié la source de cette taxe. Ce changement n'est ni dans le message de commit ni dans le CHANGELOG, et je demande s'il est voulu.\n- **Date de bascule des apprentis** (`contrat.publicodes:210`) : la condition `date >= 03/2025` porte sur la date de simulation, alors que les descriptions parlent de la date de conclusion du contrat. Un contrat signé en 2024 et simulé en 2026 prendrait donc 50 % au lieu de 79 %. Je suggère la question sur la date de début de contrat que l'autrice envisageait. Pour sa question sur l'assiette de la CSG-CRDS (avec ou sans prévoyance santé), je ne peux pas trancher sans source.\n- **Tests** : seuls des snapshots sont mis à jour, et aucun test ne documente les nouveaux cas, comme l'apprenti avant et après mars 2025 ou les plafonds 2,25 et 3,3 SMIC.\n\nL'historique par commit est lisible."
+ }
+}
+
+```

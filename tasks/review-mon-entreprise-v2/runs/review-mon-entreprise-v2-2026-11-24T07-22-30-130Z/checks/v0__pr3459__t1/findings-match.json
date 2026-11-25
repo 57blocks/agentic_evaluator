@@ -1,0 +1,157 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/SearchParamsAdapter.ts",
+      "start_line": 20,
+      "end_line": 20,
+      "message": "Je ne vois pas d'appelant de `encode` hors de son test : `getSearchParams` continue de passer par `serializeEvaluation`, avec un repli `JSON.stringify`. L'URL est donc écrite d'une façon et relue d'une autre, et rien ne garantit l'aller-retour `encode` → `decode` en production. Je me demande si on ne devrait pas soit brancher `encode` dans `getSearchParams`, soit le retirer pour l'instant (code non utilisé). Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/SearchParamsAdapter.ts",
+      "start_line": 44,
+      "end_line": 44,
+      "message": "Deux cas me questionnent (lecture du code, non exécuté) : la regex n'accepte pas de signe, donc `-500€` retombe en string brute (alors que `-500` seul devient un nombre). Et une unité monétaire inconnue (`€/trimestre`) matche la regex puis sort du `switch` sans retour, pour finir en string. Est-ce voulu ? Un test sur ces deux cas lèverait le doute."
+    },
+    {
+      "file": "site/source/hooks/useSearchParamsSimulationSharing.ts",
+      "start_line": 169,
+      "end_line": 169,
+      "message": "Deux points :\n- Le bloc supprimé gérait les valeurs en JSON (objet avec `valeur` et `unité`), format que `getSearchParams` peut encore produire (repli `JSON.stringify`) et que d'anciens liens partagés contiennent peut-être. Avec `decode`, elles arrivent en string brute. Abandon assumé ? Sinon un test de non-régression serait utile.\n- `as ValeurPublicodes` (et `{} as Record<DottedName, …>` plus haut) affirme un type que le compilateur ne vérifie pas : `decode` renvoie `ValeurDomaine` et la situation est partielle. Un `Partial<Record<…>>` et un type de retour de `decode` compatible éviteraient les casts."
+    },
+    {
+      "message": "Synthèse : la PR contient une soixantaine de commits sur des sujets variés (MDX, ADR, choix du statut, dividendes, auto-entrepreneur…), ce qui la rend difficile à relire en une fois ; la scinder aiderait. Je n'ai relu en détail que le dernier commit (`SearchParamsAdapter`) et n'ai pas vérifié le reste, ni testé manuellement un lien partagé existant."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/location-de-meublé/documentation/micro-bic.mdx",
+          "start_line": 57,
+          "end_line": 57
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/components/ChiffreAffairesActivitéMixte.tsx",
+          "start_line": 9,
+          "end_line": 108
+        },
+        {
+          "file": "site/source/domaine/Montant.ts",
+          "start_line": 1,
+          "end_line": 107
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/declaration-revenus-pamc/components/LigneImpôts.tsx",
+          "start_line": 34,
+          "end_line": 34
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/design-system/molecules/field/MontantField.tsx",
+          "start_line": 64,
+          "end_line": 64
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 0,
+      "defect": 1
+    },
+    {
+      "finding": 0,
+      "defect": 2
+    },
+    {
+      "finding": 0,
+      "defect": 3
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 1
+    },
+    {
+      "finding": 1,
+      "defect": 2
+    },
+    {
+      "finding": 1,
+      "defect": 3
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 1
+    },
+    {
+      "finding": 2,
+      "defect": 2
+    },
+    {
+      "finding": 2,
+      "defect": 3
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 1
+    },
+    {
+      "finding": 3,
+      "defect": 2
+    },
+    {
+      "finding": 3,
+      "defect": 3
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

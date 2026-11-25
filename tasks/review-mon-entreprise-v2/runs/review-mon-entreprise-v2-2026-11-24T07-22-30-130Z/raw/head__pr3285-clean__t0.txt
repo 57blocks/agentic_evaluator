@@ -1,0 +1,54 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+  "start_line": 629,
+  "end_line": 629,
+  "message": "Je me demande si l'identifiant Légifrance est le bon : la description de la PR présente `LEGIARTI000036471466` comme l'article D632-1, alors qu'ici il est libellé D632-2 (et D632-1 pointe vers `LEGIARTI000041966755`). Peux-tu vérifier la correspondance libellé/lien ?"
+ },
+ {
+  "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+  "start_line": 142,
+  "end_line": 142,
+  "message": "nit: la description de cette règle est celle, générique, d'`assiette minimale` (« certaines cotisations seront portées à un montant minimum »). Je verrais bien une phrase propre à cette règle, par exemple l'assiette plancher de 11,5 % du PASS pour la cotisation invalidité-décès, d'autant qu'elle est reprise telle quelle dans la traduction."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/indépendant.publicodes",
+   "line": 629,
+   "start_line": null,
+   "body": "Je me demande si l'identifiant Légifrance est le bon : la description de la PR présente `LEGIARTI000036471466` comme l'article D632-1, alors qu'ici il est libellé D632-2 (et D632-1 pointe vers `LEGIARTI000041966755`). Peux-tu vérifier la correspondance libellé/lien ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/indépendant.publicodes",
+   "line": 142,
+   "start_line": null,
+   "body": "nit: la description de cette règle est celle, générique, d'`assiette minimale` (« certaines cotisations seront portées à un montant minimum »). Je verrais bien une phrase propre à cette règle, par exemple l'assiette plancher de 11,5 % du PASS pour la cotisation invalidité-décès, d'autant qu'elle est reprise telle quelle dans la traduction.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/3259: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1085653,
+  "final_text": "J'ai posté deux commentaires inline sur la PR, aucun commentaire global.\n\n- **Référence Légifrance (`indépendant.publicodes:629`)** : la description de la PR donne `LEGIARTI000036471466` comme article D632-1, mais le code le libelle D632-2. Dans le code, D632-1 pointe vers `LEGIARTI000041966755`. J'ai demandé à l'auteur de vérifier la correspondance entre libellés et liens. Je n'ai pas pu confirmer lequel est le bon.\n- **Description de la règle (`indépendant.publicodes:142`)** : en `nit:`. La description de la nouvelle règle `assiette minimale . invalidité et décès` reprend le texte générique d'`assiette minimale`. Elle est aussi copiée dans la traduction. Je suggère une phrase propre à cette règle (plancher de 11,5 % du PASS).\n\nLa vérification PR est au vert. L'issue #3259, citée par la PR, n'est pas accessible (404), donc je n'ai pas pu la lire."
+ }
+}
+
+```

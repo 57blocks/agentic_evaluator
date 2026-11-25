@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/storage/sanitizePersistedSituation.ts",
+  "start_line": 15,
+  "end_line": 15,
+  "message": "Je me demande si écarter silencieusement toute valeur qui n'est ni chaîne, ni nombre, ni `{ valeur, unité }` n'est pas risqué : un booléen, `null` ou une expression Publicodes plus riche (`{ somme: … }`, `{ valeur: '50 %', … }`) déjà persistée disparaîtrait de la situation de l'usager sans trace, et il retrouverait son simulateur avec des champs vides. Le lot de valeurs invalides que tu visais à écarter est-il limité à ces objets `{ valeur, unité }` ? Si oui, laisser passer le reste telle quelle me semblerait plus sûr."
+ },
+ {
+  "file": "site/source/domaine/searchParams.ts",
+  "start_line": 36,
+  "end_line": 36,
+  "message": "La conversion `${valeur} ${unité}` est dupliquée avec `sanitizePersistedSituation.ts`. Elle pourrait vivre à côté de `isExpressionAvecUnité` dans `ExpressionPublicodes.ts` (par ex. une fonction `enChaîneAvecUnité`), pour que les deux formats ne divergent pas."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4427,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/storage/sanitizePersistedSituation.ts",
+   "line": 15,
+   "start_line": null,
+   "body": "Je me demande si écarter silencieusement toute valeur qui n'est ni chaîne, ni nombre, ni `{ valeur, unité }` n'est pas risqué : un booléen, `null` ou une expression Publicodes plus riche (`{ somme: … }`, `{ valeur: '50 %', … }`) déjà persistée disparaîtrait de la situation de l'usager sans trace, et il retrouverait son simulateur avec des champs vides. Le lot de valeurs invalides que tu visais à écarter est-il limité à ces objets `{ valeur, unité }` ? Si oui, laisser passer le reste telle quelle me semblerait plus sûr.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/domaine/searchParams.ts",
+   "line": 36,
+   "start_line": null,
+   "body": "La conversion `${valeur} ${unité}` est dupliquée avec `sanitizePersistedSituation.ts`. Elle pourrait vivre à côté de `isExpressionAvecUnité` dans `ExpressionPublicodes.ts` (par ex. une fonction `enChaîneAvecUnité`), pour que les deux formats ne divergent pas.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1207461,
+  "final_text": "J'ai relu la PR #4427 et posé deux commentaires inline sur GitHub. Je n'ai rien exécuté : la vérification PR est au vert.\n\n- **`sanitizePersistedSituation.ts`, ligne 15 :** la fonction écarte sans trace toute valeur qui n'est ni une chaîne, ni un nombre, ni un objet `{ valeur, unité }`. Un booléen, `null` ou une expression Publicodes plus riche déjà enregistrés disparaîtraient de la situation de l'usager. Je propose de laisser passer le reste tel quel. Je l'ai posé en question, car je n'ai pas vérifié ce que contiennent réellement les situations déjà persistées.\n- **`searchParams.ts`, ligne 36 :** la conversion `` `${valeur} ${unité}` `` est dupliquée avec `sanitizePersistedSituation.ts`. Je suggère de la mettre à côté de `isExpressionAvecUnité`, dans `ExpressionPublicodes.ts`."
+ }
+}
+
+```

@@ -1,0 +1,30 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/storage/sanitizePersistedSituation.ts",
+      "start_line": 15,
+      "end_line": 15,
+      "message": "Je me demande si écarter silencieusement toute valeur qui n'est ni chaîne, ni nombre, ni `{ valeur, unité }` n'est pas risqué : un booléen, `null` ou une expression Publicodes plus riche (`{ somme: … }`, `{ valeur: '50 %', … }`) déjà persistée disparaîtrait de la situation de l'usager sans trace, et il retrouverait son simulateur avec des champs vides. Le lot de valeurs invalides que tu visais à écarter est-il limité à ces objets `{ valeur, unité }` ? Si oui, laisser passer le reste telle quelle me semblerait plus sûr."
+    },
+    {
+      "file": "site/source/domaine/searchParams.ts",
+      "start_line": 36,
+      "end_line": 36,
+      "message": "La conversion `${valeur} ${unité}` est dupliquée avec `sanitizePersistedSituation.ts`. Elle pourrait vivre à côté de `isExpressionAvecUnité` dans `ExpressionPublicodes.ts` (par ex. une fonction `enChaîneAvecUnité`), pour que les deux formats ne divergent pas."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

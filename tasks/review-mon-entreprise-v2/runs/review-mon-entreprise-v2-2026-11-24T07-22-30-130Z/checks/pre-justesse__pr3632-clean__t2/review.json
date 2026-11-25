@@ -1,0 +1,23 @@
+{
+ "pr": 3632,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+   "line": 14,
+   "start_line": null,
+   "body": "Convention du projet : export nommé plutôt que `export default` (l'ancien `GuideURSSAFCard` l'était déjà). À ajuster aussi dans l'import de `NextSteps.tsx`.\n```suggestion\nexport function ExternalLinkCard({\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1266693,
+  "final_text": "J'ai posté un seul commentaire inline : `ExternalLinkCard` utilise `export default`, alors que le projet impose les exports nommés. La remarque précise aussi qu'il faut adapter l'import dans `NextSteps.tsx`.\n\nLes vérifications de la PR sont au vert. Je n'ai rien trouvé d'autre qui vaille un commentaire, et je n'ai pas posté de commentaire global."
+ }
+}

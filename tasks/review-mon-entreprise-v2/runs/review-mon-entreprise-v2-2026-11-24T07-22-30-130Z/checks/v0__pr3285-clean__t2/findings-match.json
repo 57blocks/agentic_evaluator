@@ -1,0 +1,27 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+      "start_line": 148,
+      "end_line": 148,
+      "message": "Je vois une incohérence sur les références : la description de la PR renvoie D632-1 vers `LEGIARTI000036471466`, alors qu'ici ce même identifiant est libellé « D632-2 » (l. 629) et D632-1 pointe vers `LEGIARTI000041966755`. Je n'ai pas pu ouvrir Légifrance pour vérifier lequel est le bon. Peux-tu confirmer que chaque libellé correspond bien à son lien, et que le 11,5 % du PASS figure dans l'article cité ? Les références sont aussi dupliquées entre les deux règles (l. 148 et 628) ; je me demande si les garder sur une seule suffirait."
+    },
+    {
+      "message": "Synthèse :\n- Le changement de plancher est limité et les snapshots qui bougent vont dans le sens attendu (cotisations +1 €). Je ne peux pas valider la valeur métier (11,5 % du PASS) ; voir ma remarque sur les références.\n- Tests : seuls des snapshots sont mis à jour. Je me demande si un test ciblé sur la règle (revenu bas, assiette = 11,5 % du PASS, distincte du plancher retraite) ne protégerait pas mieux contre une régression que des écarts de 1 € dans de gros snapshots.\n- Commit : le message ne suit pas le format Conventional Commits en français (`fix(indépendant): corrige l'assiette plancher de la cotisation invalidité et décès` par exemple).\n- Je n'ai pas vérifié les traductions EN générées au-delà de leur présence dans `rules-en.yaml`."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

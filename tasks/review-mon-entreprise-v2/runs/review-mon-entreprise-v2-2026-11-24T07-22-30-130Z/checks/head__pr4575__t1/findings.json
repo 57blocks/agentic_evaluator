@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/vite.config.ts",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Je me demande si le remplacement de `next` par `main` ici est voulu : il change le comportement (une branche `next` passe de production à staging, avec Sentry, Plausible et les URLs que cela implique), alors que le sujet est de déplacer la config dans l'adaptateur. Si c'est intentionnel, je le verrais dans un commit à part avec son explication ; sinon, `['master', 'next']` à conserver ?"
+ }
+]

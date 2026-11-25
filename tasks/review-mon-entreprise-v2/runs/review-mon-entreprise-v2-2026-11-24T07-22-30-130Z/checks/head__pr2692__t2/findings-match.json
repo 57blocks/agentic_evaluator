@@ -1,0 +1,94 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "api/source/redis-cache.ts",
+      "start_line": 30,
+      "end_line": 30,
+      "message": "Si Redis est indisponible, `redis.get` rejette (avec `enableOfflineQueue: false` l'erreur est immédiate) et `/evaluate` répond en erreur alors que le calcul aurait pu être fait sans cache. Le rate-limiter a un `try/catch` pour ce cas. Je verrais bien le même repli ici (get et set dans un `try/catch` qui retombe sur `next()`). Qu'en penses-tu ?"
+    },
+    {
+      "file": "api/source/redis-cache.ts",
+      "start_line": 29,
+      "end_line": 29,
+      "message": "La clé est le body JSON brut, sans préfixe, dans la même base Redis que le rate-limiter (qui utilise `keyPrefix: 'middleware'`). Je verrais bien un préfixe (`evaluate:`) pour éviter les collisions et pouvoir purger le cache facilement."
+    },
+    {
+      "file": "api/source/redis-cache.ts",
+      "start_line": 42,
+      "end_line": 42,
+      "message": "Le champ `responseCachedAt` n'est ajouté qu'à la valeur stockée : la première réponse (calculée) n'a pas ce champ, les suivantes l'ont. La forme de la réponse change donc selon le cas, et ce champ n'est pas dans `openapi.json`. C'est voulu ?"
+    },
+    {
+      "file": "api/source/redis-cache.ts",
+      "start_line": 3,
+      "end_line": 3,
+      "message": "`ioredis-mock` est en `dependencies` et importé en dur : il sera embarqué en production alors qu'il ne sert qu'en dev. Le code gère déjà `!redis` ; je me demande si ne pas avoir de cache hors production (`undefined`) ne serait pas plus simple, sans cette dépendance."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "api/source/redis-cache.ts",
+          "start_line": 30,
+          "end_line": 45
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm",
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    }
+  ]
+}

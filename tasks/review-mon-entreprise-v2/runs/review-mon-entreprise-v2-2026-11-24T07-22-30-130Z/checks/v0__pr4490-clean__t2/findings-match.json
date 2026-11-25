@@ -1,0 +1,18 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Je n'ai pas trouvé de défaut bloquant : le découpage export → push est cohérent et `algolia:update` garde le comportement local.\n\nDeux points, sans urgence :\n- **Tests** : `format.ts` est maintenant un module pur (`formatRulesToAlgolia`, `formatSimulationDataToAlgolia`, avec le filtre des simulateurs `private`). Je me demande si un petit test unitaire ne vaudrait pas le coup, puisque c'est la partie qui décide de ce qui devient cherchable. Je ne l'ai pas trouvé dans la PR, mais je n'ai peut-être pas tout vu.\n- **Sécurité du workflow** : `pr-deploy` pousse avec `ALGOLIA_ADMIN_KEY` un JSON produit par le code de la PR, et `ALGOLIA_INDEX_PREFIX` dépend de `env_name`, lu dans l'artefact `pr-context`. Ce schéma existait déjà avant la PR (même source pour le préfixe). Je n'ai pas vérifié comment `env_name` est calculé ni validé, donc je ne sais pas si un préfixe arbitraire est possible. Cela vaut peut-être un coup d'œil, par exemple en recalculant le préfixe côté `pr-deploy`.\n\nHistorique : quatre commits, chacun un changement logique. Le dernier (prettier) aurait pu être fusionné dans le commit du refactoring."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

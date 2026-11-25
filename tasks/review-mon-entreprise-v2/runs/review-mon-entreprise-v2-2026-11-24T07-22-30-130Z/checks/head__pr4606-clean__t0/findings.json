@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 107,
+  "end_line": 107,
+  "message": "En JSX, le retour à la ligne entre `,` et `<Code>modele-ti</Code>` est supprimé : le texte s’affichera « modele-as,modele-ti » sans espace. Je verrais bien un `{' '}` en fin de ligne.\n```suggestion\n\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{' '}\n```"
+ }
+]

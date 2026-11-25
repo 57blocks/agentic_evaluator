@@ -1,0 +1,14 @@
+{
+ "pr": 3285,
+ "findings": [],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1030173,
+  "final_text": "Le commentaire n'a pas pu être posté : la commande a été refusée et nécessite une approbation. Je n'ai donc rien publié sur la PR.\n\nMa seule remarque est celle-ci, sur `modele-social/règles/dirigeant/indépendant.publicodes:629`. Le lien `LEGIARTI000036471466` est libellé « Article D632-2 ». La description de la PR le présente pourtant comme l'article D632-1. Dans le code, « Article D632-1 » pointe vers `LEGIARTI000041966755`. Je me demande si les libellés sont inversés ou si l'un des liens a été mal copié.\n\nLa vérification PR est au vert. Je n'ai rien relevé d'autre qui vaille un commentaire.\n\nVoulez-vous que je poste ce commentaire inline, ou que je l'écrive autrement ?"
+ }
+}

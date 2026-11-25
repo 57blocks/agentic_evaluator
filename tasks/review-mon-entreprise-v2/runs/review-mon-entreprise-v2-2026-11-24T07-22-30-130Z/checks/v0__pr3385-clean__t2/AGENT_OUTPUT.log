@@ -1,0 +1,43 @@
+{
+ "pr": 3385,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/AnswerList.tsx",
+   "line": 321,
+   "start_line": null,
+   "body": "Je pense que cette ligne commentée est un reste de test : `showSuggestions` vaut `true` par défaut dans `RuleInput`, donc les suggestions réapparaissent dans la modale « Modifier mes réponses » pour toutes les questions numériques du site. Était-ce voulu ? Si c’est pour faire passer le test AE, je préférerais garder la prop et adapter le test. Sinon, ce changement n’aurait pas sa place dans une PR de texte sur « Charges ».",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+   "line": 22,
+   "start_line": null,
+   "body": "Je me demande si ce `cy.contains(\"Début d'année\")` fonctionne encore : le libellé de la possibilité est devenu `Début d’année` (apostrophe typographique) dans `entreprise.publicodes:25`, alors qu’ici l’apostrophe est droite. Je n’ai pas pu lancer Cypress. Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+   "line": 70,
+   "start_line": null,
+   "body": "nit: `cy.wait(500)` rend le test fragile (et oblige à désactiver ESLint). Une assertion sur l’état attendu avant la saisie suivante serait plus stable. Retirer `testIsolation: false` est aussi un refactoring distinct du sujet de la PR.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n\n- **PR à recentrer** : le sujet est la rubrique « Charges », mais elle embarque aussi la conversion des apostrophes en typographiques dans tout `entreprise.publicodes` (et `rules-en.yaml`), des `.eq(0)` → `.first()` dans quatre fichiers Cypress sans lien, et la réécriture du test AE. Je verrais mieux ces sujets en commits ou PR séparés.\n- **Traductions anglaises** : dans `rules-en.yaml`, la description de `entreprise . charges` est cassée (phrases coupées : « are not », « they are not / are not deductible », « years. Each year… », `&gt; Note**` au lieu de `> **Note**`). Le texte source a été re-césuré en lignes courtes, et la traduction semble générée sur ces coupures. Je me demande si on ne peut pas garder des paragraphes non coupés dans le `.publicodes`, puis relancer `i18n:translate`. Plusieurs entrées existantes passent aussi de relues à `[automatic]` (ex. `association non lucrative`, `TVA`) uniquement à cause du changement d’apostrophe.\n- **Commits** : « tests(AE) » n’est pas un type Conventional Commits valide (`test`), et le commit 3 mélange feature, suppression de `small` et texte. Je n’ai pas pu vérifier le rendu de `SimulationGoal` sans `small`, ni exécuter Cypress."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.19062769999999998,
+  "final_text": "J'ai posté trois commentaires inline et une synthèse sur la PR 3385. Je n'ai ni lancé Cypress, ni vérifié le rendu de `SimulationGoal` sans `small`. Le workflow « Vérification PR » est au vert.\n\nCommentaires inline :\n- **`AnswerList.tsx:321`** : `showSuggestions={false}` est mis en commentaire. Les suggestions réapparaîtraient alors dans la modale « Modifier mes réponses » pour toutes les questions numériques. Je demande si c'est voulu.\n- **`simulateur-ae.ts:22`** : le test cherche `Début d'année` avec une apostrophe droite, alors que le libellé est devenu `Début d’année` dans `entreprise.publicodes`. Ce test échoue peut-être.\n- **`simulateur-ae.ts:70`** : en nit, le `cy.wait(500)` rend le test fragile, et retirer `testIsolation: false` est un refactoring à part.\n\nSynthèse :\n- **Périmètre** : la PR mélange des changements sans rapport avec la rubrique « Charges » (apostrophes typographiques, `.eq(0)` → `.first()` dans quatre fichiers Cypress, réécriture du test AE). Je propose de les séparer.\n- **Traductions anglaises** : la description de `entreprise . charges` dans `rules-en.yaml` est cassée (phrases coupées, `&gt; Note**`). Plusieurs entrées passent aussi de relues à `[automatic]` à cause du seul changement d'apostrophe.\n- **Commits** : « tests(AE) » n'est pas un type Conventional Commits valide, et le troisième commit mélange plusieurs changements."
+ }
+}

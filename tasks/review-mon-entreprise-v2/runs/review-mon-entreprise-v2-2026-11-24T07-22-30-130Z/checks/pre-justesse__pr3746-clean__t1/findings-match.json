@@ -1,0 +1,31 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Déclarations.tsx",
+      "start_line": 41,
+      "end_line": 41,
+      "message": "Le `eslint-disable react-hooks/exhaustive-deps` avec `[]` (repris dans NonÉligible et Résultat) change le comportement par rapport à avant : la garde ne s'évalue plus qu'au montage. Avant, si `situation` ou `raisonsInéligibilité` changeaient pendant que la page est affichée (par exemple en modifiant les salariées), la redirection se déclenchait ; maintenant elle n'a plus lieu. Est-ce voulu ? Sinon, mettre les vraies dépendances (`navigate`, `situation`, `raisonsInéligibilité`) permettrait de retirer le disable : la redirection est idempotente avec `replace: true`."
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 43,
+      "end_line": 43,
+      "message": "Si une redirection part, `set.nouvelEnfant()` s'exécute quand même juste après, sur une situation invalide ou inéligible. Ce n'était pas le cas du code d'origine avec `if`/`navigate` hors effet puisque le `useEffect` était déjà séparé, mais l'enchaîner ici le rend plus visible : un `return` après chaque `navigate` éviterait d'ajouter un enfant dans l'état avant de quitter la page. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

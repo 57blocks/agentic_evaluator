@@ -1,0 +1,38 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "message": "Deux points, dont un que je n'ai pas pu vérifier de bout en bout (je n'ai rien exécuté).\n\n- **Type `BarèmeLodeom`** (`useBarèmeLodeom.ts`) : le tableau `barèmes` n'est pas `as const`, donc `BarèmeLodeom` vaut `string`. Les comparaisons de `WarningSalaireTrans.tsx` ne sont alors pas vérifiées par TypeScript. Pour ce renommage, une coquille ou un oubli passerait `yarn test:type` et l'avertissement ne s'afficherait plus. Je me demande si `as const` (ou un type dérivé des règles) ne rendrait pas ce renommage plus sûr. Je n'ai pas vérifié si `barèmes` est encore utilisé ailleurs que pour dériver ce type, ni si les noms de règles Publicodes correspondent exactement aux nouvelles valeurs.\n- **`rules-en.yaml`** : en plus des clés renommées, le diff contient des changements de formulation sans lien avec le renommage (`€50 million` ↔ `50 million euros`, `does not` déplacé dans `<strong>`) et une nouvelle `question` pour « innovation et croissance ». Ce sont probablement des effets de régénération de `i18n:translate`, ou de l'ajout de cette question dans les règles. Qu'en penses-tu ? Si c'est le cas, un commit séparé pour la question serait plus lisible.\n\nHistorique : deux commits cohérents (déplacement des exonérations, puis renommage). Le premier ne touche pas `rules-en.yaml`, alors que les clés Publicodes déplacées y sont référencées. Je n'ai pas vérifié s'il passe l'étape de traduction tout seul."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/exonérations/lodeom.publicodes",
+          "start_line": 210,
+          "end_line": 456
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

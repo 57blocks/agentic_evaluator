@@ -1,0 +1,19 @@
+{
+ "pr": 3442,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger"
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1225857,
+  "final_text": "J'ai relu la PR #3442 et n'ai trouvé aucun défaut qui vaille un commentaire inline. J'ai donc posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger ».\n\nLa vérification PR est au vert (`gh pr checks`). Je n'ai pas lu en détail les règles Publicodes ni `Résultats.tsx`, seulement les diffs de `Formulaire.tsx`, `index.tsx`, `AssistantGoal.tsx` et `Radio.tsx`. Le contrôle est donc moins poussé sur la partie calcul."
+ }
+}

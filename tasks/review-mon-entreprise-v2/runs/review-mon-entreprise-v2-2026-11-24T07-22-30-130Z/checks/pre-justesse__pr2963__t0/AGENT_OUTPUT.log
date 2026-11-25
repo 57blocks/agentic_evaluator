@@ -1,0 +1,39 @@
+{
+ "pr": 2963,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 92,
+   "start_line": null,
+   "body": "Je me demande si l’applicabilité n’est pas évaluée sur le mauvais moteur : pour une config de comparateur, `engines` contient des `shallowCopy` de `engine` et c’est sur elles que `setSituation` est appelé (l. 77-79). Ici `engine` est le moteur d’origine, qui n’a donc pas la situation de la simulation. Dans ce cas `est applicable` serait évalué sans les réponses de l’usager. Est-ce voulu ? Sinon, `engines[0]` (ou le moteur du contexte concerné) me semblerait plus juste.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 32,
+   "start_line": 29,
+   "body": "Ces quatre variables de module sont partagées par tous les stores créés dans le process (tests, remontage du Provider) : un second `createStore` hérite du `lastSimulation`/`engines` du premier, et la détection de changement (`simulation !== lastSimulation`) peut alors court-circuiter le calcul. Je verrais mieux cet état dans la closure de `(engine) => (store) => …`, ce qui reste un changement de quelques lignes. Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/store/reducers/simulation.reducer.ts",
+   "line": 111,
+   "start_line": 102,
+   "body": "nit: ce bloc « ajoute la question à `questionsRépondues` si absente » est dupliqué avec `ENREGISTRE_LA_RÉPONSE` (l. 78-87). Une petite fonction `marqueCommeRépondue(questionsRépondues, règle)` éviterait que les deux divergent.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1672243,
+  "final_text": "J'ai relu la PR et posté trois commentaires inline, tous sur le store Redux. La vérification PR est verte (`gh pr checks`). Je n'ai relu en détail que `simulation.reducer.ts` et le middleware `prendLaProchaineQuestion`. Les 130 autres fichiers du diff, dont les snapshots, les règles Publicodes et les composants, ne sont pas relus.\n\n- **Moteur de l'applicabilité** (`prendLaProchaineQuestion.middleware.ts:92`) : pour une config de comparateur, `setSituation` est appliqué aux copies du moteur (`engines`), mais l'applicabilité est évaluée sur le moteur d'origine. Je l'ai posé en question, sans l'avoir vérifié en exécutant le code.\n- **État de module partagé** (même fichier, l. 29-32) : `lastSimulation`, `lastConfig`, `lastSituationsAvecContextes` et `engines` sont des variables de module. Un second store créé dans le même process hériterait de leur état. Je propose de les déplacer dans la closure du middleware.\n- **Duplication** (`simulation.reducer.ts:102-111`, en `nit:`) : l'ajout d'une question à `questionsRépondues` est écrit deux fois, dans `ENREGISTRE_LA_RÉPONSE` et `ENREGISTRE_LES_RÉPONSES`."
+ }
+}

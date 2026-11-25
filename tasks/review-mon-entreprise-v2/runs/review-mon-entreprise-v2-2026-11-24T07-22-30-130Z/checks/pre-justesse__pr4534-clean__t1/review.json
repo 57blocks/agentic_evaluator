@@ -1,0 +1,23 @@
+{
+ "pr": 4534,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-as/règles/exonérations.publicodes",
+   "line": 16,
+   "start_line": 15,
+   "body": "Le texte affiché aux usagers contient une coquille : « dans l’ **une des situations suivantes** » (le « dans l’ » est de trop, et se retrouve dans `rules-as-en.yaml`). Je verrais bien :\n```suggestion\n    Vous ne pouvez bénéficier de l’Acre que si vous êtes dans\n    **une des situations suivantes** au moment de la création de votre entreprise :\n    \n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.1522228,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline : une coquille dans le texte affiché aux usagers.\n\nÀ la ligne 15 de `modele-as/règles/exonérations.publicodes`, on lit « dans l’ **une des situations suivantes** », avec un « dans l’ » en trop. La coquille se retrouve aussi dans `rules-as-en.yaml`. J'ai proposé la correction en bloc `suggestion`. Cette suggestion ajoute une ligne vide à la fin pour séparer le paragraphe de la liste. Corriger la source puis relancer `i18n:translate` corrigera aussi l'anglais.\n\nJe n'ai pas relevé d'autre problème. Le changement sur les cotisations salariales applique le même schéma que les cotisations patronales (`25% * …` à partir de 01/2026). La vérification PR est au vert. Je n'ai ni lancé les tests ni lu l'issue #4488 (la commande a été refusée), et je n'ai pas vérifié les montants du snapshot SASU."
+ }
+}

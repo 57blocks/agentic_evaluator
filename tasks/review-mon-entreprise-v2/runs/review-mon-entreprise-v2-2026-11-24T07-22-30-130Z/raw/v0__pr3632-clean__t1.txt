@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 36,
+  "end_line": 36,
+  "message": "Je me demande si la garde ne devrait pas porter sur `relevantExternalLinks` plutôt que sur `externalLinks`. Avec un simulateur dont tous les liens ont une `associatedRule` fausse (ex. un indépendant hors PL, sans `nextSteps` ni `iframePath`), la liste filtrée est vide mais on passe la garde : le `<H2>` « Ressources utiles » s’affiche sans aucune carte. Avant, le test portait sur `guidesUrssaf.length`, donc le cas était couvert. Peut-être `!relevantExternalLinks?.length`, qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 23,
+  "end_line": 23,
+  "message": "nit: la convention du projet est l’export nommé plutôt que `export default` (idem pour `ExternalLinkCard`)."
+ },
+ {
+  "file": "site/source/external-links/embaucherGérerSalariés.ts",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "Je vois deux conséquences à ce `TODO` sur les traductions. (1) Dans l’ancien `NextSteps`, les guides Urssaf étaient conditionnés par `language === 'fr'`, et cette condition a disparu : ces cartes (titres et descriptions en français brut, sans `t()`) vont maintenant s’afficher aussi en anglais. (2) `CONTRIBUTING.md` demande que tout texte affiché passe par `t()` avec une clé hiérarchique. Je verrais bien soit de garder le filtre par langue pour ces liens, soit de les traduire dans cette PR. Tu avais peut-être prévu l’un des deux ? Ça vaut pour tous les fichiers de `external-links/`."
+ },
+ {
+  "message": "Sur la question de fond (chevauchement des périmètres) : mettre les `associatedRule` dans des constantes partagées de `external-links/` me paraît un compromis raisonnable. Les liens restent déclarés dans les configs, et la condition suit le lien. Je n’ai pas vérifié chaque config un par un pour voir si une règle manque quand un lien est repris d’un simulateur à l’autre. Je n’ai pas non plus vu de test sur le filtrage : un test unitaire de la sélection des liens pertinents (règle vraie/fausse, liste vide) aiderait à sécuriser le point sur la garde. Rendu visuel non vérifié."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3632,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/NextSteps.tsx",
+   "line": 36,
+   "start_line": null,
+   "body": "Je me demande si la garde ne devrait pas porter sur `relevantExternalLinks` plutôt que sur `externalLinks`. Avec un simulateur dont tous les liens ont une `associatedRule` fausse (ex. un indépendant hors PL, sans `nextSteps` ni `iframePath`), la liste filtrée est vide mais on passe la garde : le `<H2>` « Ressources utiles » s’affiche sans aucune carte. Avant, le test portait sur `guidesUrssaf.length`, donc le cas était couvert. Peut-être `!relevantExternalLinks?.length`, qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/NextSteps.tsx",
+   "line": 23,
+   "start_line": null,
+   "body": "nit: la convention du projet est l’export nommé plutôt que `export default` (idem pour `ExternalLinkCard`).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/external-links/embaucherGérerSalariés.ts",
+   "line": 3,
+   "start_line": null,
+   "body": "Je vois deux conséquences à ce `TODO` sur les traductions. (1) Dans l’ancien `NextSteps`, les guides Urssaf étaient conditionnés par `language === 'fr'`, et cette condition a disparu : ces cartes (titres et descriptions en français brut, sans `t()`) vont maintenant s’afficher aussi en anglais. (2) `CONTRIBUTING.md` demande que tout texte affiché passe par `t()` avec une clé hiérarchique. Je verrais bien soit de garder le filtre par langue pour ces liens, soit de les traduire dans cette PR. Tu avais peut-être prévu l’un des deux ? Ça vaut pour tous les fichiers de `external-links/`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Sur la question de fond (chevauchement des périmètres) : mettre les `associatedRule` dans des constantes partagées de `external-links/` me paraît un compromis raisonnable. Les liens restent déclarés dans les configs, et la condition suit le lien. Je n’ai pas vérifié chaque config un par un pour voir si une règle manque quand un lien est repris d’un simulateur à l’autre. Je n’ai pas non plus vu de test sur le filtrage : un test unitaire de la sélection des liens pertinents (règle vraie/fausse, liste vide) aiderait à sécuriser le point sur la garde. Rendu visuel non vérifié."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.18570419999999999,
+  "final_text": "J'ai relu la PR #3632 et posté sur GitHub trois commentaires inline et une synthèse. Je n'ai ni exécuté le code ni vérifié le rendu visuel.\n\n- **Titre vide dans `NextSteps.tsx`** : la garde teste `externalLinks` et non la liste filtrée. Si aucune règle associée n'est vraie et qu'il n'y a ni `nextSteps` ni `iframePath`, le titre « Ressources utiles » s'affiche sans carte.\n- **Traductions des guides Urssaf** : l'ancien filtre `language === 'fr'` a disparu. Les fichiers de `external-links/` portent un `TODO` sur les traductions et leurs textes sont en français brut, hors `t()`. Ces cartes vont donc apparaître aussi en anglais.\n- **Convention** : `NextSteps` et `ExternalLinkCard` utilisent `export default` au lieu d'exports nommés (nit).\n\nLa synthèse dit aussi que les constantes partagées avec leur `associatedRule` me semblent un compromis raisonnable pour les périmètres qui se recoupent. Elle signale que je n'ai pas vu de test sur le filtrage des liens et que je n'ai pas vérifié chaque config une par une."
+ }
+}
+
+```

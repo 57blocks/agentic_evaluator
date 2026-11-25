@@ -1,0 +1,18 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "J'ai bien relu, ça me paraît bon à merger. Je n'ai trouvé aucune référence résiduelle à l'assistant CMG dans le dépôt (hors `base-stats.json`, des données historiques)."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

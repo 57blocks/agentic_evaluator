@@ -1,0 +1,39 @@
+{
+ "pr": 3722,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+   "line": 17,
+   "start_line": null,
+   "body": "Je me demande si `MoisIdentiques` en tableaux parallèles à `salariées.GED` / `salariées.AMA` ne va pas se désynchroniser : chaque ajout, suppression ou remplacement de salariée doit penser à mettre à jour deux états (c'est déjà le cas dans `useCMG`, `GED.tsx` et `AMA.tsx`), et `moisIdentiques.GED[index]` vaut `undefined` si un index manque. Une piste : porter le booléen par salariée (dans la salariée, ou dans un objet de domaine qui regroupe salariée + mois identiques) pour qu'un seul état soit à maintenir. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/components/GED/GEDInput.tsx",
+   "line": 54,
+   "start_line": null,
+   "body": "La règle « mois identiques » (mars recopié sur avril et mai ; décocher si on modifie avril ou mai) est écrite ici dans le composant, puis recopiée dans `GED.tsx` (`onMoisIdentiquesChange`) et dans les équivalents AMA. Je verrais bien une fonction de domaine pure (par ex. `appliquerMoisIdentiques(salariée)` dans `salariée.ts`) que ces endroits appellent, avec un test unitaire : la règle ne vivrait qu'une fois et serait testable sans React.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+   "line": 3,
+   "start_line": null,
+   "body": "nit: export nommé plutôt que `export default` (convention de CONTRIBUTING). Le `try/catch` avec repli sur `window.scroll(0, 0)` me paraît superflu : `window.scroll({ top: 0 })` ne devrait pas lever sur les navigateurs ciblés. Existe-t-il déjà un hook ou composant de scroll dans `components/utils/Scroll` qui couvre ce besoin ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1738473,
+  "final_text": "J'ai relu la PR et envoyé trois commentaires inline via `gh api`. Seuls deux ont été confirmés. Le troisième n'a pas été confirmé, et la relecture des commentaires de la PR a renvoyé une liste vide.\n\nLes deux commentaires confirmés par l'API (ids 1795487762945 et 1795487762976) portent sur :\n- **`CMGContext.tsx`, ligne 17 :** `MoisIdentiques` est stocké en tableaux parallèles à `salariées.GED` et `salariées.AMA`. Ces deux états peuvent se désynchroniser à chaque ajout, suppression ou remplacement de salariée. J'ai proposé de porter le booléen par salariée.\n- **`GEDInput.tsx`, ligne 54 :** la règle « mars recopié sur avril et mai, décocher si on modifie avril ou mai » est écrite dans le composant, puis dans `GED.tsx` et les équivalents AMA. J'ai proposé une fonction de domaine pure, avec un test.\n\nLe troisième commentaire, sur `useScrollToTop.tsx` ligne 3, est un nit sur l'export nommé et le `try/catch` superflu. Sa sortie a été filtrée par mon `grep`, donc je n'ai pas vu de réponse de l'API. Il faut vérifier sur la PR qu'il est bien posté.\n\nJe n'ai lu que les fichiers du contexte CMG, du design-system, de GED et le hook de scroll. Les fichiers AMA n'ont pas été relus ; la remarque sur la duplication s'appuie sur la structure du diff. Le workflow « Vérification PR » est au vert."
+ }
+}

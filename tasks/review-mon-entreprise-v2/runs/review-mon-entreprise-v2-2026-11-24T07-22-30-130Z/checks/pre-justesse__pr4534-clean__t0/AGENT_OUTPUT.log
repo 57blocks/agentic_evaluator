@@ -1,0 +1,23 @@
+{
+ "pr": 4534,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-as/règles/exonérations.publicodes",
+   "line": 16,
+   "start_line": 15,
+   "body": "Cette phrase est coupée : « dans l’ » puis « une des situations suivantes » se lit « dans l’ une des situations ». Et comme la liste commence juste après sans ligne vide, je me demande si le Markdown la rendra bien en liste. La traduction anglaise générée en hérite aussi (« one of the following situations » répété, « within » doublé).\n```suggestion\n    Vous ne pouvez bénéficier de l’Acre que si vous êtes dans **l’une des situations\n    suivantes** au moment de la création de votre entreprise :\n\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 11,
+  "cost_usd": 0.15721230000000003,
+  "final_text": "J'ai posté un commentaire inline sur la PR #4534 et rien d'autre. Les vérifications de la PR sont au vert.\n\n- **Commentaire :** dans la description de l'Acre (`modele-as/règles/exonérations.publicodes`, lignes 15-16), la phrase est coupée : « dans l’ » puis « une des situations suivantes ». J'ai proposé une correction en bloc `suggestion`. La liste qui suit sans ligne vide risque aussi de ne pas s'afficher en liste en Markdown. La traduction anglaise générée reprend les défauts : « within » est doublé et « one of the following situations » est répété.\n- **Règle salariale :** la correction suit le motif déjà utilisé pour la partie patronale (avant 01/2026, puis 25 % du montant exonéré) et reste continue avec le coefficient dégressif. Je n'ai donc rien à signaler sur ce point.\n- **Non vérifié :** l'issue #4488 n'était pas lisible dans cet environnement. Je n'ai pas pu vérifier que le taux de 25 % correspond à ce qu'elle demande.\n- **Non commenté :** la traduction de « primary » en « principally » dans la règle JEI du fichier `rules-as-en.yaml`, sans rapport avec le sujet de la PR."
+ }
+}

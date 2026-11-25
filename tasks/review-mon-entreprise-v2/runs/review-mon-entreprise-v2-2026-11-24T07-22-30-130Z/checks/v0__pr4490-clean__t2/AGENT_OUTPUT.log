@@ -1,0 +1,19 @@
+{
+ "pr": 4490,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Je n'ai pas trouvé de défaut bloquant : le découpage export → push est cohérent et `algolia:update` garde le comportement local.\n\nDeux points, sans urgence :\n- **Tests** : `format.ts` est maintenant un module pur (`formatRulesToAlgolia`, `formatSimulationDataToAlgolia`, avec le filtre des simulateurs `private`). Je me demande si un petit test unitaire ne vaudrait pas le coup, puisque c'est la partie qui décide de ce qui devient cherchable. Je ne l'ai pas trouvé dans la PR, mais je n'ai peut-être pas tout vu.\n- **Sécurité du workflow** : `pr-deploy` pousse avec `ALGOLIA_ADMIN_KEY` un JSON produit par le code de la PR, et `ALGOLIA_INDEX_PREFIX` dépend de `env_name`, lu dans l'artefact `pr-context`. Ce schéma existait déjà avant la PR (même source pour le préfixe). Je n'ai pas vérifié comment `env_name` est calculé ni validé, donc je ne sais pas si un préfixe arbitraire est possible. Cela vaut peut-être un coup d'œil, par exemple en recalculant le préfixe côté `pr-deploy`.\n\nHistorique : quatre commits, chacun un changement logique. Le dernier (prettier) aurait pu être fusionné dans le commit du refactoring."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.12375509999999999,
+  "final_text": "J'ai relu la PR #4490 et posté une synthèse sur GitHub. Je n'ai trouvé aucun défaut bloquant. Je n'ai exécuté aucun code. Le seul contrôle automatique que j'ai lu est « Vérification PR », qui passe.\n\nJe n'ai posté aucun commentaire inline, seulement la synthèse. Elle soulève deux points :\n- **Tests :** `format.ts` est devenu un module pur, qui décide de ce qui devient cherchable. Je n'ai pas trouvé de test unitaire pour lui dans la PR.\n- **Workflow `pr-deploy` :** le job pousse vers Algolia, avec la clé admin, un JSON produit par le code de la PR. Le préfixe d'index vient de `env_name`, lu dans l'artefact `pr-context`. Ce schéma existait déjà avant la PR. Je n'ai pas vérifié comment `env_name` est calculé ni validé, donc je l'ai signalé comme une question et non comme un problème avéré.\n\nJ'ai aussi noté que le commit « prettier » aurait pu être fusionné dans le commit du refactoring."
+ }
+}

@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 107,
+  "end_line": 107,
+  "message": "Il manque une espace après la virgule : JSX supprime le retour à la ligne entre `</Code>,` et `<Code>modele-ti`, donc le texte affiché sera « modele-as,modele-ti ».\n```suggestion\n\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{\" \"}\n```"
+ }
+]

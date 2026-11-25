@@ -1,0 +1,19 @@
+{
+ "pr": 4490,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.12419320000000002,
+  "final_text": "J'ai relu la PR 4490 et je n'ai trouvé aucune remarque à faire. J'ai posté un commentaire global : « J'ai bien relu, ça me paraît bon à merger. »\n\nLe check « Vérification PR » est au vert. Je n'ai ni lancé le code ni les tests, et j'ai jugé la PR par lecture seule.\n\nJe me suis arrêté sur deux points :\n- **Étape d'export :** dans `pr-check.yaml`, `algolia:export` tourne après `yarn workspace site build`. Ce build produit `simulation-data.json`, dont l'export a besoin.\n- **Artefact :** `pr-deploy.yaml` récupère `algolia-data.json` depuis le run « Vérification PR », qui est son déclencheur `workflow_run`. Il ne pousse que des données JSON vers Algolia, pas du code issu de la PR."
+ }
+}

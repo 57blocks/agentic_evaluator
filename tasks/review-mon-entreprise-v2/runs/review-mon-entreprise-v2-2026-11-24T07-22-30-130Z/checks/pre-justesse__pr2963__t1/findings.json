@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 29,
+  "end_line": 32,
+  "message": "Je me demande si ces quatre `let` au niveau du module sont une bonne idée : le cache (dernière simulation, dernière config, moteurs) est partagé entre toutes les instances du middleware, ce qui le rend fragile à tester (état qui fuit d’un test à l’autre, d’où le reset sur `SET_SIMULATION`) et couplé à l’ordre des actions. Une piste : les déclarer dans la closure de `prendLaProchaineQuestionMiddleware(engine)`, ainsi chaque store a son propre état. Qu’en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/dirigeant/exonérations/ACRE.publicodes",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Question : l’ancienne règle exigeait aussi `entreprise . durée d’activité < 3 ans` pour un auto-entrepreneur créé avant 04/2020, et cette condition n’apparaît plus ici. Est-ce voulu (source à l’appui) ? Sinon, un auto-entrepreneur créé en 2019 avec plus de 3 ans d’activité pourrait se voir appliquer l’ACRE."
+ }
+]

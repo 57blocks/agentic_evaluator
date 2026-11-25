@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/cypress/integration/mon-entreprise/assistants/declaration-revenus-pamc.ts",
+  "start_line": 44,
+  "end_line": 44,
+  "message": "Coquille : « Rrégime fiscal » ne correspondra jamais à un titre, donc l’assertion `not.exist` passe même si le titre « Régime fiscal » est affiché.\n```suggestion\n\t\tcy.get('h2').contains('Régime fiscal').should('not.exist')\n```"
+ },
+ {
+  "file": "site/cypress/integration/mon-entreprise/assistants/declaration-revenus-pamc.ts",
+  "start_line": 361,
+  "end_line": 361,
+  "message": "Les sélecteurs `${idPrefix}_..._IJ-label`, `..._AJPA-label` (l. 363) et `..._indemnités_incapacité_temporaire-label` (l. 370) n’ont pas de `#` devant : ce sont des sélecteurs de balise, qui ne trouvent jamais rien, donc les `not.exist` passent à vide. Les `-value` voisins ont bien le `#`."
+ }
+]

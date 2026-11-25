@@ -1,0 +1,31 @@
+{
+ "pr": 4427,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/storage/sanitizePersistedSituation.ts",
+   "line": 13,
+   "start_line": null,
+   "body": "Toute valeur qui n'est ni string, ni number, ni { valeur, unité } est supprimée sans trace : un booléen ou une expression Publicodes plus riche (somme, variations…) disparaît de la situation restaurée, et l'usager perd sa saisie sans qu'on sache pourquoi. Est-ce voulu ? Je verrais mieux de ne convertir que la forme { valeur, unité } et de laisser passer le reste tel quel, ou au minimum de journaliser ce qui est écarté.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/storage/persistCompanySituation.ts",
+   "line": 32,
+   "start_line": null,
+   "body": "Si le localStorage contient \"null\" (ou autre chose qu'un objet), Object.entries lève dans sanitizePersistedSituation alors que l'ancien JSON.parse renvoyait simplement la valeur, et rien ne rattrape l'erreur ici. Les entrées issues du stockage sont à valider à la frontière : qu'en penses-tu d'une garde sur le type objet ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1233728,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline sur GitHub. Aucun des deux ne bloque. Je n'ai pas lancé le code, et le workflow « Vérification PR » est au vert.\n\n- **`sanitizePersistedSituation.ts`, ligne 13** : toute valeur qui n'est ni une chaîne, ni un nombre, ni `{ valeur, unité }` est supprimée sans trace. Un booléen ou une expression Publicodes plus riche disparaît de la situation restaurée, et l'usager perd sa saisie sans le savoir. Je propose de ne convertir que la forme `{ valeur, unité }` et de laisser passer le reste, ou au moins de journaliser ce qui est écarté.\n- **`persistCompanySituation.ts`, ligne 32** : si le localStorage contient `\"null\"` ou autre chose qu'un objet, `Object.entries` lève une erreur. L'ancien `JSON.parse` renvoyait simplement la valeur, et rien ne rattrape l'erreur à cet endroit. Je suggère une garde sur le type objet."
+ }
+}

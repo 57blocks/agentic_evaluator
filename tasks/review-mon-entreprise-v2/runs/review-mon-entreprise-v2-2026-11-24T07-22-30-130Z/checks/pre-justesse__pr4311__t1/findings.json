@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 48,
+  "end_line": 48,
+  "message": "Je me demande si ce `return to` ne perd pas le `basename` du routeur. L'ancien `useHref('/iframes/...')` dans `Iframe.tsx` renvoyait `/mon-entreprise/iframes/...` (le basename est bien passé au routeur dans `Provider.tsx`, via `entry-fr` et `entry-en`), alors que `getHref` renvoie ici `/iframes/...` tel quel. L'`iframeSrc` de la page d'intégration pointerait alors hors de l'app en production. Peut-être que `useHref(to)` couvre aussi les chemins absolus, et que la branche relative peut disparaître ? Qu'en penses-tu ?"
+ }
+]

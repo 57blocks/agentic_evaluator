@@ -1,0 +1,23 @@
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": null,
+   "body": "Il manque une espace après la virgule : JSX supprime le retour à la ligne entre `</Code>,` et `<Code>modele-ti`, donc le texte affiché sera « modele-as,modele-ti ».\n```suggestion\n\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{\" \"}\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.11242510000000001,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `site/source/pages/integration/Library.tsx:107`. JSX supprime le retour à la ligne après `<Code>modele-as</Code>,`. Le texte affiché sera donc « modele-as,modele-ti », sans espace. J'ai proposé `{\" \"}` en suggestion.\n\nJe n'ai pas lancé le code ni les tests. Le workflow « Vérification PR » est passé (`gh pr checks`).\n\nJe n'ai rien relevé d'autre qui vaille un commentaire."
+ }
+}

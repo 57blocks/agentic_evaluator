@@ -1,0 +1,27 @@
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": null,
+   "body": "Il me semble qu’il manque une espace après la virgule : JSX supprime le retour à la ligne, donc le rendu serait « modele-as,modele-ti » (visible aussi dans `ui-fr.yaml` : `<3>modele-as</3>,<5>modele-ti</5>`). Peut-être ajouter `{' '}` après la virgule, comme tu l’as fait ailleurs ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Une piste, que je n'ai pas pu vérifier visuellement : le paragraphe « Utilisation » et l'exemple CodeSandbox restent centrés sur `modele-social`. Je me demande si une phrase sur l'adaptation de l'import pour `modele-as` / `modele-ti` serait utile, puisque l'avertissement indique que les règles AS/TI de `modele-social` ne sont plus maintenues."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.1445305,
+  "final_text": "J'ai posté deux commentaires sur la PR #4606.\n\n- **Commentaire inline, `Library.tsx:107`** : il manque une espace après la virgule entre `modele-as` et `modele-ti`. JSX supprime le retour à la ligne, donc le texte s'affiche « modele-as,modele-ti ». On le voit aussi dans le YAML généré, `<3>modele-as</3>,<5>modele-ti</5>`. J'ai proposé d'ajouter `{' '}` après la virgule.\n- **Synthèse** : la section « Utilisation » et l'exemple CodeSandbox restent centrés sur `modele-social`. Je me demande si une phrase sur l'adaptation de l'import pour `modele-as` et `modele-ti` serait utile. L'avertissement de la page dit que les règles AS/TI de `modele-social` ne sont plus maintenues.\n\nJe n'ai pas vérifié le rendu visuel de la page. J'ai aussi laissé de côté le `type=\"error\"` de l'avertissement : le design-system n'a pas de variante `warning` pour `Message`."
+ }
+}

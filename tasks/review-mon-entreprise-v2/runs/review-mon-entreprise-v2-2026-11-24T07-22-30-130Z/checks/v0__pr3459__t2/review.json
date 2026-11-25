@@ -1,0 +1,43 @@
+{
+ "pr": 3459,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": ".eslintrc.cjs",
+   "line": 120,
+   "start_line": null,
+   "body": "Je me demande pourquoi `no-restricted-imports` passe de `error` à `warn` en même temps qu'on ajoute les règles de frontières de modules. En `warn`, la CI ne bloquera pas un import interne vers `@/design-system/...` ou `@/contextes/x/y`, alors que CONTRIBUTING.md les présente comme interdits : les violations risquent de revenir sans bruit. Est-ce parce qu'il reste des violations existantes ? Si oui, peut-être repasser en `error` une fois corrigées, ou noter le plan dans l'ADR ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": ".eslintrc.cjs",
+   "line": 176,
+   "start_line": null,
+   "body": "nit: guillemets doubles ici alors que le reste du fichier est en simples ; un `prettier --write` sur ce fichier harmoniserait (les messages ajoutés plus haut échappent aussi des apostrophes).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "package.json",
+   "line": 39,
+   "start_line": null,
+   "body": "Je me demande si `@testing-library/react-hooks` est le bon choix : à ma connaissance il est déprécié et `renderHook` est intégré à `@testing-library/react` depuis la v13.1 (je n'ai pas vérifié la version de React/RTL installée dans `site`). Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse (je n'ai pas lu les 472 fichiers en détail, ni vérifié le rendu ou les parcours manuellement).\n\n- **Taille de la PR** : ~70 commits, +12 000/−3 400 lignes, mêlant refonte de l'économie collaborative, value-object `Montant`, frontières de modules, documentation MDX, corrections sur salarié/dividendes/choix du statut et ADR. Difficile à relire, et à annuler en cas de régression sur un simulateur en production. Je verrais bien des PR plus petites (frontières de modules + lint ; `Montant`/`Quantité` ; économie collaborative ; MDX ; correctifs indépendants).\n- **Historique git** : plusieurs commits `fix` corrigent du code introduit plus tôt dans la même PR (ex. `fix: corrige quelques problèmes suite à rebase`, `fix: mauvaise détection des champs de montant`, `fix: la situation en search params ne fonctionne pas`). Ils ne sont pas autonomes au sens de CONTRIBUTING.md ; un squash/fixup avant fusion rendrait l'historique plus lisible. Le scope `auto-entrepreneureuse` est aussi absent de la liste des scopes usuels.\n- **`SearchParamsAdapter.decode`** (`site/source/SearchParamsAdapter.ts`) : les regex n'acceptent pas les nombres négatifs (`-100€` retombe en string), et toute unité contenant `/` est acceptée comme quantité. Est-ce voulu ? Un cas limite de plus dans les tests serait utile."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.148692,
+  "final_text": "J'ai posté la revue sur la PR 3459 : 3 commentaires inline et 1 synthèse. Je n'ai pas lu en détail les 472 fichiers.\n\nInline :\n- **`.eslintrc.cjs`, ligne 120 :** `no-restricted-imports` passe de `error` à `warn`, donc la CI ne bloquera plus les imports internes. Je demande pourquoi.\n- **`.eslintrc.cjs`, ligne 176 :** nit sur les guillemets doubles, qu'un `prettier --write` corrigerait.\n- **`package.json`, ligne 39 :** `@testing-library/react-hooks` me semble déprécié, et `renderHook` est intégré à `@testing-library/react`. Je n'ai pas vérifié les versions installées.\n\nSynthèse :\n- **Taille :** la PR est trop grosse (~70 commits, environ +12 000/−3 400 lignes).\n- **Historique :** plusieurs `fix` corrigent du code introduit plus tôt dans la même PR.\n- **`SearchParamsAdapter.decode` :** il n'accepte pas les nombres négatifs, et toute unité contenant `/` est prise pour une quantité.\n\nLe workflow « Vérification PR » est au vert."
+ }
+}

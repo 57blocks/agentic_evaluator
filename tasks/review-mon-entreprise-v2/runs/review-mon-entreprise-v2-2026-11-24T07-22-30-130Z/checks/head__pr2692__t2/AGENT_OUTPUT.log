@@ -1,0 +1,47 @@
+{
+ "pr": 2692,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 30,
+   "start_line": null,
+   "body": "Si Redis est indisponible, `redis.get` rejette (avec `enableOfflineQueue: false` l'erreur est immédiate) et `/evaluate` répond en erreur alors que le calcul aurait pu être fait sans cache. Le rate-limiter a un `try/catch` pour ce cas. Je verrais bien le même repli ici (get et set dans un `try/catch` qui retombe sur `next()`). Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 29,
+   "start_line": null,
+   "body": "La clé est le body JSON brut, sans préfixe, dans la même base Redis que le rate-limiter (qui utilise `keyPrefix: 'middleware'`). Je verrais bien un préfixe (`evaluate:`) pour éviter les collisions et pouvoir purger le cache facilement.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 42,
+   "start_line": null,
+   "body": "Le champ `responseCachedAt` n'est ajouté qu'à la valeur stockée : la première réponse (calculée) n'a pas ce champ, les suivantes l'ont. La forme de la réponse change donc selon le cas, et ce champ n'est pas dans `openapi.json`. C'est voulu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 3,
+   "start_line": null,
+   "body": "`ioredis-mock` est en `dependencies` et importé en dur : il sera embarqué en production alors qu'il ne sert qu'en dev. Le code gère déjà `!redis` ; je me demande si ne pas avoir de cache hors production (`undefined`) ne serait pas plus simple, sans cette dépendance.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.1551824,
+  "final_text": "J'ai posté quatre commentaires inline sur `api/source/redis-cache.ts`. Je n'ai pas exécuté le code, la revue repose donc sur la lecture seule. Le check « Vérification PR » est au vert.\n\n- **Ligne 30, Redis indisponible :** `redis.get` rejette dans ce cas et `/evaluate` répond en erreur. Le rate-limiter a déjà un `try/catch` pour cela, et je propose le même repli sur `next()`.\n- **Ligne 29, clé de cache :** la clé est le body JSON brut, sans préfixe, dans la même base Redis que le rate-limiter. Je suggère un préfixe `evaluate:`.\n- **Ligne 42, `responseCachedAt` :** ce champ n'est présent que dans les réponses servies depuis le cache, pas dans la première. Il n'est pas non plus dans `openapi.json`. J'ai demandé si c'était voulu.\n- **Ligne 3, `ioredis-mock` :** il est en `dependencies` et importé en dur, donc embarqué en production. Je propose de n'avoir aucun cache hors production.\n\nJ'ai deviné les numéros de ligne 42 et 3. Le commentaire 42 vise le champ `responseCachedAt` (ligne 42 dans le fichier final). Le 3 vise l'import de `ioredis-mock`. Je n'ai pas relu le fichier avec ses numéros pour le confirmer.\n\nJe n'ai pas commenté les 98 fichiers touchés par la mise à jour de prettier et des dépendances, qui ressemblent à des changements mécaniques."
+ }
+}

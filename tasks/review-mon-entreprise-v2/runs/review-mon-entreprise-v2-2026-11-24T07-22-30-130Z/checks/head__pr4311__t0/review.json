@@ -1,0 +1,35 @@
+{
+ "pr": 4311,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/lib/navigation/providers/MockNavigationProvider.tsx",
+   "line": 19,
+   "start_line": null,
+   "body": "Je ne trouve aucun usage de `MockNavigationProvider` dans le dépôt en dehors de son export (les tests de `useSetSimulationFromSearchParams` construisent leur propre objet `NavigationAPI`). Il duplique aussi `getHref`/`matchPath` du provider react-router, avec le risque que les deux divergent. Je me demande si on ne devrait pas l'introduire avec le premier test ou story qui l'utilise, plutôt que d'avance. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/lib/navigation/NavigationAPI.ts",
+   "line": 18,
+   "start_line": null,
+   "body": "`locationState` n'est lu nulle part hors de `lib/navigation` (et le mock ne le met jamais à jour dans `navigate`, qui ignore `state`). Je le retirerais de l'API tant qu'aucun consommateur n'en a besoin, comme tu l'as fait pour `routeParams`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Les deux derniers commits (`fix(statistiques)` sur la pagination, et les typos `Embeded` → `Embedded`) ne portent pas sur l'adaptateur de navigation. Je me demande si ce ne serait pas plus lisible en PR séparée, pour garder celle-ci centrée sur le refactoring."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 14,
+  "cost_usd": 0.18455250000000004,
+  "final_text": "J'ai relu la PR #4311 et posté trois commentaires sur GitHub. Je n'ai pas exécuté le code ni les tests. Le workflow « Vérification PR » est au vert.\n\n- **`MockNavigationProvider`** (inline) : il n'est utilisé nulle part en dehors de son export. Il duplique aussi `getHref` et `matchPath` du provider react-router, au risque que les deux divergent. Je suggère de l'introduire avec son premier usage.\n- **`locationState`** (inline, `NavigationAPI.ts`) : il n'est lu nulle part hors de `lib/navigation`. Le mock ne le met pas à jour non plus, puisque `navigate` ignore `state`. Je propose de le retirer, comme `routeParams`.\n- **Commentaire global** : les commits sur la pagination des statistiques et les typos `Embeded` → `Embedded` ne concernent pas l'adaptateur de navigation. Je propose de les passer en PR séparée."
+ }
+}

@@ -1,0 +1,20 @@
+[
+ {
+  "file": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+  "start_line": 18,
+  "end_line": 18,
+  "message": "`cotisations.ts` importe ce module et celui-ci réimporte `DEFAULTS` depuis `cotisations.ts` : c’est un import circulaire. Ça marche aujourd’hui parce que `DEFAULTS` n’est lu qu’à l’appel, mais ça casse dès qu’une valeur est lue à l’évaluation du module. Je verrais bien `DEFAULTS` dans `constantes.ts`."
+ },
+ {
+  "file": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+  "start_line": 24,
+  "end_line": 24,
+  "message": "Le plafond (77 700 €), les taux (47,42 % / 48,72 %) et l’abattement de 60 % sont désormais codés en dur en TypeScript, alors que les règles Publicodes qui les portaient sont supprimées dans cette PR. Peut-on citer la source (texte de loi ou page officielle) en commentaire ? Je me demande aussi comment ces valeurs suivront les changements annuels, puisqu’elles sortent du modèle versionné par année."
+ },
+ {
+  "file": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-micro-entreprise.ts",
+  "start_line": 5,
+  "end_line": 5,
+  "message": "Le domaine importe ici `engineSingleton` : un module de domaine dépend directement de Publicodes, alors que la PR vise à les découpler. Je verrais plutôt l’évaluation injectée (un port dont Publicodes est l’adaptateur), ce qui permettrait aussi de tester ces fonctions sans moteur. Qu’en penses-tu ?"
+ }
+]

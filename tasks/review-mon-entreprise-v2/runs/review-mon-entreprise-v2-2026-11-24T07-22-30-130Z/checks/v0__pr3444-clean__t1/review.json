@@ -1,0 +1,35 @@
+{
+ "pr": 3444,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/protection-sociale.publicodes",
+   "line": 132,
+   "start_line": null,
+   "body": "Je vois dans ces deux liens (lignes 132 et 138) un trait d'union insécable (U+2011) à la place du `-` dans `auto‑entrepreneur` et `micro‑entreprise`. Je ne l'ai pas testé dans le navigateur, mais l'URL ne devrait plus correspondre aux chemins de la documentation (`/documentation/dirigeant/auto-entrepreneur/…`), donc je m'attends à des liens cassés. Ça vient peut-être d'un copier-coller ; qu'en penses-tu de remettre des `-` ASCII ?\n\nPar ailleurs, les `href` sont coupés sur plusieurs lignes. Les navigateurs retirent normalement les retours à la ligne dans une URL, mais c'est fragile et difficile à relire. Je les laisserais sur une seule ligne.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/protection-sociale.publicodes",
+   "line": 102,
+   "start_line": null,
+   "body": "nit: `/q` semble être une coquille, je pense que tu voulais écrire `/`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Je n'ai pas pu vérifier le rendu visuel (logos SVG/JPG, liens de documentation).\n\n- La PR mélange plusieurs sujets : contenu des rubriques retraite, renommage Pôle Emploi → France Travail, refonte des logos de références, retrait des `alt`. Je la trouverais plus facile à relire découpée en plusieurs commits ou PR.\n- Beaucoup de descriptions Publicodes sont seulement reformatées (retours à la ligne, `'` → `’`, guillemets retirés des clés de références), ce qui noie les vrais changements de contenu. Peut-être à laisser de côté ?\n- `alt=\"\"` sur les logos : correct si le texte du lien suffit, ce qui me semble le cas dans `Reference`. À confirmer pour `Article` dans `Iframe.tsx`.\n- Le message de commit reprend le titre de la PR (`[AE] …`) et n'est pas au format Conventional Commits (par ex. `docs(auto-entrepreneur): …`)."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1838868,
+  "final_text": "J'ai relu la PR #3444 et posté mes remarques sur GitHub : deux commentaires inline et une synthèse. Je n'ai ni lancé de build ni testé le rendu, et je n'ai pas vérifié les liens dans un navigateur.\n\n- **Liens de documentation (lignes 132 et 138 de `protection-sociale.publicodes`)** : `auto‑entrepreneur` et `micro‑entreprise` contiennent un trait d'union insécable (U+2011) à la place du `-`. Je l'ai confirmé dans les octets du fichier. Les URL ne devraient donc plus correspondre aux chemins de la documentation. Les `href` sont aussi coupés sur plusieurs lignes, ce qui est fragile.\n- **Ligne 102** : `/q` ressemble à une coquille pour `/`.\n- **Synthèse** :\n  - La PR mélange plusieurs sujets : contenu retraite, renommage France Travail, refonte des logos, retrait des `alt`.\n  - Beaucoup de descriptions sont seulement reformatées, ce qui noie les vrais changements.\n  - `alt=\"\"` sur les logos à confirmer pour `Article` dans `Iframe.tsx`.\n  - Le message de commit n'est pas au format Conventional Commits."
+ }
+}

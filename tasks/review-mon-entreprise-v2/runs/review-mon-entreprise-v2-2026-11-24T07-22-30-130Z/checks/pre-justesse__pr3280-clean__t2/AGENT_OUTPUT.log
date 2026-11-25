@@ -1,0 +1,23 @@
+{
+ "pr": 3280,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/protection-sociale.publicodes",
+   "line": 632,
+   "start_line": null,
+   "body": "La règle `maternité . délai d'attente` n'est pas modifiée par la PR : elle affiche toujours « 10 mois d’affiliation » (description lignes 628 et 630) et `valeur: 10 mois`. Le simulateur et la page de détails risquent donc de se contredire. Est-ce voulu, ou faut-il aussi passer cette règle à 6 mois ? Si oui, il faudra rebuilder `modele-social` et régénérer `rules-*.yaml` avec `i18n:translate`.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.12221770000000001,
+  "final_text": "J'ai relu la PR et posté un seul commentaire. Il porte sur `modele-social/règles/protection-sociale.publicodes`, à la ligne 632. La règle `délai d'attente` de la maternité affiche toujours « 10 mois d'affiliation » (lignes 628 et 630) et garde `valeur: 10 mois`. La PR ne la modifie pas, alors que le texte de `Détails.tsx` et les fichiers de traduction passent à 6 mois. Je me suis appuyé sur la lecture du code, sans rien exécuter.\n\nJe n'ai pas vérifié si `délai d'attente` sert à un calcul ou seulement à l'affichage.\n\nJ'ai posé la remarque en question: est-ce voulu, ou faut-il passer cette règle à 6 mois ? Si oui, il faudra rebuilder `modele-social` et régénérer les fichiers `rules-*.yaml`.\n\nLe workflow « Vérification PR » est au vert.\n\nGitHub a accepté le commentaire inline, bien que la ligne 632 ne soit pas dans le diff de la PR. Je ne l'ai pas rouvert pour vérifier où il s'est affiché."
+ }
+}

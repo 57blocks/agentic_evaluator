@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+  "start_line": 31,
+  "end_line": 31,
+  "message": "Je me demande si le `euros(0)` de repli est souhaitable : tant que l'effet n'a pas redirigé (ou si la navigation tarde), la page rend un montant de 0 € qui peut être lu comme un résultat réel par l'usager, alors que le cas « pas de montant » signifie « inéligible ». Qu'en penses-tu de retourner `null` (ou `<Navigate to=\"/assistants/cmg/inéligible\" replace />`) dans ce cas, plutôt que d'afficher un montant fabriqué ?"
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Déclarations.tsx",
+  "start_line": 41,
+  "end_line": 41,
+  "message": "Les mêmes gardes de redirection avec `useEffect(..., [])` + `eslint-disable react-hooks/exhaustive-deps` sont dupliquées dans 4 pages. Je verrais bien `<Navigate replace />` de react-router (retourné quand la situation est invalide), qui est précisément fait pour ça, évite le désactivage du lint et le rendu de la page avec une situation invalide en attendant l'effet. Qu'en penses-tu ?"
+ }
+]

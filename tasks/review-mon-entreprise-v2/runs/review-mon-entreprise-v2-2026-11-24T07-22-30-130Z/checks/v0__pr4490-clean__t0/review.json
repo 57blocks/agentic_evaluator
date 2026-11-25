@@ -1,0 +1,19 @@
+{
+ "pr": 4490,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Deux points, que je n'ai pas pu vérifier par une exécution (je ne lance ni le workflow ni les scripts).\n\n**1. Le job `algolia-push` ne pourra pas tourner sur cette PR elle-même.** `pr-deploy.yaml` est déclenché par `workflow_run` et son `actions/checkout` n'a pas de `ref:`. Il récupère donc la branche par défaut, où `algolia:push` et `push-data.ts` n'existent pas encore. Je m'attends à un échec de ce job tant que la PR n'est pas fusionnée. Ce choix de checkout me paraît bon, car il évite d'exécuter du code de la PR avec `ALGOLIA_ADMIN_KEY`. Je me demande seulement si c'est attendu, et s'il vaut mieux le signaler dans la description de la PR.\n\n**2. Le chemin `algolia:update` de la prod garde un comportement équivalent.** `_build-and-deploy-prod.yaml` appelle toujours `algolia:update`, qui enchaîne maintenant `build:simulator-data`, `export` et `push`. Dans `pr-check.yaml`, l'export passe après le `build`, qui produit `simulation-data.json`, donc l'ordre me semble bon.\n\nnit: dans `export-data.ts`, l'import JSON n'a plus `{ assert: { type: 'json' } }`, qui figurait dans l'ancien `update-data.ts`. Je n'ai pas vérifié que `tsx` s'en passe, mais le test local de `yarn algolia:export` le dira.\n\nHistorique : les 4 commits sont découpés logiquement et leurs messages respectent le format attendu."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.13584949999999998,
+  "final_text": "J'ai relu la PR #4490 et posté une synthèse en commentaire sur GitHub, sans commentaire inline. Je n'ai exécuté ni les scripts ni les workflows.\n\n- **Échec probable sur cette PR :** le job `algolia-push` de `pr-deploy.yaml` fait son checkout sur la branche par défaut (déclenchement par `workflow_run`, pas de `ref:`). `algolia:push` et `push-data.ts` n'y existent pas encore, donc ce job devrait échouer tant que la PR n'est pas fusionnée. Ce choix de checkout évite d'exécuter du code de la PR avec `ALGOLIA_ADMIN_KEY`. J'ai demandé si c'était attendu et suggéré de le signaler dans la description de la PR.\n- **Prod :** `_build-and-deploy-prod.yaml` appelle toujours `algolia:update`, qui enchaîne maintenant `build:simulator-data`, l'export et le push. Dans `pr-check.yaml`, l'export vient après le `build`, qui produit `simulation-data.json`. L'ordre me semble bon.\n- **nit :** `export-data.ts` n'a plus `{ assert: { type: 'json' } }` sur l'import JSON. Je n'ai pas vérifié que `tsx` s'en passe, et un test local de `yarn algolia:export` le dirait.\n- **Historique git :** les quatre commits sont découpés logiquement et leurs messages respectent le format attendu."
+ }
+}

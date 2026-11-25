@@ -1,0 +1,21 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+      "start_line": 559,
+      "end_line": 559,
+      "message": "Ce changement de règle métier (l’Acre s’applique désormais à l’invalidité-décès même avec une exonération invalidité) est embarqué dans un commit `tests:`, alors que le titre de la PR et le message parlent de tests. Quelle est la source qui justifie de retirer la condition `exonérations . invalidité = non` (texte de loi, page Urssaf) ? Elle mériterait d’être citée dans `références`, et le changement d’un commit `fix(modele-social)` dédié, pour qu’il ressorte dans l’historique et le changelog."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

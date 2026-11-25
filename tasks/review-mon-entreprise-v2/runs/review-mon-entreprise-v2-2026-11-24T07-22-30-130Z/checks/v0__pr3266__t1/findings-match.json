@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/utils/réductionDeCotisations.ts",
+      "start_line": 267,
+      "end_line": 267,
+      "message": "Je me demande si la clé `réductionGénérale` n’est pas un reste de l’ancien nom : `MonthState` ne porte que `réduction` et `régularisation`. Ici le `...monthData` conserve donc l’ancienne `réduction`, et `réductionGénérale` s’ajoute en plus. Quand la rémunération totale retombe à 0 (par exemple si on vide le dernier mois renseigné), il me semble que `réduction` n’est pas remise à zéro. Je verrais bien `réduction: {…}` à la place. Je n’ai pas lancé le code pour le confirmer. Un test sur ce cas pourrait aussi le verrouiller, qu’en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/lodeom/simulationConfig.ts",
+          "start_line": 37,
+          "end_line": 37
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

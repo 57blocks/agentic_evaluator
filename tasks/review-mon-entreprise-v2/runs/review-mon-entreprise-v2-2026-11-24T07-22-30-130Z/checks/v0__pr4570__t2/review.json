@@ -1,0 +1,31 @@
+{
+ "pr": 4570,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/locales/ui-en.yaml",
+   "line": 1962,
+   "start_line": null,
+   "body": "Les clés générées ont l'air corrompues : en EN, la valeur contient des `&lt;/3>` et `&lt;/6>` littéraux à la place des balises fermantes, et « male » pour « auto-entrepreneurs » est un contresens. Je crains que cela affiche du texte brut à l'écran en anglais. Qu'en penses-tu de corriger à la main, par exemple : `<0></0> This simulator <3>does not apply to auto-entrepreneurs</3>, who have their own <6>income simulator</6>.` ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 70,
+   "start_line": null,
+   "body": "nit: `confusionAEPossible` est recréé à chaque rendu et lu avec `indexOf(...) > -1` ; je verrais bien un tableau hors du composant, typé `satisfies SimulateurId[]` comme `nextSteps` plus haut, et `includes`. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.13135550000000001,
+  "final_text": "J'ai posté deux commentaires inline sur la PR #4570 et pas de synthèse.\n\n- **`site/source/locales/ui-en.yaml`, ligne 1962 :** la traduction anglaise générée est corrompue. Elle contient des `&lt;/3>` et `&lt;/6>` littéraux à la place des balises fermantes, et « male » à la place de « auto-entrepreneurs ». Cela afficherait du texte brut en anglais. J'ai proposé une correction à la main.\n- **`site/source/pages/simulateurs/indépendant/IndépendantBase.tsx`, ligne 70 (nit) :** `confusionAEPossible` est recréé à chaque rendu et lu avec `indexOf(...) > -1`. J'ai suggéré de le sortir du composant, de le typer `satisfies SimulateurId[]` comme `nextSteps`, et d'utiliser `includes`.\n\nJe n'ai pas exécuté le code ni lancé le rendu visuel. J'ai seulement lu le diff et vérifié que les anciens chemins des deux composants déplacés ne sont plus importés ailleurs. Je n'ai pas consulté `gh pr checks`."
+ }
+}

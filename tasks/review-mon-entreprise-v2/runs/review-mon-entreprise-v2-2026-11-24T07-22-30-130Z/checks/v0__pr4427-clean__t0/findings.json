@@ -1,0 +1,20 @@
+[
+ {
+  "file": "site/source/storage/sanitizePersistedSituation.ts",
+  "start_line": 15,
+  "end_line": 15,
+  "message": "Je me demande si la liste blanche (string, number, { valeur, unité }) n'est pas trop stricte pour une donnée persistée : toute autre valeur est supprimée sans trace. Je pense par exemple à un booléen, à null, ou à une expression Publicodes plus riche ({ somme: [...] }) écrite par un autre simulateur. L'usager perdrait alors silencieusement sa réponse au rechargement. As-tu vérifié qu'aucun simulateur n'écrit d'autre forme dans la situation ? Dans le doute, conserver ces valeurs telles quelles (et ne transformer que le cas { valeur, unité } qui pose problème) me paraîtrait plus sûr. Sinon, un log sur les clés écartées aiderait à diagnostiquer."
+ },
+ {
+  "file": "site/source/storage/persistCompanySituation.ts",
+  "start_line": 33,
+  "end_line": 33,
+  "message": "Si le localStorage contient null ou un tableau (JSON valide), Object.entries(null) lève dans sanitizePersistedSituation et l'erreur remonte à l'initialisation du store (lecture du code, non exécuté). safeLocalStorage est là pour ne pas planter sur du stockage corrompu ; qu'en penses-tu de vérifier que JSON.parse renvoie bien un objet (sinon undefined), avec un test sur ce cas ? Le cast 'as SituationPublicodes' masque aussi que le type de sortie diffère de l'entrée."
+ },
+ {
+  "file": "site/source/domaine/searchParams.ts",
+  "start_line": 36,
+  "end_line": 36,
+  "message": "nit: avant, une valeur non encodable était signalée par console.error ; désormais elle est ignorée sans aucun signal. Je me demande si on ne perd pas la visibilité sur d'éventuelles nouvelles formes de valeurs en situation (c'est ce qui a mené à #4300). Un log ou une remontée Sentry pour ce cas serait peut-être utile ?"
+ }
+]

@@ -1,0 +1,31 @@
+{
+ "pr": 2963,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 92,
+   "start_line": null,
+   "body": "Je me demande si l’applicabilité est évaluée sur le bon moteur : `engine` est le moteur passé au middleware, alors que `setSituation` est appliqué à `engines[index]`. En mode non-comparateur c’est le même objet, mais pour un `isComparateurConfig` les `engines` sont des `shallowCopy`, donc `engine` n’a pas reçu la situation. Ne faudrait-il pas évaluer sur `engines[0]` (ou sur chaque contexte) ? Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 32,
+   "start_line": 29,
+   "body": "Ces quatre `let` au niveau du module sont un état partagé entre toutes les instances du middleware (un second `store`, ou les tests, héritent des valeurs du précédent), et c’est ce qui oblige à la remise à zéro manuelle sur `SET_SIMULATION`. Ne pourraient-ils pas vivre dans la fermeture de `prendLaProchaineQuestionMiddleware(engine)`, à côté de `engine` ? Les deux `eslint-disable` en tête de fichier me font aussi me demander si un typage plus précis (de `deepEql` notamment) permettrait de s’en passer.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.17482430000000002,
+  "final_text": "J'ai posté deux commentaires inline sur `prendLaProchaineQuestion.middleware.ts`. La PR est grosse (134 fichiers) et je n'ai relu en détail que le reducer de simulation et ce middleware, pas le reste du diff. Le workflow « Vérification PR » est vert.\n\n- **Moteur utilisé pour l'applicabilité (ligne 92)** : `engine.evaluate` est appelé sur le moteur passé au middleware. La situation, elle, est posée sur `engines[index]`. En mode comparateur ce sont des copies, donc `engine` n'a pas reçu la situation. Je l'ai posé en question, car je n'ai pas exécuté le code.\n- **État au niveau du module (lignes 29 à 32)** : les quatre `let` sont partagés entre toutes les instances du middleware. Ils obligent à une remise à zéro manuelle sur `SET_SIMULATION`. Je propose de les déplacer dans la fermeture du middleware, et je demande si un meilleur typage de `deepEql` permettrait de retirer les deux `eslint-disable` en tête de fichier.\n\nRien d'autre ne m'a paru valoir un commentaire dans ce que j'ai lu."
+ }
+}

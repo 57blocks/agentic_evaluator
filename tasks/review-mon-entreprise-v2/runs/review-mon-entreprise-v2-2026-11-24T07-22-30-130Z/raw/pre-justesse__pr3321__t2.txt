@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/hooks/useBarèmeLodeom.ts",
+  "start_line": 14,
+  "end_line": 14,
+  "message": "Sans `as const`, `BarèmeLodeom` vaut `string` : les comparaisons de `WarningSalaireTrans` ne détectent pas une faute de frappe, ce qui est justement le risque d une renommage comme celui-ci. Je me demande si `] as const` ne serait pas utile ici ?\n```suggestion\n] as const\n```"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3321,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/hooks/useBarèmeLodeom.ts",
+   "line": 14,
+   "start_line": null,
+   "body": "Sans `as const`, `BarèmeLodeom` vaut `string` : les comparaisons de `WarningSalaireTrans` ne détectent pas une faute de frappe, ce qui est justement le risque d une renommage comme celui-ci. Je me demande si `] as const` ne serait pas utile ici ?\n```suggestion\n] as const\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.11559049999999998,
+  "final_text": "J'ai relu la PR 3321 et posté un seul commentaire inline, sur `site/source/hooks/useBarèmeLodeom.ts` ligne 14.\n\nIl suggère d'ajouter `as const` au tableau `barèmes`. Sans cela, `BarèmeLodeom` vaut `string`, et les comparaisons de `WarningSalaireTrans.tsx` ne détectent pas une faute de frappe dans un nom de barème. C'est un risque réel après ce renommage, mais ce typage était déjà là avant la PR.\n\n- **Vérification PR :** `gh pr checks` est au vert.\n- **Discussion :** il n'y avait aucun commentaire existant.\n- **Non commenté :** le diff de `rules-en.yaml` contient aussi des changements de formulation sans rapport avec le renommage, comme « €50 million » et « 50 million euros » inversés d'un barème à l'autre. Je ne les ai pas signalés. Ils viennent sans doute de la régénération des traductions.\n- **Pas relu en détail :** les fichiers `.publicodes` déplacés. Je n'ai vérifié que les références côté TypeScript.\n\nUne erreur de frappe s'est glissée dans mon commentaire, « d une renommage » au lieu de « d'un renommage ». Je ne l'ai pas corrigée."
+ }
+}
+
+```

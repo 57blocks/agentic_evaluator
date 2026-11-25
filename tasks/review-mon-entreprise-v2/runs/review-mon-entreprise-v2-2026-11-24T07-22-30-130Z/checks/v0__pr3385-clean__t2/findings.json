@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/components/conversation/AnswerList.tsx",
+  "start_line": 321,
+  "end_line": 321,
+  "message": "Je pense que cette ligne commentée est un reste de test : `showSuggestions` vaut `true` par défaut dans `RuleInput`, donc les suggestions réapparaissent dans la modale « Modifier mes réponses » pour toutes les questions numériques du site. Était-ce voulu ? Si c’est pour faire passer le test AE, je préférerais garder la prop et adapter le test. Sinon, ce changement n’aurait pas sa place dans une PR de texte sur « Charges »."
+ },
+ {
+  "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+  "start_line": 22,
+  "end_line": 22,
+  "message": "Je me demande si ce `cy.contains(\"Début d'année\")` fonctionne encore : le libellé de la possibilité est devenu `Début d’année` (apostrophe typographique) dans `entreprise.publicodes:25`, alors qu’ici l’apostrophe est droite. Je n’ai pas pu lancer Cypress. Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+  "start_line": 70,
+  "end_line": 70,
+  "message": "nit: `cy.wait(500)` rend le test fragile (et oblige à désactiver ESLint). Une assertion sur l’état attendu avant la saisie suivante serait plus stable. Retirer `testIsolation: false` est aussi un refactoring distinct du sujet de la PR."
+ },
+ {
+  "message": "Synthèse :\n\n- **PR à recentrer** : le sujet est la rubrique « Charges », mais elle embarque aussi la conversion des apostrophes en typographiques dans tout `entreprise.publicodes` (et `rules-en.yaml`), des `.eq(0)` → `.first()` dans quatre fichiers Cypress sans lien, et la réécriture du test AE. Je verrais mieux ces sujets en commits ou PR séparés.\n- **Traductions anglaises** : dans `rules-en.yaml`, la description de `entreprise . charges` est cassée (phrases coupées : « are not », « they are not / are not deductible », « years. Each year… », `&gt; Note**` au lieu de `> **Note**`). Le texte source a été re-césuré en lignes courtes, et la traduction semble générée sur ces coupures. Je me demande si on ne peut pas garder des paragraphes non coupés dans le `.publicodes`, puis relancer `i18n:translate`. Plusieurs entrées existantes passent aussi de relues à `[automatic]` (ex. `association non lucrative`, `TVA`) uniquement à cause du changement d’apostrophe.\n- **Commits** : « tests(AE) » n’est pas un type Conventional Commits valide (`test`), et le commit 3 mélange feature, suppression de `small` et texte. Je n’ai pas pu vérifier le rendu de `SimulationGoal` sans `small`, ni exécuter Cypress."
+ }
+]

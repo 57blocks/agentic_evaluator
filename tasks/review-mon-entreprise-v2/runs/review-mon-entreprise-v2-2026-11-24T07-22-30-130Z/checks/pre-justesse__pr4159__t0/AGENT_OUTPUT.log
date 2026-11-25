@@ -1,0 +1,19 @@
+{
+ "pr": 4159,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger"
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1030999,
+  "final_text": "J'ai relu la PR #4159 et je n'ai trouvé aucune remarque à poster en inline. J'ai laissé un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger ».\n\nLa vérification PR est au vert. Je n'ai pas pu lire l'issue #4157, car la commande a demandé une approbation que je n'avais pas. Ma relecture s'appuie donc sur le titre de la PR et sur son diff.\n\nLe changement fait de `emploi franc` la règle porteuse de la question, avec sa condition d'applicabilité et sa valeur par défaut `non`. Le calcul passe dans une règle fille `emploi franc . montant`. Je n'ai pas exécuté le code, comme le demandent les consignes. Je n'ai donc pas vérifié que la règle fille se désactive bien quand la réponse est `non`."
+ }
+}

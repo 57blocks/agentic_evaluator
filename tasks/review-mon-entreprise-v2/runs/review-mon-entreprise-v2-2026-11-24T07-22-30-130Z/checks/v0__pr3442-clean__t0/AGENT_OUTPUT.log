@@ -1,0 +1,27 @@
+{
+ "pr": 3442,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 145,
+   "start_line": null,
+   "body": "nit: les autres textes de ce fichier utilisent une clé hiérarchique (`pages.assistants.declaration-revenus-pamc.resultats.label.N`), alors qu'ici la clé est le texte lui-même (`t('Bénéfice', 'Bénéfice')`, idem pour « Déficit » aux lignes 152, 166 et 173). CONTRIBUTING demande une clé hiérarchique ; je me demande si tu préfères en ajouter deux (`resultats.label.bénéfice` / `resultats.label.déficit`) et les réutiliser aux quatre endroits. Je vois que `Bénéfice` existe déjà dans `ui-en.yaml`, donc c'est peut-être volontaire pour mutualiser ; dis-moi.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Je n'ai relu que le code du site (UI, traductions), pas le détail des règles Publicodes ni leurs sources. Je n'ai pas pu vérifier le rendu visuel : le `display: inline-flex` ajouté à `SpanBody` dans `Radio.tsx` touche tous les Radio du design-system, un coup d'œil sur les autres usages serait utile. Historique : le commit « fix: mise en forme de la doc » n'a pas de scope, un `docs` serait plus parlant ; sinon l'historique se lit bien."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.1711297,
+  "final_text": "J'ai posté deux commentaires sur la PR #3442 : un inline et une synthèse.\n\n- **Inline sur `Résultats.tsx` ligne 145 :** les libellés « Bénéfice » et « Déficit » utilisent le texte comme clé de traduction (`t('Bénéfice', 'Bénéfice')`, aux lignes 145, 152, 166 et 173). Les autres textes du fichier ont une clé hiérarchique, comme CONTRIBUTING le demande. Je l'ai présenté comme un nit, avec la question de savoir si c'est volontaire pour mutualiser avec l'existant. Le retour d'API est tronqué à l'affichage ; je n'ai pas vu de confirmation explicite de la création du commentaire inline.\n- **Synthèse :**\n  - Je n'ai relu que le code du site, pas les règles Publicodes ni leurs sources.\n  - Je n'ai pas pu vérifier le rendu visuel. Le `display: inline-flex` ajouté à `SpanBody` dans `Radio.tsx` touche tous les Radio du design-system.\n  - Le commit « fix: mise en forme de la doc » n'a pas de scope ; un `docs` serait plus parlant.\n\nJe n'ai pas lu `gh pr checks` ni le détail des tests, et je n'ai relu qu'une partie du diff : les fichiers Publicodes, `declaration-revenus-pamc.ts` et les YAML de traduction n'ont pas été relus. Je n'ai pas vérifié non plus si « Déficit » s'affiche avec un montant négatif ou en valeur absolue."
+ }
+}

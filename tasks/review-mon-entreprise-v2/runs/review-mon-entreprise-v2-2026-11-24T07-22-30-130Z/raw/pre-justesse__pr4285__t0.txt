@@ -1,0 +1,59 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "Je me demande si la puissance ne porte pas sur tout le crochet dans la formule officielle : `Tmin + Tdelta × [½ × (3 × Smic / rémunération − 1)]^P`. Ici `0.5 * (x ** P)` n’applique `P` qu’à `x`, ce qui donne un coefficient différent entre 1 et 3 Smic (à 1 Smic, `0.5 * 2^1.75 ≈ 1,68` au lieu de 1, ramené à `Tmin + Tdelta` par le plafond seulement). Peux-tu confirmer avec l’article D241-7 ou un cas du simulateur Urssaf à un salaire intermédiaire (ex. 1,5 Smic) ?\n```suggestion\n            - (0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P\n```"
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 49,
+  "end_line": 49,
+  "message": "L’ancienne règle `réduction générale` reste entière (coefficient T, imputation, régularisation…) à côté de `RGDU`, et elle est encore utilisée ici par le plafond DFS et par JEI. Deux calculs coexistent donc, et la DFS plafonne à 130 % de l’ancien calcul alors que le montant retenu vient de la RGDU. Est-ce voulu (par ex. pour le simulateur « réduction générale ») ? Sinon, je verrais bien une seule règle qui porte le calcul 2026."
+ },
+ {
+  "message": "Le simulateur `réduction-générale` (`RéductionGénérale.tsx`, l.31) affiche toujours l’avertissement « réforme RGDU non implémentée », alors que cette PR l’implémente et le retire du simulateur salarié. L’avertissement est-il toujours exact là-bas, ou ce simulateur utilise-t-il encore l’ancienne règle ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 32,
+   "start_line": null,
+   "body": "Je me demande si la puissance ne porte pas sur tout le crochet dans la formule officielle : `Tmin + Tdelta × [½ × (3 × Smic / rémunération − 1)]^P`. Ici `0.5 * (x ** P)` n’applique `P` qu’à `x`, ce qui donne un coefficient différent entre 1 et 3 Smic (à 1 Smic, `0.5 * 2^1.75 ≈ 1,68` au lieu de 1, ramené à `Tmin + Tdelta` par le plafond seulement). Peux-tu confirmer avec l’article D241-7 ou un cas du simulateur Urssaf à un salaire intermédiaire (ex. 1,5 Smic) ?\n```suggestion\n            - (0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P\n```",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 49,
+   "start_line": null,
+   "body": "L’ancienne règle `réduction générale` reste entière (coefficient T, imputation, régularisation…) à côté de `RGDU`, et elle est encore utilisée ici par le plafond DFS et par JEI. Deux calculs coexistent donc, et la DFS plafonne à 130 % de l’ancien calcul alors que le montant retenu vient de la RGDU. Est-ce voulu (par ex. pour le simulateur « réduction générale ») ? Sinon, je verrais bien une seule règle qui porte le calcul 2026.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Le simulateur `réduction-générale` (`RéductionGénérale.tsx`, l.31) affiche toujours l’avertissement « réforme RGDU non implémentée », alors que cette PR l’implémente et le retire du simulateur salarié. L’avertissement est-il toujours exact là-bas, ou ce simulateur utilise-t-il encore l’ancienne règle ?"
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 12,
+  "cost_usd": 0.20112760000000002,
+  "final_text": "J'ai posté trois remarques sur la PR #4285. Je n'ai ni lancé les tests ni recalculé de cas : tout vient de la lecture du code.\n\n- **Formule de la RGDU** (inline, `réduction-générale.publicodes:32`) : la puissance `P` ne porte que sur `(3×Smic/rémunération − 1)`, pas sur tout le crochet avec le `½`. Si la formule officielle est bien `Tmin + Tdelta × [½ × (3×Smic/rémunération − 1)]^P`, le coefficient est faux entre 1 et 3 Smic. Je l'ai posée en question, avec une suggestion de correction.\n- **Deux calculs côte à côte** (inline, `:49`) : l'ancienne règle `réduction générale` reste complète. Elle sert encore au plafond DFS (130 % de l'ancien calcul) et à JEI, alors que le montant retenu vient de la RGDU. Je demande si c'est voulu.\n- **Avertissement resté dans l'ancien simulateur** (commentaire global) : `RéductionGénérale.tsx` affiche toujours « réforme RGDU non implémentée ». Cette ligne n'étant pas dans le diff, je n'ai pas pu la commenter en inline.\n\n`gh pr checks` est au vert."
+ }
+}
+
+```

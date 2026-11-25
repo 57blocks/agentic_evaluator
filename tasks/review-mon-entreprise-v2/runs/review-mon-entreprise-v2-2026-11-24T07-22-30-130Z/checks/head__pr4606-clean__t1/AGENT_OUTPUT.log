@@ -1,0 +1,23 @@
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": null,
+   "body": "JSX supprime le retour à la ligne entre `</Code>,` et `<Code>` : le rendu sera « modele-as,modele-ti » sans espace. Il faudrait un `{' '}` après la virgule.\n```suggestion\n\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{' '}\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1275913,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `site/source/pages/integration/Library.tsx:107`.\n\nLe retour à la ligne entre `<Code>modele-as</Code>,` et `<Code>modele-ti</Code>` est supprimé par JSX. La page affichera donc « modele-as,modele-ti » sans espace. J'ai proposé un `{' '}` après la virgule, en bloc `suggestion`.\n\nLe reste du diff ne m'a pas paru mériter de remarque. La vérification PR passe. Je n'ai posté aucun commentaire global."
+ }
+}

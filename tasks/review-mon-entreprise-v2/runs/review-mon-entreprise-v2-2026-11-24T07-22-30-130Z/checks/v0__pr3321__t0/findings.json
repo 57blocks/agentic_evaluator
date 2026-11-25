@@ -1,0 +1,11 @@
+[
+ {
+  "file": "site/source/hooks/useBarèmeLodeom.ts",
+  "start_line": 7,
+  "end_line": 7,
+  "message": "Je me demande si `barèmes` ne devrait pas être déclaré `as const`. Sans ça, `BarèmeLodeom = (typeof barèmes)[number]` vaut `string`, donc les comparaisons de `WarningSalaireTrans.tsx` (`currentBarème === 'compétitivité'`) ne sont pas vérifiées par TypeScript. Un renommage comme celui de cette PR, ou une coquille, passerait `yarn test:type` sans erreur et ferait disparaître silencieusement un avertissement. Avec `as const`, TypeScript signalerait toute valeur qui n'existe plus. Qu'en penses-tu ? (Ça existait avant la PR, mais le renommage rend le risque concret.)"
+ },
+ {
+  "message": "Le renommage est cohérent entre `lodeom.publicodes`, le hook, `WarningSalaireTrans.tsx` et les traductions : je n'ai pas trouvé de référence restée sur les anciens noms de possibilités. Je n'ai pas exécuté les tests ni le build.\n\nDeux points de forme :\n- Dans `rules-en.yaml`, le diff contient des changements de texte sans rapport avec le renommage (`€50 million` ↔ `50 million euros`, `does not apply` déplacé dans la balise `<strong>`), ainsi qu'une nouvelle `question` pour `innovation et croissance`. Ils ressemblent à du bruit de régénération automatique. Je me demande si ça vaut la peine de les garder dans ce commit.\n- Le premier commit déplace ~850 lignes vers de nouveaux fichiers. Je ne l'ai pas relu ligne à ligne. Si le contenu des règles y est resté identique, le préciser dans la description faciliterait la relecture."
+ }
+]

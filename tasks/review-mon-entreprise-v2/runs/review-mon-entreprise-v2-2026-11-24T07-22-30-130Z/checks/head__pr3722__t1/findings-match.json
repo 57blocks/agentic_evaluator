@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/contextes/cmg/hooks/useCMG.ts",
+      "start_line": 142,
+      "end_line": 142,
+      "message": "Je me demande si `moisIdentiques` (un tableau de booléens indexé comme `salariées.GED`/`AMA`) ne risque pas de se désaligner de la situation. `set.salariéesGED` (et `salariéesAMA`) filtre les salariées sans aucune déclaration (`A.filter(auMoinsUneDéclaration)`) sans toucher à `moisIdentiques`. Exemple : deux salariées GED, la 2ᵉ avec « mois identiques » coché ; on vide les déclarations de la 1ʳᵉ → elle disparaît de la situation, mais `moisIdentiques.GED` garde ses deux entrées, et la nouvelle 1ʳᵉ salariée (l’ancienne 2ᵉ) hérite de la valeur `false` de l’ancienne 1ʳᵉ. Qu’en penses-tu de porter le booléen sur la salariée elle-même, ou de dériver « mois identiques » des déclarations (avril et mai égales à mars), pour qu’il n’y ait qu’une source de vérité ?"
+    },
+    {
+      "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+      "start_line": 3,
+      "end_line": 3,
+      "message": "nit: export nommé plutôt que `export default`, comme le demande CONTRIBUTING.md."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+          "start_line": 28,
+          "end_line": 31
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

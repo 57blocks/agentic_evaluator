@@ -1,0 +1,5 @@
+[
+ {
+  "message": "Synthèse :\n- La correction du taux (25 % avant/après 2026) sur la tranche salariale reprend exactement le motif déjà en place pour `employeur` dans `acre.publicodes` : cohérent.\n- Je ne vois pas de test ajouté : seuls les snapshots `SASU.test.ts.snap` changent (cotisations 766 → 851). Un test explicite sur les cotisations salariales avec Acre avant/après 01/2026 verrouillerait mieux le comportement qu'un snapshot, qui se met à jour sans relecture. Je n'ai pas pu vérifier la valeur 851 à la main.\n- Le commit mélange le correctif de calcul, la réécriture de la description de l'Acre (nouvelles conditions d'éligibilité, suppression de la note « Historique ») et un changement sans rapport sur la traduction JEI (« primarily » → « principally »). Un commit séparé pour le contenu éditorial aiderait la relecture. Les conditions d'éligibilité ont-elles une source citée ? Elle est dans les références (Urssaf), je n'ai pas relu son contenu.\n- La traduction anglaise générée contient des phrases tronquées (voir commentaire inline)."
+ }
+]

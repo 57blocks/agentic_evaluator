@@ -1,0 +1,31 @@
+{
+ "pr": 3670,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/domaine/calcul.ts",
+   "line": 58,
+   "start_line": null,
+   "body": "Le `3` (nombre de mois de référence) est écrit en dur ici, à la ligne 41 et dans `éligibilité.ts:365`. Je verrais bien une constante nommée dans `constantes.ts` (à côté de `NOMBRE_MIN_MOIS_EMPLOYEUREUSE`) : si la période de référence change, les trois endroits risquent de diverger. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/domaine/calcul.ts",
+   "line": 88,
+   "start_line": null,
+   "body": "nit: ce `reduce` mute son accumulateur, alors que le domaine est censé rester immuable. Un `Array.filter`/`findLast` sur les paliers dont le seuil est ≤ au nombre d'enfants donnerait le TEH et l'index sans mutation, et se lirait plus directement.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.1452621,
+  "final_text": "J'ai posté deux commentaires inline sur `site/source/contextes/cmg/domaine/calcul.ts`.\n\n- **Ligne 58 :** le `3` du nombre de mois de référence est écrit en dur dans `calcul.ts` (lignes 41 et 58) et dans `éligibilité.ts:365`. Je propose une constante nommée dans `constantes.ts`, pour que les trois endroits ne divergent pas.\n- **Ligne 88 :** nit sur le `reduce` de `tauxEffortHoraire`, qui modifie son accumulateur alors que le domaine doit rester immuable. Je suggère un `filter` ou `findLast`.\n\nLe check « Vérification PR » est au vert. Je n'ai relu que `calcul.ts` et `constantes.ts` en détail. Les 65 fichiers de la PR (dont `éligibilité.ts`, `useCMG.ts` et les composants) ne sont pas relus, et les tests ne sont pas relus non plus."
+ }
+}

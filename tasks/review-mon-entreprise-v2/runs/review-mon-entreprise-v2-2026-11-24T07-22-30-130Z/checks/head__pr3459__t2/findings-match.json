@@ -1,0 +1,91 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+      "start_line": 18,
+      "end_line": 18,
+      "message": "`cotisations.ts` importe `régime-général.ts` et celui-ci importe `DEFAULTS` depuis `cotisations.ts` : on a un cycle d’imports. Il ne casse rien aujourd’hui parce que `DEFAULTS` n’est lu qu’à l’appel, mais l’ordre d’évaluation des modules devient fragile. Je verrais bien déplacer `DEFAULTS` dans `constantes.ts` (ou dans `situation.ts`), dont tous les régimes dépendent déjà. Qu’en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/location-de-meublé/documentation/micro-bic.mdx",
+          "start_line": 57,
+          "end_line": 57
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/components/ChiffreAffairesActivitéMixte.tsx",
+          "start_line": 9,
+          "end_line": 108
+        },
+        {
+          "file": "site/source/domaine/Montant.ts",
+          "start_line": 1,
+          "end_line": 107
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/declaration-revenus-pamc/components/LigneImpôts.tsx",
+          "start_line": 34,
+          "end_line": 34
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/design-system/molecules/field/MontantField.tsx",
+          "start_line": 64,
+          "end_line": 64
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 0,
+      "defect": 1
+    },
+    {
+      "finding": 0,
+      "defect": 2
+    },
+    {
+      "finding": 0,
+      "defect": 3
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

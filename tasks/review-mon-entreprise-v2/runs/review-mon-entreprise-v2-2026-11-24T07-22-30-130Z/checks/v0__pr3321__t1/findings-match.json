@@ -1,0 +1,49 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/hooks/useBarèmeLodeom.ts",
+      "start_line": 7,
+      "end_line": 7,
+      "message": "Je me demande si le renommage est bien protégé par le typage : sans `as const`, `barèmes` est de type `string[]`, donc `BarèmeLodeom` vaut `string`. Les comparaisons de `WarningSalaireTrans.tsx` (`currentBarème === 'compétitivité'`) compilent quelle que soit la valeur, et un oubli lors d'un prochain renommage ne serait détecté ni par `yarn test:type` ni par les tests. Avec `] as const`, TypeScript signalerait toute comparaison à une valeur qui n'existe plus. Au passage, `barèmes` ne semble plus utilisé que pour dériver le type (je n'ai pas cherché de lecture ailleurs) : qu'en penses-tu ?"
+    },
+    {
+      "message": "Une remarque sur `rules-en.yaml` : outre les clés renommées, le diff contient des modifications de traductions sans lien avec le renommage (« 50 million euros » ↔ « €50 million », « does not » ↔ « does not apply » dans les descriptions de `barème renforcé` et `innovation et croissance`). Cela ressemble à du bruit de régénération par `i18n:translate` ; je n'ai pas vérifié leur origine, mais je me demande si ça vaut le coup de les écarter pour garder le commit centré sur le renommage. À l'inverse, la `question` ajoutée côté `innovation et croissance` semble légitime, elle suit celle déjà présente dans le publicodes.\n\nHistorique : les deux commits sont logiques et séparés (déplacement, puis renommage), c'est lisible. Je n'ai pas pu vérifier le rendu en simulateur."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/exonérations/lodeom.publicodes",
+          "start_line": 210,
+          "end_line": 456
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

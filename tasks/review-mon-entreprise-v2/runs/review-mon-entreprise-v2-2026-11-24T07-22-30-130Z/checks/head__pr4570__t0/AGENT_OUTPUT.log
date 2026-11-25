@@ -1,0 +1,37 @@
+{
+ "pr": 4570,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/locales/ui-en.yaml",
+   "line": 1962,
+   "start_line": null,
+   "body": "La traduction anglaise générée est cassée : elle contient des `&lt;/0>`, `&lt;/3>` et `&lt;/6>` échappés, et « male and female auto-entrepreneurs ». Ces balises s’afficheraient telles quelles aux usagers anglophones, et le lien vers le simulateur auto-entrepreneur disparaîtrait. Je corrigerais la valeur à la main, par exemple `<0></0> This simulator <3>does not apply to auto-entrepreneurs</3>, who have their own dedicated <6>income simulator</6>.` Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 97,
+   "start_line": null,
+   "body": "nit: `includes` est plus lisible que `indexOf(id) > -1`. Ce tableau pourrait aussi sortir du composant, en constante de module, plutôt que d’être recréé à chaque rendu.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Le déplacement des deux avertissements existants (Année et Double régime) vers `indépendant/components/`, avec l’ajout du `Body` dans chacun, n’est pas nécessaire pour ce ticket. Il aurait pu faire l’objet d’un commit séparé, voire d’une PR à part, pour garder celle-ci centrée sur le nouvel avertissement."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4044: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1385577,
+  "final_text": "J'ai relu la PR #4570 et posté mes retours sur GitHub : deux commentaires inline et un commentaire global. Les vérifications de la PR sont au vert.\n\n- **Traduction anglaise (`ui-en.yaml`, ligne 1962)** : le texte généré est cassé. Il contient des balises échappées (`&lt;/0>`, `&lt;/3>`, `&lt;/6>`) et dit « male and female auto-entrepreneurs ». Les usagers anglophones verraient ces balises telles quelles, et le lien vers le simulateur auto-entrepreneur disparaîtrait. J'ai proposé une correction à la main.\n- **`IndépendantBase.tsx`, ligne 97** : nit. `includes` est plus lisible que `indexOf(id) > -1`, et le tableau pourrait être une constante de module.\n- **Commentaire global** : le déplacement des deux avertissements existants vers `indépendant/components/` n'est pas nécessaire pour ce ticket. J'ai suggéré de le mettre dans un commit ou une PR à part.\n\nJe n'ai rien exécuté, comme le demandent les consignes de la revue."
+ }
+}

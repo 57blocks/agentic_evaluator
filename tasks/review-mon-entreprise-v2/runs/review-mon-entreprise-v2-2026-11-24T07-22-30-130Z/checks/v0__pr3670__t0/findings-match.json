@@ -1,0 +1,71 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/contextes/cmg/domaine/constantes.ts",
+      "start_line": 5,
+      "end_line": 51,
+      "message": "Ces plafonds, planchers, TEH et coûts horaires sont des valeurs métier, et je ne vois pas d'où elles viennent. Je n'ai pas pu les vérifier, donc je ne dis pas qu'elles sont fausses. Que penses-tu d'un lien en commentaire vers la source (texte de loi, circulaire CNAF/Urssaf) au-dessus de chaque groupe ? Quelqu'un qui devra les mettre à jour pourra alors retrouver d'où elles viennent. Le CONTRIBUTING demande une source vérifiable pour chaque taux ou seuil."
+    },
+    {
+      "file": "site/source/contextes/cmg/domaine/calcul.ts",
+      "start_line": 82,
+      "end_line": 82,
+      "message": "nit: le `R.reduce` mute son accumulateur (`résultat.TEHPourNbEnfantsÀCharge = teh`, `index++`), ce qui va à l'encontre du style immuable du reste du domaine. De plus, `indexPourNbEnfantsÀCharge` repose sur l'ordre d'itération des clés numériques de l'objet. Je verrais bien une liste ordonnée de paliers `{ nbEnfantsMin, teh }` : on filtre les paliers atteints, le dernier donne le TEH, et sa position donne l'index. Le code serait plus lisible et ne dépendrait plus de l'ordre des clés. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/contextes/cmg/domaine/calcul.ts",
+      "start_line": 41,
+      "end_line": 41,
+      "message": "nit: le `3` (trois mois de déclaration : mars, avril, mai) est répété ici et ligne 58. Je me demande si une constante nommée (`NOMBRE_DE_MOIS_DÉCLARÉS`) ne dirait pas plus clairement d'où vient la division. Si une salariée n'a que 2 mois renseignés, la moyenne reste divisée par 3 : est-ce voulu ?"
+    },
+    {
+      "message": "Synthèse :\n\n- **Taille** : 65 fichiers et plus de 5 000 lignes, avec environ 70 commits. Je vois un découpage possible en PR successives : domaine et calcul CMG avec ses tests, puis UI de l'assistant, puis les changements du design-system (`MontantField`, `DateField`). Chacune serait plus facile à relire. Si ce n'est pas envisageable, c'est une piste pour la suite.\n- **Historique** : plusieurs commits de correction (`fix(cmg): corrige erreur de type`, `corrige le typage…`, `refactor` après `feat`) corrigent des commits précédents de la même PR. Un `rebase --autosquash` rendrait chaque commit autonome et vert, comme le demande le CONTRIBUTING. Le commit `fix(montant-field)` touche le design-system sous le scope `montant-field`, qui ne figure pas dans la liste du CONTRIBUTING.\n- **Hors périmètre** : la suppression du commentaire `debug` dans `choix-du-statut/Navigation.tsx` n'a pas de lien avec le CMG.\n- **Non vérifié** : le rendu visuel, l'accessibilité des formulaires (RGAA) et l'exactitude des règles métier du CMG. La CI est verte."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/cmg/components/Navigation.tsx",
+          "start_line": 6,
+          "end_line": 35
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

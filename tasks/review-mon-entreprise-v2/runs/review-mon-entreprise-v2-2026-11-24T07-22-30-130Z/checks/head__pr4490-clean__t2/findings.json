@@ -1,0 +1,8 @@
+[
+ {
+  "file": ".github/workflows/pr-deploy.yaml",
+  "start_line": 52,
+  "end_line": 52,
+  "message": "Je me demande si ce téléchargement fonctionnera : `permissions` (en tête du fichier) ne liste que `contents`, `statuses`, `pull-requests` et `deployments`, donc `actions` passe à `none`. Or `download-artifact` avec `run-id` + `github-token` lit les artefacts via l API Actions, ce qui demande `actions: read`. Sans cela je m attends à un 403 et à un job `algolia-push` en échec. Ajouter `actions: read` au job (plutôt qu au workflow) te semble cohérent ?"
+ }
+]

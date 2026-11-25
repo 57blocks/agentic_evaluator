@@ -1,0 +1,55 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/SearchParamsAdapter.ts",
+  "start_line": 20,
+  "end_line": 20,
+  "message": "`encode` n'est appelé nulle part en production (seul `decode` l'est, dans `getSituationFromSearchParams`) : `getSearchParams` continue de passer par `serializeEvaluation`. Je me demande si on ne devrait pas soit le brancher dans `getSearchParams` pour que l'aller-retour soit réellement porté par l'adaptateur, soit le retirer pour ne pas garder du code qui n'est exercé que par ses tests."
+ },
+ {
+  "file": "site/source/hooks/useSearchParamsSimulationSharing.ts",
+  "start_line": 169,
+  "end_line": 169,
+  "message": "Je me demande ce que deviennent les liens déjà partagés : l'ancien code lisait les valeurs au format JSON (objet avec `valeur` et `unité`), et `getSearchParams` peut encore écrire ce format (`JSON.stringify(value)` en repli). `decode` ne le gère plus, donc une telle valeur serait renvoyée telle quelle comme string. Est-ce voulu ? Si non, un test sur ce cas aiderait."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3459,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/SearchParamsAdapter.ts",
+   "line": 20,
+   "start_line": null,
+   "body": "`encode` n'est appelé nulle part en production (seul `decode` l'est, dans `getSituationFromSearchParams`) : `getSearchParams` continue de passer par `serializeEvaluation`. Je me demande si on ne devrait pas soit le brancher dans `getSearchParams` pour que l'aller-retour soit réellement porté par l'adaptateur, soit le retirer pour ne pas garder du code qui n'est exercé que par ses tests.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/hooks/useSearchParamsSimulationSharing.ts",
+   "line": 169,
+   "start_line": null,
+   "body": "Je me demande ce que deviennent les liens déjà partagés : l'ancien code lisait les valeurs au format JSON (objet avec `valeur` et `unité`), et `getSearchParams` peut encore écrire ce format (`JSON.stringify(value)` en repli). `decode` ne le gère plus, donc une telle valeur serait renvoyée telle quelle comme string. Est-ce voulu ? Si non, un test sur ce cas aiderait.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 11,
+  "refused": [
+   "api --method POST repos/betagouv/mon-entreprise/pulls/3459/comments: cannot read /tmp/b1.txt for field body",
+   "api --method POST repos/betagouv/mon-entreprise/pulls/3459/comments: cannot read /tmp/b2.txt for field body"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 14,
+  "cost_usd": 0.20830959999999998,
+  "final_text": "J'ai posté deux commentaires inline sur la PR, tous deux sur le dernier commit (`f71676a`, le correctif des search params). Je n'ai relu que ce commit : la PR touche 472 fichiers et je n'ai pas relu le reste. Le workflow « Vérification PR » est au vert.\n\n- **`SearchParamsAdapter.ts:20`** : `encode` n'est appelé nulle part en production. Seul `decode` l'est, dans `getSituationFromSearchParams`. `getSearchParams` passe toujours par `serializeEvaluation`. Je demande si on le branche dans `getSearchParams` ou si on le retire.\n- **`useSearchParamsSimulationSharing.ts:169`** : `decode` ne lit plus le format JSON que l'ancien code gérait. `getSearchParams` peut encore l'écrire, en repli. Les liens déjà partagés avec ce format seraient donc lus comme une simple chaîne. Je demande si c'est voulu, et propose un test sur ce cas sinon."
+ }
+}
+
+```

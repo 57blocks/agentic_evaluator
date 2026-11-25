@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+      "start_line": 559,
+      "end_line": 559,
+      "message": "Ce commit est un commit de tests, mais il change aussi une règle : l’Acre s’applique désormais à l’invalidité-décès même quand l’exonération invalidité est présente (avant, la condition `exonérations . invalidité = non` l’en écartait, et le test « est nulle lorsqu’il y a à la fois Acre et invalidité » le vérifiait). Ce test est supprimé sans remplaçant. Quelle est la source de ce changement de règle (texte de loi ou page Urssaf) ? Si elle existe, je la verrais bien en référence de la règle, avec un test qui couvre le cas Acre + invalidité, et le changement dans son propre commit (`fix(modele-social)` par exemple) plutôt que mêlé aux tests."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

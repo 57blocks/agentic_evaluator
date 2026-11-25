@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 92,
+  "end_line": 92,
+  "message": "Je me demande si l’applicabilité est évaluée sur le bon moteur : `engine` est le moteur passé au middleware, alors que `setSituation` est appliqué à `engines[index]`. En mode non-comparateur c’est le même objet, mais pour un `isComparateurConfig` les `engines` sont des `shallowCopy`, donc `engine` n’a pas reçu la situation. Ne faudrait-il pas évaluer sur `engines[0]` (ou sur chaque contexte) ? Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 29,
+  "end_line": 32,
+  "message": "Ces quatre `let` au niveau du module sont un état partagé entre toutes les instances du middleware (un second `store`, ou les tests, héritent des valeurs du précédent), et c’est ce qui oblige à la remise à zéro manuelle sur `SET_SIMULATION`. Ne pourraient-ils pas vivre dans la fermeture de `prendLaProchaineQuestionMiddleware(engine)`, à côté de `engine` ? Les deux `eslint-disable` en tête de fichier me font aussi me demander si un typage plus précis (de `deepEql` notamment) permettrait de s’en passer."
+ }
+]

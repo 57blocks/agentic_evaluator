@@ -1,0 +1,39 @@
+{
+ "pr": 2963,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 92,
+   "start_line": null,
+   "body": "Pour le comparateur, `engines` contient des copies (`shallowCopy`) sur lesquelles `setSituation` est appelé, mais l’applicabilité est évaluée ici avec l’`engine` d’origine, dont la situation n’a jamais été posée. Je me demande si `applicable` est alors calculé sur une situation vide pour ces simulations. Faut-il l’évaluer sur `engines[0]` (ou sur chaque moteur) ? Un test du middleware en config comparateur permettrait de le vérifier.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 29,
+   "start_line": null,
+   "body": "Ces variables de module (`lastSimulation`, `lastConfig`, `lastSituationsAvecContextes`, `engines`) sont partagées par toutes les instances du middleware : un second store (tests, SSR Next) hériterait de l’état du premier. Je verrais bien les déplacer dans la closure de `prendLaProchaineQuestionMiddleware(engine)`, qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/store/reducers/simulation.reducer.ts",
+   "line": 101,
+   "start_line": null,
+   "body": "nit: ce cas duplique presque à l’identique `ENREGISTRE_LA_RÉPONSE` (ajout dans `questionsRépondues` si absent). Une petite fonction `marqueCommeRépondue(questionsRépondues, règle)` dans le domaine éviterait que les deux divergent.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1636073,
+  "final_text": "J'ai posté trois commentaires inline sur la PR #2963. Je n'ai relu en détail que le reducer de simulation et le middleware `prendLaProchaineQuestion`, pas les 134 fichiers du diff. La vérification de PR est au vert.\n\n- **Applicabilité en config comparateur** (`prendLaProchaineQuestion.middleware.ts:92`) : l'applicabilité est évaluée avec l'`engine` d'origine. La situation est posée sur les copies (`shallowCopy`) de `engines`, donc `applicable` pourrait être calculé sur une situation vide. Je l'ai posé en question, avec une suggestion de test du middleware en config comparateur.\n- **État partagé au niveau du module** (`prendLaProchaineQuestion.middleware.ts:29`) : `lastSimulation`, `lastConfig`, `lastSituationsAvecContextes` et `engines` sont partagés entre toutes les instances du middleware. Un second store (tests, SSR Next) hériterait de l'état du premier. Je propose de les déplacer dans la closure.\n- **Duplication dans le reducer** (`simulation.reducer.ts:101`) : `ENREGISTRE_LES_RÉPONSES` reprend presque à l'identique l'ajout dans `questionsRépondues` de `ENREGISTRE_LA_RÉPONSE`. Je l'ai présenté en `nit:`, avec une fonction partagée en suggestion.\n\nJe n'ai pas poussé la relecture plus loin à cause du budget : je n'ai pas lu le reste du diff ni les tests ajoutés. Je n'ai pas posté de commentaire global."
+ }
+}

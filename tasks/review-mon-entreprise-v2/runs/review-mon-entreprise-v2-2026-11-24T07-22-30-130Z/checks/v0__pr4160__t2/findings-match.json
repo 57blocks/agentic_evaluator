@@ -1,0 +1,92 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-ti/règles/indépendant/revenus/dividendes.publicodes",
+      "start_line": 23,
+      "end_line": 36,
+      "message": "Je me demande comment l'usager sait où classer ses dividendes avec cette séparation : avant, le modèle calculait la part au-dessus de 10 % du capital à partir du capital social (ou du bénéfice N-1 pour une EI) ; maintenant, c'est à l'usager de faire ce partage lui-même, et les deux questions (capital social et bénéfice net de l'exercice précédent) ont disparu. Une erreur de saisie déplace directement des dividendes entre prélèvements sociaux et cotisations, donc change le résultat affiché. Est-ce un choix assumé côté produit ? Si oui, je verrais bien la description de chaque champ rappeler comment calculer le seuil (10 % du capital social, ou du bénéfice net de l'exercice précédent pour une EI, sans oublier le compte courant d'associé de la famille), car ces précisions sont parties avec la question supprimée. Je n'ai pas pu vérifier le rendu dans le simulateur."
+    },
+    {
+      "message": "Synthèse (je n'ai relu en détail que le dernier commit, `fix(dividendes)` ; la PR fait 250 commits et 576 fichiers, je n'ai pas pu la relire en entier) :\n\n- La PR est très volumineuse : la réforme de l'assiette, les exonérations Acre/invalidité, la mise à jour IR 2026, la navigation et la suppression de domaine inutilisé se relisent difficilement ensemble. Je me demande si un découpage en PR par thème serait possible, au moins pour les mises à jour de snapshots de régression, qui noient le reste.\n- Historique : plusieurs commits `fix: erreurs de rebase`, `lint: fix`, `fix: type and lint` pourraient être fusionnés dans les commits d'origine, pour que chaque commit reste vert comme demandé dans CONTRIBUTING.\n- Le workflow « Vérification PR » est vert.\n- Non vérifié : le rendu des objectifs dividendes dans les simulateurs indépendant et cessation d'activité (`Objectifs.tsx`, `Goals.tsx`)."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/revenus/rémunération.publicodes",
+          "start_line": 71,
+          "end_line": 71
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/choix-du-statut/home.tsx",
+          "start_line": 30,
+          "end_line": 30
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+          "start_line": 110,
+          "end_line": 122
+        },
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/exonérations/Acre.publicodes",
+          "start_line": 144,
+          "end_line": 154
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 0,
+      "defect": 1
+    },
+    {
+      "finding": 0,
+      "defect": 2
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 1
+    },
+    {
+      "finding": 1,
+      "defect": 2
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

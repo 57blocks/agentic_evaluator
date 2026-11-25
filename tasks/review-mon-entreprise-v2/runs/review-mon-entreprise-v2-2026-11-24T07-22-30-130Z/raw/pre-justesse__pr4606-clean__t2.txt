@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 107,
+  "end_line": 107,
+  "message": "JSX supprime le retour à la ligne entre `</Code>,` et `<Code>modele-ti</Code>` : le rendu sera « modele-as,modele-ti » sans espace. Je verrais bien :\n```suggestion\n\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{\" \"}\n```"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": null,
+   "body": "JSX supprime le retour à la ligne entre `</Code>,` et `<Code>modele-ti</Code>` : le rendu sera « modele-as,modele-ti » sans espace. Je verrais bien :\n```suggestion\n\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{\" \"}\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1180704,
+  "final_text": "J'ai relu la PR et posté un commentaire inline sur `Library.tsx:107`. Il manque une espace entre `modele-as,` et `modele-ti` dans le rendu JSX. Les vérifications de la PR sont au vert. Je n'ai pas d'autre remarque."
+ }
+}
+
+```

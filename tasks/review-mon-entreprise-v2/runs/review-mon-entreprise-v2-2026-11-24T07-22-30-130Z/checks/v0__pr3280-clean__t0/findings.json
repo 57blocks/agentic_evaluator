@@ -1,0 +1,11 @@
+[
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 378,
+  "end_line": 378,
+  "message": "Je me demande si la règle Publicodes n'est pas restée à 10 mois : dans `modele-social/règles/protection-sociale.publicodes` (~l.625-632), `maternité . délai d'attente` porte encore `valeur: 10 mois` et la description mentionne deux fois « 10 mois » (maternité et paternité/adoption). Seul le texte de l'UI est corrigé ici, donc la règle et ses explications afficheront toujours 10 mois, et les deux sources se contredisent.\n\nLe décret couvre-t-il aussi la paternité/adoption ? Je ne l'ai pas vérifié, à toi de voir. Le cas échéant, il faudrait aussi mettre à jour la règle (et rebuilder `modele-social`).\n\nnit: le « 6 » est en dur dans le JSX. Une valeur lue depuis la règle éviterait une prochaine divergence, mais c'est peut-être hors périmètre."
+ },
+ {
+  "message": "Historique : le premier commit (`Prestations maternité : ajustement durée affiliation`) ne suit pas le format Conventional Commits attendu (par exemple `fix(indépendant): durée d'affiliation maternité de 6 mois`). Le commit `i18n: traduction` séparé pourrait être fusionné dans le premier, car CONTRIBUTING demande que les traductions soient dans le même commit que le code.\n\nJe n'ai pas vérifié les textes légaux liés dans la description de la PR, ni le rendu."
+ }
+]

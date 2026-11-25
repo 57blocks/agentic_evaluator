@@ -1,0 +1,66 @@
+```file:findings.json
+[
+ {
+  "file": "site/vite.config.ts",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Je me demande si ce passage de `next` à `main` est voulu. Avant, une build sur la branche `next` était considérée comme production (Sentry actif, domaine Plausible de prod, etc.) ; avec ce changement elle devient `staging`. Si une branche `next` est encore déployée, son comportement change sans que le message du commit le dise. Si c’est volontaire, je le mettrais dans un commit dédié avec son explication ; qu’en penses-tu ?"
+ },
+ {
+  "file": "site/app/page.tsx",
+  "start_line": 34,
+  "end_line": 34,
+  "message": "Je ne vois pas le lien avec l’adaptateur d’environnement : est-ce que l’ajout de `tracking` sur ce bouton est nécessaire (par exemple parce que `Button` l’exige désormais) ? Sinon je le sortirais de cette PR pour garder des commits centrés sur un seul changement."
+ },
+ {
+  "file": "site/source/services/environnement/environnement.ts",
+  "start_line": 69,
+  "end_line": 69,
+  "message": "nit: les autres valeurs côté Next ont un repli `?? \"\"`, pas celle-ci : le type de `siteId` dépend donc du bundler. Le motif `sousVite ? import.meta.env.VITE_X : process.env.NEXT_PUBLIC_X` est aussi répété une douzaine de fois ; je ne sais pas si une fonction `lireVariable` résisterait aux remplacements statiques de Vite/Next (accès littéraux requis), à vérifier avant de s’y lancer."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "Je me demande si ce passage de `next` à `main` est voulu. Avant, une build sur la branche `next` était considérée comme production (Sentry actif, domaine Plausible de prod, etc.) ; avec ce changement elle devient `staging`. Si une branche `next` est encore déployée, son comportement change sans que le message du commit le dise. Si c’est volontaire, je le mettrais dans un commit dédié avec son explication ; qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/app/page.tsx",
+   "line": 34,
+   "start_line": null,
+   "body": "Je ne vois pas le lien avec l’adaptateur d’environnement : est-ce que l’ajout de `tracking` sur ce bouton est nécessaire (par exemple parce que `Button` l’exige désormais) ? Sinon je le sortirais de cette PR pour garder des commits centrés sur un seul changement.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/services/environnement/environnement.ts",
+   "line": 69,
+   "start_line": null,
+   "body": "nit: les autres valeurs côté Next ont un repli `?? \"\"`, pas celle-ci : le type de `siteId` dépend donc du bundler. Le motif `sousVite ? import.meta.env.VITE_X : process.env.NEXT_PUBLIC_X` est aussi répété une douzaine de fois ; je ne sais pas si une fonction `lireVariable` résisterait aux remplacements statiques de Vite/Next (accès littéraux requis), à vérifier avant de s’y lancer.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1330194,
+  "final_text": "J'ai posté trois commentaires inline sur la PR #4575. Je n'ai pas exécuté le code. Le workflow « Vérification PR » est au vert.\n\n- **`site/vite.config.ts:208` :** `isProductionBranch` passe de `['master', 'next']` à `['master', 'main']`. Une build sur la branche `next` bascule donc de production à staging, sans que le message de commit le mentionne. Je demande si c'est voulu et propose un commit dédié si oui.\n- **`site/app/page.tsx:34` :** l'ajout de `tracking` sur le bouton n'a pas de lien visible avec l'adaptateur d'environnement. Je demande s'il est nécessaire, sinon je le sortirais de la PR.\n- **`environnement.ts:69` (nit) :** `piano.siteId` n'a pas de valeur de repli `?? ''` côté Next, contrairement aux autres variables, donc son type dépend du bundler. Je signale aussi que le motif `sousVite ? … : …` est répété une douzaine de fois. Je ne sais pas si une fonction de lecture résisterait aux remplacements statiques de Vite et Next, donc je le laisse à vérifier.\n\nJe n'ai pas posté de synthèse globale, les trois commentaires couvrent l'essentiel."
+ }
+}
+
+```

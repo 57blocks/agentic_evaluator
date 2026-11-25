@@ -1,0 +1,116 @@
+#!/usr/bin/env node
+/**
+ * A stand-in for gh during a replayed review. It is the leak barrier: the PR
+ * is answered from the fixture (pr.json and the local repo), never from
+ * GitHub, so the reviewer cannot read later comments, linked issues or the
+ * fix. What the reviewer posts is appended to $REVIEW_FINDINGS instead of
+ * being sent. Every call is logged to $REVIEW_GH_LOG; anything not handled
+ * here exits 1 so the attempt shows in the log.
+ *
+ * Env: REVIEW_PR_JSON, REVIEW_FINDINGS, REVIEW_GH_LOG, REVIEW_REPO_DIR.
+ */
+
+import { execFileSync } from "node:child_process";
+import { appendFileSync, readFileSync } from "node:fs";
+
+const argv = process.argv.slice(2);
+const pr = JSON.parse(readFileSync(process.env.REVIEW_PR_JSON, "utf-8"));
+const repoDir = process.env.REVIEW_REPO_DIR;
+const log = (entry) => appendFileSync(process.env.REVIEW_GH_LOG, JSON.stringify({ argv, ...entry }) + "\n");
+const post = (finding) => appendFileSync(process.env.REVIEW_FINDINGS, JSON.stringify(finding) + "\n");
+let nextId = Date.now();
+
+function done(text, code = 0) {
+  log({ code });
+  if (text) process.stdout.write(text.endsWith("\n") ? text : text + "\n");
+  process.exit(code);
+}
+function refuse(why) {
+  log({ code: 1, refused: why });
+  process.stderr.write(`gh: ${why}\n`);
+  process.exit(1);
+}
+
+/** -f k=v / -F k=v / --field / --raw-field pairs; `@file` values are read. */
+function fields(args) {
+  const out = {};
+  for (let i = 0; i < args.length; i++) {
+    if (!["-f", "-F", "--field", "--raw-field"].includes(args[i])) continue;
+    const [k, ...rest] = String(args[++i]).split("=");
+    let v = rest.join("=");
+    if (v.startsWith("@")) {
+      try {
+        v = readFileSync(v.slice(1), "utf-8");
+      } catch {
+        refuse(`cannot read ${v.slice(1)} for field ${k}`);
+      }
+    }
+    out[k] = v;
+  }
+  return out;
+}
+function flag(args, name) {
+  const i = args.indexOf(name);
+  return i >= 0 ? args[i + 1] : undefined;
+}
+function bodyArg(args) {
+  const file = flag(args, "--body-file") ?? flag(args, "-F");
+  if (file) return readFileSync(file === "-" ? 0 : file, "utf-8");
+  return flag(args, "--body") ?? flag(args, "-b") ?? "";
+}
+const git = (...a) => execFileSync("git", ["-C", repoDir, ...a], { encoding: "utf-8", maxBuffer: 64 << 20 });
+
+const [cmd, sub, ...rest] = argv;
+const prNumber = String(pr.number);
+
+if (cmd === "pr") {
+  const target = rest.find((a) => /^\d+$/.test(a));
+  if (target && target !== prNumber) refuse(`only PR ${prNumber} exists in this replay`);
+  if (sub === "diff") done(git("diff", `${pr.baseSha}...${pr.headSha}`));
+  if (sub === "checks") done("Vérification PR\tpass\t0\thttps://example.invalid/checks\n");
+  if (sub === "comment") {
+    post({ kind: "global", body: bodyArg(rest) });
+    done(`https://github.com/${pr.repo}/pull/${prNumber}#issuecomment-${nextId++}`);
+  }
+  if (sub === "view") {
+    const json = flag(rest, "--json");
+    if (json) {
+      const all = { number: pr.number, title: pr.title, body: pr.body, commits: pr.commits, comments: [], reviews: [],
+        baseRefName: pr.baseRefName, headRefOid: pr.headSha, state: "OPEN", createdAt: pr.createdAt };
+      done(JSON.stringify(Object.fromEntries(json.split(",").map((k) => [k, all[k] ?? null]))));
+    }
+    const head = `title:\t${pr.title}\nstate:\tOPEN\nnumber:\t${prNumber}\n--\n${pr.body ?? ""}\n`;
+    done(rest.includes("--comments") ? head + "\n(no comments)\n" : head);
+  }
+  refuse(`gh pr ${sub} is not available in this replay`);
+}
+
+if (cmd === "api") {
+  const args = [sub, ...rest];
+  const method = (flag(args, "--method") ?? flag(args, "-X") ?? "GET").toUpperCase();
+  const route = args.find((a, i) => !a.startsWith("-") && !["--method", "-X", "-H", "-f", "-F", "--field", "--raw-field", "--jq", "-q"].includes(args[i - 1]));
+  const path = String(route ?? "").replace(/^\//, "").split("?")[0];
+  const prComments = `repos/${pr.repo}/pulls/${prNumber}/comments`;
+  if (method === "POST" && path === prComments) {
+    const f = fields(args);
+    const id = nextId++;
+    post({ kind: f.in_reply_to ? "reply" : "inline", path: f.path, line: Number(f.line) || null,
+      start_line: Number(f.start_line) || null, body: f.body ?? "", in_reply_to: f.in_reply_to ?? null });
+    done(JSON.stringify({ id, path: f.path, line: Number(f.line) || null, body: f.body }));
+  }
+  if (method === "GET" && (path === prComments || path === `repos/${pr.repo}/issues/${prNumber}/comments`
+    || path === `repos/${pr.repo}/pulls/${prNumber}/reviews`)) done("[]");
+  if (method === "GET" && path === `repos/${pr.repo}/pulls/${prNumber}`) {
+    done(JSON.stringify({ number: pr.number, title: pr.title, body: pr.body, head: { sha: pr.headSha }, base: { ref: pr.baseRefName } }));
+  }
+  if (method === "GET" && new RegExp(`^repos/${pr.repo}/issues/\\d+(/comments)?$`).test(path)) {
+    // Linked issues are withheld in every arm: their later discussion can name the bug.
+    log({ code: 1, refused: "issue withheld" });
+    process.stdout.write(JSON.stringify({ message: "Not Found", status: "404" }) + "\n");
+    process.exit(1);
+  }
+  refuse(`gh api ${method} ${path} is not available in this replay`);
+}
+
+if (cmd === "run") refuse("CI logs are not available in this replay (checks are green)");
+refuse(`gh ${cmd ?? ""} is not available in this replay`);

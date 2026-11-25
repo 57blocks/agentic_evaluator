@@ -1,0 +1,25 @@
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": null,
+   "body": "En JSX, le retour à la ligne entre `,` et `<Code>modele-ti</Code>` est supprimé : le texte s’affichera « modele-as,modele-ti » sans espace. Je verrais bien un `{' '}` en fin de ligne.\n```suggestion\n\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{' '}\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4481: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.12624090000000002,
+  "final_text": "J'ai posté un seul commentaire inline sur la PR #4606, ligne 107 de `site/source/pages/integration/Library.tsx`. Je n'ai pas relevé d'autre défaut, et je n'ai pas posté de commentaire global.\n\nLa phrase « Remplacez `modele-xx` par `modele-as`, `modele-ti` ou … » s'affichera sans espace après la virgule. En JSX, le retour à la ligne entre `,` et `<Code>modele-ti</Code>` est supprimé, ce qui donne « modele-as,modele-ti ». J'ai proposé d'ajouter `{' '}` en fin de ligne, sous forme de bloc `suggestion`.\n\nJe n'ai pas lu les résultats de `gh pr checks`. Je n'ai pas non plus pu lire l'issue #4481 : l'API GitHub répond « Not Found »."
+ }
+}

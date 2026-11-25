@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/vite.config.ts",
+      "start_line": 208,
+      "end_line": 208,
+      "message": "Je me demande si le remplacement de `next` par `main` est voulu : il change un comportement sans rapport avec l'adaptateur. Une build sur la branche `next` passait en production (Sentry, Plausible sur le domaine de prod, `IS_PRODUCTION`) et passerait désormais en staging. Si c'est intentionnel, je le mettrais dans un commit à part avec son message ; sinon, peut-être garder `['master', 'next']` ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/services/environnement/environnement.ts",
+          "start_line": 5,
+          "end_line": 21
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

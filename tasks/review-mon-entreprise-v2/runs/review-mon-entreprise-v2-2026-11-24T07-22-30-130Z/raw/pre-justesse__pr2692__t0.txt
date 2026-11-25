@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 30,
+  "end_line": 30,
+  "message": "Si Redis est indisponible (ce que `enableOfflineQueue: false` fait échouer immédiatement), `redis.get` rejette et `/evaluate` répond une erreur alors que le calcul aurait pu se faire sans cache. Je me demande si un `try/catch` qui retombe sur `next()` (get comme set) ne serait pas plus sûr : le cache devient une optimisation qui ne peut pas casser l'API. Qu'en penses-tu ?"
+ },
+ {
+  "file": "api/source/index.ts",
+  "start_line": 50,
+  "end_line": 50,
+  "message": "`plausibleMiddleware` passe maintenant après le cache : une réponse servie depuis Redis ne rappelle pas `next()`, donc n'est plus comptée dans les stats. Est-ce voulu ? Sinon, le remettre avant `redisCacheMiddleware()` garderait le comptage des requêtes."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 2692,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 30,
+   "start_line": null,
+   "body": "Si Redis est indisponible (ce que `enableOfflineQueue: false` fait échouer immédiatement), `redis.get` rejette et `/evaluate` répond une erreur alors que le calcul aurait pu se faire sans cache. Je me demande si un `try/catch` qui retombe sur `next()` (get comme set) ne serait pas plus sûr : le cache devient une optimisation qui ne peut pas casser l'API. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/index.ts",
+   "line": 50,
+   "start_line": null,
+   "body": "`plausibleMiddleware` passe maintenant après le cache : une réponse servie depuis Redis ne rappelle pas `next()`, donc n'est plus comptée dans les stats. Est-ce voulu ? Sinon, le remettre avant `redisCacheMiddleware()` garderait le comptage des requêtes.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.11658059999999999,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline sur GitHub. Je n'ai rien exécuté. `gh pr checks` est au vert.\n\n- **`api/source/redis-cache.ts`, ligne 30** : si Redis est indisponible, `redis.get` rejette (`enableOfflineQueue: false` fait échouer l'appel tout de suite). `/evaluate` répond alors une erreur alors que le calcul se ferait sans cache. J'ai suggéré un `try/catch` qui retombe sur `next()`, pour le `get` comme pour le `set`.\n- **`api/source/index.ts`, ligne 50** : `plausibleMiddleware` passe maintenant après le cache. Une réponse servie depuis Redis ne rappelle pas `next()`, donc n'est plus comptée dans les stats. J'ai demandé si c'est voulu, sinon il suffit de le remettre avant `redisCacheMiddleware()`."
+ }
+}
+
+```

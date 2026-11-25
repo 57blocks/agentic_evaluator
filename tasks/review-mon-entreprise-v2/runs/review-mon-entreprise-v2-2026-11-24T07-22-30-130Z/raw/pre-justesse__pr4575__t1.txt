@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/vite.config.ts",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Le remplacement de `next` par `main` dans les branches de production passe inaperçu dans une PR qui parle d’environnement : est-ce voulu ? Une build sur la branche `next` passerait de `production` à `staging` (Sentry, domaine Plausible, affichage de la branche en console) et `main` n’a pas l’air d’exister dans ce dépôt. Si c’est intentionnel, je le mettrais dans un commit à part avec son explication ; sinon je le retirerais."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "Le remplacement de `next` par `main` dans les branches de production passe inaperçu dans une PR qui parle d’environnement : est-ce voulu ? Une build sur la branche `next` passerait de `production` à `staging` (Sentry, domaine Plausible, affichage de la branche en console) et `main` n’a pas l’air d’exister dans ce dépôt. Si c’est intentionnel, je le mettrais dans un commit à part avec son explication ; sinon je le retirerais.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.12468830000000002,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `site/vite.config.ts:208`. Il demande si le remplacement de `next` par `main` dans `isProductionBranch` est voulu. Les vérifications CI passent. Je n'ai rien d'autre à signaler, donc je m'arrête là."
+ }
+}
+
+```

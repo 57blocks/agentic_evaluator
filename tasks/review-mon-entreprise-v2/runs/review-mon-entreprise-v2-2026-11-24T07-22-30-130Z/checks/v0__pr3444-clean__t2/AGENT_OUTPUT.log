@@ -1,0 +1,19 @@
+{
+ "pr": 3444,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Je n'ai pas pu vérifier le rendu visuel (logos SVG/JPG) ni la nouvelle URL `entreprise.francetravail.fr/cout-salarie/` (utilisée dans `Iframe.tsx` et le test Cypress).\n\n- **Périmètre de la PR** : le titre annonce les définitions des rubriques retraite, mais le diff mélange aussi le renommage Pôle Emploi → France Travail (règles, UI, Cypress), le remplacement de tous les logos des références et le passage des `alt` à `\"\"`. Je me demande si trois PR (ou au moins trois commits distincts) ne se reliraient pas plus facilement, notamment parce que `protection-sociale.publicodes` (~500 lignes) et `rules-en.yaml` (~1200 lignes) noient le reste. Il n'y a qu'un seul commit.\n- **`alt=\"\"` sur les logos de `References.tsx`** : je trouve le choix cohérent si le nom du site est déjà dans le lien voisin. Je n'ai pas vérifié que c'est le cas pour chaque `Reference`. Si le titre du lien ne contient pas le domaine, le logo ne sera plus annoncé du tout, ce qui me semble acceptable mais à confirmer avec `site/ACCESSIBILITY.md`.\n- **Clé `pole-emploi.fr` retirée de `referencesImages`** : les règles que j'ai parcourues ne pointent plus vers ce domaine, donc je n'y vois pas de régression. Une redirection d'anciennes URLs dans d'autres packages m'a échappé si tu en connais.\n- **nit :** dans `Iframe.tsx`, la variable `poleEmploiLogo` garde l'ancien nom alors que l'article s'appelle désormais France Travail.\n- **Références Publicodes** : je ne vérifie que leur présence. Pour la règle `senior professionnalisation`, la référence « Ministère du travail » est supprimée au profit d'une seule référence France Travail. Est-ce voulu ?"
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1318417,
+  "final_text": "J'ai relu la PR #3444 et posté une synthèse sur GitHub. Je n'ai écrit aucun commentaire inline.\n\nLa synthèse soulève cinq points :\n- **Périmètre :** la PR mélange les définitions retraite, le renommage Pôle Emploi → France Travail, le remplacement des logos et le passage des `alt` à vide, le tout en un seul commit. Je suggère de découper.\n- **`alt=\"\"` :** je ne sais pas si le nom du site figure toujours dans le lien voisin, donc je demande de le confirmer.\n- **Clé `pole-emploi.fr` retirée :** je ne vois pas de régression, car aucune règle ne pointe plus vers ce domaine.\n- **nit :** la variable `poleEmploiLogo` garde son ancien nom.\n- **Règle `senior professionnalisation` :** la référence « Ministère du travail » disparaît. Je demande si c'est voulu.\n\nJe n'ai pas vérifié le rendu des nouveaux logos, ni que la nouvelle URL `entreprise.francetravail.fr/cout-salarie/` fonctionne. Je n'ai pas non plus relu le contenu des définitions retraite dans `protection-sociale.publicodes`. Je ne vérifie que la présence d'une référence dans les règles Publicodes. La synthèse mentionne les deux premiers points, mais pas le dernier."
+ }
+}

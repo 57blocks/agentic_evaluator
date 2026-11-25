@@ -1,0 +1,23 @@
+{
+ "pr": 4567,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "line": 559,
+   "start_line": null,
+   "body": "Je me demande si ce changement est voulu : en retirant la condition `exonérations . invalidité = non`, une personne qui cumule Acre et pension d'invalidité (sans exonération âge) paie maintenant l'invalidité-décès au taux Acre, alors qu'avant elle la payait sans exonération. C'est un changement de résultat pour les usagers métropolitains, pas seulement pour Mayotte. Le test qui couvrait ce cas (« est nulle lorsqu'il y a à la fois Acre et invalidité mais pas d'exonération âge ») a été supprimé plutôt que remplacé par un test du nouveau comportement. Si c'est voulu, quelle est la source (texte ou site officiel) ? Dans ce cas, je verrais bien un test qui fixe le nouveau comportement, et idéalement ce changement dans son propre commit, séparé de la réécriture des tests.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.13603600000000002,
+  "final_text": "J'ai relu la PR et posté un commentaire inline. Je n'ai pas pu lire l'issue #4411 (la commande a été refusée), donc je n'ai pas pu vérifier si le changement est voulu.\n\nLe commentaire porte sur la règle `invalidité et décès` dans `cotisations.publicodes`. La PR retire la condition `exonérations . invalidité = non`. Une personne qui cumule Acre et pension d'invalidité, sans exonération d'âge, paie donc maintenant cette cotisation au taux Acre. Avant, elle la payait sans exonération.\n\nCela change le résultat pour les usagers métropolitains, pas seulement à Mayotte. Le test qui couvrait ce cas a été supprimé au lieu d'être remplacé par un test du nouveau comportement. J'ai demandé la source de la règle et un test de ce comportement, idéalement dans un commit séparé de la réécriture des tests.\n\nLe reste du diff est une réécriture des tests avec une constante `EXONÉRATIONS`, plus de nouveaux tests de comparaison Mayotte et métropole. Il ne m'a pas paru mériter de commentaire. Le workflow « Vérification PR » est au vert."
+ }
+}

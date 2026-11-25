@@ -1,0 +1,18 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Le correctif me semble juste : sous Vite on ne touche plus à `process.env`, et ne pas définir `SENTRY_RELEASE_NAME` quand il n'y a pas de release évite le `define` à `undefined`. Quelques pistes, sans blocage :\n\n- nit: dans `site/vite.config.ts`, `sentryReleaseName(mode)` est évalué deux fois dans le spread. Une constante locale (ou un petit helper) éviterait la répétition.\n- nit: `(typeof BRANCH_NAME !== 'undefined' && BRANCH_NAME) || ''` se lit moins facilement que `typeof BRANCH_NAME !== 'undefined' ? BRANCH_NAME : ''`, qui est la forme utilisée juste au-dessus pour `ENVIRONNEMENT`. Qu'en penses-tu ?\n- Je n'ai pas trouvé de test pour `environnement.ts`. Le bug (un `ReferenceError` au chargement sous Vite) pourrait revenir sans qu'on le voie en CI. Un test qui importe le module sans `process` défini (`vi.stubGlobal('process', undefined)`) le couvrirait, si c'est faisable avec ta config Vitest. Je n'ai pas pu le vérifier.\n- Je n'ai pas lancé le serveur de dev (hors de ma portée), donc le démarrage local reste à confirmer à la main.\n\nHistorique : deux commits, chacun avec un changement logique et un message au bon format."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

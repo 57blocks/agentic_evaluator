@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/conversation/AnswerList.tsx",
+  "start_line": 321,
+  "end_line": 321,
+  "message": "Je pense que cette ligne commentée est un reste de débogage : elle change le comportement de la modale « Modifier mes réponses » (les suggestions s’affichent désormais pour toutes les questions) sans rapport avec les charges. Si c’est voulu (c’est ce qui permet de cliquer « Début d’année » dans le test AE ?), je verrais plutôt la suppression de la prop, avec son propre commit ; sinon, un revert. Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+  "start_line": 71,
+  "end_line": 71,
+  "message": "nit: `cy.wait(500)` rend le test dépendant du timing. Je me demande si on peut plutôt attendre un état observable (par ex. une assertion `have.value` sur le champ recalculé) avant de saisir la valeur suivante, pour éviter un test flaky ou inutilement lent."
+ },
+ {
+  "file": "modele-social/règles/entreprise/entreprise.publicodes",
+  "start_line": 25,
+  "end_line": 25,
+  "message": "Ici la clé de la suggestion change (`Début d’année`), et pas seulement un texte affiché : si cette clé est stockée ou référencée quelque part (URL, situation sauvegardée, tests), elle ne correspondra plus à l’ancienne. Je n’ai pas vérifié ce point. Par ailleurs, je me demande si cette conversion de nombreuses apostrophes sur tout le fichier mérite sa propre PR : elle noie les lignes réellement liées aux charges dans le diff et dans `rules-en.yaml` (+315 lignes)."
+ },
+ {
+  "message": "Synthèse :\n- Le texte de la rubrique « Charges » est clair. « Il ne faut pas déclarer ici… » est assez injonctif pour un usager ; « Ne déclarez pas ici… » serait peut-être plus naturel, mais c’est une préférence.\n- Le retrait de `small` sur `SimulationGoal` (indépendant et cessation d’activité) change l’affichage de la rubrique. Je n’ai pas pu vérifier le rendu : est-ce voulu ? Cela mériterait une mention dans la description de la PR.\n- Historique : le commit « tests(AE) » n’a pas un type Conventional Commits valide (`test:`). Le test AE réécrit (retrait de `testIsolation: false`) semble lié à la modale plutôt qu’aux charges, et irait mieux avec le changement d’`AnswerList` dans un commit dédié, voire une PR séparée. Le commit sur les apostrophes typographiques n’a pas de lien fonctionnel avec #3360.\n- Je n’ai pas pu exécuter les tests Cypress ni vérifier le rendu."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3385,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/AnswerList.tsx",
+   "line": 321,
+   "start_line": null,
+   "body": "Je pense que cette ligne commentée est un reste de débogage : elle change le comportement de la modale « Modifier mes réponses » (les suggestions s’affichent désormais pour toutes les questions) sans rapport avec les charges. Si c’est voulu (c’est ce qui permet de cliquer « Début d’année » dans le test AE ?), je verrais plutôt la suppression de la prop, avec son propre commit ; sinon, un revert. Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+   "line": 71,
+   "start_line": null,
+   "body": "nit: `cy.wait(500)` rend le test dépendant du timing. Je me demande si on peut plutôt attendre un état observable (par ex. une assertion `have.value` sur le champ recalculé) avant de saisir la valeur suivante, pour éviter un test flaky ou inutilement lent.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/entreprise/entreprise.publicodes",
+   "line": 25,
+   "start_line": null,
+   "body": "Ici la clé de la suggestion change (`Début d’année`), et pas seulement un texte affiché : si cette clé est stockée ou référencée quelque part (URL, situation sauvegardée, tests), elle ne correspondra plus à l’ancienne. Je n’ai pas vérifié ce point. Par ailleurs, je me demande si cette conversion de nombreuses apostrophes sur tout le fichier mérite sa propre PR : elle noie les lignes réellement liées aux charges dans le diff et dans `rules-en.yaml` (+315 lignes).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- Le texte de la rubrique « Charges » est clair. « Il ne faut pas déclarer ici… » est assez injonctif pour un usager ; « Ne déclarez pas ici… » serait peut-être plus naturel, mais c’est une préférence.\n- Le retrait de `small` sur `SimulationGoal` (indépendant et cessation d’activité) change l’affichage de la rubrique. Je n’ai pas pu vérifier le rendu : est-ce voulu ? Cela mériterait une mention dans la description de la PR.\n- Historique : le commit « tests(AE) » n’a pas un type Conventional Commits valide (`test:`). Le test AE réécrit (retrait de `testIsolation: false`) semble lié à la modale plutôt qu’aux charges, et irait mieux avec le changement d’`AnswerList` dans un commit dédié, voire une PR séparée. Le commit sur les apostrophes typographiques n’a pas de lien fonctionnel avec #3360.\n- Je n’ai pas pu exécuter les tests Cypress ni vérifier le rendu."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1604115,
+  "final_text": "J'ai posté ma revue sur la PR #3385 : trois commentaires inline et une synthèse. Je n'ai exécuté ni les tests ni le rendu.\n\nLes trois commentaires inline :\n- **`AnswerList.tsx`, ligne 321** : `showSuggestions={false}` est commenté au lieu d'être supprimé ou rétabli. Cela change la modale « Modifier mes réponses » pour toutes les questions, sans lien avec les charges.\n- **`simulateur-ae.ts`, ligne 71** : `cy.wait(500)` rend le test dépendant du timing. Je propose d'attendre un état observable à la place.\n- **`entreprise.publicodes`, ligne 25** : la clé de suggestion devient `Début d’année`. Je n'ai pas vérifié si cette clé est stockée ou référencée ailleurs. La conversion en masse des apostrophes mériterait sa propre PR, car elle noie le texte des charges dans le diff.\n\nLa synthèse reprend quatre points :\n- le texte de la rubrique « Charges » est clair ;\n- le ton de « Il ne faut pas déclarer ici… » est un peu injonctif ;\n- le retrait de `small` sur `SimulationGoal` change l'affichage, et je demande si c'est voulu ;\n- côté historique git, le type « tests(AE) » n'est pas valide en Conventional Commits, et le test AE et les apostrophes n'ont pas de lien fonctionnel avec #3360."
+ }
+}
+
+```

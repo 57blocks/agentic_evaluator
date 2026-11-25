@@ -1,0 +1,38 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 36,
+      "end_line": 36,
+      "message": "Le test porte sur `externalLinks` et non sur `relevantExternalLinks` : si aucun lien ne passe le filtre `associatedRule` (et sans `nextSteps` ni `iframePath`), on affiche le titre « Ressources utiles » avec une liste vide. Je verrais bien le test sur la liste filtrée (en la calculant avant le `return null`)."
+    },
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 57,
+      "end_line": 57,
+      "message": "Avant, les guides Urssaf n’étaient affichés que si `language === 'fr'` (leur contenu n’est pas traduit). Cette condition a disparu : en anglais, les cartes s’affichent maintenant avec titre et description en français. Est-ce voulu ? Sinon je verrais bien le filtre sur la langue ici."
+    },
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 23,
+      "end_line": 23,
+      "message": "nit: `NextSteps` passe en `export default`, alors que CONTRIBUTING demande des exports nommés (idem pour `ExternalLinkCard`)."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

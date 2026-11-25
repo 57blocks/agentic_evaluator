@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/vite.config.ts",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Je me demande si le remplacement de `next` par `main` est voulu : il change un comportement sans rapport avec l'adaptateur. Une build sur la branche `next` passait en production (Sentry, Plausible sur le domaine de prod, `IS_PRODUCTION`) et passerait désormais en staging. Si c'est intentionnel, je le mettrais dans un commit à part avec son message ; sinon, peut-être garder `['master', 'next']` ?"
+ }
+]

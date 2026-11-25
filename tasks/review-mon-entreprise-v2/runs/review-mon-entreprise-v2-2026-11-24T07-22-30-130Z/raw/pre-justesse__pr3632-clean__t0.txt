@@ -1,0 +1,66 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 36,
+  "end_line": 36,
+  "message": "Si `externalLinks` est défini mais que toutes les règles `associatedRule` valent faux (ex. un simulateur qui n'a que des liens conditionnels, sans `nextSteps` ni iframe), on n'a pas de `return null` et la section affiche le titre « Ressources utiles » avec une liste vide. Je me demande si le test ne devrait pas porter sur `relevantExternalLinks?.length` plutôt que sur `externalLinks` (comme l'ancien code le faisait avec `guidesUrssaf.length`)."
+ },
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 59,
+  "end_line": 59,
+  "message": "Régression possible : l'ancien code n'affichait les guides Urssaf que si `language === 'fr'`, car leurs textes sont en français uniquement. Cette condition a disparu, et les fichiers de `external-links/` portent encore `// TODO: gérer les traductions`. Un usager en interface anglaise verra donc des cartes entièrement en français (titre, description, `ariaLabel`). Qu'en penses-tu : conserver le filtre sur la langue pour ces liens tant qu'ils ne sont pas traduits, ou les traduire dans cette PR ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+  "start_line": 13,
+  "end_line": 13,
+  "message": "nit: `CONTRIBUTING.md` demande des exports nommés plutôt que `export default` ; idem pour `NextSteps` qui passe de `export function` à `export default`."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3632,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/NextSteps.tsx",
+   "line": 36,
+   "start_line": null,
+   "body": "Si `externalLinks` est défini mais que toutes les règles `associatedRule` valent faux (ex. un simulateur qui n'a que des liens conditionnels, sans `nextSteps` ni iframe), on n'a pas de `return null` et la section affiche le titre « Ressources utiles » avec une liste vide. Je me demande si le test ne devrait pas porter sur `relevantExternalLinks?.length` plutôt que sur `externalLinks` (comme l'ancien code le faisait avec `guidesUrssaf.length`).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/NextSteps.tsx",
+   "line": 59,
+   "start_line": null,
+   "body": "Régression possible : l'ancien code n'affichait les guides Urssaf que si `language === 'fr'`, car leurs textes sont en français uniquement. Cette condition a disparu, et les fichiers de `external-links/` portent encore `// TODO: gérer les traductions`. Un usager en interface anglaise verra donc des cartes entièrement en français (titre, description, `ariaLabel`). Qu'en penses-tu : conserver le filtre sur la langue pour ces liens tant qu'ils ne sont pas traduits, ou les traduire dans cette PR ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+   "line": 13,
+   "start_line": null,
+   "body": "nit: `CONTRIBUTING.md` demande des exports nommés plutôt que `export default` ; idem pour `NextSteps` qui passe de `export function` à `export default`.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.17834470000000002,
+  "final_text": "J'ai posté trois commentaires inline sur la PR #3632. Le check « Vérification PR » est au vert. Je n'ai pas exécuté le code, et je n'ai pas relu le détail de tous les fichiers de config des simulateurs.\n\n- **Section vide** (`NextSteps.tsx:36`) : le `return null` teste `externalLinks` et non `relevantExternalLinks`. Si un simulateur n'a que des liens conditionnels et qu'aucun ne s'applique, le titre « Ressources utiles » s'affiche avec une liste vide.\n- **Régression de langue** (`NextSteps.tsx:59`) : l'ancien code n'affichait les guides Urssaf qu'en `language === 'fr'`. Cette condition a disparu, alors que les fichiers de `external-links/` portent encore `// TODO: gérer les traductions`. Un usager en interface anglaise verra donc des cartes en français. J'ai posé la question de garder le filtre ou de traduire dans cette PR.\n- **Exports par défaut** (`ExternalLinkCard.tsx:13`) : en `nit:`, `ExternalLinkCard` et `NextSteps` utilisent `export default`, alors que `CONTRIBUTING.md` demande des exports nommés.\n\nJe n'ai pas posté de commentaire global."
+ }
+}
+
+```

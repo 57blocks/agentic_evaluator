@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/hooks/useBarèmeLodeom.ts",
+      "start_line": 8,
+      "end_line": 13,
+      "message": "Je me demande si on ne devrait pas ajouter `as const` à ce tableau : sans lui, `(typeof barèmes)[number]` vaut `string`, donc `BarèmeLodeom` ne protège pas les comparaisons de `WarningSalaireTrans.tsx`. Un renommage comme celui-ci (ou une faute de frappe) y passerait sans erreur de `tsc`, alors que le message d'avertissement disparaîtrait silencieusement. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/exonérations/lodeom.publicodes",
+          "start_line": 210,
+          "end_line": 456
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

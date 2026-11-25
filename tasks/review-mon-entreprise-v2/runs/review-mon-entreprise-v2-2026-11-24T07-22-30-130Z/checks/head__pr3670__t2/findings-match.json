@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/domaine/Montant.ts",
+      "start_line": 109,
+      "end_line": 175,
+      "message": "Seule `toEurosParMois` est utilisée (dans `calcul.ts`) : `toEurosParAn`, `toEurosParJour` et `toEurosParHeure` sont du code mort, et aucune des quatre n’a de test dans `Montant.test.ts`. Je les retirerais jusqu’au besoin.\n\nAu passage, les conversions jour/heure multiplient par 24 et 365 (un « jour » = 24 h, une « heure » à 24 × 365 / 12 par mois) : je me demande si c’est une règle voulue, car un tarif horaire ou journalier de salariée ne correspond pas à un temps de travail de 24 h/j. Quelle est la source ?"
+    },
+    {
+      "file": "site/source/contextes/cmg/domaine/éligibilité.ts",
+      "start_line": 265,
+      "end_line": 265,
+      "message": "Question : `CMGPerçu` (appelée via `aPerçuCMG`) renvoie `inéligible('CMG-perçu')` quand aucune déclaration n’a de CMG perçu > 0, alors que `ditAvoirPerçuCMG` renvoie déjà la même raison pour la réponse déclarée. Les deux sont-elles vraiment à garder ? Si l’usager déclare avoir perçu le CMG mais saisit 0 € partout, il tombe sur la même page d’inéligibilité sans explication de l’écart, je me demande si c’est le comportement souhaité."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/cmg/components/Navigation.tsx",
+          "start_line": 6,
+          "end_line": 35
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

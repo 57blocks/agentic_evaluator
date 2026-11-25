@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/hooks/useSearchParamsSimulationSharing.ts",
+  "start_line": 169,
+  "end_line": 169,
+  "message": "Je me demande si on ne perd pas un cas avec la suppression du parsing JSON. getSearchParams (l. 137) écrit toujours JSON.stringify(value) quand serializeEvaluation ne sait pas sérialiser, et d'anciens liens partagés contiennent ce format JSON. SearchParamsAdapter.decode ne le reconnaît pas et renvoie la chaîne brute, qui part telle quelle dans la situation. Je n'ai rien exécuté pour le confirmer. Est-ce voulu ? Sinon, un test avec une valeur JSON permettrait de trancher. getSearchParams pourrait aussi passer par SearchParamsAdapter.encode, pour garder les deux sens symétriques ?"
+ },
+ {
+  "file": "site/source/SearchParamsAdapter.ts",
+  "start_line": 44,
+  "end_line": 44,
+  "message": "Les regex n'acceptent pas de signe moins. encode d'un montant négatif (par ex. euros(-100)) produit -100€, que decode ne relit pas comme un montant : il retombe en chaîne, donc decode(encode(x)) perd le type. Je ne sais pas si des règles peuvent avoir une valeur négative dans les simulateurs partagés par lien, qu'en penses-tu ? Si oui, un -? en tête de regex et un cas dans le test suffiraient peut-être."
+ },
+ {
+  "file": "site/source/SearchParamsAdapter.ts",
+  "start_line": 73,
+  "end_line": 73,
+  "message": "nit: unit.includes('/') rend valide n'importe quelle unité composée (abc/def) en Quantité, alors que la liste explicite ne couvre que les unités simples. Je me demande si ce n'est pas trop permissif : une chaîne comme 2x/y devient une quantité. Une liste d'unités connues, partagée avec le domaine Quantité, lèverait le doute."
+ },
+ {
+  "message": "Synthèse : la PR fait 472 fichiers et environ 12 000 lignes et mélange plusieurs sujets (frontières de modules, MDX, correctifs par simulateur, adaptateur de search params). Je n'ai relu en détail que le dernier commit (SearchParamsAdapter, voir les commentaires inline), pas le reste. Des PR plus petites, ou au moins des commits regroupés par sujet, seraient plus faciles à relire. Je n'ai exécuté ni build ni test."
+ }
+]

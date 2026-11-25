@@ -1,0 +1,18 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Le titre et l'issue parlent des définitions des rubriques retraite, mais la PR embarque aussi le renommage Pôle emploi → France Travail (règles, textes SEO, page intégration), la refonte des logos de `References.tsx` et le passage de leur `alt` à `\"\"`. Je me demande si ces sujets ne gagneraient pas à avoir leur propre PR : ils se relisent et se reviennent (ou se revert) indépendamment, et ici ils noient les ~540 lignes de `protection-sociale.publicodes`. Sinon, une mention dans la description suffirait à les rendre visibles."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

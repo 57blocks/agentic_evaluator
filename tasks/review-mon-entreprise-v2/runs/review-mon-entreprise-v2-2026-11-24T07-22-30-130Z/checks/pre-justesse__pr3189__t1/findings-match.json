@@ -1,0 +1,46 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+      "start_line": 176,
+      "end_line": 176,
+      "message": "Question : que devient le taux au-delà de 110 % du PASS ? La dernière tranche a un plafond explicite, et les snapshots à 300 000 € / 400 000 € de CA bougent beaucoup (médecin : +4 000 € puis +10 000 € de cotisations). Est-ce bien le comportement voulu pour les hauts revenus, avec 9,75 % qui continue de s'appliquer ? Si oui, omettre le plafond de la dernière tranche le rendrait explicite.\n\nPar ailleurs, je ne vois pas de référence (texte ou fiche Urssaf) pour ces seuils de 40 % et 110 % ni pour le 9,75 %, alors que la règle voisine en a une : peux-tu l'ajouter dans `références` ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+          "start_line": 166,
+          "end_line": 177
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ]
+}

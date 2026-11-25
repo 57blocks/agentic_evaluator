@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/components/Simulation/SimulationGoal.tsx",
+  "start_line": 85,
+  "end_line": 85,
+  "message": "Je me demande si `RuleInputWrapper` défini via `useCallback` et rendu comme composant (`<ChampSaisie />`) ne pose pas un souci : dès qu'une dépendance change (`handleChange`, `evaluation.missingVariables`, `currentUnit`…), React voit un nouveau type de composant, démonte et remonte l'input. Ça peut faire perdre le focus et la position du curseur pendant la saisie, puisque chaque frappe met à jour la situation et donc l'évaluation. Je n'ai pas pu le vérifier à l'exécution. Qu'en penses-tu ? Garder une render prop qui reçoit `{ id, aria }` éviterait ce risque, tout en changeant le nom accessible comme voulu."
+ },
+ {
+  "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Deux points qui m'inquiètent ici : 1) sans `role=\"group\"`, un `div` n'a pas de rôle qui accepte un nom accessible, donc `aria-labelledby` risque d'être ignoré par les lecteurs d'écran (je n'ai pas testé) ; la PR dit pourtant que ce `role` est pertinent pour les radios, et c'est le même cas pour les cases à cocher. 2) l'id en dur `questionHeader` en repli (avec un FIXME) couple ce composant du design-system à une page particulière. Ne vaudrait-il pas mieux garder le `role=\"group\"` et ne poser `aria-labelledby` que lorsqu'il est fourni ?"
+ },
+ {
+  "file": "site/source/components/conversation/OuiNonInput.tsx",
+  "start_line": 47,
+  "end_line": 47,
+  "message": "nit: `aria-label=\"\"` ne sert que de contournement pour les warnings de React Aria, et il est répété dans `CardChoiceGroup`, `ToggleChoiceGroup`… Un attribut vide n'apporte pas de nom, et sans `aria-labelledby` (usages hors `<Questions />`) le composant n'a plus aucun nom accessible. Ça mériterait un commentaire expliquant ce choix, ou de rendre `aria.labelledby` obligatoire pour que le type garantisse un nom."
+ },
+ {
+  "message": "Je n'ai pas vérifié le rendu dans les devtools ni avec un lecteur d'écran. Côté historique, le dernier commit mêle le correctif d'accessibilité et un refactor (render prop → composant, `Option` → `O`) : un commit séparé se relirait plus facilement."
+ }
+]

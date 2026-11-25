@@ -1,0 +1,69 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/Simulation/SimulationGoal.tsx",
+      "start_line": 85,
+      "end_line": 85,
+      "message": "Je me demande si ce composant défini via `useCallback` ne va pas poser problème : dès qu'une dépendance change (`evaluation.missingVariables` est recalculé à chaque évaluation, donc probablement à chaque frappe), React voit un nouveau type de composant, démonte puis remonte `RuleInput`, et le champ risque de perdre le focus pendant la saisie. Avant, `rendreChampSaisie` retournait un élément, donc pas de remontage. Qu'en penses-tu de garder une fonction de rendu qui reçoit `{ id, aria }` et retourne l'élément, ou de sortir le composant du rendu ?"
+    },
+    {
+      "file": "site/source/components/conversation/OuiNonInput.tsx",
+      "start_line": 47,
+      "end_line": 47,
+      "message": "Je me demande pourquoi `aria-label=\"\"` : c'est sans doute pour faire taire React Aria, mais un label vide est un attribut sans effet utile pour les lecteurs d'écran, et il va à l'encontre de l'objectif de simplifier le nom accessible. Est-ce que le choix mériterait au moins un commentaire, ou une autre façon de contenter React Aria ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+          "start_line": 16,
+          "end_line": 102
+        },
+        {
+          "file": "site/source/components/Simulation/SimulationGoal.tsx",
+          "start_line": 160,
+          "end_line": 161
+        },
+        {
+          "file": "site/source/pages/simulateurs/location-de-meublé/objectifs/ObjectifRecettes.tsx",
+          "start_line": 18,
+          "end_line": 32
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm",
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": []
+}

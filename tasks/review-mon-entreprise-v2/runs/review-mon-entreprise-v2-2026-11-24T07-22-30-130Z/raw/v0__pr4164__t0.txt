@@ -1,0 +1,87 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/Simulation/SimulationGoal.tsx",
+  "start_line": 85,
+  "end_line": 85,
+  "message": "Je me demande si `RuleInputWrapper` ne pose pas un souci de remontage. Il est passé à `ObjectifSaisissableDeSimulation` comme **type de composant** (`<ChampSaisie />`), et son identité change dès qu'une dépendance du `useCallback` change (`handleChange`, `evaluation.missingVariables`, `currentUnit`…). React démonte alors l'input pour en remonter un nouveau, avec un risque de perte du focus pendant la saisie à chaque recalcul. Je n'ai pas pu l'exécuter pour le confirmer, mais ça mériterait un test manuel au clavier. Une piste : garder une render prop (`rendreChampSaisie({ id, aria })`) plutôt qu'un composant dynamique. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Deux points : (1) je ne trouve aucun élément avec l'id `questionHeader` dans `site/source`, donc cette référence semble pendante et ne donne pas de nom accessible. (2) sans `role` (le `role=\"group\"` a été retiré), un `div` avec `aria-labelledby` n'est pas exposé de façon fiable par les technologies d'assistance. Je verrais plutôt garder `role=\"group\"` et ne poser `aria-labelledby` que s'il est fourni, sans valeur en dur."
+ },
+ {
+  "file": "site/source/components/conversation/OuiNonInput.tsx",
+  "start_line": 47,
+  "end_line": 47,
+  "message": "nit: `aria-label=\"\"` ressemble à un contournement du warning React Aria. Un `aria-label` vide n'est pas un nom accessible, et quand `aria.labelledby` n'est pas fourni (le type le rend optionnel) le groupe n'aura plus aucun nom, alors qu'avant il avait « Oui ou non ». Peut-être rendre `labelledby` obligatoire ici ? Si la clé `conversation.yes-no.aria-label` n'est plus utilisée, les fichiers de traduction sont-ils régénérés ?"
+ },
+ {
+  "file": "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+  "start_line": 1,
+  "end_line": 1,
+  "message": "nit: le passage de `import { Option } from 'effect'` à `import * as O from 'effect/Option'` ne suit pas l'usage du reste du dépôt, et ce refactoring (render prop → composant, `onChange` typé `Option<Montant>`) est mêlé au commit `fix(a11y)` : je le sortirais dans son propre commit pour garder un changement logique par commit."
+ },
+ {
+  "message": "Synthèse : l'intention (un seul mécanisme de nom accessible) me paraît bonne. Mes réserves portent sur le remontage possible de l'input dans `SimulationGoal` et sur la référence `questionHeader` dans `ChoixMultiple` (détails inline). Je n'ai pas pu vérifier le rendu réel ni les warnings React Aria ; une vérification au lecteur d'écran du simulateur salarié serait utile. Les warnings console massifs sont un compromis assumé dans la description, mais ils risquent de masquer de vrais problèmes : une issue de suivi serait peut-être utile."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4164,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/Simulation/SimulationGoal.tsx",
+   "line": 85,
+   "start_line": null,
+   "body": "Je me demande si `RuleInputWrapper` ne pose pas un souci de remontage. Il est passé à `ObjectifSaisissableDeSimulation` comme **type de composant** (`<ChampSaisie />`), et son identité change dès qu'une dépendance du `useCallback` change (`handleChange`, `evaluation.missingVariables`, `currentUnit`…). React démonte alors l'input pour en remonter un nouveau, avec un risque de perte du focus pendant la saisie à chaque recalcul. Je n'ai pas pu l'exécuter pour le confirmer, mais ça mériterait un test manuel au clavier. Une piste : garder une render prop (`rendreChampSaisie({ id, aria })`) plutôt qu'un composant dynamique. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+   "line": 40,
+   "start_line": null,
+   "body": "Deux points : (1) je ne trouve aucun élément avec l'id `questionHeader` dans `site/source`, donc cette référence semble pendante et ne donne pas de nom accessible. (2) sans `role` (le `role=\"group\"` a été retiré), un `div` avec `aria-labelledby` n'est pas exposé de façon fiable par les technologies d'assistance. Je verrais plutôt garder `role=\"group\"` et ne poser `aria-labelledby` que s'il est fourni, sans valeur en dur.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/OuiNonInput.tsx",
+   "line": 47,
+   "start_line": null,
+   "body": "nit: `aria-label=\"\"` ressemble à un contournement du warning React Aria. Un `aria-label` vide n'est pas un nom accessible, et quand `aria.labelledby` n'est pas fourni (le type le rend optionnel) le groupe n'aura plus aucun nom, alors qu'avant il avait « Oui ou non ». Peut-être rendre `labelledby` obligatoire ici ? Si la clé `conversation.yes-no.aria-label` n'est plus utilisée, les fichiers de traduction sont-ils régénérés ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+   "line": 1,
+   "start_line": null,
+   "body": "nit: le passage de `import { Option } from 'effect'` à `import * as O from 'effect/Option'` ne suit pas l'usage du reste du dépôt, et ce refactoring (render prop → composant, `onChange` typé `Option<Montant>`) est mêlé au commit `fix(a11y)` : je le sortirais dans son propre commit pour garder un changement logique par commit.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse : l'intention (un seul mécanisme de nom accessible) me paraît bonne. Mes réserves portent sur le remontage possible de l'input dans `SimulationGoal` et sur la référence `questionHeader` dans `ChoixMultiple` (détails inline). Je n'ai pas pu vérifier le rendu réel ni les warnings React Aria ; une vérification au lecteur d'écran du simulateur salarié serait utile. Les warnings console massifs sont un compromis assumé dans la description, mais ils risquent de masquer de vrais problèmes : une issue de suivi serait peut-être utile."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1692268,
+  "final_text": "J'ai posté sur la PR #4164 quatre commentaires inline et une synthèse. Je n'ai ni exécuté le code ni vérifié le rendu réel.\n\n- **`SimulationGoal.tsx`** : `RuleInputWrapper` est passé comme type de composant, et son identité change dès qu'une dépendance du `useCallback` change. L'input risque donc d'être remonté pendant la saisie, avec perte du focus. J'ai proposé de revenir à une render prop. C'est une hypothèse que je n'ai pas pu confirmer.\n- **`ChoixMultiple.tsx`** : l'id `questionHeader` n'existe nulle part dans `site/source`, donc la référence `aria-labelledby` est pendante. Le `role=\"group\"` retiré rend de plus le `div` peu fiable pour les technologies d'assistance.\n- **`OuiNonInput.tsx`** : le `aria-label=\"\"` ressemble à un contournement du warning React Aria. Si `labelledby` n'est pas fourni, le groupe n'a plus de nom. J'ai demandé si les traductions étaient bien régénérées.\n- **`ObjectifSaisissableDeSimulation.tsx`** : l'import `effect/Option` s'écarte de l'usage du dépôt, et le refactoring est mêlé au commit `fix(a11y)`.\n- **Synthèse** : elle recommande une vérification au lecteur d'écran du simulateur salarié et une issue de suivi pour les warnings React Aria."
+ }
+}
+
+```

@@ -1,0 +1,23 @@
+{
+ "pr": 3280,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 378,
+   "start_line": null,
+   "body": "Je vois que la règle `protection sociale . maladie . maternité paternité adoption . délai d'attente` dit encore 10 mois (description l.628 et l.631, valeur l.632 de `modele-social/règles/protection-sociale.publicodes`). Est-ce voulu de ne pas l'aligner sur les 6 mois ici ? Sinon, les deux sources afficheront des durées différentes.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.12269490000000002,
+  "final_text": "J'ai relu la PR et posté une seule remarque, en commentaire inline sur `Détails.tsx` (ligne 378).\n\nLe texte du comparateur passe à 6 mois, mais la règle Publicodes `délai d'attente` est restée à 10 mois dans `modele-social/règles/protection-sociale.publicodes`. C'est vrai pour sa description (lignes 628 et 631) comme pour sa valeur (ligne 632). Les deux sources afficheront donc des durées différentes. Je l'ai formulé en question, au cas où l'écart serait voulu.\n\nLes vérifications de la PR sont au vert. Je n'ai exécuté ni build ni tests."
+ }
+}

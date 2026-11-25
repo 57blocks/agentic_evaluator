@@ -1,0 +1,31 @@
+{
+ "pr": 4159,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/aides-employeur.publicodes",
+   "line": 56,
+   "start_line": 56,
+   "body": "Je me demande si on ne pourrait pas ajouter un test qui verrouille le bug de #4157 : les tests de régression modifiés ne font que renommer la clé (`éligible` → `emploi franc`) et ne couvrent pas le scénario de départ (répondre « non » à la question). Un test sur le parcours (la question n'est plus reposée / la situation reste valide avec `emploi franc: non`) ou une entrée de régression avec `non` aiderait à voir qu'il échoue avant et passe après. Qu'en penses-tu ?\n\nPar ailleurs, je n'ai pas pu vérifier à la lecture seule que `emploi franc . montant` redevient bien non applicable quand le parent vaut `non` (et que `le maximum de` l'ignore) : le test ci-dessus le couvrirait aussi.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/aides-employeur.publicodes",
+   "line": 57,
+   "start_line": null,
+   "body": "Je me demande si on ne pourrait pas ajouter un test qui verrouille le bug de #4157 : les régressions modifiées ne font que renommer la clé (`éligible` → `emploi franc`) sans couvrir le scénario de départ (répondre « non »). Une entrée avec `emploi franc: non`, ou un test du parcours, montrerait qu'il échoue avant et passe après. Qu'en penses-tu ?\n\nJe n'ai pas pu vérifier à la seule lecture que `emploi franc . montant` devient bien non applicable quand le parent vaut `non` (et que `le maximum de` l'ignore) : ce test le couvrirait aussi.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.12936789999999998,
+  "final_text": "J'ai posté un seul commentaire inline sur la PR #4159, sur `aides-employeur.publicodes` (ligne 57). Il suggère d'ajouter un test qui reproduit le scénario de #4157, c'est-à-dire répondre « non » à la question sur l'emploi franc. Les régressions modifiées ne font que renommer la clé `éligible` en `emploi franc` et ne couvrent pas ce cas.\n\nDans le même commentaire, je précise que je n'ai pas pu vérifier à la lecture que `emploi franc . montant` redevient non applicable quand le parent vaut `non`, ni que `le maximum de` l'ignore. Je n'ai exécuté ni build ni test, comme les consignes le prévoient.\n\nJe n'ai pas posté de synthèse : le reste du diff m'a paru cohérent (règle renommée, config du simulateur, snapshot de l'API et traductions mis à jour) et la PR n'a qu'un commit."
+ }
+}

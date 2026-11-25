@@ -1,0 +1,21 @@
+{
+ "pr": 4324,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger"
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4268: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 4,
+  "cost_usd": 0.11486589999999999,
+  "final_text": "J'ai relu la PR #4324 et je n'ai trouvé aucune remarque qui vaille un commentaire inline. J'ai posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger ».\n\nLes vérifications de la PR sont au vert (`gh pr checks`). Je n'ai pas exécuté le code.\n\nJe n'ai pas pu lire l'issue #4268 que la PR dit fermer : l'API renvoie « Not Found ». Je n'ai donc pas vérifié si la PR traite tout ce qu'elle demandait.\n\nJe n'ai pas commenté le `TODO` ajouté dans `Condition.tsx`. Il renvoie à l'issue #4323 et ne dépend pas d'un commit suivant, donc il ne contredit pas la règle de `CONTRIBUTING.md`."
+ }
+}

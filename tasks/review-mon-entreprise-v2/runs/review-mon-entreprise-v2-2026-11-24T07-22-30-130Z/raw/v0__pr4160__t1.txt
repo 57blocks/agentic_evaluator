@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "modele-ti/règles/indépendant/revenus/dividendes.publicodes",
+  "start_line": 4,
+  "end_line": 4,
+  "message": "Je me demande si, avec cette séparation, l'usager garde un moyen de savoir où passe la frontière des 10 %. Avant, le plafond était calculé à partir du capital social (ou du bénéfice net de l'exercice précédent pour l'EI) et le partage entre les deux parts était automatique. Maintenant l'usager doit faire ce partage lui-même avant de saisir les deux montants. Si l'aide sur le plafond n'apparaît plus dans l'interface, il y a un risque de mettre des dividendes dans la mauvaise case, avec un impact direct sur les cotisations affichées. Les `description` des deux règles couvrent peut-être ce besoin, mais je n'ai pas pu vérifier le rendu. Était-ce voulu, et un texte d'aide près des deux champs est-il prévu ?"
+ },
+ {
+  "message": "Quelques remarques d'ensemble. Je n'ai relu en détail que le dernier commit (`6239666`), car le reste est trop volumineux pour une relecture sérieuse : la PR compte environ 576 fichiers et plus de 250 commits.\n\n- **Taille de la PR** : elle mêle réforme de cotisations, nouveaux paquets `modele-as` et `modele-ti`, refactoring de store, questions et documentation. Je me demande si un découpage en PR successives (paquets et moteur, puis réforme TI, puis UI) serait possible. Les relectures humaine et automatisée en seraient plus fiables.\n- **Historique** : plusieurs commits correctifs (`fix: erreurs de rebase`, `lint: fix`) laissent supposer des états intermédiaires non verts. Un fixup puis un squash avant fusion rendrait chaque commit autonome. Qu'en penses-tu ?\n- **Vérifications** : le workflow passe selon `gh pr checks`. Je n'ai pas pu vérifier le rendu visuel ni les parcours manuels, en particulier la saisie des deux champs dividendes."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4160,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/revenus/dividendes.publicodes",
+   "line": 4,
+   "start_line": null,
+   "body": "Je me demande si, avec cette séparation, l'usager garde un moyen de savoir où passe la frontière des 10 %. Avant, le plafond était calculé à partir du capital social (ou du bénéfice net de l'exercice précédent pour l'EI) et le partage entre les deux parts était automatique. Maintenant l'usager doit faire ce partage lui-même avant de saisir les deux montants. Si l'aide sur le plafond n'apparaît plus dans l'interface, il y a un risque de mettre des dividendes dans la mauvaise case, avec un impact direct sur les cotisations affichées. Les `description` des deux règles couvrent peut-être ce besoin, mais je n'ai pas pu vérifier le rendu. Était-ce voulu, et un texte d'aide près des deux champs est-il prévu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Quelques remarques d'ensemble. Je n'ai relu en détail que le dernier commit (`6239666`), car le reste est trop volumineux pour une relecture sérieuse : la PR compte environ 576 fichiers et plus de 250 commits.\n\n- **Taille de la PR** : elle mêle réforme de cotisations, nouveaux paquets `modele-as` et `modele-ti`, refactoring de store, questions et documentation. Je me demande si un découpage en PR successives (paquets et moteur, puis réforme TI, puis UI) serait possible. Les relectures humaine et automatisée en seraient plus fiables.\n- **Historique** : plusieurs commits correctifs (`fix: erreurs de rebase`, `lint: fix`) laissent supposer des états intermédiaires non verts. Un fixup puis un squash avant fusion rendrait chaque commit autonome. Qu'en penses-tu ?\n- **Vérifications** : le workflow passe selon `gh pr checks`. Je n'ai pas pu vérifier le rendu visuel ni les parcours manuels, en particulier la saisie des deux champs dividendes."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.15741019999999997,
+  "final_text": "J'ai posté mes commentaires de revue sur la PR 4160. Le diff est trop gros pour une relecture complète (environ 576 fichiers, plus de 250 commits), donc je n'ai relu en détail que le dernier commit.\n\n- **Commentaire inline** sur `modele-ti/règles/indépendant/revenus/dividendes.publicodes` : depuis la séparation du champ dividendes en deux, l'usager doit lui-même partager ses dividendes autour du seuil de 10 %. Je me demande s'il garde une aide pour le faire. Un montant dans la mauvaise case changerait les cotisations affichées.\n- **Synthèse** sur la PR :\n  - Le découpage en PR plus petites faciliterait la relecture.\n  - Les commits correctifs (`fix: erreurs de rebase`, `lint: fix`) suggèrent des états intermédiaires non verts. Un squash avant fusion les rendrait autonomes.\n  - Le workflow « Vérification PR » passe, mais je n'ai pas pu vérifier le rendu ni les parcours manuels.\n\nMon commentaire inline pose aussi la question du `par défaut: 0 €/an` sur chaque part, mais le texte posté n'en parle pas (je l'ai raccourci en le postant)."
+ }
+}
+
+```

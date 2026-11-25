@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/vite.config.ts",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Je me demande si le remplacement de `next` par `main` ici est voulu : il change un comportement sans rapport avec l'adaptateur. Une build de la branche `next` passerait de production à staging (Sentry, bandeau de branche, domaine Plausible), et une branche `main` deviendrait production. Si c'est intentionnel, un commit séparé qui l'explique serait plus lisible ; sinon, je reviendrais à `['master', 'next']`."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "Je me demande si le remplacement de `next` par `main` ici est voulu : il change un comportement sans rapport avec l'adaptateur. Une build de la branche `next` passerait de production à staging (Sentry, bandeau de branche, domaine Plausible), et une branche `main` deviendrait production. Si c'est intentionnel, un commit séparé qui l'explique serait plus lisible ; sinon, je reviendrais à `['master', 'next']`.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1190165,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `site/vite.config.ts:208`. `['master', 'next']` y devient `['master', 'main']`, ce qui change silencieusement quelles branches comptent comme production. Je l'ai posé en question, en demandant si c'est voulu. Le reste de la PR ne m'a pas paru mériter de remarque, et la vérification de la PR est au vert."
+ }
+}
+
+```

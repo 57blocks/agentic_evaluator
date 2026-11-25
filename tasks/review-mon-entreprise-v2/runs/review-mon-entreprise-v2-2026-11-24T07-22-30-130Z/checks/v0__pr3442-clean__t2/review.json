@@ -1,0 +1,43 @@
+{
+ "pr": 3442,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 208,
+   "start_line": null,
+   "body": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée l.200 et autres activités non salariées l.208) portent le même code `DSAR`. Je n'ai pas pu vérifier le formulaire officiel, mais si ce sont deux cases distinctes, je me demande si l'une des deux n'a pas un autre code. Peux-tu confirmer la source ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 145,
+   "start_line": null,
+   "body": "nit: les clés `t('Bénéfice', 'Bénéfice')` et `t('Déficit', 'Déficit')` ne suivent pas la convention de clés hiérarchiques utilisée ailleurs dans ce fichier (`pages.assistants.declaration-revenus-pamc.resultats.label.N`). Je verrais bien des clés dédiées, d'autant qu'elles sont répétées 4 fois (l.145, 152, 166, 173).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/design-system/field/Radio/Radio.tsx",
+   "line": 159,
+   "start_line": null,
+   "body": "Cette modification touche `SpanBody`, utilisé par tous les Radio du design-system, pas seulement par l'assistant PAM. As-tu vérifié visuellement les autres usages ? Je n'ai pas pu le faire de mon côté. Un `inline-flex` peut modifier le retour à la ligne des labels longs.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse : la PR est grosse (règles Publicodes, UI, i18n, Radio du design-system), mais les commits sont découpés par logique et la CI passe. Je n'ai pas vérifié les règles métier (codes de cases de la déclaration) ni le rendu visuel. Le point le plus important à confirmer me semble être le code `DSAR` dupliqué (voir inline)."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.17427259999999997,
+  "final_text": "J'ai posté sur la PR #3442 trois commentaires inline et une synthèse. Je n'ai ni lancé le code ni vérifié les règles métier ou le rendu visuel.\n\n- **Code `DSAR` en double** (`Résultats.tsx:208`) : les lignes « Dont cotisations facultatives » pour l'activité conventionnée et pour les autres activités non salariées portent le même code. Je demande de confirmer la source, car je n'ai pas pu consulter le formulaire officiel. C'est le point le plus important.\n- **Clés de traduction** (`Résultats.tsx:145`) : `t('Bénéfice', 'Bénéfice')` et `t('Déficit', 'Déficit')`, répétés quatre fois, ne suivent pas la convention de clés hiérarchiques du fichier. Je l'ai marqué comme nit.\n- **Radio** (`Radio.tsx:159`) : le `display: inline-flex` ajouté à `SpanBody` touche tous les Radio du design-system, pas seulement l'assistant PAM. Je demande si les autres usages ont été vérifiés visuellement.\n\nLa synthèse rappelle que les commits sont bien découpés, que la CI passe, et ce que je n'ai pas pu vérifier."
+ }
+}

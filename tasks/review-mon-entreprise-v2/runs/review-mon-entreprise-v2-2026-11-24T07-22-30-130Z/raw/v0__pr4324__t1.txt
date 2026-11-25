@@ -1,0 +1,22 @@
+```file:findings.json
+[]
+
+```
+
+```file:review.json
+{
+ "pr": 4324,
+ "findings": [],
+ "gh": {
+  "calls": 2,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.24259839999999996,
+  "final_text": "Je n'ai posté aucun commentaire sur la PR #4324. Mes commandes de publication ont été bloquées trois fois de suite. Voici ce que j'aurais publié, à poster à la main ou à me laisser réessayer une fois la commande approuvée.\n\n**Inline sur `Détails.tsx`, ligne 329 (somme des points)**\nJe me demande si additionner les points AGIRC-ARRCO, RCI et Cipav a du sens pour comparer les statuts. Ces régimes ont des valeurs de service du point différentes, donc « 120 points » chez un indépendant et chez un assimilé salarié n'ouvrent pas les mêmes droits. Un usager risque de lire la somme comme un équivalent de pension. Qu'en penses-tu ? Un libellé qui le précise, ou une ligne par régime, pourrait aider. Je n'ai pas vérifié ce que donne la somme quand certaines règles sont non applicables dans un moteur donné.\n\n**Inline sur `Détails.tsx`, ligne 288 (`<Condition>` sans `engine`)**\n`DetailsRowCards` contourne `<Condition>` à cause de #4323. Ici, `<Condition>` est utilisé sans `engine`, donc avec le moteur par défaut de `useEngine()`. Je me demande si `entreprise . activité . nature . libérale . réglementée` est évaluée sur le bon moteur, et si #4323 joue aussi ici. Quelle est la logique voulue : masquer le revenu cotisé si l'un des statuts est une profession libérale réglementée ?\n\n**Inline sur `Condition.tsx`, ligne 27**\nnit: je préférerais ne pas commiter un TODO (CONTRIBUTING l'écarte), le renvoi à #4323 étant déjà dans l'issue. Si le correctif est simple (`undefined`), il pourrait aller dans cette PR ou dans une PR dédiée. Cela supprimerait aussi le contournement dans `DetailsRowCards`.\n\n**Synthèse de la PR**\n- **Historique :** 16 commits, dont plusieurs vont et viennent (lien Cnav ajouté puis supprimé, objectifs retirés en plusieurs fois). Un squash en quelques commits logiques faciliterait la lecture. Plusieurs `fix:` et `feat:` n'ont pas de scope fonctionnel, et `doc(retraite)` se termine par un point.\n- **`DroitsRetraite.tsx` :** les apostrophes typographiques `’` sont deven"
+ }
+}
+
+```

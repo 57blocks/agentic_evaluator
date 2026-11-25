@@ -1,0 +1,23 @@
+{
+ "pr": 3459,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+   "line": 18,
+   "start_line": null,
+   "body": "`cotisations.ts` importe `régime-général.ts` et celui-ci importe `DEFAULTS` depuis `cotisations.ts` : on a un cycle d’imports. Il ne casse rien aujourd’hui parce que `DEFAULTS` n’est lu qu’à l’appel, mais l’ordre d’évaluation des modules devient fragile. Je verrais bien déplacer `DEFAULTS` dans `constantes.ts` (ou dans `situation.ts`), dont tous les régimes dépendent déjà. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 15,
+  "cost_usd": 0.2795309,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline. Il porte sur un import circulaire entre `cotisations.ts` et `régime-général.ts` : `régime-général.ts` importe `DEFAULTS` depuis `cotisations.ts`, qui importe lui-même `régime-général.ts`.\n\nJe n'ai pas relu les 472 fichiers de cette PR. J'ai lu en entier le domaine `location-de-meublé` (cotisations des trois régimes, revenu net, situation), le hook `useEconomieCollaborative` et `SearchParamsAdapter.ts`. Sur ces fichiers, je n'ai rien trouvé d'autre qui vaille un commentaire.\n\nJ'ai comparé les calculs du régime général aux règles Publicodes supprimées. Les taux, l'abattement, le plafond et l'assiette de première année sont identiques. Un cas change de comportement : sous le seuil de professionnalisation, l'ancienne règle donnait 0 €, alors que le nouveau code renvoie une erreur `RecettesInférieuresAuSeuilRequisPourCeRégime`. Cela me paraît voulu et des tests le couvrent, donc je ne l'ai pas signalé.\n\nLes vérifications de la PR (`gh pr checks`) sont au vert."
+ }
+}

@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 166,
+  "end_line": 176,
+  "message": "Deux points que je n'arrive pas à lever :\n\n1. Source : la règle n'a pas de références pour ces taux et seuils (3,25 % jusqu'à 40 % du PASS, 9,75 % jusqu'à 110 %). Je n'ai pas pu les vérifier ; pourrais-tu ajouter le lien Urssaf ou l'article, comme pour les règles voisines ?\n\n2. Base du taux : taux progressif calcule un taux moyen sur assiette des cotisations, mais il est appliqué à (assiette des cotisations - assiette participation CPAM). Je me demande si c'est voulu, ou si les tranches doivent porter sur la part non couverte par la CPAM. Je ne sais pas non plus ce que renvoie taux progressif au-delà de 110 % du PASS quand la dernière tranche a un plafond (même motif dans indépendant.publicodes vers la ligne 488, mais suivi d'un autre régime à 5 PASS) : je n'ai pas pu le vérifier.\n\nUn test ciblé (assiette sous 40 %, entre 40 % et 110 %, au-dessus de 110 % du PASS, avec et sans participation CPAM) rendrait le comportement lisible en plus des snapshots. Qu'en penses-tu ?"
+ },
+ {
+  "message": "Les snapshots changent aussi sur retraite . base (médecin 2 : 229 → 228). C'est plausible si la baisse du revenu net joue sur les points, mais je n'ai pas pu le vérifier. Je n'ai pas vu non plus de test qui échoue avant le correctif hors snapshots. Le commit unique et son message sont corrects."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3189,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "line": 176,
+   "start_line": 166,
+   "body": "Deux points que je n'arrive pas à lever :\n\n1. Source : la règle n'a pas de références pour ces taux et seuils (3,25 % jusqu'à 40 % du PASS, 9,75 % jusqu'à 110 %). Je n'ai pas pu les vérifier ; pourrais-tu ajouter le lien Urssaf ou l'article, comme pour les règles voisines ?\n\n2. Base du taux : taux progressif calcule un taux moyen sur assiette des cotisations, mais il est appliqué à (assiette des cotisations - assiette participation CPAM). Je me demande si c'est voulu, ou si les tranches doivent porter sur la part non couverte par la CPAM. Je ne sais pas non plus ce que renvoie taux progressif au-delà de 110 % du PASS quand la dernière tranche a un plafond (même motif dans indépendant.publicodes vers la ligne 488, mais suivi d'un autre régime à 5 PASS) : je n'ai pas pu le vérifier.\n\nUn test ciblé (assiette sous 40 %, entre 40 % et 110 %, au-dessus de 110 % du PASS, avec et sans participation CPAM) rendrait le comportement lisible en plus des snapshots. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Les snapshots changent aussi sur retraite . base (médecin 2 : 229 → 228). C'est plausible si la baisse du revenu net joue sur les points, mais je n'ai pas pu le vérifier. Je n'ai pas vu non plus de test qui échoue avant le correctif hors snapshots. Le commit unique et son message sont corrects."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 14,
+  "cost_usd": 0.19746870000000002,
+  "final_text": "J'ai relu la PR #3189 et posté deux commentaires sur GitHub : un inline sur `PAMC.publicodes` (lignes 166-176) et une synthèse. Je n'ai rien exécuté (ni build, ni tests, ni `gh pr checks`).\n\n**Commentaire inline**\n- **Source :** les taux 3,25 % et 9,75 % et les seuils 40 % et 110 % du PASS n'ont pas de `références` dans la règle. Je n'ai pas pu les vérifier et je demande le lien Urssaf ou l'article.\n- **Base du taux :** `taux progressif` calcule un taux moyen sur `assiette des cotisations`, mais ce taux est appliqué à `assiette des cotisations - assiette participation CPAM`. Je demande si c'est voulu.\n- **Au-delà de 110 % du PASS :** je n'ai pas pu vérifier ce que renvoie `taux progressif` quand la dernière tranche a un `plafond`.\n- **Test :** je suggère un test ciblé en plus des snapshots.\n\n**Synthèse**\n- **Snapshot retraite :** `retraite . base` passe de 229 à 228 (médecin 2). C'est plausible, mais je n'ai pas pu le vérifier.\n- **Test avant correctif :** je n'ai pas vu de test, hors snapshots, qui échoue avant le correctif.\n- **Commit :** le commit unique et son message sont conformes."
+ }
+}
+
+```

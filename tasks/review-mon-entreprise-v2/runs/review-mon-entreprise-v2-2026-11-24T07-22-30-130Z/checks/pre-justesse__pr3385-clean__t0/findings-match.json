@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/components/conversation/AnswerList.tsx",
+      "start_line": 321,
+      "end_line": 321,
+      "message": "Cette ligne commentée semble un reste de test : elle change le comportement (les suggestions s’affichent désormais dans la liste des réponses) et ne devrait pas être commitée en commentaire. Est-ce voulu ? Si oui, je retirerais simplement la prop ; sinon, je la restaurerais."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

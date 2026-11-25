@@ -1,0 +1,43 @@
+{
+ "pr": 2692,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "api/source/index.ts",
+   "line": 50,
+   "start_line": null,
+   "body": "Avec ce nouvel ordre, une réponse servie depuis le cache ne passe plus par `plausibleMiddleware` : les appels en cache disparaissent des statistiques d'usage de l'API. C'est voulu ? Sinon, remettre `plausibleMiddleware` avant le cache.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 29,
+   "start_line": null,
+   "body": "Avec `enableOfflineQueue: false`, si Redis est indisponible `redis.get` rejette immédiatement, et comme rien ne l'attrape, `/evaluate` répond une erreur alors que le calcul serait possible sans cache. Je verrais bien un repli sur `next()` (et le même traitement pour le `set`) pour que le cache reste une optimisation et pas une dépendance. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 41,
+   "start_line": null,
+   "body": "Le champ `responseCachedAt` n'est présent que dans les réponses servies depuis le cache (la première réponse, non cachée, ne l'a pas), et la clé ne dépend que du body. Deux questions : ce champ est-il documenté dans `openapi.json` ? Et après un déploiement qui change les règles, Redis garde jusqu'à 2h des résultats calculés avec l'ancienne version : ne faudrait-il pas inclure une version du modèle dans la clé ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Le commit « Update api + server packages and prettier » (~100 fichiers de reformatage/ordre d'imports, `yarn.lock`) noie les ~50 lignes du cache redis. Une PR séparée pour la mise à jour des dépendances et de prettier faciliterait la relecture."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1445211,
+  "final_text": "J'ai terminé la relecture de la PR #2692 et posté mes retours sur GitHub. Il y a trois commentaires inline et un commentaire global.\n\n- **Statistiques Plausible** (`api/source/index.ts:50`) : avec le nouvel ordre des middlewares, les réponses servies depuis le cache ne comptent plus dans les statistiques d'usage de l'API.\n- **Indisponibilité de Redis** (`api/source/redis-cache.ts:29`) : si Redis est indisponible, `redis.get` rejette sans être attrapé et `/evaluate` répond une erreur. Je propose un repli sur `next()`.\n- **Contenu du cache** (`api/source/redis-cache.ts:41`) : le champ `responseCachedAt` n'apparaît que dans les réponses mises en cache. Je demande aussi si la clé devrait inclure une version du modèle, pour ne pas servir pendant 2 h des résultats calculés avec d'anciennes règles après un déploiement.\n- **Commentaire global** : le commit de mise à jour des dépendances et de prettier (une centaine de fichiers) noie le cache Redis. Une PR séparée faciliterait la relecture.\n\nJe n'ai pas exécuté le code. Le workflow « Vérification PR » est au vert."
+ }
+}

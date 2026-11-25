@@ -1,0 +1,82 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 33,
+      "end_line": 39,
+      "message": "Je me demande si appeler `navigate(...)` directement dans le corps du composant est voulu : React déconseille les effets de bord pendant le rendu, et le composant continue de rendre après la redirection (`situation.enfantsÀCharge` est lu juste après, alors que les informations sont invalides). Je verrais bien `<Navigate to=... replace />` en early return, ou un `useEffect`. Je n’ai pas pu tester le rendu : à toi de voir si un autre pattern est déjà utilisé dans les autres pages du CMG."
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 80,
+      "end_line": 80,
+      "message": "Avec `key={index}`, la suppression d’un enfant au milieu de la liste fait réutiliser l’état local des `EnfantInput` par l’enfant suivant (focus, saisie en cours). Un identifiant stable porté par `Enfant` serait-il envisageable ? Si les champs sont entièrement contrôlés, ça peut rester tel quel : qu’en penses-tu ?"
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 55,
+      "end_line": 55,
+      "message": "nit: `enfants.length > 18` est un seuil sans nom ni source. Une constante nommée (par ex. dans `config.ts`) le rendrait lisible ; et s’il vient d’une règle métier, quelle en est la source ?"
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+      "start_line": 28,
+      "end_line": 28,
+      "message": "nit: `export default` ici (et pour `EnfantInput`, `QuestionsAeeH`, etc.), alors que CONTRIBUTING.md demande des exports nommés."
+    },
+    {
+      "message": "Synthèse (je n’ai relu en détail que `pages/Enfants.tsx` ; la PR fait 68 commits et ~5 200 lignes, je n’ai pas tout parcouru ni vérifié le rendu visuel ou l’accessibilité manuellement).\n\n- Taille : difficile à relire en une fois. Y avait-il moyen de découper (domaine `contextes/cmg` / UI de l’assistant) ? Les commits `fix(montant-field)` et `feat(date input)` touchent le design-system : une PR dédiée faciliterait la relecture.\n- Historique : plusieurs commits en corrigent d’autres de la même PR (`corrige erreur de type`, `corrige la version mobile…`) ; un fixup les rendrait chacun autonome et vert, comme CONTRIBUTING.md le demande.\n- Les checks CI sont verts."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/cmg/components/Navigation.tsx",
+          "start_line": 6,
+          "end_line": 35
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    },
+    {
+      "finding": 4,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

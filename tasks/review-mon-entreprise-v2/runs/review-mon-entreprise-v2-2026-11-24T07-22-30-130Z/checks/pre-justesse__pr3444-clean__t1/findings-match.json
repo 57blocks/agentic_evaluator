@@ -1,0 +1,18 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Deux points globaux :\n\n- Le commit `[AE] Préciser les définitions des rubriques retraite (#3444)` ne suit pas le format Conventional Commits attendu (`<type>[scope]: <description>`). Par ailleurs, la PR mélange plusieurs changements logiques : les définitions retraite, le renommage Pôle Emploi → France Travail (règles, Iframe, Cypress) et la refonte des logos de références. Je me demande si un découpage en commits (voire en PR) distincts ne faciliterait pas la relecture et un éventuel revert.\n- nit: dans `site/source/pages/integration/Iframe.tsx` (l.28), le logo importé s'appelle encore `poleEmploiLogo` / `pole-emploi.png` alors que le titre et le lien sont passés à France Travail ; le logo affiché est-il déjà à jour ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

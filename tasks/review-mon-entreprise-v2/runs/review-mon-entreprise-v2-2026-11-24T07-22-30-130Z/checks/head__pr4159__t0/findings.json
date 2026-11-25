@@ -1,0 +1,8 @@
+[
+ {
+  "message": "Je me demande si le renommage de `emploi franc . éligible` en `emploi franc` ne casse pas les consommateurs de l'API qui passent aujourd'hui `salarié . coût total employeur . aides . emploi franc . éligible: oui` dans leur situation : la règle n'existant plus, la valeur serait ignorée ou rejetée selon le cas, et l'aide ne serait plus appliquée sans erreur visible. Est-ce un usage connu, et faut-il prévoir un alias ou le mentionner dans la PR ?"
+ },
+ {
+  "message": "Le bug corrigé est un comportement de navigation (retour à la première question après « non »), mais les tests modifiés se limitent au renommage de la clé dans les situations de régression. Je verrais bien un test qui échoue avant le correctif et couvre ce parcours : qu'en penses-tu ?"
+ }
+]

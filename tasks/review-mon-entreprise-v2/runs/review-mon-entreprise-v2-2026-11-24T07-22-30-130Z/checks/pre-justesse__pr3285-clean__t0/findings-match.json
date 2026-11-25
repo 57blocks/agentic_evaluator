@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+      "start_line": 629,
+      "end_line": 629,
+      "message": "Un doute sur les références : la description de la PR associe l'article D632-1 à `LEGIARTI000036471466`, alors qu'ici ce lien est étiqueté D632-2 et D632-1 pointe vers `LEGIARTI000041966755`. Les libellés et les liens sont-ils bien appariés ? Le même jeu de références est aussi dupliqué dans la nouvelle règle d'assiette minimale."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

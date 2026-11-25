@@ -1,0 +1,82 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/utils/réductionDeCotisations.ts",
+      "start_line": 267,
+      "end_line": 267,
+      "message": "Je me demande si la clé `réductionGénérale` n'est pas un reste de l'époque où ce code ne servait qu'à la réduction générale : le type `MonthState` attend `réduction`. Avec cette clé, quand la rémunération totale est nulle, `réduction` n'est pas remise à zéro (on garde les anciennes valeurs) et une propriété inconnue est ajoutée à l'objet. Que penses-tu de `réduction: { value: 0, répartition: emptyRépartition }` ? (Le code existait avant la PR, mais comme il est maintenant partagé avec Lodeom, l'impact est plus large.)"
+    },
+    {
+      "file": "site/source/pages/simulateurs/lodeom/components/WarningSalaireTrans.tsx",
+      "start_line": 7,
+      "end_line": 7,
+      "message": "Le seuil « 2,2 SMIC » et le montant « 3 964 € » pour 2024 sont écrits en dur dans le texte alors que le simulateur permet de choisir l'année (`SelectSimulationYear`). Pour une autre année, le message afficherait un montant faux. Je verrais bien le montant calculé depuis le moteur (2,2 × SMIC de l'année simulée) et passé en paramètre à `<Trans>`. Y a-t-il une raison de l'avoir figé ?"
+    },
+    {
+      "file": "site/source/pages/simulateurs/lodeom/config.ts",
+      "start_line": 3,
+      "end_line": 3,
+      "message": "nit: des noms hérités de la réduction générale sont restés dans le simulateur Lodeom (`RéductionGénéraleSimulation` ici, `configRéductionGénérale` dans `simulationConfig.ts`). Je les renommerais en `Lodeom…` pour éviter de confondre les deux à la maintenance. Aussi, `shortName`/`title`/`meta.title` contiennent « Éxonération » : je pense que c'est « Exonération »."
+    },
+    {
+      "file": "modele-social/règles/salarié/cotisations.publicodes",
+      "start_line": 486,
+      "end_line": 486,
+      "message": "Question (je n'ai pas vérifié la source) : `imputation retraite complémentaire` vaut `montant - imputation sécurité sociale`, et `imputation sécurité sociale` utilise `T . sécurité sociale et chômage / T`, dont le nom suggère que la part chômage y est déjà incluse. Si c'est le cas, IRC + Urssaf + chômage dépasserait le montant total une fois `imputation chômage` ajoutée. L'IRC ne devrait-elle pas devenir `montant - sécurité sociale - chômage` ? Peux-tu confirmer avec la référence légale (et ajouter un `références` sur cette règle) ?"
+    },
+    {
+      "message": "Synthèse :\n\n- Je n'ai pas pu vérifier le rendu ni l'exactitude métier des taux et du barème de compétitivité.\n- La factorisation avec la réduction générale est cohérente et les tests Cypress couvrent bien les scénarios Lodeom.\n- La PR est grosse (nouveau simulateur + refactoring partagé) : isoler le refactoring de `réductionDeCotisations` dans une PR séparée la rendrait plus simple à relire.\n- Historique : le commit `fix(avertissement)` pourrait être un fixup du commit qui introduit l'avertissement, pour garder un changement logique par commit."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/lodeom/simulationConfig.ts",
+          "start_line": 37,
+          "end_line": 37
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    },
+    {
+      "finding": 4,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

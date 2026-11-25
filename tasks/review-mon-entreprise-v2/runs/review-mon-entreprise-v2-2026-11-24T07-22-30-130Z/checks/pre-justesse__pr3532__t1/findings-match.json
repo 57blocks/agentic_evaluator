@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/salarié/contrat.publicodes",
+      "start_line": 210,
+      "end_line": 210,
+      "message": "Les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », mais la condition porte sur la date de la simulation (`date`), pas sur la date de début du contrat. Une simulation faite en 2026 pour un contrat signé en 2024 appliquerait donc 50 % au lieu de 79 % (et l'exonération de CSG-CRDS ne serait plus totale). Je me demande si la description ne devrait pas dire « à partir de mars 2025 » tant que la question sur la date de début de contrat n'est pas tranchée, ou si tu préfères poser cette question dans cette PR ? Qu'en penses-tu ?"
+    },
+    {
+      "file": "modele-social/règles/salarié/salarié.publicodes",
+      "start_line": 521,
+      "end_line": 521,
+      "message": "Je ne suis pas sûr de comprendre pourquoi la taxe sur les salaires change ici. `CSG-CRDS . assiette de base` est dans l'espace de noms visé par le `remplace` de l'apprentissage : pour un apprenti, l'assiette de la taxe serait alors réduite de 50 % du Smic (ou nulle avant mars 2025), alors que la taxe porte sur la rémunération brute. Est-ce voulu ? Sinon, garder l'ancienne somme (`cotisations . assiette` + prévoyances employeur) me semblerait plus sûr."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/contrat.publicodes",
+          "start_line": 217,
+          "end_line": 231
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

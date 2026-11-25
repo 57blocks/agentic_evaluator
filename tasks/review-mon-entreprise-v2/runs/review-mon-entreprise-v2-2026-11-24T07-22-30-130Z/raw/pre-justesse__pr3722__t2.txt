@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "Ce hook reprend le `useEffect` de `ScrollToTop.tsx` (même `window.scroll` avec repli) : les deux vont diverger. Ne pourrait-on pas simplement rendre `<ScrollToTop />` dans `CMG` (`index.tsx`) ? Au passage, `export default` va à l’encontre des exports nommés de CONTRIBUTING.md."
+ },
+ {
+  "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+  "start_line": 33,
+  "end_line": 33,
+  "message": "Je me demande si `moisIdentiques` (tableaux parallèles à `situation.salariées`) ne risque pas de se désynchroniser : chaque ajout, suppression ou remplacement doit penser à mettre à jour les deux, et `moisIdentiques.GED[index]` vaut `undefined` dès qu’un index manque. Une piste : porter le booléen sur la salariée elle-même dans le domaine, plutôt que dans un état à côté. Qu’en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3722,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+   "line": 3,
+   "start_line": null,
+   "body": "Ce hook reprend le `useEffect` de `ScrollToTop.tsx` (même `window.scroll` avec repli) : les deux vont diverger. Ne pourrait-on pas simplement rendre `<ScrollToTop />` dans `CMG` (`index.tsx`) ? Au passage, `export default` va à l’encontre des exports nommés de CONTRIBUTING.md.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+   "line": 33,
+   "start_line": null,
+   "body": "Je me demande si `moisIdentiques` (tableaux parallèles à `situation.salariées`) ne risque pas de se désynchroniser : chaque ajout, suppression ou remplacement doit penser à mettre à jour les deux, et `moisIdentiques.GED[index]` vaut `undefined` dès qu’un index manque. Une piste : porter le booléen sur la salariée elle-même dans le domaine, plutôt que dans un état à côté. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.15524849999999998,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline sur GitHub. La vérification de la PR (`gh pr checks`) est au vert, et je n'ai rien exécuté moi-même.\n\n- **`useScrollToTop.tsx`, ligne 3 :** le nouveau hook reprend le `useEffect` de `ScrollToTop.tsx` (même `window.scroll` avec repli). J'ai suggéré de rendre `<ScrollToTop />` dans `CMG` plutôt que d'ajouter un hook. J'ai aussi relevé l'`export default`, alors que CONTRIBUTING.md demande des exports nommés.\n- **`CMGContext.tsx`, ligne 33 :** `moisIdentiques` est un tableau parallèle à `situation.salariées`. Les deux peuvent se désynchroniser, et `moisIdentiques.GED[index]` vaut `undefined` si un index manque. J'ai proposé de porter le booléen sur la salariée dans le domaine.\n\nJe n'ai pas posté de commentaire global."
+ }
+}
+
+```

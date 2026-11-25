@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "La durée de 10 mois subsiste dans `modele-social/règles/protection-sociale.publicodes` (règle `délai d'attente`, lignes 628, 630 et 632 : description et `valeur: 10 mois`), ainsi que dans ses traductions de `site/source/locales/rules-en.yaml` (vers la ligne 7084). Le simulateur risque donc d'afficher 6 mois dans `Détails.tsx` et 10 mois ailleurs. Est-ce voulu, par exemple parce que cette règle concerne un autre cas, ou faut-il l'aligner dans cette PR ? Si tu la modifies, il faudra aussi rebuilder `modele-social` puis relancer `i18n:translate`."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3280,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "La durée de 10 mois subsiste dans `modele-social/règles/protection-sociale.publicodes` (règle `délai d'attente`, lignes 628, 630 et 632 : description et `valeur: 10 mois`), ainsi que dans ses traductions de `site/source/locales/rules-en.yaml` (vers la ligne 7084). Le simulateur risque donc d'afficher 6 mois dans `Détails.tsx` et 10 mois ailleurs. Est-ce voulu, par exemple parce que cette règle concerne un autre cas, ou faut-il l'aligner dans cette PR ? Si tu la modifies, il faudra aussi rebuilder `modele-social` puis relancer `i18n:translate`."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.10692940000000002,
+  "final_text": "J'ai relu la PR et posté un commentaire global dessus. Le changement de 10 à 6 mois est limité au texte de `Détails.tsx` et aux fichiers de traduction. La règle `délai d'attente` de `modele-social/règles/protection-sociale.publicodes` reste à 10 mois, et ses traductions dans `rules-en.yaml` aussi. J'ai demandé à l'auteur si c'était voulu, et sinon de l'aligner dans cette PR.\n\nLe workflow « Vérification PR » est au vert."
+ }
+}
+
+```
