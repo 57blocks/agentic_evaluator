@@ -4,7 +4,11 @@
  * rate leads (tinted: blue above 50, red below); on a step with no judge, the
  * success rate does — a dash there would hide that the step was decided on
  * its checks. ⬢ marks the judge's favourite; "Recommended" the selector's
- * choice — not the same thing, and the grid shows both.
+ * choice — not the same thing, and the grid shows both. Where the required
+ * check reports a score it is in the cell too: highest-assurance ranks on it
+ * before the judge, so without it a recommendation can contradict the large
+ * number with nothing on the page to say why. A favourite that lost on that
+ * score says so in its own cell.
  */
 
 import type { CandidateMeta, WorkflowStep } from "../../../../../workflow-report-model.js";
@@ -28,9 +32,13 @@ function Cell({ step, candidate }: { step: WorkflowStep; candidate: string }) {
   if (!r || !row) return <td className="border border-border px-3 py-2 text-center text-muted-foreground">—</td>;
   const judged = r.candidates.some((c) => c.winRate !== null);
   const fav = r.verdict.judge?.sole === true && r.verdict.judge.candidate === candidate;
+  const passedOver = fav ? r.verdict.judgePassedOver : null;
   const tries = row.outcomes.success + row.outcomes.failure + row.outcomes.undetermined;
   const successPct = tries > 0 ? (row.outcomes.success / tries) * 100 : null;
   const success = `${row.outcomes.success}/${tries}`;
+  const passed = judged ? `${success} passed` : null;
+  const score = row.checkScore !== null ? `score ${Math.round(row.checkScore * 100)}%` : null;
+  const checks = [passed, score].filter((part) => part !== null).join(" · ");
   const cost = row.costPerSuccess != null ? `${shortUsd(row.costPerSuccess)}/success` : row.costObserved ? "no success" : "cost unobserved";
   return (
     <td
@@ -42,11 +50,11 @@ function Cell({ step, candidate }: { step: WorkflowStep; candidate: string }) {
         {judged ? fmtPct(row.winRate) : success}
         {fav && <span title="The judge's favourite on this step">⬢</span>}
       </div>
-      <div className="font-mono text-[11px] text-muted-foreground">
-        {judged ? `${success} passed · ${cost}` : cost}
-      </div>
+      {checks !== "" && <div className="font-mono text-[11px] text-muted-foreground">{checks}</div>}
+      <div className="font-mono text-[11px] text-muted-foreground">{cost}</div>
       {row.chosen && <Badge className="mt-1">Recommended</Badge>}
       {row.gated && <div className="mt-1 text-[11px] font-medium text-bad">gated out</div>}
+      {passedOver && <div className="mt-1 text-[11px] font-medium text-foreground">not picked: {passedOver}</div>}
     </td>
   );
 }
@@ -83,8 +91,10 @@ export function Overview({ steps, candidates }: { steps: WorkflowStep[]; candida
       </div>
       <Note>
         On a step a judge compared, the large number is the pairwise win rate (a tie counts as half), which only shows who the judge prefers and swings widely on small samples;
-        on a step with no judge, it is the success count. Underneath: successes and the generation cost per success. ⬢ is the judge's favourite on the step; "Recommended"
-        is what the selector chose by eligibility gates and operating mode, the judge breaking a tie on assurance. A faded, untinted cell is a candidate a gate removed on that step.
+        on a step with no judge, it is the success count. Underneath: successes, the required check's score where it reports one, and the generation cost per success.
+        ⬢ is the judge's favourite on the step; "Recommended" is what the selector chose by eligibility gates and operating mode. In highest-assurance, candidates level on
+        reliability and pass rate are ranked by the check's score first and the judge only after that, so the recommended candidate is not always the one with the largest number;
+        where that happens, the judge's favourite says "not picked" with the two scores. A faded, untinted cell is a candidate a gate removed on that step.
       </Note>
     </Section>
   );

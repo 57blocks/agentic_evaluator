@@ -5,7 +5,7 @@ import path from "node:path";
 import { fixturesDir } from "../src/paths.js";
 import { loadBundle, renderRunReport } from "../src/report-v2.js";
 import {
-  buildStepReport, buildWorkflowReport, dimensionPreference, gapLines, loadReportModel,
+  buildStepReport, buildWorkflowReport, dimensionPreference, gapLines, loadReportModel, passedOverReason,
 } from "../src/report-model.js";
 import { fmtPct, fmtUsd, heatTint } from "../src/report-format.js";
 import { buildWorkflowRecord } from "../src/canon/workflow.js";
@@ -161,4 +161,31 @@ test("the report API serves a model, 404s a non-run, and refuses to leave the ru
   } finally {
     await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())));
   }
+});
+
+const SCORE_REASON = "4 eligible candidates tie at 1.000 (3/3) reliability and 1.000 (3/3) required-check pass rate; skill is picked by the required check's score first (none 83% below 100%), then the judge's pairwise score (skill 72%, next other 22%)";
+
+test("the judge's favourite that lost on the check's score says so with both scores", () => {
+  // Arrange - the judge prefers `none`, the selector dropped it on the check score.
+  const rec = { chosen: "skill", eligible: ["skill", "none"], reasons: [SCORE_REASON] };
+  const scores = new Map([["skill", 1], ["none", 5 / 6]]);
+
+  // Act
+  const reason = passedOverReason(rec, "none", scores);
+
+  // Assert
+  assert.equal(reason, "check score 83% < 100%");
+});
+
+test("no passed-over reason when the favourite is the pick, was gated, or did not lose on the score", () => {
+  const scores = new Map([["skill", 1], ["none", 5 / 6]]);
+  const rec = { chosen: "skill", eligible: ["skill", "none"], reasons: [SCORE_REASON] };
+
+  assert.equal(passedOverReason(rec, "skill", scores), null, "the favourite is the recommendation");
+  assert.equal(passedOverReason(rec, null, scores), null, "no sole favourite");
+  assert.equal(passedOverReason({ ...rec, eligible: ["skill"] }, "none", scores), null, "a gate removed it: the cell already says so");
+  assert.equal(passedOverReason({ ...rec, reasons: ["skill has the lowest generation cost per success"] }, "none", scores), null, "the score did not decide");
+  const within = [SCORE_REASON.replace("first (none 83% below 100%)", "counted as equal within the minimum meaningful difference 0.2 (skill 100%, none 83%)")];
+  assert.equal(passedOverReason({ ...rec, reasons: within }, "none", scores), null, "scores counted as equal");
+  assert.equal(passedOverReason(rec, "none", new Map([["skill", 1]])), null, "the favourite reports no score");
 });
