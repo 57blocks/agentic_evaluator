@@ -324,6 +324,30 @@ function duelStandings(b: RunBundle): Array<{ candidate: string } & ReturnType<t
     .sort((a, z) => (z.rate ?? -1) - (a.rate ?? -1));
 }
 
+/** Said by the selector when scores inside the minimum meaningful difference were not allowed to rank. */
+const SCORES_COUNTED_EQUAL = "counted as equal";
+
+/**
+ * Why the judge's sole favourite is not the recommendation, short enough for
+ * a grid cell: the two check scores, when the selector says the score ranked
+ * before the judge. Null when the favourite is the pick, when a gate removed
+ * it (the page says that already), and when the score did not decide — the
+ * reason is then the operating mode's, and the verdict text gives it.
+ */
+export function passedOverReason(
+  rec: Pick<Recommendation, "chosen" | "eligible" | "reasons">,
+  favourite: string | null,
+  checkScores: ReadonlyMap<string, number | null>,
+): string | null {
+  if (favourite === null || rec.chosen === null || favourite === rec.chosen) return null;
+  if (!rec.eligible.includes(favourite)) return null;
+  const byScore = rec.reasons.some((r) => r.includes(CHECK_SCORE_BREAKER) && !r.includes(SCORES_COUNTED_EQUAL));
+  const own = checkScores.get(favourite) ?? null;
+  const chosen = checkScores.get(rec.chosen) ?? null;
+  if (!byScore || own === null || chosen === null || own >= chosen) return null;
+  return `check score ${Math.round(own * 100)}% < ${Math.round(chosen * 100)}%`;
+}
+
 /** Headline facts under the recommendation: cost, check pass rate, firmness. */
 export function verdictFacts(rec: Recommendation, chosenView: CandidateView | undefined): string[] {
   if (!rec.chosen || !chosenView) return [];
@@ -596,6 +620,8 @@ export interface StepReport {
     why: string | null;
     judge: JudgeFavourite | null;
     judgeNote: string;
+    /** Why the judge's sole favourite was not picked, when the check's score ranked it lower; else null. */
+    judgePassedOver: string | null;
     /** The chosen candidate's headline numbers; null when nobody was chosen. */
     headline: { costPerSuccess: number | null; costObserved: boolean; checkPass: number; checkExecuted: number } | null;
     /** Everything this evaluation spent, all-in. */
@@ -697,6 +723,7 @@ export function buildStepReport(b: RunBundle): StepReport {
       why: verdictWhy(b),
       judge,
       judgeNote: judgeNote(judge, rec.chosen),
+      judgePassedOver: passedOverReason(rec, judge?.sole ? judge.candidate : null, new Map(views.map((v) => [v.id, v.checkScore]))),
       headline: chosenView
         ? { costPerSuccess: chosenView.costPerSuccess, costObserved: chosenView.costObserved, checkPass: chosenView.checkPass, checkExecuted: chosenView.checkExecuted }
         : null,
