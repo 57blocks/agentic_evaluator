@@ -8,6 +8,7 @@ import { judgeRun } from "../../core/judge-run.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
 import { rejectUnknown, stringFlag, UsageError, type ParsedArgs } from "../args.js";
 import type { Io } from "../io.js";
+import { pickLabel } from "../../report-format.js";
 import { resolveTask } from "./run.js";
 
 export const JUDGE_HELP = `agenteval judge <task> <run> [options]
@@ -32,7 +33,7 @@ export async function cmdJudge(args: ParsedArgs, io: Io): Promise<ExitCode> {
   const steps = stringFlag(args.flags, "step")?.split(",").map((s) => s.trim()).filter(Boolean);
   const result = await judgeRun(spec, run, { html: args.flags.html === true, ...(steps ? { steps } : {}) });
   for (const s of result.steps) {
-    io.out(`  ${s.id}: ${s.pairs} pair(s) judged${s.failed ? `, ${s.failed} failed` : ""} · $${s.costUsd.toFixed(4)} · recommend ${s.chosen ?? "none"}\n`);
+    io.out(`  ${s.id}: ${s.pairs} pair(s) judged${s.failed ? `, ${s.failed} failed` : ""} · $${s.costUsd.toFixed(4)} · ${s.firmness === "scorecard" ? pickLabel(s) : `recommend ${s.chosen ?? "none"}`}\n`);
   }
   return EXIT.ok;
 }

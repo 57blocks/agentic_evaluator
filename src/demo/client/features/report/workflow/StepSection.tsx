@@ -7,6 +7,7 @@
 import { Tag } from "@/components/tag";
 import type { CandidateMeta, WorkflowStep } from "../../../../../workflow-report-model.js";
 import { fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, plural } from "../../../../../report-format.js";
+import { measureSummary } from "../../../../../canon/measures.js";
 import { navigate } from "@/app/routes";
 import { firmnessTone } from "@/lib/tone";
 import { Badge } from "@/components/ui/badge";
@@ -101,7 +102,7 @@ export function StepSection({ step, index, runId, root, colorOf }: Props) {
       <div className="flex flex-wrap items-center gap-2">
         <Tag tone={firmnessTone(r.verdict.firmness)}>{r.verdict.firmnessLabel}</Tag>
         <span className="text-xs">
-          {r.verdict.chosen ? <>Recommended: <b className="font-mono text-brand">{r.verdict.chosen}</b></> : "No candidate to recommend"}
+          {r.verdict.chosen ? <>Recommended: <b className="font-mono text-brand">{r.verdict.chosen}</b></> : r.verdict.firmness === "scorecard" ? "Scorecard: no pick by design" : "No candidate to recommend"}
         </span>
         <Button
           size="xs"
@@ -147,6 +148,7 @@ export function StepSection({ step, index, runId, root, colorOf }: Props) {
                 <TableCell className="text-right">
                   <Rate ok={c.checkPass} total={c.checkExecuted} />
                   {c.checkScore !== null && <span className="block font-mono text-[11px] text-muted-foreground">score {Math.round(c.checkScore * 100)}%</span>}
+                  {measureSummary(c.checkMeasures) !== "" && <span className="block font-mono text-[11px] text-muted-foreground">{measureSummary(c.checkMeasures)}</span>}
                 </TableCell>
                 <TableCell className="text-right"><Rate ok={c.completed.ok} total={c.completed.total} /></TableCell>
                 <TableCell className="text-right font-mono">{fmtCost(c.costPerSuccess, c.costObserved)}</TableCell>

@@ -55,7 +55,12 @@ export interface CandidateTradeoff {
   all_trials_pass_rate: Rate;
 }
 
-export type RecommendationFirmness = "firm" | "directional" | "needs-review";
+/**
+ * "scorecard": the step declared `decision: scorecard` — it reports every
+ * candidate's results and picks none, so `chosen` is null by design, not
+ * because nobody qualified.
+ */
+export type RecommendationFirmness = "firm" | "directional" | "needs-review" | "scorecard";
 
 /**
  * Who came nearest when every candidate was gated out. Never adopted: `chosen`
@@ -128,6 +133,59 @@ export interface RecommendInput {
    * mean cannot rank anyone. Defaults to true for callers that never scored.
    */
   absoluteDiscriminates?: boolean;
+}
+
+/** No gate applied: what a scorecard step freezes. */
+export const NO_GATES: EligibilityThresholds = {
+  minimum_reliability: null,
+  minimum_required_check_pass_rate: null,
+  minimum_all_trials_pass_rate: null,
+  maximum_p95_ms: null,
+  cost_ceiling_per_success_usd: null,
+};
+
+/** The gates a step applies: none on a scorecard step, the declared ones (with defaults) otherwise. */
+export function stepEligibility(step: {
+  decision?: "scorecard";
+  requiredChecks?: readonly string[];
+  eligibility?: EligibilityDecl | EligibilityThresholds | null;
+}): EligibilityThresholds {
+  return step.decision === "scorecard" ? { ...NO_GATES } : resolveEligibility(step.requiredChecks ?? [], step.eligibility);
+}
+
+export const SCORECARD_REASON = "scorecard: this step reports every candidate's results and picks none (decision: scorecard); no gate or operating mode was applied";
+
+/**
+ * A scorecard step's recommendation: nobody chosen, nobody gated, every
+ * candidate's numbers kept in `tradeoffs` for whoever reads them.
+ */
+export function scorecardRecommendation(input: { operatingMode: string | null; controlCandidate: string | null; candidates: readonly CandidateRates[] }): Recommendation {
+  return {
+    rule_version: SELECT_RULE_VERSION,
+    operating_mode: input.operatingMode,
+    control_candidate: input.controlCandidate,
+    eligibility: { ...NO_GATES },
+    filters: [],
+    eligible: input.candidates.map((c) => c.candidate),
+    tradeoffs: input.candidates.map((c) => ({
+      candidate: c.candidate,
+      eligible: true,
+      generation_cost_per_success: c.generation_cost_per_success,
+      p50_ms: c.p50_ms,
+      p95_ms: c.p95_ms,
+      reliability: c.reliability,
+      required_check_pass_rate: c.required_check_pass_rate,
+      task_success_rate: c.task_success_rate,
+      all_trials_pass_rate: passAllOf(c),
+    })),
+    chosen: null,
+    compared_to_control: null,
+    firmness: "scorecard",
+    firmness_reasons: [],
+    evidence: null,
+    reasons: [SCORECARD_REASON],
+    closest: null,
+  };
 }
 
 /**
@@ -855,6 +913,7 @@ export function recommendFromCanon(
     minimum_meaningful_difference: number | null;
     evaluators: { required_checks: string[] };
     eligibility?: EligibilityThresholds;
+    decision?: "scorecard";
   },
   summary: { candidates: CandidateRates[]; directionality: Directionality },
   /** Judge standings are derived from the trial rows; only judge-preference reads them. */
@@ -869,6 +928,9 @@ export function recommendFromCanon(
       ? c
       : { ...c, all_trials_pass_rate: allTrialsPassRate(trials.filter((t) => t.candidate === c.candidate)) },
   );
+  if (manifest.decision === "scorecard") {
+    return scorecardRecommendation({ operatingMode: manifest.operating_mode, controlCandidate: manifest.control_candidate, candidates });
+  }
   return recommend({
     trials,
     judge: judgeStandings(trials),

@@ -13,8 +13,9 @@ import type { Suite } from "../types.js";
 import { DEFAULT_MAX_PAUSE_MS } from "../transport-gate.js";
 import { DEFAULT_MAX_CONSECUTIVE_PROVIDER_ERRORS, DEFAULT_MAX_CONSECUTIVE_TIMEOUTS } from "./halt.js";
 import type { CandidateDef, EligibilityThresholds } from "./types.js";
-import { resolveEligibility } from "./select.js";
+import { stepEligibility } from "./select.js";
 import { readLabels, type InputLabels } from "./about.js";
+import type { CheckReport } from "./headline.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -38,6 +39,8 @@ export interface RunManifest {
   spec: { path: string | null; sha256: string | null };
   /** The spec's description; absent on runs made before it existed (see canon/about.ts). */
   description?: string | null;
+  /** The spec's caveats; absent on runs made before they existed (see canon/about.ts). */
+  caveats?: string[];
   test_set: {
     id: string | null;
     inputs: Record<string, string>;
@@ -53,6 +56,8 @@ export interface RunManifest {
     rubric_sha256: string;
     /** What a pass of the required check means (its spec `description`). */
     check_description?: string | null;
+    /** The required check's spec `report`; null when it declares none (a built-in kind may still have its own). */
+    check_report?: CheckReport | null;
     producer_template_sha256: string;
     judge_template_sha256: string;
     score_template_sha256: string;
@@ -61,6 +66,8 @@ export interface RunManifest {
   prompts?: RunPrompts | null;
   success_criteria: { mandatory_checks: "all" } | null;
   operating_mode: string | null;
+  /** Present only on a scorecard step: results per candidate, no gates, no pick. Absent means pick. */
+  decision?: "scorecard";
   /** Resolved gates actually used; frozen so a later default change cannot rewrite this run. */
   eligibility: EligibilityThresholds;
   minimum_meaningful_difference: number | null;
@@ -128,6 +135,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     step: { id: suite.stepId ?? suite.step, version: suite.stepVersion ?? null, description: suite.stepDescription ?? null },
     spec: { path: suite.specPath ?? null, sha256: suite.specSha ?? null },
     description: suite.description ?? null,
+    caveats: suite.caveats ?? [],
     test_set: {
       id: suite.testSetId ?? null,
       inputs: m.inputShas,
@@ -146,6 +154,7 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
       check_version: m.checkVersion,
       rubric_sha256: m.rubricSha,
       check_description: suite.checkDescription ?? null,
+      check_report: suite.checkReport ?? null,
       producer_template_sha256: m.producerTemplateSha,
       judge_template_sha256: m.judgeTemplateSha,
       score_template_sha256: m.scoreTemplateSha,
@@ -153,7 +162,8 @@ export async function buildManifest(suite: Suite, m: ManifestInputs): Promise<Ru
     prompts: m.prompts ?? null,
     success_criteria: suite.successCriteria ?? null,
     operating_mode: suite.operatingMode ?? null,
-    eligibility: resolveEligibility(suite.requiredChecks ?? [], suite.eligibility),
+    ...(suite.decision ? { decision: suite.decision } : {}),
+    eligibility: stepEligibility(suite),
     minimum_meaningful_difference: suite.mmd ?? null,
     execution: {
       trials_per_case: suite.trials ?? 2,

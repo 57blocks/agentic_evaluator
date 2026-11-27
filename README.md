@@ -354,6 +354,70 @@ open datasets/tasks/*/runs/*/report.html   # or open the reports directly
 [`datasets/README.md`](datasets/README.md) says what each set evaluates, where
 its answers come from, and what its run found.
 
+## Code review
+
+`agenteval code-review` builds a dataset for evaluating code reviewers from a
+repository's own history: PRs that shipped a bug a later commit fixed
+(escaped), and PRs no fix traced a bug to (clean). It reads the clone and
+never writes to it. Item and finding shapes: [docs/design/code-review.md](docs/design/code-review.md).
+
+```bash
+agenteval code-review mine ~/src/app --since 2025-06-01 --github owner/app --out mined
+# read mined/candidates.md; set "confirmed": true|false in mined/candidates.json
+agenteval code-review pick-clean ~/src/app --mined mined --count 20 --out mined
+agenteval code-review build ~/src/app --mined mined --clean mined --task tasks/app-review \
+  --pin-files main CLAUDE.md docs/review   # optional: the same repo rules in every fixture
+```
+
+- **`mine`** — SZZ over the branch's first-parent history: for each fix
+  commit (`fix:`, `fix(scope):`, or `--fix-pattern`), the lines it removed
+  from code files (not tests, docs, data or lockfiles) are blamed at its
+  parent with `-w -M -C`. A pair is kept when the fix removed at most
+  `--max-removed-lines` (40), one commit owns at least `--min-owner-share`
+  (0.6) of the blamed lines, that commit is not `chore`/`style`/`ci`, and it
+  landed through a different PR than the fix. `--github` maps commits to PRs
+  with `gh api`; without it each commit is its own unit. Writes
+  `candidates.json` (every blamed commit, and a reason per dropped fix) and
+  `candidates.md`, a table to read while confirming. Mining again keeps
+  `confirmed` marks (a marked pair it no longer finds is reported, and the
+  earlier file kept as `candidates.previous.json`). `--prescreen MODEL` (`--prescreen-limit N`) asks a model
+  whether each candidate is a real defect: a first pass for the reader, never
+  the label.
+- **`pick-clean`** — merged PRs in the mined window that no scanned fix
+  blamed, minus bots, housekeeping and escaped PRs, drawn with a seed
+  (`--seed`, recorded in `clean.json`) and size-matched by changed lines to
+  the confirmed escaped PRs. Clean means only "no fix traced a bug to it":
+  read its measure as defect claims per clean PR, not a false-positive rate.
+- **`build`** — one item per PR in `<task>/items.jsonl` and
+  `<task>/fixtures/<id>/`: `repo.bundle` (the PR's base as a root commit plus
+  its commits, nothing after its head, so the fix is out of reach) and
+  `pr.json`. Only `"confirmed": true` goes in; `--include-unconfirmed` adds
+  unreviewed ones (not those pre-screened `not_defect`) and says so in their
+  provenance. A candidate's `label` may also say `"knowable": true|false`
+  (could a reviewer have known from the PR alone?), which tags the item
+  `knowable`, `not-knowable` or, when its defects differ, `partly-knowable`,
+  so the report slices them apart; and `"confirmed_by": "<who>"` when
+  something other than a person set `confirmed`, so the item's provenance
+  reads "confirmed by <who>" and not "human-confirmed". Defect lines are line
+  numbers in the PR head. Rebase, squash and
+  merge-commit PRs are handled; a PR GitHub lists only part of, or whose
+  commits lack the introducer, is skipped with the reason in
+  `code-review-build.json`, as are defects whose lines could not be found at
+  the PR head (they keep their file). Same inputs, same fixture bytes:
+  fixtures are part of trial identity, so a rebuild does not re-run trials.
+  `pr.json` takes the PR's title, body, creation time and base branch from
+  GitHub as they are when you build. Someone editing the PR's title or body
+  later changes the fixture on the next build, and its trials then run
+  again. Keep the built `fixtures/` rather than rebuilding when that matters.
+  `--pin-files REV PATH...` lays those paths (files or directories), as REV
+  has them, over every tree of every fixture, base and PR commits alike. A
+  reviewer that reads repo rules (CLAUDE.md, CONTRIBUTING.md, a review
+  guide) then reads today's rules on every item, and the PR's diff is
+  unchanged. A pinned path is replaced whole, so a file REV no longer has is
+  gone from older trees too. A PR that itself edited a pinned path loses
+  that part of its diff; `code-review-build.json` lists it under
+  `pinned_edited`.
+
 ## Concepts
 
 - **Workspace** — a directory with a `tasks/` folder. Commands find it by
@@ -394,6 +458,7 @@ Every command takes `--help`.
 | `agenteval diff <before> <after>` | did the conclusion change between two runs: the pick, who entered or left the gates, each pass rate split into shared and new inputs, and which shared inputs flipped — same answer graded differently, or a new answer (`--step`, `--json`); in the dashboard, Compare on a run or task page | no |
 | `agenteval calibrate <run> --labels FILE` | does the judge's 1–5 score separate answers a person called right from the ones they called wrong: AUC with an input-resampled 95% interval, per judged dimension and per label group, and how often the labels overrule the check | no |
 | `agenteval replay <run>...` | decide finished runs again under baseline rules (leaderboard, weighted cost, within q of best) and with grader errors blamed on the model; names the gate each pick fails | no |
+| `agenteval code-review mine\|pick-clean\|build` | build a code-review dataset from a repo's history: PRs that shipped a bug a later fix traced back to, size-matched clean PRs, and their fixtures ([Code review](#code-review)) | only for `mine --prescreen` |
 | `agenteval install-skill` | add the `/agenteval-new-task` skill for Claude Code to this workspace | no |
 | `agenteval dash` | serve the dashboard on http://127.0.0.1:4173 | only to start runs from it |
 
@@ -490,6 +555,19 @@ which gate and by how much.
 trial succeeded. Use it with `trials` above 1 when one wrong answer in k is a
 wrong answer (security, compliance): a candidate right 9 times in 10 on every
 input has reliability 0.9 but pass^2 near 0.8. Off unless declared.
+
+**Scorecard** — `decision: scorecard` on a step (default `pick`) reports
+every candidate's results and picks none: no gate, no operating mode, no
+early stop. The report leads with the scorecard — per candidate, the
+required check's pass rate with its 95% interval (per input), the check's
+measures (or its headline numbers, when it declares a `report`), cost and
+p50/p95, over every input and per tag and split — then
+the per-input comparison, then every failed trial with the check's reason.
+`recommendation.json` has `chosen: null` and `firmness: "scorecard"`, and
+every view prints "no pick (scorecard)". For a question that is not yet a
+choice: how often each prompt version catches an escaped bug, and how noisy
+it is. A scorecard step cannot be in an `input_from` chain, whose proposed
+combination needs a pick on every step.
 
 ### Calling a provider directly
 
@@ -833,9 +911,256 @@ Pass/fail still decides success and the gates. The score is shown under the
 required-check column, and in `highest-assurance` it breaks a tie between
 candidates with the same pass rate, before the judge; it decides only when
 every compared candidate has one.
+Add `"measures"` to report counts that are neither a verdict nor a share —
+comments a review posted, claims it made: `{"evidence": "...", "measures":
+{"comments": 3, "defect_claims": 1}}`. Names are lower snake case (up to 40
+characters), values finite numbers; anything else is dropped, never an
+error. Measures are descriptive only: no gate, mode or score reads them.
+The report shows them per candidate, over every input and per tag and split:
+the mean over each input's graded trials, then the mean over inputs, with a
+95% t-interval over the per-input means. A measure only some inputs report
+is averaged over those inputs. `agenteval diff` prints each candidate's
+means in both runs.
+Add `"parts"` when the verdict is made of several things the check looked
+for, each passed or not — the fields of a form, the known defects of a PR:
+`{"parts": [{"id": "deadline", "pass": false, "label": "the appeal
+deadline", "tags": ["hard"]}]}`. An `id` names the same part on every trial
+of that input; `label` and `tags` are optional. Parts are descriptive too.
+The report lists every part with each candidate's passes over graded
+trials, and gives a pass rate per part tag, with a 95% interval counted per
+part. An input's tags cannot give that: an input holding two kinds of part
+would count both under each of its tags.
+
+A check with more than a few measures can say which ones a scorecard leads
+with, in a `report` block:
+
+```yaml
+evaluators:
+  required_checks:
+    triage-check:
+      kind: command
+      report:
+        headline:
+          - { label: Fields right, measure: fields_right, of: fields, by_slice: true }
+          - { label: Notes per answer, measure: notes }
+        slice_groups:
+          - { title: Difficulty, tags: [normal, hard] }
+        parts:
+          title: Every field
+          tag_groups:
+            - { title: Difficulty, tags: [normal, hard] }
+        input_groups:
+          - { tag: claim, title: Claims, pass: every field right }
+          - { tag: empty, title: Empty forms, pass: nothing invented }
+```
+
+Each headline becomes a column of the scorecard, in place of every measure
+on one line (they all stay in the measures section):
+
+- With `of`, it is a share: the measure summed over graded trials, out of
+  the other measure summed, shown as `13/39 · 33%`. Its 95% interval is
+  Wilson's, counted per input.
+- Without `of`, it is the mean over inputs, with its t-interval.
+- `measure` and `of` each take one name, or a list that is summed.
+- `tag` keeps only the inputs carrying that tag. A headline no candidate
+  has a value for (a tag the test set does not use) is left out.
+- `by_slice: true` adds a table of that headline per tag and split.
+  `slice_groups` orders those tags under titles; tags in no group are
+  folded under "Other slices".
+
+- `parts` titles the parts section and orders the parts' tags in groups.
+- `input_groups` splits the per-input table by tag, each table under what
+  a pass means there. Use it when a pass is not the same thing on every
+  kind of input.
+
+Under the columns, the scorecard says for each headline whether any two
+candidates differ: an exact two-sided sign test over inputs at 0.05, not
+adjusted for the number of pairs. "No difference shown" means the test set
+could not show one, not that there is none.
 `version_files` hashes the script into the check's version, so editing it
 shows up in the evidence. `kind: tsc` with `scaffold_dir: scaffold` instead
 compiles the produced TypeScript against `scaffold/tsconfig.json`.
+
+### Code review checks (`findings.json`, `kind: findings-match`)
+
+A reviewer under test leaves `findings.json` in its work dir: an array, or
+`{"findings": [...]}`. A command candidate writes the file itself. A model
+candidate on a `codegen` step returns it as a ```` ```file: findings.json ````
+block. A `prompt` step yields only text, so it has no `findings.json`. Each
+finding:
+
+```json
+{"file": "src/a.ts", "start_line": 40, "end_line": 42,
+ "category": "calculation", "severity": "high",
+ "message": "…", "blocking": true, "producer": "security-reviewer"}
+```
+
+`message` is required. No `file` makes it a PR-level finding. Lines are in
+the PR head version of the file, and `end_line` defaults to `start_line`.
+`severity` is one of critical, high, medium or low. `category` comes from
+the taxonomy below or is free text. A finding that breaks these rules is
+dropped and counted, never an error.
+
+The item's `expected` in `items.jsonl` (written to `references/<id>.txt`)
+says what the review should find:
+
+```json
+{"kind": "defect", "source": "escaped",
+ "defects": [{"file": "src/a.ts", "start_line": 40, "end_line": 42,
+              "category": "calculation", "severity": "high",
+              "description": "…", "fix_commit": "abc1234", "fix_diff": "…"}]}
+```
+
+or `{"kind": "clean", "note": "…"}`. Categories: calculation, logic, crash,
+state, data, security, privacy, accessibility, concurrency, resource, ui,
+other. Tag items `escaped`, `seeded` or `clean`, plus category and severity,
+so the report's slices read each kind separately.
+
+The matcher is built in, with no script to write:
+
+```yaml
+evaluators:
+  required_checks:
+    caught:
+      kind: findings-match
+      line_tolerance: 3          # default 3
+      require_category: false    # default false
+      llm_fallback:              # optional
+        model: google/gemini-3.1-pro-preview
+        provider_route: openrouter
+        judge: ambiguous         # default; `all` makes location a hint (below)
+```
+
+- On a defect item, a finding catches a defect when the files are equal
+  (compared after NFC normalization, with no leading `./`) and the line
+  ranges overlap, widened by `line_tolerance` on each side. With
+  `require_category`, the categories must also be equal (case aside). A
+  finding on the defect's file but away from its lines, or one with no lines
+  or no file, is ambiguous. Only ambiguous findings go to `llm_fallback`, in
+  one call per item. Without a fallback they stay unmatched. The item passes
+  when every defect is caught, and the evidence states a partial catch.
+- `llm_fallback.judge: all` puts every finding to the fallback against every
+  defect, still in one call per item, and only its matches catch. A comment
+  that merely sits on the defect's lines no longer counts (a naming nit on
+  the faulty line is not a catch), and one in another file that names the
+  fault does. Use it when defect ranges are wide, as mined ones are: a fix's
+  lines can span a whole rule. The `caught_on_location` measure keeps what
+  location alone would have said, so the two readings can be compared. The
+  grade then rests on the fallback: calibrate it before trusting the rate.
+- A defect is one fix. `code-review build` writes an entry per file a fix
+  touched, so entries that share a `fix_commit` are one defect with several
+  places. It is caught when a finding catches any place, and the fallback
+  sees it once, with all its places. Entries without a `fix_commit` are
+  separate defects.
+- On a clean item, the review passes when no finding claims a defect. A
+  finding with `blocking: true` is a claim, and one with `blocking: false`
+  is not. When `blocking` is absent, the fallback classifies the finding.
+  With no fallback it counts as a claim, and the evidence says so.
+- No `findings.json` fails the trial ("no review"). It never passes as a
+  clean review. A `findings.json` that is not JSON also fails. A missing or
+  malformed `expected`, or a fallback that still fails after 3 attempts, is
+  an evaluator error.
+- The evidence names each defect's location, or its places when a fix
+  touched several, and says whether it was caught on location or by the
+  LLM, and by which finding. Every decision is also
+  written to `findings-match.json` in the trial's kept work dir. The record
+  keeps defect locations but never a description or fix, because a later
+  trial can read `runs/`.
+- The version covers the options and the fallback's model, route and
+  prompts. Changing any of them regrades reused trials on `--reuse`, from the
+  `findings.json` each trial left.
+- `check-task` hands the check the review a perfect reviewer would leave:
+  each known defect becomes a blocking finding on its own lines, and a clean
+  item gets `[]`. The check must pass that review and fail an empty one, and
+  neither probe calls the fallback.
+
+The check reports these measures:
+
+| measure | items | what it counts |
+|---|---|---|
+| `findings`, `invalid_findings` | all, when a review came | valid findings, and dropped ones |
+| `no_review` | all, when none came | 1: the trial left no readable `findings.json` |
+| `defects`, `caught` | defect | known defects (one per fix), and how many were caught (0 when the trial left no review) |
+| `matched_deterministic`, `matched_llm` | defect | findings that matched a defect on location, or through the LLM (each finding counted once) |
+| `caught_on_location` | defect, with `judge: all` | defects some finding sits on, whatever it says |
+| `unmatched_findings` | defect | findings that matched no defect |
+| `knowable_defects`, `knowable_caught` | defect, when the answer key says | defects a reviewer could have known, and how many of those were caught |
+| `defect_claims` | clean, when a review came | findings that claim a defect |
+
+`findings-match` has a `report` of its own (declare one to replace it). A
+scorecard (`decision: scorecard`) leads with these numbers per candidate:
+
+- **Knowable defects caught**: `knowable_caught` out of
+  `knowable_defects`. Left out when no defect says whether it was knowable.
+- **Defects caught**: `caught` out of `defects`, over every trial.
+- **Defect claims per clean item**: the mean of `defect_claims`.
+- **Precision on defect items**: matched findings (`matched_*`) out of
+  those plus `unmatched_findings`. It uses the defect-only measures, not
+  `findings`, because clean items report `findings` too. Without a
+  fallback, it is a lower bound.
+- **Findings per review**: the mean of `findings`.
+
+Defects caught and defect claims are also shown by source (escaped,
+seeded, clean).
+
+The check reports each defect as a part (`D1`, `D2` … in the answer key's
+order), tagged with its category, severity and, when the answer key says,
+`knowable` or `not-knowable`. **Every known defect** in the report lists
+them all with each candidate's catches over its trials, and gives the catch
+rate per category, severity and knowability from the defects themselves.
+The item's own tags would count an item's every defect under each tag, so
+they stay folded under "Other slices".
+
+**Defect claims on clean items** ranks the clean items by how many claims
+they drew and, on opening a row, shows the comments that were counted. It
+is read from the `findings-match.json` each trial leaves, so it needs
+`checks/` beside the run. Clean means no later fix traced a bug to the PR,
+not that it has none, so read the noisiest ones before calling them false
+alarms.
+
+The per-input table is split in two, because a pass means different
+things: on a defect item, every known defect caught; on a clean item, no
+finding claims a defect.
+
+A review that never came (a crash, unreadable JSON) fails its trial. On a
+defect item every defect counts as missed. On a clean item it reports no
+`defect_claims` and no `findings`, so "claims per clean item" and "findings
+per review" are means over the reviews that exist: a reviewer that crashes
+half the time does not look half as noisy.
+
+**What a reviewer under test can read.** An item's id is the input it is
+handed and its fixture's directory, so `build` names clean items like any
+other. Two things are not sealed when candidates run on the host without
+`cli.image`:
+
+- The check leaves `findings-match.json` in each trial's kept directory
+  under `runs/`. It holds no description or fix, but it does hold each
+  defect's file and lines and whether the item is clean, and a later trial
+  could read it.
+- `code-review-build.json` and whatever `--mined` directory sits inside the
+  task say which items are clean and what the defects are.
+
+`check-task` warns about candidates that run without an image. Give them
+`cli.image`, or keep the mining directory outside the task, when the
+reviewer is not yours to trust.
+
+The fallback reads text written by the reviewer it is grading. Each finding
+reaches it as one JSON object on one line, so a comment cannot pose as the
+answer key, a verdict or another finding, and a message is cut at 4,000
+characters. This narrows what a reviewer can do to the grader; it does not
+make an LLM immune to being talked round, which is one more reason to
+calibrate it against people.
+
+The fallback's calls do not count toward the run's cost or `budget_usd`.
+`agenteval calibrate` cannot yet check the fallback against human labels.
+It calibrates the absolute judge's 1–5 scores, and refuses a run without
+them. Its labels are per answer, while the fallback decides per finding
+and defect pair. Three things are missing to enforce the ≥ 90% agreement
+gate before the fallback is trusted:
+
+- labels per finding and defect pair;
+- a calibrate mode that reads the decisions in `findings-match.json`;
+- a gate that uses the result.
 
 ### Saying what a task evaluates
 
@@ -858,13 +1183,17 @@ evaluators:
       description: "Root cause, next action and deadline match the answer key."
 ```
 
+Add `caveats`, a list at the top of the spec, for what a reader must keep
+in mind (a judge nobody calibrated, labels no person confirmed). The report
+lists them under the description as **Read these numbers with care**.
+
 `description` heads the report as **What it evaluates**; a step's
 `description` stands beside the step's id wherever it appears (a workflow's
 step cards, a step's report), so name steps for what they do and say it there;
 a check's `description` replaces its version hash under **How success is
 decided**; with `labels_file`, the report adds **Results by input tag**: the
-required check's passes per candidate for each tag and split. All four are
-frozen into the run's `manifest.json`. `agenteval report` on a run made before they existed
+required check's passes per candidate for each tag and split. All of these
+and a check's `report` are frozen into the run's `manifest.json`. `agenteval report` on a run made before they existed
 reads them from the task's current spec and says so on the page.
 
 ### A test set as one file
@@ -984,6 +1313,8 @@ Every verdict carries a confidence:
   same evidence under each step's table, and `agenteval report <run>` prints
   it for a finished run.
 - **needs review** — no candidate passed the gates, so nothing was recommended.
+- **scorecard** — the step declared `decision: scorecard`: nothing was picked
+  by design, and the page compares instead of deciding.
 
 Raise `trials_per_case` to see how stable a candidate is; add inputs to see how
 general.
@@ -1000,6 +1331,10 @@ Every run prints the directory it wrote, `tasks/<task>/runs/<runId>/`. Open
    number that removed them, and who was left. *Gated* means removed by a gate.
 3. **Candidates** — per candidate: trials that succeeded, checks passed,
    pairwise record, cost per success, median time.
+   **Per input** below it puts the candidates side by side on each input:
+   required-check passes k/n and the check's measures, inputs where the
+   candidates differ first; open a row for its trials, with what the check
+   said and the opening of each answer.
 4. **Judge** — what the judge preferred, per dimension, with its reasons. It is
    reported beside the recommendation, not inside it: unless the mode is
    `judge-preference`, the judge does not choose, and the report says when it

@@ -38,11 +38,17 @@ function candidateKey(suite: Suite, id: string): MissingKey[] {
   return missing(id, endpointOf(def));
 }
 
-/** The keys one step's calls need: its candidates', and the judge's when it judges. */
+/** The findings-match check's LLM fallback, when it has one. */
+function fallbackKey(suite: Suite): MissingKey[] {
+  const c = suite.check;
+  return c?.kind === "findings-match" && c.llmFallback ? missing(`${c.id} llm_fallback ${c.llmFallback.model}`, c.llmFallback.endpoint) : [];
+}
+
+/** The keys one step's calls need: its candidates', the judge's when it judges, and the check's LLM fallback. */
 export function missingModelKeys(suite: Suite): MissingKey[] {
   const { pairwise, absolute } = methodsOf(suite);
   const judge = (pairwise || absolute) && suite.judgeEndpoint ? missing(`judge ${suite.judge}`, suite.judgeEndpoint) : [];
-  return [...suite.candidates.flatMap((id) => candidateKey(suite, id)), ...judge];
+  return [...suite.candidates.flatMap((id) => candidateKey(suite, id)), ...judge, ...fallbackKey(suite)];
 }
 
 /**

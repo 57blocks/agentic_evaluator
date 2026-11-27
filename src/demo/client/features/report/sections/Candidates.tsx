@@ -7,6 +7,7 @@
 import type { CandidateRow, StepReport } from "../../../../../report-model.js";
 import { fmtCost, fmtPct, fmtScore, fmtSec } from "../../../../../report-format.js";
 import { completionLabel, promptLabel } from "../../../../../report-copy.js";
+import { measureSummary } from "../../../../../canon/measures.js";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -70,6 +71,7 @@ function Checks({ c }: { c: CandidateRow }) {
     <div className="flex flex-col items-end gap-0.5">
       <Tag tone={all ? "ok" : "bad"} className="font-mono">{c.checkPass} / {c.checkExecuted}</Tag>
       {c.checkScore !== null && <span className="font-mono text-[11px] text-muted-foreground">score {Math.round(c.checkScore * 100)}%</span>}
+      {measureSummary(c.checkMeasures) !== "" && <span className="font-mono text-[11px] text-muted-foreground">{measureSummary(c.checkMeasures)}</span>}
     </div>
   );
 }

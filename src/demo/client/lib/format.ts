@@ -9,7 +9,7 @@
  */
 
 import type { RunView, TaskView } from "../../catalog.js";
-import { NEEDS_REVIEW } from "./copy.js";
+import { stepPick } from "./copy.js";
 import { isCombined } from "../../spend.js";
 
 export function runDate(iso: string | null): string {
@@ -31,7 +31,7 @@ export function runMoney(usd: number | null): string {
 
 /** One line under a run: when it ran, what it cost, what it concluded. */
 export function runMeta(run: RunView): string {
-  const verdict = run.steps.map((s) => s.chosen ?? NEEDS_REVIEW).join(" · ");
+  const verdict = run.steps.map(stepPick).join(" · ");
   return [runDate(run.startedAt), runMoney(run.totalUsd), verdict].filter(Boolean).join(" · ");
 }
 
@@ -68,7 +68,7 @@ export function spendLabel(task: TaskView): Spend | null {
  */
 export function latestVerdict(task: TaskView): string[] | null {
   const run = task.runs[0];
-  return run ? run.steps.map((s) => s.chosen ?? NEEDS_REVIEW) : null;
+  return run ? run.steps.map(stepPick) : null;
 }
 
 /** A task whose every run used scripted stand-ins proves the pipeline, not a model. */

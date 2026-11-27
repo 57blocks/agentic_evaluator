@@ -6,6 +6,7 @@
  * changing how a run reads never means touching the driver.
  */
 
+import { SCORECARD_PICK } from "../report-format.js";
 import type { RunEvent, RunEventSink, StepPlan } from "../core/events.js";
 import { summaryLines } from "./summary.js";
 import { haltCause } from "../canon/halt.js";
@@ -108,7 +109,7 @@ export function formatEvent(e: RunEvent): string[] {
           ledgerTotal: e.ledgerTotal,
           ledgerSource: e.ledgerSource,
         }),
-        `✔ ${e.dir}/ — ${e.trials} trials, ${e.evaluations} evaluator rows, ${e.traceEvents} trace events, ledger total ${usd(e.ledgerTotal)} (${e.ledgerSource}), recommend ${e.chosen ?? (e.closest ? `none, closest ${e.closest}` : "none")} (${e.firmness})${e.html ? ", report.html" : ""}`,
+        `✔ ${e.dir}/ — ${e.trials} trials, ${e.evaluations} evaluator rows, ${e.traceEvents} trace events, ledger total ${usd(e.ledgerTotal)} (${e.ledgerSource}), ${e.firmness === "scorecard" ? SCORECARD_PICK : `recommend ${e.chosen ?? (e.closest ? `none, closest ${e.closest}` : "none")} (${e.firmness})`}${e.html ? ", report.html" : ""}`,
       ];
     case "e2e.arm.start":
       return [`\n▶ ${e.armId} — ${Object.entries(e.assignment).map(([s, c]) => `${s}:${c}`).join(" → ")}`];

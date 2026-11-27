@@ -41,7 +41,7 @@ function itemsLine(items: ItemStats): string {
   const failNote =
     allFail.length === 0
       ? ""
-      : ` Every candidate failed ${allFail.length}: ${allFail.slice(0, MAX_LISTED).map(escapeHtml).join(", ")}${allFail.length > MAX_LISTED ? " …" : ""} — check those for a harness or check bug first.`;
+      : ` Every candidate failed ${allFail.length}: ${allFail.slice(0, MAX_LISTED).map(escapeHtml).join(", ")}${allFail.length > MAX_LISTED ? " …" : ""} — a hard set can do that; if you did not expect it, check those for a harness or check bug first.`;
   const judge = items.judge_effective_n == null ? "" : ` The judge preferred one candidate over another on ${items.judge_effective_n}.`;
   return `<p class="note"><b>Effective N ${items.effective_n} of ${items.inputs}.</b> Inputs that separated any two candidates on the required check; ${items.counts["all-pass"]} every candidate passed and ${items.counts.flat} gave everyone the same partial rate, so they cannot inform a choice.${judge}${failNote} Per-input detail: items.json.</p>`;
 }

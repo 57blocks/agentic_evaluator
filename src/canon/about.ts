@@ -15,6 +15,7 @@ import type { CandidateDef } from "./types.js";
 import { sha256 } from "./hash.js";
 import { taskInputPath } from "../paths.js";
 import { labelsOfItems, readItems } from "../core/items.js";
+import { checkReportFor, type CheckReport } from "./headline.js";
 
 export interface InputLabel {
   tags: string[];
@@ -31,6 +32,12 @@ export interface RunAbout {
   labels: InputLabels | null;
   /** "frozen": from this run's manifest. "current-spec": from the task's spec as it is now. */
   source: "frozen" | "current-spec" | "none";
+  /** What the required check's scorecard leads with: its spec `report`, else its kind's own (canon/headline.ts). */
+  checkReport: CheckReport | null;
+  /** The spec's caveats: what to read the numbers with. */
+  caveats: string[];
+  /** Set when the run froze its descriptions before caveats existed, so these are the spec's as it is now. */
+  caveatsFromCurrentSpec?: true;
 }
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -162,24 +169,40 @@ export async function promptsOfRun(dir: string, m: RunManifest): Promise<RunProm
   }
 }
 
+/** The task's spec as it is now, for what a run did not freeze; null when it cannot be found or read. */
+async function currentSpecOf(dir: string, m: RunManifest): Promise<{ spec: ReturnType<typeof parseSpec>; taskRoot: string } | null> {
+  if (!m.spec?.path) return null;
+  const taskRoot = await taskRootOf(dir, path.basename(m.spec.path));
+  if (!taskRoot) return null;
+  const specFile = path.join(taskRoot, path.basename(m.spec.path));
+  try {
+    return { spec: parseSpec(await fs.readFile(specFile, "utf-8"), specFile), taskRoot };
+  } catch {
+    return null;
+  }
+}
+
 /** The run's own record when it has one; otherwise the task's current spec. */
 export async function aboutOfRun(dir: string, m: RunManifest): Promise<RunAbout> {
+  const builtIn = checkReportFor(m.evaluators.check_report, m.evaluators.check_version);
   if (frozen(m)) {
+    const current = m.caveats === undefined ? ((await currentSpecOf(dir, m))?.spec.caveats ?? []) : [];
     return {
       description: m.description ?? null,
       stepDescription: m.step.description ?? null,
       checkDescription: m.evaluators.check_description ?? null,
       labels: m.test_set.labels ?? null,
       source: "frozen",
+      checkReport: builtIn,
+      caveats: m.caveats ?? current,
+      ...(current.length > 0 ? { caveatsFromCurrentSpec: true as const } : {}),
     };
   }
-  const none: RunAbout = { description: null, stepDescription: null, checkDescription: null, labels: null, source: "none" };
-  if (!m.spec.path) return none;
-  const taskRoot = await taskRootOf(dir, path.basename(m.spec.path));
-  if (!taskRoot) return none;
-  const specFile = path.join(taskRoot, path.basename(m.spec.path));
+  const none: RunAbout = { description: null, stepDescription: null, checkDescription: null, labels: null, source: "none", checkReport: builtIn, caveats: [] };
+  const found = await currentSpecOf(dir, m);
+  if (!found) return none;
+  const { spec, taskRoot } = found;
   try {
-    const spec = parseSpec(await fs.readFile(specFile, "utf-8"), specFile);
     const step = spec.workflow.steps.find((s) => s.id === m.step.id);
     const checkId = step?.required_checks?.[0];
     const labelsFile = step?.test_set.labels_file;
@@ -190,8 +213,10 @@ export async function aboutOfRun(dir: string, m: RunManifest): Promise<RunAbout>
       checkDescription: (checkId && spec.evaluators.required_checks?.[checkId]?.description) || null,
       labels: labelsFile ? await readLabels(taskRoot, labelsFile).catch(() => null) : itemsFile ? labelsOfItemsFile(taskRoot, itemsFile) : null,
       source: "current-spec",
+      checkReport: checkReportFor((checkId && spec.evaluators.required_checks?.[checkId]?.report) || null, m.evaluators.check_version),
+      caveats: spec.caveats ?? [],
     };
-    return about.description || about.stepDescription || about.checkDescription || about.labels ? about : none;
+    return about.description || about.stepDescription || about.checkDescription || about.labels || about.caveats.length > 0 ? about : none;
   } catch {
     return none;
   }

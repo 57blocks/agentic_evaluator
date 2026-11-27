@@ -29,10 +29,10 @@ section.card{position:relative;overflow:hidden;background:var(--surface);border:
 section.card h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--ink);display:flex;gap:10px;align-items:baseline}section.card h2 .hint{font-size:12px;color:var(--ink-3);font-weight:400}
 .table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
 th{text-align:left;font-weight:600;color:var(--ink-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:8px 13px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--surface-2)}
-th.num,td.num{text-align:right;white-space:nowrap}
+th.num,td.num{text-align:right;white-space:nowrap}th.wrap{white-space:normal;min-width:72px}table.tight th,table.tight td{padding-left:6px;padding-right:6px}table.tight td.num{font-size:12px}table.tight td .sub{font-size:10.5px}
 td.num .bar{margin-right:8px}td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}tr:last-child td{border-bottom:none}
 td.cand{font-weight:600}td.cand .model{display:block;font-weight:400;font-size:12px;color:var(--ink-3);font-family:var(--mono)}td.cand .prompt{display:block;font-weight:400;font-size:12px;color:var(--ink-3)}
-td .sub{display:block;font-size:11px;color:var(--ink-3)}
+td .sub{display:block;font-size:11px;color:var(--ink-3)}h3 .hint{font-size:12px;font-weight:400;color:var(--ink-3);margin-left:6px}tr.group td{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);background:var(--surface-2);padding:6px 13px}
 tr.control td.cand::after{content:"control";margin-left:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:3px;font-weight:500}
 tr.chosen,tr.chosen:hover{background:var(--champ);box-shadow:inset 3px 0 0 var(--accent)}tr.gated td{color:var(--ink-3)}
 tbody tr{transition:background .12s ease}tbody tr:hover{background:var(--accent-soft)}

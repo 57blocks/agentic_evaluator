@@ -35,6 +35,7 @@ import type { CandidateDef, CostSource, EvaluationState,
   Isolation,
 } from "../canon/types.js";
 import type { TrialRow } from "../canon/rows.js";
+import type { CheckPart } from "../canon/parts.js";
 import type { ProducerKind, RunRecord, Suite } from "../types.js";
 
 /** A task's input text. Every task owns its inputs; there is no shared pool. */
@@ -126,6 +127,8 @@ export interface GenOutput {
   checkOutput?: string;
   checkReason?: string;
   checkScore?: number;
+  checkMeasures?: Record<string, number>;
+  checkParts?: CheckPart[];
   checkState?: EvaluationState;
   checkVersion?: string;
 }
@@ -173,8 +176,8 @@ export async function generateOne(params: {
 /**
  * A reused trial whose check has since changed is graded again, on the files
  * it left (kept under its run), so fixing a check never means paying for the
- * generations again. Null when the check is unchanged, is not a command, or
- * the trial's files were not kept.
+ * generations again. Null when the check is unchanged, is tsc, or the
+ * trial's files were not kept.
  */
 async function regradeIfChanged(
   suite: Suite,
@@ -182,7 +185,7 @@ async function regradeIfChanged(
   t: { candidate: string; inputSlug: string; inputText: string; trial: number; checkWorkDir: string },
 ): Promise<Partial<RunRecord> | null> {
   const check = suite.check;
-  if (!check || check.kind !== "command") return null;
+  if (!check || check.kind === "tsc") return null;
   const { requiredCheckVersion, runCommandCheck } = await import("../check.js");
   const version = await requiredCheckVersion(check, suite.taskRoot);
   if (reused.record.checkVersion === version) return null;
@@ -195,18 +198,28 @@ async function regradeIfChanged(
     const read = await keptTrace(reused.dir, t);
     const trace = read && "trace" in read ? read.trace : undefined;
     const traceError = read && "error" in read ? read.error : reused.record.traceError;
-    const result = await runCommandCheck({
-      argv: check.argv,
-      versionFiles: check.versionFiles,
-      taskRoot: suite.taskRoot,
-      timeoutMs: check.timeoutMs,
-      files: [],
-      output: reused.record.text,
-      input: t.inputText,
-      meta: { step: suite.step, candidate: t.candidate, input: t.inputSlug, trial: t.trial, ...(fixture ? { fixture } : {}), chained: false },
-      ...(trace ? { trace } : {}),
-      workDir: scratch,
-    });
+    const result =
+      check.kind === "findings-match"
+        ? await (await import("../code-review/findings-match.js")).runFindingsMatchCheck({
+            check,
+            files: [],
+            workDir: scratch,
+            taskRoot: suite.taskRoot,
+            step: suite.step,
+            input: t.inputSlug,
+          })
+        : await runCommandCheck({
+            argv: check.argv,
+            versionFiles: check.versionFiles,
+            taskRoot: suite.taskRoot,
+            timeoutMs: check.timeoutMs,
+            files: [],
+            output: reused.record.text,
+            input: t.inputText,
+            meta: { step: suite.step, candidate: t.candidate, input: t.inputSlug, trial: t.trial, ...(fixture ? { fixture } : {}), chained: false },
+            ...(trace ? { trace } : {}),
+            workDir: scratch,
+          });
     await keepEvidence(scratch, t.checkWorkDir);
     const graded = applyTraceRules(result, check.trace, {
       declaredTrace: suite.candidateDefs?.[t.candidate]?.cli?.trace !== undefined,
@@ -218,6 +231,8 @@ async function regradeIfChanged(
       checkOutput: graded.output,
       checkReason: graded.reason,
       checkScore: graded.score,
+      checkMeasures: graded.measures,
+      checkParts: graded.parts,
       checkState: graded.state,
       checkVersion: graded.version,
     };
@@ -279,7 +294,16 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
           scaffoldDir: await resolveTaskAsset(suite.taskRoot, suite.check.scaffoldDir),
           workDir,
         })
-      : await runCommandCheck({
+      : suite.check.kind === "findings-match"
+        ? await (await import("../code-review/findings-match.js")).runFindingsMatchCheck({
+            check: suite.check,
+            files: result.artifacts,
+            workDir,
+            taskRoot: suite.taskRoot,
+            step: suite.step,
+            input: params.inputSlug,
+          })
+        : await runCommandCheck({
           argv: suite.check.argv,
           versionFiles: suite.check.versionFiles,
           taskRoot: suite.taskRoot,
@@ -311,6 +335,8 @@ async function generateIn(workDir: string, params: Parameters<typeof generateOne
     checkOutput: graded.output,
     checkReason: graded.reason,
     checkScore: graded.score,
+    checkMeasures: graded.measures,
+      checkParts: graded.parts,
     checkState: graded.state,
     checkVersion: graded.version,
   };
@@ -547,6 +573,8 @@ function recordFromRow(row: TrialRow, text: string): RunRecord {
     checkOutput: check?.evidence,
     checkReason: check?.reason,
     checkScore: check?.score,
+    checkMeasures: check?.measures,
+    checkParts: check?.parts,
     modelRef: row.model_ref,
     deploymentRef: row.deployment_ref ?? undefined,
     trialHash: row.trial_hash,
@@ -853,6 +881,8 @@ export async function runAll(params: {
         checkOutput: g.checkOutput,
         checkReason: g.checkReason,
         checkScore: g.checkScore,
+        checkMeasures: g.checkMeasures,
+        checkParts: g.checkParts,
         checkState: g.checkState,
         checkVersion: g.checkVersion,
         modelRef: modelRefOf(def),

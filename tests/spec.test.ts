@@ -384,3 +384,62 @@ test("a step id or input name that is a path (`..`, a slash) is rejected before 
   assert.ok(slash instanceof SpecError, String(slash));
   assert.match(slash.message, /inputs\/0/);
 });
+
+/* ── kind: findings-match ────────────────────────────────────────────────── */
+
+const FINDINGS_MATCH = ["      kind: tsc\n      scaffold_dir: scaffold", "      kind: findings-match"] as const;
+
+test("a findings-match check compiles with its defaults: tolerance 3, category not required, no fallback", async () => {
+  const { spec, sha } = await parsePatched([FINDINGS_MATCH]);
+  const suite = compileSpec(spec, "x.yaml", sha, TASK_ROOT);
+  assert.deepEqual(suite.check, { id: "tsc-noemit", kind: "findings-match", lineTolerance: 3, requireCategory: false });
+});
+
+test("a findings-match check takes its options and an LLM fallback endpoint", async () => {
+  const { spec, sha } = await parsePatched([
+    [FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      line_tolerance: 0\n      require_category: true\n      llm_fallback: { model: anthropic/claude-opus-4.8, provider_route: anthropic, price: { input: 5, output: 25 } }`],
+  ]);
+  const suite = compileSpec(spec, "x.yaml", sha, TASK_ROOT);
+  assert.deepEqual(suite.check, {
+    id: "tsc-noemit",
+    kind: "findings-match",
+    lineTolerance: 0,
+    requireCategory: true,
+    llmFallback: { model: "anthropic/claude-opus-4.8", endpoint: { route: "anthropic", price: { input: 5, output: 25 } } },
+  });
+});
+
+test("llm_fallback.judge: all is kept on the check, and any other value is refused", async () => {
+  const withJudge = (judge: string): Promise<{ spec: unknown; sha: string }> =>
+    parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      llm_fallback: { model: google/gemini-3.1-pro-preview, judge: ${judge} }`]]) as Promise<{ spec: unknown; sha: string }>;
+  const { spec, sha } = await parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      llm_fallback: { model: google/gemini-3.1-pro-preview, judge: all }`]]);
+  const check = compileSpec(spec, "x.yaml", sha, TASK_ROOT).check;
+  assert.equal(check?.kind === "findings-match" ? check.llmFallback?.judge : undefined, "all");
+  const dflt = await parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      llm_fallback: { model: google/gemini-3.1-pro-preview, judge: ambiguous }`]]);
+  const plain = compileSpec(dflt.spec, "x.yaml", dflt.sha, TASK_ROOT).check;
+  assert.equal(plain?.kind === "findings-match" ? plain.llmFallback?.judge : "unset", undefined);
+  await assert.rejects(withJudge("everything"), SpecError);
+});
+
+test("findings-match is built in: a program, scaffold or timeout on it is rejected", async () => {
+  for (const extra of ["argv: [node, checks/x.mjs]", "version_files: [checks/x.mjs]", "scaffold_dir: scaffold", "timeout_seconds: 10"]) {
+    const { spec, sha } = await parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      ${extra}`]]);
+    assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /is kind: findings-match, which is built in: drop/, extra);
+  }
+});
+
+test("matcher options on another kind are rejected rather than ignored", async () => {
+  const { spec, sha } = await parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[0]}\n      line_tolerance: 2`]]);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /is kind: tsc; line_tolerance belongs to kind: findings-match/);
+});
+
+test("an LLM fallback that cannot be called is rejected at load time", async () => {
+  const { spec, sha } = await parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      llm_fallback: { model: claude-opus-4-8, provider_route: anthropic }`]]);
+  assert.throws(() => compileSpec(spec, "x.yaml", sha, TASK_ROOT), /llm_fallback: provider_route anthropic needs a price/);
+});
+
+test("the schema refuses a negative or fractional tolerance and unknown fallback keys", async () => {
+  for (const bad of ["line_tolerance: -1", "line_tolerance: 1.5", "require_category: yes-please", "llm_fallback: { model: m, temperature: 0 }", "llm_fallback: { provider_route: openrouter }"]) {
+    await assert.rejects(async () => parsePatched([[FINDINGS_MATCH[0], `${FINDINGS_MATCH[1]}\n      ${bad}`]]), SpecError, bad);
+  }
+});

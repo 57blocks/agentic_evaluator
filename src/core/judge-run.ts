@@ -85,7 +85,7 @@ async function trialDirFor(runsRoot: string, stepDir: string, step: string, t: T
 }
 
 export interface JudgeRunResult {
-  steps: Array<{ id: string; pairs: number; failed: number; costUsd: number; chosen: string | null }>;
+  steps: Array<{ id: string; pairs: number; failed: number; costUsd: number; chosen: string | null; firmness: string }>;
 }
 
 export async function judgeRun(
@@ -248,7 +248,7 @@ export async function judgeRun(
       "utf-8",
     );
     if (opts.html) await writeRunReport(stepDir);
-    result.steps.push({ id: suite.step, pairs: pairs.length, failed, costUsd, chosen: recommendation.chosen });
+    result.steps.push({ id: suite.step, pairs: pairs.length, failed, costUsd, chosen: recommendation.chosen, firmness: recommendation.firmness });
   }
 
   if (nested && result.steps.length > 0) {

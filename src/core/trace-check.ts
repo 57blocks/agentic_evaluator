@@ -21,6 +21,7 @@
 import type { AgentTrace } from "../canon/agent-trace.js";
 import { evaluateTraceRules, hasTraceRules, type TraceRules } from "../canon/trace-rules.js";
 import type { EvaluationState } from "../canon/types.js";
+import type { CheckPart } from "../canon/parts.js";
 import { withTraceRules } from "../check.js";
 
 /** What a check produced, as generate.ts records it on the trial. */
@@ -32,6 +33,10 @@ export interface GradedCheck {
   reason?: string;
   /** The command check's own score (0–1), carried through untouched: trace rules judge the path, not how much of the deliverable was accepted. */
   score?: number;
+  /** The command check's measures, carried through untouched like its score. */
+  measures?: Record<string, number>;
+  /** The check's parts, carried through untouched too. */
+  parts?: CheckPart[];
 }
 
 export interface TraceSubject {

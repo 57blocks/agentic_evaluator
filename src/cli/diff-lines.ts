@@ -1,10 +1,13 @@
 /**
  * A run diff (src/canon/run-diff.ts) as terminal lines: what changed in the
  * setup, then whether the conclusion moved, who crossed a gate, how each
- * rate moved, and which shared inputs flipped and why.
+ * rate moved, the check's measures in each run, and which shared inputs
+ * flipped and why.
  */
 
-import type { Count, RateChange, RateWithInterval, RunDiff } from "../canon/run-diff.js";
+import type { Count, MeasureChange, RateChange, RateWithInterval, RunDiff } from "../canon/run-diff.js";
+import { fmtMeasureStat } from "../canon/measures.js";
+import { pickLabel } from "../report-format.js";
 
 const pct = (v: number | null): string => (v === null ? "—" : v.toFixed(2));
 const frac = (c: Count | null): string => (c === null || c.denominator === 0 ? "—" : `${c.numerator}/${c.denominator}`);
@@ -28,7 +31,7 @@ function setupLines(d: RunDiff): string[] {
 }
 
 function recommendationLine(d: RunDiff): string {
-  const show = (r: { chosen: string | null; firmness: string | null } | null) => (r === null ? "not recorded" : `${r.chosen ?? "none"}${r.firmness ? ` (${r.firmness})` : ""}`);
+  const show = (r: { chosen: string | null; firmness: string | null } | null) => (r === null ? "not recorded" : pickLabel(r));
   const { a, b, changed } = d.recommendation;
   if (a === null || b === null) return `recommendation: ${show(a)} → ${show(b)} (a run without recommendation.json cannot be compared)`;
   return changed ? `recommendation CHANGED: ${show(a)} → ${show(b)}` : `recommendation unchanged: ${show(b)}`;
@@ -48,6 +51,16 @@ function rateLines(d: RunDiff): string[] {
   const head = ["candidate", "before", "after", "shared inputs", "after, not shared", "before, not shared"];
   const row = (r: RateChange) => [r.candidate, rateText(r.a), rateText(r.b), `${frac(r.shared.a)} → ${frac(r.shared.b)}`, frac(r.onlyB), frac(r.onlyA)];
   return ["task success rate, as recorded [95% interval]", ...table([head, ...d.rates.map(row)])];
+}
+
+/** Each candidate's check measures before and after; nothing when neither run reported any. */
+function measureLines(d: RunDiff): string[] {
+  if (d.measures.length === 0) return [];
+  const side = (m: MeasureChange["a"]) => (m === null ? "—" : fmtMeasureStat(m));
+  const arrow = (m: MeasureChange) => `${m.a === null ? "—" : m.a.mean.toFixed(2)} → ${m.b === null ? "—" : m.b.mean.toFixed(2)}`;
+  const head = ["candidate", "measure", "mean", "before [95% interval]", "after [95% interval]"];
+  const rows = d.measures.map((m) => [m.candidate, m.measure, arrow(m), side(m.a), side(m.b)]);
+  return ["check measures, mean per input over graded trials", ...table([head, ...rows]), ""];
 }
 
 /** Per flipped input and trial, what the check said before and after (`--why`). */
@@ -87,6 +100,7 @@ export function diffLines(d: RunDiff, opts: { why?: boolean } = {}): string[] {
     "",
     ...rateLines(d),
     "",
+    ...measureLines(d),
     ...flipLines(d, opts.why === true),
   ];
 }

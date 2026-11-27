@@ -68,7 +68,7 @@ export function Certainty({ certainty: c }: Props) {
           <b className="text-foreground">Effective N {c.effectiveN} of {c.inputs}.</b> Inputs that separated any two candidates on the required check;{" "}
           {c.allPass} every candidate passed and {c.flat} gave everyone the same partial rate, so they cannot inform a choice.
           {c.judgeEffectiveN !== null && c.judgeEffectiveN !== undefined && <> The judge preferred one candidate over another on {c.judgeEffectiveN}.</>}
-          {c.allFail.length > 0 && <> Every candidate failed {c.allFail.length}: <span className="font-mono">{listed}</span> — check those for a harness or check bug first.</>}
+          {c.allFail.length > 0 && <> Every candidate failed {c.allFail.length}: <span className="font-mono">{listed}</span> — a hard set can do that; if you did not expect it, check those for a harness or check bug first.</>}
         </p>
       )}
     </Section>

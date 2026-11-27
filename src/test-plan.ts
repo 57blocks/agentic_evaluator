@@ -16,7 +16,7 @@
 import type { Suite } from "./types.js";
 import type { CandidateDef, EligibilityThresholds } from "./canon/types.js";
 import type { RunBundle } from "./report-v2.js";
-import { resolveEligibility } from "./canon/select.js";
+import { resolveEligibility, stepEligibility } from "./canon/select.js";
 import { describeTraceRules, hasTraceRules } from "./canon/trace-rules.js";
 import { planStep, methodsOf, planE2e } from "./core/plan.js";
 import { readInput } from "./core/generate.js";
@@ -127,7 +127,21 @@ function checkHow(suite: Suite): Array<{ id: string; how: string }> {
   const rules = hasTraceRules(c.trace) ? `; ${describeTraceRules(c.trace)}` : "";
   if (suite.checkDescription) return [{ id: c.id, how: `${suite.checkDescription}${rules}` }];
   if (c.kind === "tsc") return [{ id: c.id, how: `compile the candidate's files with tsc --noEmit (config from ${c.scaffoldDir}/)${rules}` }];
+  if (c.kind === "findings-match") {
+    const category = c.requireCategory ? " and category" : "";
+    const decided = c.llmFallback?.judge === "all" ? "every finding judged against every defect (location is only a hint), and unflagged claims decided," : "ambiguous locations and unflagged claims decided";
+    const llm = c.llmFallback ? `; ${decided} by ${c.llmFallback.model}` : "; no LLM fallback";
+    return [{ id: c.id, how: `match findings.json to the item's known defects by file and lines (±${c.lineTolerance})${category}${llm}${rules}` }];
+  }
   return [{ id: c.id, how: `run ${c.argv.join(" ")} in the trial dir, ${Math.round(c.timeoutMs / 1000)} s timeout${rules}` }];
+}
+
+/** How a step chooses; a scorecard step does not, whatever operating mode it names. */
+function planMode(mode: string | null | undefined, decision: "scorecard" | undefined): { id: string | null; label: string; explain: string } {
+  if (decision === "scorecard") {
+    return { id: "scorecard", label: "Scorecard (no pick)", explain: "decision: scorecard: every candidate's results are reported side by side; no gate or operating mode is applied and no candidate is picked." };
+  }
+  return { id: mode ?? null, label: modeLabel(mode), explain: modeExplain(mode) };
 }
 
 // ── from the spec ────────────────────────────────────────────────────────────
@@ -135,7 +149,7 @@ function checkHow(suite: Suite): Array<{ id: string; how: string }> {
 async function stepFromSuite(suite: Suite): Promise<PlanStep> {
   const defs = suite.candidateDefs ?? {};
   const required = suite.requiredChecks ?? [];
-  const eligibility: EligibilityThresholds = resolveEligibility(required, suite.eligibility);
+  const eligibility: EligibilityThresholds = stepEligibility(suite);
   const methods = methodsOf(suite);
   const scale = planStep(suite);
   const inputs = await Promise.all(
@@ -160,7 +174,7 @@ async function stepFromSuite(suite: Suite): Promise<PlanStep> {
     trials: scale.trials,
     checks: checkHow(suite),
     gates: gateLabels(eligibility, required, suite.operatingMode),
-    mode: { id: suite.operatingMode ?? null, label: modeLabel(suite.operatingMode), explain: modeExplain(suite.operatingMode) },
+    mode: planMode(suite.operatingMode, suite.decision),
     mmd: suite.mmd ?? null,
     judge:
       methods.pairwise || methods.absolute
@@ -220,7 +234,7 @@ export function planFromRun(b: RunBundle): PlanStep {
       how: b.about?.checkDescription ?? (m.evaluators.check_version ? `version ${m.evaluators.check_version}` : "—"),
     })),
     gates: gateLabels(rec.eligibility, m.evaluators.required_checks, m.operating_mode),
-    mode: { id: m.operating_mode ?? null, label: modeLabel(m.operating_mode), explain: modeExplain(m.operating_mode) },
+    mode: planMode(m.operating_mode, m.decision),
     mmd: m.minimum_meaningful_difference ?? null,
     judge: methods.length > 0 ? { model: m.judge.model, methods, dimensions: dims } : null,
     scale: {

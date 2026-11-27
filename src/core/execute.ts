@@ -177,7 +177,8 @@ async function executeSuite(params: {
       absolute: `${suite.judge}+rubric-${short(rubricSha)}+tpl-${short(scoreTplSha)}`,
     },
   };
-  const stopper = suite.earlyStop
+  // A scorecard has no gate to fall out of reach: stopping would only cut the data it shows.
+  const stopper = suite.earlyStop && suite.decision !== "scorecard"
     ? earlyStop({
         trialsPerCandidate: suite.inputs.length * (suite.trials ?? 2),
         inputs: suite.inputs.length,

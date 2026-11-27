@@ -17,7 +17,7 @@ import { workflowGaps, workflowLedger, type WorkflowArm, type WorkflowRecord, ty
 import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
 import { workflowNoVerdictLine, workflowVerdictLine, workflowVerdictTone } from "./report-model.js";
-import { plural, stepsHeadline, STEPS_NOT_VALIDATED } from "./report-format.js";
+import { NO_PICK, plural, SCORECARD_PICK, stepsHeadline, STEPS_NOT_VALIDATED } from "./report-format.js";
 import { FIRMNESS_LABEL, modeLabel } from "./report-copy.js";
 import { aboutOfWorkflow, stepDescriptionsOf, type RunAbout } from "./canon/about.js";
 
@@ -87,15 +87,18 @@ function renderArms(record: WorkflowRecord): string {
   </section>`;
 }
 
-const FIRMNESS_PILL: Record<string, string> = { firm: "pass", directional: "warn", "needs-review": "miss" };
+const FIRMNESS_PILL: Record<string, string> = { firm: "pass", directional: "warn", "needs-review": "miss", scorecard: "warn" };
+
+/** What a step with no pick shows instead of a candidate. */
+const noPick = (s: WorkflowStepRecord): string => (s.firmness === "scorecard" ? SCORECARD_PICK : NO_PICK);
 
 function stepCard(s: WorkflowStepRecord, index: number): string {
   const gated = (s.gated ?? []).length > 0 ? s.gated.map((g) => `${g.candidate} (${g.reason})`).join("; ") : "none";
   const link = `<a href="${encodeURIComponent(s.dir)}/report.html">${escapeHtml(s.dir)}/report.html</a>`;
   const cost = s.ledger_total == null ? "—" : usd(s.ledger_total);
-  return `<div class="step-card${s.chosen ? "" : " open"}">
+  return `<div class="step-card${s.chosen || s.firmness === "scorecard" ? "" : " open"}">
     <span class="idx">${index + 1} · ${escapeHtml(s.id)}</span>
-    <span class="pick">${s.chosen ? escapeHtml(s.chosen) : "no recommendation"}</span>
+    <span class="pick">${s.chosen ? escapeHtml(s.chosen) : noPick(s)}</span>
     <span class="pill ${FIRMNESS_PILL[s.firmness] ?? "warn"}">${escapeHtml(FIRMNESS_LABEL[s.firmness as keyof typeof FIRMNESS_LABEL] ?? s.firmness)}</span>
     <span class="small">${escapeHtml(modeLabel(s.operating_mode))} · gated out: ${escapeHtml(gated)}</span>
     <span class="small">${plural(s.trials, "trial")} · ${cost} · ${link}</span>
@@ -117,7 +120,7 @@ function stepRow(s: WorkflowStepRecord): string {
   const firmness = FIRMNESS_LABEL[s.firmness as keyof typeof FIRMNESS_LABEL] ?? s.firmness;
   return `<tr class="${s.chosen ? "chosen" : ""}">
     <td class="cand">${escapeHtml(s.id)}<span class="model">${escapeHtml(modeLabel(s.operating_mode))}</span></td>
-    <td>${s.chosen ? escapeHtml(s.chosen) : '<span class="pill miss">no recommendation</span>'}<span class="sub">${escapeHtml(firmness)}</span></td>
+    <td>${s.chosen ? escapeHtml(s.chosen) : `<span class="pill ${s.firmness === "scorecard" ? "warn" : "miss"}">${noPick(s)}</span>`}<span class="sub">${escapeHtml(firmness)}</span></td>
     <td class="small">${escapeHtml(gated)}</td>
     <td class="num">${s.trials}</td>
     <td class="num">${s.ledger_total == null ? "—" : usd(s.ledger_total)}</td>

@@ -9,6 +9,8 @@
 import type { AgentActivity } from "./canon/agent-trace.js";
 import type { TraceRules } from "./canon/trace-rules.js";
 import type { InputLabels } from "./canon/about.js";
+import type { CheckReport } from "./canon/headline.js";
+import type { CheckPart } from "./canon/parts.js";
 import type {
   CandidateDef,
   CompletionState,
@@ -37,12 +39,15 @@ export type ProducerKind = "prompt" | "agent" | "codegen";
 export type JudgeMethod = "pairwise-swap" | "absolute-1-5";
 
 /**
- * The step's required check. Two kinds:
+ * The step's required check. Three kinds:
  *
- *   tsc      — compile the produced files against a scaffold tsconfig.
- *   command  — run a user-declared program in the trial's work dir. This is
- *              how a step that is not codegen gets a deterministic gate at
- *              all: without one, every trial outcome stays `undetermined`.
+ *   tsc            — compile the produced files against a scaffold tsconfig.
+ *   command        — run a user-declared program in the trial's work dir. This
+ *                    is how a step that is not codegen gets a deterministic
+ *                    gate at all: without one, every trial outcome stays
+ *                    `undetermined`.
+ *   findings-match — pair a code review's findings.json with the item's known
+ *                    defects (src/code-review/), built in.
  *
  * One per step today. A step declaring two required checks is rejected by the
  * loader rather than silently gated on one of them.
@@ -65,6 +70,22 @@ export type CheckConfig =
       /** Task-relative files hashed into the evaluator version. */
       versionFiles: string[];
       timeoutMs: number;
+      trace?: TraceRules;
+    }
+  | {
+      id: string;
+      kind: "findings-match";
+      /** Lines a finding may sit from a defect's range and still match it (default 3). */
+      lineTolerance: number;
+      /** A deterministic match also needs the finding's category to equal the defect's. */
+      requireCategory: boolean;
+      /** The model that decides ambiguous locations and unflagged claims; none: they stay undecided. */
+      llmFallback?: {
+        model: string;
+        endpoint: ModelEndpoint;
+        /** "all": it judges every finding against every defect, and location is only a hint. Absent: ambiguous locations only. */
+        judge?: "ambiguous" | "all";
+      };
       trace?: TraceRules;
     };
 
@@ -154,6 +175,8 @@ export interface Suite {
   requiredChecks?: string[];
   successCriteria?: SuccessCriteria;
   operatingMode?: string;
+  /** Set only for a step that reports a scorecard and picks no candidate (no gates applied). */
+  decision?: "scorecard";
   /** Declared eligibility gates; resolved and frozen into the run manifest. */
   eligibility?: EligibilityDecl;
   /** Predeclared minimum meaningful difference; null/undefined → directional only. */
@@ -214,6 +237,10 @@ export interface Suite {
   checkDescription?: string;
   /** The step's own `description`: what its candidates do. */
   stepDescription?: string;
+  /** The step's required check's `report`: the measures a scorecard leads with. */
+  checkReport?: CheckReport;
+  /** spec `caveats`: what to read the numbers with. */
+  caveats?: string[];
   /** `test_set.labels_file`, task-relative: tags and split per input. */
   labelsFile?: string;
   /** Tags and split per input, read from `test_set.items_file` when the spec was loaded. */
@@ -258,6 +285,10 @@ export interface RunRecord {
   checkReason?: string;
   /** What share of the deliverable a command check accepted, in [0, 1], when it reported one. */
   checkScore?: number;
+  /** Named counts a command check reported beside its verdict (canon/measures.ts), when it reported any. */
+  checkMeasures?: Record<string, number>;
+  /** What the check looked for on this trial, each passed or not (canon/parts.ts), when it reported any. */
+  checkParts?: CheckPart[];
 
   // ── Canonical (protocol v0.4) fields. `candidate` above holds the candidate
   // id. ──

@@ -141,7 +141,7 @@ export function itemGaps(s: ItemStats): string[] {
   const allFail = s.items.filter((i) => i.class === "all-fail").map((i) => i.input);
   if (allFail.length > 0) {
     lines.push(
-      `- every candidate failed ${allFail.length} input(s): ${listed(allFail)}. Check those traces for a harness or check bug before counting them as model failures.`,
+      `- every candidate failed ${allFail.length} input(s): ${listed(allFail)}. A hard set can do that; if you did not expect it, check those traces for a harness or check bug before counting them as model failures.`,
     );
   }
   return lines;

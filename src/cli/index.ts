@@ -31,6 +31,7 @@ import { cmdImportHarbor, IMPORT_HARBOR_HELP } from "./commands/import-harbor.js
 import { cmdReplay, REPLAY_HELP } from "./commands/replay.js";
 import { cmdDiff, DIFF_HELP } from "./commands/diff.js";
 import { CALIBRATE_HELP, cmdCalibrate } from "./commands/calibrate.js";
+import { cmdCodeReview, CODE_REVIEW_HELP, CODE_REVIEW_VALUED } from "./commands/code-review.js";
 
 interface Command {
   summary: string;
@@ -56,6 +57,7 @@ export const COMMANDS: Record<string, Command> = {
   replay: { summary: "decide finished runs again under baseline rules, and with grader errors blamed on the model", help: REPLAY_HELP, valued: VALUED, run: cmdReplay },
   calibrate: { summary: "does the judge's 1–5 score separate answers a person called right from wrong", help: CALIBRATE_HELP, valued: [...VALUED, "labels"], run: cmdCalibrate },
   review: { summary: "review a run blind, in the dashboard", help: REVIEW_HELP, valued: [...VALUED, "reviewer"], run: cmdReview },
+  "code-review": { summary: "build a code-review dataset from a repo's history: escaped bugs and clean PRs", help: CODE_REVIEW_HELP, valued: CODE_REVIEW_VALUED, run: cmdCodeReview },
   dash: { summary: "serve the dashboard, or export it as files", help: DASH_HELP, valued: [...VALUED, "export"], run: cmdDash },
   "install-skill": { summary: "add the /agenteval-new-task skill for Claude Code", help: INSTALL_SKILL_HELP, valued: VALUED, run: cmdInstallSkill },
   "import-harbor": { summary: "a finished Harbor job as a task with one run, nothing re-run", help: IMPORT_HARBOR_HELP, valued: [...VALUED, "into", "mode", "threshold"], run: cmdImportHarbor },

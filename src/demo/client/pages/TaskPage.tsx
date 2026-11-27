@@ -10,7 +10,7 @@
 import { Tag } from "@/components/tag";
 import type { RunView, TaskView } from "../../catalog.js";
 import { navigate } from "@/app/routes";
-import { NEEDS_REVIEW } from "@/lib/copy";
+import { stepPick } from "@/lib/copy";
 import { primaryReportDir, runStamp, spendLabel } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { FileBrowser } from "@/features/task-files/FileBrowser";
@@ -101,7 +101,7 @@ function RunsTable({ runs }: { runs: RunView[] }) {
                     {s.chosen ? (
                       <span className="font-mono text-[13px]">{s.chosen}</span>
                     ) : (
-                      <Tag tone="bad">{NEEDS_REVIEW}</Tag>
+                      <Tag tone={s.firmness === "scorecard" ? "neutral" : "bad"}>{stepPick(s)}</Tag>
                     )}
                   </span>
                 ))}

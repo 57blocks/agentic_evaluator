@@ -20,7 +20,7 @@ import type { EvaluationRow, TrialRow } from "./canon/rows.js";
 import { gapsFor, type CanonSummary } from "./canon/write.js";
 import { recommendFromCanon, type Recommendation } from "./canon/select.js";
 import { FIRMNESS_LABEL, firmnessNote, gateRows, judgeNote, modeLabel, promptLabel } from "./report-copy.js";
-import { NO_PICK, plural } from "./report-format.js";
+import { NO_PICK, plural, SCORECARD_PICK } from "./report-format.js";
 import {
   candidateViews, evaluatorErrorSubject, fmtCost, fmtPct, fmtScore, fmtSec, fmtUsd, judgeFavourite,
   ledgerNote, reviewGapLines, reviewSummary, sha8, stateTone, subtitleReasons, verdictFacts, verdictText,
@@ -39,8 +39,18 @@ import { escapeHtml } from "./html.js";
 import { PAGE_STYLE } from "./report-style.js";
 import { isWorkflowRun, writeWorkflowReport } from "./report-workflow.js";
 import { CHART_STYLES, renderScoreDistribution, renderScoreSummary } from "./report-charts.js";
-import { aboutOfRun, promptsOfRun, type RunAbout, type RunPromptsAbout } from "./canon/about.js";
-import { sliceRows } from "./report-slices.js";
+import { aboutOfRun, promptsOfRun, type InputLabels, type RunAbout, type RunPromptsAbout } from "./canon/about.js";
+import { measureSlices, sliceRows } from "./report-slices.js";
+import { measureLine, renderMeasures } from "./report-measures.js";
+import { COMPARE_STYLES, renderInputComparison, type CellNote } from "./report-compare.js";
+import { headlineValue, inputGroups, type CheckReport } from "./canon/headline.js";
+import { partBoard } from "./canon/parts.js";
+import { renderParts } from "./report-parts.js";
+import { headlineNote } from "./report-headline.js";
+import { HEADLINE_CHART_STYLES } from "./report-headline-charts.js";
+import { claimBoard, loadDefectClaims, renderClaims, type DefectClaim } from "./code-review/claims.js";
+import { inputComparison } from "./canon/input-compare.js";
+import { renderFailedTrials, renderScorecard } from "./report-scorecard.js";
 import { SCATTER_STYLES, costSuccessChart, gateNotesOf, renderCostSuccess } from "./report-scatter.js";
 import { renderCertainty } from "./report-certainty.js";
 import { agentActivityRows, type AgentActivityRow } from "./report-model.js";
@@ -65,6 +75,8 @@ export interface RunBundle {
   recommendation: Recommendation;
   gaps: string;
   outputs: RawOutput[];
+  /** A code review's defect claims on clean items, from each trial's decision record (code-review/claims.ts); empty for any other check. */
+  claims?: DefectClaim[];
   /**
    * Human verdicts from reviews/*.jsonl, latest per (reviewer, pair). Kept apart
    * from `evaluations` so nothing that selects a candidate can read them.
@@ -98,6 +110,7 @@ export async function loadBundle(dir: string): Promise<RunBundle> {
     dir,
     manifest,
     outputs: await loadRawOutputs(dir, trials),
+    claims: await loadDefectClaims(dir, trials),
     trials,
     evaluations: await readJsonl<EvaluationRow>(path.join(dir, "evaluations.jsonl")),
     ledger: await read<CostLedger>("ledger.json"),
@@ -112,10 +125,18 @@ export async function loadBundle(dir: string): Promise<RunBundle> {
 
 // ── rendering helpers ──────────────────────────────────────────────────────
 
+/** What to read the numbers with, as the spec lists it; said plainly when the run itself did not freeze them. */
+function renderCaveats(a: RunAbout): string {
+  if (a.caveats.length === 0) return "";
+  const stale = a.caveatsFromCurrentSpec ? `<p class="note">This run predates these caveats; they are read from the task's spec as it is now.</p>` : "";
+  return `<h3>Read these numbers with care</h3>
+    <ul class="gaps">${a.caveats.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}</ul>${stale}`;
+}
+
 /** What the run evaluated and what a pass means, before any number. Empty when the spec says neither. */
 function renderAbout(b: RunBundle): string {
   const a = b.about;
-  if (!a || (!a.description && !a.stepDescription && !a.checkDescription)) return "";
+  if (!a || (!a.description && !a.stepDescription && !a.checkDescription && a.caveats.length === 0)) return "";
   const check = b.manifest.evaluators.required_checks[0];
   const stale = a.source === "current-spec" ? `<p class="note">This run predates these descriptions; they are read from the task's spec as it is now.</p>` : "";
   return `<section class="card">
@@ -123,6 +144,7 @@ function renderAbout(b: RunBundle): string {
     ${a.description ? `<p>${escapeHtml(a.description)}</p>` : ""}
     ${a.stepDescription ? `<p><b>This step (${escapeHtml(b.manifest.step.id)})</b>: ${escapeHtml(a.stepDescription)}</p>` : ""}
     ${a.checkDescription && check ? `<p class="note"><b>A pass of ${escapeHtml(check)}</b> means: ${escapeHtml(a.checkDescription)}</p>` : ""}
+    ${renderCaveats(a)}
     ${stale}
   </section>`;
 }
@@ -203,12 +225,12 @@ function renderHero(b: RunBundle, views: readonly CandidateView[], support: read
 }
 
 
-/** Required checks as a pill: green when every executed check passed. */
-function checkPill(v: CandidateView): string {
+/** Required checks as a pill: green when every executed check passed. Its measures follow unless the scorecard above already leads with the check's headlines. */
+function checkPill(v: CandidateView, withMeasures: boolean): string {
   if (v.checkExecuted === 0) return "—";
   const all = v.checkPass === v.checkExecuted;
   const score = v.checkScore === null ? "" : `<span class="sub">score ${Math.round(v.checkScore * 100)}%</span>`;
-  return `<span class="pill ${all ? "pass" : "miss"}">${v.checkPass} / ${v.checkExecuted}</span>${score}`;
+  return `<span class="pill ${all ? "pass" : "miss"}">${v.checkPass} / ${v.checkExecuted}</span>${score}${withMeasures ? measureLine(v.checkMeasures) : ""}`;
 }
 
 /** The legacy report's inline win-rate bar; absent when nothing was compared. */
@@ -338,6 +360,38 @@ function renderAgentActivity(rows: readonly AgentActivityRow[]): string {
     </section>`;
 }
 
+/** Per candidate and input, the headlines the check breaks down by slice, each in a few words; none where it reported nothing. */
+function headlineNotes(report: CheckReport, trials: readonly TrialRow[], labels: InputLabels | null): CellNote {
+  const sliced = report.headline.filter((h) => h.by_slice);
+  return (candidate, input) =>
+    sliced.flatMap((h) => {
+      // A headline over one tag says nothing on an input without it.
+      if (h.tag !== undefined && !labels?.[input]?.tags.includes(h.tag)) return [];
+      const v = headlineValue(trials, candidate, h, new Set([input]));
+      return v ? [headlineNote(h.label, v)] : [];
+    });
+}
+
+/**
+ * A scorecard step's page leads with the scorecard, then the inputs side by
+ * side, then what failed and why; the candidates table and the slices follow.
+ * No verdict, gate trace or "how sure": nothing was picked.
+ */
+function scorecardTop(b: RunBundle, views: readonly CandidateView[], candidateTable: string): string {
+  const ids = views.map((v) => v.id);
+  const labels = b.about?.labels ?? null;
+  const report = b.about?.checkReport ?? null;
+  return [
+    renderScorecard(labels, b.trials, b.summary.candidates, ids, report),
+    renderParts(partBoard(report?.parts, b.trials, ids), ids),
+    renderClaims(claimBoard(b.claims ?? [], ids), ids),
+    renderInputComparison(inputComparison(b.trials, ids), ids, b.outputs, report ? headlineNotes(report, b.trials, labels) : undefined, inputGroups(labels, report?.input_groups)),
+    renderFailedTrials(b.trials, ids),
+    candidateTable,
+    renderSlices(b, ids) + renderMeasures(measureSlices(labels, b.trials, ids), ids),
+  ].join("\n\n  ");
+}
+
 export function renderRunReport(b: RunBundle): string {
   const m = b.manifest;
   const rec = b.recommendation;
@@ -373,7 +427,7 @@ export function renderRunReport(b: RunBundle): string {
       return `<tr${rowClass ? ` class="${rowClass}"` : ""}>
         <td class="cand"><span class="sw sw${colorOf.get(v.id) ?? 0}"></span>${escapeHtml(v.id)}${candidateMark(gated, chosen)}<span class="model">${escapeHtml(v.model)} · ${escapeHtml(v.deployment)}</span>${promptVariants ? promptLine(v, b.prompts?.stepFile ?? null) : ""}</td>
         <td><div class="state-list">${outcomes}</div></td>
-        <td class="num">${checkPill(v)}</td>
+        <td class="num">${checkPill(v, !(rec.firmness === "scorecard" && b.about?.checkReport))}</td>
         <td class="num">${winBar(v.winRate)}${fmtPct(v.winRate)}<span class="sub">${v.comparisons} matches</span></td>
         ${review ? `<td class="num">${winBar(v.human?.rate ?? null)}${fmtPct(v.human?.rate ?? null)}<span class="sub">${v.human?.comparisons ?? 0} reviewed</span></td>` : ""}
         <td class="num">${fmtScore(v.absolute)}</td>
@@ -400,13 +454,22 @@ export function renderRunReport(b: RunBundle): string {
     })
     .join("");
 
+  const candidateTable = `<section class="card">
+    <h2>Candidates <span class="hint">the same inputs, paired by candidate; ${trialsPer} trial(s) per cell</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th>${review ? '<th class="num">Human win rate</th>' : ""}<th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
+      <tbody>${candidateRows}</tbody>
+    </table></div>
+    <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.${m.control_candidate ? ` Control candidate: ${escapeHtml(m.control_candidate)}.` : ""}</p>
+  </section>`;
+
   const led = b.ledger;
   const sampleTrial = b.trials[0] ? JSON.stringify(b.trials[0], null, 1) : "{}";
 
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(m.run_name)} run report</title>
-<style>${PAGE_STYLE}${EVIDENCE_STYLES}${CHART_STYLES}${SCATTER_STYLES}</style></head>
+<style>${PAGE_STYLE}${EVIDENCE_STYLES}${CHART_STYLES}${SCATTER_STYLES}${COMPARE_STYLES}${HEADLINE_CHART_STYLES}</style></head>
 <body><div class="page">
   <header class="run">
     <p class="eyebrow">Agentic Evaluator · run report · protocol ${escapeHtml(m.protocol_version)}</p>
@@ -418,7 +481,7 @@ export function renderRunReport(b: RunBundle): string {
       <div><dt>Judge</dt><dd>${escapeHtml(m.judge.model)} · rubric ${sha8(m.evaluators.rubric_sha256)}</dd></div>
       <div><dt>Mode</dt><dd>${escapeHtml(m.execution.benchmark_mode)} · ${escapeHtml(m.execution.cache_mode)} cache</dd></div>
       <div><dt>Run time</dt><dd>${escapeHtml(m.started_at.slice(0, 16).replace("T", " "))} → ${escapeHtml((m.finished_at ?? "").slice(11, 16))}</dd></div>
-      <div><dt>Operating mode</dt><dd>${escapeHtml(modeLabel(m.operating_mode))} · ${escapeHtml(FIRMNESS_LABEL[rec.firmness])}${rec.chosen ? ` · recommend ${escapeHtml(rec.chosen)}` : ` · ${NO_PICK}${rec.closest ? ` · closest ${escapeHtml(rec.closest.candidate)}` : ""}`}</dd></div>
+      <div><dt>Operating mode</dt><dd>${rec.firmness === "scorecard" ? `not applied · ${SCORECARD_PICK}` : `${escapeHtml(modeLabel(m.operating_mode))} · ${escapeHtml(FIRMNESS_LABEL[rec.firmness])}${rec.chosen ? ` · recommend ${escapeHtml(rec.chosen)}` : ` · ${NO_PICK}${rec.closest ? ` · closest ${escapeHtml(rec.closest.candidate)}` : ""}`}`}</dd></div>
       <div><dt>harness</dt><dd>${escapeHtml(m.harness.version)} · ${escapeHtml(m.harness.git_sha ?? "—")}</dd></div>
     </dl>
   </header>
@@ -427,7 +490,7 @@ export function renderRunReport(b: RunBundle): string {
 
   ${renderPromptComparison(promptComparison)}
 
-  ${renderHero(b, views, support)}
+  ${rec.firmness === "scorecard" ? scorecardTop(b, views, candidateTable) : `${renderHero(b, views, support)}
 
   ${renderCostSuccess(costSuccessChart(
     views.map((v) => ({ ...v, isControl: m.control_candidate === v.id, gated: !rec.eligible.includes(v.id), chosen: rec.chosen === v.id })),
@@ -444,16 +507,13 @@ export function renderRunReport(b: RunBundle): string {
 
   ${renderCertainty(rec, itemStats(b.trials))}
 
-  <section class="card">
-    <h2>Candidates <span class="hint">the same inputs, paired by candidate; ${trialsPer} trial(s) per cell</span></h2>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Candidate</th><th>Outcome</th><th class="num">Required check</th><th class="num">Pairwise win rate</th>${review ? '<th class="num">Human win rate</th>' : ""}<th class="num">Absolute score 1–5</th><th class="num">Generation cost per success</th><th class="num">p50 duration</th><th>Completion</th></tr></thead>
-      <tbody>${candidateRows}</tbody>
-    </table></div>
-    <p class="note">The required check's denominator is the number of times the check actually ran. Pairwise win rate uses only the first successful output per cell; a tie counts 0.5. Generation cost per success excludes judging; the full cost is in the cost breakdown.${m.control_candidate ? ` Control candidate: ${escapeHtml(m.control_candidate)}.` : ""}</p>
-  </section>
+  ${candidateTable}
 
-  ${renderSlices(b, views.map((v) => v.id))}
+  ${renderSlices(b, views.map((v) => v.id))}${renderMeasures(measureSlices(b.about?.labels ?? null, b.trials, views.map((v) => v.id)), views.map((v) => v.id))}
+
+  ${renderParts(partBoard(b.about?.checkReport?.parts, b.trials, views.map((v) => v.id)), views.map((v) => v.id))}
+
+  ${renderInputComparison(inputComparison(b.trials, views.map((v) => v.id)), views.map((v) => v.id), b.outputs)}`}
 
   <div class="two-col">
     ${renderAgentActivity(agentActivityRows(b.trials, views.map((v) => v.id)))}

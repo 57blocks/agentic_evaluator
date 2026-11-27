@@ -19,7 +19,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { buildLedger, type CostLedger } from "../canon/cost.js";
-import { resolveEligibility, type Recommendation } from "../canon/select.js";
+import { resolveEligibility, stepEligibility, type Recommendation } from "../canon/select.js";
 import { judgeDiscrimination } from "../canon/discrimination.js";
 import type { RunManifest } from "../canon/manifest.js";
 import { directionality, ratesFor } from "../canon/rates.js";
@@ -146,7 +146,7 @@ export async function writeWorkflowFromSteps(
 export interface CombineResult {
   dir: string;
   runId: string;
-  steps: Array<{ id: string; chosen: string | null; sources: string[] }>;
+  steps: Array<{ id: string; chosen: string | null; firmness: string; sources: string[] }>;
 }
 
 export async function combineRuns(specPath: string, runIds: readonly string[], opts: { html?: boolean } = {}): Promise<CombineResult> {
@@ -179,7 +179,9 @@ export async function combineRuns(specPath: string, runIds: readonly string[], o
       control_candidate: suite.controlCandidate ?? null,
       success_criteria: suite.successCriteria ?? null,
       operating_mode: suite.operatingMode ?? null,
-      eligibility: resolveEligibility(suite.requiredChecks ?? [], suite.eligibility),
+      // The spec's decision, not the source runs': absent means pick.
+      decision: suite.decision,
+      eligibility: stepEligibility(suite),
       // The selector reads it from the manifest: the spec's, not the source runs'.
       minimum_meaningful_difference: suite.mmd ?? null,
       finished_at: new Date().toISOString(),
@@ -206,7 +208,7 @@ export async function combineRuns(specPath: string, runIds: readonly string[], o
       "utf-8",
     );
     if (opts.html) await writeRunReport(stepDir);
-    out.push({ id: suite.step, chosen: recommendation.chosen, sources: sources.map((s) => s.run) });
+    out.push({ id: suite.step, chosen: recommendation.chosen, firmness: recommendation.firmness, sources: sources.map((s) => s.run) });
   }
   if (out.length === 0) throw new Error(`none of ${runIds.join(", ")} holds a step of ${specPath}`);
 

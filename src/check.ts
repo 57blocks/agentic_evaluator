@@ -30,10 +30,13 @@ import { sha256, short } from "./canon/hash.js";
 import type { EvaluationState } from "./canon/types.js";
 import type { AgentTrace } from "./canon/agent-trace.js";
 import { hasTraceRules, type TraceRules } from "./canon/trace-rules.js";
+import { measuresOf } from "./canon/measures.js";
+import { partsOf, type CheckPart } from "./canon/parts.js";
 import type { CheckConfig } from "./types.js";
+import { findingsMatchVersion } from "./code-review/version.js";
 
 /** Truncate captured compiler output so records / reports stay small. */
-const MAX_OUTPUT_CHARS = 8_000;
+export const MAX_OUTPUT_CHARS = 8_000;
 const TSC_TIMEOUT_MS = 120_000;
 
 /**
@@ -67,6 +70,10 @@ export interface CheckResult {
    * candidates the verdict alone cannot.
    */
   score?: number;
+  /** Named counts a command check reported (`{"measures": {"comments": 3}}`); descriptive only (canon/measures.ts). */
+  measures?: Record<string, number>;
+  /** What a check looked for, each passed or not (`{"parts": [{"id": "D1", "pass": true}]}`); descriptive only (canon/parts.ts). */
+  parts?: CheckPart[];
 }
 
 let cachedTscVersion: string | undefined;
@@ -104,7 +111,9 @@ export async function requiredCheckVersion(check: CheckConfig, taskRoot: string)
   const base =
     check.kind === "tsc"
       ? await checkVersion(await resolveTaskAsset(taskRoot, check.scaffoldDir))
-      : await commandCheckVersion(check.argv, check.versionFiles, taskRoot);
+      : check.kind === "findings-match"
+        ? findingsMatchVersion(check)
+        : await commandCheckVersion(check.argv, check.versionFiles, taskRoot);
   return withTraceRules(base, check.trace);
 }
 
@@ -114,7 +123,7 @@ export function withTraceRules(version: string, rules: TraceRules | undefined): 
 }
 
 /** Keys sorted at every level, so the same rules written in another order hash alike. */
-function canonicalJson(value: unknown): string {
+export function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
   if (value && typeof value === "object") {
     const o = value as Record<string, unknown>;
@@ -132,7 +141,7 @@ function canonicalJson(value: unknown): string {
  * so it fails the check rather than erroring the evaluator, and nothing is
  * written before every path has been looked at.
  */
-function placeFiles(
+export function placeFiles(
   workDir: string,
   files: readonly CheckFile[],
   version: string,
@@ -157,7 +166,7 @@ function placeFiles(
   return { placed };
 }
 
-async function writePlaced(placed: ReadonlyArray<{ dest: string; content: string }>): Promise<void> {
+export async function writePlaced(placed: ReadonlyArray<{ dest: string; content: string }>): Promise<void> {
   await Promise.all(
     placed.map(async (f) => {
       await fs.mkdir(path.dirname(f.dest), { recursive: true });
@@ -271,8 +280,9 @@ function runTsc(workDir: string): Promise<Omit<CheckResult, "version">> {
  *   stdout       optional JSON {"evidence": "...", "reason": "...", "score": 0.93};
  *                plain text is kept verbatim as the evidence instead. `score`
  *                (a number in [0, 1]: held-out tests passed, requirements
- *                covered) is kept beside the verdict; anything else there is
- *                ignored, never an evaluator error
+ *                covered) is kept beside the verdict, and so is `measures`
+ *                ({"comments": 3}: named finite numbers, canon/measures.ts);
+ *                anything else there is ignored, never an evaluator error
  *
  * The command runs on this host with the caller's privileges. Until the
  * Docker sandbox lands, only declare checks you would run yourself.
@@ -329,7 +339,7 @@ export async function commandCheckVersion(
  * elsewhere on the host, so whatever is there is removed first (the link, not
  * its target) and a fresh regular file written; the candidate has exited.
  */
-async function writeFresh(file: string, content: string): Promise<void> {
+export async function writeFresh(file: string, content: string): Promise<void> {
   await fs.rm(file, { force: true });
   await fs.writeFile(file, content, { encoding: "utf-8", flag: "wx" });
 }
@@ -339,17 +349,21 @@ function scoreOf(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1 ? value : undefined;
 }
 
-/** Pull evidence (and a score, when reported) out of the check's stdout, JSON or not. */
-function evidenceOf(stdout: string): { evidence: string; reason?: string; score?: number } {
+/** Pull evidence (and a score and measures, when reported) out of the check's stdout, JSON or not. */
+function evidenceOf(stdout: string): { evidence: string; reason?: string; score?: number; measures?: Record<string, number>; parts?: CheckPart[] } {
   const text = stdout.trim();
   if (!text.startsWith("{")) return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
   try {
-    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown; score?: unknown };
+    const parsed = JSON.parse(text) as { evidence?: unknown; reason?: unknown; score?: unknown; measures?: unknown; parts?: unknown };
     const score = scoreOf(parsed.score);
+    const measures = measuresOf(parsed.measures);
+    const parts = partsOf(parsed.parts);
     return {
       evidence: typeof parsed.evidence === "string" ? parsed.evidence.slice(0, MAX_OUTPUT_CHARS) : text.slice(0, MAX_OUTPUT_CHARS),
       ...(typeof parsed.reason === "string" ? { reason: parsed.reason } : {}),
       ...(score === undefined ? {} : { score }),
+      ...(measures === undefined ? {} : { measures }),
+      ...(parts === undefined ? {} : { parts }),
     };
   } catch {
     return { evidence: text.slice(0, MAX_OUTPUT_CHARS) };
@@ -427,8 +441,8 @@ export async function runCommandCheck(params: {
     const why = e.code === "ENOENT" ? `check program not found: ${program}` : `check could not start: ${e.message}`;
     return { state: "evaluator_error", passed: false, exitCode: -1, output: why, version, reason: why };
   }
-  const { evidence, reason, score } = evidenceOf(ran.stdout);
-  const scored = score === undefined ? {} : { score };
+  const { evidence, reason, score, measures, parts } = evidenceOf(ran.stdout);
+  const scored = { ...(score === undefined ? {} : { score }), ...(measures === undefined ? {} : { measures }), ...(parts === undefined ? {} : { parts }) };
   const errText = ran.stderr.trim().slice(0, MAX_OUTPUT_CHARS);
   if (!ran.timedOut && ran.exitCode === COMMAND_EXIT_PASS) {
     return { state: "pass", passed: true, exitCode: COMMAND_EXIT_PASS, output: evidence, version, ...(reason ? { reason } : {}), ...scored };

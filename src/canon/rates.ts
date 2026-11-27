@@ -22,6 +22,7 @@
 
 import type { CheckCell, TrialRow } from "./rows.js";
 import { INFRA_COMPLETION_STATES } from "./states.js";
+import { measureStats, type MeasureStats } from "./measures.js";
 import { MIN_DIFFERING_INPUTS } from "./stats.js";
 import type { CompletionState, EvaluationState } from "./types.js";
 
@@ -45,6 +46,12 @@ export interface CandidateRates {
    * carries one. Absent in summaries written before checks could score.
    */
   required_check_score?: number | null;
+  /**
+   * The check's named measures over the candidate's graded trials, input as
+   * the unit (canon/measures.ts). Descriptive: no gate or mode reads them.
+   * Absent when the check reported none, and in older summaries.
+   */
+  required_check_measures?: MeasureStats;
   /** pass^k over inputs (see the header). Absent in summaries written before it existed. */
   all_trials_pass_rate?: Rate;
   completion_states: Record<CompletionState, number>;
@@ -109,6 +116,7 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
   // figure, unknown — not a cheaper number.
   const costObserved = own.every((r) => r.cost.source !== "none");
   const durations = own.filter((r) => r.completion_state === "success").map((r) => r.ms).sort((a, b) => a - b);
+  const measures = measureStats(own, candidate);
 
   return {
     candidate,
@@ -119,6 +127,7 @@ export function ratesFor(candidate: string, rows: readonly TrialRow[]): Candidat
     evaluation_coverage: rate(classified, own.length),
     required_check_pass_rate: rate(checkStates.pass, checkStates.pass + checkStates.fail),
     required_check_score: meanScore(checkCells),
+    ...(Object.keys(measures).length > 0 ? { required_check_measures: measures } : {}),
     all_trials_pass_rate: allTrialsPassRate(own),
     completion_states: completion,
     outcomes: { success: successes, failure: failures, undetermined },

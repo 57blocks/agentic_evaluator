@@ -21,6 +21,7 @@ import { sha256 } from "../canon/hash.js";
 import { endpointOf, endpointProblem, type EndpointDecl } from "../providers/index.js";
 import type { CandidateDef, EligibilityDecl } from "../canon/types.js";
 import { hasTraceRules, type TraceRules } from "../canon/trace-rules.js";
+import type { CheckReport } from "../canon/headline.js";
 import type { CheckConfig, JudgeMethod } from "../types.js";
 import { workspaceForSpec, type Workspace } from "../core/workspace.js";
 import { labelsOfItems, materializeItems, readItems } from "../core/items.js";
@@ -42,6 +43,8 @@ export interface EvalStep {
   judged_dimensions?: string[];
   success_criteria?: { mandatory_checks: "all" };
   operating_mode?: string;
+  /** "scorecard": report results per candidate and pick none (no gates, no operating mode). Default "pick". */
+  decision?: "pick" | "scorecard";
   eligibility?: EligibilityDecl;
   maximum_completion_time_seconds?: number;
   /** A spend cap per trial, handed to command candidates (they enforce it). */
@@ -75,6 +78,7 @@ export interface EvalSpec {
   protocol_version: string;
   run_name: string;
   description?: string;
+  caveats?: string[];
   budget_usd?: number;
   workflow: {
     control_candidate?: string;
@@ -92,12 +96,16 @@ export interface EvalSpec {
     required_checks?: Record<
       string,
       {
-        kind: "tsc" | "command";
+        kind: "tsc" | "command" | "findings-match";
         scaffold_dir?: string;
+        line_tolerance?: number;
+        require_category?: boolean;
+        llm_fallback?: EndpointDecl & { model: string; judge?: "ambiguous" | "all" };
         argv?: string[];
         version_files?: string[];
         timeout_seconds?: number;
         description?: string;
+        report?: CheckReport;
         trace?: TraceRules;
       }
     >;
@@ -283,6 +291,13 @@ function checkControlChain(spec: EvalSpec, specPath: string): void {
     }
   }
 
+  // The proposed combination is each chained step's pick; a scorecard step has none.
+  const chained = new Set(steps.flatMap((s) => (s.input_from ? [s.id, s.input_from] : [])));
+  const carded = steps.find((s) => s.decision === "scorecard" && chained.has(s.id));
+  if (carded) {
+    throw specError(specPath, `step "${carded.id}" has decision: scorecard but is in an input_from chain: the chain's proposed combination needs a pick on every chained step. Use decision: pick there, or drop input_from.`);
+  }
+
   const chain = orderControlChain(steps.map((s) => ({ id: s.id, inputFrom: s.input_from })));
   if (!chain) {
     if (steps.some((s) => s.input_from)) {
@@ -325,6 +340,8 @@ function checkE2eBlock(spec: EvalSpec, specPath: string, root: EvalStep): void {
 }
 
 const DEFAULT_CHECK_TIMEOUT_S = 120;
+/** findings-match: lines a finding may sit from a defect and still match it. */
+const DEFAULT_LINE_TOLERANCE = 3;
 const ALL_JUDGE_METHODS: JudgeMethod[] = ["pairwise-swap", "absolute-1-5"];
 
 /**
@@ -380,6 +397,11 @@ function compileCheck(
     if (r.first === r.then) throw specError(specPath, `required check "${id}": trace rule orders ${r.first} before itself`);
   }
   const trace = def.trace ? { trace: def.trace } : {};
+  const matcherOptions = (["line_tolerance", "require_category", "llm_fallback"] as const).filter((k) => def[k] !== undefined);
+  if (def.kind !== "findings-match" && matcherOptions.length > 0) {
+    throw specError(specPath, `required check "${id}" is kind: ${def.kind}; ${matcherOptions.join(", ")} belong${matcherOptions.length === 1 ? "s" : ""} to kind: findings-match`);
+  }
+  if (def.kind === "findings-match") return findingsMatchCheck(id, def, specPath, trace);
   if (def.kind === "tsc") {
     return { id, kind: "tsc", scaffoldDir: def.scaffold_dir ?? "scaffold", ...trace };
   }
@@ -392,6 +414,29 @@ function compileCheck(
     argv: [...def.argv],
     versionFiles: [...(def.version_files ?? [])],
     timeoutMs: (def.timeout_seconds ?? DEFAULT_CHECK_TIMEOUT_S) * 1000,
+    ...trace,
+  };
+}
+
+type CheckDecl = NonNullable<EvalSpec["evaluators"]["required_checks"]>[string];
+
+/** kind: findings-match, compiled: the matcher is built in, so it takes options and no program. */
+function findingsMatchCheck(id: string, def: CheckDecl, specPath: string, trace: { trace?: TraceRules }): CheckConfig {
+  const foreign = (["argv", "version_files", "scaffold_dir", "timeout_seconds"] as const).filter((k) => def[k] !== undefined);
+  if (foreign.length > 0) {
+    throw specError(specPath, `required check "${id}" is kind: findings-match, which is built in: drop ${foreign.join(", ")}`);
+  }
+  const llm = def.llm_fallback;
+  if (llm) {
+    const problem = endpointProblem(llm);
+    if (problem) throw specError(specPath, `required check "${id}" llm_fallback: ${problem}`);
+  }
+  return {
+    id,
+    kind: "findings-match",
+    lineTolerance: def.line_tolerance ?? DEFAULT_LINE_TOLERANCE,
+    requireCategory: def.require_category ?? false,
+    ...(llm ? { llmFallback: { model: llm.model, endpoint: endpointOf(llm), ...(llm.judge === "all" ? { judge: "all" as const } : {}) } } : {}),
     ...trace,
   };
 }
@@ -490,6 +535,7 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     requiredChecks,
     successCriteria: step.success_criteria,
     operatingMode: step.operating_mode,
+    ...(step.decision === "scorecard" ? { decision: "scorecard" as const } : {}),
     eligibility: step.eligibility,
     mmd: spec.execution.minimum_meaningful_difference ?? null,
     ...(spec.execution.early_stop ? { earlyStop: true } : {}),
@@ -514,6 +560,10 @@ function compileOneStep(spec: EvalSpec, specPath: string, specSha: string, taskR
     ...(requiredChecks[0] && spec.evaluators.required_checks?.[requiredChecks[0]]?.description
       ? { checkDescription: spec.evaluators.required_checks[requiredChecks[0]].description }
       : {}),
+    ...(requiredChecks[0] && spec.evaluators.required_checks?.[requiredChecks[0]]?.report
+      ? { checkReport: spec.evaluators.required_checks[requiredChecks[0]].report }
+      : {}),
+    ...(spec.caveats ? { caveats: [...spec.caveats] } : {}),
     ...(step.test_set.labels_file ? { labelsFile: step.test_set.labels_file } : {}),
   };
 }

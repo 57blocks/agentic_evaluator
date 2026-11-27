@@ -46,6 +46,7 @@ export const FIRMNESS_LABEL: Record<Recommendation["firmness"], string> = {
   firm: "firm",
   directional: "directional",
   "needs-review": "needs review",
+  scorecard: "scorecard",
 };
 
 const COMPLETION_LABEL: Record<string, string> = {
@@ -204,6 +205,7 @@ function controlClause(rec: Recommendation): string {
 
 /** One paragraph: what is recommended and why, or why nothing is. */
 export function recommendationSentence(rec: Recommendation): string {
+  if (rec.firmness === "scorecard") return "This step is a scorecard (decision: scorecard): it reports each candidate's results and picks none. No gate or operating mode was applied.";
   if (rec.chosen) return (pickClause(rec) + controlClause(rec)).trim();
   if (!rec.operating_mode) return "The spec declares no operating mode, so no choice can be made among eligible candidates.";
   if (rec.eligible.length === 0) {
@@ -246,6 +248,7 @@ const TOLD_APART = /cannot be told apart/;
 export function firmnessNote(firmness: Recommendation["firmness"], directionalReasons: readonly string[]): string {
   if (firmness === "firm") return "Sample size and thresholds both meet the bar for a decision.";
   if (firmness === "needs-review") return "This step has no recommendation to adopt; someone needs to review the evidence below and decide.";
+  if (firmness === "scorecard") return "A scorecard compares; it does not decide. Read the intervals before treating a gap as real.";
   const all = directionalReasons.map(directionalReason);
   const why = all.length > 1 ? all.filter((w) => !TOLD_APART.test(w)) : all;
   const lead = why.find((w) => TOO_FEW_INPUTS.test(w) && !TOLD_APART.test(w)) ?? why[0];
