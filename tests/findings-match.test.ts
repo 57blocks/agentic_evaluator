@@ -475,13 +475,23 @@ test("nothing the check leaves in the work dir carries a defect's description or
 
 test("a trial with no review still reports the item's defects as not caught, so caught over defects counts it", async () => {
   const defect = await grade({ expected: DEFECT_ITEM });
-  assert.deepEqual(defect.measures, { findings: 0, invalid_findings: 0, defects: 1, caught: 0, matched_deterministic: 0, matched_llm: 0, unmatched_findings: 0 });
+  assert.deepEqual(defect.measures, { no_review: 1, defects: 1, caught: 0, matched_deterministic: 0, matched_llm: 0, unmatched_findings: 0 });
   const unreadable = await grade({ expected: DEFECT_ITEM, findings: "nope" });
   assert.equal(unreadable.measures?.defects, 1);
+  // On a clean item a review that never came is not a quiet one: it reports no claims and no findings at all,
+  // so "claims per clean item" and "findings per review" are means over the reviews that exist.
   const clean = await grade({ expected: CLEAN_ITEM });
-  assert.deepEqual(clean.measures, { findings: 0, invalid_findings: 0, defect_claims: 0 });
+  assert.deepEqual(clean.measures, { no_review: 1 });
   const noKey = await grade({});
-  assert.deepEqual(noKey.measures, { findings: 0, invalid_findings: 0 });
+  assert.deepEqual(noKey.measures, { no_review: 1 });
+});
+
+test("the verdict is the first JSON object in the reply, whatever follows it", async () => {
+  // A note after the object, with braces of its own, used to make the whole reply unreadable.
+  const ask = stub('Here it is: {"matches":[{"finding":1,"defect":1}],"reason":"same {fault}"} (format: {"matches": [...]})');
+  const r = await grade({ expected: DEFECT_ITEM, findings: [finding({ start_line: 90 })], check: WITH_LLM, ask });
+  assert.equal(r.state, "pass");
+  assert.equal(ask.calls.length, 1, "read on the first reply");
 });
 
 test("the configured fallback calls the model through the repo's client, at temperature 0", async () => {

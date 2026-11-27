@@ -81,8 +81,17 @@ export async function readMined(dir: string): Promise<MinedFile> {
   return mined;
 }
 
+/**
+ * The earlier candidates.json, or null when there is none yet. A file that
+ * is there but does not read is an error, never "none": a re-mine would
+ * otherwise write over the marks a person set by hand.
+ */
 export async function readMinedIfAny(dir: string): Promise<MinedFile | null> {
-  return readMined(dir).catch(() => null);
+  const present = await fs.stat(path.join(dir, "candidates.json")).then(() => true, (err: NodeJS.ErrnoException) => {
+    if (err.code === "ENOENT" || err.code === "ENOTDIR") return false;
+    throw err;
+  });
+  return present ? readMined(dir) : null;
 }
 
 export async function readClean(dir: string): Promise<CleanFile> {

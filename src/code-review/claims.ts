@@ -57,14 +57,28 @@ export function claimsOfRecord(record: unknown): RecordedClaim[] {
 /** As run.ts names a trial's directories: a candidate id may hold `/` and `:`. */
 const safeName = (candidate: string): string => candidate.replace(/[/:]/g, "_");
 
+/**
+ * A trial's decision record. A trial reused with its check unchanged has no
+ * checks/ of its own in this run, so the record is looked for in the run it
+ * was reused from (a sibling under the same runs/). Missing or not JSON:
+ * null, and the trial has nothing to show.
+ */
+export async function readDecisionRecord(dir: string, t: Pick<TrialRow, "candidate" | "input" | "trial" | "reused_from">): Promise<unknown> {
+  const rel = path.join("checks", `${safeName(t.candidate)}__${t.input}__t${t.trial}`, DECISIONS_FILE);
+  const places = [dir, ...(t.reused_from ? [path.join(path.dirname(dir), path.basename(t.reused_from))] : [])];
+  for (const place of places) {
+    const record = await fs.readFile(path.join(place, rel), "utf-8").then((text) => JSON.parse(text) as unknown).catch(() => null);
+    if (record !== null) return record;
+  }
+  return null;
+}
+
 /** Every claim on a clean item, from checks/<candidate>__<input>__t<n>/findings-match.json of each trial a findings-match check graded. */
 export async function loadDefectClaims(dir: string, trials: readonly TrialRow[]): Promise<DefectClaim[]> {
   const graded = trials.filter((t) => Object.values(t.checks ?? {}).some((c) => c.version?.startsWith(KIND_PREFIX)));
   const perTrial = await Promise.all(
     graded.map(async (t) => {
-      const file = path.join(dir, "checks", `${safeName(t.candidate)}__${t.input}__t${t.trial}`, DECISIONS_FILE);
-      // Missing or not JSON: this trial has nothing to show.
-      const record = await fs.readFile(file, "utf-8").then((text) => JSON.parse(text) as unknown).catch(() => null);
+      const record = await readDecisionRecord(dir, t);
       return claimsOfRecord(record).map((c): DefectClaim => ({ candidate: t.candidate, input: t.input, trial: t.trial, ...c }));
     }),
   );

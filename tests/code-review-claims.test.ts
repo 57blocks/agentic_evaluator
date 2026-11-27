@@ -55,6 +55,12 @@ test("claims are loaded per trial from the run's checks/, and only for a finding
 
   assert.deepEqual(claims.map((c) => [c.candidate, c.input, c.trial, c.where]), [["a", "c1", 0, "src/a.ts:3-5"], ["a", "c1", 0, "PR-level"], ["a", "c1", 0, "src/b.ts:1"]]);
   assert.deepEqual(await loadDefectClaims(dir, [trial("a", "c1", 0, "command-1")]), [], "another kind of check: nothing is read");
+
+  // A trial reused with its check unchanged has no checks/ of its own: its record is in the run it was reused from.
+  const later = path.join(path.dirname(dir), `${path.basename(dir)}-later`);
+  await fs.mkdir(later);
+  const reused = { ...trial("a", "c1", 0), reused_from: `tasks/demo/runs/${path.basename(dir)}` } as TrialRow;
+  assert.equal((await loadDefectClaims(later, [reused])).length, 3);
 });
 
 test("the board ranks clean items by how many claims they drew, and the section lists what was said", async () => {

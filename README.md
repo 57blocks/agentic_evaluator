@@ -1078,13 +1078,14 @@ The check reports these measures:
 
 | measure | items | what it counts |
 |---|---|---|
-| `findings`, `invalid_findings` | all | valid findings, and dropped ones |
+| `findings`, `invalid_findings` | all, when a review came | valid findings, and dropped ones |
+| `no_review` | all, when none came | 1: the trial left no readable `findings.json` |
 | `defects`, `caught` | defect | known defects (one per fix), and how many were caught (0 when the trial left no review) |
 | `matched_deterministic`, `matched_llm` | defect | findings that matched a defect on location, or through the LLM (each finding counted once) |
 | `caught_on_location` | defect, with `judge: all` | defects some finding sits on, whatever it says |
 | `unmatched_findings` | defect | findings that matched no defect |
 | `knowable_defects`, `knowable_caught` | defect, when the answer key says | defects a reviewer could have known, and how many of those were caught |
-| `defect_claims` | clean | findings that claim a defect |
+| `defect_claims` | clean, when a review came | findings that claim a defect |
 
 `findings-match` has a `report` of its own (declare one to replace it). A
 scorecard (`decision: scorecard`) leads with these numbers per candidate:
@@ -1120,6 +1121,28 @@ alarms.
 The per-input table is split in two, because a pass means different
 things: on a defect item, every known defect caught; on a clean item, no
 finding claims a defect.
+
+A review that never came (a crash, unreadable JSON) fails its trial. On a
+defect item every defect counts as missed. On a clean item it reports no
+`defect_claims` and no `findings`, so "claims per clean item" and "findings
+per review" are means over the reviews that exist: a reviewer that crashes
+half the time does not look half as noisy.
+
+**What a reviewer under test can read.** An item's id is the input it is
+handed and its fixture's directory, so `build` names clean items like any
+other. Two things are not sealed when candidates run on the host without
+`cli.image`:
+
+- The check leaves `findings-match.json` in each trial's kept directory
+  under `runs/`. It holds no description or fix, but it does hold each
+  defect's file and lines and whether the item is clean, and a later trial
+  could read it.
+- `code-review-build.json` and whatever `--mined` directory sits inside the
+  task say which items are clean and what the defects are.
+
+`check-task` warns about candidates that run without an image. Give them
+`cli.image`, or keep the mining directory outside the task, when the
+reviewer is not yours to trust.
 
 The fallback reads text written by the reviewer it is grading. Each finding
 reaches it as one JSON object on one line, so a comment cannot pose as the

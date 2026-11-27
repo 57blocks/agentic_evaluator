@@ -268,12 +268,36 @@ function matchPrompt(findings: readonly Finding[], groups: readonly DefectGroup[
   return [`KNOWN DEFECTS:\n\n${defectText.join("\n\n")}`, `REVIEW FINDINGS:\n\n${fs.map((i) => findingBlock(findings[i]!, i)).join("\n")}`].join("\n\n");
 }
 
+/**
+ * The first balanced {...} in a reply, as text; null when there is none.
+ * From the first brace to the last would also swallow anything the model
+ * adds after its answer, and one stray brace there made the reply unreadable.
+ */
+export function firstJsonObject(text: string): string | null {
+  const start = text.indexOf("{");
+  if (start === -1) return null;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+    } else if (ch === '"') inString = true;
+    else if (ch === "{") depth++;
+    else if (ch === "}" && --depth === 0) return text.slice(start, i + 1);
+  }
+  return null;
+}
+
 /** The first {...} in a reply, parsed; null when there is none. */
 function verdictOf(text: string): Record<string, unknown> | null {
-  const m = text.match(/\{[\s\S]*\}/);
-  if (!m) return null;
+  const json = firstJsonObject(text);
+  if (json === null) return null;
   try {
-    const v = JSON.parse(m[0]) as unknown;
+    const v = JSON.parse(json) as unknown;
     return typeof v === "object" && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
   } catch {
     return null;

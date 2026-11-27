@@ -164,3 +164,16 @@ export async function changedLines(repo: string, from: string, to: string): Prom
 export async function isAncestor(repo: string, a: string, b: string): Promise<boolean> {
   return git(repo, ["merge-base", "--is-ancestor", "--end-of-options", a, b]).then(() => true, () => false);
 }
+
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * `git log` arguments for a window of whole days. git reads a bare date as
+ * that date at the current time of day, so the same command would mine a
+ * different window in the morning and in the afternoon.
+ */
+export function windowArgs(since: string, until: string | null | undefined): string[] {
+  const from = DATE_ONLY.test(since) ? `${since}T00:00:00` : since;
+  const to = until && DATE_ONLY.test(until) ? `${until}T23:59:59` : until;
+  return [`--since=${from}`, ...(to ? [`--until=${to}`] : [])];
+}

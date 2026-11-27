@@ -126,12 +126,14 @@ function decisionRecord(version: string, findings: readonly Finding[], invalid: 
  * input without one.
  */
 async function noReviewMeasures(params: { taskRoot: string; step?: string; input: string }): Promise<Pick<CheckResult, "measures" | "parts">> {
-  const base = { findings: 0, invalid_findings: 0 };
+  // No `findings` and, on a clean item, no `defect_claims`: a review that never came is not a quiet one, and
+  // counting it as zero would pull "findings per review" and "claims per clean item" down for a reviewer that crashes.
+  const base = { no_review: 1 };
   try {
     const found = await readExpectedText(params.taskRoot, params.step, params.input);
     if (found === null) return { measures: base };
     const expected = parseExpected(found.text);
-    if (expected.kind === "clean") return { measures: { ...base, defect_claims: 0 } };
+    if (expected.kind === "clean") return { measures: base };
     const groups = groupDefects(expected.defects);
     // Every defect is a missed part, so the trial stays in each defect's count.
     const missed = defectParts(groups, groups.map(() => false));

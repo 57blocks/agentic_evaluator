@@ -5,6 +5,7 @@
  * however the source clone is packed.
  */
 
+import { locatedOnly } from "../src/code-review/build.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -483,4 +484,12 @@ test("at GitHub's 250-commit cap, a range whose base still belongs to the PR is 
   // Assert
   assert.ok("range" in fits && fits.range.kind === "rebase" && fits.range.base === root && fits.range.replay.length === GITHUB_COMMIT_CAP, JSON.stringify(fits).slice(0, 200));
   assert.deepEqual(longer, { skip: `PR #9 has more than the ${GITHUB_COMMIT_CAP} commits GitHub lists: its base is unknown` });
+});
+
+test("a defect entry with no line in the PR head is left out of the answer key, which the matcher could not read otherwise", () => {
+  const located = { file: "src/a.ts", start_line: 3, end_line: 4, category: "logic", description: "d", fix_commit: "abc", fix_diff: "x" };
+  const lost: { file: string; start_line?: number; category: string; description: string; fix_commit: string; fix_diff: string } = { file: "src/gone.ts", category: "logic", description: "d", fix_commit: "abc", fix_diff: "x" };
+
+  assert.deepEqual(locatedOnly([located, lost]), [located]);
+  assert.deepEqual(locatedOnly([lost]), [], "nothing left: the item is skipped, not written unreadable");
 });

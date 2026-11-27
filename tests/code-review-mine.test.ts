@@ -2,6 +2,7 @@
  * `code-review mine` on a synthetic repo whose bug, fix and decoys are known.
  */
 
+import { windowArgs } from "../src/code-review/git.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
@@ -187,4 +188,23 @@ test("in a shallow clone, a fix whose blame stops at the boundary commit is drop
   assert.match(drop.reason, /shallow clone/);
   assert.ok(boundary.includes(drop.introducing ?? ""));
   assert.ok(!mined.candidates.some((c) => boundary.includes(c.introducing.sha)));
+});
+
+test("a candidates.json that no longer reads stops a re-mine: marks set by hand are never overwritten unread", async () => {
+  // Arrange — a person confirmed candidates and left a trailing comma.
+  const s = await shop();
+  const out = await fs.mkdtemp(path.join(os.tmpdir(), "cr-mined-"));
+  await main(["code-review", "mine", s.repo.dir, "--since", "2025-01-01", "--branch", "main", "--out", out], bufferIo());
+  const broken = (await fs.readFile(path.join(out, "candidates.json"), "utf-8")).replace(/\}\s*$/, ",}");
+  await fs.writeFile(path.join(out, "candidates.json"), broken);
+
+  // Act, Assert — refused, and the file is as the person left it.
+  await assert.rejects(main(["code-review", "mine", s.repo.dir, "--since", "2025-01-01", "--branch", "main", "--out", out], bufferIo()), /not valid JSON/);
+  assert.equal(await fs.readFile(path.join(out, "candidates.json"), "utf-8"), broken);
+});
+
+test("a date-only window covers whole days, whatever the clock says when mine runs", () => {
+  // git reads a bare date as that date at the current time of day.
+  assert.deepEqual(windowArgs("2025-06-01", "2025-06-30"), ["--since=2025-06-01T00:00:00", "--until=2025-06-30T23:59:59"]);
+  assert.deepEqual(windowArgs("2025-06-01", null), ["--since=2025-06-01T00:00:00"]);
 });

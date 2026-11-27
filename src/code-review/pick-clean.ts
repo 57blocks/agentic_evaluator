@@ -11,7 +11,7 @@
  * lines to the confirmed escaped PRs.
  */
 
-import { changedLines, logCommits } from "./git.js";
+import { changedLines, logCommits, windowArgs } from "./git.js";
 import { checkMinedShas } from "./candidates-file.js";
 import type { GitHub } from "./github.js";
 import { resolveRange } from "./pr-range.js";
@@ -102,10 +102,12 @@ async function pool(opts: PickOptions, branch: string): Promise<Pool> {
     }
     return { units, rejected, hints };
   }
-  const window = [`--since=${opts.since}`, ...(opts.until ? [`--until=${opts.until}`] : [])];
+  const window = windowArgs(opts.since, opts.until);
   for (const c of await logCommits(opts.repo, ["--first-parent", ...window, "--end-of-options", opts.mined.repo.head])) {
     const unit: Unit = { kind: "commit", sha: c.sha, title: c.subject };
-    if (/\bbot\b|\[bot\]/i.test(`${c.authorName} ${c.authorEmail}`)) rejected.push({ unit: unitId(unit), reason: `bot (${c.authorName})` });
+    // A merge commit's own diff is everything its branch brought in, and the check against blamed commits sees only the merge itself.
+    if (c.parents.length > 1) rejected.push({ unit: unitId(unit), reason: "merge commit: what it brought in is not one change, and may hold a blamed commit" });
+    else if (/\bbot\b|\[bot\]/i.test(`${c.authorName} ${c.authorEmail}`)) rejected.push({ unit: unitId(unit), reason: `bot (${c.authorName})` });
     else if (NOT_A_CHANGE.test(c.subject.trim())) rejected.push({ unit: unitId(unit), reason: "housekeeping subject" });
     else units.push(unit);
   }

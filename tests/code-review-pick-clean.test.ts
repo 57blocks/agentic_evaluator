@@ -11,6 +11,7 @@ import { apportion, binOf, pickClean, shuffled, type PickOptions } from "../src/
 import { build } from "../src/code-review/build.js";
 import { resolveRange } from "../src/code-review/pr-range.js";
 import { DEFAULT_BLAME, mine } from "../src/code-review/mine.js";
+import { git } from "../src/code-review/git.js";
 import type { CleanFile, MinedFile } from "../src/code-review/types.js";
 import { EXIT } from "../src/cli/exit-codes.js";
 import { bufferIo } from "../src/cli/io.js";
@@ -91,10 +92,12 @@ test("picked clean PRs build as clean items, squash and merge commits included",
 
   // Assert
   assert.equal(items.length, 8);
-  assert.ok(items.every((i) => i.id.endsWith("-clean") && i.expected.kind === "clean" && i.tags[0] === "clean"));
+  assert.ok(items.every((i) => i.expected.kind === "clean" && i.tags[0] === "clean"));
+  // The id is the input a reviewer under test is handed and its fixture's directory: it must not say the item is clean.
+  assert.ok(items.every((i) => /^pr\d+$/.test(i.id) && i.input === i.id), "a clean item is named like any other");
   const mergedAs = Object.fromEntries(report.items.map((i) => [i.id, i.merged_as]));
-  assert.equal(mergedAs["pr2-clean"], "squash");
-  assert.equal(mergedAs["pr3-clean"], "merge");
+  assert.equal(mergedAs["pr2"], "squash");
+  assert.equal(mergedAs["pr3"], "merge");
 });
 
 test("the CLI picks commits when the mine had no GitHub, and exits partial when it cannot fill the count", async () => {
@@ -159,4 +162,18 @@ test("GitHub's size hint passes over PRs whose bin is full without asking GitHub
   const clean = await pickClean(options(s, mined, { github: hinted }));
   assert.equal(clean.picked.length, 0, "every PR claims 4000 lines; the escaped one is in 1-50");
   assert.equal(asked, 1, "only the escaped PR is resolved, to size the bins");
+});
+
+test("without GitHub, a merge commit is never a clean pick: what it brought in is not its own change", async () => {
+  // Arrange — the shop's PR 3 was merged with a merge commit; with no PR list each first-parent commit is a unit.
+  const s = await shop();
+  const mined = await minedShop(s, false);
+
+  // Act
+  const clean = await pickClean(options(s, mined, { github: null, count: 50 }));
+
+  // Assert
+  const parents = async (sha: string) => (await git(s.repo.dir, ["rev-list", "--parents", "-n", "1", sha])).trim().split(" ").length - 1;
+  for (const p of clean.picked) assert.equal(p.unit.kind === "commit" ? await parents(p.unit.sha) : 1, 1, "a picked commit has one parent");
+  assert.ok(clean.rejected.some((r) => /merge commit/.test(r.reason)), "and the merge is listed as rejected, with why");
 });

@@ -12,6 +12,7 @@
 import { complete } from "../llm.js";
 import { git } from "./git.js";
 import { mapPool } from "./mine.js";
+import { firstJsonObject } from "./match.js";
 import { CATEGORIES, SEVERITIES, type Candidate, type MinedFile, type Prescreen } from "./types.js";
 
 const MAX_DIFF_CHARS = 14_000;
@@ -77,7 +78,7 @@ async function packet(repo: string, c: Candidate): Promise<string> {
 const VERDICTS = new Set(["defect", "not_defect", "unsure"]);
 
 export function parseVerdict(text: string, model: string, costUsd: number): Prescreen {
-  const json = /\{[\s\S]*\}/.exec(text)?.[0];
+  const json = firstJsonObject(text);
   if (!json) return { model, verdict: "error", reason: "the reply held no JSON object", cost_usd: costUsd };
   let raw: Record<string, unknown>;
   try {

@@ -9,7 +9,7 @@
  * confirm; nothing here decides that a defect is real.
  */
 
-import { commitInfo, logCommits, shallowBoundary, type CommitInfo } from "./git.js";
+import { commitInfo, logCommits, shallowBoundary, windowArgs, type CommitInfo } from "./git.js";
 import { landedThrough, type GitHub } from "./github.js";
 import { blameLines, DEFAULT_BLAME, fixedFiles, HOUSEKEEPING, isFix, removedRanges } from "./szz.js";
 import { unitId, type BlamedLine, type Candidate, type Dropped, type Introducer, type MinedFile, type Unit } from "./types.js";
@@ -154,7 +154,7 @@ export async function mine(opts: MineOptions): Promise<MinedFile> {
     units: new Map(),
     infos: new Map(),
   };
-  const window = [`--since=${opts.since}`, ...(opts.until ? [`--until=${opts.until}`] : [])];
+  const window = windowArgs(opts.since, opts.until);
   const commits = await logCommits(opts.repo, ["--first-parent", ...window, "--end-of-options", opts.head]);
   const fixes = commits.filter((c) => isFix(c.subject, c.body, c.parents.length > 1, ctx.extra));
   opts.log?.(`${commits.length} commits on ${opts.branch} in the window, ${fixes.length} fixes`);

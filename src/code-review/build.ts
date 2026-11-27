@@ -109,6 +109,15 @@ function labelOf(c: Candidate, report: BuildReport): { category: string; severit
   return { category, ...(severity ? { severity } : {}), description };
 }
 
+/**
+ * The entries a finding can be matched to: those with a line in the PR
+ * head. An entry the fix's lines could not be traced to is reported under
+ * `unlocated` and left out; the matcher reads no defect without a line.
+ */
+export function locatedOnly<T extends { start_line?: number }>(defects: readonly T[]): T[] {
+  return defects.filter((d) => d.start_line !== undefined);
+}
+
 async function defectsOf(opts: BuildOptions, itemId: string, c: Candidate, range: PrRange, report: BuildReport): Promise<Defect[]> {
   const fixParent = (await git(opts.repo, ["rev-parse", "--verify", "--end-of-options", `${c.fix.sha}^1`])).trim();
   const locations: Location[] = await locateDefect(opts.repo, fixParent, range.head, c.blamed, new Set(range.members));
@@ -202,7 +211,11 @@ async function buildEscaped(opts: BuildOptions, unit: Unit, group: Candidate[], 
   });
   if (kept.length === 0) return null;
   const defects: Defect[] = [];
-  for (const c of kept) defects.push(...(await defectsOf(opts, id, c, range, report)));
+  for (const c of kept) defects.push(...locatedOnly(await defectsOf(opts, id, c, range, report)));
+  if (defects.length === 0) {
+    report.skipped.push({ id, reason: "none of its defects has a line in the PR head (see unlocated): nothing a finding could be matched to" });
+    return null;
+  }
   await writeFixture(opts, id, unit, range, pull, report);
   report.items.push({ id, kind: "escaped", merged_as: range.kind, commits: range.replay.length, defects: defects.length });
   return {
@@ -230,7 +243,9 @@ async function buildEscaped(opts: BuildOptions, unit: Unit, group: Candidate[], 
 }
 
 async function buildClean(opts: BuildOptions, pick: CleanPick, clean: CleanFile, report: BuildReport): Promise<Item | null> {
-  const id = `${unitId(pick.unit)}-clean`;
+  // Named like any other item. The id is the input a reviewer under test is handed and its fixture's directory,
+  // so "-clean" in it would tell the reviewer to stay silent. A clean pick is never also an escaped unit.
+  const id = unitId(pick.unit);
   const resolved = await resolveRange(opts.repo, pick.unit, opts.github);
   if ("skip" in resolved) {
     report.skipped.push({ id, reason: resolved.skip });
@@ -278,7 +293,7 @@ export async function build(opts: BuildOptions): Promise<{ items: Item[]; report
     if (item) items.push(item);
   }
   for (const pick of opts.clean?.picked ?? []) {
-    opts.log?.(`${unitId(pick.unit)}-clean`);
+    opts.log?.(`${unitId(pick.unit)} (clean)`);
     const item = await buildClean(opts, pick, opts.clean!, report);
     if (item) items.push(item);
   }
