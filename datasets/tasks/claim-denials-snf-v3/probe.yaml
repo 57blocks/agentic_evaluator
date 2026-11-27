@@ -1,0 +1,92 @@
+# claim-denials-snf-v3 probe (2026-11-19): the four noisiest dev items of each archetype.
+# Three models, 28 dev inputs, no judge. Before anyone reviews v3:
+# does noise make items ambiguous, and do the attacks separate models?
+#
+#   agenteval run datasets/tasks/claim-denials-snf-v3/probe.yaml --yes --html   # billed, a few dollars
+
+protocol_version: "0.3"
+run_name: claim-denials-snf-v3-probe
+description: "Which model knows Medicare's rules well enough to triage a denied skilled-nursing claim, from a messy claim file? v2's rules and case types (42 CFR, CMS manuals, X12), 210 dev items stratified by case type, with the noise of real claim files: mixed date formats, one-line 835s, irrelevant records, missing fields, scanned labels."
+budget_usd: 8
+
+workflow:
+  control_candidate: opus-5.5
+  steps:
+    - id: triage
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/triage.md
+      rubric_file: rubrics/triage.md
+      test_set:
+        id: claim-denials-snf-v3-dev
+        items_file: claim-denials-snf-v3.dev.jsonl
+        inputs: [cd3-d-exh-01, cd3-d-exh-03, cd3-d-exh-11, cd3-d-exh-13, cd3-d-dup-03, cd3-d-dup-13, cd3-d-dup-18, cd3-d-dup-20, cd3-d-ftd-02, cd3-d-ftd-03, cd3-d-ftd-25, cd3-d-ftd-28, cd3-d-late-04, cd3-d-late-08, cd3-d-late-10, cd3-d-late-22, cd3-d-nbp-03, cd3-d-nbp-06, cd3-d-nbp-07, cd3-d-nbp-28, cd3-d-qstay-03, cd3-d-qstay-04, cd3-d-qstay-08, cd3-d-qstay-11, cd3-d-ma130-05, cd3-d-ma130-10, cd3-d-ma130-13, cd3-d-ma130-15]
+      candidate_ids: [opus-5.5, gpt-5.6-sol, deepseek-v4.1-flash]
+      required_checks: [triage-check]
+      success_criteria:
+        mandatory_checks: all
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: opus-5.5
+    model: anthropic/claude-opus-5.5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: gpt-5.6-sol
+    model: openai/gpt-5.6-sol
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: qwen3.8-max
+    model: qwen/qwen3.8-max-0902
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro-0813
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    triage-check:
+      kind: command
+      description: "Root cause, correctability, next action and deadline match the key computed from RULES.md; the deadline must be the last day the rules allow."
+      argv: ["node", "checks/triage-check.mjs"]
+      version_files: [checks/triage-check.mjs]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/triage.md
+    methods: [absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/triage.md
+  default_temperature: 0

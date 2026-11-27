@@ -1,0 +1,107 @@
+# kyc-ubo-v3 — v2's German beneficial-owner task, rebuilt for the paper: a
+# stratified split, per-item seeds, roughened register extracts, and the
+# ownership each answer follows from stored beside it.
+#
+# Structures, rules (RULES.md in kyc-ubo-v2) and the solver are v2's,
+# imported, not copied. Eight archetypes, each 25 dev / 10 calibration / 65
+# holdout. Noise (dates and euro amounts written other ways, a table without
+# its alignment, register entries no rule reads, a dropped birth date / list
+# date / register number, garbled labels) never changes who holds what; each
+# item's tags name the noise it got.
+#
+# Not yet: near-match screening names and missing documents; their rules
+# come after the Upmarket session.
+#
+# This spec runs the dev split. The holdout is generated from a seed kept out
+# of the repo and lives in holdout/ (gitignored); holdout.sha256 pins it.
+#
+#   node datasets/tasks/kyc-ubo-v3/gen/generate.mjs     # rebuild
+#   agenteval check-task datasets/tasks/kyc-ubo-v3            # free
+#   agenteval run datasets/tasks/kyc-ubo-v3 --yes --html      # billed
+
+protocol_version: "0.3"
+run_name: kyc-ubo-v3
+description: "Which model knows how German KYC identifies a company's beneficial owners (§ 3 GwG as the BVA Transparenzregister applies it), from messy register extracts? v2's rules and case types, 200 dev items stratified by case type, with mixed date and amount formats, unaligned tables, irrelevant register entries, missing details and scanned labels."
+budget_usd: 50
+
+workflow:
+  control_candidate: sonnet-5
+  steps:
+    - id: ubo
+      version: "1"
+      producer: prompt
+      prompt_file: prompts/ubo.md
+      rubric_file: rubrics/ubo.md
+      test_set:
+        id: kyc-ubo-v3-dev
+        items_file: kyc-ubo-v3.dev.jsonl
+      candidate_ids: [sonnet-5, kimi-k3, glm-5.3, deepseek-v4.1-flash, opus-5.5, gpt-5.6-sol, qwen3.8-max, deepseek-v4-pro]
+      required_checks: [ubo-check]
+      judged_dimensions: [correct-basis, reasoning-clarity]
+      success_criteria:
+        mandatory_checks: all
+      eligibility:
+        minimum_required_check_pass_rate: 0.9
+        minimum_reliability: 0.9
+      operating_mode: lowest-cost
+      maximum_completion_time_seconds: 300
+
+candidates:
+  - id: sonnet-5
+    model: anthropic/claude-sonnet-5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: kimi-k3
+    model: moonshotai/kimi-k3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: glm-5.3
+    model: z-ai/glm-5.3
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: opus-5.5
+    model: anthropic/claude-opus-5.5
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: gpt-5.6-sol
+    model: openai/gpt-5.6-sol
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: qwen3.8-max
+    model: qwen/qwen3.8-max-0902
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+  - id: deepseek-v4-pro
+    model: deepseek/deepseek-v4-pro-0813
+    provider_route: openrouter
+    generation_settings: { temperature: 0 }
+
+evaluators:
+  required_checks:
+    ubo-check:
+      kind: command
+      description: "The set of beneficial owners and of fictitious beneficial owners matches the key computed from RULES.md, by name; the stated basis is left to the judge."
+      argv: ["node", "checks/ubo-check.mjs"]
+      version_files: [checks/ubo-check.mjs]
+      timeout_seconds: 30
+  judge:
+    model: google/gemini-3.1-pro-preview
+    provider_route: openrouter
+    rubric_file: rubrics/ubo.md
+    methods: [absolute-1-5]
+
+execution:
+  trials_per_case: 1
+  concurrency: 4
+  benchmark_mode: capability-neutral
+  cache_mode: cold
+  minimum_meaningful_difference: null
+
+x-harness:
+  producer: prompt
+  prompt_file: prompts/ubo.md
+  default_temperature: 0
