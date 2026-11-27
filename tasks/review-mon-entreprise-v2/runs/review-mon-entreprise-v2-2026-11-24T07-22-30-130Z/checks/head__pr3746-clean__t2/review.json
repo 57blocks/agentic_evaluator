@@ -1,0 +1,31 @@
+{
+ "pr": 3746,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 43,
+   "start_line": null,
+   "body": "Je me demande si les gardes de redirection ne doivent pas rester réactives : avant, elles étaient réévaluées à chaque rendu, alors qu’avec `[]` elles ne le sont qu’au montage (ici et dans `Déclarations`, `NonÉligible`, `Résultat`, avec un `eslint-disable`). Si `raisonsInéligibilité` ou `montantCT` change pendant que l’usager est sur la page (modification d’un enfant, par exemple), il ne sera plus redirigé. Ne serait-il pas plus simple de déclarer les vraies dépendances (`situation`, `raisonsInéligibilité`, `navigate`…) ? Ici, il faudrait alors sortir `set.nouvelEnfant()` dans un effet séparé, pour ne pas le rejouer. Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+   "line": 31,
+   "start_line": null,
+   "body": "nit: `euros(0)` sert uniquement à contenter le typage pendant la redirection, et afficherait « 0 € » le temps d’un rendu. Retourner `null` tant que `montantCT` n’est pas disponible éviterait ce montant factice.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1122813,
+  "final_text": "J'ai posté deux commentaires inline sur la PR 3746. Je n'ai pas exécuté le code. Le workflow « Vérification PR » est au vert.\n\n- **`Enfants.tsx`, ligne 43 :** les redirections ne se déclenchent plus qu'au montage, avec `[]` et un `eslint-disable`. Avant, elles étaient réévaluées à chaque rendu. Je demande si l'usager sera encore redirigé quand `raisonsInéligibilité` ou `montantCT` change pendant qu'il est sur la page. Je propose de déclarer les vraies dépendances et de sortir `set.nouvelEnfant()` dans un effet séparé. Cette remarque vaut aussi pour `Déclarations`, `NonÉligible` et `Résultat`.\n- **`Résultat.tsx`, ligne 31 (nit) :** `euros(0)` ne sert qu'à contenter le typage pendant la redirection, et afficherait « 0 € » le temps d'un rendu. Je suggère de retourner `null` à la place."
+ }
+}

@@ -1,0 +1,18 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Le commit unique `[AE] Préciser les définitions des rubriques retraite (#3444)` ne suit pas le format Conventional Commits attendu (`<type>[scope]: <description>`). Il mélange aussi plusieurs changements logiques : les définitions retraite dans `protection-sociale.publicodes`, la refonte des logos de références (`References.tsx` et images), le renommage Pôle emploi → France Travail (iframe, page salarié) et le passage à `alt=\"\"`. Je verrais bien un découpage en commits distincts, par exemple `feat(auto-entrepreneur)`, `fix(a11y)` et `chore(salarié)`. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

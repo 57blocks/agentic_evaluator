@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/locales/ui-fr.yaml",
+  "start_line": 256,
+  "end_line": 256,
+  "message": "La règle `délai d'attente` de `modele-social/règles/protection-sociale.publicodes` (lignes 628, 630 et 632) dit toujours 10 mois, et sa traduction dans `rules-en.yaml` aussi (lignes ~7084-7094). Les usagers verraient donc 6 mois dans le comparateur et 10 mois dans la description de la règle. Est-ce voulu, ou faut-il aligner la règle (puis rebuilder `modele-social` et relancer `i18n:translate`) dans cette PR ?"
+ }
+]

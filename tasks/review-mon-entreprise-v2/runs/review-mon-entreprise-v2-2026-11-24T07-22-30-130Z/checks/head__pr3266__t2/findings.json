@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Cette clé `réductionGénérale` ne correspond à aucun champ de `MonthState` (le champ s’appelle `réduction`, et il est partagé avec le Lodeom désormais). Quand la rémunération annuelle est nulle, `réduction` garde donc l’ancienne valeur au lieu d’être remise à 0. Ça vient de l’existant, mais comme le code est déplacé et généralisé ici, je verrais bien le corriger : `réduction: { value: 0, répartition: emptyRépartition }`. Qu’en penses-tu ?"
+ }
+]

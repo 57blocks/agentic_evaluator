@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 92,
+  "end_line": 92,
+  "message": "Je me demande si ce `engine` est le bon : dans le `forEach` du dessus, `engine` est shadowé et c'est la copie de `engines` qui reçoit `setSituation`, alors qu'ici on évalue sur le moteur d'origine passé au middleware. Pour une config non comparateur, `engines = [engine]` donc ça marche. Mais pour le comparateur, `engines` contient des `shallowCopy()` : le moteur d'origine n'a alors pas reçu la situation courante, et l'applicabilité serait calculée sur une situation périmée. Je n'ai pas exécuté le code, donc à vérifier. Évaluer sur `engines[0]` (ou sur le moteur de chaque contexte) lèverait l'ambiguïté. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 29,
+  "end_line": 32,
+  "message": "Ces quatre `let` au niveau du module font vivre un état caché hors du store, partagé entre toutes les instances du middleware (et entre les tests, tant qu'aucun `SET_SIMULATION` ne les remet à zéro). Je verrais bien les passer dans la closure de `prendLaProchaineQuestionMiddleware` : le cycle de vie suit alors celui du store. nit: ce middleware mélange aussi calcul d'applicabilité et détermination des questions suivantes, ça pourrait vivre dans le domaine."
+ },
+ {
+  "file": "site/source/store/reducers/simulation.reducer.ts",
+  "start_line": 101,
+  "end_line": 101,
+  "message": "nit: `ENREGISTRE_LES_RÉPONSES` duplique la logique d'ajout dans `questionsRépondues` de `ENREGISTRE_LA_RÉPONSE` (juste au-dessus). Une petite fonction `ajouteQuestionRépondue` éviterait la copie, et pourrait aussi servir au cas « passer la question » de `VA_À_LA_QUESTION_SUIVANTE`."
+ },
+ {
+  "message": "Synthèse : la PR est très grosse (134 fichiers, ~25 commits mêlant refactor, renommage `domain`→`domaine`, fixes et features). Les déplacements de fichiers pourraient être une PR à part pour faciliter la relecture. Le reducer a de bons tests (`simulation.reducer.spec.ts`) ; je n'en vois pas pour le middleware, qui porte pourtant la logique la plus délicate (détection de changement de situation, comparateur). Je n'ai pas vérifié le rendu ni le comportement en navigation."
+ }
+]

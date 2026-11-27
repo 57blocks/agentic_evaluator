@@ -1,0 +1,20 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "J'ai bien relu, ça me paraît bon à merger : je ne trouve plus de référence à l'assistant dans le code, et les vérifications sont au vert. Une question hors diff : les anciennes URLs `/assistants/cmg/*` (et `/en/assistants/cmg`) vont maintenant tomber sur la 404 ; est-ce voulu, ou préfères-tu une redirection dans `site/netlify.base.toml` vers la page des simulateurs ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

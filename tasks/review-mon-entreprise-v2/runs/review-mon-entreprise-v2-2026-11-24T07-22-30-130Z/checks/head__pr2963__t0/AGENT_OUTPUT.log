@@ -1,0 +1,39 @@
+{
+ "pr": 2963,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 29,
+   "start_line": null,
+   "body": "Je me demande si ces `let` au niveau du module sont un risque : l’état (`lastSimulation`, `lastConfig`, `engines`…) est partagé entre toutes les instances du middleware. Deux stores (tests, ou un `createStore` rejoué) se verraient mutuellement leur cache, et un test laisse des valeurs derrière lui. Ne pourrait-on pas les déclarer dans `prendLaProchaineQuestionMiddleware(engine)`, avant le `(store) => ...`, pour que chaque store ait les siens ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+   "line": 92,
+   "start_line": null,
+   "body": "Question : ici l’applicabilité est évaluée avec `engine`, alors que pour le comparateur `setSituation` est appliqué aux copies de `engines`, pas à `engine`. Est-ce que `engine` a bien la situation de la simulation dans ce cas ? Sinon `engines[0]` (ou l’engine du contexte concerné) serait plus sûr.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/store/reducers/simulation.reducer.ts",
+   "line": 101,
+   "start_line": null,
+   "body": "nit: ce bloc duplique celui de `ENREGISTRE_LA_RÉPONSE` (vérifier la présence dans `questionsRépondues`, puis ajouter `{ règle, applicable: true }`). Une petite fonction du domaine du type `ajouteQuestionRépondue(questionsRépondues, règle)` éviterait que les deux divergent.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1709251,
+  "final_text": "J'ai posté trois commentaires inline sur la PR #2963. Je n'ai relu que le reducer et le middleware, pas les 134 fichiers modifiés. Je n'ai rien exécuté et je n'ai pas posté de commentaire global.\n\nLa vérification de la PR est au vert. Les trois remarques, dans `site/source/store/` :\n\n- **État partagé dans le middleware** (`prendLaProchaineQuestion.middleware.ts:29`) : les `let` au niveau du module (`lastSimulation`, `lastConfig`, `engines`…) sont partagés entre tous les stores. Je propose de les déclarer dans la fonction du middleware.\n- **Moteur utilisé pour l'applicabilité** (`prendLaProchaineQuestion.middleware.ts:92`) : l'applicabilité est évaluée avec `engine`, alors que pour le comparateur la situation est posée sur les copies de `engines`. J'ai posé la remarque en question, car je n'ai pas vérifié si `engine` a la bonne situation dans ce cas.\n- **Duplication dans le reducer** (`reducers/simulation.reducer.ts:101`) : le bloc d'ajout dans `questionsRépondues` de `ENREGISTRE_LES_RÉPONSES` reprend celui de `ENREGISTRE_LA_RÉPONSE`. C'est un `nit:`."
+ }
+}

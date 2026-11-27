@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+      "start_line": 378,
+      "end_line": 378,
+      "message": "Le texte affiche maintenant 6 mois, mais `modele-social/règles/protection-sociale.publicodes` (règle `protection sociale . maladie . maternité paternité adoption . délai d'attente`, lignes ~628-632) dit toujours « 10 mois d’affiliation » dans sa description et a `valeur: 10 mois`. Cette règle sert de source au reste du simulateur, donc le même écran risque d'afficher deux durées différentes. Ne faut-il pas l'aligner dans cette PR (en pensant à `rules-en.yaml` et au build de `modele-social`) ? Et le 6 mois vaut-il aussi pour paternité/adoption, ou seulement pour la maternité ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

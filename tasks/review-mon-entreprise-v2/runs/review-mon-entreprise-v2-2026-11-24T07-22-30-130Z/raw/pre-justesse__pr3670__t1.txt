@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 33,
+  "end_line": 34,
+  "message": "Je me demande si appeler `navigate` pendant le rendu est voulu : React Router le déconseille (effet de bord en render, avertissement « Cannot update a component while rendering » possible), et le composant continue à se rendre ensuite avec une situation invalide. Un `<Navigate to=... replace />` retourné, ou un `useEffect`, serait plus sûr. Même schéma dans `Déclarations.tsx` (l.30-34), `NonÉligible.tsx` (l.16) et `Résultat.tsx` (l.24) : une garde de route partagée éviterait de répéter ce bloc dans chaque page."
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 38,
+  "end_line": 38,
+  "message": "nit: les chemins `/assistants/cmg` et `/assistants/cmg/inéligible` sont écrits en dur alors que `sitePaths.ts` définit déjà `assistants.cmg` (utilisé dans `index.tsx` via `useSitePaths`). Ils divergeraient en cas de changement d’URL ou de version anglaise."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3670,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 34,
+   "start_line": 33,
+   "body": "Je me demande si appeler `navigate` pendant le rendu est voulu : React Router le déconseille (effet de bord en render, avertissement « Cannot update a component while rendering » possible), et le composant continue à se rendre ensuite avec une situation invalide. Un `<Navigate to=... replace />` retourné, ou un `useEffect`, serait plus sûr. Même schéma dans `Déclarations.tsx` (l.30-34), `NonÉligible.tsx` (l.16) et `Résultat.tsx` (l.24) : une garde de route partagée éviterait de répéter ce bloc dans chaque page.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 38,
+   "start_line": null,
+   "body": "nit: les chemins `/assistants/cmg` et `/assistants/cmg/inéligible` sont écrits en dur alors que `sitePaths.ts` définit déjà `assistants.cmg` (utilisé dans `index.tsx` via `useSitePaths`). Ils divergeraient en cas de changement d’URL ou de version anglaise.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 13,
+  "cost_usd": 0.1670238,
+  "final_text": "J'ai relu la PR #3670 et posté deux commentaires inline, tous les deux sur `site/source/pages/assistants/cmg/pages/Enfants.tsx`. Je n'ai lu en détail que cette page, plus `index.tsx` et la liste des fichiers modifiés. Le reste de la PR (65 fichiers) n'a donc pas été relu fichier par fichier. `gh pr checks` est au vert.\n\n- **`navigate` pendant le rendu (l.33-34)** : l'appel se fait directement dans le corps du composant, et le composant continue de se rendre ensuite. Je propose `<Navigate />` ou un `useEffect`. La même chose apparaît dans `Déclarations.tsx`, `NonÉligible.tsx` et `Résultat.tsx`, et je suggère une garde de route partagée.\n- **Chemins en dur (l.38, nit)** : `/assistants/cmg` et `/assistants/cmg/inéligible` sont écrits en dur, alors que `sitePaths.ts` définit déjà `assistants.cmg`.\n\nJe n'ai pas signalé les noms de fichiers accentués : je n'ai pas pu lister les fichiers accentués de la PR, et je n'ai vu dans `site` aucune configuration Next qui rende la règle applicable. Je n'ai pas commenté les `export default` non plus. Les routes de `index.tsx` ne sont pas chargées en lazy, donc rien ne les impose, et je n'ai pas vérifié si des fichiers de la PR en dépendent."
+ }
+}
+
+```

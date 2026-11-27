@@ -1,0 +1,122 @@
+{
+  "format": "claude-code",
+  "turns": 9,
+  "tool_calls": [
+    {
+      "name": "Bash",
+      "ms": 1310,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 33,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 44,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 12,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 17,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 59,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 32,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 118,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 55,
+      "failed": false
+    }
+  ],
+  "retries": 0,
+  "denials": 4,
+  "compactions": 0,
+  "turn_tokens": [
+    {
+      "prompt": 2,
+      "cached": 10015,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 24657,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 29534,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 34303,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 35118,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 35366,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 35675,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 36414,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 37418,
+      "output": null,
+      "costUsd": null
+    }
+  ],
+  "models": [
+    "claude-sonnet-5-5"
+  ],
+  "cost_usd": 0.19411799999999999,
+  "ended": "finished",
+  "provider": "anthropic-subscription",
+  "usage": {
+    "prompt": 29726,
+    "completion": 4740,
+    "cached": 278500,
+    "costUsd": 0.19411799999999999
+  }
+}

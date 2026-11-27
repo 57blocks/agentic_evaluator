@@ -1,0 +1,20 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Je viens de relire la PR. Le changement du texte dans `Détails.tsx` et dans les fichiers de traduction est cohérent.\n\nUne chose me gêne : la règle Publicodes `protection sociale . maladie . maternité paternité adoption . délai d'attente` (`modele-social/règles/protection-sociale.publicodes`, lignes 628, 630 et 632) dit toujours \"10 mois\", dans la description et dans `valeur: 10 mois`. Ces lignes ne sont pas dans le diff, donc je ne peux pas les commenter en inline. Je n'ai pas vérifié où cette règle est lue ni affichée (description dans l'explication des règles, ou valeur utilisée dans un calcul). Je me demande si elle devrait passer à 6 mois dans cette PR. Sinon, le simulateur affichera 6 mois à un endroit et 10 mois à un autre. Dans ce cas, `rules-en.yaml` serait à régénérer avec `yarn workspace modele-social build` puis `i18n:translate`. Qu'en penses-tu ?\n\nnit : les deux commits touchent au même changement logique. Le commit `i18n: traduction` sépare les fichiers YAML du code, alors que CONTRIBUTING.md demande qu'ils fassent partie du même commit. Un squash serait plus conforme. Le premier commit n'est pas au format Conventional Commits non plus : par exemple `fix(comparateur): durée d'affiliation maternité de 6 mois`.\n\nJe n'ai pas pu vérifier le rendu dans le navigateur. Les sources légales citées dans la description me semblent adaptées, mais je n'ai pas relu leur contenu."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

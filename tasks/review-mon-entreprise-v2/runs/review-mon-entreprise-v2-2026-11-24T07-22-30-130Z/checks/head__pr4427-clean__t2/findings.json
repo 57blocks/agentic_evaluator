@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/storage/sanitizePersistedSituation.ts",
+  "start_line": 13,
+  "end_line": 13,
+  "message": "Toute valeur qui n'est ni string, ni number, ni { valeur, unité } est supprimée sans trace : un booléen ou une expression Publicodes plus riche (somme, variations…) disparaît de la situation restaurée, et l'usager perd sa saisie sans qu'on sache pourquoi. Est-ce voulu ? Je verrais mieux de ne convertir que la forme { valeur, unité } et de laisser passer le reste tel quel, ou au minimum de journaliser ce qui est écarté."
+ },
+ {
+  "file": "site/source/storage/persistCompanySituation.ts",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "Si le localStorage contient \"null\" (ou autre chose qu'un objet), Object.entries lève dans sanitizePersistedSituation alors que l'ancien JSON.parse renvoyait simplement la valeur, et rien ne rattrape l'erreur ici. Les entrées issues du stockage sont à valider à la frontière : qu'en penses-tu d'une garde sur le type objet ?"
+ }
+]

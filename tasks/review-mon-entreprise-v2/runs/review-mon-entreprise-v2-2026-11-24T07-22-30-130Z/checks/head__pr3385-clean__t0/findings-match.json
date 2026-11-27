@@ -1,0 +1,30 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/components/conversation/AnswerList.tsx",
+      "start_line": 321,
+      "end_line": 321,
+      "message": "Ce `showSuggestions={false}` mis en commentaire ressemble à un reste de débogage : il change le comportement de la modale « Modifier mes réponses » pour toutes les questions (les suggestions s’affichent désormais). Est-ce voulu ? Si oui, je supprimerais la ligne plutôt que de la commenter ; sinon, je la rétablirais."
+    },
+    {
+      "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+      "start_line": 71,
+      "end_line": 71,
+      "message": "nit: un `cy.wait(500)` rend le test sensible au timing ; un `should` sur la valeur attendue avant de continuer serait plus fiable."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

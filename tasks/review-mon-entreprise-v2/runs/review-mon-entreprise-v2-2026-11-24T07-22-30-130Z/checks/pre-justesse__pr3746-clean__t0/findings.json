@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+  "start_line": 27,
+  "end_line": 27,
+  "message": "Le `useEffect` avec `[]` + `eslint-disable` se retrouve ici, dans `Déclarations` et dans `NonÉligible`. Avec des dépendances vides, la redirection ne se déclenche qu au montage : si `montantCT` passe à `None` ou à 0 après le premier rendu, l usager reste sur une page sans résultat. Je me demande si on ne gagnerait pas à déclarer les vraies dépendances (`[montantCT, navigate]`), ce qui évite aussi de désactiver la règle. Qu en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 42,
+  "end_line": 42,
+  "message": "Après une redirection (infos invalides ou inéligibilité), on enchaîne quand même sur `set.nouvelEnfant()`, qui modifie la situation d un usager qu on est en train de renvoyer ailleurs. Un `return` après chaque `navigate` serait peut-être plus sûr ?"
+ }
+]

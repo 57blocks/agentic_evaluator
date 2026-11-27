@@ -1,0 +1,22 @@
+{
+ "pr": 4653,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger. Je n'ai trouvé aucune référence résiduelle à l'assistant CMG dans le dépôt (hors `base-stats.json`, des données historiques)."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4620: issue withheld",
+   "api --method GET repos/betagouv/mon-entreprise/issues/4620: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1091001,
+  "final_text": "J'ai relu la PR et je n'ai rien trouvé qui vaille un commentaire inline. J'ai posté un commentaire global : « bon à merger ».\n\n- **Références résiduelles :** il n'en reste aucune à l'assistant CMG dans le dépôt, hors `site/source/public/data/base-stats.json`, qui contient des statistiques historiques.\n- **Vérifications :** `gh pr checks` est au vert.\n- **Issue #4620 :** je n'ai pas pu la lire, l'API renvoie 404. Je n'ai donc pas pu vérifier si la PR traite tout ce que l'issue demandait.\n- **Anciennes URLs :** je n'ai pas cherché de redirection pour les anciennes URLs de l'assistant. Elles renverront probablement une 404."
+ }
+}

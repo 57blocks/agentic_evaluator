@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/hooks/useBarèmeLodeom.ts",
+  "start_line": 14,
+  "end_line": 14,
+  "message": "Sans `as const`, `BarèmeLodeom` vaut `string` : les comparaisons de `WarningSalaireTrans` ne détectent pas une faute de frappe, ce qui est justement le risque d une renommage comme celui-ci. Je me demande si `] as const` ne serait pas utile ici ?\n```suggestion\n] as const\n```"
+ }
+]

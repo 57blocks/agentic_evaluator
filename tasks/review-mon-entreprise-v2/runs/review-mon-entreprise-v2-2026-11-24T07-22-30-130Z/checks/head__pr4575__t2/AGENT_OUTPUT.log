@@ -1,0 +1,31 @@
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "`next` devient `main` dans la liste des branches de production : est-ce voulu ? Ça change l'environnement déployé (Sentry, domaine Plausible, `IS_PRODUCTION`) de la branche `next`, sans rapport avec l'adaptateur. Si c'est une correction, elle mériterait son propre commit ; sinon je laisserais `next`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/app/page.tsx",
+   "line": 34,
+   "start_line": null,
+   "body": "Cette prop `tracking` sur la page de démo Next me semble hors sujet de l'adaptateur d'environnement. Est-elle nécessaire ici, ou est-ce un reste d'un autre chantier ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1286154,
+  "final_text": "J'ai relu la PR #4575 et posté deux commentaires inline. Les vérifications de la PR sont au vert.\n\n- **`site/vite.config.ts:208`** : la liste des branches de production passe de `['master', 'next']` à `['master', 'main']`. Je demande si c'est voulu. Cela change l'environnement déployé de la branche `next` (Sentry, domaine Plausible, `IS_PRODUCTION`), sans rapport avec l'adaptateur. Si c'est une correction, je propose un commit à part.\n- **`site/app/page.tsx:34`** : une prop `tracking` a été ajoutée sur le bouton de la page de démo Next, ce qui semble hors sujet. Je demande si elle est nécessaire ici.\n\nJe n'ai pas exécuté le code, comme le prévoient les consignes. Je n'ai posté aucun commentaire global."
+ }
+}

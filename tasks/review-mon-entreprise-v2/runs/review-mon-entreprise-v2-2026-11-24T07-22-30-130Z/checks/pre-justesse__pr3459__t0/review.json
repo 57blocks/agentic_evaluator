@@ -1,0 +1,31 @@
+{
+ "pr": 3459,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/SearchParamsAdapter.ts",
+   "line": 19,
+   "start_line": null,
+   "body": "`encode` n’est utilisé que par ses tests : le partage d’URL passe par `serializeEvaluation` dans `getSearchParams`. Je me demande si on ne garde pas du code mort (et un format d’encodage, sans espace, qui diverge de celui réellement produit, `100 €/mois`). Tu le prévois pour un usage à venir, ou on peut le retirer ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/SearchParamsAdapter.ts",
+   "line": 42,
+   "start_line": null,
+   "body": "Les regex n’acceptent pas de signe : un montant négatif (`-100 €`, par exemple un déficit) ou un nombre négatif sérialisé par `serializeEvaluation` ne sera pas reconnu comme `Montant` et repartira en `string` dans la situation. Est-ce voulu ? Sinon un `-?` en début de regex et un cas de test couvriraient ça.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.19739569999999998,
+  "final_text": "J'ai posté deux commentaires inline sur `site/source/SearchParamsAdapter.ts`. Ils portent sur le dernier commit (`f71676a`), le correctif de la situation en search params. Je n'ai pas relu le reste de la PR, qui touche 472 fichiers : le refactoring du design-system, le domaine `location-de-meublé` et les hooks de questions.\n\n- **Code mort probable (ligne 19) :** `SearchParamsAdapter.encode` n'est appelé que par ses propres tests. Le partage d'URL passe par `serializeEvaluation` dans `getSearchParams`. Je demande si on le garde pour un usage à venir ou si on le retire.\n- **Nombres négatifs (ligne 42) :** les regex de `decode` n'acceptent pas de signe. Un montant négatif comme `-100 €` ne devient donc pas un `Montant` et reste une chaîne dans la situation. Je propose un `-?` en début de regex et un cas de test.\n\nLe check « Vérification PR » est vert. Je n'ai pas exécuté le code ni les tests."
+ }
+}

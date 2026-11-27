@@ -1,0 +1,128 @@
+{
+  "format": "claude-code",
+  "turns": 10,
+  "tool_calls": [
+    {
+      "name": "Bash",
+      "ms": 1006,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 29,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 124,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 81,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 32,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 11,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 33,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 12,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 96,
+      "failed": false
+    }
+  ],
+  "retries": 0,
+  "denials": 3,
+  "compactions": 0,
+  "turn_tokens": [
+    {
+      "prompt": 2,
+      "cached": 10015,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 26780,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 27908,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 28144,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 29369,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 29802,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 30008,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 30234,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 30522,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 30650,
+      "output": null,
+      "costUsd": null
+    }
+  ],
+  "models": [
+    "claude-sonnet-5-5"
+  ],
+  "cost_usd": 0.12651120000000002,
+  "ended": "finished",
+  "provider": "anthropic-subscription",
+  "usage": {
+    "prompt": 20852,
+    "completion": 1580,
+    "cached": 273432,
+    "costUsd": 0.12651120000000002
+  }
+}

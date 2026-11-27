@@ -1,0 +1,366 @@
+{
+  "inputs": 32,
+  "effective_n": 16,
+  "judge_effective_n": null,
+  "counts": {
+    "splits": 16,
+    "all-pass": 1,
+    "all-fail": 15,
+    "flat": 0,
+    "unscored": 0
+  },
+  "items": [
+    {
+      "input": "pr2692",
+      "class": "splits",
+      "pass_rate": 0.8888888888888888,
+      "by_candidate": {
+        "head": 0.6666666666666666,
+        "pre-justesse": 1,
+        "v0": 1
+      },
+      "discrimination": 0.9958705948858224
+    },
+    {
+      "input": "pr2963",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr3189",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr3266",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr3280-clean",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr3285-clean",
+      "class": "splits",
+      "pass_rate": 0.3333333333333333,
+      "by_candidate": {
+        "head": 0.3333333333333333,
+        "pre-justesse": 0,
+        "v0": 0.6666666666666666
+      },
+      "discrimination": 0.09078412990032003
+    },
+    {
+      "input": "pr3321",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr3385-clean",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr3442-clean",
+      "class": "splits",
+      "pass_rate": 0.4444444444444444,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0.6666666666666666,
+        "v0": 0.6666666666666666
+      },
+      "discrimination": 0.9958705948858224
+    },
+    {
+      "input": "pr3444-clean",
+      "class": "splits",
+      "pass_rate": 0.5555555555555556,
+      "by_candidate": {
+        "head": 0.3333333333333333,
+        "pre-justesse": 1,
+        "v0": 0.3333333333333333
+      },
+      "discrimination": 0.41931393468876765
+    },
+    {
+      "input": "pr3459",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr3532",
+      "class": "splits",
+      "pass_rate": 0.3333333333333333,
+      "by_candidate": {
+        "head": 0.3333333333333333,
+        "pre-justesse": 0,
+        "v0": 0.6666666666666666
+      },
+      "discrimination": 0.09078412990032003
+    },
+    {
+      "input": "pr3632-clean",
+      "class": "splits",
+      "pass_rate": 0.1111111111111111,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0.3333333333333333,
+        "v0": 0
+      },
+      "discrimination": 0.4193139346887676
+    },
+    {
+      "input": "pr3670",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr3722",
+      "class": "splits",
+      "pass_rate": 0.2222222222222222,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0.3333333333333333,
+        "v0": 0.3333333333333333
+      },
+      "discrimination": 0.9958705948858224
+    },
+    {
+      "input": "pr3746-clean",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr4159",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr4160",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr4164",
+      "class": "splits",
+      "pass_rate": 0.8888888888888888,
+      "by_candidate": {
+        "head": 0.6666666666666666,
+        "pre-justesse": 1,
+        "v0": 1
+      },
+      "discrimination": 0.9958705948858224
+    },
+    {
+      "input": "pr4285",
+      "class": "splits",
+      "pass_rate": 0.4444444444444444,
+      "by_candidate": {
+        "head": 0.6666666666666666,
+        "pre-justesse": 0.3333333333333333,
+        "v0": 0.3333333333333333
+      },
+      "discrimination": -0.9958705948858224
+    },
+    {
+      "input": "pr4311",
+      "class": "splits",
+      "pass_rate": 0.2222222222222222,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0.3333333333333333,
+        "v0": 0.3333333333333333
+      },
+      "discrimination": 0.9958705948858224
+    },
+    {
+      "input": "pr4324",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr4427-clean",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr4490-clean",
+      "class": "splits",
+      "pass_rate": 0.7777777777777778,
+      "by_candidate": {
+        "head": 0.3333333333333333,
+        "pre-justesse": 1,
+        "v0": 1
+      },
+      "discrimination": 0.9958705948858222
+    },
+    {
+      "input": "pr4534-clean",
+      "class": "splits",
+      "pass_rate": 0.4444444444444444,
+      "by_candidate": {
+        "head": 0.6666666666666666,
+        "pre-justesse": 0,
+        "v0": 0.6666666666666666
+      },
+      "discrimination": -0.4193139346887676
+    },
+    {
+      "input": "pr4567-clean",
+      "class": "splits",
+      "pass_rate": 0.1111111111111111,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0.3333333333333333,
+        "v0": 0
+      },
+      "discrimination": 0.4193139346887676
+    },
+    {
+      "input": "pr4570",
+      "class": "splits",
+      "pass_rate": 0.8888888888888888,
+      "by_candidate": {
+        "head": 0.6666666666666666,
+        "pre-justesse": 1,
+        "v0": 1
+      },
+      "discrimination": 0.9958705948858224
+    },
+    {
+      "input": "pr4575",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr4596",
+      "class": "splits",
+      "pass_rate": 0.1111111111111111,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0.3333333333333333
+      },
+      "discrimination": 0.5765566601970548
+    },
+    {
+      "input": "pr4606-clean",
+      "class": "all-fail",
+      "pass_rate": 0,
+      "by_candidate": {
+        "head": 0,
+        "pre-justesse": 0,
+        "v0": 0
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr4609-clean",
+      "class": "all-pass",
+      "pass_rate": 1,
+      "by_candidate": {
+        "head": 1,
+        "pre-justesse": 1,
+        "v0": 1
+      },
+      "discrimination": null
+    },
+    {
+      "input": "pr4653-clean",
+      "class": "splits",
+      "pass_rate": 0.6666666666666666,
+      "by_candidate": {
+        "head": 0.6666666666666666,
+        "pre-justesse": 1,
+        "v0": 0.3333333333333333
+      },
+      "discrimination": -0.09078412990031999
+    }
+  ]
+}

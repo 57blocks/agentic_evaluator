@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1962,
+  "message": "La traduction anglaise générée est cassée : `<0>&lt;/0>`, `&lt;/3>` et `&lt;/6>` échappent les balises fermantes, et « does not apply to male and female auto-entrepreneurs » est un contresens. Les usagers anglophones verraient les balises en clair. Je verrais bien une correction à la main :\n```suggestion\n        auto-entrepreneur: <0></0> This simulator <3>does not apply to auto-entrepreneurs</3>, who have their own <6>income simulator</6>.\n```"
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 97,
+  "end_line": 97,
+  "message": "nit: la liste est recréée à chaque rendu, et `.includes(id)` se lit mieux que `indexOf(id) > -1`. Une constante de module avec `.includes` suffirait."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4570,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/locales/ui-en.yaml",
+   "line": 1962,
+   "start_line": null,
+   "body": "La traduction anglaise générée est cassée : `<0>&lt;/0>`, `&lt;/3>` et `&lt;/6>` échappent les balises fermantes, et « does not apply to male and female auto-entrepreneurs » est un contresens. Les usagers anglophones verraient les balises en clair. Je verrais bien une correction à la main :\n```suggestion\n        auto-entrepreneur: <0></0> This simulator <3>does not apply to auto-entrepreneurs</3>, who have their own <6>income simulator</6>.\n```",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 97,
+   "start_line": null,
+   "body": "nit: la liste est recréée à chaque rendu, et `.includes(id)` se lit mieux que `indexOf(id) > -1`. Une constante de module avec `.includes` suffirait.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.13165159999999998,
+  "final_text": "Je viens de poster mes deux remarques inline sur la PR 4570, et la revue est terminée.\n\n- **`site/source/locales/ui-en.yaml`, ligne 1962 :** la traduction anglaise générée est cassée. Les balises fermantes sont échappées (`&lt;/3>`, `&lt;/6>`), et « male and female auto-entrepreneurs » est un contresens. J'ai proposé une correction à la main.\n- **`IndépendantBase.tsx`, ligne 97 :** nit sur la liste `confusionAEPossible`. Elle est recréée à chaque rendu, et `.includes(id)` se lit mieux que `indexOf(id) > -1`.\n\nJe n'ai pas pu lire l'issue #4044 : la commande a demandé une approbation, donc je n'ai pas vérifié que la liste des simulateurs concernés correspond à ce qu'elle demande. `gh pr checks` est au vert."
+ }
+}
+
+```

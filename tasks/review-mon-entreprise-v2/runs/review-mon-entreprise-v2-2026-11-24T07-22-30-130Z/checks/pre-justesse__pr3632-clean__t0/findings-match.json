@@ -1,0 +1,38 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 36,
+      "end_line": 36,
+      "message": "Si `externalLinks` est défini mais que toutes les règles `associatedRule` valent faux (ex. un simulateur qui n'a que des liens conditionnels, sans `nextSteps` ni iframe), on n'a pas de `return null` et la section affiche le titre « Ressources utiles » avec une liste vide. Je me demande si le test ne devrait pas porter sur `relevantExternalLinks?.length` plutôt que sur `externalLinks` (comme l'ancien code le faisait avec `guidesUrssaf.length`)."
+    },
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 59,
+      "end_line": 59,
+      "message": "Régression possible : l'ancien code n'affichait les guides Urssaf que si `language === 'fr'`, car leurs textes sont en français uniquement. Cette condition a disparu, et les fichiers de `external-links/` portent encore `// TODO: gérer les traductions`. Un usager en interface anglaise verra donc des cartes entièrement en français (titre, description, `ariaLabel`). Qu'en penses-tu : conserver le filtre sur la langue pour ces liens tant qu'ils ne sont pas traduits, ou les traduire dans cette PR ?"
+    },
+    {
+      "file": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+      "start_line": 13,
+      "end_line": 13,
+      "message": "nit: `CONTRIBUTING.md` demande des exports nommés plutôt que `export default` ; idem pour `NextSteps` qui passe de `export function` à `export default`."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

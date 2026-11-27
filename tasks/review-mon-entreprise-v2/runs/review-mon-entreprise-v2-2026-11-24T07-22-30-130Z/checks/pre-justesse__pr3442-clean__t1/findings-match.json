@@ -1,0 +1,37 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+      "start_line": 208,
+      "end_line": 208,
+      "message": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) utilisent le même code DSAR. Est-ce voulu ? Si le formulaire officiel prévoit deux cases distinctes, je me demande si l'un des deux codes n'est pas erroné ; sinon l'usager verrait deux montants différents à reporter dans la même case."
+    },
+    {
+      "file": "modele-social/CHANGELOG.md",
+      "start_line": 7,
+      "end_line": 7,
+      "message": "nit: la section « Breaking changes » apparaît deux fois sous « next ». Le renommage des règles PAMC pourrait rejoindre la liste existante, juste au-dessus."
+    },
+    {
+      "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+      "start_line": 152,
+      "end_line": 152,
+      "message": "nit: t('Bénéfice', 'Bénéfice') et t('Déficit', 'Déficit') n'ont pas de clé hiérarchique, contrairement aux autres textes du fichier (pages.assistants.declaration-revenus-pamc.resultats.label.N). Même remarque pour les occurrences de « Bénéfice » plus bas."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

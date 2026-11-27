@@ -1,0 +1,71 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+      "start_line": 14,
+      "end_line": 14,
+      "message": "Ce hook reprend à l'identique le corps du composant `ScrollToTop` voisin (`ScrollToTop.tsx`), sans le reset des `scrollTop` des parents ni le paramètre `behavior`. Je me demande si on ne pourrait pas rendre `<ScrollToTop />` dans `CMG` plutôt que d'ajouter une seconde implémentation à maintenir. Si le reset des parents posait problème ici, un paramètre sur le composant existant serait peut-être préférable. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+      "start_line": 20,
+      "end_line": 20,
+      "message": "Je me demande si `moisIdentiques` en tableaux parallèles (`GED[i]`, `AMA[i]`) à `situation.salariées` est le bon modèle : il faut les synchroniser à chaque ajout/suppression (`useCMG`, `onSalariéeDelete`), et un oubli donne un index décalé ou `undefined` (`moisIdentiques.GED[index]` est passé comme `boolean` sans que le type le garantisse). Qu'en dirais-tu de porter l'info avec la salariée elle-même (un champ dans `SalariéeGED`/`SalariéeAMA`), ou de la dériver (mars = avril = mai) ? Cela supprimerait la synchronisation, l'extension du contexte et les `set.moisIdentiques` répétés dans GED et AMA."
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/components/GED/GEDInput.tsx",
+      "start_line": 53,
+      "end_line": 53,
+      "message": "Cette règle (propager mars vers avril/mai, décocher si on modifie un autre mois) est dupliquée entre `GEDInput` et `AMAInput`, et la propagation à la coche vit en plus dans `GED.tsx`/`AMA.tsx`. Je verrais bien une fonction pure dans le domaine `cmg` (du type `appliquerMoisIdentiques(salariée)`), testable unitairement, plutôt que dans les composants. Je n'ai vu aucun test ajouté pour ce comportement : qu'en penses-tu ?"
+    },
+    {
+      "message": "Côté historique : `fix(cmg): corrige le scroll (?)` et `i18n: fix fichier de trad` sont des commits de rattrapage. Les traductions devraient partir dans le commit qui modifie les textes, donc un petit fixup/squash serait bienvenu. Je n'ai pas pu vérifier le rendu visuel (alignement du `Checkbox`, grille à 5 lignes) ni le comportement en usage manuel."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+          "start_line": 28,
+          "end_line": 31
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+      "start_line": 559,
+      "end_line": 559,
+      "message": "Ce changement de règle (l’Acre s’applique désormais à l’invalidité-décès même avec une exonération invalidité, et le test « nulle lorsqu’il y a à la fois Acre et invalidité » disparaît) modifie le calcul pour tous les indépendants, pas seulement à Mayotte. Quelle est la source qui le justifie (texte, page Urssaf) ? Une référence dans `références` aiderait à la retrouver. Et comme le commit est typé `tests:`, je me demande s’il ne vaudrait pas mieux le séparer en un commit `fix(modele-social)` pour la règle et un commit `tests` pour les tests."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

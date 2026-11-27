@@ -1,0 +1,114 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/SearchParamsAdapter.ts",
+      "start_line": 19,
+      "end_line": 19,
+      "message": "`encode` n’est utilisé que par ses tests : le partage d’URL passe par `serializeEvaluation` dans `getSearchParams`. Je me demande si on ne garde pas du code mort (et un format d’encodage, sans espace, qui diverge de celui réellement produit, `100 €/mois`). Tu le prévois pour un usage à venir, ou on peut le retirer ?"
+    },
+    {
+      "file": "site/source/SearchParamsAdapter.ts",
+      "start_line": 42,
+      "end_line": 42,
+      "message": "Les regex n’acceptent pas de signe : un montant négatif (`-100 €`, par exemple un déficit) ou un nombre négatif sérialisé par `serializeEvaluation` ne sera pas reconnu comme `Montant` et repartira en `string` dans la situation. Est-ce voulu ? Sinon un `-?` en début de regex et un cas de test couvriraient ça."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/location-de-meublé/documentation/micro-bic.mdx",
+          "start_line": 57,
+          "end_line": 57
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/components/ChiffreAffairesActivitéMixte.tsx",
+          "start_line": 9,
+          "end_line": 108
+        },
+        {
+          "file": "site/source/domaine/Montant.ts",
+          "start_line": 1,
+          "end_line": 107
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/declaration-revenus-pamc/components/LigneImpôts.tsx",
+          "start_line": 34,
+          "end_line": 34
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/design-system/molecules/field/MontantField.tsx",
+          "start_line": 64,
+          "end_line": 64
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 0,
+      "defect": 1
+    },
+    {
+      "finding": 0,
+      "defect": 2
+    },
+    {
+      "finding": 0,
+      "defect": 3
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 1
+    },
+    {
+      "finding": 1,
+      "defect": 2
+    },
+    {
+      "finding": 1,
+      "defect": 3
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

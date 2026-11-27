@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/SearchParamsAdapter.ts",
+  "start_line": 44,
+  "end_line": 44,
+  "message": "Les regex n'acceptent pas de signe `-` : un montant ou une quantité négatifs encodés par `encode` (ex. `-100€`) ne sont pas reconnus au décodage. `parseFloat(\"-100€\")` donne `-100` mais `valeur.trim() === nombre.toString()` échoue, donc la valeur revient en `string` brute et finit dans la situation Publicodes à la place d'un montant. Est-ce un cas qui peut arriver dans les simulateurs (déficit, résultat négatif, etc.) ? Si oui, un `-?` en tête des deux regex et un test aller-retour `decode(encode(x))` couvriraient le cas."
+ },
+ {
+  "file": "site/source/SearchParamsAdapter.ts",
+  "start_line": 19,
+  "end_line": 19,
+  "message": "nit: cet adaptateur dépend de `domaine/Montant` et `domaine/Quantité` et n'est utilisé que par `hooks/useSearchParamsSimulationSharing.ts`. À la racine de `site/source`, il se retrouve à côté de rien d'autre ; `domaine/engine/` (où vivent déjà `MontantAdapter` et `PublicodesAdapter`) ou `hooks/` me paraîtraient plus cohérents. Dans le hook, le `as ValeurPublicodes` après `decode` masque aussi que `ValeurDomaine` n'est pas la même chose : un passage par `PublicodesAdapter` rendrait la conversion explicite."
+ }
+]

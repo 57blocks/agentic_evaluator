@@ -1,0 +1,54 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 170,
+  "end_line": 177,
+  "message": "Les seuils (40 %, 110 % du PSS) et les taux (3,25 %, 9,75 %) n'ont aucune source dans la règle. Pourrais-tu ajouter une `références` (article du code de la sécurité sociale ou page Urssaf), comme `indépendant.publicodes` avec l'article D621-2 ?"
+ },
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 177,
+  "end_line": 177,
+  "message": "Je ne vois que des snapshots modifiés, pas de test qui cible ce comportement. Un cas explicite par tranche (sous 40 % du PSS, entre 40 % et 110 %, au-delà de 110 %) rendrait le taux lisible et protégerait d'une régression. Au-delà de 110 %, le taux effectif redescend puisque la dernière tranche est plafonnée : est-ce voulu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3189,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "line": 177,
+   "start_line": 170,
+   "body": "Les seuils (40 %, 110 % du PSS) et les taux (3,25 %, 9,75 %) n'ont aucune source dans la règle. Pourrais-tu ajouter une `références` (article du code de la sécurité sociale ou page Urssaf), comme `indépendant.publicodes` avec l'article D621-2 ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "line": 177,
+   "start_line": null,
+   "body": "Je ne vois que des snapshots modifiés, pas de test qui cible ce comportement. Un cas explicite par tranche (sous 40 % du PSS, entre 40 % et 110 %, au-delà de 110 %) rendrait le taux lisible et protégerait d'une régression. Au-delà de 110 %, le taux effectif redescend puisque la dernière tranche est plafonnée : est-ce voulu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/3176: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 11,
+  "cost_usd": 0.16128859999999998,
+  "final_text": "J'ai relu la PR #3189 et posté deux commentaires inline sur `PAMC.publicodes`, autour de la ligne 177. Aucun des deux n'est bloquant.\n\n- **Sources manquantes :** les seuils (40 % et 110 % du PSS) et les taux (3,25 % et 9,75 %) n'ont pas de `références`. J'ai demandé d'en ajouter une.\n- **Pas de test ciblé :** seuls des snapshots changent. J'ai suggéré un cas par tranche. J'ai aussi demandé si le taux effectif qui redescend au-delà de 110 % du PSS est voulu. Je n'ai pas vérifié ce point : j'ai seulement constaté que la dernière tranche est plafonnée, comme dans `indépendant.publicodes`.\n\nL'issue #3176 citée dans la description renvoie un 404, donc je n'ai pas pu vérifier que la PR traite bien ce qu'elle annonce. Les vérifications de la PR (`gh pr checks`) sont au vert."
+ }
+}
+
+```

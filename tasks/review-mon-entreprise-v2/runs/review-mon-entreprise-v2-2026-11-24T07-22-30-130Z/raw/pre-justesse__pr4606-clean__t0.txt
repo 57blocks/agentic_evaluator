@@ -1,0 +1,80 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 107,
+  "end_line": 107,
+  "message": "Il me semble qu’il manque une espace après la virgule : JSX supprime le retour à la ligne entre `,` et `<Code>modele-ti</Code>`, donc le rendu serait « modele-as,modele-ti ». Un `{' '}` après la virgule règlerait ça."
+ },
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 178,
+  "end_line": 178,
+  "message": "Cette phrase parle toujours uniquement de `modele-social`, alors que le reste de la page présente maintenant trois paquets. Est-ce voulu (l’exemple CodeSandbox étant sur `modele-social`) ? Sinon je verrais bien une formulation qui renvoie au paquet choisi plus haut."
+ },
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 106,
+  "end_line": 106,
+  "message": "Il me semble qu’il manque une espace après la virgule : JSX supprime le retour à la ligne entre `,` et `<Code>modele-ti</Code>`, donc le rendu serait « modele-as,modele-ti ». Un `{' '}` après la virgule règlerait ça."
+ },
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 182,
+  "end_line": 182,
+  "message": "Cette phrase parle toujours uniquement de `modele-social`, alors que le reste de la page présente maintenant trois paquets. Est-ce voulu (l’exemple CodeSandbox étant sur `modele-social`) ? Sinon je verrais bien une formulation qui renvoie au paquet choisi plus haut."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": null,
+   "body": "Il me semble qu’il manque une espace après la virgule : JSX supprime le retour à la ligne entre `,` et `<Code>modele-ti</Code>`, donc le rendu serait « modele-as,modele-ti ». Un `{' '}` après la virgule règlerait ça.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 178,
+   "start_line": null,
+   "body": "Cette phrase parle toujours uniquement de `modele-social`, alors que le reste de la page présente maintenant trois paquets. Est-ce voulu (l’exemple CodeSandbox étant sur `modele-social`) ? Sinon je verrais bien une formulation qui renvoie au paquet choisi plus haut.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 106,
+   "start_line": null,
+   "body": "Il me semble qu’il manque une espace après la virgule : JSX supprime le retour à la ligne entre `,` et `<Code>modele-ti</Code>`, donc le rendu serait « modele-as,modele-ti ». Un `{' '}` après la virgule règlerait ça.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 182,
+   "start_line": null,
+   "body": "Cette phrase parle toujours uniquement de `modele-social`, alors que le reste de la page présente maintenant trois paquets. Est-ce voulu (l’exemple CodeSandbox étant sur `modele-social`) ? Sinon je verrais bien une formulation qui renvoie au paquet choisi plus haut.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1422709,
+  "final_text": "J'ai relu la PR #4606 et posté deux commentaires inline sur `site/source/pages/integration/Library.tsx`. Mes premiers appels avaient échoué sans bruit à cause de la redirection de sortie. Je les ai relancés en affichant la réponse, et l'API renvoie bien les deux commentaires (ids 1795488915136 et 1795488915164).\n\n- **Ligne 106** : il manque une espace après la virgule entre `modele-as` et `modele-ti`. JSX supprime le retour à la ligne, donc le rendu serait « modele-as,modele-ti ».\n- **Ligne 182** : la phrase de la section « Utilisation » ne parle que de `modele-social`, alors que la page présente maintenant trois paquets. Je l'ai posée en question, puisque l'exemple CodeSandbox est peut-être resté sur `modele-social` volontairement.\n\nLa vérification PR (`gh pr checks`) est au vert. Je n'ai pas lu l'issue #4481 : l'appel qui l'incluait a été bloqué.\n\nJe n'ai pas relu les traductions générées (`ui-en.yaml`, `ui-fr.yaml`). Pas de commentaire global."
+ }
+}
+
+```

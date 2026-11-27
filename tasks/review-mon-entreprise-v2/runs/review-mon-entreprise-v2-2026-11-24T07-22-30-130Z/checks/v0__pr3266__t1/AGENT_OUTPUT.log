@@ -1,0 +1,23 @@
+{
+ "pr": 3266,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/utils/réductionDeCotisations.ts",
+   "line": 267,
+   "start_line": null,
+   "body": "Je me demande si la clé `réductionGénérale` n’est pas un reste de l’ancien nom : `MonthState` ne porte que `réduction` et `régularisation`. Ici le `...monthData` conserve donc l’ancienne `réduction`, et `réductionGénérale` s’ajoute en plus. Quand la rémunération totale retombe à 0 (par exemple si on vide le dernier mois renseigné), il me semble que `réduction` n’est pas remise à zéro. Je verrais bien `réduction: {…}` à la place. Je n’ai pas lancé le code pour le confirmer. Un test sur ce cas pourrait aussi le verrouiller, qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1650586,
+  "final_text": "J'ai posté un commentaire inline sur la PR, à `site/source/utils/réductionDeCotisations.ts:267`, et rien d'autre : pas de synthèse. Je n'ai pas lu le détail des composants ni des tests Cypress. Je n'ai pas non plus consulté `gh pr checks` ni lancé le code.\n\n- **Le commentaire :** dans `reevaluateRéductionMoisParMois`, la branche « rémunération totale nulle » utilise la clé `réductionGénérale`, qui ressemble à l'ancien nom. `MonthState` ne porte que `réduction` et `régularisation`. Le `...monthData` garde donc l'ancienne `réduction` au lieu de la remettre à zéro. Le commentaire propose de la remplacer par `réduction: {…}` et d'ajouter un test sur ce cas.\n- **Ce que j'ai relu :** le diff de `cotisations.publicodes` (`imputation chômage` ajoutée à la règle lodeom) et `réductionDeCotisations.ts`.\n- **Commits :** les cinq commits sont des changements logiques distincts, sans TODO ni `@ts-expect-error`.\n- **Discussion existante :** aucun commentaire n'existait sur la PR avant le mien."
+ }
+}

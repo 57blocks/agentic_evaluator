@@ -1,0 +1,106 @@
+{
+  "format": "claude-code",
+  "turns": 8,
+  "tool_calls": [
+    {
+      "name": "Bash",
+      "ms": 1322,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 118,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 26,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 30,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 90,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 10,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 139,
+      "failed": false
+    }
+  ],
+  "retries": 0,
+  "denials": 3,
+  "compactions": 0,
+  "turn_tokens": [
+    {
+      "prompt": 2,
+      "cached": 10015,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 26873,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 28162,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 36209,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 37045,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 37257,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 40757,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 41887,
+      "output": null,
+      "costUsd": null
+    }
+  ],
+  "models": [
+    "claude-sonnet-5-5"
+  ],
+  "cost_usd": 0.19621850000000005,
+  "ended": "finished",
+  "provider": "anthropic-subscription",
+  "usage": {
+    "prompt": 32845,
+    "completion": 3905,
+    "cached": 258205,
+    "costUsd": 0.19621850000000005
+  }
+}

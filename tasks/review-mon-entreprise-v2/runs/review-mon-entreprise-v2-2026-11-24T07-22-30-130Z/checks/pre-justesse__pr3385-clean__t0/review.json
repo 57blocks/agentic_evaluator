@@ -1,0 +1,23 @@
+{
+ "pr": 3385,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/AnswerList.tsx",
+   "line": 321,
+   "start_line": null,
+   "body": "Cette ligne commentée semble un reste de test : elle change le comportement (les suggestions s’affichent désormais dans la liste des réponses) et ne devrait pas être commitée en commentaire. Est-ce voulu ? Si oui, je retirerais simplement la prop ; sinon, je la restaurerais.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 4,
+  "cost_usd": 0.12569229999999998,
+  "final_text": "J'ai posté un seul commentaire inline sur la PR, dans `site/source/components/conversation/AnswerList.tsx`, ligne 321.\n\nLa ligne `showSuggestions={false}` y est passée en commentaire. Cela ressemble à un reste de test et change le comportement : les suggestions s'afficheraient maintenant dans la liste des réponses. J'ai demandé si c'était voulu. Si oui, je propose de retirer la prop au lieu de la laisser en commentaire. Sinon, je propose de la restaurer.\n\nJe n'ai pas relevé d'autre remarque. La vérification PR est au vert."
+ }
+}

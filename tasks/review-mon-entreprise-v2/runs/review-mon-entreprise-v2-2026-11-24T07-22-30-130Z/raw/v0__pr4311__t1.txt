@@ -1,0 +1,59 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+  "start_line": 74,
+  "end_line": 74,
+  "message": "Le paramètre `page-open` vient maintenant de l’URL, donc d’une saisie non maîtrisée. Avec `?page-open=abc`, `Number(...)` vaut `NaN` : `slice(NaN, NaN)` renvoie une liste vide, et aucun bouton n’est marqué comme page actuelle. C’est le même résultat avec `-1` ou `999`. Je verrais bien une validation à cette frontière (entier entre 0 et le nombre de pages − 1, sinon 0). Qu’en penses-tu ? Un test sur ce cas serait utile."
+ },
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 54,
+  "end_line": 54,
+  "message": "nit: `getHref` résout avec `new URL(...).pathname` contre un hôte factice. Les `..` et les `?query`/`#hash` éventuels dans `to` sont soit résolus soit perdus, ce qui diffère de `useHref` de react-router. Je n’ai pas vérifié les appelants un par un : est-ce que tous passent des chemins sans query ni hash ? Sinon `useResolvedPath` me semblerait plus fidèle."
+ },
+ {
+  "message": "Synthèse :\n- La PR est grosse (64 fichiers, 28 commits) et mélange l’adaptateur de navigation avec des changements fonctionnels : pagination des statistiques passée en query params, renommage `Embeded` → `Embedded`, suppression de `fromCréer`. Je me demande si ces changements fonctionnels pourraient être séparés dans leurs propres PR, pour faciliter la relecture.\n- Plusieurs commits corrigent des commits précédents de la même PR (`fix: ajoute ReactRouterNavigationProvider`, `fix: ajoute le slash final`, `style: applique Prettier`). Un rebase pour les fusionner donnerait un historique où chaque commit est autonome et vert.\n- Je n’ai pas vérifié le rendu visuel ni le comportement du SSR et d’`useIsEmbedded` dans le navigateur."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4311,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+   "line": 74,
+   "start_line": null,
+   "body": "Le paramètre `page-open` vient maintenant de l’URL, donc d’une saisie non maîtrisée. Avec `?page-open=abc`, `Number(...)` vaut `NaN` : `slice(NaN, NaN)` renvoie une liste vide, et aucun bouton n’est marqué comme page actuelle. C’est le même résultat avec `-1` ou `999`. Je verrais bien une validation à cette frontière (entier entre 0 et le nombre de pages − 1, sinon 0). Qu’en penses-tu ? Un test sur ce cas serait utile.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+   "line": 54,
+   "start_line": null,
+   "body": "nit: `getHref` résout avec `new URL(...).pathname` contre un hôte factice. Les `..` et les `?query`/`#hash` éventuels dans `to` sont soit résolus soit perdus, ce qui diffère de `useHref` de react-router. Je n’ai pas vérifié les appelants un par un : est-ce que tous passent des chemins sans query ni hash ? Sinon `useResolvedPath` me semblerait plus fidèle.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- La PR est grosse (64 fichiers, 28 commits) et mélange l’adaptateur de navigation avec des changements fonctionnels : pagination des statistiques passée en query params, renommage `Embeded` → `Embedded`, suppression de `fromCréer`. Je me demande si ces changements fonctionnels pourraient être séparés dans leurs propres PR, pour faciliter la relecture.\n- Plusieurs commits corrigent des commits précédents de la même PR (`fix: ajoute ReactRouterNavigationProvider`, `fix: ajoute le slash final`, `style: applique Prettier`). Un rebase pour les fusionner donnerait un historique où chaque commit est autonome et vert.\n- Je n’ai pas vérifié le rendu visuel ni le comportement du SSR et d’`useIsEmbedded` dans le navigateur."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1430359,
+  "final_text": "J'ai posté ma revue de la PR #4311 sur GitHub : deux commentaires inline et une synthèse. Je n'ai ni exécuté ni lancé les tests. Je n'ai pas non plus regardé les résultats de `gh pr checks`.\n\n- **`DemandesUtilisateurs.tsx`, ligne 74 :** la page courante vient désormais de l'URL. Avec `?page-open=abc`, `-1` ou `999`, la liste devient vide et aucun bouton n'est marqué comme page actuelle. Je propose de valider à cette frontière, avec un test.\n- **`ReactRouterNavigationProvider.tsx`, ligne 54 (nit) :** `getHref` résout le chemin avec `new URL(...)` sur un hôte factice. Je me demande si les `..`, `?query` et `#hash` sont traités comme avec `useHref` de react-router. Je n'ai pas vérifié les appelants un par un.\n- **Synthèse :** la PR est grosse (64 fichiers, 28 commits) et mélange l'adaptateur de navigation avec des changements fonctionnels. Je suggère de les séparer. Plusieurs commits en corrigent d'autres de la même PR (`fix: ajoute ReactRouterNavigationProvider`, `fix: ajoute le slash final`, `style: applique Prettier`), donc un rebase me semble utile. J'ai aussi signalé que je n'ai pas vérifié le rendu visuel, le SSR ni `useIsEmbedded` dans le navigateur."
+ }
+}
+
+```

@@ -1,0 +1,23 @@
+{
+ "pr": 4575,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/vite.config.ts",
+   "line": 208,
+   "start_line": null,
+   "body": "Je me demande si le remplacement de `next` par `main` est voulu : il change un comportement sans rapport avec l'adaptateur. Une build sur la branche `next` passait en production (Sentry, Plausible sur le domaine de prod, `IS_PRODUCTION`) et passerait désormais en staging. Si c'est intentionnel, je le mettrais dans un commit à part avec son message ; sinon, peut-être garder `['master', 'next']` ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.11863770000000001,
+  "final_text": "J'ai relu la PR et posté une remarque inline sur `site/vite.config.ts:208`. Elle demande si le remplacement de `next` par `main` dans les branches de production est voulu. Je n'ai rien d'autre à signaler, et `gh pr checks` est au vert."
+ }
+}

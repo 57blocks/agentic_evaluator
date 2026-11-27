@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+  "start_line": 74,
+  "end_line": 74,
+  "message": "Le paramètre d'URL est lu sans validation : avec `?page-open=abc`, `currentPage` vaut `NaN`, `items.slice(NaN, NaN)` renvoie une liste vide et aucun bouton n'est « actuel ». Idem pour `-1` ou une page au-delà du dernier index. Auparavant l'état venait de `location.state`, que l'usager ne pouvait pas saisir. Je verrais bien un repli sur 0 quand la valeur n'est pas un entier dans `[0, nombre de pages[`. Qu'en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4311,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+   "line": 74,
+   "start_line": null,
+   "body": "Le paramètre d'URL est lu sans validation : avec `?page-open=abc`, `currentPage` vaut `NaN`, `items.slice(NaN, NaN)` renvoie une liste vide et aucun bouton n'est « actuel ». Idem pour `-1` ou une page au-delà du dernier index. Auparavant l'état venait de `location.state`, que l'usager ne pouvait pas saisir. Je verrais bien un repli sur 0 quand la valeur n'est pas un entier dans `[0, nombre de pages[`. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1277002,
+  "final_text": "J'ai posté un commentaire inline sur la PR #4311, sur `DemandesUtilisateurs.tsx` ligne 74. Le paramètre de page de l'URL est lu sans validation. Avec `?page-open=abc`, la valeur vaut `NaN`, la liste affichée est vide et aucun bouton de pagination n'est actif. Le cas se produit aussi pour `-1` ou un index au-delà de la dernière page.\n\nJe n'ai relevé que ce point. Le reste de l'adaptateur de navigation me semble cohérent et le workflow « Vérification PR » est au vert. Je n'ai pas posté de commentaire global."
+ }
+}
+
+```

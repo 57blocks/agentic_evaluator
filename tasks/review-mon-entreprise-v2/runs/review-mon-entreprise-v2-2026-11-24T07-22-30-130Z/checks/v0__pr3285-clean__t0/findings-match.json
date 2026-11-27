@@ -1,0 +1,32 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+      "start_line": 148,
+      "end_line": 148,
+      "message": "Les liens Légifrance ne me semblent pas cohérents avec la description de la PR : celle-ci donne l'article D632-1 sous l'identifiant `LEGIARTI000036471466`, alors qu'ici cet identifiant est étiqueté D632-2 (et D632-1 pointe vers `LEGIARTI000041966755`). Je n'ai pas pu ouvrir Légifrance pour vérifier lequel est correct. Peux-tu confirmer les étiquettes ? Comme la même paire apparaît aux deux endroits, une erreur serait dupliquée."
+    },
+    {
+      "file": "modele-social/règles/dirigeant/indépendant.publicodes",
+      "start_line": 139,
+      "end_line": 139,
+      "message": "nit: la description est copiée de la règle parente et de `maladie`, elle ne dit rien de spécifique à l'invalidité-décès (plancher de 11,5 % du PASS). Une phrase propre à cette règle aiderait celui qui consulte l'explication du calcul."
+    },
+    {
+      "message": "Je ne vois pas de test dédié au nouveau plancher : seuls des snapshots changent (écarts d'1 € dus à l'arrondi). Un cas de test sur un revenu inférieur à 11,5 % du PASS, qui vérifie la cotisation invalidité-décès, documenterait la correction mieux que ces snapshots. Je n'ai pas pu vérifier le rendu dans le simulateur."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim",
+    "llm-no-claim",
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

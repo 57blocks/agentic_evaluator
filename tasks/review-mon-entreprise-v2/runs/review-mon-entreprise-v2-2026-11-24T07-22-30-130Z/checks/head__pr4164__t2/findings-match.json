@@ -1,0 +1,69 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/Simulation/SimulationGoal.tsx",
+      "start_line": 85,
+      "end_line": 85,
+      "message": "`RuleInputWrapper` est un composant défini à l'intérieur de `SimulationGoal` et passé comme `ChampSaisie`. Ses dépendances (`handleChange`, `evaluation.missingVariables`…) changent à chaque mise à jour de la situation, donc son identité change et React démonte/remonte le `RuleInput` au lieu de le mettre à jour. Je crains une perte du focus à chaque frappe dans un objectif saisissable. Je verrais plutôt garder une fonction de rendu (comme avant) ou un composant défini hors de `SimulationGoal`. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+      "start_line": 40,
+      "end_line": 40,
+      "message": "Je ne trouve `questionHeader` nulle part ailleurs dans `site/source` : cet id ne pointe vers aucun élément, et le groupe se retrouve sans nom accessible quand `aria.labelledby` est absent. Le `role=\"group\"` est aussi retiré alors que la description de la PR ne parle que du `radiogroup`. Est-ce voulu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+          "start_line": 16,
+          "end_line": 102
+        },
+        {
+          "file": "site/source/components/Simulation/SimulationGoal.tsx",
+          "start_line": 160,
+          "end_line": 161
+        },
+        {
+          "file": "site/source/pages/simulateurs/location-de-meublé/objectifs/ObjectifRecettes.tsx",
+          "start_line": 18,
+          "end_line": 32
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm",
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": []
+}

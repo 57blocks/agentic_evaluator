@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 378,
+  "end_line": 378,
+  "message": "Je me demande si on ne laisse pas une incohérence : la règle Publicodes `délai d'attente` dans `modele-social/règles/protection-sociale.publicodes` (l.628, 631 et 632) affiche encore « 10 mois d’affiliation » et `valeur: 10 mois`. Si le décret change bien la durée, l'explication de la règle (visible par l'usager) dit désormais autre chose que ce texte du comparateur. Faut-il l'aligner dans cette PR, ou la valeur 10 mois correspond-elle à un autre cas (paternité/adoption) que je n'ai pas vérifié ? Je n'ai pas pu relire les textes Légifrance pour ma part."
+ },
+ {
+  "message": "Deux commits : le second (`i18n: traduction`) contient les YAML générés pour le changement de texte du premier. D'après CONTRIBUTING, les traductions doivent être dans le même commit que le code, pour que chaque commit soit vert ; je me demande si un squash des deux serait possible. Le reste du changement (clé de traduction FR/EN mise à jour de façon cohérente) me semble bon."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3280,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 378,
+   "start_line": null,
+   "body": "Je me demande si on ne laisse pas une incohérence : la règle Publicodes `délai d'attente` dans `modele-social/règles/protection-sociale.publicodes` (l.628, 631 et 632) affiche encore « 10 mois d’affiliation » et `valeur: 10 mois`. Si le décret change bien la durée, l'explication de la règle (visible par l'usager) dit désormais autre chose que ce texte du comparateur. Faut-il l'aligner dans cette PR, ou la valeur 10 mois correspond-elle à un autre cas (paternité/adoption) que je n'ai pas vérifié ? Je n'ai pas pu relire les textes Légifrance pour ma part.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Deux commits : le second (`i18n: traduction`) contient les YAML générés pour le changement de texte du premier. D'après CONTRIBUTING, les traductions doivent être dans le même commit que le code, pour que chaque commit soit vert ; je me demande si un squash des deux serait possible. Le reste du changement (clé de traduction FR/EN mise à jour de façon cohérente) me semble bon."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.10344590000000001,
+  "final_text": "J'ai relu la PR #3280 et posté deux commentaires sur GitHub. Je n'ai rien d'autre à faire.\n\n- **Commentaire inline** sur `Détails.tsx:378` : la règle Publicodes `délai d'attente` (`protection-sociale.publicodes`, l. 628, 631 et 632) affiche encore « 10 mois ». Ce texte contredit désormais celui du comparateur.\n- **Synthèse** : les traductions YAML sont dans un second commit (`i18n: traduction`), alors que CONTRIBUTING demande de les commiter avec le code. J'ai suggéré un squash des deux commits.\n\nJe n'ai pas vérifié les textes Légifrance cités dans la PR. Je l'ai écrit dans le commentaire inline."
+ }
+}
+
+```

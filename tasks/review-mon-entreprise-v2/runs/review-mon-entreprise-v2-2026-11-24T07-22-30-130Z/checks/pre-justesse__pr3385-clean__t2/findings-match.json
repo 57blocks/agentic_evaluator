@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/components/conversation/AnswerList.tsx",
+      "start_line": 321,
+      "end_line": 321,
+      "message": "Cette ligne commentée ressemble à un reste de test : elle fait apparaître les suggestions dans la modale « Modifier mes réponses » pour toutes les questions, pas seulement les charges. Est-ce voulu ? Sinon, je la remettrait.\n```suggestion\n\t\t\t\t\t\t\tshowSuggestions={false}\n```"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

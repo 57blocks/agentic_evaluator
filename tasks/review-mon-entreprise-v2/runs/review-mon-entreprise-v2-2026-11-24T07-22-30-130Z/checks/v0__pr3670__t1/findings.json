@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/contextes/cmg/domaine/calcul.ts",
+  "start_line": 86,
+  "end_line": 92,
+  "message": "nit: ce `reduce` mute son accumulateur (`résultat.TEHPourNbEnfantsÀCharge = …`, `résultat.indexPourNbEnfantsÀCharge++`), alors que le reste du module est en style immuable. Je me demande si on ne gagnerait pas en lisibilité avec un filtre sur les paliers atteints (`nbEnfants <= enfants.length`) : le dernier palier donne le taux, et son index (`longueur - 1`) donne l’index. Ça éviterait aussi le `+nbEnfants` (les clés de `Record` sont des chaînes). Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/contextes/cmg/domaine/déclaration-de-garde.ts",
+  "start_line": 64,
+  "end_line": 67,
+  "message": "Le `as DéclarationDeGardeGED` fait passer une déclaration AMA pour une GED uniquement pour réutiliser la validation. Le cast contourne le typage strict : si `DéclarationDeGardeGED` gagne un champ obligatoire, ce code compilera toujours mais sera faux. Je verrais bien une fonction privée `sontHeuresEtRémunérationValides({ heuresDeGarde, rémunération })` partagée par les deux validateurs, sans cast. Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/contextes/cmg/domaine/constantes.ts",
+  "start_line": 5,
+  "end_line": 51,
+  "message": "Ces constantes (plafonds, majorations, TEH, coûts horaires maximal et médian, planchers d’heures) déterminent le montant affiché aux usagers, et aucune source n’est citée. Pourrais-tu ajouter en commentaire la référence (texte réglementaire, barème Caf/Urssaf) de chaque bloc ? Les relecteurs pourront les vérifier, et ce sera utile à la prochaine mise à jour du barème. Je n’ai pas pu les vérifier moi-même."
+ },
+ {
+  "message": "Synthèse : je n’ai pas pu relire en détail les 65 fichiers, donc j’ai surtout regardé le domaine (`contextes/cmg/domaine`). Je n’ai pas non plus vérifié le rendu visuel ni testé à la main les pages et l’iframe.\n\n- Le domaine en TypeScript pur, avec des tests étendus sur l’éligibilité et le calcul, va dans le bon sens.\n- La PR fait plus de 5 000 lignes et une quarantaine de commits. Une découpe (domaine / UI / design-system / métadonnées des simulateurs) aurait facilité la relecture. Les correctifs `DateField` et `MontantField` auraient pu être une PR à part.\n- Plusieurs commits ajustent des commits précédents de la même PR (`corrige la version mobile…`, `retours de mise en forme…`). Un fixup avant fusion rendrait l’historique plus lisible.\n- Voir les remarques inline pour le détail."
+ }
+]

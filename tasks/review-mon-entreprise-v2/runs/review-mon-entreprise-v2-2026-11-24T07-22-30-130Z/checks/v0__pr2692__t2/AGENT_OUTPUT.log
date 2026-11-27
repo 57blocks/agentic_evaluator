@@ -1,0 +1,51 @@
+{
+ "pr": 2692,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 30,
+   "start_line": null,
+   "body": "Je me demande ce qui se passe si Redis est indisponible : avec `enableOfflineQueue: false`, `redis.get` (et le `redis.set` plus bas) lèvent une erreur immédiate, et comme il n’y a pas de `try/catch` la requête `/evaluate` part en erreur alors que le calcul aurait pu être fait sans cache. Qu’en penses-tu de traiter le cache comme optionnel (catch → log Sentry → `await next()`) ? Pour la même raison, un échec du `set` ne devrait pas faire échouer une réponse déjà calculée.\n\nAutre point : la clé est `JSON.stringify(body)` sans préfixe, donc deux bodies équivalents avec un ordre de clés différent ne partageront pas d’entrée, et la clé peut devenir très volumineuse. Un préfixe (`evaluate:`) et/ou un hash du body me semblerait plus sain.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 41,
+   "start_line": null,
+   "body": "Deux remarques sur la réponse mise en cache :\n- `responseCachedAt` n’est présent que dans les réponses servies depuis le cache, pas dans la première (la miss). Le contrat de la réponse diffère donc selon le cas ; est-ce voulu ? Si oui, il faudrait le documenter dans `openapi.json`.\n- `...ctx.body` suppose un objet ; je n’ai pas vérifié que `publicodesAPI` retourne toujours un objet sur un 200, à confirmer.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 13,
+   "start_line": null,
+   "body": "Si `NODE_ENV=production` mais que `SCALINGO_REDIS_URL` est absente, on retombe silencieusement sur `ioredis-mock` : le cache devient local à chaque instance et disparaît au redémarrage, sans aucun signal. Un log ou une désactivation explicite du cache serait plus lisible. Par ailleurs `ioredis-mock` est dans `dependencies` alors qu’il ne sert qu’hors production : `devDependencies` ? (Et `!redis` ligne 23 ne peut jamais être vrai, `redis` étant toujours défini.)",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/index.ts",
+   "line": 50,
+   "start_line": null,
+   "body": "En plaçant le cache avant `plausibleMiddleware`, les requêtes servies depuis le cache ne sont plus comptées dans les stats Plausible. Si c’est voulu, très bien, sinon je garderais `plausibleMiddleware` avant le cache. Je n’ai pas vérifié non plus que `koaBody()` ici n’empêche pas le parsing du body par `publicodesAPI` en aval (body déjà consommé) : un test d’intégration cache miss puis hit sur `/evaluate` lèverait le doute.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- Aucun test n’accompagne le cache (miss puis hit, Redis indisponible, body invalide) alors que c’est un comportement observable et testable avec `ioredis-mock`.\n- La PR mélange la fonctionnalité (`redis-cache.ts`, `index.ts`) avec une mise à jour massive de dépendances (koa, sentry, typescript 5, vitest, prettier…) et le reformatage/réordonnancement d’imports sur ~90 fichiers du site. Je verrais bien deux PR : une pour les mises à jour, une pour le cache, pour faciliter la relecture et un éventuel revert.\n- Le message du 3ᵉ commit (« Fix prettier import order update ») ne suit pas le format Conventional Commits en français.\n- Je n’ai pas exécuté le code ; les points ci-dessus sont des lectures du code, non vérifiées à l’exécution."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.15888009999999997,
+  "final_text": "J'ai posté sur la PR #2692 quatre commentaires inline et une synthèse. Je n'ai exécuté ni le code ni les tests, donc ce sont des lectures du code. Je n'ai pas lu les résultats de `gh pr checks`.\n\nLes commentaires inline portent sur ces points :\n- **`api/source/redis-cache.ts`, ligne 30 :** il n'y a pas de `try/catch` autour de `redis.get` et `redis.set`. Si Redis est indisponible, `/evaluate` part en erreur alors que le calcul aurait pu se faire sans cache. La clé est aussi le `JSON.stringify` du body, sans préfixe.\n- **`api/source/redis-cache.ts`, ligne 41 :** `responseCachedAt` n'apparaît que dans les réponses servies depuis le cache, pas à la première requête. J'ai aussi signalé que `...ctx.body` suppose un objet, sans l'avoir vérifié.\n- **`api/source/redis-cache.ts`, ligne 13 :** en production sans `SCALINGO_REDIS_URL`, le code bascule silencieusement sur `ioredis-mock`. `ioredis-mock` est dans `dependencies` au lieu de `devDependencies`. Le test `!redis` ne peut jamais être vrai.\n- **`api/source/index.ts`, ligne 50 :** le cache est placé avant `plausibleMiddleware`, donc les réponses servies depuis le cache ne sont plus comptées dans Plausible. Je n'ai pas vérifié que `koaBody()` ne consomme pas le body avant `publicodesAPI`.\n\nLa synthèse relève trois points :\n- **Tests :** aucun test n'accompagne le cache.\n- **Découpage :** la PR mélange le cache avec une grosse mise à jour de dépendances et un reformatage d'environ 90 fichiers. Je propose de la scinder en deux.\n- **Commit :** le message « Fix prettier import order update » ne suit pas le format Conventional Commits en français."
+ }
+}

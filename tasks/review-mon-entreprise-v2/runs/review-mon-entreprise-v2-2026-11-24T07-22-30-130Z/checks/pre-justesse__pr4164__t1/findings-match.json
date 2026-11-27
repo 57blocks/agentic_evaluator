@@ -1,0 +1,69 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/Simulation/SimulationGoal.tsx",
+      "start_line": 85,
+      "end_line": 85,
+      "message": "Je me demande si `RuleInputWrapper` ne pose pas problème : c’est un composant créé via `useCallback`, dont l’identité change dès qu’une dépendance change (`handleChange`, `evaluation.missingVariables`, `displayedUnit`…). À chaque saisie la situation est mise à jour, donc l’évaluation et ces dépendances changent. React verrait alors un nouveau type de composant dans `<ChampSaisie />`, démonterait puis remonterait l’input, et l’usager risquerait de perdre le focus et la position du curseur en tapant. Est-ce que tu as vérifié ce cas dans le navigateur ?\n\nUne piste : garder une fonction de rendu qui reçoit `id` et `aria` (par exemple `rendreChampSaisie({ id, aria })` appelée comme une fonction, pas montée comme composant), ce qui évite de recréer un type de composant."
+    },
+    {
+      "file": "site/source/design-system/molecules/field/ChoiceGroup/CardChoiceGroup.tsx",
+      "start_line": 32,
+      "end_line": 32,
+      "message": "Je me demande pourquoi garder `aria-label=\"\"` plutôt que de retirer la prop : une chaîne vide n’est pas un nom accessible, et elle semble n’être là que pour faire taire le typage de React Aria. Le même motif est dans `OuiNonInput`, `ToggleChoiceGroup` et d’autres. Un `aria-label` vide peut aussi masquer un `aria-labelledby` absent plutôt que le signaler. Qu’en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+          "start_line": 16,
+          "end_line": 102
+        },
+        {
+          "file": "site/source/components/Simulation/SimulationGoal.tsx",
+          "start_line": 160,
+          "end_line": 161
+        },
+        {
+          "file": "site/source/pages/simulateurs/location-de-meublé/objectifs/ObjectifRecettes.tsx",
+          "start_line": 18,
+          "end_line": 32
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm",
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": []
+}

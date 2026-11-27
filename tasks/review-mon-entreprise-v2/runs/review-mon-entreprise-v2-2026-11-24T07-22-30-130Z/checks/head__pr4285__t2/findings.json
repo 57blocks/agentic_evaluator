@@ -1,0 +1,26 @@
+[
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "Je me demande si le `0.5 *` ne devrait pas être dans la puissance : la formule du BOSS est `Tdelta × [½ × (3 × Smic / rémunération − 1)]^P`, alors qu’ici on calcule `½ × (3 × Smic / rémunération − 1)^P`. Pour une rémunération à 2 Smic, par exemple, on obtient `0,5 × 0,5^1,75 ≈ 0,148` au lieu de `0,25^1,75 ≈ 0,088`, et le coefficient est plafonné à `Tmin + Tdelta` plus tôt que prévu au voisinage du Smic. Les snapshots ont-ils été comparés à un calcul de référence (simulateur Urssaf) ?\n```suggestion\n            - (0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P\n```"
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 49,
+  "end_line": 49,
+  "message": "Ce `valeur: réduction générale` pointe vers l’ancienne règle, donc le plafond DFS (130 %) est calculé avec l’ancienne formule (1,6 Smic) et pas avec la RGDU. Pour un salarié avec DFS, la RGDU sera plafonnée sur la base de l’ancien montant. Je verrais plutôt `valeur: RGDU` (avec le même contexte) ; je ne vois pas de test DFS qui le couvrirait, qu’en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 29,
+  "end_line": 29,
+  "message": "Le `coefficient de majoration` (caisse de congés payés, ×100/90) de l’ancienne règle n’est plus repris dans la RGDU. Est-ce voulu par la réforme ? Sinon la question `caisse de congés payés` n’a plus d’effet sur la réduction calculée."
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 54,
+  "end_line": 54,
+  "message": "Après cette PR, quels consommateurs lisent encore `réduction générale` (imputations retraite/chômage, `T`, `régularisation`) ? Si la RGDU la remplace pour 2026, deux règles coexistent avec deux formules et leurs montants peuvent diverger (voir le plafond DFS plus haut). Je me demande s’il faut migrer ce qui en dépend, ou documenter ce qui reste volontairement sur l’ancien calcul."
+ }
+]

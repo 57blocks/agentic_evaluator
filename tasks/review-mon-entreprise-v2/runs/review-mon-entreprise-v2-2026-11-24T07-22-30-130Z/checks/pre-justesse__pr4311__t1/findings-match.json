@@ -1,0 +1,68 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+      "start_line": 48,
+      "end_line": 48,
+      "message": "Je me demande si ce `return to` ne perd pas le `basename` du routeur. L'ancien `useHref('/iframes/...')` dans `Iframe.tsx` renvoyait `/mon-entreprise/iframes/...` (le basename est bien passé au routeur dans `Provider.tsx`, via `entry-fr` et `entry-en`), alors que `getHref` renvoie ici `/iframes/...` tel quel. L'`iframeSrc` de la page d'intégration pointerait alors hors de l'app en production. Peut-être que `useHref(to)` couvre aussi les chemins absolus, et que la branche relative peut disparaître ? Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/lib/navigation/NavigationAPI.ts",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "file": "site/source/lib/navigation/providers/MockNavigationProvider.tsx",
+          "start_line": 43,
+          "end_line": 98
+        },
+        {
+          "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+          "start_line": 5,
+          "end_line": 88
+        },
+        {
+          "file": "site/source/pages/integration/Iframe.tsx",
+          "start_line": 59,
+          "end_line": 89
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm"
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ]
+}

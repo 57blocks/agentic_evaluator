@@ -1,0 +1,21 @@
+{
+ "pr": 4534,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4488: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1111222,
+  "final_text": "J'ai relu la PR #4534 et je n'ai trouvé aucune remarque à poster. J'ai laissé un commentaire global : « J'ai bien relu, ça me paraît bon à merger ».\n\n- **Règle modifiée :** la part salariale de l'Acre applique désormais 25 % des cotisations exonérées à partir de janvier 2026. Elle reprend la même structure que la part patronale, déjà en place dans `acre.publicodes`.\n- **Vérifications :** le workflow « Vérification PR » est au vert. Je n'ai pas exécuté le code. Les snapshots de `SASU.test.ts.snap` ont bien été mis à jour (cotisations 766 → 851 sur les cas Acre 1 et 5).\n- **Issue #4488 :** `gh api` m'a renvoyé « Not Found » en la lisant, donc je n'ai pas pu vérifier ce que l'issue demandait."
+ }
+}

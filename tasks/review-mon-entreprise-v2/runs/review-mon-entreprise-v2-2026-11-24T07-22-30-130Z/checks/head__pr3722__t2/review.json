@@ -1,0 +1,39 @@
+{
+ "pr": 3722,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+   "line": 3,
+   "start_line": null,
+   "body": "Ce hook duplique le corps de `ScrollToTop.tsx` (même `window.scroll` avec le même repli), qui est déjà utilisé dans `pages/assistants/index.tsx` et `choix-du-statut/index.tsx`. Je me demande si on ne pourrait pas simplement rendre `<ScrollToTop />` dans `cmg/index.tsx`, pour ne pas avoir deux implémentations qui divergeront. Il y a aussi un souci de cohérence : ici c'est un `export default` alors que la convention est l'export nommé. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/components/GED/GED.tsx",
+   "line": 34,
+   "start_line": 28,
+   "body": "La règle « mois identiques = avril et mai recopient mars » est écrite ici, puis réécrite dans `GEDInput.onDéclarationChange`, et sans doute une troisième fois côté AMA. C'est de la logique métier dans des composants. Je verrais bien une fonction pure dans `contextes/cmg/domaine` (par ex. `appliquerMoisIdentiques(salariée)`) que GED et AMA appellent, et que l'on puisse tester sans React. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+   "line": 16,
+   "start_line": null,
+   "body": "`moisIdentiques` est un tableau parallèle à `situation.salariées.GED/AMA`, qu'il faut maintenir à la main : ajout dans `useCMG`, suppression dans `GED.tsx`, et probablement à chaque autre endroit qui modifie la liste des salariées. Si un des chemins l'oublie, les index se décalent et la case se retrouve cochée sur la mauvaise salariée, ou `undefined` passé à `moisIdentiques: boolean`. Je me demande si ce booléen ne pourrait pas faire partie de la salariée elle-même (ou être déduit de l'égalité des trois mois), ce qui supprimerait la synchronisation. Je ne vois par ailleurs pas de test sur ce nouveau comportement : en as-tu prévu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1668338,
+  "final_text": "J'ai posté trois commentaires inline sur la PR, et aucun commentaire global. La vérification PR est au vert. Je n'ai relu que le diff de GED et des fichiers partagés, pas la partie AMA.\n\n- **Doublon de code** (`useScrollToTop.tsx`) : le hook reprend le corps de `ScrollToTop.tsx`, déjà utilisé ailleurs. Je propose de rendre `<ScrollToTop />` dans `cmg/index.tsx`. Je signale aussi l'`export default`, alors que la convention est l'export nommé.\n- **Logique métier dans les composants** (`GED.tsx`) : la règle « avril et mai recopient mars » est écrite à plusieurs endroits, dans `GED.tsx` et dans `GEDInput.tsx`. Je suggère une fonction pure dans `contextes/cmg/domaine`.\n- **Tableau parallèle à synchroniser** (`CMGContext.tsx`) : `moisIdentiques` doit rester aligné à la main avec la liste des salariées. Un oubli décale les index. Je demande aussi si des tests sont prévus.\n\nJe n'ai pas vérifié que la règle est dupliquée côté AMA : le commentaire dit « sans doute »."
+ }
+}

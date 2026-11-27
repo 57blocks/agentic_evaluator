@@ -1,0 +1,27 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+      "start_line": 1,
+      "end_line": 1,
+      "message": "x"
+    },
+    {
+      "message": "Le délai d'affiliation de 10 mois reste dans `modele-social/règles/protection-sociale.publicodes` (règle `délai d'attente`, lignes ~628, 631 et 632 : descriptions maternité et paternité/adoption, et `valeur: 10 mois`). Le texte du comparateur passe à 6 mois, mais ces règles continuent d'afficher 10 mois. Est-ce voulu, ou faut-il aligner la règle (puis rebuilder `modele-social` et régénérer les traductions) ? Je n'ai pas vérifié si la valeur est utilisée dans un calcul."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim",
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      1
+    ]
+  }
+}

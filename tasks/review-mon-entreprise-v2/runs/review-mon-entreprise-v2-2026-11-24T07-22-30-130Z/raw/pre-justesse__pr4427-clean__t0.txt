@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/storage/sanitizePersistedSituation.ts",
+  "start_line": 15,
+  "end_line": 15,
+  "message": "Je me demande si ce filtre ne risque pas de supprimer silencieusement des valeurs légitimes : tout ce qui n'est ni chaîne, ni nombre, ni `{ valeur, unité }` disparaît de la situation restaurée (un booléen, ou une expression Publicodes plus riche comme `{ somme: [...] }` ou `{ variations: ... }` si certains simulateurs en persistent). L'usager retrouverait alors une simulation amputée sans signal. As-tu vérifié que les situations persistées ne contiennent que ces trois formes ? Sinon, peut-être garder les valeurs inconnues telles quelles, et ne convertir que le cas ciblé par #4300."
+ },
+ {
+  "file": "site/source/domaine/searchParams.ts",
+  "start_line": 37,
+  "end_line": 37,
+  "message": "Une valeur qui n'est ni encodable ni `{ valeur, unité }` est maintenant ignorée sans aucune trace, alors qu'avant l'erreur était au moins loguée. Le lien partagé perdrait un paramètre sans que personne ne le sache. Qu'en penses-tu de garder un `console.error` (ou un retour d'erreur) dans ce cas ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4427,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/storage/sanitizePersistedSituation.ts",
+   "line": 15,
+   "start_line": null,
+   "body": "Je me demande si ce filtre ne risque pas de supprimer silencieusement des valeurs légitimes : tout ce qui n'est ni chaîne, ni nombre, ni `{ valeur, unité }` disparaît de la situation restaurée (un booléen, ou une expression Publicodes plus riche comme `{ somme: [...] }` ou `{ variations: ... }` si certains simulateurs en persistent). L'usager retrouverait alors une simulation amputée sans signal. As-tu vérifié que les situations persistées ne contiennent que ces trois formes ? Sinon, peut-être garder les valeurs inconnues telles quelles, et ne convertir que le cas ciblé par #4300.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/domaine/searchParams.ts",
+   "line": 37,
+   "start_line": null,
+   "body": "Une valeur qui n'est ni encodable ni `{ valeur, unité }` est maintenant ignorée sans aucune trace, alors qu'avant l'erreur était au moins loguée. Le lien partagé perdrait un paramètre sans que personne ne le sache. Qu'en penses-tu de garder un `console.error` (ou un retour d'erreur) dans ce cas ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1192131,
+  "final_text": "J'ai posté deux commentaires inline sur la PR #4427. Les vérifications de la PR (`gh pr checks`) passent.\n\n- **`sanitizePersistedSituation.ts`, ligne 15** : le filtre supprime sans signal toute valeur qui n'est ni chaîne, ni nombre, ni `{ valeur, unité }`. Un usager pourrait retrouver une simulation amputée. J'ai demandé si les situations persistées ne contiennent bien que ces trois formes. Sinon, je propose de garder les autres valeurs telles quelles et de ne convertir que le cas de #4300.\n- **`searchParams.ts`, ligne 37** : une valeur non encodable est maintenant ignorée sans trace, alors qu'avant l'erreur était au moins loguée. J'ai suggéré de garder un `console.error` dans ce cas.\n\nJe n'ai pas lu les fichiers de tests ni les consommateurs de `sanitizePersistedSituation` : la revue ne porte que sur le diff des sources."
+ }
+}
+
+```

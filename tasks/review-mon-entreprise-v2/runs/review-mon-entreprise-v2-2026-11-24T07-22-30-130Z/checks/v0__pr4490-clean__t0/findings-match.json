@@ -1,0 +1,18 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Deux points, que je n'ai pas pu vérifier par une exécution (je ne lance ni le workflow ni les scripts).\n\n**1. Le job `algolia-push` ne pourra pas tourner sur cette PR elle-même.** `pr-deploy.yaml` est déclenché par `workflow_run` et son `actions/checkout` n'a pas de `ref:`. Il récupère donc la branche par défaut, où `algolia:push` et `push-data.ts` n'existent pas encore. Je m'attends à un échec de ce job tant que la PR n'est pas fusionnée. Ce choix de checkout me paraît bon, car il évite d'exécuter du code de la PR avec `ALGOLIA_ADMIN_KEY`. Je me demande seulement si c'est attendu, et s'il vaut mieux le signaler dans la description de la PR.\n\n**2. Le chemin `algolia:update` de la prod garde un comportement équivalent.** `_build-and-deploy-prod.yaml` appelle toujours `algolia:update`, qui enchaîne maintenant `build:simulator-data`, `export` et `push`. Dans `pr-check.yaml`, l'export passe après le `build`, qui produit `simulation-data.json`, donc l'ordre me semble bon.\n\nnit: dans `export-data.ts`, l'import JSON n'a plus `{ assert: { type: 'json' } }`, qui figurait dans l'ancien `update-data.ts`. Je n'ai pas vérifié que `tsx` s'en passe, mais le test local de `yarn algolia:export` le dira.\n\nHistorique : les 4 commits sont découpés logiquement et leurs messages respectent le format attendu."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

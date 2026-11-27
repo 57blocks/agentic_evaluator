@@ -1,0 +1,23 @@
+{
+ "pr": 3280,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 378,
+   "start_line": null,
+   "body": "Le texte affiche maintenant 6 mois, mais `modele-social/règles/protection-sociale.publicodes` (règle `protection sociale . maladie . maternité paternité adoption . délai d'attente`, lignes ~628-632) dit toujours « 10 mois d’affiliation » dans sa description et a `valeur: 10 mois`. Cette règle sert de source au reste du simulateur, donc le même écran risque d'afficher deux durées différentes. Ne faut-il pas l'aligner dans cette PR (en pensant à `rules-en.yaml` et au build de `modele-social`) ? Et le 6 mois vaut-il aussi pour paternité/adoption, ou seulement pour la maternité ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1253601,
+  "final_text": "J'ai posté un commentaire inline sur la PR #3280. Je n'ai pas relancé le build ni les tests, et le workflow « Vérification PR » est au vert.\n\nLa PR passe la durée d'affiliation de 10 à 6 mois dans `Détails.tsx` et dans les fichiers de traduction. La règle Publicodes `protection sociale . maladie . maternité paternité adoption . délai d'attente` (`modele-social/règles/protection-sociale.publicodes`, lignes 628 à 632) dit encore « 10 mois », dans sa description et dans `valeur: 10 mois`. Le même écran risque donc d'afficher deux durées différentes.\n\nMon commentaire demande si la règle doit être alignée dans cette PR. Il demande aussi si les 6 mois valent seulement pour la maternité ou aussi pour la paternité et l'adoption. Le texte de la règle mentionne 10 mois pour les trois cas, et je n'ai pas pu le vérifier dans les décrets cités."
+ }
+}

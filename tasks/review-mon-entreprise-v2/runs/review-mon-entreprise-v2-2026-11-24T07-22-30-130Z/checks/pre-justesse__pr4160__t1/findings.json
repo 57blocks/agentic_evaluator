@@ -1,0 +1,5 @@
+[
+ {
+  "message": "Question sur le dernier commit (`sépare le champ dividendes en 2`) : le simulateur ne calcule plus lui-même la part des dividendes au-delà de 10 % du capital social (suppression de `entreprise . capital social`, `bénéfice net de l'exercice précédent` et du plafond). C'est désormais à l'usager de ventiler ses dividendes entre les deux champs, alors que ce seuil est justement le point difficile (capital + primes d'émission + comptes courants d'associés de la famille, ou bénéfice N-1 pour les EI). Je me demande si, pour quelqu'un qui connaît son capital mais pas le découpage, le risque n'est pas de saisir toute la somme dans le premier champ et d'obtenir des cotisations sous-estimées. C'est peut-être un choix délibéré (retour usagers ?) ; dans ce cas, une aide dans la description des deux champs (comment calculer le seuil) limiterait ce risque. Qu'en penses-tu ?"
+ }
+]

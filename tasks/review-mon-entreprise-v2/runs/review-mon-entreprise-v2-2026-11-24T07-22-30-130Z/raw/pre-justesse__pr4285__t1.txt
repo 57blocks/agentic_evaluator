@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/AvertissementRéformeRGDUNonImplémentée.tsx",
+  "start_line": 12,
+  "end_line": 12,
+  "message": "Le simulateur de réduction générale (`RéductionGénérale.tsx`, ligne 31) affiche toujours cet avertissement « La RGDU n'est pas encore implémentée sur ce simulateur » dans un `Message type=\"error\"`, alors que la PR implémente la RGDU dans `modele-social` (et que ce simulateur s'appuie sur ces règles). Les usagers vont lire qu'un résultat est faux alors qu'il ne l'est plus. Est-ce voulu (le simulateur dédié n'est pas encore adapté) ? Sinon, je verrais bien supprimer le composant et ses clés de traduction, comme pour le simulateur salarié."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/AvertissementRéformeRGDUNonImplémentée.tsx",
+   "line": 12,
+   "start_line": null,
+   "body": "Le simulateur de réduction générale (`RéductionGénérale.tsx`, ligne 31) affiche toujours cet avertissement « La RGDU n'est pas encore implémentée sur ce simulateur » dans un `Message type=\"error\"`, alors que la PR implémente la RGDU dans `modele-social` (et que ce simulateur s'appuie sur ces règles). Les usagers vont lire qu'un résultat est faux alors qu'il ne l'est plus. Est-ce voulu (le simulateur dédié n'est pas encore adapté) ? Sinon, je verrais bien supprimer le composant et ses clés de traduction, comme pour le simulateur salarié.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1658445,
+  "final_text": "J'ai relu la PR #4285 et posé un seul commentaire inline, sur `AvertissementRéformeRGDUNonImplémentée.tsx`. Je n'ai rien exécuté. La vérification PR passe (`gh pr checks`).\n\nLe simulateur de réduction générale (`RéductionGénérale.tsx`, ligne 31) affiche toujours l'avertissement « La RGDU n'est pas encore implémentée sur ce simulateur », dans un message d'erreur. Or la PR implémente la RGDU dans `modele-social`. Je demande si c'est voulu, et sinon je propose de supprimer le composant et ses clés de traduction, comme pour le simulateur salarié.\n\nJe n'ai pas lu l'issue #4284 (`gh issue view` a été refusé), donc je n'ai pas pu vérifier ce que la PR devait traiter."
+ }
+}
+
+```

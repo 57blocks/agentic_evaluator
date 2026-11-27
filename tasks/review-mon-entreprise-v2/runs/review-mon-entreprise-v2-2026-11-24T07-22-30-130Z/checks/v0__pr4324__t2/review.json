@@ -1,0 +1,43 @@
+{
+ "pr": 4324,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 349,
+   "start_line": null,
+   "body": "Le lien (URL, texte, aria-label et `Message`) est dupliqué quasiment à l'identique dans `DroitsRetraite.tsx` (l.157). Si l'URL de l'Assurance retraite change, il faudra penser aux deux endroits. Je verrais bien un petit composant partagé, qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 327,
+   "start_line": null,
+   "body": "Je me demande si la somme AGIRC ARRCO + RCI + CIPAV a du sens pour l'usager : ce sont des points de régimes différents, à valeur de service différente, donc « 150 points » ne donne pas forcément la même pension d'un statut à l'autre, alors que le libellé les présente comme homogènes. Est-ce un choix assumé ? Je n'ai pas vérifié non plus le comportement de `somme` quand une des trois règles est non applicable pour un statut : un test sur ce cas serait rassurant.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+   "line": 32,
+   "start_line": null,
+   "body": "nit: les apostrophes typographiques (’) du texte existant sont devenues des apostrophes droites (') dans ce fichier (« droits acquis sur l'année », messages DROM/ACRE…), ce qui modifie aussi les textes par défaut des traductions. Est-ce voulu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n\n- **Historique** : 16 commits avec plusieurs allers-retours (lien Cnav ajouté puis supprimé `d6567ae` → `42b27b5`, ACRE retiré après coup, `<Body>` ajouté dans `6c99c3c`). Je me demande si un squash des allers-retours, ou un découpage (suppression des projections / nouveaux affichages trimestres-points / lien Assurance retraite), rendrait la PR plus lisible. Les messages `fix:`/`feat:` sans scope fonctionnel s'écartent aussi de la convention (`fix(indépendant): …`).\n- **Tests** : snapshots mis à jour, mais je ne vois pas de test pour les nouveaux affichages du comparateur (trimestres, revenu cotisé, points) ni pour la condition `libérale réglementée = non`.\n- **Non vérifié** : rendu visuel, accessibilité du lien, relecture des traductions EN."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 13,
+  "cost_usd": 0.2449609,
+  "final_text": "J'ai posté ma revue de la PR #4324 sur GitHub : trois commentaires inline et une synthèse. Je n'ai exécuté ni build ni tests et je n'ai pas vu le rendu à l'écran.\n\nCommentaires inline :\n- **`Détails.tsx`, lien Assurance retraite** : le lien est dupliqué presque à l'identique dans `DroitsRetraite.tsx`. Je suggère un composant partagé.\n- **`Détails.tsx`, somme des points** : la somme AGIRC ARRCO + RCI + CIPAV présente comme homogènes des points de régimes différents. Je n'ai pas vérifié le cas où l'une des trois règles est non applicable pour un statut.\n- **`DroitsRetraite.tsx`, apostrophes** (nit) : les apostrophes typographiques (’) sont devenues des apostrophes droites (').\n\nJ'ai aussi préparé un commentaire sur le TODO ajouté dans `Condition.tsx`, qui renvoie à #4323. Il n'a pas été posté : l'appel a échoué à cause d'une erreur de variable shell, et je ne l'ai pas relancé.\n\nLa synthèse rappelle trois points :\n- **Historique** : 16 commits avec plusieurs allers-retours, et des messages sans scope fonctionnel.\n- **Tests** : pas de test pour les nouveaux affichages du comparateur ni pour la condition « libérale réglementée = non ».\n- **Non vérifié** : le rendu visuel, l'accessibilité du lien et les traductions EN."
+ }
+}

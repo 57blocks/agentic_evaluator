@@ -1,0 +1,19 @@
+{
+ "pr": 4653,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.10549009999999999,
+  "final_text": "J'ai relu la PR et je n'ai trouvé aucune remarque à faire. J'ai posté un commentaire global : « J'ai bien relu, ça me paraît bon à merger. »\n\n- **Contenu :** c'est une suppression pure de l'assistant CMG (5 599 lignes retirées, 2 ajoutées).\n- **Vérifications :** `gh pr checks` est au vert. Une recherche `git grep` ne trouve plus aucune référence à `cmg` hors modele-social, hors fichiers binaires et hors un fichier de statistiques (`base-stats.json`).\n- **Non vérifié :** je n'ai pas cherché de redirection ni de lien externe vers les anciennes URLs `/assistants/cmg`."
+ }
+}

@@ -1,0 +1,14 @@
+[
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "Je me demande si la parenthèse est au bon endroit : la formule du BOSS est `Tdelta × { ½ × [3 × SMIC/rémunération − 1] }^P`, donc le ½ est dans la puissance, alors qu'ici `0.5 * (x ** P)` ne l'applique qu'à l'extérieur. Pour une rémunération à 2 Smic (x = 0,5), on obtient 0,5 × 0,5^1,75 ≈ 0,148 au lieu de (0,25)^1,75 ≈ 0,088, soit un coefficient surestimé sur toute la zone dégressive (les bornes à 1 Smic via le plafond et à 3 Smic restent justes, ce qui masque l'écart). Qu'en penses-tu ?\n```suggestion\n            - (0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P\n```"
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 49,
+  "end_line": 49,
+  "message": "Le plafond DFS de la RGDU s'appuie sur `réduction générale`, c'est-à-dire l'ancienne formule (1,6 Smic, T), conservée dans le fichier. Le plafond à 130 % est donc calculé avec l'ancien dispositif. De la même façon, les imputations (retraite complémentaire, sécurité sociale, chômage) et la régularisation restent attachées à l'ancienne règle, alors que le montant total vient de `RGDU`. Est-ce voulu ? Sinon, je me demande si l'ancienne règle ne devrait pas disparaître au profit de la RGDU, plutôt que de laisser deux calculs en parallèle qui vont diverger."
+ }
+]

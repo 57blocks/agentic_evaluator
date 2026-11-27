@@ -1,0 +1,38 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 36,
+      "end_line": 36,
+      "message": "Je me demande si cette garde ne devrait pas porter sur `relevantExternalLinks` : sur un simulateur dont tous les liens sont conditionnés par une règle, la liste filtrée est vide mais `externalLinks` ne l'est pas, donc le titre « Ressources utiles » s'affiche sans carte. (`!externalLinks` ne couvre pas non plus un tableau vide.)"
+    },
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 31,
+      "end_line": 31,
+      "message": "Le filtre `language === 'fr'` de l'ancien code a disparu, alors que les liens de `external-links/` sont en français non traduit (`// TODO: gérer les traductions`). Sur les pages EN, les usagers vont donc voir des cartes Urssaf en français. Était-ce voulu ? Sinon on pourrait garder le filtre, ou traduire ces liens dans cette PR."
+    },
+    {
+      "file": "site/source/pages/simulateurs/NextSteps.tsx",
+      "start_line": 23,
+      "end_line": 23,
+      "message": "nit: `NextSteps` était un export nommé ; `CONTRIBUTING.md` demande des exports nommés plutôt que `export default` (idem pour `ExternalLinkCard`)."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

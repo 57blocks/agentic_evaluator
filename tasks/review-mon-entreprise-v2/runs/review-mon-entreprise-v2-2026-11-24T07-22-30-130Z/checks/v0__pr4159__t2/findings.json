@@ -1,0 +1,14 @@
+[
+ {
+  "file": "modele-social/règles/salarié/aides-employeur.publicodes",
+  "start_line": 56,
+  "end_line": 56,
+  "message": "Je me demande si on ne pourrait pas ajouter un test qui verrouille le bug de #4157 : les tests de régression modifiés ne font que renommer la clé (`éligible` → `emploi franc`) et ne couvrent pas le scénario de départ (répondre « non » à la question). Un test sur le parcours (la question n'est plus reposée / la situation reste valide avec `emploi franc: non`) ou une entrée de régression avec `non` aiderait à voir qu'il échoue avant et passe après. Qu'en penses-tu ?\n\nPar ailleurs, je n'ai pas pu vérifier à la lecture seule que `emploi franc . montant` redevient bien non applicable quand le parent vaut `non` (et que `le maximum de` l'ignore) : le test ci-dessus le couvrirait aussi."
+ },
+ {
+  "file": "modele-social/règles/salarié/aides-employeur.publicodes",
+  "start_line": 57,
+  "end_line": 57,
+  "message": "Je me demande si on ne pourrait pas ajouter un test qui verrouille le bug de #4157 : les régressions modifiées ne font que renommer la clé (`éligible` → `emploi franc`) sans couvrir le scénario de départ (répondre « non »). Une entrée avec `emploi franc: non`, ou un test du parcours, montrerait qu'il échoue avant et passe après. Qu'en penses-tu ?\n\nJe n'ai pas pu vérifier à la seule lecture que `emploi franc . montant` devient bien non applicable quand le parent vaut `non` (et que `le maximum de` l'ignore) : ce test le couvrirait aussi."
+ }
+]

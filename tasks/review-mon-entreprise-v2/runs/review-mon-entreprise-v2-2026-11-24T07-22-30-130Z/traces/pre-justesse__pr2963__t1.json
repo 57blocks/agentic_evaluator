@@ -1,0 +1,127 @@
+{
+  "format": "claude-code",
+  "turns": 9,
+  "tool_calls": [
+    {
+      "name": "Bash",
+      "ms": 1119,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 54,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 11,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 28,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 77,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 68,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 94,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 25,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 53,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 95,
+      "failed": false
+    }
+  ],
+  "retries": 0,
+  "denials": 3,
+  "compactions": 0,
+  "turn_tokens": [
+    {
+      "prompt": 2,
+      "cached": 10015,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 26767,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 31664,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 37672,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 38333,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 38524,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 38832,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 39171,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 39871,
+      "output": null,
+      "costUsd": null
+    }
+  ],
+  "models": [
+    "claude-sonnet-5-5"
+  ],
+  "cost_usd": 0.18501089999999998,
+  "ended": "finished",
+  "provider": "anthropic-subscription",
+  "usage": {
+    "prompt": 31103,
+    "completion": 3055,
+    "cached": 300849,
+    "costUsd": 0.18501089999999998
+  }
+}

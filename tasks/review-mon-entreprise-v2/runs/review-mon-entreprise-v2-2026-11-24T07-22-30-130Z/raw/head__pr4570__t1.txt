@@ -1,0 +1,54 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1964,
+  "message": "La traduction anglaise générée est cassée : `<0>&lt;/0>`, `does not apply to male&lt;/3>`, `income simulator&lt;/6>` contiennent des balises échappées et un « male » mal placé. Peut-on corriger la valeur EN à la main ? Sortir l'emoji du `<Trans>` simplifierait peut-être aussi les index de balises."
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 70,
+  "end_line": 75,
+  "message": "nit: cette liste est recréée à chaque rendu et `indexOf(id) > -1` se lit moins bien que `includes`. Une constante de module typée `SimulateurId[]` (comme `nextSteps` plus haut) avec `.includes(id)` serait plus cohérente."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4570,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/locales/ui-en.yaml",
+   "line": 1964,
+   "start_line": 1962,
+   "body": "La traduction anglaise générée est cassée : `<0>&lt;/0>`, `does not apply to male&lt;/3>`, `income simulator&lt;/6>` contiennent des balises échappées et un « male » mal placé. Peut-on corriger la valeur EN à la main ? Sortir l'emoji du `<Trans>` simplifierait peut-être aussi les index de balises.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+   "line": 75,
+   "start_line": 70,
+   "body": "nit: cette liste est recréée à chaque rendu et `indexOf(id) > -1` se lit moins bien que `includes`. Une constante de module typée `SimulateurId[]` (comme `nextSteps` plus haut) avec `.includes(id)` serait plus cohérente.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4044: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1331578,
+  "final_text": "J'ai relu la PR 4570 et posté deux commentaires inline sur GitHub.\n\n- **`ui-en.yaml`, lignes 1962-1964 :** la traduction anglaise générée est cassée. Elle contient des balises échappées (`&lt;/3>`, `&lt;/6>`, `<0>&lt;/0>`) et un « male » mal placé. J'ai demandé de corriger la valeur à la main.\n- **`IndépendantBase.tsx`, lignes 70-75 (nit) :** la liste `confusionAEPossible` est recréée à chaque rendu et `indexOf(id) > -1` se lit moins bien que `includes`. J'ai suggéré une constante de module typée avec `.includes(id)`.\n\nLe workflow « Vérification PR » est au vert. L'issue #4044 renvoyait un 404, donc je n'ai pas pu vérifier ce qu'elle demandait."
+ }
+}
+
+```

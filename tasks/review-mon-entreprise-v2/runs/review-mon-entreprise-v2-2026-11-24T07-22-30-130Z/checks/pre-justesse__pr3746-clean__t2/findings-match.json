@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+      "start_line": 31,
+      "end_line": 31,
+      "message": "Je me demande si le `getOrElse(…, () => euros(0))` ne risque pas d'afficher brièvement « 0 € » à l'usager le temps de la redirection (avant, le composant retournait `null` dans ce cas). Retourner `null` après le `useEffect` tant que `montantCT` n'est pas valide éviterait d'afficher un montant faux. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

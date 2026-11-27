@@ -1,0 +1,8 @@
+[
+ {
+  "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+  "start_line": 559,
+  "end_line": 559,
+  "message": "Ce changement de règle modifie le résultat pour tous les indépendants, pas seulement à Mayotte : avec Acre + invalidité (sans exonération âge), l'abattement passe de « aucun » à « taux Acre ». Le test qui figeait l'ancien comportement (« est nulle lorsqu'il y a à la fois Acre et invalidité ») est supprimé dans cette PR.\n\nJe ne vois pas la source de cette nouvelle règle : pourrais-tu en indiquer une (texte de loi ou page Urssaf) en référence ou dans la description ? Sans elle, je me demande si on ne risque pas d'afficher un montant erroné aux usagers concernés. Un test qui exprime explicitement le nouveau comportement (Acre + invalidité → taux Acre) serait aussi plus lisible qu'une simple suppression.\n\nCôté historique : le commit est annoncé comme `tests:` alors qu'il embarque ce changement de règle. Je verrais bien un commit `fix(modele-social)` séparé, avec son test écrit avant. Au passage, le type Conventional Commits est `test`, sans « s »."
+ }
+]

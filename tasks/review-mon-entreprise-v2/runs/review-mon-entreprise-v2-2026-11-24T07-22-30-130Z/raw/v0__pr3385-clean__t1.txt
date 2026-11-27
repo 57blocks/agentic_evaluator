@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/conversation/AnswerList.tsx",
+  "start_line": 321,
+  "end_line": 321,
+  "message": "Je me demande si ce `// showSuggestions={false}` commenté est voulu : c'est du code mort, et sa disparition change le comportement (les suggestions s'affichent maintenant dans la modale « Modifier mes réponses » pour toutes les règles). Si c'est l'effet recherché (le test AE clique sur une suggestion dans la modale), je verrais bien la suppression pure de la prop, idéalement dans un commit dédié. Qu'en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/entreprise/entreprise.publicodes",
+  "start_line": 25,
+  "end_line": 25,
+  "message": "Je crois que renommer cette suggestion en `Début d’année` (apostrophe typographique) casse le test Cypress : `simulateur-ae.ts:22` fait toujours `cy.contains(\"Début d'année\")` avec l'apostrophe droite, et je ne pense pas que `cy.contains` normalise les apostrophes. Je n'ai pas pu exécuter Cypress, donc à confirmer : peux-tu vérifier ?"
+ },
+ {
+  "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+  "start_line": 70,
+  "end_line": 70,
+  "message": "nit: `cy.wait(500)` (avec désactivation du lint) rend le test dépendant du timing et potentiellement instable en CI. Y a-t-il une assertion sur laquelle attendre à la place ? Retirer `testIsolation: false` rend les tests indépendants, ce qui est plus robuste, mais cela réécrit beaucoup de tests AE sans lien direct avec la rubrique « Charges »."
+ },
+ {
+  "message": "Remarques transverses :\n\n- **Périmètre / historique** : la PR mêle le texte de la règle « charges », un changement d'UI (retrait de `small` sur les `SimulationGoal`), la conversion en apostrophes typographiques de tout `entreprise.publicodes` (beaucoup de bruit dans le diff et dans `rules-en.yaml`), et des remaniements Cypress (`.eq(0)` → `.first()` dans lodeom, réduction-générale, salarié) sans lien avec le sujet. Des PR ou commits séparés faciliteraient la relecture. Les commits « apostrophes » et « correction du test AE » rattrapent les précédents plutôt que d'être autonomes ; un fixup garderait un historique plus net.\n- **Non vérifié** : le contenu métier du nouveau texte (cotisations, CSG déductible), le rendu visuel après retrait de `small`, et le contenu des traductions régénérées."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3385,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/AnswerList.tsx",
+   "line": 321,
+   "start_line": null,
+   "body": "Je me demande si ce `// showSuggestions={false}` commenté est voulu : c'est du code mort, et sa disparition change le comportement (les suggestions s'affichent maintenant dans la modale « Modifier mes réponses » pour toutes les règles). Si c'est l'effet recherché (le test AE clique sur une suggestion dans la modale), je verrais bien la suppression pure de la prop, idéalement dans un commit dédié. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/entreprise/entreprise.publicodes",
+   "line": 25,
+   "start_line": null,
+   "body": "Je crois que renommer cette suggestion en `Début d’année` (apostrophe typographique) casse le test Cypress : `simulateur-ae.ts:22` fait toujours `cy.contains(\"Début d'année\")` avec l'apostrophe droite, et je ne pense pas que `cy.contains` normalise les apostrophes. Je n'ai pas pu exécuter Cypress, donc à confirmer : peux-tu vérifier ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+   "line": 70,
+   "start_line": null,
+   "body": "nit: `cy.wait(500)` (avec désactivation du lint) rend le test dépendant du timing et potentiellement instable en CI. Y a-t-il une assertion sur laquelle attendre à la place ? Retirer `testIsolation: false` rend les tests indépendants, ce qui est plus robuste, mais cela réécrit beaucoup de tests AE sans lien direct avec la rubrique « Charges ».",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Remarques transverses :\n\n- **Périmètre / historique** : la PR mêle le texte de la règle « charges », un changement d'UI (retrait de `small` sur les `SimulationGoal`), la conversion en apostrophes typographiques de tout `entreprise.publicodes` (beaucoup de bruit dans le diff et dans `rules-en.yaml`), et des remaniements Cypress (`.eq(0)` → `.first()` dans lodeom, réduction-générale, salarié) sans lien avec le sujet. Des PR ou commits séparés faciliteraient la relecture. Les commits « apostrophes » et « correction du test AE » rattrapent les précédents plutôt que d'être autonomes ; un fixup garderait un historique plus net.\n- **Non vérifié** : le contenu métier du nouveau texte (cotisations, CSG déductible), le rendu visuel après retrait de `small`, et le contenu des traductions régénérées."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.17706529999999998,
+  "final_text": "J'ai relu la PR #3385 et posté trois commentaires inline et une synthèse sur GitHub. Je n'ai exécuté ni Cypress ni aucun test.\n\n**Commentaires inline :**\n- **`AnswerList.tsx:321` :** `showSuggestions={false}` est laissé en commentaire. C'est du code mort, et sa disparition fait aussi apparaître les suggestions dans la modale « Modifier mes réponses » pour toutes les règles.\n- **`entreprise.publicodes:25` :** la suggestion « Début d’année » passe à l'apostrophe typographique. Le test `simulateur-ae.ts:22` cherche toujours `\"Début d'année\"` avec l'apostrophe droite, donc je pense qu'il casse. Je n'ai pas pu le confirmer.\n- **`simulateur-ae.ts:70` :** un `cy.wait(500)` rend le test dépendant du timing. Retirer `testIsolation: false` réécrit aussi beaucoup de tests AE sans lien direct avec la rubrique « Charges ».\n\n**Synthèse :**\n- **Périmètre et historique :** la PR mélange le texte de la règle « charges », le retrait de `small` sur les `SimulationGoal`, la conversion des apostrophes et des remaniements Cypress hors sujet. Les commits « apostrophes » et « correction du test AE » rattrapent les précédents au lieu d'être autonomes.\n- **Non vérifié :** le contenu métier du nouveau texte, le rendu visuel après retrait de `small` et le contenu des traductions régénérées."
+ }
+}
+
+```

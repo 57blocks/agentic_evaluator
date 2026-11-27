@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 36,
+  "end_line": 36,
+  "message": "Je me demande si la condition de sortie ne devrait pas porter sur `relevantExternalLinks` plutôt que sur `externalLinks`. Si tous les liens sont filtrés par leur `associatedRule` et qu’il n’y a ni `nextSteps` ni `iframePath`, le titre « Ressources utiles » s’afficherait au-dessus d’une liste vide (un `[]` est aussi truthy). Qu’en penses-tu ?\n\nPar ailleurs, l’ancien code n’affichait les guides Urssaf que si `language === 'fr'` ; cette condition a disparu et les fichiers de `external-links/` portent un `// TODO: gérer les traductions` avec des textes français. Je n’ai pas trouvé d’autre garde-fou : en version anglaise, on afficherait donc des cartes Urssaf en français. C’est voulu ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 23,
+  "end_line": 23,
+  "message": "nit: CONTRIBUTING préfère les exports nommés à `export default` ; `NextSteps` était exporté nommément avant cette PR. Je verrais bien rester sur des exports nommés (même remarque pour `ExternalLinkCard`), ça évite aussi de toucher les imports existants."
+ },
+ {
+  "file": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+  "start_line": 23,
+  "end_line": 23,
+  "message": "nit: les clés `t()` du projet sont hiérarchiques (`pages.simulateurs...`), alors qu’ici le texte français sert de clé (« Lire la page sur… », « En savoir plus »). Une clé hiérarchique avec valeur par défaut serait plus cohérente avec CONTRIBUTING."
+ },
+ {
+  "message": "Je n’ai pas pu tester le rendu. Déporter la décision éditoriale dans les `config.ts` me paraît une bonne direction.\n\n- Le `// TODO: gérer les traductions` dans `external-links/*.ts` : tout texte affiché devrait passer par `t()` selon CONTRIBUTING. À traiter ici ou via un ticket, d’autant que le garde-fou `language === 'fr'` a disparu.\n- Ces constantes (`nouvelEmployeur`, etc.) ne sont pas typées `ExternalLink` : un `satisfies ExternalLink` éviterait une dérive silencieuse.\n- Sur la duplication des `associatedRule` entre simulateurs (cas expert-comptable) : je serais tenté de laisser la règle dans le lien partagé et de ne le lister que dans les configs concernées, mais je manque de contexte pour trancher.\n- Historique : `refactor: guides Urssaf` puis `refactor: déplacement…` pourraient être squashés ; la PR mêle fonctionnalité et refactoring global, plus petite elle serait plus simple à relire.\n- Je ne vois pas de test sur le filtrage des liens par `associatedRule`."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3632,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/NextSteps.tsx",
+   "line": 36,
+   "start_line": null,
+   "body": "Je me demande si la condition de sortie ne devrait pas porter sur `relevantExternalLinks` plutôt que sur `externalLinks`. Si tous les liens sont filtrés par leur `associatedRule` et qu’il n’y a ni `nextSteps` ni `iframePath`, le titre « Ressources utiles » s’afficherait au-dessus d’une liste vide (un `[]` est aussi truthy). Qu’en penses-tu ?\n\nPar ailleurs, l’ancien code n’affichait les guides Urssaf que si `language === 'fr'` ; cette condition a disparu et les fichiers de `external-links/` portent un `// TODO: gérer les traductions` avec des textes français. Je n’ai pas trouvé d’autre garde-fou : en version anglaise, on afficherait donc des cartes Urssaf en français. C’est voulu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/NextSteps.tsx",
+   "line": 23,
+   "start_line": null,
+   "body": "nit: CONTRIBUTING préfère les exports nommés à `export default` ; `NextSteps` était exporté nommément avant cette PR. Je verrais bien rester sur des exports nommés (même remarque pour `ExternalLinkCard`), ça évite aussi de toucher les imports existants.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+   "line": 23,
+   "start_line": null,
+   "body": "nit: les clés `t()` du projet sont hiérarchiques (`pages.simulateurs...`), alors qu’ici le texte français sert de clé (« Lire la page sur… », « En savoir plus »). Une clé hiérarchique avec valeur par défaut serait plus cohérente avec CONTRIBUTING.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Je n’ai pas pu tester le rendu. Déporter la décision éditoriale dans les `config.ts` me paraît une bonne direction.\n\n- Le `// TODO: gérer les traductions` dans `external-links/*.ts` : tout texte affiché devrait passer par `t()` selon CONTRIBUTING. À traiter ici ou via un ticket, d’autant que le garde-fou `language === 'fr'` a disparu.\n- Ces constantes (`nouvelEmployeur`, etc.) ne sont pas typées `ExternalLink` : un `satisfies ExternalLink` éviterait une dérive silencieuse.\n- Sur la duplication des `associatedRule` entre simulateurs (cas expert-comptable) : je serais tenté de laisser la règle dans le lien partagé et de ne le lister que dans les configs concernées, mais je manque de contexte pour trancher.\n- Historique : `refactor: guides Urssaf` puis `refactor: déplacement…` pourraient être squashés ; la PR mêle fonctionnalité et refactoring global, plus petite elle serait plus simple à relire.\n- Je ne vois pas de test sur le filtrage des liens par `associatedRule`."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1838362,
+  "final_text": "J'ai posté ma revue de la PR 3632 sur GitHub : trois commentaires inline et une synthèse. Je n'ai ni exécuté le code ni testé le rendu.\n\n**Commentaires inline**\n- **`NextSteps.tsx:36`**\n  - La condition de sortie porte sur `externalLinks` et non sur `relevantExternalLinks`. Si tous les liens sont filtrés par leur règle, le titre « Ressources utiles » s'affiche au-dessus d'une liste vide.\n  - L'ancienne garde `language === 'fr'` a disparu alors que les textes des fichiers `external-links/` sont en français. Je n'ai pas trouvé d'autre garde-fou, donc en version anglaise les cartes Urssaf s'afficheraient en français.\n- **`NextSteps.tsx:23`** (nit) : `export default` alors que CONTRIBUTING préfère les exports nommés. Même remarque pour `ExternalLinkCard`.\n- **`ExternalLinkCard.tsx:23`** (nit) : les textes de `t()` servent de clé au lieu d'une clé hiérarchique avec valeur par défaut.\n\n**Synthèse**\n- Le `// TODO: gérer les traductions` dans `external-links/*.ts`.\n- Les constantes `external-links` ne sont pas typées `ExternalLink`.\n- La question de la duplication des règles entre simulateurs, que l'auteur a soulevée.\n- L'historique git : deux commits de refactoring qui pourraient être squashés, et une PR qui mêle fonctionnalité et refactoring global.\n- L'absence de test sur le filtrage des liens par règle."
+ }
+}
+
+```

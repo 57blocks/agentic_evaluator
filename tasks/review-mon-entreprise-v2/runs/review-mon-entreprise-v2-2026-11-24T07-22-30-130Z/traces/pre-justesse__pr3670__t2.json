@@ -1,0 +1,170 @@
+{
+  "format": "claude-code",
+  "turns": 12,
+  "tool_calls": [
+    {
+      "name": "Bash",
+      "ms": 1044,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 14,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 28,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 27,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 72,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 4,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 37,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 30,
+      "failed": false
+    },
+    {
+      "name": "Read",
+      "ms": 13,
+      "failed": false
+    },
+    {
+      "name": "Read",
+      "ms": 8,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 9,
+      "failed": true
+    },
+    {
+      "name": "Read",
+      "ms": 12,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 29,
+      "failed": true
+    },
+    {
+      "name": "Bash",
+      "ms": 89,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 53,
+      "failed": false
+    }
+  ],
+  "retries": 0,
+  "denials": 6,
+  "compactions": 0,
+  "turn_tokens": [
+    {
+      "prompt": 2,
+      "cached": 10015,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 26779,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 28270,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 28672,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 29044,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 29458,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 29825,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 30661,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 33835,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 34336,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 35788,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 36582,
+      "output": null,
+      "costUsd": null
+    }
+  ],
+  "models": [
+    "claude-sonnet-5-5"
+  ],
+  "cost_usd": 0.18319850000000001,
+  "ended": "finished",
+  "provider": "anthropic-subscription",
+  "usage": {
+    "prompt": 27390,
+    "completion": 3836,
+    "cached": 353265,
+    "costUsd": 0.18319850000000001
+  }
+}

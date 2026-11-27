@@ -1,0 +1,19 @@
+{
+ "pr": 4596,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1159294,
+  "final_text": "J'ai relu la PR #4596 et posté un seul commentaire global, qui dit que ça me paraît bon à merger. Je n'ai laissé aucune remarque inline.\n\nLe workflow « Vérification PR » est au vert. Je n'ai pas exécuté le code, par consigne, donc le jugement vient de la lecture du diff et des tests.\n\nRien ne m'a semblé valoir une remarque : les règles sont cohérentes avec leurs tests, et la condition Mayotte répétée sur le plancher et le plafond ne justifie pas une abstraction."
+ }
+}

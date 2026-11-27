@@ -1,0 +1,20 @@
+[
+ {
+  "file": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+  "start_line": 13,
+  "end_line": 13,
+  "message": "nit: export nommé plutôt que `export default` (convention de CONTRIBUTING.md)."
+ },
+ {
+  "file": "site/source/external-links/serviceEmployeur.ts",
+  "start_line": 4,
+  "end_line": 4,
+  "message": "Ce `// TODO: gérer les traductions` laisse des textes français en dur, affichés tels quels en anglais, alors que ces cartes étaient traduites avant la PR (ex. `réductionGénérale` et `auto-entrepreneur` supprimés de `ui-en.yaml`). `ExternalLinkCard` ne passe `title` et `description` ni par `t()` ni par `<Trans>`. Les cartes de `external-links/` ont-elles bien une traduction anglaise aujourd’hui ? Si non, la PR fait régresser l’anglais, et CONTRIBUTING demande `t()` pour tout texte affiché."
+ },
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 34,
+  "end_line": 34,
+  "message": "Si tous les `externalLinks` sont écartés par leur `associatedRule` et qu’il n’y a ni `nextSteps` ni `iframePath`, la garde ne retourne pas `null` (elle teste `externalLinks`, pas `relevantExternalLinks`). La section affiche alors le titre « Ressources utiles » sans carte. Tester `relevantExternalLinks?.length` serait-il plus juste ?"
+ }
+]

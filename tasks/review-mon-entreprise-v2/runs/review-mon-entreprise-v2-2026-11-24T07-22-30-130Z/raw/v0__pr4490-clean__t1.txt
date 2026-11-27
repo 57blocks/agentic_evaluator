@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "Je n'ai pas pu exécuter le code ni les workflows, donc ce qui suit vient de la lecture du diff.\n\nLe découpage export / push me paraît sain : l'export tourne dans `pr-check` sans aucun secret, et seul `pr-deploy` (déclenché par `workflow_run`) manipule `ALGOLIA_ADMIN_KEY`. L'export est placé après `yarn workspace site build`, qui exécute `build:simulator-data`, donc `simulation-data.json` existe bien à ce moment-là.\n\nDeux points :\n\n- **Historique git** : le dernier commit (`style: prettier sur les nouveaux scripts algolia`) corrige le formatage de fichiers introduits dans `43ecb47`, qui n'était donc pas vert au lint/prettier. Je verrais bien un fixup dans ce commit, pour respecter « chaque commit est vert ». Qu'en penses-tu ?\n- **Tests** : `format.ts` extrait la logique de formatage (`formatRulesToAlgolia`, `formatSimulationDataToAlgolia`) sans test. Comme c'est du code pur, un test sur quelques règles et simulateurs est facile à écrire, et ça protégerait le contrat JSON entre `export` et `push`, désormais séparés par un artifact. Si le format évolue d'un côté seulement, la rupture n'apparaîtrait qu'au déploiement.\n\nnit: `_build-and-deploy-prod.yaml` utilise toujours `algolia:update`, ce qui est cohérent avec l'alias conservé. Je note juste que la prod n'utilise pas le pattern artifact ; je suppose que c'est voulu, puisque le même job a accès aux secrets."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4490,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Je n'ai pas pu exécuter le code ni les workflows, donc ce qui suit vient de la lecture du diff.\n\nLe découpage export / push me paraît sain : l'export tourne dans `pr-check` sans aucun secret, et seul `pr-deploy` (déclenché par `workflow_run`) manipule `ALGOLIA_ADMIN_KEY`. L'export est placé après `yarn workspace site build`, qui exécute `build:simulator-data`, donc `simulation-data.json` existe bien à ce moment-là.\n\nDeux points :\n\n- **Historique git** : le dernier commit (`style: prettier sur les nouveaux scripts algolia`) corrige le formatage de fichiers introduits dans `43ecb47`, qui n'était donc pas vert au lint/prettier. Je verrais bien un fixup dans ce commit, pour respecter « chaque commit est vert ». Qu'en penses-tu ?\n- **Tests** : `format.ts` extrait la logique de formatage (`formatRulesToAlgolia`, `formatSimulationDataToAlgolia`) sans test. Comme c'est du code pur, un test sur quelques règles et simulateurs est facile à écrire, et ça protégerait le contrat JSON entre `export` et `push`, désormais séparés par un artifact. Si le format évolue d'un côté seulement, la rupture n'apparaîtrait qu'au déploiement.\n\nnit: `_build-and-deploy-prod.yaml` utilise toujours `algolia:update`, ce qui est cohérent avec l'alias conservé. Je note juste que la prod n'utilise pas le pattern artifact ; je suppose que c'est voulu, puisque le même job a accès aux secrets."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1342608,
+  "final_text": "J'ai relu la PR et posté une synthèse sur GitHub (#4490). Je n'ai posté aucun commentaire inline, car aucune remarque ne portait sur une ligne précise. Je n'ai pas exécuté le code ni les workflows, tout vient de la lecture du diff. `gh pr checks` montre « Vérification PR » en `pass`.\n\nCe que la synthèse contient :\n- **Rien de bloquant :** l'export tourne dans `pr-check` sans secret, et seul `pr-deploy` manipule la clé admin Algolia. `simulation-data.json` existe au moment de l'export, car l'étape de build l'a déjà produit.\n- **Historique git :** le commit « style: prettier… » corrige des fichiers introduits dans `43ecb47`, qui n'était donc pas vert au lint. Je propose un fixup dans ce commit.\n- **Tests :** `format.ts` n'a pas de test. Un test protégerait le format JSON échangé entre l'export et le push.\n- **nit :** la prod (`_build-and-deploy-prod.yaml`) utilise toujours `algolia:update`, sans passer par l'artifact. Je suppose que c'est voulu."
+ }
+}
+
+```

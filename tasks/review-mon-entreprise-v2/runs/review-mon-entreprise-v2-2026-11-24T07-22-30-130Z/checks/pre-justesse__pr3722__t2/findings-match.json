@@ -1,0 +1,57 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+      "start_line": 3,
+      "end_line": 3,
+      "message": "Ce hook reprend le `useEffect` de `ScrollToTop.tsx` (même `window.scroll` avec repli) : les deux vont diverger. Ne pourrait-on pas simplement rendre `<ScrollToTop />` dans `CMG` (`index.tsx`) ? Au passage, `export default` va à l’encontre des exports nommés de CONTRIBUTING.md."
+    },
+    {
+      "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+      "start_line": 33,
+      "end_line": 33,
+      "message": "Je me demande si `moisIdentiques` (tableaux parallèles à `situation.salariées`) ne risque pas de se désynchroniser : chaque ajout, suppression ou remplacement doit penser à mettre à jour les deux, et `moisIdentiques.GED[index]` vaut `undefined` dès qu’un index manque. Une piste : porter le booléen sur la salariée elle-même dans le domaine, plutôt que dans un état à côté. Qu’en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+          "start_line": 28,
+          "end_line": 31
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": [
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ]
+}

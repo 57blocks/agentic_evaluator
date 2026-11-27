@@ -1,0 +1,17 @@
+[
+ {
+  "file": "modele-social/règles/protection-sociale.publicodes",
+  "start_line": 132,
+  "end_line": 132,
+  "message": "Je vois dans ces deux liens (lignes 132 et 138) un trait d'union insécable (U+2011) à la place du `-` dans `auto‑entrepreneur` et `micro‑entreprise`. Je ne l'ai pas testé dans le navigateur, mais l'URL ne devrait plus correspondre aux chemins de la documentation (`/documentation/dirigeant/auto-entrepreneur/…`), donc je m'attends à des liens cassés. Ça vient peut-être d'un copier-coller ; qu'en penses-tu de remettre des `-` ASCII ?\n\nPar ailleurs, les `href` sont coupés sur plusieurs lignes. Les navigateurs retirent normalement les retours à la ligne dans une URL, mais c'est fragile et difficile à relire. Je les laisserais sur une seule ligne."
+ },
+ {
+  "file": "modele-social/règles/protection-sociale.publicodes",
+  "start_line": 102,
+  "end_line": 102,
+  "message": "nit: `/q` semble être une coquille, je pense que tu voulais écrire `/`."
+ },
+ {
+  "message": "Je n'ai pas pu vérifier le rendu visuel (logos SVG/JPG, liens de documentation).\n\n- La PR mélange plusieurs sujets : contenu des rubriques retraite, renommage Pôle Emploi → France Travail, refonte des logos de références, retrait des `alt`. Je la trouverais plus facile à relire découpée en plusieurs commits ou PR.\n- Beaucoup de descriptions Publicodes sont seulement reformatées (retours à la ligne, `'` → `’`, guillemets retirés des clés de références), ce qui noie les vrais changements de contenu. Peut-être à laisser de côté ?\n- `alt=\"\"` sur les logos : correct si le texte du lien suffit, ce qui me semble le cas dans `Reference`. À confirmer pour `Article` dans `Iframe.tsx`.\n- Le message de commit reprend le titre de la PR (`[AE] …`) et n'est pas au format Conventional Commits (par ex. `docs(auto-entrepreneur): …`)."
+ }
+]

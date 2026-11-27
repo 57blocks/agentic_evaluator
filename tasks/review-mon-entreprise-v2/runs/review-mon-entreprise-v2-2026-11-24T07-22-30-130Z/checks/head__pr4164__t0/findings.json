@@ -1,0 +1,20 @@
+[
+ {
+  "file": "site/source/components/Simulation/SimulationGoal.tsx",
+  "start_line": 85,
+  "end_line": 85,
+  "message": "`RuleInputWrapper` est un composant créé dans le corps de `SimulationGoal` et rendu comme `<ChampSaisie />`. Dès qu’une dépendance du `useCallback` change (`evaluation.missingVariables` est recalculé à chaque évaluation, `handleChange` dépend de `currentUnit`…), React voit un nouveau type de composant : l’input est démonté puis remonté, et il perd le focus et le curseur en pleine saisie. Avant, `RuleInput` était un élément créé à chaque rendu, donc stable. Je me demande si on ne garderait pas le render-prop, en lui passant `{ id, aria }` (`rendreChampSaisie({ id, aria })`) : même gain sur l’`aria-labelledby`, sans remontage. Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Deux points sur ce `div` : `role=\"group\"` a disparu, donc plus rien n’annonce le regroupement des cases à cocher et le `aria-labelledby` ne nomme plus rien de significatif (sur un `div` sans rôle, il est ignoré). Et le repli sur `questionHeader` en dur couple ce composant du design-system à un id de la page de questions ; ailleurs (hors `<Questions />`) il pointerait vers un id inexistant. Je remettrais `role=\"group\"` et je ne ferais pas de repli : `aria.labelledby` seul."
+ },
+ {
+  "file": "site/source/components/conversation/OuiNonInput.tsx",
+  "start_line": 47,
+  "end_line": 47,
+  "message": "`aria-label=\"\"` est une valeur vide forcée pour faire taire React Aria, mais si `aria.labelledby` n’est pas fourni (cas hors `<Questions />`), le groupe n’a plus aucun nom accessible, alors qu’avant il avait au moins « Oui ou non ». Même remarque pour `CardChoiceGroup` (et sans doute `ToggleChoiceGroup`). Peut-on ne poser `aria-label` que quand `labelledby` est absent, ou garder le défaut ?"
+ }
+]

@@ -1,0 +1,51 @@
+{
+ "pr": 3632,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/NextSteps.tsx",
+   "line": 36,
+   "start_line": null,
+   "body": "Je me demande si cette condition de sortie ne laisse pas passer un cas : avant, on testait `guidesUrssaf.length` (liste déjà filtrée par les règles), maintenant on teste `externalLinks` (liste brute). Sur un simulateur qui n'a que des liens conditionnés dont aucune règle n'est vraie, on afficherait le titre « Ressources utiles » avec une grille vide. Tester `relevantExternalLinks?.length` me semblerait plus sûr. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/NextSteps.tsx",
+   "line": 59,
+   "start_line": null,
+   "body": "Le test `language === 'fr'` de l'ancienne version a disparu : les guides Urssaf (en français uniquement, cf. les TODO de traduction dans `external-links/*`) vont donc s'afficher aussi en anglais. Est-ce voulu ? Sinon je verrais bien un filtre sur la langue, ou la traduction des textes avant de les exposer.\n\nnit: `key={index}` → `key={externalLink.url}` serait plus stable.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/external-links/premiersMoisUrssaf.ts",
+   "line": 4,
+   "start_line": null,
+   "body": "Dans l'ancienne liste, ce lien avait une `associatedRule` (auto-entrepreneur ou `dirigeant . indépendant . PL`). Ici elle a disparu, alors que le lien est utilisé dans le simulateur indépendant (et médecin, avocat, EI…) : il sera donc affiché à tous les indépendants, y compris hors professions libérales. Même question pour `embaucherGérerSalariés` et `nouvelEmployeur` (conditions sur `dirigeant = non` et artiste-auteur retirées ; correct sur le simulateur salarié, mais je n'ai pas vérifié les autres usages). Je n'ai pas pu vérifier le périmètre éditorial voulu : est-ce un choix assumé ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+   "line": 23,
+   "start_line": null,
+   "body": "Je n'ai pas trouvé de clé hiérarchique ici, alors que CONTRIBUTING demande `t('cle.hierarchique', 'défaut fr')`. Idem pour « En savoir plus » plus bas. Peut-être existe-t-il des clés équivalentes à réutiliser (l'ancienne `GuideURSSAFCard` en avait) ?\n\nnit: `export default` ici et sur `NextSteps`, alors que la convention est l'export nommé.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- Direction claire : la décision éditoriale passe dans les configs, et `NextSteps` s'allège nettement.\n- Je ne vois aucun test ajouté ou modifié (filtrage par règle, section vide, langue). Un test sur la liste filtrée me semblerait utile vu les régressions possibles ci-dessus.\n- Les fichiers `external-links/*` portent des TODO de traduction : CONTRIBUTING demande que tout texte affiché passe par `t()`. À traiter ici ou en suite assumée ?\n- Je n'ai pas pu vérifier le rendu visuel ni les parcours E2E.\n- Historique : un commit `fix(tests)` corrige l'e2e cassé par un commit précédent de la PR ; un fixup dans le commit fautif garderait chaque commit vert."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 14,
+  "cost_usd": 0.2518421,
+  "final_text": "J'ai relu la PR #3632 et posté mes remarques sur GitHub : quatre commentaires inline et une synthèse. Je n'ai ni exécuté le code, ni testé le rendu, ni rejoué les tests E2E.\n\nLes remarques inline portent sur ces points :\n- **Section vide :** `NextSteps.tsx` teste `externalLinks` (liste brute) au lieu de la liste filtrée par les règles. Sur un simulateur dont aucun lien conditionné ne s'applique, le titre « Ressources utiles » s'afficherait avec une grille vide.\n- **Langue :** le test `language === 'fr'` a disparu. Les guides Urssaf, qui ne sont qu'en français, risquent donc de s'afficher aussi en anglais.\n- **Règles retirées :** `premiersMoisUrssaf`, `embaucherGérerSalariés` et `nouvelEmployeur` n'ont plus d'`associatedRule`. `premiersMoisUrssaf` s'afficherait donc à tous les indépendants, y compris hors professions libérales. Pour les deux autres, je n'ai vérifié que le simulateur salarié.\n- **Traductions et conventions :** `ExternalLinkCard` utilise `t()` sans clé hiérarchique, et `export default` remplace l'export nommé de la convention. J'ai ajouté en nit que `key={index}` serait moins stable que l'URL du lien.\n\nLa synthèse relève aussi l'absence de tests, les TODO de traduction dans `external-links/*` et le commit `fix(tests)` qui répare un commit précédent de la même PR."
+ }
+}

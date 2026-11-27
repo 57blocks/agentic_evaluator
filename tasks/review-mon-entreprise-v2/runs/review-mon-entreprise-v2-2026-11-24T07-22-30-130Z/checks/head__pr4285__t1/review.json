@@ -1,0 +1,33 @@
+{
+ "pr": 4285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 32,
+   "start_line": null,
+   "body": "Je me demande si la parenthèse est au bon endroit : la formule du BOSS est `Tdelta × { ½ × [3 × SMIC/rémunération − 1] }^P`, donc le ½ est dans la puissance, alors qu'ici `0.5 * (x ** P)` ne l'applique qu'à l'extérieur. Pour une rémunération à 2 Smic (x = 0,5), on obtient 0,5 × 0,5^1,75 ≈ 0,148 au lieu de (0,25)^1,75 ≈ 0,088, soit un coefficient surestimé sur toute la zone dégressive (les bornes à 1 Smic via le plafond et à 3 Smic restent justes, ce qui masque l'écart). Qu'en penses-tu ?\n```suggestion\n            - (0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P\n```",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 49,
+   "start_line": null,
+   "body": "Le plafond DFS de la RGDU s'appuie sur `réduction générale`, c'est-à-dire l'ancienne formule (1,6 Smic, T), conservée dans le fichier. Le plafond à 130 % est donc calculé avec l'ancien dispositif. De la même façon, les imputations (retraite complémentaire, sécurité sociale, chômage) et la régularisation restent attachées à l'ancienne règle, alors que le montant total vient de `RGDU`. Est-ce voulu ? Sinon, je me demande si l'ancienne règle ne devrait pas disparaître au profit de la RGDU, plutôt que de laisser deux calculs en parallèle qui vont diverger.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4284: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.19621850000000005,
+  "final_text": "J'ai relu la PR #4285 et posté deux commentaires inline sur `réduction-générale.publicodes`. Je n'ai rien exécuté, tout vient de la lecture du diff et du fichier. Le check « Vérification PR » est au vert.\n\n- **Formule du coefficient (ligne 32)** : `0.5 * (x ** P)` n'applique le ½ qu'à l'extérieur de la puissance. J'ai retenu la formule du BOSS (`Tdelta × {½ × [3 × SMIC/rémunération − 1]}^P`) sans l'avoir vérifiée sur le site. Je l'ai donc posée en question, avec une suggestion de correction. À 2 Smic, le coefficient serait surestimé : environ 0,148 au lieu de 0,088 pour la partie dégressive. Les bornes à 1 et 3 Smic restent justes, ce qui masque l'écart.\n- **Ancienne règle conservée (ligne 49)** : le plafond DFS de la RGDU s'appuie encore sur `réduction générale`, c'est-à-dire l'ancienne formule. Les imputations et la régularisation restent aussi attachées à cette règle. J'ai demandé si c'était voulu, sinon si l'ancienne règle ne devrait pas être remplacée plutôt que de garder deux calculs en parallèle.\n\nJe n'ai pas pu lire l'issue #4284 (`gh api` renvoie 404). Je n'ai donc pas pu vérifier ce que la PR devait traiter."
+ }
+}

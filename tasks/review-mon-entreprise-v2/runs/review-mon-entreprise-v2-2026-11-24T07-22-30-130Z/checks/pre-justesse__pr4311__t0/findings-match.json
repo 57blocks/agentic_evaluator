@@ -1,0 +1,56 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+      "start_line": 74,
+      "end_line": 74,
+      "message": "Le paramètre d'URL est lu sans validation : avec `?page-open=abc`, `currentPage` vaut `NaN`, `items.slice(NaN, NaN)` renvoie une liste vide et aucun bouton n'est « actuel ». Idem pour `-1` ou une page au-delà du dernier index. Auparavant l'état venait de `location.state`, que l'usager ne pouvait pas saisir. Je verrais bien un repli sur 0 quand la valeur n'est pas un entier dans `[0, nombre de pages[`. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/lib/navigation/NavigationAPI.ts",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "file": "site/source/lib/navigation/providers/MockNavigationProvider.tsx",
+          "start_line": 43,
+          "end_line": 98
+        },
+        {
+          "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+          "start_line": 5,
+          "end_line": 88
+        },
+        {
+          "file": "site/source/pages/integration/Iframe.tsx",
+          "start_line": 59,
+          "end_line": 89
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

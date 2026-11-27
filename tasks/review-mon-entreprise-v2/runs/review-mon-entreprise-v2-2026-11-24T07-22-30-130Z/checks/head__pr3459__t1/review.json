@@ -1,0 +1,23 @@
+{
+ "pr": 3459,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+   "line": 18,
+   "start_line": null,
+   "body": "Dépendance circulaire : `cotisations.ts` importe `calculeCotisationsRégimeGénéral` d’ici, et ce fichier importe `DEFAULTS` de `cotisations.ts` (idem pour les deux autres régimes, s’ils lisent `DEFAULTS`). Ça fonctionne aujourd’hui parce que `DEFAULTS` n’est lu qu’à l’appel, mais ça devient fragile dès qu’on en lit une valeur à l’initialisation du module. Je verrais bien `DEFAULTS` dans `constantes.ts`, déjà importé ici, pour que les régimes ne dépendent plus de l’orchestrateur. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.20705109999999996,
+  "final_text": "J'ai relu la PR de façon partielle et posté un seul commentaire inline, sur une dépendance circulaire dans le domaine de la location de meublé.\n\nLe diff compte 472 fichiers et je n'ai lu en détail que le calcul des cotisations du régime général, dans `cotisations.ts` et `régime-général.ts`. Le reste de la PR n'est pas relu, et je n'ai pas vérifié les taux, seuils et plafonds par rapport à des sources.\n\nLe problème signalé : `cotisations.ts` importe `calculeCotisationsRégimeGénéral`, et `régime-général.ts` importe `DEFAULTS` depuis `cotisations.ts`. J'ai proposé de déplacer `DEFAULTS` dans `constantes.ts`. Pour les deux autres régimes, je n'ai pas vérifié s'ils lisent aussi `DEFAULTS`.\n\nLa vérification de la PR (`gh pr checks`) est au vert. Aucun commentaire global n'a été posté."
+ }
+}

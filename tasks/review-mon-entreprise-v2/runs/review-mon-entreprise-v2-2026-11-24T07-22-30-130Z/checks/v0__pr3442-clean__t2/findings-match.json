@@ -1,0 +1,42 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+      "start_line": 208,
+      "end_line": 208,
+      "message": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée l.200 et autres activités non salariées l.208) portent le même code `DSAR`. Je n'ai pas pu vérifier le formulaire officiel, mais si ce sont deux cases distinctes, je me demande si l'une des deux n'a pas un autre code. Peux-tu confirmer la source ?"
+    },
+    {
+      "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+      "start_line": 145,
+      "end_line": 145,
+      "message": "nit: les clés `t('Bénéfice', 'Bénéfice')` et `t('Déficit', 'Déficit')` ne suivent pas la convention de clés hiérarchiques utilisée ailleurs dans ce fichier (`pages.assistants.declaration-revenus-pamc.resultats.label.N`). Je verrais bien des clés dédiées, d'autant qu'elles sont répétées 4 fois (l.145, 152, 166, 173)."
+    },
+    {
+      "file": "site/source/design-system/field/Radio/Radio.tsx",
+      "start_line": 159,
+      "end_line": 159,
+      "message": "Cette modification touche `SpanBody`, utilisé par tous les Radio du design-system, pas seulement par l'assistant PAM. As-tu vérifié visuellement les autres usages ? Je n'ai pas pu le faire de mon côté. Un `inline-flex` peut modifier le retour à la ligne des labels longs."
+    },
+    {
+      "message": "Synthèse : la PR est grosse (règles Publicodes, UI, i18n, Radio du design-system), mais les commits sont découpés par logique et la CI passe. Je n'ai pas vérifié les règles métier (codes de cases de la déclaration) ni le rendu visuel. Le point le plus important à confirmer me semble être le code `DSAR` dupliqué (voir inline)."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim",
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      2
+    ]
+  }
+}

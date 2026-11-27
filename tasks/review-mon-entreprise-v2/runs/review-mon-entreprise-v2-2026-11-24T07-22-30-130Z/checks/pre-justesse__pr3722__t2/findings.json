@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "Ce hook reprend le `useEffect` de `ScrollToTop.tsx` (même `window.scroll` avec repli) : les deux vont diverger. Ne pourrait-on pas simplement rendre `<ScrollToTop />` dans `CMG` (`index.tsx`) ? Au passage, `export default` va à l’encontre des exports nommés de CONTRIBUTING.md."
+ },
+ {
+  "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+  "start_line": 33,
+  "end_line": 33,
+  "message": "Je me demande si `moisIdentiques` (tableaux parallèles à `situation.salariées`) ne risque pas de se désynchroniser : chaque ajout, suppression ou remplacement doit penser à mettre à jour les deux, et `moisIdentiques.GED[index]` vaut `undefined` dès qu’un index manque. Une piste : porter le booléen sur la salariée elle-même dans le domaine, plutôt que dans un état à côté. Qu’en penses-tu ?"
+ }
+]

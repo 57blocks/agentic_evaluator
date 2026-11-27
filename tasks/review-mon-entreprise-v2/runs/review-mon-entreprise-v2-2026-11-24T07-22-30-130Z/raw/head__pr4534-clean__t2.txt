@@ -1,0 +1,68 @@
+```file:findings.json
+[
+ {
+  "file": "modele-as/règles/exonérations.publicodes",
+  "start_line": 15,
+  "end_line": 15,
+  "message": "La phrase est coupée : « dans l’ » puis « **une des situations suivantes** » donne « dans l’**une des situations** » une fois rendu. Peut-être « Vous ne pouvez bénéficier de l’Acre que si vous êtes dans **l’une des situations suivantes** au moment de la création de votre entreprise : » ?"
+ },
+ {
+  "file": "modele-as/règles/exonérations.publicodes",
+  "start_line": 7,
+  "end_line": 7,
+  "message": "Les retours à la ligne en milieu de phrase (ici et dans les items de la liste) se retrouvent dans `rules-as-en.yaml` : la traduction automatique traite chaque ligne séparément et produit des doublons (« within / within 60 days », « one of the following situations / **one of the following situations** », « allocation de / solidarité spécifique »). Je me demande si on ne gagnerait pas à écrire chaque paragraphe et chaque item de liste sur une seule ligne, puis à régénérer les traductions."
+ },
+ {
+  "file": "site/source/locales/rules-as-en.yaml",
+  "start_line": 988,
+  "end_line": 988,
+  "message": "nit: le changement « primarily » → « principally » sur la règle JEI n’a pas de rapport avec l’Acre ; il vient sans doute de la régénération. Tu peux l’écarter de la PR ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4534,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-as/règles/exonérations.publicodes",
+   "line": 15,
+   "start_line": null,
+   "body": "La phrase est coupée : « dans l’ » puis « **une des situations suivantes** » donne « dans l’**une des situations** » une fois rendu. Peut-être « Vous ne pouvez bénéficier de l’Acre que si vous êtes dans **l’une des situations suivantes** au moment de la création de votre entreprise : » ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-as/règles/exonérations.publicodes",
+   "line": 7,
+   "start_line": null,
+   "body": "Les retours à la ligne en milieu de phrase (ici et dans les items de la liste) se retrouvent dans `rules-as-en.yaml` : la traduction automatique traite chaque ligne séparément et produit des doublons (« within / within 60 days », « one of the following situations / **one of the following situations** », « allocation de / solidarité spécifique »). Je me demande si on ne gagnerait pas à écrire chaque paragraphe et chaque item de liste sur une seule ligne, puis à régénérer les traductions.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/locales/rules-as-en.yaml",
+   "line": 988,
+   "start_line": null,
+   "body": "nit: le changement « primarily » → « principally » sur la règle JEI n’a pas de rapport avec l’Acre ; il vient sans doute de la régénération. Tu peux l’écarter de la PR ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4488: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.15327620000000003,
+  "final_text": "J'ai relu la PR #4534 et posté trois commentaires inline. Aucun ne porte sur le calcul, et les vérifications de la PR sont au vert.\n\n- **Calcul :** la tranche salariale suit le même schéma que la tranche employeur, avec 25 % des cotisations exonérées à partir de 01/2026. Le raccord à 75 % du PSS est continu : les deux tranches donnent 25 % des cotisations exonérées.\n- **Phrase coupée :** dans `modele-as/règles/exonérations.publicodes` (ligne 15), « dans l’ » puis « **une des situations suivantes** » donne « dans l’**une des situations** » à l'affichage. Je propose « dans **l’une des situations suivantes** ».\n- **Retours à la ligne :** dans la description, les retours à la ligne en milieu de phrase se retrouvent dans `site/source/locales/rules-as-en.yaml`. La traduction automatique traite chaque ligne séparément et produit des doublons (« within / within 60 days » par exemple). Je suggère une seule ligne par paragraphe ou par item de liste, puis de régénérer les traductions.\n- **Changement hors sujet (nit) :** le passage de « primarily » à « principally » sur la règle JEI n'a pas de rapport avec l'Acre. Il vient sans doute de la régénération des traductions, et je demande de l'écarter de la PR.\n\nJe n'ai exécuté ni les tests ni le build."
+ }
+}
+
+```

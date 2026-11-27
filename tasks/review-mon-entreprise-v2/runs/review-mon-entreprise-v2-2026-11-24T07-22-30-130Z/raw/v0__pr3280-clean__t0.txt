@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 378,
+  "end_line": 378,
+  "message": "Je me demande si la règle Publicodes n'est pas restée à 10 mois : dans `modele-social/règles/protection-sociale.publicodes` (~l.625-632), `maternité . délai d'attente` porte encore `valeur: 10 mois` et la description mentionne deux fois « 10 mois » (maternité et paternité/adoption). Seul le texte de l'UI est corrigé ici, donc la règle et ses explications afficheront toujours 10 mois, et les deux sources se contredisent.\n\nLe décret couvre-t-il aussi la paternité/adoption ? Je ne l'ai pas vérifié, à toi de voir. Le cas échéant, il faudrait aussi mettre à jour la règle (et rebuilder `modele-social`).\n\nnit: le « 6 » est en dur dans le JSX. Une valeur lue depuis la règle éviterait une prochaine divergence, mais c'est peut-être hors périmètre."
+ },
+ {
+  "message": "Historique : le premier commit (`Prestations maternité : ajustement durée affiliation`) ne suit pas le format Conventional Commits attendu (par exemple `fix(indépendant): durée d'affiliation maternité de 6 mois`). Le commit `i18n: traduction` séparé pourrait être fusionné dans le premier, car CONTRIBUTING demande que les traductions soient dans le même commit que le code.\n\nJe n'ai pas vérifié les textes légaux liés dans la description de la PR, ni le rendu."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3280,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 378,
+   "start_line": null,
+   "body": "Je me demande si la règle Publicodes n'est pas restée à 10 mois : dans `modele-social/règles/protection-sociale.publicodes` (~l.625-632), `maternité . délai d'attente` porte encore `valeur: 10 mois` et la description mentionne deux fois « 10 mois » (maternité et paternité/adoption). Seul le texte de l'UI est corrigé ici, donc la règle et ses explications afficheront toujours 10 mois, et les deux sources se contredisent.\n\nLe décret couvre-t-il aussi la paternité/adoption ? Je ne l'ai pas vérifié, à toi de voir. Le cas échéant, il faudrait aussi mettre à jour la règle (et rebuilder `modele-social`).\n\nnit: le « 6 » est en dur dans le JSX. Une valeur lue depuis la règle éviterait une prochaine divergence, mais c'est peut-être hors périmètre.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Historique : le premier commit (`Prestations maternité : ajustement durée affiliation`) ne suit pas le format Conventional Commits attendu (par exemple `fix(indépendant): durée d'affiliation maternité de 6 mois`). Le commit `i18n: traduction` séparé pourrait être fusionné dans le premier, car CONTRIBUTING demande que les traductions soient dans le même commit que le code.\n\nJe n'ai pas vérifié les textes légaux liés dans la description de la PR, ni le rendu."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.11291770000000001,
+  "final_text": "J'ai posté la revue de la PR #3280 sur GitHub : un commentaire inline et une synthèse.\n\n- **Règle Publicodes non mise à jour (commentaire inline) :** la PR corrige le texte de l'interface (`Détails.tsx` et les fichiers de traduction), mais `modele-social/règles/protection-sociale.publicodes` indique toujours « 10 mois », à la fois dans `valeur: 10 mois` et dans la description (maternité et paternité/adoption). La règle et l'interface se contredisent donc. Je n'ai pas vérifié si le décret vise aussi la paternité et l'adoption, et j'ai laissé la question ouverte.\n- **Nit :** le « 6 » est écrit en dur dans le JSX. Je suggère, sans insister, de le lire depuis la règle pour éviter une prochaine divergence.\n- **Historique git (synthèse) :** le message du premier commit ne suit pas le format Conventional Commits, et le commit `i18n: traduction` pourrait être fusionné avec le code, comme le demande CONTRIBUTING.\n- **Non vérifié :** je n'ai pas lu les textes légaux liés dans la description, ni regardé le rendu."
+ }
+}
+
+```

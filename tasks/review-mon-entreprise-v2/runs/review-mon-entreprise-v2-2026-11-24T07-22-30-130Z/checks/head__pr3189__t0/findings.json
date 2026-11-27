@@ -1,0 +1,14 @@
+[
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 177,
+  "end_line": 177,
+  "message": "Je ne vois nulle part la source de ces taux (3,25 % jusqu'à 40 % du PASS, 9,75 % jusqu'à 110 %). Pourrais-tu ajouter une `références` (texte de loi ou fiche Urssaf) sur la règle, comme pour la cotisation maladie générale dans `indépendant.publicodes` ? Cela permettrait aussi de vérifier que ces taux valent pour toutes les années simulables, ou s'il faut une `variations` sur la date."
+ },
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 166,
+  "end_line": 170,
+  "message": "Je me demande si le taux obtenu est le bon : `taux progressif` calcule un taux moyen sur `assiette des cotisations`, mais il est ensuite multiplié par `assiette des cotisations - assiette participation CPAM`, une base plus petite pour un médecin secteur 1. Un taux moyen appliqué à une autre base ne donne pas le même montant qu'un barème appliqué à la base réellement concernée. Est-ce bien ce que prévoit le texte ? Si oui, une note dans la règle l'expliquerait. Par ailleurs, les snapshots montrent des hausses fortes (médecin à 300 k€ : +4 k€ de cotisations) : un test dédié avec des valeurs calculées à la main aux seuils (40 % et 110 % du PASS, et au-delà) donnerait plus de confiance que les seuls snapshots."
+ }
+]

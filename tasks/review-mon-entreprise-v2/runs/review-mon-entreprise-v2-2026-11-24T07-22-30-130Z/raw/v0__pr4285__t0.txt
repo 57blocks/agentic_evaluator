@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 49,
+  "end_line": 49,
+  "message": "Je me demande si ce plafond DFS ne reste pas branché sur l'ancienne formule : `valeur: réduction générale` évalue l'ancien coefficient (1,6 Smic, `T`), pas la RGDU. Pour un salarié en DFS, le plafond à 130 % serait donc calculé à partir de l'ancien dispositif. Je n'ai pas fait tourner le calcul, mais ne faudrait-il pas viser `RGDU` avec le contexte `DFS: non` ? Au passage, `plafond avec application de la DFS` est maintenant dupliqué à l'identique dans les deux règles."
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 33,
+  "end_line": 33,
+  "message": "Deux points sur le coefficient RGDU, à vérifier avec toi :\n- l'ancien coefficient intégrait `coefficient de majoration` (caisse de congés payés, 100/90) ; il n'est pas repris ici. Est-ce voulu (supprimé par la réforme) ou un oubli ? Le simulateur « réduction générale » utilise toujours la question `caisse de congés payés`.\n- Tmin/Tdelta sont posés à côté de `T` dans `exonérations.publicodes`, sans référence propre. Une référence sur l'origine de 0,0200, 0,3781 et 0,3821 aiderait la relecture métier (je n'ai pas vérifié les valeurs)."
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/lodeom.publicodes",
+  "start_line": 20,
+  "end_line": 20,
+  "message": "Je ne suis pas sûr de comprendre l'ajout de `valeur: oui` : est-ce pour que `applicable si: exonérations . lodeom` (taux réduits AF/maladie) soit vrai uniquement quand la règle est applicable (zone un/deux) ? Un mot dans la description rendrait l'intention claire."
+ },
+ {
+  "message": "Quelques points transverses (en plus des commentaires inline) :\n- **Ancienne règle `réduction générale`** : elle reste en place avec l'ancienne formule, et est encore utilisée par `JEI`, le simulateur « réduction générale » (`simulationConfig.ts`, `réductionDeCotisations.ts`) et le plafond DFS de la RGDU. Le simulateur affiche toujours `AvertissementRéformeRGDUNonImplémentée`, cohérent s'il est volontairement hors périmètre, mais deux règles qui coexistent (`imputation`/`régularisation` côté ancienne seulement) risquent de diverger. Est-ce transitoire ? Si oui, une issue de suivi serait utile.\n- **Tests** : je ne vois que des mises à jour de snapshots, pas de test ciblé sur la RGDU (assiette = Smic, juste sous 3 Smic, effectif < 50 vs ≥ 50, DFS, Lodeom). Les snapshots seuls me semblent difficiles à relire pour valider la formule.\n- **Taux réduits AF/maladie** : je n'ai pas vérifié les seuils 3,5 / 2,5 Smic.\n- **Historique** : d'après le CHANGELOG, le commit `feat(salarié): implémentation de la réforme RGDU` regroupe RGDU, heures supplémentaires (extension >250 salariés, CET) et traductions ; je verrais bien les heures supplémentaires dans un commit à part. Typo dans `suprression` (09485c8).\n- Je n'ai pas pu vérifier le rendu des simulateurs ni les résultats de CI."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 49,
+   "start_line": null,
+   "body": "Je me demande si ce plafond DFS ne reste pas branché sur l'ancienne formule : `valeur: réduction générale` évalue l'ancien coefficient (1,6 Smic, `T`), pas la RGDU. Pour un salarié en DFS, le plafond à 130 % serait donc calculé à partir de l'ancien dispositif. Je n'ai pas fait tourner le calcul, mais ne faudrait-il pas viser `RGDU` avec le contexte `DFS: non` ? Au passage, `plafond avec application de la DFS` est maintenant dupliqué à l'identique dans les deux règles.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 33,
+   "start_line": null,
+   "body": "Deux points sur le coefficient RGDU, à vérifier avec toi :\n- l'ancien coefficient intégrait `coefficient de majoration` (caisse de congés payés, 100/90) ; il n'est pas repris ici. Est-ce voulu (supprimé par la réforme) ou un oubli ? Le simulateur « réduction générale » utilise toujours la question `caisse de congés payés`.\n- Tmin/Tdelta sont posés à côté de `T` dans `exonérations.publicodes`, sans référence propre. Une référence sur l'origine de 0,0200, 0,3781 et 0,3821 aiderait la relecture métier (je n'ai pas vérifié les valeurs).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/lodeom.publicodes",
+   "line": 20,
+   "start_line": null,
+   "body": "Je ne suis pas sûr de comprendre l'ajout de `valeur: oui` : est-ce pour que `applicable si: exonérations . lodeom` (taux réduits AF/maladie) soit vrai uniquement quand la règle est applicable (zone un/deux) ? Un mot dans la description rendrait l'intention claire.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Quelques points transverses (en plus des commentaires inline) :\n- **Ancienne règle `réduction générale`** : elle reste en place avec l'ancienne formule, et est encore utilisée par `JEI`, le simulateur « réduction générale » (`simulationConfig.ts`, `réductionDeCotisations.ts`) et le plafond DFS de la RGDU. Le simulateur affiche toujours `AvertissementRéformeRGDUNonImplémentée`, cohérent s'il est volontairement hors périmètre, mais deux règles qui coexistent (`imputation`/`régularisation` côté ancienne seulement) risquent de diverger. Est-ce transitoire ? Si oui, une issue de suivi serait utile.\n- **Tests** : je ne vois que des mises à jour de snapshots, pas de test ciblé sur la RGDU (assiette = Smic, juste sous 3 Smic, effectif < 50 vs ≥ 50, DFS, Lodeom). Les snapshots seuls me semblent difficiles à relire pour valider la formule.\n- **Taux réduits AF/maladie** : je n'ai pas vérifié les seuils 3,5 / 2,5 Smic.\n- **Historique** : d'après le CHANGELOG, le commit `feat(salarié): implémentation de la réforme RGDU` regroupe RGDU, heures supplémentaires (extension >250 salariés, CET) et traductions ; je verrais bien les heures supplémentaires dans un commit à part. Typo dans `suprression` (09485c8).\n- Je n'ai pas pu vérifier le rendu des simulateurs ni les résultats de CI."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 11,
+  "cost_usd": 0.23692819999999998,
+  "final_text": "J'ai posté la revue sur la PR 4285 : trois commentaires inline et une synthèse. Je n'ai ni lancé le calcul, ni lu `gh pr checks`, ni vérifié les valeurs métier (0,0200, 0,3781, 0,3821, seuils 3,5 et 2,5 Smic).\n\nInline :\n- **`réduction-générale.publicodes`, plafond DFS (ligne 49)** : il évalue encore `réduction générale` (ancienne formule) et non `RGDU`. Le bloc est aussi dupliqué dans les deux règles.\n- **`réduction-générale.publicodes`, coefficient (ligne 33)** : le `coefficient de majoration` (caisse de congés payés, 100/90) a disparu sans explication, et `Tmin`/`Tdelta` n'ont pas de référence.\n- **`lodeom.publicodes` (ligne 20)** : le `valeur: oui` ajouté n'est pas expliqué.\n\nDans la synthèse :\n- L'ancienne règle coexiste avec la RGDU et reste utilisée par `JEI`, le simulateur « réduction générale » et le plafond DFS.\n- Il n'y a pas de test ciblé sur la RGDU, seulement des snapshots mis à jour.\n- Les heures supplémentaires pourraient aller dans un commit à part.\n- Il y a une typo dans « suprression » (commit 09485c8).\n- Je n'ai pas pu vérifier le rendu des simulateurs."
+ }
+}
+
+```

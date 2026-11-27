@@ -1,0 +1,31 @@
+{
+ "pr": 3670,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/domaine/calcul.ts",
+   "line": 41,
+   "start_line": null,
+   "body": "Je me demande si la division par 3 reste juste quand l’usager ne déclare que 2 mois : `NOMBRE_MIN_MOIS_EMPLOYEUREUSE` vaut 2 et `toutesLesDéclarations` ne garde que les mois renseignés (`A.getSomes`). Dans ce cas, la moyenne (CMG perçus comme CMGR linéarisés) serait tirée vers le bas et le complément transitoire pourrait s’en trouver faussé. Ce 3 est aussi dupliqué ligne 58. Est-ce que le nombre de mois ne devrait pas plutôt venir des déclarations, ou d’une constante nommée si 3 est bien voulu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/domaine/déclaration-de-garde.ts",
+   "line": 67,
+   "start_line": null,
+   "body": "nit: le cast `as DéclarationDeGardeGED` contourne le typage strict pour réutiliser la validation GED. Un type commun `Pick<DéclarationDeGarde, \"heuresDeGarde\" | \"rémunération\">` en paramètre de la fonction partagée éviterait le cast.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 16,
+  "cost_usd": 0.18319850000000001,
+  "final_text": "J'ai posté deux commentaires inline sur la PR #3670. Je n'ai pas relu les 65 fichiers de la PR. J'ai lu le domaine CMG (`calcul.ts`, `constantes.ts`, `déclaration-de-garde.ts`), pas les pages, les composants ni les tests. Le workflow « Vérification PR » est vert.\n\n- **`calcul.ts:41`** : question sur la division par 3 dans les deux moyennes. Si l'usager ne déclare que 2 mois (`NOMBRE_MIN_MOIS_EMPLOYEUREUSE` vaut 2), les mois absents sont écartés par `A.getSomes`. La moyenne serait alors tirée vers le bas et le complément transitoire pourrait être faussé. Le 3 est aussi dupliqué à la ligne 58. Je n'ai pas vérifié si le cas à 2 mois peut réellement arriver jusqu'au calcul.\n- **`déclaration-de-garde.ts:67`** : nit sur le cast `as DéclarationDeGardeGED`, qui contourne le typage strict.\n\nJe n'ai pas relevé les noms de fichiers accentués, qui sont pourtant à éviter dans le graphe d'import Next selon `CLAUDE.md`. Le dépôt en contient déjà beaucoup, et je n'ai pas cherché à savoir si ceux de la PR sont dans le graphe Next."
+ }
+}

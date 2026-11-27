@@ -1,0 +1,23 @@
+{
+ "pr": 3285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/indépendant.publicodes",
+   "line": 629,
+   "start_line": null,
+   "body": "Un doute sur les références : la description de la PR associe l'article D632-1 à `LEGIARTI000036471466`, alors qu'ici ce lien est étiqueté D632-2 et D632-1 pointe vers `LEGIARTI000041966755`. Les libellés et les liens sont-ils bien appariés ? Le même jeu de références est aussi dupliqué dans la nouvelle règle d'assiette minimale.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.11654070000000001,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `modele-social/règles/dirigeant/indépendant.publicodes` ligne 629. Il pose une question sur les références légales.\n\nLa description de la PR associe l'article D632-1 au lien `LEGIARTI000036471466`. Dans le code, ce même lien est étiqueté D632-2, et D632-1 pointe vers `LEGIARTI000041966755`. J'ai demandé si libellés et liens sont bien appariés, sans pouvoir le vérifier moi-même. Le commentaire note aussi que les mêmes références sont dupliquées dans la nouvelle règle d'assiette minimale.\n\n`gh pr checks` est au vert (« Vérification PR » passe). Je n'ai pas lu l'issue #3259 : la commande a été refusée par le sandbox."
+ }
+}

@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 163,
+  "end_line": 175,
+  "message": "Le barème progressif reprend bien le pattern de `profession-libérale.publicodes` (même `taux progressif` sur l'assiette). Deux points :\n\n- Je ne vois pas de `références` sur cette règle : les taux 3,25 % / 9,75 % et les seuils 40 % / 110 % du PSS n'ont donc pas de source consultable. Pourrais-tu ajouter le lien Urssaf ou le texte de loi ? (je n'ai pas pu vérifier ces valeurs de mon côté)\n- `taux progressif` renvoie un taux moyen calculé sur `assiette des cotisations`, qui est ensuite appliqué à `assiette des cotisations - assiette participation CPAM`. Est-ce bien ce que prévoit la règle (barème appliqué à l'assiette totale, puis taux moyen reporté sur la part hors participation CPAM) ? Si oui, une phrase en `note` aiderait le prochain lecteur.\n\nEnfin, seul le snapshot a changé : un test explicite avec un revenu au-dessus de 40 % du PSS, qui échouait avant le correctif, me semblerait plus lisible qu'un diff de snapshot. Qu'en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3189,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "line": 175,
+   "start_line": 163,
+   "body": "Le barème progressif reprend bien le pattern de `profession-libérale.publicodes` (même `taux progressif` sur l'assiette). Deux points :\n\n- Je ne vois pas de `références` sur cette règle : les taux 3,25 % / 9,75 % et les seuils 40 % / 110 % du PSS n'ont donc pas de source consultable. Pourrais-tu ajouter le lien Urssaf ou le texte de loi ? (je n'ai pas pu vérifier ces valeurs de mon côté)\n- `taux progressif` renvoie un taux moyen calculé sur `assiette des cotisations`, qui est ensuite appliqué à `assiette des cotisations - assiette participation CPAM`. Est-ce bien ce que prévoit la règle (barème appliqué à l'assiette totale, puis taux moyen reporté sur la part hors participation CPAM) ? Si oui, une phrase en `note` aiderait le prochain lecteur.\n\nEnfin, seul le snapshot a changé : un test explicite avec un revenu au-dessus de 40 % du PSS, qui échouait avant le correctif, me semblerait plus lisible qu'un diff de snapshot. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.11523279999999998,
+  "final_text": "J'ai posté un seul commentaire inline sur `PAMC.publicodes`, lignes 163 à 175. Je n'ai pas pu lire l'issue #3176 (la commande a demandé une approbation), donc je n'ai rien vérifié par rapport à elle. Je n'ai pas lancé les tests, conformément aux consignes. Je n'ai pas non plus posté de synthèse, faute de point transverse à y mettre.\n\nLe commentaire soulève trois points :\n- **Sources manquantes :** la règle n'a pas de `références` pour les taux de 3,25 % et 9,75 % ni pour les seuils de 40 % et 110 % du PSS. Je n'ai pas pu vérifier ces valeurs.\n- **Taux moyen :** `taux progressif` renvoie un taux moyen calculé sur `assiette des cotisations`, appliqué ensuite à `assiette des cotisations - assiette participation CPAM`. J'ai demandé si c'est bien voulu et suggéré une `note` si oui.\n- **Test :** seul le snapshot a changé. Je propose un test explicite avec un revenu supérieur à 40 % du PSS.\n\nLe barème reprend le même pattern que `profession-libérale.publicodes`, et le commit est unique et propre."
+ }
+}
+
+```

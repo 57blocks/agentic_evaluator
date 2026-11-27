@@ -1,0 +1,14 @@
+[
+ {
+  "file": "api/source/index.ts",
+  "start_line": 50,
+  "end_line": 50,
+  "message": "Le cache est placé avant `plausibleMiddleware` et répond sans appeler `next()` : les requêtes servies par le cache ne seront plus comptées dans Plausible, alors que l'ordre précédent les comptait toutes. Est-ce voulu ? Sinon, remettre `plausibleMiddleware` avant `redisCacheMiddleware()` garderait les statistiques d'usage complètes."
+ },
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 28,
+  "end_line": 28,
+  "message": "La clé ne dépend que du body : après un déploiement qui change les règles (`modele-social`), Redis continue de servir pendant jusqu'à 2h des résultats calculés avec les anciennes règles, ce qui peut afficher un montant faux à un usager. Je verrais bien un préfixe de version dans la clé (version du paquet `modele-social` ou hash du build), pour que chaque déploiement invalide naturellement le cache. Qu'en penses-tu ?"
+ }
+]

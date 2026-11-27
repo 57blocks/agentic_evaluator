@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/lib/navigation/index.ts",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "Je me demande si exporter `MockNavigationProvider` depuis l'index public est souhaitable : il n'est utilisé que par Storybook et les tests, mais il se retrouve ainsi dans le graphe d'import de tout consommateur de `@/lib/navigation` (donc potentiellement dans le bundle de prod, selon le tree-shaking). Un import direct depuis `.storybook` et `TestProvider` ne serait pas plus coûteux. Qu'en penses-tu ?"
+ },
+ {
+  "message": "Les commits `65f6a95`, `49a29ee` et `7c6428a` changent le comportement de la pagination des demandes utilisateurs (état local → query params, puis deux correctifs), ce qui sort du sujet « adaptateur de navigation » et rend le diff plus long à relire. Je verrais bien une PR séparée pour la partie statistiques, à moins que le passage par `setSearchParams` soit nécessaire à la démonstration de l'adaptateur ? Même remarque, en plus léger, pour les commits de typo `Embeded → Embedded`."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4311,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/lib/navigation/index.ts",
+   "line": 3,
+   "start_line": null,
+   "body": "Je me demande si exporter `MockNavigationProvider` depuis l'index public est souhaitable : il n'est utilisé que par Storybook et les tests, mais il se retrouve ainsi dans le graphe d'import de tout consommateur de `@/lib/navigation` (donc potentiellement dans le bundle de prod, selon le tree-shaking). Un import direct depuis `.storybook` et `TestProvider` ne serait pas plus coûteux. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Les commits `65f6a95`, `49a29ee` et `7c6428a` changent le comportement de la pagination des demandes utilisateurs (état local → query params, puis deux correctifs), ce qui sort du sujet « adaptateur de navigation » et rend le diff plus long à relire. Je verrais bien une PR séparée pour la partie statistiques, à moins que le passage par `setSearchParams` soit nécessaire à la démonstration de l'adaptateur ? Même remarque, en plus léger, pour les commits de typo `Embeded → Embedded`."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.14257840000000002,
+  "final_text": "J'ai posté deux remarques sur la PR #4311, sans lancer ni tests ni build. Le workflow « Vérification PR » est au vert.\n\n- **Commentaire inline sur `site/source/lib/navigation/index.ts`, ligne 3 :** je me demande si exporter `MockNavigationProvider` depuis l'index public est souhaitable. Il ne sert qu'à Storybook et aux tests, mais il entre dans le graphe d'import de tout code qui utilise `@/lib/navigation`. Je ne l'ai pas vérifié côté bundle de prod. J'ai donc posé la remarque en question.\n- **Commentaire global :** la refonte de la pagination des demandes utilisateurs en query params (commits `65f6a95`, `49a29ee`, `7c6428a`) sort du sujet « adaptateur de navigation ». Je propose une PR séparée pour cette partie, et une remarque plus légère pour les commits de typo `Embeded → Embedded`.\n\nJ'ai relu `NavigationAPI`, `useNavigation`, `Link`, `ReactRouterNavigationProvider` et `useNavigationOrigin`, sans autre remarque. Je n'ai pas relu les 64 fichiers du diff un par un. Je n'ai pas pu lire l'issue #4214 : la commande `gh issue view` a été refusée par les permissions."
+ }
+}
+
+```

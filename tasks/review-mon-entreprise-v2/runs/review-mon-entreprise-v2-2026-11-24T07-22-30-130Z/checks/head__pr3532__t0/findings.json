@@ -1,0 +1,14 @@
+[
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Je me demande si ce changement de l'assiette de la taxe sur les salaires a sa place ici : il ne figure pas dans le CHANGELOG ni dans la description de la PR. Il retire aussi du calcul l'assiette des heures supplémentaires défiscalisées, ce que l'ancienne formule ne faisait pas. Et comme `CSG-CRDS . assiette de base` s'appuie sur `cotisations . assiette`, je me demande si l'exonération CSG des apprentis introduite dans cette PR ne vient pas aussi réduire cette assiette. Est-ce voulu ? Sinon, un commit séparé avec sa source serait plus facile à relire."
+ },
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 228,
+  "end_line": 228,
+  "message": "Les descriptions parlent de contrats « conclus depuis le 1er mars 2025 », mais la condition porte sur la `date` de la simulation. Un contrat conclu en 2024 simulé aujourd'hui passera donc au régime à 50 % (et à la CSG-CRDS due), alors que le régime d'origine continue de s'y appliquer. Je comprends que tu hésitais à ajouter la question de la date de début : il me semble qu'elle conditionne la justesse du résultat affiché. Peut-être au moins le signaler dans la description de la règle ?"
+ }
+]

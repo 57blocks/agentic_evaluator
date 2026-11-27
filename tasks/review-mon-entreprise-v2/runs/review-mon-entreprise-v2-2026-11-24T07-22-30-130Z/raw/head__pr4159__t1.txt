@@ -1,0 +1,33 @@
+```file:findings.json
+[
+ {
+  "message": "J'ai bien relu, ça me paraît bon à merger."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4159,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4157: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.114208,
+  "final_text": "J'ai relu la PR #4159 et n'y ai trouvé aucun point à commenter. J'ai donc posté un commentaire global : « J'ai bien relu, ça me paraît bon à merger. »\n\n- **Vérifications :** `gh pr checks` est au vert.\n- **Renommage de la règle :** `emploi franc . éligible` devient `emploi franc`, et le montant passe dans `emploi franc . montant`. Aucune référence à l'ancien nom ne subsiste dans le dépôt (règles, config du simulateur, snapshot de l'API, tests de régression).\n- **Non vérifié :** si d'anciennes simulations partagées ou sauvegardées utilisent encore l'ancien nom, je n'ai pas pu le déterminer.\n\nJe n'ai pas exécuté le code."
+ }
+}
+
+```

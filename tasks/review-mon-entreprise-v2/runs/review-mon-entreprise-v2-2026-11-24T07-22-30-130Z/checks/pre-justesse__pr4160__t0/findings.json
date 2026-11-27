@@ -1,0 +1,5 @@
+[
+ {
+  "message": "Je n'ai pas relu les 576 fichiers en détail : la PR (≈ 270 commits, 34 000 lignes ajoutées) mélange la réforme de l'assiette TI-PAM, la création des paquets `modele-ti` et `modele-as`, la refonte du moteur et des stores, la branche du simulateur SASU et des corrections d'UI. À cette taille, une relecture humaine ou automatique ne peut pas valider les calculs affichés aux usagers. Je me demande si on pourrait la découper en PR successives mergeables (par exemple : création des paquets et refactors du moteur, puis réforme des barèmes, puis PAMC, puis UI), ou au moins la relire en s'appuyant sur les snapshots de régression commit par commit. Qu'en penses-tu ?"
+ }
+]

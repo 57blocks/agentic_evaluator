@@ -1,0 +1,33 @@
+{
+ "pr": 3385,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/AnswerList.tsx",
+   "line": 321,
+   "start_line": null,
+   "body": "Cette ligne commentée ressemble à un reste de test local. Si on veut afficher les suggestions dans cette modale, je supprimerais la ligne plutôt que de la laisser en commentaire ; sinon, peut-être à remettre. Ce changement modifie aussi le comportement de toutes les modales « Modifier mes réponses », pas seulement celle des charges : c’est voulu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+   "line": 71,
+   "start_line": null,
+   "body": "Je me demande si on peut éviter ce `cy.wait(500)` (et le `eslint-disable`) : une assertion sur la valeur attendue du champ juste avant de taper dans le premier input permettrait d’attendre l’état stable sans délai fixe, qui rend le test fragile. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/3360: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1232188,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline sur GitHub : un sur la ligne `showSuggestions` mise en commentaire dans `AnswerList.tsx`, l'autre sur le `cy.wait(500)` du test `simulateur-ae.ts`. Les vérifications de la PR sont au vert. Je n'ai pas de commentaire global à ajouter."
+ }
+}

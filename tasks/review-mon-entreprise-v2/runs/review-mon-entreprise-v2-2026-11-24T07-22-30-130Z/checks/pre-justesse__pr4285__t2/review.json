@@ -1,0 +1,31 @@
+{
+ "pr": 4285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 49,
+   "start_line": null,
+   "body": "Je me demande si le plafond DFS ne calcule pas ici le montant avec l'ancienne formule : `réduction générale` utilise toujours `1.6 * SMIC` et `T / 0.6`, pas `Tmin`/`Tdelta`/`3 * SMIC`. Pour un salarié en DFS, le plafond à 130 % serait alors celui de l'ancien dispositif, alors que la RGDU est calculée avec le nouveau. Est-ce voulu ? Il faudrait plutôt référencer le montant RGDU hors DFS, avec un test sur un cas DFS.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 27,
+   "start_line": null,
+   "body": "Le `coefficient de majoration` (caisse de congés payés, 100/90) et la question associée n'ont pas été repris dans la RGDU, alors qu'ils existent dans l'ancienne règle. Est-ce que la RGDU les supprime vraiment ? Sinon ce cas n'est plus pris en compte. Dans tous les cas, l'ancienne règle `réduction générale` reste dans le modèle avec ses imputations et sa régularisation. Je me demande si elle est encore utile, ou si c'est de la duplication qui va diverger.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.18938229999999998,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline, tous les deux sur `réduction-générale.publicodes`. Je n'ai rien exécuté. Le workflow « Vérification PR » est au vert.\n\n- **Plafond DFS (ligne 49)** : `plafond avec application de la DFS` appelle encore l'ancienne règle `réduction générale`, avec `1.6 * SMIC` et `T / 0.6`. Pour un salarié en DFS, le plafond à 130 % serait donc calculé sur l'ancien dispositif et non sur la RGDU. J'ai posé la remarque en question et suggéré de partir du montant RGDU hors DFS, avec un test sur un cas DFS.\n- **Majoration caisse de congés payés (ligne 27)** : le `coefficient de majoration` (100/90) et la question associée ne sont pas repris dans la RGDU. J'ai demandé si la réforme les supprime vraiment. Je me suis aussi demandé si l'ancienne règle, gardée avec ses imputations et sa régularisation, est encore utile ou si c'est de la duplication.\n\nJe n'ai pas vérifié si les imputations et la régularisation de l'ancienne règle sont encore utilisées ailleurs dans le modèle."
+ }
+}

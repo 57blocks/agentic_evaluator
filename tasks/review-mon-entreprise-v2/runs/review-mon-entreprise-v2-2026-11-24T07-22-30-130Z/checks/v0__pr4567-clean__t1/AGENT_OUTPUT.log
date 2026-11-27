@@ -1,0 +1,35 @@
+{
+ "pr": 4567,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "line": 559,
+   "start_line": null,
+   "body": "Ce changement modifie un résultat affiché aux usagers, pas seulement à Mayotte : avant, avec Acre + invalidité (sans exonération âge), l’abattement était nul ; maintenant le taux Acre s’applique à l’invalidité-décès. Le test sur ce cas est supprimé dans le même commit, donc plus rien ne le couvre. Je n’ai pas trouvé dans la PR de source qui justifie ce nouveau comportement (la condition « invalidité = non » avait peut-être une raison légale ?). Peux-tu citer le texte ou la page officielle, idéalement en référence de la règle ? Si c’est voulu, je verrais bien un test explicite du nouveau comportement plutôt qu’une suppression. Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/test/modele-ti/cotisations-et-contributions/exonérations/exonérations.test.ts",
+   "line": 315,
+   "start_line": null,
+   "body": "nit: dans le cas « pension invalidité seule » de la retraite complémentaire, la situation fixe le taux de la retraite de base alors que c’est la complémentaire qui est testée : est-ce voulu ? Plus largement, je me demande si ces tests « Mayotte = métropole » protègent assez : ils passent aussi si les deux résultats sont faux de la même façon (ex. 0 des deux côtés). Un cas avec une valeur attendue explicite à Mayotte renforcerait le filet.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Historique : le commit « tests: … » contient aussi une modification de règle Publicodes et la refonte de tests existants (clés calculées) sans lien direct avec Mayotte. Je verrais bien des commits séparés : refactor des tests, nouveaux tests, puis changement de règle avec sa source. Côté Conventional Commits, le type est `test` (pas `tests`), avec un scope fonctionnel comme `indépendant`. Je n’ai pas vérifié les checks CI ni les taux réels côté Urssaf."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.19061129999999998,
+  "final_text": "J'ai posté la revue de la PR 4567 sur GitHub : deux commentaires inline et une synthèse. Je n'ai pas lu les checks CI ni vérifié les taux réels côté Urssaf.\n\n- **Règle Publicodes (inline, `cotisations.publicodes` ligne 559)** : la suppression de la condition `invalidité = non` change aussi le résultat hors Mayotte. Avec Acre et invalidité, sans exonération âge, l'abattement sur l'invalidité-décès passe de nul au taux Acre. Le test qui couvrait ce cas est supprimé dans le même commit. J'ai demandé la source du nouveau comportement et un test explicite.\n- **Tests (inline, `exonérations.test.ts` ligne 315)** :\n  - Dans le cas « pension invalidité seule » de la retraite complémentaire, le test fixe le taux de la retraite de base alors que c'est la complémentaire qui est évaluée.\n  - Les comparaisons Mayotte/métropole passent même si les deux côtés sont faux de la même façon. Je suggère au moins un cas avec une valeur attendue explicite.\n- **Synthèse** : le commit unique mélange le changement de règle et la refonte de tests existants. Son type `tests` n'est pas le bon : Conventional Commits attend `test`, avec un scope fonctionnel. Je propose de le scinder en trois.\n\nPlusieurs commandes ont été refusées avant d'aboutir, mais chaque commentaire n'a été posté qu'une fois."
+ }
+}

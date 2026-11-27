@@ -1,0 +1,20 @@
+[
+ {
+  "file": "modele-social/règles/protection-sociale.publicodes",
+  "start_line": 102,
+  "end_line": 102,
+  "message": "Coquille : « /q » en fin de ligne, sans doute « / » (division) ou à supprimer."
+ },
+ {
+  "file": "modele-social/règles/protection-sociale.publicodes",
+  "start_line": 132,
+  "end_line": 143,
+  "message": "Les `href` sont coupés sur plusieurs lignes (ex. `.../cotisations-et-contributions` puis `/cotisations/...`, ou `href=\"/` puis `documentation/...`), et `auto‑entrepreneur` / `micro‑entreprise` (l. 132 et 138) semblent contenir des traits d’union insécables (U+2011) au lieu de `-`. Dans un bloc scalaire `|` les retours à la ligne sont conservés : je me demande si ces liens fonctionnent une fois rendus. Peux-tu vérifier dans le navigateur, et si besoin remettre chaque `<a href=...>` sur une seule ligne avec des `-` ordinaires ?"
+ },
+ {
+  "file": "site/source/pages/integration/Iframe.tsx",
+  "start_line": 280,
+  "end_line": 280,
+  "message": "nit: le titre devient « France Travail » mais l’image affichée est toujours `pole-emploi.png` (import `poleEmploiLogo`, l. 28). Le logo sera-t-il remplacé dans une suite ? Sinon ça vaudrait le coup de le faire ici, pour rester cohérent avec le reste de la PR."
+ }
+]

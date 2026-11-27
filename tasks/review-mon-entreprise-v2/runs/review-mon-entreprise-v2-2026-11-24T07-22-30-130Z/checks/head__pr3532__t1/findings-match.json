@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/salarié/contrat.publicodes",
+      "start_line": 210,
+      "end_line": 210,
+      "message": "Je me demande si `date >= 03/2025` modélise bien la règle : les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », alors que `date` est la date de la simulation. Un contrat signé en 2024 simulé en avril 2025 passerait donc à 50 % du Smic (et à la CSG-CRDS partielle), alors qu_il reste à 79 % / exonération totale. Tu évoquais dans la description de la PR une question sur la date de début du contrat : je verrais bien celle-ci conditionner ces deux règles (la même condition est en l.228). Qu_en penses-tu ?"
+    },
+    {
+      "file": "modele-social/règles/salarié/salarié.publicodes",
+      "start_line": 521,
+      "end_line": 521,
+      "message": "Je ne vois pas le lien entre ce changement et la CSG-CRDS des apprentis : l_assiette de la taxe sur les salaires passe de `assiette + prévoyance employeur` à `CSG-CRDS . assiette de base`, qui applique en plus l_abattement de 1,75 % et celui des heures supplémentaires défiscalisées (cotisations.publicodes:483-495). Est-ce voulu, et avec quelle source ? Sinon, je le sortirais de cette PR (le snapshot de la taxe sur les salaires pourrait bouger)."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/contrat.publicodes",
+          "start_line": 217,
+          "end_line": 231
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

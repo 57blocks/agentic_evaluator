@@ -1,0 +1,72 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+      "start_line": 32,
+      "end_line": 32,
+      "message": "Je me demande si la puissance ne porte pas sur tout le crochet dans la formule officielle : `Tmin + Tdelta × [½ × (3 × Smic / rémunération − 1)]^P`. Ici `0.5 * (x ** P)` n’applique `P` qu’à `x`, ce qui donne un coefficient différent entre 1 et 3 Smic (à 1 Smic, `0.5 * 2^1.75 ≈ 1,68` au lieu de 1, ramené à `Tmin + Tdelta` par le plafond seulement). Peux-tu confirmer avec l’article D241-7 ou un cas du simulateur Urssaf à un salaire intermédiaire (ex. 1,5 Smic) ?\n```suggestion\n            - (0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P\n```"
+    },
+    {
+      "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+      "start_line": 49,
+      "end_line": 49,
+      "message": "L’ancienne règle `réduction générale` reste entière (coefficient T, imputation, régularisation…) à côté de `RGDU`, et elle est encore utilisée ici par le plafond DFS et par JEI. Deux calculs coexistent donc, et la DFS plafonne à 130 % de l’ancien calcul alors que le montant retenu vient de la RGDU. Est-ce voulu (par ex. pour le simulateur « réduction générale ») ? Sinon, je verrais bien une seule règle qui porte le calcul 2026."
+    },
+    {
+      "message": "Le simulateur `réduction-générale` (`RéductionGénérale.tsx`, l.31) affiche toujours l’avertissement « réforme RGDU non implémentée », alors que cette PR l’implémente et le retire du simulateur salarié. L’avertissement est-il toujours exact là-bas, ou ce simulateur utilise-t-il encore l’ancienne règle ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+          "start_line": 32,
+          "end_line": 32
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm",
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ]
+}

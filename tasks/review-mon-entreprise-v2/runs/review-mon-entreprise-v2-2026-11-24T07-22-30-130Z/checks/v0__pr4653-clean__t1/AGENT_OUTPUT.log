@@ -1,0 +1,19 @@
+{
+ "pr": 4653,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Je n'ai rien trouvé à redire : plus aucune référence à `cmg` ni au complément transitoire dans le code, les chemins ou les traductions (hors `base-stats.json`, des statistiques historiques), et le découpage en trois commits est clair.\n\nUne question que je n'ai pas pu trancher : je ne vois pas de fichier de redirections dans le dépôt, donc je ne sais pas comment les anciennes URL `/assistants/cmg` (et son équivalent iframe) se comportent après la suppression. Est-ce que le 404 / la page d'erreur actuelle te convient, ou faut-il rediriger vers une page existante (par exemple la liste des assistants) ?\n\nJe n'ai pas lancé le build ni les tests ; je m'en remets à `gh pr checks`."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.09718609999999998,
+  "final_text": "J'ai relu la PR #4653 et posté ma revue sous forme d'un seul commentaire de synthèse : je n'ai pas trouvé de défaut, et aucun commentaire inline n'était nécessaire.\n\n- **Références restantes :** plus aucune référence à `cmg` ni au complément transitoire dans le code, les chemins ou les traductions. Seul `base-stats.json` en contient encore, ce sont des statistiques historiques.\n- **Anciennes URL :** je n'ai pas trouvé de fichier de redirections dans le dépôt. J'ai donc demandé dans le commentaire comment `/assistants/cmg` doit se comporter après la suppression.\n- **Vérifications :** je n'ai pas lancé le build ni les tests, et je ne suis pas allé voir le résultat de `gh pr checks`."
+ }
+}

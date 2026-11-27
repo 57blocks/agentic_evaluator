@@ -1,0 +1,62 @@
+{
+  "format": "claude-code",
+  "turns": 4,
+  "tool_calls": [
+    {
+      "name": "Bash",
+      "ms": 995,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 92,
+      "failed": false
+    },
+    {
+      "name": "Bash",
+      "ms": 153,
+      "failed": false
+    }
+  ],
+  "retries": 0,
+  "denials": 0,
+  "compactions": 0,
+  "turn_tokens": [
+    {
+      "prompt": 2,
+      "cached": 9302,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 23579,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 25202,
+      "output": null,
+      "costUsd": null
+    },
+    {
+      "prompt": 2,
+      "cached": 27723,
+      "output": null,
+      "costUsd": null
+    }
+  ],
+  "models": [
+    "claude-sonnet-5-5"
+  ],
+  "cost_usd": 0.10258660000000001,
+  "ended": "finished",
+  "provider": "anthropic-subscription",
+  "usage": {
+    "prompt": 19428,
+    "completion": 1631,
+    "cached": 85806,
+    "costUsd": 0.10258660000000001
+  }
+}

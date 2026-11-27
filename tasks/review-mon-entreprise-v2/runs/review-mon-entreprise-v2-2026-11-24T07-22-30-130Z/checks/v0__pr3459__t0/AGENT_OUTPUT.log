@@ -1,0 +1,43 @@
+{
+ "pr": 3459,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/hooks/useSearchParamsSimulationSharing.ts",
+   "line": 169,
+   "start_line": null,
+   "body": "Je me demande si on ne perd pas un cas avec la suppression du parsing JSON. getSearchParams (l. 137) écrit toujours JSON.stringify(value) quand serializeEvaluation ne sait pas sérialiser, et d'anciens liens partagés contiennent ce format JSON. SearchParamsAdapter.decode ne le reconnaît pas et renvoie la chaîne brute, qui part telle quelle dans la situation. Je n'ai rien exécuté pour le confirmer. Est-ce voulu ? Sinon, un test avec une valeur JSON permettrait de trancher. getSearchParams pourrait aussi passer par SearchParamsAdapter.encode, pour garder les deux sens symétriques ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/SearchParamsAdapter.ts",
+   "line": 44,
+   "start_line": null,
+   "body": "Les regex n'acceptent pas de signe moins. encode d'un montant négatif (par ex. euros(-100)) produit -100€, que decode ne relit pas comme un montant : il retombe en chaîne, donc decode(encode(x)) perd le type. Je ne sais pas si des règles peuvent avoir une valeur négative dans les simulateurs partagés par lien, qu'en penses-tu ? Si oui, un -? en tête de regex et un cas dans le test suffiraient peut-être.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/SearchParamsAdapter.ts",
+   "line": 73,
+   "start_line": null,
+   "body": "nit: unit.includes('/') rend valide n'importe quelle unité composée (abc/def) en Quantité, alors que la liste explicite ne couvre que les unités simples. Je me demande si ce n'est pas trop permissif : une chaîne comme 2x/y devient une quantité. Une liste d'unités connues, partagée avec le domaine Quantité, lèverait le doute.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse : la PR fait 472 fichiers et environ 12 000 lignes et mélange plusieurs sujets (frontières de modules, MDX, correctifs par simulateur, adaptateur de search params). Je n'ai relu en détail que le dernier commit (SearchParamsAdapter, voir les commentaires inline), pas le reste. Des PR plus petites, ou au moins des commits regroupés par sujet, seraient plus faciles à relire. Je n'ai exécuté ni build ni test."
+  }
+ ],
+ "gh": {
+  "calls": 9,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 18,
+  "cost_usd": 0.2536742,
+  "final_text": "J'ai posté sur la PR #3459 trois commentaires inline et une synthèse. Je n'ai relu en détail que le dernier commit (`SearchParamsAdapter`), pas les 472 fichiers de la PR. Je n'ai exécuté ni build ni test.\n\n- **Liens partagés (`useSearchParamsSimulationSharing.ts:169`)** : `getSearchParams` écrit encore du JSON pour les valeurs qu'il ne sait pas sérialiser, et d'anciens liens contiennent ce format. Le nouveau `decode` ne le lit plus et renvoie la chaîne brute, donc je pose la question de la régression. Je n'ai pas pu le confirmer. J'ai aussi proposé de faire passer `getSearchParams` par `encode`.\n- **Montants négatifs (`SearchParamsAdapter.ts:44`)** : les regex n'acceptent pas le signe `-`, donc `decode(encode(x))` perd le type d'un montant négatif. J'ignore si de tels montants existent dans les simulateurs partagés par lien.\n- **Unités composées (`SearchParamsAdapter.ts:73`)** : `unit.includes('/')` accepte n'importe quelle unité composée, comme `2x/y`. C'est posé comme une remarque de style (`nit:`).\n- **Synthèse** : la PR mélange plusieurs sujets sur environ 12 000 lignes, et je suggère des PR plus petites ou des commits regroupés par sujet.\n\nLe premier essai de publication n'a rien posté, car l'outil a refusé les heredocs et les variables. J'ai donc repris avec des appels `gh` séparés qui contiennent le texte directement."
+ }
+}

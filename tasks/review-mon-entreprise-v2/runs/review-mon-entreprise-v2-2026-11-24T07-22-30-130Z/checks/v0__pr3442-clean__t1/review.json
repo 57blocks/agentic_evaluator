@@ -1,0 +1,27 @@
+{
+ "pr": 3442,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 145,
+   "start_line": null,
+   "body": "Les clés `'Bénéfice'` et `'Déficit'` ne sont pas hiérarchiques, alors que le reste du fichier utilise `pages.assistants.declaration-revenus-pamc.resultats.label.N`. CONTRIBUTING demande une clé hiérarchique avec valeur par défaut en français. Ces clés sont de plus utilisées 2 fois chacune (l. 145/152 et 166/173) : qu'en penses-tu de les aligner sur le schéma existant (`...resultats.label.bénéfice` / `...label.déficit`) ? Une clé aussi générique risque aussi de collisionner avec une autre traduction du site.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- Historique : l'ordre feat/fix/refactor reste lisible, mais la PR est grosse (règles Publicodes, domaine TS, UI, traductions). Le commit `fix: mise en forme de la doc` n'a pas de scope et le commit `refactor: aligne les labels d'input Radio` touche le design-system (`Radio.tsx`) au milieu de changements métier PAM : je les aurais isolés dans une PR à part.\n- `AssistantGoal` reçoit une prop `label` avec `label || rule.title` : `??` serait plus précis si une chaîne vide n'est pas voulue (nit).\n- Non vérifié : je n'ai pas relu le contenu métier des règles Publicodes (taux, codes de cases fiscales DSxx) ni le rendu visuel ; je n'ai pas non plus consulté les résultats de la CI."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.12364770000000001,
+  "final_text": "J'ai posté ma revue sur la PR #3442 : un commentaire inline et une synthèse. Je n'ai pas lu le code du domaine TypeScript ni les règles Publicodes en détail, et je n'ai pas consulté `gh pr checks`.\n\n- **Inline sur `Résultats.tsx`, ligne 145 :** les clés de traduction `'Bénéfice'` et `'Déficit'` ne sont pas hiérarchiques, contrairement au reste du fichier. Elles sont utilisées deux fois chacune. Je propose de les aligner sur le schéma `...resultats.label.N`.\n- **Synthèse :**\n  - La PR est grosse.\n  - Le commit `fix: mise en forme de la doc` n'a pas de scope.\n  - Le changement de `Radio.tsx` dans le design-system aurait pu être isolé dans une PR à part.\n  - Nit sur `label || rule.title` dans `AssistantGoal`, où `??` serait plus précis.\n  - Ce que je n'ai pas pu vérifier : le contenu métier des règles Publicodes (taux, codes de cases fiscales) et le rendu visuel."
+ }
+}

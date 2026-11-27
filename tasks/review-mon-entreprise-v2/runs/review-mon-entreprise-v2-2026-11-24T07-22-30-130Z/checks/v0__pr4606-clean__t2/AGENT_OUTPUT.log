@@ -1,0 +1,31 @@
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": null,
+   "body": "Je pense que l’espace entre `modele-as,` et `modele-ti` va disparaître au rendu : en JSX, le retour à la ligne entre `</Code>,` et `<Code>` est supprimé, donc on obtiendrait « modele-as,modele-ti » (je n’ai pas vérifié visuellement). Un `{' '}` après la virgule règlerait ça. Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 178,
+   "start_line": null,
+   "body": "Cette section « Utilisation » et la suivante (exemples CodeSandbox) restent centrées sur `modele-social`, alors que le reste de la page oriente désormais vers `modele-as` / `modele-ti`. Je me demande si un lecteur qui choisit `modele-as` saura comment adapter l’exemple (import, règle à évaluer). Je n’ai pas pu ouvrir les sandbox pour vérifier si elles sont à jour : une phrase d’explication, ou un exemple en `modele-as`, aiderait peut-être ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1276369,
+  "final_text": "J'ai posté deux commentaires inline sur la PR 4606, et je n'ai pas posté de synthèse. Je n'ai pas vérifié le rendu visuel de la page ni ouvert les exemples CodeSandbox. Les checks de la PR sont verts.\n\n- **`Library.tsx:107`** : je pense que l'espace entre `modele-as,` et `modele-ti` disparaît au rendu. En JSX, le retour à la ligne entre `</Code>,` et `<Code>` est supprimé, donc on obtiendrait « modele-as,modele-ti ». Je propose d'ajouter `{' '}` après la virgule.\n- **`Library.tsx:178`** : la section « Utilisation » et les exemples CodeSandbox restent centrés sur `modele-social`, alors que le reste de la page oriente vers `modele-as` et `modele-ti`. Je me demande si un lecteur qui choisit `modele-as` saura adapter l'exemple. Une phrase d'explication ou un exemple en `modele-as` pourrait aider.\n\nLa PR ne contient qu'un seul commit, donc je n'ai rien relevé sur l'historique git."
+ }
+}

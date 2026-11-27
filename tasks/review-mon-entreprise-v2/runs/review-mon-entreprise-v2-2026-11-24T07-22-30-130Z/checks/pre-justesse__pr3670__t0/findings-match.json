@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/contextes/cmg/domaine/calcul.ts",
+      "start_line": 58,
+      "end_line": 58,
+      "message": "Le `3` (nombre de mois de référence) est écrit en dur ici, à la ligne 41 et dans `éligibilité.ts:365`. Je verrais bien une constante nommée dans `constantes.ts` (à côté de `NOMBRE_MIN_MOIS_EMPLOYEUREUSE`) : si la période de référence change, les trois endroits risquent de diverger. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/contextes/cmg/domaine/calcul.ts",
+      "start_line": 88,
+      "end_line": 88,
+      "message": "nit: ce `reduce` mute son accumulateur, alors que le domaine est censé rester immuable. Un `Array.filter`/`findLast` sur les paliers dont le seuil est ≤ au nombre d'enfants donnerait le TEH et l'index sans mutation, et se lirait plus directement."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/cmg/components/Navigation.tsx",
+          "start_line": 6,
+          "end_line": 35
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

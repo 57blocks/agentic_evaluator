@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+      "start_line": 70,
+      "end_line": 76,
+      "message": "Cette liste est recréée à chaque rendu et typée string[], donc id n’est pas vérifié contre elle. Je la verrais plutôt en constante de module avec satisfies, comme nextSteps plus haut. Et includes(id) serait plus lisible que indexOf(id) > -1."
+    },
+    {
+      "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+      "start_line": 24,
+      "end_line": 24,
+      "message": "Le déplacement des deux avertissements existants (Avertissements/ vers indépendant/components/, export nommé, Body intégré) n’a pas de lien avec #4044. Je le mettrais dans un commit refactor séparé, voire une autre PR, pour garder le diff de la feature lisible. Qu’en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/indépendant/components/AvertissementAutoEntrepreneur.tsx",
+          "start_line": 12,
+          "end_line": 13
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 349,
+  "end_line": 349,
+  "message": "Le lien (URL, texte, aria-label et `Message`) est dupliqué quasiment à l'identique dans `DroitsRetraite.tsx` (l.157). Si l'URL de l'Assurance retraite change, il faudra penser aux deux endroits. Je verrais bien un petit composant partagé, qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 327,
+  "end_line": 327,
+  "message": "Je me demande si la somme AGIRC ARRCO + RCI + CIPAV a du sens pour l'usager : ce sont des points de régimes différents, à valeur de service différente, donc « 150 points » ne donne pas forcément la même pension d'un statut à l'autre, alors que le libellé les présente comme homogènes. Est-ce un choix assumé ? Je n'ai pas vérifié non plus le comportement de `somme` quand une des trois règles est non applicable pour un statut : un test sur ce cas serait rassurant."
+ },
+ {
+  "file": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "nit: les apostrophes typographiques (’) du texte existant sont devenues des apostrophes droites (') dans ce fichier (« droits acquis sur l'année », messages DROM/ACRE…), ce qui modifie aussi les textes par défaut des traductions. Est-ce voulu ?"
+ },
+ {
+  "message": "Synthèse :\n\n- **Historique** : 16 commits avec plusieurs allers-retours (lien Cnav ajouté puis supprimé `d6567ae` → `42b27b5`, ACRE retiré après coup, `<Body>` ajouté dans `6c99c3c`). Je me demande si un squash des allers-retours, ou un découpage (suppression des projections / nouveaux affichages trimestres-points / lien Assurance retraite), rendrait la PR plus lisible. Les messages `fix:`/`feat:` sans scope fonctionnel s'écartent aussi de la convention (`fix(indépendant): …`).\n- **Tests** : snapshots mis à jour, mais je ne vois pas de test pour les nouveaux affichages du comparateur (trimestres, revenu cotisé, points) ni pour la condition `libérale réglementée = non`.\n- **Non vérifié** : rendu visuel, accessibilité du lien, relecture des traductions EN."
+ }
+]

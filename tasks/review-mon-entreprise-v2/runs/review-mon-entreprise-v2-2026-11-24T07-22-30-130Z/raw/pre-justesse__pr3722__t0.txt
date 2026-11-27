@@ -1,0 +1,66 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+  "start_line": 3,
+  "end_line": 3,
+  "message": "Ce hook duplique le corps de `ScrollToTop.tsx` (même dossier), qui fait déjà ça en composant. Je me demande si `<ScrollToTop />` ne suffirait pas dans `CMG`, sans nouveau fichier. Par ailleurs, avec `[]` comme dépendances, le scroll ne se déclenche qu au montage de `CMG`, pas à chaque changement d étape : est-ce bien ce que tu vises (le commit dit \"(?)\") ? Enfin, l export par défaut va à l encontre de la convention d exports nommés."
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/components/AMA/AMAInput.tsx",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Cette règle (mois identiques : recopier mars sur avril et mai, décocher si on modifie un autre mois) est une logique métier de saisie, répétée presque à l identique dans `GEDInput` et dans `AMA.tsx`/`GED.tsx` (`onMoisIdentiquesChange`). Je verrais bien une fonction pure dans le domaine `cmg` (par ex. `appliquerMoisIdentiques(salariée)`), testée unitairement et utilisée par les deux. Qu en penses-tu ?"
+ },
+ {
+  "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+  "start_line": 16,
+  "end_line": 16,
+  "message": "`MoisIdentiques` est un tableau de booléens parallèle à `situation.salariées`, que chaque ajout et suppression doit garder synchronisé à la main. Si un chemin l oublie, `moisIdentiques.AMA[index]` devient `undefined` ou décalé, et la case se retrouve cochée sur la mauvaise salariée. Je me demande si l information ne gagnerait pas à vivre avec la salariée (ou à être déduite de l égalité des trois mois) plutôt que dans un second tableau."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3722,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+   "line": 3,
+   "start_line": null,
+   "body": "Ce hook duplique le corps de `ScrollToTop.tsx` (même dossier), qui fait déjà ça en composant. Je me demande si `<ScrollToTop />` ne suffirait pas dans `CMG`, sans nouveau fichier. Par ailleurs, avec `[]` comme dépendances, le scroll ne se déclenche qu au montage de `CMG`, pas à chaque changement d étape : est-ce bien ce que tu vises (le commit dit \"(?)\") ? Enfin, l export par défaut va à l encontre de la convention d exports nommés.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/components/AMA/AMAInput.tsx",
+   "line": 40,
+   "start_line": null,
+   "body": "Cette règle (mois identiques : recopier mars sur avril et mai, décocher si on modifie un autre mois) est une logique métier de saisie, répétée presque à l identique dans `GEDInput` et dans `AMA.tsx`/`GED.tsx` (`onMoisIdentiquesChange`). Je verrais bien une fonction pure dans le domaine `cmg` (par ex. `appliquerMoisIdentiques(salariée)`), testée unitairement et utilisée par les deux. Qu en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+   "line": 16,
+   "start_line": null,
+   "body": "`MoisIdentiques` est un tableau de booléens parallèle à `situation.salariées`, que chaque ajout et suppression doit garder synchronisé à la main. Si un chemin l oublie, `moisIdentiques.AMA[index]` devient `undefined` ou décalé, et la case se retrouve cochée sur la mauvaise salariée. Je me demande si l information ne gagnerait pas à vivre avec la salariée (ou à être déduite de l égalité des trois mois) plutôt que dans un second tableau.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1718429,
+  "final_text": "J'ai posté trois commentaires inline sur la PR 3722 (« Vérification PR » est au vert). Le code n'a pas été exécuté.\n\n- **`useScrollToTop.tsx`** : le hook reprend le corps de `ScrollToTop.tsx`, qui existe déjà dans le même dossier. Avec `[]` comme dépendances, il ne scrolle qu'au montage de `CMG`, pas à chaque étape. C'est un export par défaut, alors que la convention demande des exports nommés.\n- **`AMAInput.tsx`** : la règle « mars recopié sur avril et mai, case décochée si on modifie un autre mois » est de la logique métier. Elle est répétée dans `GEDInput`, `AMA.tsx` et `GED.tsx`. Je propose une fonction pure dans le domaine `cmg`, testée.\n- **`CMGContext.tsx`** : `MoisIdentiques` est un tableau de booléens parallèle à `situation.salariées`, resynchronisé à la main à chaque ajout et suppression. Si un chemin l'oublie, la case peut se retrouver sur la mauvaise salariée.\n\nJe n'ai pas lu `GED.tsx` ni `GEDInput.tsx`. Que GED duplique la logique d'AMA vient du diff d'AMA et des appels visibles dans `useCMG.ts`."
+ }
+}
+
+```

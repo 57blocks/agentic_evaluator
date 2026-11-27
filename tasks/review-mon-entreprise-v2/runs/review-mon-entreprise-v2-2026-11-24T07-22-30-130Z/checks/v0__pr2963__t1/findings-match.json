@@ -1,0 +1,103 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+      "start_line": 92,
+      "end_line": 92,
+      "message": "Je me demande si l'applicabilité est évaluée sur le bon moteur. Pour un comparateur, `engines` contient des copies (`shallowCopy`) qui reçoivent chacune leur situation, alors qu'ici `engine` est le moteur d'origine, dont la situation n'est jamais mise à jour dans ce cas. L'applicabilité des questions répondues serait alors calculée sans la situation de la simulation. Je n'ai pas exécuté le code, donc je peux me tromper si le moteur d'origine est synchronisé ailleurs. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+      "start_line": 29,
+      "end_line": 29,
+      "message": "nit: `lastSimulation`, `lastConfig`, `lastSituationsAvecContextes` et `engines` sont des variables de module. Elles sont partagées entre toutes les instances du middleware, par exemple entre deux stores créés dans des tests, et il faut les remettre à zéro à la main dans `SET_SIMULATION`. Je verrais bien ces valeurs dans la closure de `prendLaProchaineQuestionMiddleware`, à l'intérieur de `(engine) => ...`. Chaque store aurait alors son propre état, sans reset explicite."
+    },
+    {
+      "file": "site/source/store/reducers/simulation.reducer.ts",
+      "start_line": 101,
+      "end_line": 101,
+      "message": "nit: `ENREGISTRE_LES_RÉPONSES` répète tel quel le bloc « ajoute la question à `questionsRépondues` si elle n'y est pas » de `ENREGISTRE_LA_RÉPONSE`. Une petite fonction du domaine, par exemple `marqueCommeRépondue(questionsRépondues, règle)`, éviterait la duplication. Elle servirait aussi à `VA_À_LA_QUESTION_SUIVANTE`, qui ajoute une question de la même façon."
+    },
+    {
+      "message": "Synthèse : j'ai relu en détail le reducer et le middleware, pas les ~130 fichiers de la PR, et je n'ai rien exécuté.\n\n- **Taille de la PR** : elle réunit une vingtaine de commits : déplacement `domain` vers `domaine`, refonte du reducer, de la navigation, de `ModifierOptions`, et corrections de règles Publicodes (ACRE). Je me demande si des morceaux autonomes, comme le renommage de dossier et la règle ACRE, ne gagneraient pas à être des PR séparées. Elles seraient plus faciles à relire et à annuler en cas de problème.\n- **Historique** : les messages suivent les Conventional Commits. Les trois derniers (`chore: ...`) retouchent du code introduit plus haut dans la même PR. Un fixup les ferait disparaître de l'historique.\n- **Non vérifié** : le rendu et l'accessibilité de la navigation entre questions, c'est-à-dire le bouton «précédent» masqué et le Drawer."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/domaine/IndépendantContexte.ts",
+          "start_line": 4,
+          "end_line": 4
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/hooks/useStatefulRulesEdit.ts",
+          "start_line": 5,
+          "end_line": 49
+        },
+        {
+          "file": "site/source/pages/simulateurs/comparaison-statuts/components/ModifierOptions.tsx",
+          "start_line": 29,
+          "end_line": 34
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 0,
+      "defect": 1
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 1
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 1
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 1
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

@@ -1,0 +1,23 @@
+{
+ "pr": 3385,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/AnswerList.tsx",
+   "line": 321,
+   "start_line": null,
+   "body": "Ce `showSuggestions={false}` mis en commentaire dans le JSX semble être un reste de test, et il n'a pas de lien avec la rubrique « charges ». Si c'est volontaire, un commit dédié en expliquerait la raison. Sinon, je le restaurerais.\n```suggestion\n\t\t\t\t\t\t\tshowSuggestions={false}\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.13047519999999999,
+  "final_text": "J'ai posté un seul commentaire inline sur la PR 3385. Il porte sur `site/source/components/conversation/AnswerList.tsx:321`, où `showSuggestions={false}` a été mis en commentaire dans le JSX. Cela ressemble à un reste de test sans lien avec la rubrique « charges », et j'ai proposé de le restaurer.\n\nJe n'ai relu que le diff du code (règles Publicodes, `AnswerList.tsx` et les deux `Goals.tsx`). Je n'ai pas relu les changements des tests Cypress ni des traductions `rules-en.yaml`, et je n'ai pas pu lire l'issue #3360 (la commande a été refusée). Je n'ai donc pas vérifié que la PR traite tout ce qu'elle devait. `gh pr checks` est au vert."
+ }
+}

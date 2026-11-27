@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/vite.config.ts",
+      "start_line": 208,
+      "end_line": 208,
+      "message": "`next` devient `main` dans la liste des branches de production : est-ce voulu ? Ça change l'environnement déployé (Sentry, domaine Plausible, `IS_PRODUCTION`) de la branche `next`, sans rapport avec l'adaptateur. Si c'est une correction, elle mériterait son propre commit ; sinon je laisserais `next`."
+    },
+    {
+      "file": "site/app/page.tsx",
+      "start_line": 34,
+      "end_line": 34,
+      "message": "Cette prop `tracking` sur la page de démo Next me semble hors sujet de l'adaptateur d'environnement. Est-elle nécessaire ici, ou est-ce un reste d'un autre chantier ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/services/environnement/environnement.ts",
+          "start_line": 5,
+          "end_line": 21
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

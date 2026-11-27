@@ -1,0 +1,46 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+      "start_line": 163,
+      "end_line": 175,
+      "message": "Le barème progressif reprend bien le pattern de `profession-libérale.publicodes` (même `taux progressif` sur l'assiette). Deux points :\n\n- Je ne vois pas de `références` sur cette règle : les taux 3,25 % / 9,75 % et les seuils 40 % / 110 % du PSS n'ont donc pas de source consultable. Pourrais-tu ajouter le lien Urssaf ou le texte de loi ? (je n'ai pas pu vérifier ces valeurs de mon côté)\n- `taux progressif` renvoie un taux moyen calculé sur `assiette des cotisations`, qui est ensuite appliqué à `assiette des cotisations - assiette participation CPAM`. Est-ce bien ce que prévoit la règle (barème appliqué à l'assiette totale, puis taux moyen reporté sur la part hors participation CPAM) ? Si oui, une phrase en `note` aiderait le prochain lecteur.\n\nEnfin, seul le snapshot a changé : un test explicite avec un revenu au-dessus de 40 % du PSS, qui échouait avant le correctif, me semblerait plus lisible qu'un diff de snapshot. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+          "start_line": 166,
+          "end_line": 177
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ]
+}

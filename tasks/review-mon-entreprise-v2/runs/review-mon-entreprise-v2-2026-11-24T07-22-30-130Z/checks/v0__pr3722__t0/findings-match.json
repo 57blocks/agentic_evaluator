@@ -1,0 +1,67 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/contextes/cmg/hooks/useCMG.ts",
+      "start_line": 42,
+      "end_line": 42,
+      "message": "Je me demande si `reset` ne devrait pas aussi réinitialiser `moisIdentiques` : la situation repasse à `salariées: { GED: [], AMA: [] }` mais les tableaux de booléens gardent leurs anciennes valeurs. Après un reset, si on ajoute une salariée, `[...prev.GED, false]` est ajouté en fin de tableau, donc `moisIdentiques.GED[0]` reprend l'ancienne valeur (possiblement `true`) et la case apparaît cochée pour la nouvelle salariée. Je n'ai pas exécuté le scénario, c'est une lecture du code.\n\nPlus largement, deux tableaux parallèles à `salariées`, synchronisés à la main à chaque ajout/suppression, sont fragiles. Qu'en penses-tu de porter l'indicateur par salariée (ou de le dériver : `avril` et `mai` égaux à `mars`) plutôt que de le stocker à part ?"
+    },
+    {
+      "file": "site/source/components/utils/Scroll/useScrollToTop.tsx",
+      "start_line": 3,
+      "end_line": 3,
+      "message": "nit: la convention du projet est l'export nommé plutôt que `export default`. Aussi, je me demande si le `try/catch` est utile : `window.scroll({ behavior: 'auto' })` est supporté par les navigateurs actuels, et le `catch` avec `e` inutilisé risque d'être signalé par le lint. `window.scrollTo(0, 0)` seul suffirait peut-être."
+    },
+    {
+      "message": "Historique : `fix(cmg): corrige le scroll (?)` laisse transparaître une incertitude ; si le correctif n'est pas confirmé, je le sortirais de cette PR ou le validerais avant. Le hook `useScrollToTop` n'a pas de test, et je n'ai pas pu vérifier visuellement le comportement du scroll ni de la checkbox. Je n'ai pas non plus de tests pour la logique « mois identiques » (propagation de mars vers avril/mai, décochage à la modification d'un autre mois), qui me semblerait bien se tester en domaine pur."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/contextes/cmg/hooks/CMGContext.tsx",
+          "start_line": 28,
+          "end_line": 31
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm",
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": []
+}

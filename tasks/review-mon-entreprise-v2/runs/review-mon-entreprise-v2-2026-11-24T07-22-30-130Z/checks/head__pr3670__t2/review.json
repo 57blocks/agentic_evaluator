@@ -1,0 +1,31 @@
+{
+ "pr": 3670,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/domaine/Montant.ts",
+   "line": 175,
+   "start_line": 109,
+   "body": "Seule `toEurosParMois` est utilisée (dans `calcul.ts`) : `toEurosParAn`, `toEurosParJour` et `toEurosParHeure` sont du code mort, et aucune des quatre n’a de test dans `Montant.test.ts`. Je les retirerais jusqu’au besoin.\n\nAu passage, les conversions jour/heure multiplient par 24 et 365 (un « jour » = 24 h, une « heure » à 24 × 365 / 12 par mois) : je me demande si c’est une règle voulue, car un tarif horaire ou journalier de salariée ne correspond pas à un temps de travail de 24 h/j. Quelle est la source ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/domaine/éligibilité.ts",
+   "line": 265,
+   "start_line": null,
+   "body": "Question : `CMGPerçu` (appelée via `aPerçuCMG`) renvoie `inéligible('CMG-perçu')` quand aucune déclaration n’a de CMG perçu > 0, alors que `ditAvoirPerçuCMG` renvoie déjà la même raison pour la réponse déclarée. Les deux sont-elles vraiment à garder ? Si l’usager déclare avoir perçu le CMG mais saisit 0 € partout, il tombe sur la même page d’inéligibilité sans explication de l’écart, je me demande si c’est le comportement souhaité.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 13,
+  "cost_usd": 0.19714159999999994,
+  "final_text": "J'ai relu la PR (65 fichiers) et envoyé deux commentaires inline avec `gh api`. Je n'ai pas pu confirmer qu'ils sont bien enregistrés. Chaque POST a renvoyé un id, mais la liste des commentaires de la PR était encore vide juste après. Je n'ai pas relu le reste du diff en détail, en particulier les composants React des pages CMG.\n\n- **`site/source/domaine/Montant.ts`, lignes 109 à 175 :** seule `toEurosParMois` est utilisée (dans `calcul.ts`). `toEurosParAn`, `toEurosParJour` et `toEurosParHeure` sont du code mort, et aucune des quatre n'a de test. Je pose aussi la question de la source des conversions jour et heure, qui supposent 24 h par jour.\n- **`site/source/contextes/cmg/domaine/éligibilité.ts`, ligne 265 :** `ditAvoirPerçuCMG` et `CMGPerçu` (via `aPerçuCMG`) renvoient la même raison `CMG-perçu`. Je demande si les deux sont à garder. Un usager qui déclare avoir perçu le CMG mais saisit 0 € partout arrive sur la même page d'inéligibilité, sans explication.\n\nLe workflow « Vérification PR » est au vert. Je n'ai posté aucun commentaire global."
+ }
+}

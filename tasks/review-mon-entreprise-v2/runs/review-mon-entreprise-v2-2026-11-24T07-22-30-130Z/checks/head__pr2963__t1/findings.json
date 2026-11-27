@@ -1,0 +1,20 @@
+[
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 92,
+  "end_line": 92,
+  "message": "Pour le comparateur, `engines` contient des copies (`shallowCopy`) sur lesquelles `setSituation` est appelé, mais l’applicabilité est évaluée ici avec l’`engine` d’origine, dont la situation n’a jamais été posée. Je me demande si `applicable` est alors calculé sur une situation vide pour ces simulations. Faut-il l’évaluer sur `engines[0]` (ou sur chaque moteur) ? Un test du middleware en config comparateur permettrait de le vérifier."
+ },
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 29,
+  "end_line": 29,
+  "message": "Ces variables de module (`lastSimulation`, `lastConfig`, `lastSituationsAvecContextes`, `engines`) sont partagées par toutes les instances du middleware : un second store (tests, SSR Next) hériterait de l’état du premier. Je verrais bien les déplacer dans la closure de `prendLaProchaineQuestionMiddleware(engine)`, qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/store/reducers/simulation.reducer.ts",
+  "start_line": 101,
+  "end_line": 101,
+  "message": "nit: ce cas duplique presque à l’identique `ENREGISTRE_LA_RÉPONSE` (ajout dans `questionsRépondues` si absent). Une petite fonction `marqueCommeRépondue(questionsRépondues, règle)` dans le domaine éviterait que les deux divergent."
+ }
+]

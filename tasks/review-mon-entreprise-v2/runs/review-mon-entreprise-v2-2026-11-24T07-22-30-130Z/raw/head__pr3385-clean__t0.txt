@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/conversation/AnswerList.tsx",
+  "start_line": 321,
+  "end_line": 321,
+  "message": "Ce `showSuggestions={false}` mis en commentaire ressemble à un reste de débogage : il change le comportement de la modale « Modifier mes réponses » pour toutes les questions (les suggestions s’affichent désormais). Est-ce voulu ? Si oui, je supprimerais la ligne plutôt que de la commenter ; sinon, je la rétablirais."
+ },
+ {
+  "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+  "start_line": 71,
+  "end_line": 71,
+  "message": "nit: un `cy.wait(500)` rend le test sensible au timing ; un `should` sur la valeur attendue avant de continuer serait plus fiable."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3385,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/AnswerList.tsx",
+   "line": 321,
+   "start_line": null,
+   "body": "Ce `showSuggestions={false}` mis en commentaire ressemble à un reste de débogage : il change le comportement de la modale « Modifier mes réponses » pour toutes les questions (les suggestions s’affichent désormais). Est-ce voulu ? Si oui, je supprimerais la ligne plutôt que de la commenter ; sinon, je la rétablirais.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+   "line": 71,
+   "start_line": null,
+   "body": "nit: un `cy.wait(500)` rend le test sensible au timing ; un `should` sur la valeur attendue avant de continuer serait plus fiable.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.128728,
+  "final_text": "J'ai relu la PR #3385 et posté deux commentaires inline sur GitHub. Je n'ai pas lu en détail les changements des règles Publicodes ni des traductions (`entreprise.publicodes`, `rules-en.yaml`). Les checks « Vérification PR » sont au vert.\n\n- **`AnswerList.tsx`, ligne 321 :** `showSuggestions={false}` est mis en commentaire. Cela ressemble à un reste de débogage. Les suggestions s'affichent désormais dans la modale « Modifier mes réponses » pour toutes les questions. J'ai demandé si c'était voulu, en proposant de supprimer ou de rétablir la ligne.\n- **`simulateur-ae.ts`, ligne 71 :** un `cy.wait(500)` rend le test sensible au timing. Je l'ai signalé en `nit:`.\n\nJe n'ai pas relevé de problème dans l'historique git."
+ }
+}
+
+```

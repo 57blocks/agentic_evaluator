@@ -1,0 +1,20 @@
+[
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 29,
+  "end_line": 29,
+  "message": "Je me demande si ces `let` au niveau du module sont un risque : l’état (`lastSimulation`, `lastConfig`, `engines`…) est partagé entre toutes les instances du middleware. Deux stores (tests, ou un `createStore` rejoué) se verraient mutuellement leur cache, et un test laisse des valeurs derrière lui. Ne pourrait-on pas les déclarer dans `prendLaProchaineQuestionMiddleware(engine)`, avant le `(store) => ...`, pour que chaque store ait les siens ?"
+ },
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 92,
+  "end_line": 92,
+  "message": "Question : ici l’applicabilité est évaluée avec `engine`, alors que pour le comparateur `setSituation` est appliqué aux copies de `engines`, pas à `engine`. Est-ce que `engine` a bien la situation de la simulation dans ce cas ? Sinon `engines[0]` (ou l’engine du contexte concerné) serait plus sûr."
+ },
+ {
+  "file": "site/source/store/reducers/simulation.reducer.ts",
+  "start_line": 101,
+  "end_line": 101,
+  "message": "nit: ce bloc duplique celui de `ENREGISTRE_LA_RÉPONSE` (vérifier la présence dans `questionsRépondues`, puis ajouter `{ règle, applicable: true }`). Une petite fonction du domaine du type `ajouteQuestionRépondue(questionsRépondues, règle)` éviterait que les deux divergent."
+ }
+]

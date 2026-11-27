@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/contextes/cmg/domaine/constantes.ts",
+  "start_line": 5,
+  "end_line": 51,
+  "message": "Ces plafonds, planchers, TEH et coûts horaires sont des valeurs métier, et je ne vois pas d'où elles viennent. Je n'ai pas pu les vérifier, donc je ne dis pas qu'elles sont fausses. Que penses-tu d'un lien en commentaire vers la source (texte de loi, circulaire CNAF/Urssaf) au-dessus de chaque groupe ? Quelqu'un qui devra les mettre à jour pourra alors retrouver d'où elles viennent. Le CONTRIBUTING demande une source vérifiable pour chaque taux ou seuil."
+ },
+ {
+  "file": "site/source/contextes/cmg/domaine/calcul.ts",
+  "start_line": 82,
+  "end_line": 82,
+  "message": "nit: le `R.reduce` mute son accumulateur (`résultat.TEHPourNbEnfantsÀCharge = teh`, `index++`), ce qui va à l'encontre du style immuable du reste du domaine. De plus, `indexPourNbEnfantsÀCharge` repose sur l'ordre d'itération des clés numériques de l'objet. Je verrais bien une liste ordonnée de paliers `{ nbEnfantsMin, teh }` : on filtre les paliers atteints, le dernier donne le TEH, et sa position donne l'index. Le code serait plus lisible et ne dépendrait plus de l'ordre des clés. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/contextes/cmg/domaine/calcul.ts",
+  "start_line": 41,
+  "end_line": 41,
+  "message": "nit: le `3` (trois mois de déclaration : mars, avril, mai) est répété ici et ligne 58. Je me demande si une constante nommée (`NOMBRE_DE_MOIS_DÉCLARÉS`) ne dirait pas plus clairement d'où vient la division. Si une salariée n'a que 2 mois renseignés, la moyenne reste divisée par 3 : est-ce voulu ?"
+ },
+ {
+  "message": "Synthèse :\n\n- **Taille** : 65 fichiers et plus de 5 000 lignes, avec environ 70 commits. Je vois un découpage possible en PR successives : domaine et calcul CMG avec ses tests, puis UI de l'assistant, puis les changements du design-system (`MontantField`, `DateField`). Chacune serait plus facile à relire. Si ce n'est pas envisageable, c'est une piste pour la suite.\n- **Historique** : plusieurs commits de correction (`fix(cmg): corrige erreur de type`, `corrige le typage…`, `refactor` après `feat`) corrigent des commits précédents de la même PR. Un `rebase --autosquash` rendrait chaque commit autonome et vert, comme le demande le CONTRIBUTING. Le commit `fix(montant-field)` touche le design-system sous le scope `montant-field`, qui ne figure pas dans la liste du CONTRIBUTING.\n- **Hors périmètre** : la suppression du commentaire `debug` dans `choix-du-statut/Navigation.tsx` n'a pas de lien avec le CMG.\n- **Non vérifié** : le rendu visuel, l'accessibilité des formulaires (RGAA) et l'exactitude des règles métier du CMG. La CI est verte."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3670,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/domaine/constantes.ts",
+   "line": 51,
+   "start_line": 5,
+   "body": "Ces plafonds, planchers, TEH et coûts horaires sont des valeurs métier, et je ne vois pas d'où elles viennent. Je n'ai pas pu les vérifier, donc je ne dis pas qu'elles sont fausses. Que penses-tu d'un lien en commentaire vers la source (texte de loi, circulaire CNAF/Urssaf) au-dessus de chaque groupe ? Quelqu'un qui devra les mettre à jour pourra alors retrouver d'où elles viennent. Le CONTRIBUTING demande une source vérifiable pour chaque taux ou seuil.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/domaine/calcul.ts",
+   "line": 82,
+   "start_line": null,
+   "body": "nit: le `R.reduce` mute son accumulateur (`résultat.TEHPourNbEnfantsÀCharge = teh`, `index++`), ce qui va à l'encontre du style immuable du reste du domaine. De plus, `indexPourNbEnfantsÀCharge` repose sur l'ordre d'itération des clés numériques de l'objet. Je verrais bien une liste ordonnée de paliers `{ nbEnfantsMin, teh }` : on filtre les paliers atteints, le dernier donne le TEH, et sa position donne l'index. Le code serait plus lisible et ne dépendrait plus de l'ordre des clés. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/contextes/cmg/domaine/calcul.ts",
+   "line": 41,
+   "start_line": null,
+   "body": "nit: le `3` (trois mois de déclaration : mars, avril, mai) est répété ici et ligne 58. Je me demande si une constante nommée (`NOMBRE_DE_MOIS_DÉCLARÉS`) ne dirait pas plus clairement d'où vient la division. Si une salariée n'a que 2 mois renseignés, la moyenne reste divisée par 3 : est-ce voulu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n\n- **Taille** : 65 fichiers et plus de 5 000 lignes, avec environ 70 commits. Je vois un découpage possible en PR successives : domaine et calcul CMG avec ses tests, puis UI de l'assistant, puis les changements du design-system (`MontantField`, `DateField`). Chacune serait plus facile à relire. Si ce n'est pas envisageable, c'est une piste pour la suite.\n- **Historique** : plusieurs commits de correction (`fix(cmg): corrige erreur de type`, `corrige le typage…`, `refactor` après `feat`) corrigent des commits précédents de la même PR. Un `rebase --autosquash` rendrait chaque commit autonome et vert, comme le demande le CONTRIBUTING. Le commit `fix(montant-field)` touche le design-system sous le scope `montant-field`, qui ne figure pas dans la liste du CONTRIBUTING.\n- **Hors périmètre** : la suppression du commentaire `debug` dans `choix-du-statut/Navigation.tsx` n'a pas de lien avec le CMG.\n- **Non vérifié** : le rendu visuel, l'accessibilité des formulaires (RGAA) et l'exactitude des règles métier du CMG. La CI est verte."
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 11,
+  "cost_usd": 0.19139899999999999,
+  "final_text": "J'ai posté la revue sur la PR 3670 : trois commentaires inline et une synthèse. Je n'ai lu qu'une partie du code (domaine CMG, hook `useCMG`, quelques fichiers du design-system). Je n'ai pas relu les composants de l'assistant ni les pages. La CI est verte.\n\n**Commentaires inline**\n- **`constantes.ts` :** les plafonds, planchers, TEH et coûts horaires n'ont pas de source indiquée. Je n'ai pas pu les vérifier, et je propose d'ajouter un lien vers la source de chaque groupe de valeurs.\n- **`calcul.ts`, ligne 82 :** le `R.reduce` mute son accumulateur et dépend de l'ordre des clés numériques de l'objet. Je suggère une liste ordonnée de paliers (nit).\n- **`calcul.ts`, ligne 41 :** le `3` (mois déclarés) est répété. Je demande aussi si diviser par 3 est voulu quand une salariée n'a que 2 mois renseignés (nit).\n\n**Synthèse**\n- **Taille :** 65 fichiers, plus de 5 000 lignes, environ 70 commits. Je propose un découpage en PR successives.\n- **Historique :** plusieurs commits corrigent des commits précédents de la même PR. Un `rebase --autosquash` rendrait chaque commit autonome et vert. Le scope `montant-field` ne figure pas dans la liste du CONTRIBUTING.\n- **Hors périmètre :** la suppression du commentaire `debug` dans `choix-du-statut/Navigation.tsx` n'a pas de lien avec le CMG.\n- **Non vérifié :** le rendu visuel, l'accessibilité (RGAA) et l'exactitude des règles métier."
+ }
+}
+
+```

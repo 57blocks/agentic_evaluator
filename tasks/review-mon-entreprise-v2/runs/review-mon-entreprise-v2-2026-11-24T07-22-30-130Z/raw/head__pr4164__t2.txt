@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/Simulation/SimulationGoal.tsx",
+  "start_line": 85,
+  "end_line": 85,
+  "message": "`RuleInputWrapper` est un composant défini à l'intérieur de `SimulationGoal` et passé comme `ChampSaisie`. Ses dépendances (`handleChange`, `evaluation.missingVariables`…) changent à chaque mise à jour de la situation, donc son identité change et React démonte/remonte le `RuleInput` au lieu de le mettre à jour. Je crains une perte du focus à chaque frappe dans un objectif saisissable. Je verrais plutôt garder une fonction de rendu (comme avant) ou un composant défini hors de `SimulationGoal`. Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Je ne trouve `questionHeader` nulle part ailleurs dans `site/source` : cet id ne pointe vers aucun élément, et le groupe se retrouve sans nom accessible quand `aria.labelledby` est absent. Le `role=\"group\"` est aussi retiré alors que la description de la PR ne parle que du `radiogroup`. Est-ce voulu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4164,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/Simulation/SimulationGoal.tsx",
+   "line": 85,
+   "start_line": null,
+   "body": "`RuleInputWrapper` est un composant défini à l'intérieur de `SimulationGoal` et passé comme `ChampSaisie`. Ses dépendances (`handleChange`, `evaluation.missingVariables`…) changent à chaque mise à jour de la situation, donc son identité change et React démonte/remonte le `RuleInput` au lieu de le mettre à jour. Je crains une perte du focus à chaque frappe dans un objectif saisissable. Je verrais plutôt garder une fonction de rendu (comme avant) ou un composant défini hors de `SimulationGoal`. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+   "line": 40,
+   "start_line": null,
+   "body": "Je ne trouve `questionHeader` nulle part ailleurs dans `site/source` : cet id ne pointe vers aucun élément, et le groupe se retrouve sans nom accessible quand `aria.labelledby` est absent. Le `role=\"group\"` est aussi retiré alors que la description de la PR ne parle que du `radiogroup`. Est-ce voulu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.17332179999999997,
+  "final_text": "J'ai relu la PR #4164 et posté deux commentaires inline. Je n'ai ni exécuté le code ni lu les résultats de `gh pr checks`, donc mes remarques viennent de la lecture du code seulement.\n\n- **`SimulationGoal.tsx:85`** : `RuleInputWrapper` est un composant défini à l'intérieur de `SimulationGoal` et passé comme `ChampSaisie`. Ses dépendances changent à chaque mise à jour de la situation, donc `RuleInput` est démonté puis remonté. Je crains une perte du focus à chaque frappe. Je propose de garder une fonction de rendu ou de sortir le composant de `SimulationGoal`.\n- **`ChoixMultiple.tsx:40`** : l'id `questionHeader` n'existe nulle part ailleurs dans `site/source`. Le groupe n'a donc pas de nom accessible quand `aria.labelledby` est absent. Le `role=\"group\"` est aussi retiré, alors que la description de la PR ne parle que du `radiogroup`. J'ai posé la question de l'intention."
+ }
+}
+
+```

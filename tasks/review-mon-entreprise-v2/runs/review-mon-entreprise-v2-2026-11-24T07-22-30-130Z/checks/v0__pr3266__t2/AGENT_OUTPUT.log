@@ -1,0 +1,43 @@
+{
+ "pr": 3266,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/utils/réductionDeCotisations.ts",
+   "line": 267,
+   "start_line": null,
+   "body": "Je me demande si cette clé `réductionGénérale` n'est pas un reste de l'ancien code : le type `MonthState` n'a que `réduction` et `régularisation`. Du coup, quand la rémunération annuelle est nulle, `réduction` n'est pas remise à zéro, et les montants d'un calcul précédent pourraient rester affichés (je n'ai pas rejoué le cas). Ne faudrait-il pas `réduction: { value: 0, répartition: emptyRépartition }` ? Un test sur ce cas limite le verrouillerait.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/lodeom/config.ts",
+   "line": 14,
+   "start_line": null,
+   "body": "nit: « Éxonération » (aussi ligne 20 et 18, et dans `ui-fr.yaml`) s'écrit « Exonération ». C'est visible dans le titre et les métadonnées de la page.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/lodeom/config.ts",
+   "line": 3,
+   "start_line": null,
+   "body": "nit: le composant importé s'appelle `RéductionGénéraleSimulation` et la config `configRéductionGénérale`, alors qu'on est dans le Lodeom (reste d'un copier-coller). Renommer en `LodeomSimulation` / `configLodeom` éviterait la confusion.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- La factorisation vers `utils/réductionDeCotisations.ts` va dans le bon sens. En revanche, ce module de 667 lignes mêle calculs métier et dispatch Redux (`updateRémunérationBruteAnnuelle`). Je me demande si, dans un second temps, la partie calcul pourrait vivre dans un module de domaine sans Redux.\n- La PR est grosse (refonte de la réduction générale, nouveau simulateur, règle Publicodes, cypress). La découper en deux (refactor, puis Lodeom) la rendrait plus facile à relire.\n- Je n'ai pas vérifié le contenu des règles Publicodes (taux, coefficients), seulement leur structure, ni le rendu visuel."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1863755,
+  "final_text": "J'ai relu la PR #3266 et posté sur GitHub trois commentaires inline et une synthèse. Je n'ai pas lancé le code, ni vérifié le contenu des règles Publicodes ni le rendu visuel.\n\nTrois remarques inline :\n- **Clé résiduelle** (`site/source/utils/réductionDeCotisations.ts:267`) : la clé `réductionGénérale` n'existe pas dans `MonthState`. Quand la rémunération annuelle est nulle, `réduction` n'est donc pas remise à zéro, et des montants périmés pourraient rester affichés. Je n'ai pas rejoué ce cas, et le commentaire le dit.\n- **Typo** (`lodeom/config.ts:14`) : « Éxonération » au lieu de « Exonération », visible dans le titre et les métadonnées de la page. Elle se retrouve aussi dans `ui-fr.yaml`.\n- **Nommage** (`lodeom/config.ts:3`) : `RéductionGénéraleSimulation` et `configRéductionGénérale` viennent du copier-coller de la réduction générale. Je propose de les renommer en `LodeomSimulation` et `configLodeom`.\n\nLa synthèse relève trois points :\n- le module `réductionDeCotisations.ts` mêle calculs et dispatch Redux ;\n- la PR serait plus facile à relire en deux, d'abord le refactor, ensuite le Lodeom ;\n- ce que je n'ai pas pu vérifier."
+ }
+}

@@ -1,0 +1,92 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-ti/règles/indépendant/revenus/dividendes.publicodes",
+      "start_line": 4,
+      "end_line": 4,
+      "message": "Je me demande si, avec cette séparation, l'usager garde un moyen de savoir où passe la frontière des 10 %. Avant, le plafond était calculé à partir du capital social (ou du bénéfice net de l'exercice précédent pour l'EI) et le partage entre les deux parts était automatique. Maintenant l'usager doit faire ce partage lui-même avant de saisir les deux montants. Si l'aide sur le plafond n'apparaît plus dans l'interface, il y a un risque de mettre des dividendes dans la mauvaise case, avec un impact direct sur les cotisations affichées. Les `description` des deux règles couvrent peut-être ce besoin, mais je n'ai pas pu vérifier le rendu. Était-ce voulu, et un texte d'aide près des deux champs est-il prévu ?"
+    },
+    {
+      "message": "Quelques remarques d'ensemble. Je n'ai relu en détail que le dernier commit (`6239666`), car le reste est trop volumineux pour une relecture sérieuse : la PR compte environ 576 fichiers et plus de 250 commits.\n\n- **Taille de la PR** : elle mêle réforme de cotisations, nouveaux paquets `modele-as` et `modele-ti`, refactoring de store, questions et documentation. Je me demande si un découpage en PR successives (paquets et moteur, puis réforme TI, puis UI) serait possible. Les relectures humaine et automatisée en seraient plus fiables.\n- **Historique** : plusieurs commits correctifs (`fix: erreurs de rebase`, `lint: fix`) laissent supposer des états intermédiaires non verts. Un fixup puis un squash avant fusion rendrait chaque commit autonome. Qu'en penses-tu ?\n- **Vérifications** : le workflow passe selon `gh pr checks`. Je n'ai pas pu vérifier le rendu visuel ni les parcours manuels, en particulier la saisie des deux champs dividendes."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/revenus/rémunération.publicodes",
+          "start_line": 71,
+          "end_line": 71
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/choix-du-statut/home.tsx",
+          "start_line": 30,
+          "end_line": 30
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+          "start_line": 110,
+          "end_line": 122
+        },
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/exonérations/Acre.publicodes",
+          "start_line": 144,
+          "end_line": 154
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 0,
+      "defect": 1
+    },
+    {
+      "finding": 0,
+      "defect": 2
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 1
+    },
+    {
+      "finding": 1,
+      "defect": 2
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

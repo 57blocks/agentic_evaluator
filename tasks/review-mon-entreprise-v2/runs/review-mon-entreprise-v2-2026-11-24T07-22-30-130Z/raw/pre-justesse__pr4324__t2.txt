@@ -1,0 +1,66 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+  "start_line": 24,
+  "end_line": 24,
+  "message": "Je me demande si retirer l'ACRE de cette condition est sans effet pour les indépendants hors auto-entrepreneur : le message ACRE plus bas ne parle que des auto-entrepreneurs, et l'ancien texte disait que le calcul des droits n'était pas implémenté avec l'ACRE. Les trimestres et points affichés sont-ils bien corrects dans ce cas ? Si oui, une source (ou un test) me rassurerait ; sinon l'affichage pourrait induire l'usager en erreur."
+ },
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 329,
+  "end_line": 329,
+  "message": "Je me demande ce qu'affiche cette somme quand certaines règles ne sont pas applicables (ex. un indépendant PL non-AE, pour qui DroitsRetraite affiche « non connue »). Si les règles non applicables comptent pour 0, la carte indiquerait « 0 point acquis par an », ce qui est différent de « non calculable ». Est-ce vérifié ?"
+ },
+ {
+  "file": "site/source/components/EngineValue/Condition.tsx",
+  "start_line": 27,
+  "end_line": 27,
+  "message": "nit: un TODO sans changement de comportement dans cette PR ; l'issue #4323 suffit à tracer le sujet, je retirerais le commentaire du code."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4324,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+   "line": 24,
+   "start_line": null,
+   "body": "Je me demande si retirer l'ACRE de cette condition est sans effet pour les indépendants hors auto-entrepreneur : le message ACRE plus bas ne parle que des auto-entrepreneurs, et l'ancien texte disait que le calcul des droits n'était pas implémenté avec l'ACRE. Les trimestres et points affichés sont-ils bien corrects dans ce cas ? Si oui, une source (ou un test) me rassurerait ; sinon l'affichage pourrait induire l'usager en erreur.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 329,
+   "start_line": null,
+   "body": "Je me demande ce qu'affiche cette somme quand certaines règles ne sont pas applicables (ex. un indépendant PL non-AE, pour qui DroitsRetraite affiche « non connue »). Si les règles non applicables comptent pour 0, la carte indiquerait « 0 point acquis par an », ce qui est différent de « non calculable ». Est-ce vérifié ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/EngineValue/Condition.tsx",
+   "line": 27,
+   "start_line": null,
+   "body": "nit: un TODO sans changement de comportement dans cette PR ; l'issue #4323 suffit à tracer le sujet, je retirerais le commentaire du code.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.17975470000000005,
+  "final_text": "J'ai relu la PR et posté trois commentaires inline. Le workflow « Vérification PR » est au vert.\n\n- **`DroitsRetraite.tsx:24`** : je demande si retirer l'ACRE de la condition est sans effet pour les indépendants qui ne sont pas auto-entrepreneurs. Le message ACRE qui reste ne parle que des auto-entrepreneurs. L'ancien texte disait que le calcul n'était pas implémenté avec l'ACRE, donc l'affichage pourrait être faux dans ce cas.\n- **`Détails.tsx:329`** : je demande ce qu'affiche la somme des points quand certaines règles ne sont pas applicables. Par exemple, pour un indépendant en profession libérale non auto-entrepreneur, `DroitsRetraite` affiche « non connue ». La carte du comparateur pourrait afficher « 0 point acquis par an » à la place.\n- **`Condition.tsx:27`** (nit) : je suggère de retirer le commentaire TODO, puisque l'issue #4323 trace déjà le sujet.\n\nJe n'ai rien exécuté, donc ces deux questions restent des doutes que je n'ai pas vérifiés."
+ }
+}
+
+```

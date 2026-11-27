@@ -1,0 +1,47 @@
+{
+ "pr": 2692,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 30,
+   "start_line": null,
+   "body": "Si Redis est indisponible (avec `enableOfflineQueue: false`, `get` rejette tout de suite), `/evaluate` répond une 500 alors que le cache n’est qu’une optimisation. Je verrais bien un `try/catch` autour des accès Redis pour retomber sur `await next()`. Qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 29,
+   "start_line": null,
+   "body": "La clé est le body seul, sans lien avec la version des règles : après un déploiement qui change `modele-social`, les usagers peuvent recevoir pendant 2 h un résultat calculé avec les anciennes règles. Je me demande si on ne devrait pas inclure une version (ou un hash des règles) dans la clé, et un préfixe du type `evaluate:` pour ne pas mélanger avec d’autres usages de Redis.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 42,
+   "start_line": null,
+   "body": "La première réponse (non cachée) n’a pas `responseCachedAt`, alors que les suivantes l’ont : le format de réponse diffère selon le passage. Est-ce voulu ? Par ailleurs, ce spread suppose que `ctx.body` est un objet ; qu’en est-il si la réponse est un tableau ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/index.ts",
+   "line": 50,
+   "start_line": null,
+   "body": "`plausibleMiddleware` passe désormais après le cache : les réponses servies depuis Redis ne sont plus comptées dans les stats. Le changement d’ordre est-il voulu ? Je me demande aussi si `apiRoutes` relit le body, déjà consommé par `koaBody()` dans le cache.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 12,
+  "cost_usd": 0.1558255,
+  "final_text": "J'ai relu la PR #2692 et posé 4 commentaires inline. Je n'ai rien exécuté, et les vérifications de la PR (`gh pr checks`) sont au vert. Je n'ai pas lu l'issue #2691 : la lecture a été bloquée et je n'ai pas relancé. Je n'ai pas pu vérifier non plus si `@publicodes/api` relit le body, car ma recherche de `koaBody` dans ses sources n'a rien donné.\n\n- **Redis indisponible** (`api/source/redis-cache.ts:30`) : avec `enableOfflineQueue: false`, `get` rejette tout de suite et `/evaluate` répondrait une 500. Je suggère un `try/catch` qui retombe sur `await next()`.\n- **Clé de cache** (`api/source/redis-cache.ts:29`) : elle ne dépend que du body, donc après un déploiement qui change les règles, un usager peut recevoir pendant 2 h un résultat calculé avec les anciennes. Je suggère d'y inclure une version ou un hash des règles, et un préfixe.\n- **Format de réponse** (`api/source/redis-cache.ts:42`) : la première réponse n'a pas `responseCachedAt`, les suivantes l'ont. Le spread de `ctx.body` suppose aussi un objet.\n- **Ordre des middlewares** (`api/source/index.ts:50`) : `plausibleMiddleware` passe maintenant après le cache, donc les réponses servies depuis Redis ne sont plus comptées. Je demande aussi si `apiRoutes` relit le body déjà consommé par `koaBody()`.\n\nLes deux dernières sont posées en questions, pas en constats."
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "pr": 4609,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Le correctif me semble juste : sous Vite on ne touche plus à `process.env`, et ne pas définir `SENTRY_RELEASE_NAME` quand il n'y a pas de release évite le `define` à `undefined`. Quelques pistes, sans blocage :\n\n- nit: dans `site/vite.config.ts`, `sentryReleaseName(mode)` est évalué deux fois dans le spread. Une constante locale (ou un petit helper) éviterait la répétition.\n- nit: `(typeof BRANCH_NAME !== 'undefined' && BRANCH_NAME) || ''` se lit moins facilement que `typeof BRANCH_NAME !== 'undefined' ? BRANCH_NAME : ''`, qui est la forme utilisée juste au-dessus pour `ENVIRONNEMENT`. Qu'en penses-tu ?\n- Je n'ai pas trouvé de test pour `environnement.ts`. Le bug (un `ReferenceError` au chargement sous Vite) pourrait revenir sans qu'on le voie en CI. Un test qui importe le module sans `process` défini (`vi.stubGlobal('process', undefined)`) le couvrirait, si c'est faisable avec ta config Vitest. Je n'ai pas pu le vérifier.\n- Je n'ai pas lancé le serveur de dev (hors de ma portée), donc le démarrage local reste à confirmer à la main.\n\nHistorique : deux commits, chacun avec un changement logique et un message au bon format."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.10788940000000001,
+  "final_text": "J'ai relu la PR 4609 et posté une synthèse sur GitHub, sans commentaire inline. Je n'ai ni lancé le serveur de dev ni exécuté de test.\n\nLe correctif me semble juste. Sous Vite, `environnement.ts` ne lit plus `process.env`, et `SENTRY_RELEASE_NAME` n'est défini que lorsqu'une release est nommée.\n\nRemarques postées :\n- **Appel double :** `sentryReleaseName(mode)` est évalué deux fois dans `site/vite.config.ts`.\n- **Lisibilité :** `(typeof BRANCH_NAME !== 'undefined' && BRANCH_NAME) || ''` se lit moins bien que la forme ternaire déjà utilisée pour `ENVIRONNEMENT`.\n- **Test manquant :** je n'ai pas trouvé de test pour `environnement.ts`, donc le `ReferenceError` au chargement pourrait revenir sans être vu en CI. J'ai suggéré un test avec `process` non défini, sans avoir vérifié qu'il est faisable avec la config Vitest.\n- **Historique git :** deux commits, chacun un changement logique avec un message au bon format."
+ }
+}

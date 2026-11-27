@@ -1,0 +1,66 @@
+```file:findings.json
+[
+ {
+  "file": "api/source/index.ts",
+  "start_line": 51,
+  "end_line": 51,
+  "message": "Je me demande si placer le cache avant `plausibleMiddleware` ne fait pas disparaître les requêtes servies depuis le cache des statistiques Plausible : sur un hit, le middleware court-circuite et `next()` n’est jamais appelé. Les stats d’usage de `/evaluate` risquent de chuter après la mise en prod. Est-ce voulu ? Sinon, mettre `plausibleMiddleware` avant le cache le préserverait."
+ },
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Le `responseCachedAt` n’est présent que dans la réponse servie depuis le cache : le premier appel renvoie le corps sans ce champ, les suivants l’ont, avec la date de la première mise en cache. Je verrais plus de cohérence soit à l’ajouter aussi à la première réponse, soit à ne pas le mélanger au corps de l’évaluation (en-tête HTTP par exemple). Ça pose aussi la question de la compatibilité avec le schéma `openapi.json`."
+ },
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 16,
+  "end_line": 16,
+  "message": "Deux questions sur la robustesse : (1) si Redis est indisponible, `redis.get`/`redis.set` lèvent et `/evaluate` répond une erreur alors que le calcul aurait fonctionné sans cache. Un `try/catch` qui retombe sur `next()` éviterait que le cache devienne un point de défaillance. (2) `ioredis-mock` est en `dependencies` et importé en prod même quand `SCALINGO_REDIS_URL` est défini ; ne serait-ce pas mieux en import dynamique, ou en désactivant simplement le cache hors production ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 2692,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "api/source/index.ts",
+   "line": 51,
+   "start_line": null,
+   "body": "Je me demande si placer le cache avant `plausibleMiddleware` ne fait pas disparaître les requêtes servies depuis le cache des statistiques Plausible : sur un hit, le middleware court-circuite et `next()` n’est jamais appelé. Les stats d’usage de `/evaluate` risquent de chuter après la mise en prod. Est-ce voulu ? Sinon, mettre `plausibleMiddleware` avant le cache le préserverait.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 40,
+   "start_line": null,
+   "body": "Le `responseCachedAt` n’est présent que dans la réponse servie depuis le cache : le premier appel renvoie le corps sans ce champ, les suivants l’ont, avec la date de la première mise en cache. Je verrais plus de cohérence soit à l’ajouter aussi à la première réponse, soit à ne pas le mélanger au corps de l’évaluation (en-tête HTTP par exemple). Ça pose aussi la question de la compatibilité avec le schéma `openapi.json`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 16,
+   "start_line": null,
+   "body": "Deux questions sur la robustesse : (1) si Redis est indisponible, `redis.get`/`redis.set` lèvent et `/evaluate` répond une erreur alors que le calcul aurait fonctionné sans cache. Un `try/catch` qui retombe sur `next()` éviterait que le cache devienne un point de défaillance. (2) `ioredis-mock` est en `dependencies` et importé en prod même quand `SCALINGO_REDIS_URL` est défini ; ne serait-ce pas mieux en import dynamique, ou en désactivant simplement le cache hors production ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 7,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1853563,
+  "final_text": "J'ai relu la PR et posté trois commentaires inline, tous sur le cache Redis de `/evaluate`. Je n'ai rien exécuté. `gh pr checks` est au vert.\n\n- **Statistiques Plausible (`api/source/index.ts:51`)** : le cache est placé avant `plausibleMiddleware`. Une réponse servie depuis le cache ne passe donc plus par Plausible, et les statistiques d'usage de `/evaluate` risquent de chuter. J'ai demandé si c'était voulu.\n- **Champ `responseCachedAt` (`api/source/redis-cache.ts:40`)** : il n'apparaît que dans les réponses servies depuis le cache, pas dans la première. J'ai proposé de l'ajouter aussi à la première réponse, ou de le passer en en-tête HTTP, et signalé la question de compatibilité avec `openapi.json`. Je n'ai pas vérifié ce schéma.\n- **Robustesse (`api/source/redis-cache.ts:16`)** : si Redis est indisponible, `redis.get` et `redis.set` lèvent une erreur et `/evaluate` échoue alors que le calcul aurait marché sans cache. De plus, `ioredis-mock` est importé et listé en `dependencies` même en production. J'ai suggéré un `try/catch` qui retombe sur `next()`, et un import dynamique ou un cache désactivé hors production.\n\nJe n'ai pas pu vérifier si le `koaBody()` du cache entre en conflit avec le body parser interne de `@publicodes/api`. Je n'ai donc rien posté sur ce point."
+ }
+}
+
+```

@@ -1,0 +1,87 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+      "start_line": 74,
+      "end_line": 74,
+      "message": "Le paramètre `page-open` vient maintenant de l’URL, donc d’une saisie non maîtrisée. Avec `?page-open=abc`, `Number(...)` vaut `NaN` : `slice(NaN, NaN)` renvoie une liste vide, et aucun bouton n’est marqué comme page actuelle. C’est le même résultat avec `-1` ou `999`. Je verrais bien une validation à cette frontière (entier entre 0 et le nombre de pages − 1, sinon 0). Qu’en penses-tu ? Un test sur ce cas serait utile."
+    },
+    {
+      "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+      "start_line": 54,
+      "end_line": 54,
+      "message": "nit: `getHref` résout avec `new URL(...).pathname` contre un hôte factice. Les `..` et les `?query`/`#hash` éventuels dans `to` sont soit résolus soit perdus, ce qui diffère de `useHref` de react-router. Je n’ai pas vérifié les appelants un par un : est-ce que tous passent des chemins sans query ni hash ? Sinon `useResolvedPath` me semblerait plus fidèle."
+    },
+    {
+      "message": "Synthèse :\n- La PR est grosse (64 fichiers, 28 commits) et mélange l’adaptateur de navigation avec des changements fonctionnels : pagination des statistiques passée en query params, renommage `Embeded` → `Embedded`, suppression de `fromCréer`. Je me demande si ces changements fonctionnels pourraient être séparés dans leurs propres PR, pour faciliter la relecture.\n- Plusieurs commits corrigent des commits précédents de la même PR (`fix: ajoute ReactRouterNavigationProvider`, `fix: ajoute le slash final`, `style: applique Prettier`). Un rebase pour les fusionner donnerait un historique où chaque commit est autonome et vert.\n- Je n’ai pas vérifié le rendu visuel ni le comportement du SSR et d’`useIsEmbedded` dans le navigateur."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/lib/navigation/NavigationAPI.ts",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "file": "site/source/lib/navigation/providers/MockNavigationProvider.tsx",
+          "start_line": 43,
+          "end_line": 98
+        },
+        {
+          "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+          "start_line": 5,
+          "end_line": 88
+        },
+        {
+          "file": "site/source/pages/integration/Iframe.tsx",
+          "start_line": 59,
+          "end_line": 89
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        1
+      ]
+    }
+  ],
+  "finding_source": [
+    null,
+    "llm",
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 1,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": [
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ]
+}

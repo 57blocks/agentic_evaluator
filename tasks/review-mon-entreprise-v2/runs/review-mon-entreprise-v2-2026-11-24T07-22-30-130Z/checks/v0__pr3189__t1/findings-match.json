@@ -1,0 +1,54 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+      "start_line": 169,
+      "end_line": 177,
+      "message": "Quelques questions sur cette règle, que je n'ai pas pu vérifier (je ne vois pas la source des taux dans la PR) :\n\n- Je ne vois pas de `références` vers le texte ou la page Urssaf qui donne 3,25 % / 9,75 % et les seuils 40 % / 110 % du PASS. Pourrait-on en ajouter une, comme sur la règle voisine `assiette participation CPAM` ? Cela permettrait de relire les valeurs.\n- Le taux progressif est calculé sur `assiette des cotisations` entière, puis appliqué à `assiette des cotisations - assiette participation CPAM`. Est-ce bien ce que prévoit le texte ? J'aurais pu imaginer les tranches appliquées directement à la part non conventionnée : un taux moyen appliqué à une autre assiette donne un résultat différent.\n- La dernière tranche a un `plafond: 110%`. Au-delà (par exemple 400 k€ de CA dans le snapshot « médecin 4 »), je me demande comment publicodes traite la part restante. Je n'ai pas vérifié ; si le taux doit rester à 9,75 % sans limite, omettre le plafond de la dernière tranche serait plus explicite.\n- Les snapshots bougent de 4 à 10 k€ de cotisations sur les gros revenus : un test ciblé avec un calcul fait à la main (un cas sous 40 %, un entre 40 % et 110 %, un au-dessus) donnerait plus de confiance que le seul snapshot de régression. Qu'en penses-tu ?"
+    },
+    {
+      "message": "Historique : un commit, un changement logique, rien à redire. Je n'ai pas pu vérifier les valeurs métier ni le comportement de publicodes au-delà de la dernière tranche (voir le commentaire inline)."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+          "start_line": 166,
+          "end_line": 177
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ]
+}

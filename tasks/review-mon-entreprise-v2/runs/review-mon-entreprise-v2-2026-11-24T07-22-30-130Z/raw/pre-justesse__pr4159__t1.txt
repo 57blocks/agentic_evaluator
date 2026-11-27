@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "J'ai bien relu, ça me paraît bon à merger"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4159,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger"
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.11781159999999999,
+  "final_text": "J'ai relu la PR 4159 et n'ai trouvé aucune remarque à faire. J'ai posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger ».\n\n- **Règle** : la question « emploi franc » devient la règle parente, et le calcul du montant passe dans `emploi franc . montant`. L'aide est donc bien annulée quand on répond « non ».\n- **Références** : je n'ai trouvé aucune autre référence à l'ancienne règle `emploi franc . éligible`. Le fichier de régression et `simulationConfig.ts` sont mis à jour.\n- **Vérifications** : `gh pr checks` est au vert.\n- **Non fait** : je n'ai pas pu lire l'issue #4157 (commande refusée), et je n'ai exécuté ni build ni tests."
+ }
+}
+
+```

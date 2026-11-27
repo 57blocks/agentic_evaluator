@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+      "start_line": 32,
+      "end_line": 32,
+      "message": "nit: les apostrophes typographiques (’) du texte d'origine sont devenues des apostrophes droites (') dans tout ce fichier (« l'année », « n'ont aucune », « l'exonération »…). Je les remettrais pour garder la typographie du reste du site, et éviter de changer les clés de traduction sans raison."
+    },
+    {
+      "file": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+      "start_line": 157,
+      "end_line": 157,
+      "message": "Ce message avec le lien vers le simulateur de l'Assurance retraite (URL, aria-label, texte) est dupliqué quasi à l'identique dans `Détails.tsx` du comparateur. Si l'URL change, les deux divergeront : je verrais bien un petit composant partagé (par ex. `LienSimulateurAssuranceRetraite`). Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+          "start_line": 307,
+          "end_line": 307
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

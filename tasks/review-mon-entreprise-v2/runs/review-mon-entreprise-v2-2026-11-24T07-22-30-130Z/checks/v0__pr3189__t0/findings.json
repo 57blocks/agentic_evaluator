@@ -1,0 +1,11 @@
+[
+ {
+  "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+  "start_line": 166,
+  "end_line": 176,
+  "message": "Deux points que je n'arrive pas à lever :\n\n1. Source : la règle n'a pas de références pour ces taux et seuils (3,25 % jusqu'à 40 % du PASS, 9,75 % jusqu'à 110 %). Je n'ai pas pu les vérifier ; pourrais-tu ajouter le lien Urssaf ou l'article, comme pour les règles voisines ?\n\n2. Base du taux : taux progressif calcule un taux moyen sur assiette des cotisations, mais il est appliqué à (assiette des cotisations - assiette participation CPAM). Je me demande si c'est voulu, ou si les tranches doivent porter sur la part non couverte par la CPAM. Je ne sais pas non plus ce que renvoie taux progressif au-delà de 110 % du PASS quand la dernière tranche a un plafond (même motif dans indépendant.publicodes vers la ligne 488, mais suivi d'un autre régime à 5 PASS) : je n'ai pas pu le vérifier.\n\nUn test ciblé (assiette sous 40 %, entre 40 % et 110 %, au-dessus de 110 % du PASS, avec et sans participation CPAM) rendrait le comportement lisible en plus des snapshots. Qu'en penses-tu ?"
+ },
+ {
+  "message": "Les snapshots changent aussi sur retraite . base (médecin 2 : 229 → 228). C'est plausible si la baisse du revenu net joue sur les points, mais je n'ai pas pu le vérifier. Je n'ai pas vu non plus de test qui échoue avant le correctif hors snapshots. Le commit unique et son message sont corrects."
+ }
+]

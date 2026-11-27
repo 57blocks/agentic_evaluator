@@ -1,0 +1,33 @@
+{
+ "pr": 3385,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/AnswerList.tsx",
+   "line": 321,
+   "start_line": null,
+   "body": "Ce `showSuggestions={false}` commenté ressemble à un reste de débogage. Le retirer change le comportement : les suggestions s'affichent maintenant dans la modale « Modifier mes réponses » pour toutes les questions. Est-ce voulu ? Si oui, je supprimerais la ligne plutôt que de la laisser en commentaire ; sinon je la restaurerais.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+   "line": 71,
+   "start_line": null,
+   "body": "nit: un `cy.wait(500)` rend le test fragile (trop court sur une CI lente, du temps perdu sinon). Une assertion à attendre (par exemple `should('have.value', ...)` sur le champ précédent) avant la saisie suivante serait plus fiable. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/3360: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1323531,
+  "final_text": "J'ai fini la relecture de la PR 3385 et posté deux commentaires inline sur GitHub, sans commentaire global :\n\n- **`AnswerList.tsx:321`** : le `showSuggestions={false}` est mis en commentaire. Ça ressemble à un reste de débogage, et ça change le comportement, puisque les suggestions s'affichent désormais dans la modale « Modifier mes réponses ». J'ai demandé si c'était voulu.\n- **`simulateur-ae.ts:71`** : un `cy.wait(500)` rend le test fragile. Je propose en `nit:` une assertion à attendre à la place.\n\nLe workflow « Vérification PR » est au vert d'après `gh pr checks`. Je n'ai pas relu les changements Publicodes ni les traductions en détail. L'issue #3360, citée par « Résoud », m'a renvoyé 404, donc je n'ai pas pu vérifier ce que la PR devait traiter."
+ }
+}

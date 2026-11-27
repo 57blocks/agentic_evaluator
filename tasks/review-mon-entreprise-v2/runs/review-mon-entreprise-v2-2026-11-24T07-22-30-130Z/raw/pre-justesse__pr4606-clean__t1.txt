@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/integration/Library.tsx",
+  "start_line": 107,
+  "end_line": 107,
+  "message": "JSX supprime le retour à la ligne entre `</Code>,` et `<Code>` : le texte affiché sera « modele-as,modele-ti » sans espace. Un `{' '}` après la virgule règle ça.\n```suggestion\n\t\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{' '}\n```"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4606,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/integration/Library.tsx",
+   "line": 107,
+   "start_line": 107,
+   "body": "JSX supprime le retour à la ligne entre `</Code>,` et `<Code>` : le texte affiché sera « modele-as,modele-ti » sans espace. Un `{' '}` après la virgule règle ça.\n```suggestion\n\t\t\t\t\t\tRemplacez <Code>modele-xx</Code> par <Code>modele-as</Code>,{' '}\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1192485,
+  "final_text": "J'ai relu la PR et posté un commentaire inline sur `Library.tsx`, ligne 107.\n\nIl porte sur l'espace manquant entre `modele-as,` et `modele-ti` : JSX supprime le retour à la ligne, donc le texte affiché serait « modele-as,modele-ti ». J'ai proposé un `{' '}` en suggestion.\n\nJe n'ai rien d'autre à signaler, et la vérification de la PR est au vert."
+ }
+}
+
+```

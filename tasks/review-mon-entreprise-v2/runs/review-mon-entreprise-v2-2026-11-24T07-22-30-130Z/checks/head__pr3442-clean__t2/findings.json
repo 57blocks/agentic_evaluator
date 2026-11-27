@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) portent le même code `DSAR`. Est-ce voulu ? Si les deux montants se reportent dans des cases différentes de la 2042-C-PRO, un usager pourrait saisir le mauvais montant au mauvais endroit. Quelle est la source (notice de la déclaration) pour ces codes ?"
+ },
+ {
+  "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+  "start_line": 145,
+  "end_line": 145,
+  "message": "nit: les clés `Bénéfice` et `Déficit` ne sont pas hiérarchiques, contrairement aux autres libellés du fichier (`pages.assistants.declaration-revenus-pamc.resultats.label.N`), alors que CONTRIBUTING.md demande une clé hiérarchique. Même chose sur les autres occurrences (l. 152, 166, 173)."
+ }
+]

@@ -1,0 +1,23 @@
+{
+ "pr": 4567,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "line": 559,
+   "start_line": null,
+   "body": "Ce changement de règle métier (l’Acre s’applique désormais à l’invalidité-décès même avec une exonération invalidité) est embarqué dans un commit `tests:`, alors que le titre de la PR et le message parlent de tests. Quelle est la source qui justifie de retirer la condition `exonérations . invalidité = non` (texte de loi, page Urssaf) ? Elle mériterait d’être citée dans `références`, et le changement d’un commit `fix(modele-social)` dédié, pour qu’il ressorte dans l’historique et le changelog.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.13668149999999998,
+  "final_text": "J'ai posté un seul commentaire inline, sur la règle Publicodes d'invalidité-décès. Il porte sur la suppression de la condition `exonérations . invalidité = non`.\n\n- **Changement de règle dans un commit `tests:`**: ce changement métier est embarqué dans un commit `tests:`, alors que le titre de la PR et le message parlent de tests.\n- **Source demandée**: j'ai demandé la source qui justifie ce retrait et suggéré de la citer dans `références`.\n- **Commit dédié**: j'ai aussi suggéré un commit `fix(modele-social)` séparé, pour que le changement ressorte dans l'historique.\n\nJe n'ai pas pu lire l'issue #4411 (`gh issue view` a été refusé), donc je n'ai pas vérifié si la PR couvre tout ce qu'elle devait traiter. Le check « Vérification PR » est au vert.\n\nJe n'ai posté aucun commentaire global, puisque la PR garde un point ouvert."
+ }
+}

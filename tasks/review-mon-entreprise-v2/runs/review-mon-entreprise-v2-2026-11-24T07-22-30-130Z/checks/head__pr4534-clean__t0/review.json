@@ -1,0 +1,22 @@
+{
+ "pr": 4534,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger"
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4488: issue withheld",
+   "api --method GET repos/betagouv/mon-entreprise/issues/4488/comments: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1131593,
+  "final_text": "J'ai relu la PR #4534 et je n'ai trouvé aucune remarque à faire. J'ai posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger ».\n\n- **Règle salariale :** le correctif applique la même condition de date et le même taux de 25 % que la règle patronale voisine. Je n'ai pas vérifié ce taux contre une source, car la consigne est de ne pas juger le contenu d'une règle Publicodes.\n- **Snapshots :** les deux snapshots modifiés (`Acre 1` et `Acre 5`) changent dans le sens attendu : les cotisations augmentent et le net diminue.\n- **Vérifications :** le workflow « Vérification PR » est vert.\n- **Issue #4488 :** je n'ai pas pu la lire, `gh api` renvoie une erreur 404. Je n'ai donc pas pu vérifier ce qu'elle demandait en plus du correctif."
+ }
+}

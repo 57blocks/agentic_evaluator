@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Je me demande si ce changement d'assiette de la taxe sur les salaires est voulu. `CSG-CRDS . assiette de base` applique l'abattement de 1,75 % (sous 4 PSS) et retranche les heures supplémentaires défiscalisées, ce que ne faisait pas `cotisations . assiette + prévoyances . employeur`. La base de la taxe sur les salaires risque donc de baisser pour tous les salariés concernés, sans lien apparent avec la LFSS 2025 ni avec les apprentis. Y a-t-il une source qui l'indique ? Sinon, il vaudrait peut-être mieux revenir à l'ancienne formule, ou en faire un commit séparé avec sa référence."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3532,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/salarié.publicodes",
+   "line": 521,
+   "start_line": null,
+   "body": "Je me demande si ce changement d'assiette de la taxe sur les salaires est voulu. `CSG-CRDS . assiette de base` applique l'abattement de 1,75 % (sous 4 PSS) et retranche les heures supplémentaires défiscalisées, ce que ne faisait pas `cotisations . assiette + prévoyances . employeur`. La base de la taxe sur les salaires risque donc de baisser pour tous les salariés concernés, sans lien apparent avec la LFSS 2025 ni avec les apprentis. Y a-t-il une source qui l'indique ? Sinon, il vaudrait peut-être mieux revenir à l'ancienne formule, ou en faire un commit séparé avec sa référence.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1384347,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `salarié.publicodes:521`. Je n'ai rien exécuté. Le workflow « Vérification PR » est au vert d'après `gh pr checks`.\n\nLe commentaire porte sur l'assiette de la taxe sur les salaires. Le commit `d8d7320` la remplace par `CSG-CRDS . assiette de base`. Cette base applique l'abattement de 1,75 % et retranche les heures supplémentaires défiscalisées, ce que l'ancienne formule ne faisait pas. Je ne vois pas de lien avec la LFSS 2025 ni avec les apprentis, et aucune source n'est citée. J'ai posé la remarque en question: le changement est-il voulu, sinon un retour à l'ancienne formule ou un commit séparé avec sa référence.\n\nLe reste de la PR ne m'a pas paru mériter de commentaire."
+ }
+}
+
+```

@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+  "start_line": 111,
+  "end_line": 116,
+  "message": "nit: la condition Mayotte est dupliquée sur le plancher et le plafond. Je me demande si on ne pourrait pas la porter en un seul endroit, pour éviter que les deux bornes divergent lors d une évolution. Je n ai pas vérifié ce qui serait le plus lisible en Publicodes ici, donc à toi de juger. Qu en penses-tu ?"
+ },
+ {
+  "message": "Les règles Mayotte (CSG-CRDS non applicable, abattement sans plancher ni plafond) sont couvertes par des tests et la CI passe. Je n ai pas vérifié les sources légales : une référence vers le texte justifiant l absence de plancher et de plafond à Mayotte serait utile dans la règle. Historique : le commit sur le titre de la règle PSS métropole et celui sur l arrondi RC/ID des conjoints collaborateurs PLR Cipav ne concernent pas Mayotte, alors que la PR s intitule Mayotte Retours métier. Je les aurais volontiers vus dans une PR séparée pour garder celle-ci lisible ; à toi de voir si le regroupement est voulu."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4596,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+   "line": 116,
+   "start_line": 111,
+   "body": "nit: la condition Mayotte est dupliquée sur le plancher et le plafond. Je me demande si on ne pourrait pas la porter en un seul endroit, pour éviter que les deux bornes divergent lors d une évolution. Je n ai pas vérifié ce qui serait le plus lisible en Publicodes ici, donc à toi de juger. Qu en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Les règles Mayotte (CSG-CRDS non applicable, abattement sans plancher ni plafond) sont couvertes par des tests et la CI passe. Je n ai pas vérifié les sources légales : une référence vers le texte justifiant l absence de plancher et de plafond à Mayotte serait utile dans la règle. Historique : le commit sur le titre de la règle PSS métropole et celui sur l arrondi RC/ID des conjoints collaborateurs PLR Cipav ne concernent pas Mayotte, alors que la PR s intitule Mayotte Retours métier. Je les aurais volontiers vus dans une PR séparée pour garder celle-ci lisible ; à toi de voir si le regroupement est voulu."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.148574,
+  "final_text": "J'ai relu la PR #4596 et posté mes remarques sur GitHub : un commentaire inline et une synthèse. Je n'ai rien exécuté moi-même. Le workflow « Vérification PR » est passé.\n\n- **Inline (nit)** : sur `cotisations-et-contributions.publicodes`, la condition Mayotte est dupliquée sur le plancher et le plafond de l'abattement. Je me demande si elle ne pourrait pas être portée en un seul endroit. Je n'ai pas vérifié ce qui serait le plus lisible en Publicodes.\n- **Synthèse, sources** : je n'ai pas vérifié les sources légales. Je suggère d'ajouter une référence qui justifie l'absence de plancher et de plafond à Mayotte.\n- **Synthèse, historique** : deux commits ne concernent pas Mayotte. L'un ajoute les titres des règles PSS métropole, l'autre arrondit les cotisations RC et ID des conjoints collaborateurs PLR Cipav. Je les aurais mis dans une PR séparée, tout en laissant la porte ouverte si le regroupement par « retours métier » est voulu.\n\nLes règles Mayotte sont couvertes par des tests : CSG-CRDS non applicable, abattement sans plancher ni plafond."
+ }
+}
+
+```

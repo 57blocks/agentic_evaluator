@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-as/règles/exonérations.publicodes",
+      "start_line": 15,
+      "end_line": 16,
+      "message": "Le texte affiché aux usagers contient une coquille : « dans l’ **une des situations suivantes** » (le « dans l’ » est de trop, et se retrouve dans `rules-as-en.yaml`). Je verrais bien :\n```suggestion\n    Vous ne pouvez bénéficier de l’Acre que si vous êtes dans\n    **une des situations suivantes** au moment de la création de votre entreprise :\n    \n```"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

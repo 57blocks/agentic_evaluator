@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "modele-commun/règles/base.publicodes",
+  "start_line": 18,
+  "end_line": 18,
+  "message": "Le message du commit parle de « PASS métropole » et la règle voisine déclare `acronyme: PASS` (ligne 35), mais le titre est « PSS métropole » (idem ligne 29). Je me demande si « PASS » ne serait pas plus cohérent pour les usagers. Qu’en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4596,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-commun/règles/base.publicodes",
+   "line": 18,
+   "start_line": null,
+   "body": "Le message du commit parle de « PASS métropole » et la règle voisine déclare `acronyme: PASS` (ligne 35), mais le titre est « PSS métropole » (idem ligne 29). Je me demande si « PASS » ne serait pas plus cohérent pour les usagers. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.13604480000000002,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline. Il porte sur le libellé « PSS métropole » dans `modele-commun/règles/base.publicodes`. Le message du commit parle de « PASS métropole » et la règle voisine déclare `acronyme: PASS`. Le titre devrait donc plutôt dire « PASS ». Je ne vois rien d'autre qui vaille un commentaire.\n\nLe workflow « Vérification PR » est au vert. Je n'ai ni lancé les tests ni exécuté le code de la PR."
+ }
+}
+
+```

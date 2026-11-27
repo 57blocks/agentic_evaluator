@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/salarié/salarié.publicodes",
+      "start_line": 521,
+      "end_line": 521,
+      "message": "Je me demande si ce changement d'assiette de la taxe sur les salaires est voulu. `CSG-CRDS . assiette de base` applique l'abattement de 1,75 % (sous 4 PSS) et retranche les heures supplémentaires défiscalisées, ce que ne faisait pas `cotisations . assiette + prévoyances . employeur`. La base de la taxe sur les salaires risque donc de baisser pour tous les salariés concernés, sans lien apparent avec la LFSS 2025 ni avec les apprentis. Y a-t-il une source qui l'indique ? Sinon, il vaudrait peut-être mieux revenir à l'ancienne formule, ou en faire un commit séparé avec sa référence."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/contrat.publicodes",
+          "start_line": 217,
+          "end_line": 231
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

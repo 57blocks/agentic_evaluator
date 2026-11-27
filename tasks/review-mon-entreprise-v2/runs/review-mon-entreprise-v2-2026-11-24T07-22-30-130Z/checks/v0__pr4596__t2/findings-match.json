@@ -1,0 +1,38 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "message": "Quelques remarques d'ensemble, rien de bloquant :\n\n- **Périmètre** : la PR mélange la suppression de la CSG-CRDS et l'abattement à Mayotte (le sujet de #4588) avec l'arrondi des cotisations RC et ID des conjoints collaborateurs PLR Cipav (2463549). Ce dernier ne concerne pas Mayotte, et le lien avec l'issue ne m'apparaît pas. Je me demande s'il ne serait pas plus lisible dans une PR séparée, plus petite à relire et à revert si besoin. Y a-t-il un lien que je ne vois pas ?\n- **Titres PSS** (5a38a89) : le message de commit parle de « PASS métropole », alors que l'acronyme de la règle est `PSS` et que les titres ajoutés sont « PSS métropole » et « PSS métropole N-1 ». Rien de gênant dans le code, mais le message pourrait être aligné. Là non plus, je ne vois pas le rapport avec Mayotte.\n- **Commits** : `fix: …` sans scope alors que le scope fonctionnel `indépendant` ou `mayotte` existe pour 8c80d82, 2463549 et 5a38a89. Nit: à toi de voir. Mayotte n'est pas dans la liste des scopes de CONTRIBUTING, mais 1500a7d l'utilise déjà.\n- **Tests** : les deux cas d'abattement (plafond et plancher à Mayotte) et la non-applicabilité de la CSG-CRDS sont couverts. Je n'ai pas pu vérifier que les tests échouaient avant l'implémentation, ni la source du taux ou de l'absence de plancher/plafond à Mayotte (je vérifie seulement la présence d'une référence, pas son contenu).\n- Je n'ai pas exécuté les tests, je m'en remets à `gh pr checks`."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+          "start_line": 85,
+          "end_line": 116
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

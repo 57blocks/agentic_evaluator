@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 210,
+  "end_line": 210,
+  "message": "Les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », mais la condition porte sur la date de la simulation (`date`), pas sur la date de début du contrat. Une simulation faite en 2026 pour un contrat signé en 2024 appliquerait donc 50 % au lieu de 79 % (et l'exonération de CSG-CRDS ne serait plus totale). Je me demande si la description ne devrait pas dire « à partir de mars 2025 » tant que la question sur la date de début de contrat n'est pas tranchée, ou si tu préfères poser cette question dans cette PR ? Qu'en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Je ne suis pas sûr de comprendre pourquoi la taxe sur les salaires change ici. `CSG-CRDS . assiette de base` est dans l'espace de noms visé par le `remplace` de l'apprentissage : pour un apprenti, l'assiette de la taxe serait alors réduite de 50 % du Smic (ou nulle avant mars 2025), alors que la taxe porte sur la rémunération brute. Est-ce voulu ? Sinon, garder l'ancienne somme (`cotisations . assiette` + prévoyances employeur) me semblerait plus sûr."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3532,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/contrat.publicodes",
+   "line": 210,
+   "start_line": null,
+   "body": "Les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », mais la condition porte sur la date de la simulation (`date`), pas sur la date de début du contrat. Une simulation faite en 2026 pour un contrat signé en 2024 appliquerait donc 50 % au lieu de 79 % (et l'exonération de CSG-CRDS ne serait plus totale). Je me demande si la description ne devrait pas dire « à partir de mars 2025 » tant que la question sur la date de début de contrat n'est pas tranchée, ou si tu préfères poser cette question dans cette PR ? Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/salarié.publicodes",
+   "line": 521,
+   "start_line": null,
+   "body": "Je ne suis pas sûr de comprendre pourquoi la taxe sur les salaires change ici. `CSG-CRDS . assiette de base` est dans l'espace de noms visé par le `remplace` de l'apprentissage : pour un apprenti, l'assiette de la taxe serait alors réduite de 50 % du Smic (ou nulle avant mars 2025), alors que la taxe porte sur la rémunération brute. Est-ce voulu ? Sinon, garder l'ancienne somme (`cotisations . assiette` + prévoyances employeur) me semblerait plus sûr.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.14612789999999998,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline sur GitHub. Je n'ai pas exécuté le code. Le workflow « Vérification PR » est au vert.\n\n- **`contrat.publicodes:210`** : les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », mais la condition `date >= 03/2025` porte sur la date de la simulation. Un contrat signé en 2024 et simulé en 2026 passerait donc à 50 % au lieu de 79 %. C'est le point que l'auteur évoquait dans la PR. Je propose d'ajuster les descriptions, ou de poser la question de la date de début de contrat dans cette PR.\n- **`salarié.publicodes:521`** : la taxe sur les salaires utilise maintenant `CSG-CRDS . assiette de base`. Cette règle est dans l'espace de noms visé par le `remplace` de l'apprentissage. Pour un apprenti, l'assiette de la taxe serait donc réduite (nulle avant mars 2025). Je demande si c'est voulu. Je n'ai pas vérifié le résultat sur un cas concret."
+ }
+}
+
+```

@@ -1,0 +1,19 @@
+{
+ "pr": 3444,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Deux points globaux :\n\n- Le commit `[AE] Préciser les définitions des rubriques retraite (#3444)` ne suit pas le format Conventional Commits attendu (`<type>[scope]: <description>`). Par ailleurs, la PR mélange plusieurs changements logiques : les définitions retraite, le renommage Pôle Emploi → France Travail (règles, Iframe, Cypress) et la refonte des logos de références. Je me demande si un découpage en commits (voire en PR) distincts ne faciliterait pas la relecture et un éventuel revert.\n- nit: dans `site/source/pages/integration/Iframe.tsx` (l.28), le logo importé s'appelle encore `poleEmploiLogo` / `pole-emploi.png` alors que le titre et le lien sont passés à France Travail ; le logo affiché est-il déjà à jour ?"
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.13908549999999997,
+  "final_text": "J'ai relu la PR #3444 et posté un seul commentaire global, sans commentaire inline. Il porte sur deux points :\n\n- **Commit et périmètre :** le message du commit ne suit pas le format Conventional Commits. La PR mélange aussi plusieurs changements : les définitions retraite, le renommage Pôle Emploi → France Travail et la refonte des logos de références. Je me demande si un découpage ne faciliterait pas la relecture.\n- **Logo France Travail (nit) :** dans `site/source/pages/integration/Iframe.tsx`, le logo importé s'appelle encore `poleEmploiLogo` (fichier `pole-emploi.png`), alors que le titre et le lien sont passés à France Travail. Je demande si ce logo est déjà à jour.\n\nLe workflow « Vérification PR » est vert (`gh pr checks`). Toutes les images référencées dans `References.tsx` existent dans `site/source/public/références-images`. Je n'ai pas relu le fond des 538 lignes de `protection-sociale.publicodes` ni vérifié les sources des références."
+ }
+}

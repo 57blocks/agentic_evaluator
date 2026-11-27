@@ -1,0 +1,38 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "message": "Le déplacement de la question sur la règle parente me semble une bonne façon de régler le retour à la première question : la règle n'est plus non applicable quand on répond « non ».\n\nDeux points, que je n'ai pas pu vérifier sans exécuter le code :\n\n- Je ne vois pas de test qui reproduise le bug de #4157 : les modifications de tests sont le snapshot E2E et le YAML de régression, qui ne font que suivre le renommage. Qu'en penses-tu d'un test qui répond « non » à la question emploi franc et vérifie que la simulation continue sur la question suivante ? Il échouerait avant le correctif.\n- Je me demande si les noms `salarié . coût total employeur . aides . emploi franc` (booléen d'éligibilité) et `… emploi franc . montant` sont stables pour les intégrations externes (API, iframes), qui pourraient référencer l'ancien `… emploi franc . éligible` ou lire `emploi franc` comme un montant. Je n'ai pas cherché de consommateur externe.\n\nLe commit unique est cohérent, et les traductions `rules-en.yaml` sont régénérées avec le code."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/salarié/simulationConfig.ts",
+          "start_line": 23,
+          "end_line": 23
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

@@ -1,0 +1,87 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 33,
+  "end_line": 39,
+  "message": "Je me demande si appeler `navigate(...)` directement dans le corps du composant est voulu : React déconseille les effets de bord pendant le rendu, et le composant continue de rendre après la redirection (`situation.enfantsÀCharge` est lu juste après, alors que les informations sont invalides). Je verrais bien `<Navigate to=... replace />` en early return, ou un `useEffect`. Je n’ai pas pu tester le rendu : à toi de voir si un autre pattern est déjà utilisé dans les autres pages du CMG."
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 80,
+  "end_line": 80,
+  "message": "Avec `key={index}`, la suppression d’un enfant au milieu de la liste fait réutiliser l’état local des `EnfantInput` par l’enfant suivant (focus, saisie en cours). Un identifiant stable porté par `Enfant` serait-il envisageable ? Si les champs sont entièrement contrôlés, ça peut rester tel quel : qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 55,
+  "end_line": 55,
+  "message": "nit: `enfants.length > 18` est un seuil sans nom ni source. Une constante nommée (par ex. dans `config.ts`) le rendrait lisible ; et s’il vient d’une règle métier, quelle en est la source ?"
+ },
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+  "start_line": 28,
+  "end_line": 28,
+  "message": "nit: `export default` ici (et pour `EnfantInput`, `QuestionsAeeH`, etc.), alors que CONTRIBUTING.md demande des exports nommés."
+ },
+ {
+  "message": "Synthèse (je n’ai relu en détail que `pages/Enfants.tsx` ; la PR fait 68 commits et ~5 200 lignes, je n’ai pas tout parcouru ni vérifié le rendu visuel ou l’accessibilité manuellement).\n\n- Taille : difficile à relire en une fois. Y avait-il moyen de découper (domaine `contextes/cmg` / UI de l’assistant) ? Les commits `fix(montant-field)` et `feat(date input)` touchent le design-system : une PR dédiée faciliterait la relecture.\n- Historique : plusieurs commits en corrigent d’autres de la même PR (`corrige erreur de type`, `corrige la version mobile…`) ; un fixup les rendrait chacun autonome et vert, comme CONTRIBUTING.md le demande.\n- Les checks CI sont verts."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3670,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 39,
+   "start_line": 33,
+   "body": "Je me demande si appeler `navigate(...)` directement dans le corps du composant est voulu : React déconseille les effets de bord pendant le rendu, et le composant continue de rendre après la redirection (`situation.enfantsÀCharge` est lu juste après, alors que les informations sont invalides). Je verrais bien `<Navigate to=... replace />` en early return, ou un `useEffect`. Je n’ai pas pu tester le rendu : à toi de voir si un autre pattern est déjà utilisé dans les autres pages du CMG.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 80,
+   "start_line": null,
+   "body": "Avec `key={index}`, la suppression d’un enfant au milieu de la liste fait réutiliser l’état local des `EnfantInput` par l’enfant suivant (focus, saisie en cours). Un identifiant stable porté par `Enfant` serait-il envisageable ? Si les champs sont entièrement contrôlés, ça peut rester tel quel : qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 55,
+   "start_line": null,
+   "body": "nit: `enfants.length > 18` est un seuil sans nom ni source. Une constante nommée (par ex. dans `config.ts`) le rendrait lisible ; et s’il vient d’une règle métier, quelle en est la source ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Enfants.tsx",
+   "line": 28,
+   "start_line": null,
+   "body": "nit: `export default` ici (et pour `EnfantInput`, `QuestionsAeeH`, etc.), alors que CONTRIBUTING.md demande des exports nommés.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse (je n’ai relu en détail que `pages/Enfants.tsx` ; la PR fait 68 commits et ~5 200 lignes, je n’ai pas tout parcouru ni vérifié le rendu visuel ou l’accessibilité manuellement).\n\n- Taille : difficile à relire en une fois. Y avait-il moyen de découper (domaine `contextes/cmg` / UI de l’assistant) ? Les commits `fix(montant-field)` et `feat(date input)` touchent le design-system : une PR dédiée faciliterait la relecture.\n- Historique : plusieurs commits en corrigent d’autres de la même PR (`corrige erreur de type`, `corrige la version mobile…`) ; un fixup les rendrait chacun autonome et vert, comme CONTRIBUTING.md le demande.\n- Les checks CI sont verts."
+  }
+ ],
+ "gh": {
+  "calls": 8,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 12,
+  "cost_usd": 0.1681326,
+  "final_text": "J'ai posté sur la PR #3670 quatre commentaires inline et une synthèse. Je n'ai relu en détail que `site/source/pages/assistants/cmg/pages/Enfants.tsx`. Les 64 autres fichiers (~5 200 lignes, 68 commits) ne sont pas relus, et je n'ai vérifié ni le rendu ni l'accessibilité.\n\nCommentaires inline sur `Enfants.tsx` :\n- **Redirections (lignes 33-39) :** `navigate(...)` est appelé pendant le rendu, et le composant continue de rendre après la redirection. Je suggère `<Navigate>` ou un `useEffect`.\n- **Clés de liste (ligne 80) :** `key={index}` fait réutiliser l'état local des `EnfantInput` quand on supprime un enfant au milieu de la liste. Je propose un identifiant stable.\n- **Seuil non nommé (ligne 55, nit) :** `enfants.length > 18` n'a ni nom ni source indiquée.\n- **Exports (ligne 28, nit) :** `export default` alors que CONTRIBUTING.md demande des exports nommés.\n\nLa synthèse relève la taille de la PR, avec un découpage possible. Les commits touchant le design-system (`fix(montant-field)`, `feat(date input)`) iraient bien dans une PR à part. Elle signale aussi que plusieurs commits en corrigent d'autres de la même PR, et que les checks CI sont verts.\n\nLes premières tentatives de commentaire ont échoué sur des variables shell. Les commentaires ont ensuite été postés en commandes séparées, une seule fois chacun."
+ }
+}
+
+```

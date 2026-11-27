@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+  "start_line": 48,
+  "end_line": 48,
+  "message": "Je me demande si ce `return to` ne perd pas le `basename` du routeur. L'ancien `useHref('/iframes/...')` dans `Iframe.tsx` renvoyait `/mon-entreprise/iframes/...` (le basename est bien passé au routeur dans `Provider.tsx`, via `entry-fr` et `entry-en`), alors que `getHref` renvoie ici `/iframes/...` tel quel. L'`iframeSrc` de la page d'intégration pointerait alors hors de l'app en production. Peut-être que `useHref(to)` couvre aussi les chemins absolus, et que la branche relative peut disparaître ? Qu'en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4311,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+   "line": 48,
+   "start_line": null,
+   "body": "Je me demande si ce `return to` ne perd pas le `basename` du routeur. L'ancien `useHref('/iframes/...')` dans `Iframe.tsx` renvoyait `/mon-entreprise/iframes/...` (le basename est bien passé au routeur dans `Provider.tsx`, via `entry-fr` et `entry-en`), alors que `getHref` renvoie ici `/iframes/...` tel quel. L'`iframeSrc` de la page d'intégration pointerait alors hors de l'app en production. Peut-être que `useHref(to)` couvre aussi les chemins absolus, et que la branche relative peut disparaître ? Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 15,
+  "cost_usd": 0.20415820000000004,
+  "final_text": "J'ai posté un seul commentaire inline sur la PR #4311, sur `ReactRouterNavigationProvider.tsx` ligne 48.\n\n`getHref` renvoie les chemins absolus tels quels, sans le `basename` du routeur. L'ancien `useHref('/iframes/...')` dans `Iframe.tsx` ajoutait ce préfixe (`/mon-entreprise` ou `/infrance`). L'`iframeSrc` de la page d'intégration risque donc de pointer hors de l'app en production. Je l'ai formulé en question et j'ai proposé d'utiliser `useHref(to)`, qui couvre peut-être déjà les chemins absolus. Je n'ai pas exécuté le code pour le confirmer.\n\nJ'ai aussi vérifié que `generatePath`, `matchPath`, `onNavigate`, `getHref`, `locationState` et `navigationType` ont tous un usage hors de `lib/navigation`. Je n'ai donc rien signalé comme code mort. `gh pr checks` est au vert.\n\nJe n'ai pas commenté trois points mineurs :\n- **`useIsEmbedded` :** il est désormais dérivé de la route courante au lieu d'être un état qui reste à `true` une fois activé.\n- **`ui-fr.yaml` :** une apostrophe typographique y est passée en apostrophe droite, sans lien avec le sujet.\n- **`useSetSimulationFromSearchParams.test.ts` :** les mocks de `NavigationAPI` y sont écrits à la main alors qu'un `MockNavigationProvider` existe."
+ }
+}
+
+```

@@ -1,0 +1,87 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "api/source/index.ts",
+      "start_line": 50,
+      "end_line": 50,
+      "message": "Avec ce nouvel ordre, une réponse servie depuis le cache ne passe plus par `plausibleMiddleware` : les appels en cache disparaissent des statistiques d'usage de l'API. C'est voulu ? Sinon, remettre `plausibleMiddleware` avant le cache."
+    },
+    {
+      "file": "api/source/redis-cache.ts",
+      "start_line": 29,
+      "end_line": 29,
+      "message": "Avec `enableOfflineQueue: false`, si Redis est indisponible `redis.get` rejette immédiatement, et comme rien ne l'attrape, `/evaluate` répond une erreur alors que le calcul serait possible sans cache. Je verrais bien un repli sur `next()` (et le même traitement pour le `set`) pour que le cache reste une optimisation et pas une dépendance. Qu'en penses-tu ?"
+    },
+    {
+      "file": "api/source/redis-cache.ts",
+      "start_line": 41,
+      "end_line": 41,
+      "message": "Le champ `responseCachedAt` n'est présent que dans les réponses servies depuis le cache (la première réponse, non cachée, ne l'a pas), et la clé ne dépend que du body. Deux questions : ce champ est-il documenté dans `openapi.json` ? Et après un déploiement qui change les règles, Redis garde jusqu'à 2h des résultats calculés avec l'ancienne version : ne faudrait-il pas inclure une version du modèle dans la clé ?"
+    },
+    {
+      "message": "Le commit « Update api + server packages and prettier » (~100 fichiers de reformatage/ordre d'imports, `yarn.lock`) noie les ~50 lignes du cache redis. Une PR séparée pour la mise à jour des dépendances et de prettier faciliterait la relecture."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "api/source/redis-cache.ts",
+          "start_line": 30,
+          "end_line": 45
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        1
+      ]
+    }
+  ],
+  "finding_source": [
+    null,
+    "llm",
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 1,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": [
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    }
+  ]
+}

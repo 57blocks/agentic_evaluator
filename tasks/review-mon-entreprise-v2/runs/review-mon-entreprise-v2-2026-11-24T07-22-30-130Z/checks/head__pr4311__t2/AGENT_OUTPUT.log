@@ -1,0 +1,23 @@
+{
+ "pr": 4311,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+   "line": 74,
+   "start_line": null,
+   "body": "Le paramètre vient maintenant de l’URL, donc d’une saisie libre : avec `?page-open=abc` on obtient `NaN` (`slice(NaN, NaN)` donne une liste vide), et avec `?page-open=-1` ou `?page-open=99` une page vide sans que le bouton de page actuelle ne soit marqué. Je verrais bien un repli sur 0 quand la valeur n’est pas un entier dans `[0, nombre de pages[`. Qu’en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1525045,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `site/source/pages/statistiques/DemandesUtilisateurs.tsx` ligne 74. Je n'ai ni exécuté le code ni lu `gh pr checks`.\n\nLe numéro de page de la pagination vient maintenant de l'URL (`page-open`, `page-closed`) et n'est pas validé. `?page-open=abc` donne `NaN` et une liste vide. `?page-open=-1` ou `?page-open=99` donnent une page vide, sans bouton de page actuelle marqué. Je propose de revenir à la page 0 quand la valeur n'est pas un entier dans la plage des pages.\n\nJe n'ai rien relevé d'autre dans l'adaptateur de navigation, ses providers ou `useIsEmbedded`."
+ }
+}

@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "J'ai bien relu, ça me paraît bon à merger."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3321,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1311761,
+  "final_text": "J'ai relu la PR #3321 et je n'ai trouvé aucun défaut qui justifie un commentaire inline. J'ai donc posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger. »\n\nLe check « Vérification PR » est au vert. J'ai lu le code sans l'exécuter.\n\nLe renommage des valeurs de `barèmes` est cohérent entre `lodeom.publicodes`, `useBarèmeLodeom.ts`, `WarningSalaireTrans.tsx` et `rules-en.yaml`. Les règles gardent leur nom « barème … ». Les références de `simulationConfig.ts` pointent vers ces noms de règles, donc elles restent valides.\n\nSeul point que j'ai laissé de côté : `rules-en.yaml` contient quelques reformulations anglaises sans rapport avec le renommage (par exemple « €50 million » devenu « 50 million euros »). Cela m'a semblé du bruit de génération automatique, trop mineur pour un commentaire."
+ }
+}
+
+```

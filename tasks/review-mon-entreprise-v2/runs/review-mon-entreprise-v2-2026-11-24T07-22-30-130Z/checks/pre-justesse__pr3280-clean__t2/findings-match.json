@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-social/règles/protection-sociale.publicodes",
+      "start_line": 632,
+      "end_line": 632,
+      "message": "La règle `maternité . délai d'attente` n'est pas modifiée par la PR : elle affiche toujours « 10 mois d’affiliation » (description lignes 628 et 630) et `valeur: 10 mois`. Le simulateur et la page de détails risquent donc de se contredire. Est-ce voulu, ou faut-il aussi passer cette règle à 6 mois ? Si oui, il faudra rebuilder `modele-social` et régénérer `rules-*.yaml` avec `i18n:translate`."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

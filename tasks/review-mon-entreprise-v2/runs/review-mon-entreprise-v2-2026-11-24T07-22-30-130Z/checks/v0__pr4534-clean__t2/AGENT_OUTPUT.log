@@ -1,0 +1,19 @@
+{
+ "pr": 4534,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- La correction du taux (25 % avant/après 2026) sur la tranche salariale reprend exactement le motif déjà en place pour `employeur` dans `acre.publicodes` : cohérent.\n- Je ne vois pas de test ajouté : seuls les snapshots `SASU.test.ts.snap` changent (cotisations 766 → 851). Un test explicite sur les cotisations salariales avec Acre avant/après 01/2026 verrouillerait mieux le comportement qu'un snapshot, qui se met à jour sans relecture. Je n'ai pas pu vérifier la valeur 851 à la main.\n- Le commit mélange le correctif de calcul, la réécriture de la description de l'Acre (nouvelles conditions d'éligibilité, suppression de la note « Historique ») et un changement sans rapport sur la traduction JEI (« primarily » → « principally »). Un commit séparé pour le contenu éditorial aiderait la relecture. Les conditions d'éligibilité ont-elles une source citée ? Elle est dans les références (Urssaf), je n'ai pas relu son contenu.\n- La traduction anglaise générée contient des phrases tronquées (voir commentaire inline)."
+  }
+ ],
+ "gh": {
+  "calls": 2,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.130162,
+  "final_text": "Je n'ai pas pu poster le commentaire inline : la commande qui cherche la ligne a été refusée. Seule la synthèse est publiée sur la PR (#4534).\n\nLa synthèse contient quatre remarques :\n- **Correction du taux** : la tranche salariale suit le même motif que `employeur` (25 % avant/après 2026), donc elle est cohérente avec l'existant.\n- **Tests** : aucun test n'est ajouté, seuls les snapshots changent (cotisations 766 → 851). Je suggère un test explicite sur les cotisations salariales avec Acre avant et après 01/2026. Je n'ai pas pu vérifier la valeur 851.\n- **Commit** : il mélange le calcul, la réécriture de la description de l'Acre et un changement de traduction JEI sans rapport. Je propose de les séparer.\n- **Traduction anglaise** : la version générée contient des phrases tronquées.\n\nLe commentaire inline que je n'ai pas posté portait sur la description FR dans `modele-as/règles/exonérations.publicodes`. La phrase « dans l’ » puis « **une des situations suivantes** » est coupée par un retour à la ligne. La traduction générée en hérite (« within / within 60 days »). Je proposais de réécrire la phrase sur des lignes complètes, puis de régénérer les traductions. Cette remarque n'est donc pas encore sur la PR."
+ }
+}

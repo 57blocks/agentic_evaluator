@@ -1,0 +1,73 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "message": "Question sur le dernier commit (`sépare le champ dividendes en 2`) : le simulateur ne calcule plus lui-même la part des dividendes au-delà de 10 % du capital social (suppression de `entreprise . capital social`, `bénéfice net de l'exercice précédent` et du plafond). C'est désormais à l'usager de ventiler ses dividendes entre les deux champs, alors que ce seuil est justement le point difficile (capital + primes d'émission + comptes courants d'associés de la famille, ou bénéfice N-1 pour les EI). Je me demande si, pour quelqu'un qui connaît son capital mais pas le découpage, le risque n'est pas de saisir toute la somme dans le premier champ et d'obtenir des cotisations sous-estimées. C'est peut-être un choix délibéré (retour usagers ?) ; dans ce cas, une aide dans la description des deux champs (comment calculer le seuil) limiterait ce risque. Qu'en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/revenus/rémunération.publicodes",
+          "start_line": 71,
+          "end_line": 71
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "site/source/pages/assistants/choix-du-statut/home.tsx",
+          "start_line": 30,
+          "end_line": 30
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    },
+    {
+      "places": [
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+          "start_line": 110,
+          "end_line": 122
+        },
+        {
+          "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/exonérations/Acre.publicodes",
+          "start_line": 144,
+          "end_line": 154
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 0,
+      "defect": 1
+    },
+    {
+      "finding": 0,
+      "defect": 2
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

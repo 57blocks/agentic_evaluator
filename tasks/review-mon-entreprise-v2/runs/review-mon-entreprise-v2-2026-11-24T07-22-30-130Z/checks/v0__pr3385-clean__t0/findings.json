@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/components/conversation/AnswerList.tsx",
+  "start_line": 321,
+  "end_line": 321,
+  "message": "Je pense que cette ligne commentée est un reste de débogage : elle change le comportement de la modale « Modifier mes réponses » (les suggestions s’affichent désormais pour toutes les questions) sans rapport avec les charges. Si c’est voulu (c’est ce qui permet de cliquer « Début d’année » dans le test AE ?), je verrais plutôt la suppression de la prop, avec son propre commit ; sinon, un revert. Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+  "start_line": 71,
+  "end_line": 71,
+  "message": "nit: `cy.wait(500)` rend le test dépendant du timing. Je me demande si on peut plutôt attendre un état observable (par ex. une assertion `have.value` sur le champ recalculé) avant de saisir la valeur suivante, pour éviter un test flaky ou inutilement lent."
+ },
+ {
+  "file": "modele-social/règles/entreprise/entreprise.publicodes",
+  "start_line": 25,
+  "end_line": 25,
+  "message": "Ici la clé de la suggestion change (`Début d’année`), et pas seulement un texte affiché : si cette clé est stockée ou référencée quelque part (URL, situation sauvegardée, tests), elle ne correspondra plus à l’ancienne. Je n’ai pas vérifié ce point. Par ailleurs, je me demande si cette conversion de nombreuses apostrophes sur tout le fichier mérite sa propre PR : elle noie les lignes réellement liées aux charges dans le diff et dans `rules-en.yaml` (+315 lignes)."
+ },
+ {
+  "message": "Synthèse :\n- Le texte de la rubrique « Charges » est clair. « Il ne faut pas déclarer ici… » est assez injonctif pour un usager ; « Ne déclarez pas ici… » serait peut-être plus naturel, mais c’est une préférence.\n- Le retrait de `small` sur `SimulationGoal` (indépendant et cessation d’activité) change l’affichage de la rubrique. Je n’ai pas pu vérifier le rendu : est-ce voulu ? Cela mériterait une mention dans la description de la PR.\n- Historique : le commit « tests(AE) » n’a pas un type Conventional Commits valide (`test:`). Le test AE réécrit (retrait de `testIsolation: false`) semble lié à la modale plutôt qu’aux charges, et irait mieux avec le changement d’`AnswerList` dans un commit dédié, voire une PR séparée. Le commit sur les apostrophes typographiques n’a pas de lien fonctionnel avec #3360.\n- Je n’ai pas pu exécuter les tests Cypress ni vérifier le rendu."
+ }
+]

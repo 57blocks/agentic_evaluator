@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+  "start_line": 31,
+  "end_line": 31,
+  "message": "Je me demande si le `getOrElse(…, () => euros(0))` ne risque pas d'afficher brièvement « 0 € » à l'usager le temps de la redirection (avant, le composant retournait `null` dans ce cas). Retourner `null` après le `useEffect` tant que `montantCT` n'est pas valide éviterait d'afficher un montant faux. Qu'en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3746,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+   "line": 31,
+   "start_line": null,
+   "body": "Je me demande si le `getOrElse(…, () => euros(0))` ne risque pas d'afficher brièvement « 0 € » à l'usager le temps de la redirection (avant, le composant retournait `null` dans ce cas). Retourner `null` après le `useEffect` tant que `montantCT` n'est pas valide éviterait d'afficher un montant faux. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.11993619999999999,
+  "final_text": "J'ai relu la PR et posé un seul commentaire inline, sur `Résultat.tsx` ligne 31. Je n'ai exécuté ni build ni tests. Le workflow « Vérification PR » est au vert.\n\nMon commentaire concerne le `getOrElse(montantCT, () => euros(0))`. Quand `montantCT` n'est pas valide, la page peut afficher brièvement « 0 € » pendant la redirection. Avant la PR, le composant retournait `null` dans ce cas. Je propose de retourner `null` après le `useEffect` tant que le montant n'est pas valide.\n\nLe reste des changements, qui déplace les `navigate` dans des `useEffect`, ne m'a pas paru mériter de remarque."
+ }
+}
+
+```

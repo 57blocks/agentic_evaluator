@@ -1,0 +1,14 @@
+{
+ "pr": 4160,
+ "findings": [],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1282691,
+  "final_text": "Le shell m'a refusé les commandes qui lisent ou écrivent des fichiers (la lecture du chemin accentué, puis l'écriture dans `/tmp`). Je n'ai donc pas pu poster la remarque.\n\nVoici ce que je voulais publier en commentaire inline sur `dividendes.publicodes` (ligne 7 du fichier `modele-ti/règles/indépendant/revenus/`) du commit `6239666` :\n\n> Je me demande si on ne perd pas quelque chose pour l'usager avec ce découpage : avant, il saisissait un seul montant de dividendes et la règle calculait elle-même la part sous le seuil de 10 % du capital (ou du bénéfice N-1 en EI). Maintenant il doit faire la répartition lui-même entre les deux champs, alors que c'est justement le calcul qu'il ne sait pas forcément faire. Est-ce un choix assumé (par ex. retour utilisateurs ou besoin lié à la réforme) ? Si oui, un message d'aide dans l'interface sur la façon de calculer le seuil me semblerait utile. Qu'en penses-tu ?\n\nJe n'ai pas relu les 576 fichiers de la PR, seulement le dernier commit. La vérification de la PR est au vert et personne n'avait encore commenté. Dites-moi si je dois retenter le post avec le chemin saisi explicitement, ou si vous préférez le publier vous-même."
+ }
+}

@@ -1,0 +1,23 @@
+[
+ {
+  "file": ".eslintrc.cjs",
+  "start_line": 120,
+  "end_line": 120,
+  "message": "Je me demande pourquoi `no-restricted-imports` passe de `error` à `warn` en même temps qu'on ajoute les règles de frontières de modules. En `warn`, la CI ne bloquera pas un import interne vers `@/design-system/...` ou `@/contextes/x/y`, alors que CONTRIBUTING.md les présente comme interdits : les violations risquent de revenir sans bruit. Est-ce parce qu'il reste des violations existantes ? Si oui, peut-être repasser en `error` une fois corrigées, ou noter le plan dans l'ADR ?"
+ },
+ {
+  "file": ".eslintrc.cjs",
+  "start_line": 176,
+  "end_line": 176,
+  "message": "nit: guillemets doubles ici alors que le reste du fichier est en simples ; un `prettier --write` sur ce fichier harmoniserait (les messages ajoutés plus haut échappent aussi des apostrophes)."
+ },
+ {
+  "file": "package.json",
+  "start_line": 39,
+  "end_line": 39,
+  "message": "Je me demande si `@testing-library/react-hooks` est le bon choix : à ma connaissance il est déprécié et `renderHook` est intégré à `@testing-library/react` depuis la v13.1 (je n'ai pas vérifié la version de React/RTL installée dans `site`). Qu'en penses-tu ?"
+ },
+ {
+  "message": "Synthèse (je n'ai pas lu les 472 fichiers en détail, ni vérifié le rendu ou les parcours manuellement).\n\n- **Taille de la PR** : ~70 commits, +12 000/−3 400 lignes, mêlant refonte de l'économie collaborative, value-object `Montant`, frontières de modules, documentation MDX, corrections sur salarié/dividendes/choix du statut et ADR. Difficile à relire, et à annuler en cas de régression sur un simulateur en production. Je verrais bien des PR plus petites (frontières de modules + lint ; `Montant`/`Quantité` ; économie collaborative ; MDX ; correctifs indépendants).\n- **Historique git** : plusieurs commits `fix` corrigent du code introduit plus tôt dans la même PR (ex. `fix: corrige quelques problèmes suite à rebase`, `fix: mauvaise détection des champs de montant`, `fix: la situation en search params ne fonctionne pas`). Ils ne sont pas autonomes au sens de CONTRIBUTING.md ; un squash/fixup avant fusion rendrait l'historique plus lisible. Le scope `auto-entrepreneureuse` est aussi absent de la liste des scopes usuels.\n- **`SearchParamsAdapter.decode`** (`site/source/SearchParamsAdapter.ts`) : les regex n'acceptent pas les nombres négatifs (`-100€` retombe en string), et toute unité contenant `/` est acceptée comme quantité. Est-ce voulu ? Un cas limite de plus dans les tests serait utile."
+ }
+]

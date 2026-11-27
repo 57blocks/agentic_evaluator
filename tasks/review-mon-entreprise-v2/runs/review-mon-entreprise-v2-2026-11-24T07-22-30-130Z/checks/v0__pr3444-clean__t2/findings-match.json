@@ -1,0 +1,18 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Je n'ai pas pu vérifier le rendu visuel (logos SVG/JPG) ni la nouvelle URL `entreprise.francetravail.fr/cout-salarie/` (utilisée dans `Iframe.tsx` et le test Cypress).\n\n- **Périmètre de la PR** : le titre annonce les définitions des rubriques retraite, mais le diff mélange aussi le renommage Pôle Emploi → France Travail (règles, UI, Cypress), le remplacement de tous les logos des références et le passage des `alt` à `\"\"`. Je me demande si trois PR (ou au moins trois commits distincts) ne se reliraient pas plus facilement, notamment parce que `protection-sociale.publicodes` (~500 lignes) et `rules-en.yaml` (~1200 lignes) noient le reste. Il n'y a qu'un seul commit.\n- **`alt=\"\"` sur les logos de `References.tsx`** : je trouve le choix cohérent si le nom du site est déjà dans le lien voisin. Je n'ai pas vérifié que c'est le cas pour chaque `Reference`. Si le titre du lien ne contient pas le domaine, le logo ne sera plus annoncé du tout, ce qui me semble acceptable mais à confirmer avec `site/ACCESSIBILITY.md`.\n- **Clé `pole-emploi.fr` retirée de `referencesImages`** : les règles que j'ai parcourues ne pointent plus vers ce domaine, donc je n'y vois pas de régression. Une redirection d'anciennes URLs dans d'autres packages m'a échappé si tu en connais.\n- **nit :** dans `Iframe.tsx`, la variable `poleEmploiLogo` garde l'ancien nom alors que l'article s'appelle désormais France Travail.\n- **Références Publicodes** : je ne vérifie que leur présence. Pour la règle `senior professionnalisation`, la référence « Ministère du travail » est supprimée au profit d'une seule référence France Travail. Est-ce voulu ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

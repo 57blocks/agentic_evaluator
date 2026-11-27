@@ -1,0 +1,17 @@
+[
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Je me demande si ce changement d’assiette est voulu : `CSG-CRDS . assiette de base` applique l’abattement de 1,75 % (`assiette abattue`, cotisations.publicodes l.495-502) et déduit les heures supplémentaires défiscalisées, ce que l’ancienne somme `cotisations . assiette` + prévoyance employeur ne faisait pas. La base de la taxe sur les salaires baisse donc pour tous les salariés concernés, pas seulement les apprentis. Je n’ai pas vérifié ce que dit la source sur l’assiette de cette taxe. Cette modification ne figure ni dans le message du commit `feat(salarié): … CSG-CRDS pour les apprentis`, ni dans le CHANGELOG. Est-ce un effet de bord du retrait de `cotisations . CSG-CRDS` des règles rendues non applicables ? Si oui, un commit dédié avec sa référence (et un test) serait plus lisible ; sinon, quelle source justifie cette assiette ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 210,
+  "end_line": 210,
+  "message": "Les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », mais la condition porte sur `date` (la date de la simulation), pas sur la date de début de contrat. Une simulation en 2026 d’un contrat signé en 2024 appliquerait donc 50 % au lieu de 79 % (et la CSG-CRDS ne serait plus exonérée en totalité). Tu mentionnes dans la PR avoir hésité à ajouter une question sur la date de début : je pense qu’elle est nécessaire pour que le résultat affiché soit fiable, sinon le comportement ne correspond pas à la description. Qu’en penses-tu ? Pour ta question sur l’assiette de la CSG-CRDS (avec ou sans prévoyance santé), je ne peux pas la trancher sans source ; si la page Urssaf citée ne la précise pas, une question à l’Urssaf me semble préférable à un choix par défaut."
+ },
+ {
+  "message": "Synthèse : outre les deux remarques inline, je n’ai pas vu de tests ajoutés pour les nouveaux cas (apprenti avant/après mars 2025, plafonds 2,25 / 3,3 SMIC) : seuls des snapshots sont mis à jour, ce qui ne documente pas le comportement attendu. L’historique par commit est lisible. Je n’ai pas vérifié les valeurs elles-mêmes (taux, plafonds) contre les textes."
+ }
+]

@@ -1,0 +1,99 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/Simulation/SimulationGoal.tsx",
+      "start_line": 85,
+      "end_line": 85,
+      "message": "Je me demande si `RuleInputWrapper` ne pose pas un souci de remontage. Il est passé à `ObjectifSaisissableDeSimulation` comme **type de composant** (`<ChampSaisie />`), et son identité change dès qu'une dépendance du `useCallback` change (`handleChange`, `evaluation.missingVariables`, `currentUnit`…). React démonte alors l'input pour en remonter un nouveau, avec un risque de perte du focus pendant la saisie à chaque recalcul. Je n'ai pas pu l'exécuter pour le confirmer, mais ça mériterait un test manuel au clavier. Une piste : garder une render prop (`rendreChampSaisie({ id, aria })`) plutôt qu'un composant dynamique. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+      "start_line": 40,
+      "end_line": 40,
+      "message": "Deux points : (1) je ne trouve aucun élément avec l'id `questionHeader` dans `site/source`, donc cette référence semble pendante et ne donne pas de nom accessible. (2) sans `role` (le `role=\"group\"` a été retiré), un `div` avec `aria-labelledby` n'est pas exposé de façon fiable par les technologies d'assistance. Je verrais plutôt garder `role=\"group\"` et ne poser `aria-labelledby` que s'il est fourni, sans valeur en dur."
+    },
+    {
+      "file": "site/source/components/conversation/OuiNonInput.tsx",
+      "start_line": 47,
+      "end_line": 47,
+      "message": "nit: `aria-label=\"\"` ressemble à un contournement du warning React Aria. Un `aria-label` vide n'est pas un nom accessible, et quand `aria.labelledby` n'est pas fourni (le type le rend optionnel) le groupe n'aura plus aucun nom, alors qu'avant il avait « Oui ou non ». Peut-être rendre `labelledby` obligatoire ici ? Si la clé `conversation.yes-no.aria-label` n'est plus utilisée, les fichiers de traduction sont-ils régénérés ?"
+    },
+    {
+      "file": "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+      "start_line": 1,
+      "end_line": 1,
+      "message": "nit: le passage de `import { Option } from 'effect'` à `import * as O from 'effect/Option'` ne suit pas l'usage du reste du dépôt, et ce refactoring (render prop → composant, `onChange` typé `Option<Montant>`) est mêlé au commit `fix(a11y)` : je le sortirais dans son propre commit pour garder un changement logique par commit."
+    },
+    {
+      "message": "Synthèse : l'intention (un seul mécanisme de nom accessible) me paraît bonne. Mes réserves portent sur le remontage possible de l'input dans `SimulationGoal` et sur la référence `questionHeader` dans `ChoixMultiple` (détails inline). Je n'ai pas pu vérifier le rendu réel ni les warnings React Aria ; une vérification au lecteur d'écran du simulateur salarié serait utile. Les warnings console massifs sont un compromis assumé dans la description, mais ils risquent de masquer de vrais problèmes : une issue de suivi serait peut-être utile."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+          "start_line": 16,
+          "end_line": 102
+        },
+        {
+          "file": "site/source/components/Simulation/SimulationGoal.tsx",
+          "start_line": 160,
+          "end_line": 161
+        },
+        {
+          "file": "site/source/pages/simulateurs/location-de-meublé/objectifs/ObjectifRecettes.tsx",
+          "start_line": 18,
+          "end_line": 32
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm",
+    null,
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    },
+    {
+      "finding": 4,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": []
+}

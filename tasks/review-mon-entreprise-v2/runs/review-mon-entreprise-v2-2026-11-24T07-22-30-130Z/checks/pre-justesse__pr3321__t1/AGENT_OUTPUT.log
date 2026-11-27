@@ -1,0 +1,23 @@
+{
+ "pr": 3321,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/hooks/useBarèmeLodeom.ts",
+   "line": 13,
+   "start_line": 8,
+   "body": "Je me demande si on ne devrait pas ajouter `as const` à ce tableau : sans lui, `(typeof barèmes)[number]` vaut `string`, donc `BarèmeLodeom` ne protège pas les comparaisons de `WarningSalaireTrans.tsx`. Un renommage comme celui-ci (ou une faute de frappe) y passerait sans erreur de `tsc`, alors que le message d'avertissement disparaîtrait silencieusement. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.144696,
+  "final_text": "J'ai posté un seul commentaire inline sur la PR, dans `site/source/hooks/useBarèmeLodeom.ts`. Les checks `gh pr checks` sont au vert.\n\nLe tableau `barèmes` n'a pas de `as const`. Le type `BarèmeLodeom` vaut donc `string`, et `tsc` ne protège pas les comparaisons de `WarningSalaireTrans.tsx`. Après ce renommage, une faute de frappe ferait disparaître un avertissement sans aucune erreur. Ce défaut existait avant la PR, mais elle modifie justement ces chaînes.\n\nJe n'ai pas relevé d'autre problème dans le renommage des possibilités de barèmes. Seules les possibilités ont changé, les règles gardent leur nom `barème …`. Les références restantes (`simulationConfig.ts`, `site/test/regressions/salarié.yaml`) visent ces règles et restent donc valides.\n\nJ'ai lu le diff des fichiers TypeScript et des traductions anglaises. Je n'ai pas relu les 610 lignes de `lodeom.publicodes`, seulement les références aux barèmes qu'il contient. Le diff de `rules-en.yaml` contient aussi deux reformulations sans rapport avec le renommage, par exemple « €50 million » devenu « 50 million euros ». Cela ressemble à du bruit de `i18n:translate`, je ne l'ai pas commenté."
+ }
+}

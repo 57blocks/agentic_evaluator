@@ -1,0 +1,23 @@
+{
+ "pr": 4159,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Je me demande si le renommage de `emploi franc . éligible` en `emploi franc` ne casse pas les consommateurs de l'API qui passent aujourd'hui `salarié . coût total employeur . aides . emploi franc . éligible: oui` dans leur situation : la règle n'existant plus, la valeur serait ignorée ou rejetée selon le cas, et l'aide ne serait plus appliquée sans erreur visible. Est-ce un usage connu, et faut-il prévoir un alias ou le mentionner dans la PR ?"
+  },
+  {
+   "kind": "global",
+   "body": "Le bug corrigé est un comportement de navigation (retour à la première question après « non »), mais les tests modifiés se limitent au renommage de la clé dans les situations de régression. Je verrais bien un test qui échoue avant le correctif et couvre ce parcours : qu'en penses-tu ?"
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1169612,
+  "final_text": "J'ai relu la PR et posté deux commentaires globaux sur GitHub, sans commentaire inline. Le workflow « Vérification PR » est au vert.\n\n- **Renommage de la règle :** `emploi franc . éligible` devient `emploi franc`. Je me demande si les consommateurs de l'API qui passent l'ancienne clé dans leur situation ne perdraient pas l'aide sans erreur visible. Je n'ai pas cherché d'usage réel de cette clé côté API, donc je l'ai posé en question.\n- **Test manquant :** le bug corrigé est un comportement de navigation, mais les tests modifiés se limitent au renommage de la clé dans les situations de régression. J'ai proposé un test qui échoue avant le correctif.\n\nJ'ai posté ces deux remarques en commentaires globaux plutôt qu'inline. Le code visé est sur des lignes du diff, donc l'inline aurait été possible."
+ }
+}

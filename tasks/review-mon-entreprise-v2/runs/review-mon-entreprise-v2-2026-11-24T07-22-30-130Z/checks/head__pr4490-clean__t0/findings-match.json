@@ -1,0 +1,20 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "message": "Une question sur le nouveau flux : `algolia-data.json` est produit par le workflow `pull_request`, donc par du code que l'auteur de la PR contrôle (y compris pour une PR depuis un fork), puis poussé dans Algolia avec `ALGOLIA_ADMIN_KEY` par `pr-deploy`. Avant, ce job reconstruisait les données depuis le code de la branche par défaut. Le contenu de l'artefact est maintenant non fiable, et `env_name` (donc le préfixe d'index) vient déjà d'un artefact de la même façon. Est-ce que `pr-deploy` est volontairement limité aux PR non issues de forks, ou est-ce qu'une validation du préfixe / du schéma du JSON avant le push te semblerait utile ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

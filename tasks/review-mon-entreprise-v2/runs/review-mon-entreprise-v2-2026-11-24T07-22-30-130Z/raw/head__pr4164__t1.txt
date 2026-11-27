@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+  "start_line": 40,
+  "end_line": 40,
+  "message": "Je ne trouve aucun élément avec l'id `questionHeader` dans le dépôt : quand `aria.labelledby` est absent, ce `aria-labelledby` pointe donc dans le vide. De plus, en retirant `role=\"group\"`, le `div` n'a plus de rôle, et `aria-labelledby` n'est pas fiable sur un `div` sans rôle : le nom risque de ne plus être annoncé, y compris quand `aria.labelledby` est fourni. Le `role=\"group\"` ne pourrait-il pas rester (il est pertinent pour un groupe de cases) et le repli en dur disparaître ? Sans `aria.labelledby`, ce choix multiple se retrouve sans nom accessible, ce que la description de la PR cherche justement à éviter ailleurs."
+ },
+ {
+  "file": "site/source/components/conversation/OuiNonInput.tsx",
+  "start_line": 47,
+  "end_line": 47,
+  "message": "Je me demande si `aria-label=\"\"` (idem dans `CardChoiceGroup` et `ToggleChoiceGroup`) est la bonne façon de faire taire React Aria : c'est une valeur vide posée pour contourner un avertissement, sans qu'on le comprenne en lisant le code. Qu'en penses-tu de passer `aria-labelledby` seul et d'accepter l'avertissement comme tu l'indiques dans la description, ou à défaut d'ajouter un commentaire qui explique ce choix ? Par ailleurs, les clés `conversation.yes-no.aria-label` et `conversation.multiple-answer.aria-label` ne sont plus utilisées : les fichiers de traduction ont-ils été régénérés (`i18n:translate`) ? Je ne les vois pas dans le diff."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4164,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/design-system/molecules/field/choix/ChoixMultiple.tsx",
+   "line": 40,
+   "start_line": null,
+   "body": "Je ne trouve aucun élément avec l'id `questionHeader` dans le dépôt : quand `aria.labelledby` est absent, ce `aria-labelledby` pointe donc dans le vide. De plus, en retirant `role=\"group\"`, le `div` n'a plus de rôle, et `aria-labelledby` n'est pas fiable sur un `div` sans rôle : le nom risque de ne plus être annoncé, y compris quand `aria.labelledby` est fourni. Le `role=\"group\"` ne pourrait-il pas rester (il est pertinent pour un groupe de cases) et le repli en dur disparaître ? Sans `aria.labelledby`, ce choix multiple se retrouve sans nom accessible, ce que la description de la PR cherche justement à éviter ailleurs.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/OuiNonInput.tsx",
+   "line": 47,
+   "start_line": null,
+   "body": "Je me demande si `aria-label=\"\"` (idem dans `CardChoiceGroup` et `ToggleChoiceGroup`) est la bonne façon de faire taire React Aria : c'est une valeur vide posée pour contourner un avertissement, sans qu'on le comprenne en lisant le code. Qu'en penses-tu de passer `aria-labelledby` seul et d'accepter l'avertissement comme tu l'indiques dans la description, ou à défaut d'ajouter un commentaire qui explique ce choix ? Par ailleurs, les clés `conversation.yes-no.aria-label` et `conversation.multiple-answer.aria-label` ne sont plus utilisées : les fichiers de traduction ont-ils été régénérés (`i18n:translate`) ? Je ne les vois pas dans le diff.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1608138,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline. Les vérifications de la PR passent (`gh pr checks`).\n\n- **`ChoixMultiple.tsx:40`** : le repli `aria-labelledby={aria.labelledby || 'questionHeader'}` pointe vers un id que je ne trouve nulle part dans le dépôt. Avec `role=\"group\"` retiré, le `div` n'a plus de rôle. Je demande si le nom accessible y est encore annoncé, et s'il ne vaudrait pas mieux garder le rôle et supprimer le repli en dur.\n- **`OuiNonInput.tsx:47`** : `aria-label=\"\"` est posé pour faire taire React Aria, sans explication. Il y en a aussi dans `CardChoiceGroup` et `ToggleChoiceGroup`. Je demande aussi si les traductions ont été régénérées, puisque deux clés `aria-label` ne sont plus utilisées.\n\nJe n'ai rien exécuté. Je n'ai pas non plus vérifié le HTML rendu dans les devtools, que l'auteur demandait de regarder."
+ }
+}
+
+```

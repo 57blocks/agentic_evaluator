@@ -1,0 +1,19 @@
+{
+ "pr": 4596,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger"
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 4,
+  "cost_usd": 0.0976109,
+  "final_text": "J'ai relu la PR #4596 et je n'ai trouvé aucune remarque à faire. J'ai posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger ».\n\n- **Vérifications :** `gh pr checks` est au vert.\n- **Ce que j'ai lu :** le diff des règles Publicodes, la liste des commits et les fichiers de test ajoutés.\n- **Ce que je n'ai pas fait :** je n'ai pas exécuté les tests moi-même. Je n'ai pas non plus vérifié comment Publicodes traite un `plancher` ou un `plafond` marqué « non applicable ». Les tests ajoutés sont censés couvrir ce cas, mais je ne les ai pas ouverts un par un."
+ }
+}

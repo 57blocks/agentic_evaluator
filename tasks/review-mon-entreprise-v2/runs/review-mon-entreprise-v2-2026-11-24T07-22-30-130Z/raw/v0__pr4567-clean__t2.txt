@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+  "start_line": 559,
+  "end_line": 559,
+  "message": "Ce changement de règle modifie le résultat pour tous les indépendants, pas seulement à Mayotte : avec Acre + invalidité (sans exonération âge), l'abattement passe de « aucun » à « taux Acre ». Le test qui figeait l'ancien comportement (« est nulle lorsqu'il y a à la fois Acre et invalidité ») est supprimé dans cette PR.\n\nJe ne vois pas la source de cette nouvelle règle : pourrais-tu en indiquer une (texte de loi ou page Urssaf) en référence ou dans la description ? Sans elle, je me demande si on ne risque pas d'afficher un montant erroné aux usagers concernés. Un test qui exprime explicitement le nouveau comportement (Acre + invalidité → taux Acre) serait aussi plus lisible qu'une simple suppression.\n\nCôté historique : le commit est annoncé comme `tests:` alors qu'il embarque ce changement de règle. Je verrais bien un commit `fix(modele-social)` séparé, avec son test écrit avant. Au passage, le type Conventional Commits est `test`, sans « s »."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4567,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "line": 559,
+   "start_line": null,
+   "body": "Ce changement de règle modifie le résultat pour tous les indépendants, pas seulement à Mayotte : avec Acre + invalidité (sans exonération âge), l'abattement passe de « aucun » à « taux Acre ». Le test qui figeait l'ancien comportement (« est nulle lorsqu'il y a à la fois Acre et invalidité ») est supprimé dans cette PR.\n\nJe ne vois pas la source de cette nouvelle règle : pourrais-tu en indiquer une (texte de loi ou page Urssaf) en référence ou dans la description ? Sans elle, je me demande si on ne risque pas d'afficher un montant erroné aux usagers concernés. Un test qui exprime explicitement le nouveau comportement (Acre + invalidité → taux Acre) serait aussi plus lisible qu'une simple suppression.\n\nCôté historique : le commit est annoncé comme `tests:` alors qu'il embarque ce changement de règle. Je verrais bien un commit `fix(modele-social)` séparé, avec son test écrit avant. Au passage, le type Conventional Commits est `test`, sans « s ».",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 2,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.13372050000000002,
+  "final_text": "J'ai posté un commentaire inline sur `cotisations.publicodes` (ligne 559). Je n'ai pas posté de synthèse : les tests sont propres et rien d'autre ne mérite un commentaire.\n\nLa remarque porte sur la suppression de la condition `exonérations . invalidité = non` dans l'abattement de la cotisation invalidité-décès. Ce changement modifie le résultat pour tous les indépendants, pas seulement à Mayotte. Avec Acre et invalidité sans exonération âge, l'abattement passe de « aucun » à « taux Acre ». Le test qui figeait l'ancien comportement est supprimé, et aucune source n'est indiquée. J'ai demandé une référence (texte de loi ou page Urssaf) et un test qui exprime explicitement le nouveau comportement.\n\nJ'ai aussi relevé deux points sur l'historique, dans le même commentaire :\n- Le commit est annoncé `tests:` alors qu'il contient ce changement de règle, qui mériterait un commit `fix(modele-social)` séparé.\n- Le type Conventional Commits est `test`, sans « s ».\n\nJe n'ai lancé ni build ni tests, conformément aux consignes. Je n'ai pas non plus consulté `gh pr checks`."
+ }
+}
+
+```

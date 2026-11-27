@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) portent le même code `DSAR`. Est-ce voulu ? Si les deux montants se reportent dans des cases différentes de la 2042-C-PRO, un usager pourrait saisir le mauvais montant au mauvais endroit. Quelle est la source (notice de la déclaration) pour ces codes ?"
+ },
+ {
+  "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+  "start_line": 145,
+  "end_line": 145,
+  "message": "nit: les clés `Bénéfice` et `Déficit` ne sont pas hiérarchiques, contrairement aux autres libellés du fichier (`pages.assistants.declaration-revenus-pamc.resultats.label.N`), alors que CONTRIBUTING.md demande une clé hiérarchique. Même chose sur les autres occurrences (l. 152, 166, 173)."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3442,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 208,
+   "start_line": null,
+   "body": "Les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) portent le même code `DSAR`. Est-ce voulu ? Si les deux montants se reportent dans des cases différentes de la 2042-C-PRO, un usager pourrait saisir le mauvais montant au mauvais endroit. Quelle est la source (notice de la déclaration) pour ces codes ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+   "line": 145,
+   "start_line": null,
+   "body": "nit: les clés `Bénéfice` et `Déficit` ne sont pas hiérarchiques, contrairement aux autres libellés du fichier (`pages.assistants.declaration-revenus-pamc.resultats.label.N`), alors que CONTRIBUTING.md demande une clé hiérarchique. Même chose sur les autres occurrences (l. 152, 166, 173).",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.17567170000000004,
+  "final_text": "J'ai relu la PR #3442 et posté deux commentaires inline sur `Résultats.tsx`. Je n'ai pas lu en entier les règles Publicodes ni le script `declaration-revenus-pamc.ts` (seulement le diff des fichiers TSX). Le check « Vérification PR » est au vert.\n\n- **Ligne 208 :** les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) portent le même code `DSAR`. Je ne trouve ce code nulle part ailleurs dans le dépôt, donc je l'ai posé en question : si les deux montants vont dans des cases différentes, un usager pourrait reporter le mauvais montant.\n- **Ligne 145 :** nit sur les clés i18n `Bénéfice` et `Déficit`, qui ne sont pas hiérarchiques comme les autres libellés du fichier."
+ }
+}
+
+```

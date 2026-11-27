@@ -1,0 +1,19 @@
+{
+ "pr": 4160,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Synthèse (je n'ai pas pu relire en détail 576 fichiers, ni vérifier le rendu ni le fond des règles Publicodes ; le workflow « Vérification PR » est vert).\n\n**Taille de la PR** : environ 34 000 lignes ajoutées et 9 000 supprimées, avec ~290 commits. Je me demande si elle ne pourrait pas être découpée, par exemple :\n- la création des paquets `modele-as` et `modele-ti` et le branchement des simulateurs (SASU, indépendant) ;\n- la réforme des barèmes de cotisations 2026 ;\n- les dividendes et la cessation d'activité ;\n- les refactors d'UI (`Questions`, `Objectifs`).\n\nUne PR de cette taille se relit difficilement : les règles métier et les snapshots (~2 000 lignes de diff dans les snapshots indépendant et professions libérales) se noient dans le reste. Y a-t-il des contraintes qui obligent à tout livrer ensemble ? Si oui, une description listant les changements de comportement visibles par l'usager aiderait beaucoup, la description actuelle est vide.\n\n**Historique git** : beaucoup de commits correctifs (`fix: erreurs de rebase`, `lint: fix`, `fix: type and lint`, `fix: typo`, etc.). Ils pourraient être fusionnés (fixup) dans les commits qu'ils corrigent. Le critère « un commit = un changement autonome et vert » est difficile à tenir sinon. Le scope est aussi absent sur beaucoup de messages alors qu'un scope fonctionnel existe (`indépendant`, `modele-ti`…).\n\n**Sources métier** : la réforme des assiettes, les taux 2026 et l'exonération Acre changent des valeurs affichées aux usagers. Pourrais-tu indiquer dans la description les textes ou pages Urssaf utilisés, pour que la relecture humaine puisse les recouper ?"
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 4,
+  "cost_usd": 0.1201196,
+  "final_text": "J'ai posté une seule synthèse sur la PR #4160, sans commentaire inline. La PR est trop grosse (576 fichiers) pour que je la relise en détail avec le budget disponible. Je n'ai donc pas relu le code ligne à ligne, ni vérifié le fond des règles Publicodes ou le rendu.\n\nLe workflow « Vérification PR » est vert. La synthèse porte sur trois points :\n- **Taille :** environ 34 000 lignes ajoutées et 9 000 supprimées, avec plus de 280 commits. Je propose de la découper en plusieurs PR (nouveaux paquets, réforme des barèmes, dividendes, refactors d'UI). Je signale aussi que la description est vide.\n- **Historique git :** plusieurs commits correctifs (`fix: erreurs de rebase`, `lint: fix`, `fix: type and lint`, `fix: typo`) pourraient être fusionnés dans les commits qu'ils corrigent. Beaucoup de messages n'ont pas de scope.\n- **Sources métier :** je demande de lister dans la description les sources utilisées pour la réforme des assiettes, les taux 2026 et l'Acre, afin que la relecture humaine puisse les recouper."
+ }
+}

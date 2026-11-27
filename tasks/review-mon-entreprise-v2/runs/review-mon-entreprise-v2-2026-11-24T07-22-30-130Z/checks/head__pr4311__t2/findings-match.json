@@ -1,0 +1,56 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/pages/statistiques/DemandesUtilisateurs.tsx",
+      "start_line": 74,
+      "end_line": 74,
+      "message": "Le paramètre vient maintenant de l’URL, donc d’une saisie libre : avec `?page-open=abc` on obtient `NaN` (`slice(NaN, NaN)` donne une liste vide), et avec `?page-open=-1` ou `?page-open=99` une page vide sans que le bouton de page actuelle ne soit marqué. Je verrais bien un repli sur 0 quand la valeur n’est pas un entier dans `[0, nombre de pages[`. Qu’en penses-tu ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/lib/navigation/NavigationAPI.ts",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "file": "site/source/lib/navigation/providers/MockNavigationProvider.tsx",
+          "start_line": 43,
+          "end_line": 98
+        },
+        {
+          "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+          "start_line": 5,
+          "end_line": 88
+        },
+        {
+          "file": "site/source/pages/integration/Iframe.tsx",
+          "start_line": 59,
+          "end_line": 89
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

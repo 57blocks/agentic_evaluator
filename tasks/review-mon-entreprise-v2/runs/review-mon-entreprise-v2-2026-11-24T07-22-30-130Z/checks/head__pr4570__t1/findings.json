@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1964,
+  "message": "La traduction anglaise générée est cassée : `<0>&lt;/0>`, `does not apply to male&lt;/3>`, `income simulator&lt;/6>` contiennent des balises échappées et un « male » mal placé. Peut-on corriger la valeur EN à la main ? Sortir l'emoji du `<Trans>` simplifierait peut-être aussi les index de balises."
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 70,
+  "end_line": 75,
+  "message": "nit: cette liste est recréée à chaque rendu et `indexOf(id) > -1` se lit moins bien que `includes`. Une constante de module typée `SimulateurId[]` (comme `nextSteps` plus haut) avec `.includes(id)` serait plus cohérente."
+ }
+]

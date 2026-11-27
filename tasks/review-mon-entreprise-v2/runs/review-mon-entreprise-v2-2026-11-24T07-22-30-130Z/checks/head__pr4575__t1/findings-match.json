@@ -1,0 +1,41 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/vite.config.ts",
+      "start_line": 208,
+      "end_line": 208,
+      "message": "Je me demande si le remplacement de `next` par `main` ici est voulu : il change le comportement (une branche `next` passe de production à staging, avec Sentry, Plausible et les URLs que cela implique), alors que le sujet est de déplacer la config dans l'adaptateur. Si c'est intentionnel, je le verrais dans un commit à part avec son explication ; sinon, `['master', 'next']` à conserver ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/services/environnement/environnement.ts",
+          "start_line": 5,
+          "end_line": 21
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

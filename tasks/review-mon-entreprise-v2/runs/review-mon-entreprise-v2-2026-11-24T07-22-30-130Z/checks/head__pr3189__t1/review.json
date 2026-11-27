@@ -1,0 +1,26 @@
+{
+ "pr": 3189,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "line": 177,
+   "start_line": null,
+   "body": "Pourrais-tu ajouter une `références:` vers la source des taux 3,25 % / 9,75 % et du seuil de 40 % du PSS (fiche Urssaf ou texte de loi) sur cette règle ? Je n'en vois pas dans le diff, et la règle n'en avait pas non plus avant.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/3176: issue withheld",
+   "api --method GET repos/betagouv/mon-entreprise/issues/3176/comments: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1125586,
+  "final_text": "J'ai relu la PR et posté un commentaire inline sur `PAMC.publicodes`. Il demande d'ajouter une `références:` vers la source des taux 3,25 % et 9,75 % et du seuil de 40 % du PSS. Je n'ai rien posté d'autre pour l'instant.\n\nVoici ce que j'ai vérifié :\n- **Vérification PR :** elle est au vert.\n- **Issue liée :** la description dit « Résoud #3176 », mais l'API renvoie 404 pour cette issue. Je n'ai donc pas pu vérifier que la PR traite bien ce qu'elle demande.\n- **Tranche à 110 % du PSS :** elle suit le même motif que `profession-libérale.publicodes`, donc je n'ai rien relevé là-dessus."
+ }
+}

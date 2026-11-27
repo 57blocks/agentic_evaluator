@@ -1,0 +1,31 @@
+{
+ "pr": 4164,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/Simulation/SimulationGoal.tsx",
+   "line": 85,
+   "start_line": null,
+   "body": "Je me demande si `RuleInputWrapper` ne pose pas un souci de remontage : il est rendu comme composant (`<ChampSaisie />`), et son identité change dès qu'une dépendance du `useCallback` change (`handleChange`, `currentUnit`, `evaluation.missingVariables`…). Si `missingVariables` est un nouvel objet à chaque évaluation, React démonterait puis remonterait le champ à chaque frappe, avec perte du focus. Je n'ai pas pu le vérifier à l'exécution : peux-tu tester la saisie dans un objectif du simulateur salarié ? Si c'est le cas, une fonction de rendu recevant `id`/`aria` (comme avant avec `rendreChampSaisie`) évite le problème.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/conversation/OuiNonInput.tsx",
+   "line": 47,
+   "start_line": null,
+   "body": "Je ne suis pas sûr qu'un `aria-label=\"\"` soit une bonne façon de faire taire React Aria : une chaîne vide n'est pas un nom accessible, et le même hack est répété dans `CardChoiceGroup`, `ToggleChoiceGroup`… Quand `aria-labelledby` est présent, la valeur vide a-t-elle un effet autre que supprimer le warning ? Sinon, qu'en penses-tu de ne laisser que `aria-labelledby` ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1464869,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline. Je n'ai rien exécuté, le code n'a donc pas été testé.\n\n- **`SimulationGoal.tsx` (ligne 85)** : `RuleInputWrapper` est un composant créé avec `useCallback`. Si ses dépendances changent à chaque évaluation, par exemple `evaluation.missingVariables` s'il s'agit d'un nouvel objet à chaque fois, le champ serait remonté à chaque frappe et perdrait le focus. J'ai demandé de tester la saisie dans le simulateur salarié et proposé de revenir à une fonction de rendu.\n- **`OuiNonInput.tsx` (ligne 47)** : `aria-label=\"\"` sert à faire taire React Aria. J'ai demandé s'il avait un autre effet. Sinon, `aria-labelledby` seul suffirait. Le même motif est répété dans `CardChoiceGroup` et `ToggleChoiceGroup`.\n\n`gh pr checks` est au vert (« Vérification PR »)."
+ }
+}

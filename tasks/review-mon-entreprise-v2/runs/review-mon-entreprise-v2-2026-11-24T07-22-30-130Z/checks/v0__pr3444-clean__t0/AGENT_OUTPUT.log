@@ -1,0 +1,35 @@
+{
+ "pr": 3444,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/protection-sociale.publicodes",
+   "line": 145,
+   "start_line": 132,
+   "body": "Je me demande si ces liens vont fonctionner : la description est un bloc `|` YAML, donc les retours à la ligne sont conservés, y compris à l'intérieur des `href=\"…\"` (ex. l. 132-133 : `…/cotisations-et-contributions⏎/cotisations/répartition/…`). Je n'ai pas pu tester le rendu, mais je m'attendrais à des URLs cassées. De plus, `auto‑entrepreneur` (l. 132) et `micro‑entreprise` (l. 138) semblent contenir un tiret insécable (U+2011) au lieu de `-`, donc le chemin ne correspondrait pas aux règles. Je verrais bien des liens markdown `[texte](/documentation/…)` chacun sur une seule ligne. Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/protection-sociale.publicodes",
+   "line": 102,
+   "start_line": null,
+   "body": "Coquille : `/q` devrait sans doute être `/` (« … Assurance retraite / durée d’assurance … »).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- nit: le diff mélange le contenu des rubriques retraite, le remplacement des logos de références (PNG → SVG/JPG), le renommage Pôle emploi → France Travail et un reformatage de notes sans rapport (retour à la ligne, apostrophes typographiques). Je me demande si un découpage en 2-3 PR/commits serait envisageable : il n'y a ici qu'un seul commit dont le titre ne mentionne que les rubriques retraite.\n- Non vérifié : le rendu des logos et des liens de documentation, et le contenu métier (je n'ai relu que la présence de références)."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 12,
+  "cost_usd": 0.2054118,
+  "final_text": "J'ai posté la revue sur la PR #3444 : deux commentaires inline et une synthèse. Je n'ai ni lancé le code ni testé le rendu des liens et des logos.\n\nCommentaires inline sur `modele-social/règles/protection-sociale.publicodes` :\n- **Liens de documentation (l. 132-145)** : les `href` de la description sont coupés sur plusieurs lignes. Comme la description est un bloc `|` YAML, ces retours à la ligne sont conservés. Je pense donc que les URLs sont cassées, mais je ne l'ai pas vérifié au rendu. Les segments `auto‑entrepreneur` et `micro‑entreprise` semblent aussi contenir un tiret insécable (U+2011) à la place de `-`. J'ai proposé des liens markdown sur une seule ligne.\n- **Coquille (l. 102)** : `/q` devrait sans doute être `/`.\n\nSynthèse :\n- **Découpage** : j'ai signalé en nit que la PR mélange les rubriques retraite, les logos de références, le renommage Pôle emploi → France Travail et un reformatage sans rapport. Elle tient en un seul commit dont le titre ne mentionne que les rubriques retraite.\n- **Non vérifié** : le rendu des logos et des liens, et le contenu métier. Pour les règles Publicodes, j'ai seulement regardé que des références sont présentes."
+ }
+}

@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/hooks/useBarèmeLodeom.ts",
+  "start_line": 7,
+  "end_line": 7,
+  "message": "Je me demande si `barèmes` ne devrait pas être déclaré `as const`. Sans ça, `BarèmeLodeom = (typeof barèmes)[number]` vaut `string`, donc les comparaisons de `WarningSalaireTrans.tsx` (`currentBarème === 'compétitivité'`) ne sont pas vérifiées par TypeScript. Un renommage comme celui de cette PR, ou une coquille, passerait `yarn test:type` sans erreur et ferait disparaître silencieusement un avertissement. Avec `as const`, TypeScript signalerait toute valeur qui n'existe plus. Qu'en penses-tu ? (Ça existait avant la PR, mais le renommage rend le risque concret.)"
+ },
+ {
+  "message": "Le renommage est cohérent entre `lodeom.publicodes`, le hook, `WarningSalaireTrans.tsx` et les traductions : je n'ai pas trouvé de référence restée sur les anciens noms de possibilités. Je n'ai pas exécuté les tests ni le build.\n\nDeux points de forme :\n- Dans `rules-en.yaml`, le diff contient des changements de texte sans rapport avec le renommage (`€50 million` ↔ `50 million euros`, `does not apply` déplacé dans la balise `<strong>`), ainsi qu'une nouvelle `question` pour `innovation et croissance`. Ils ressemblent à du bruit de régénération automatique. Je me demande si ça vaut la peine de les garder dans ce commit.\n- Le premier commit déplace ~850 lignes vers de nouveaux fichiers. Je ne l'ai pas relu ligne à ligne. Si le contenu des règles y est resté identique, le préciser dans la description faciliterait la relecture."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3321,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/hooks/useBarèmeLodeom.ts",
+   "line": 7,
+   "start_line": null,
+   "body": "Je me demande si `barèmes` ne devrait pas être déclaré `as const`. Sans ça, `BarèmeLodeom = (typeof barèmes)[number]` vaut `string`, donc les comparaisons de `WarningSalaireTrans.tsx` (`currentBarème === 'compétitivité'`) ne sont pas vérifiées par TypeScript. Un renommage comme celui de cette PR, ou une coquille, passerait `yarn test:type` sans erreur et ferait disparaître silencieusement un avertissement. Avec `as const`, TypeScript signalerait toute valeur qui n'existe plus. Qu'en penses-tu ? (Ça existait avant la PR, mais le renommage rend le risque concret.)",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Le renommage est cohérent entre `lodeom.publicodes`, le hook, `WarningSalaireTrans.tsx` et les traductions : je n'ai pas trouvé de référence restée sur les anciens noms de possibilités. Je n'ai pas exécuté les tests ni le build.\n\nDeux points de forme :\n- Dans `rules-en.yaml`, le diff contient des changements de texte sans rapport avec le renommage (`€50 million` ↔ `50 million euros`, `does not apply` déplacé dans la balise `<strong>`), ainsi qu'une nouvelle `question` pour `innovation et croissance`. Ils ressemblent à du bruit de régénération automatique. Je me demande si ça vaut la peine de les garder dans ce commit.\n- Le premier commit déplace ~850 lignes vers de nouveaux fichiers. Je ne l'ai pas relu ligne à ligne. Si le contenu des règles y est resté identique, le préciser dans la description faciliterait la relecture."
+  }
+ ],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.16765820000000003,
+  "final_text": "J'ai relu la PR #3321 et posté un commentaire inline et une synthèse sur GitHub. Je n'ai pas lancé les tests ni le build.\n\n- **Cohérence du renommage :** il est cohérent entre `lodeom.publicodes`, le hook `useBarèmeLodeom.ts`, `WarningSalaireTrans.tsx` et les traductions. Je n'ai trouvé aucune référence restée sur les anciens noms de possibilités.\n- **Commentaire inline (`useBarèmeLodeom.ts`, ligne 7) :** `barèmes` n'est pas déclaré `as const`. `BarèmeLodeom` vaut donc `string`, et TypeScript ne vérifie pas les comparaisons de `WarningSalaireTrans.tsx`. Une coquille passerait `yarn test:type` et ferait disparaître un avertissement sans erreur.\n- **Synthèse :**\n  - `rules-en.yaml` contient des changements de texte sans rapport avec le renommage. Il s'agit de `€50 million` ↔ `50 million euros`, de `does not apply` déplacé dans la balise `<strong>`, et d'une nouvelle `question` pour `innovation et croissance`. Ils ressemblent à du bruit de régénération automatique.\n  - Le premier commit déplace environ 850 lignes de règles. Je ne l'ai pas relu ligne à ligne.\n- **Rien d'autre relevé :** il reste des règles nommées `barème compétitivité` dans `lodeom.publicodes` et dans la liste noire de `simulationConfig.ts`. Ces noms sont des règles, pas des possibilités renommées, donc je ne les ai pas signalés."
+ }
+}
+
+```

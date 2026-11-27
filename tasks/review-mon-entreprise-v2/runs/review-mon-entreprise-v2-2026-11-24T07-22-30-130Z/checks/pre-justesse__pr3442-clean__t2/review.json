@@ -1,0 +1,14 @@
+{
+ "pr": 3442,
+ "findings": [],
+ "gh": {
+  "calls": 3,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.16985419999999998,
+  "final_text": "Je n'ai pas pu poster mes remarques sur la PR : toutes mes commandes `gh api` ont été bloquées avec « Quoted text in this command can't be checked before it runs ». J'ai essayé trois formes (corps en ligne, puis fichiers temporaires), sans succès. Rien n'est publié.\n\nVoici les deux remarques que je voulais poster :\n\n1. **`Résultats.tsx`, lignes 198 à 208 (question).** Les deux lignes « Dont cotisations facultatives… » (activité conventionnée et autres activités non salariées) portent le même code `DSAR`. Est-ce voulu, c'est-à-dire deux montants reportés dans la même case, ou un copier-coller ? Si les cases diffèrent sur impots.gouv.fr, l'usager reportera le mauvais montant. Je n'ai pas pu vérifier le code attendu : `DSAR` n'apparaît pas dans les règles de `modele-social`.\n2. **`Résultats.tsx`, ligne 145 (nit).** Les clés de traduction `Bénéfice` et `Déficit` (aussi lignes 152, 166 et 173) ne suivent pas la clé hiérarchique `pages.assistants.declaration-revenus-pamc.resultats.label.N` des autres libellés du fichier.\n\n`gh pr checks` est au vert. Dites-moi si vous préférez que je réessaye, ou que vous les postiez vous-même."
+ }
+}

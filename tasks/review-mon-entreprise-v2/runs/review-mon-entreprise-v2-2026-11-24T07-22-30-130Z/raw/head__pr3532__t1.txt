@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 210,
+  "end_line": 210,
+  "message": "Je me demande si `date >= 03/2025` modélise bien la règle : les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », alors que `date` est la date de la simulation. Un contrat signé en 2024 simulé en avril 2025 passerait donc à 50 % du Smic (et à la CSG-CRDS partielle), alors qu_il reste à 79 % / exonération totale. Tu évoquais dans la description de la PR une question sur la date de début du contrat : je verrais bien celle-ci conditionner ces deux règles (la même condition est en l.228). Qu_en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Je ne vois pas le lien entre ce changement et la CSG-CRDS des apprentis : l_assiette de la taxe sur les salaires passe de `assiette + prévoyance employeur` à `CSG-CRDS . assiette de base`, qui applique en plus l_abattement de 1,75 % et celui des heures supplémentaires défiscalisées (cotisations.publicodes:483-495). Est-ce voulu, et avec quelle source ? Sinon, je le sortirais de cette PR (le snapshot de la taxe sur les salaires pourrait bouger)."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3532,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/contrat.publicodes",
+   "line": 210,
+   "start_line": null,
+   "body": "Je me demande si `date >= 03/2025` modélise bien la règle : les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », alors que `date` est la date de la simulation. Un contrat signé en 2024 simulé en avril 2025 passerait donc à 50 % du Smic (et à la CSG-CRDS partielle), alors qu_il reste à 79 % / exonération totale. Tu évoquais dans la description de la PR une question sur la date de début du contrat : je verrais bien celle-ci conditionner ces deux règles (la même condition est en l.228). Qu_en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/salarié.publicodes",
+   "line": 521,
+   "start_line": null,
+   "body": "Je ne vois pas le lien entre ce changement et la CSG-CRDS des apprentis : l_assiette de la taxe sur les salaires passe de `assiette + prévoyance employeur` à `CSG-CRDS . assiette de base`, qui applique en plus l_abattement de 1,75 % et celui des heures supplémentaires défiscalisées (cotisations.publicodes:483-495). Est-ce voulu, et avec quelle source ? Sinon, je le sortirais de cette PR (le snapshot de la taxe sur les salaires pourrait bouger).",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 8,
+  "cost_usd": 0.1561268,
+  "final_text": "J'ai posté deux commentaires inline sur la PR 3532. Les vérifications de la PR (`gh pr checks`) sont au vert.\n\n- **`contrat.publicodes:210`** : la condition `date >= 03/2025` porte sur la date de simulation. Les descriptions parlent pourtant de « contrats conclus depuis le 1er mars 2025 ». Un contrat signé en 2024 et simulé en avril 2025 passerait à 50 % du Smic (et à la CSG-CRDS partielle), alors qu'il reste à 79 % et à l'exonération totale. Je propose que la date de début du contrat conditionne ces règles. La même condition apparaît à la ligne 228.\n- **`salarié.publicodes:521`** : l'assiette de la taxe sur les salaires passe à `CSG-CRDS . assiette de base`. Elle reçoit ainsi les abattements de 1,75 % et des heures supplémentaires défiscalisées. Je ne vois pas le lien avec la CSG-CRDS des apprentis, et je demande si c'est voulu et sur quelle source. Sinon, ce changement serait à sortir de la PR.\n\nLes deux commentaires contenaient des `_` à la place des apostrophes. Mes deux tentatives de correction avec `PATCH` n'ont pas abouti : la commande combinée a demandé une approbation, et je n'ai rien relancé. Les commentaires restent donc tels quels sur GitHub."
+ }
+}
+
+```

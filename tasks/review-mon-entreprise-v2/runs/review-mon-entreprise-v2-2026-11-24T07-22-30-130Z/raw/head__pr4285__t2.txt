@@ -1,0 +1,82 @@
+```file:findings.json
+[
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "Je me demande si le `0.5 *` ne devrait pas être dans la puissance : la formule du BOSS est `Tdelta × [½ × (3 × Smic / rémunération − 1)]^P`, alors qu’ici on calcule `½ × (3 × Smic / rémunération − 1)^P`. Pour une rémunération à 2 Smic, par exemple, on obtient `0,5 × 0,5^1,75 ≈ 0,148` au lieu de `0,25^1,75 ≈ 0,088`, et le coefficient est plafonné à `Tmin + Tdelta` plus tôt que prévu au voisinage du Smic. Les snapshots ont-ils été comparés à un calcul de référence (simulateur Urssaf) ?\n```suggestion\n            - (0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P\n```"
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 49,
+  "end_line": 49,
+  "message": "Ce `valeur: réduction générale` pointe vers l’ancienne règle, donc le plafond DFS (130 %) est calculé avec l’ancienne formule (1,6 Smic) et pas avec la RGDU. Pour un salarié avec DFS, la RGDU sera plafonnée sur la base de l’ancien montant. Je verrais plutôt `valeur: RGDU` (avec le même contexte) ; je ne vois pas de test DFS qui le couvrirait, qu’en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 29,
+  "end_line": 29,
+  "message": "Le `coefficient de majoration` (caisse de congés payés, ×100/90) de l’ancienne règle n’est plus repris dans la RGDU. Est-ce voulu par la réforme ? Sinon la question `caisse de congés payés` n’a plus d’effet sur la réduction calculée."
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+  "start_line": 54,
+  "end_line": 54,
+  "message": "Après cette PR, quels consommateurs lisent encore `réduction générale` (imputations retraite/chômage, `T`, `régularisation`) ? Si la RGDU la remplace pour 2026, deux règles coexistent avec deux formules et leurs montants peuvent diverger (voir le plafond DFS plus haut). Je me demande s’il faut migrer ce qui en dépend, ou documenter ce qui reste volontairement sur l’ancien calcul."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 32,
+   "start_line": null,
+   "body": "Je me demande si le `0.5 *` ne devrait pas être dans la puissance : la formule du BOSS est `Tdelta × [½ × (3 × Smic / rémunération − 1)]^P`, alors qu’ici on calcule `½ × (3 × Smic / rémunération − 1)^P`. Pour une rémunération à 2 Smic, par exemple, on obtient `0,5 × 0,5^1,75 ≈ 0,148` au lieu de `0,25^1,75 ≈ 0,088`, et le coefficient est plafonné à `Tmin + Tdelta` plus tôt que prévu au voisinage du Smic. Les snapshots ont-ils été comparés à un calcul de référence (simulateur Urssaf) ?\n```suggestion\n            - (0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P\n```",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 49,
+   "start_line": null,
+   "body": "Ce `valeur: réduction générale` pointe vers l’ancienne règle, donc le plafond DFS (130 %) est calculé avec l’ancienne formule (1,6 Smic) et pas avec la RGDU. Pour un salarié avec DFS, la RGDU sera plafonnée sur la base de l’ancien montant. Je verrais plutôt `valeur: RGDU` (avec le même contexte) ; je ne vois pas de test DFS qui le couvrirait, qu’en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 29,
+   "start_line": null,
+   "body": "Le `coefficient de majoration` (caisse de congés payés, ×100/90) de l’ancienne règle n’est plus repris dans la RGDU. Est-ce voulu par la réforme ? Sinon la question `caisse de congés payés` n’a plus d’effet sur la réduction calculée.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 54,
+   "start_line": null,
+   "body": "Après cette PR, quels consommateurs lisent encore `réduction générale` (imputations retraite/chômage, `T`, `régularisation`) ? Si la RGDU la remplace pour 2026, deux règles coexistent avec deux formules et leurs montants peuvent diverger (voir le plafond DFS plus haut). Je me demande s’il faut migrer ce qui en dépend, ou documenter ce qui reste volontairement sur l’ancien calcul.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 8,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4284: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.23296409999999995,
+  "final_text": "J'ai relu la PR et posté 4 commentaires inline sur `réduction-générale.publicodes`. Je n'ai exécuté ni build ni tests. Le workflow « Vérification PR » est au vert, mais les snapshots ne prouvent pas que la formule est juste.\n\n- **Formule du coefficient (ligne 32) :** le `0.5 *` est hors de la puissance, alors que la formule du BOSS le met dedans. Par exemple, à 2 Smic on obtient environ 0,148 au lieu de 0,088. J'ai joint une suggestion de correction.\n- **Plafond DFS (ligne 49) :** il s'appuie encore sur l'ancienne règle `réduction générale`, donc sur l'ancienne formule (1,6 Smic). Pour un salarié avec DFS, la RGDU serait plafonnée sur un mauvais montant.\n- **Caisse de congés payés (ligne 29) :** le coefficient de majoration de l'ancienne règle n'est plus repris dans la RGDU. J'ai posé la question de savoir si c'est voulu.\n- **Deux règles qui coexistent (ligne 54) :** l'ancienne `réduction générale` reste lue par les imputations, `T` et la régularisation. J'ai demandé si ces dépendances doivent migrer ou être documentées.\n\nJe n'ai pas pu lire l'issue #4284 : l'API renvoie 404, donc je n'ai pas vérifié ce que la PR devait traiter."
+ }
+}
+
+```

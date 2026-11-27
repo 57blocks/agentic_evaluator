@@ -1,0 +1,30 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/integration/Library.tsx",
+      "start_line": 107,
+      "end_line": 107,
+      "message": "Je pense que l’espace entre `modele-as,` et `modele-ti` va disparaître au rendu : en JSX, le retour à la ligne entre `</Code>,` et `<Code>` est supprimé, donc on obtiendrait « modele-as,modele-ti » (je n’ai pas vérifié visuellement). Un `{' '}` après la virgule règlerait ça. Qu’en penses-tu ?"
+    },
+    {
+      "file": "site/source/pages/integration/Library.tsx",
+      "start_line": 178,
+      "end_line": 178,
+      "message": "Cette section « Utilisation » et la suivante (exemples CodeSandbox) restent centrées sur `modele-social`, alors que le reste de la page oriente désormais vers `modele-as` / `modele-ti`. Je me demande si un lecteur qui choisit `modele-as` saura comment adapter l’exemple (import, règle à évaluer). Je n’ai pas pu ouvrir les sandbox pour vérifier si elles sont à jour : une phrase d’explication, ou un exemple en `modele-as`, aiderait peut-être ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

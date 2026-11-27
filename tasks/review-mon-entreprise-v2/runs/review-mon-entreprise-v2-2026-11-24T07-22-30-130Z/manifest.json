@@ -1,0 +1,452 @@
+{
+  "protocol_version": "0.3",
+  "run_id": "review-mon-entreprise-v2-2026-11-24T07-22-30-130Z",
+  "run_name": "review-mon-entreprise-v2",
+  "step": {
+    "id": "review",
+    "version": "1",
+    "description": "Review one historical PR the way the production workflow does; the check pairs the posted comments with the defects that later had to be fixed."
+  },
+  "spec": {
+    "path": "tasks/review-mon-entreprise-v2/spec.yaml",
+    "sha256": "a5d199633e401af20026d462af832f66ade0d6bfc4b8985e82a20709de44317d"
+  },
+  "description": "Would mon-entreprise's AI reviewer have caught the bugs that escaped review? Their own Claude Code reviewer, replayed on PRs that later needed a fix, with three historical versions of its prompt (go-live, before correctness was added, current). Escaped PRs are graded by whether its comments land on the known defects; size-matched clean PRs by whether any comment claims a defect.",
+  "caveats": [
+    "The matcher's LLM (google/gemini-3.1-pro-preview) decides every catch and every defect claim, and has not been calibrated against people.",
+    "Defect labels were confirmed by a model review (mining/label-review.json), not by a person; six are flagged there for a human.",
+    "These PRs predate the reviewer model's training cutoff, so it may have seen the fixes: read the catch rate as an upper bound.",
+    "With 18 defect PRs and 14 clean ones, only a difference of about 20 points between prompts could show."
+  ],
+  "test_set": {
+    "id": "me-escaped-v2",
+    "inputs": {
+      "pr2692": "0ac37fbb69b6de18187ee931aa160f0d0d7e6311a19cd588885646100b8216fd",
+      "pr2963": "89a954b73e56c70aaa88ffc429410ba54ba1b151de60c121289ffa926850b430",
+      "pr3189": "d305dc8c757b631242528a570b1fa87c90ef15e7917c76563dbe1ccadf012300",
+      "pr3266": "19c0f4d61e83aa2a34ccfe1f73bee424ea2375b1df232ddbaf1e072b299dda60",
+      "pr3280-clean": "d632bb903787a157039dc1a2e8e8a3e0e7e259586ad9546776120b26e7f6aaa7",
+      "pr3285-clean": "7780a24abd94f7e61930dd4e656bed7282672d6728d40fb70d520b10f1fcc90d",
+      "pr3321": "a99269ef4269822c8ea9424da6433fc7f220fb4a73942222de1c88031596a28b",
+      "pr3385-clean": "e9898e222e5ba8c720872c4860bf0f0d1e12010997eac25bc43a6f43ca99734c",
+      "pr3442-clean": "4ad7a6ada46dc77e706bc37981bd986d3c3e1313fc5c8d915ad36316682e8df3",
+      "pr3444-clean": "1beebd903aaab565a3d8087e80c85f33b178a7be476796af6d0da9fe56d0b45d",
+      "pr3459": "53e72ad564e74d56841a7a6ae50400e4b84dad3754865b5ad6700dfeac8776a4",
+      "pr3532": "63da4b3641487467867762ade324f5266cb681a4ccd6a063c9ea6cf727c6e845",
+      "pr3632-clean": "35a92cb5cb98add45805b08dcdf718641e3eef0f7bf05a002bc561cb7c26eb71",
+      "pr3670": "5b361380467918bd7881152a98ce905396763f15c9f101239c9d821de18ace61",
+      "pr3722": "501e26123feb01ec68729f2677ddfc700f7c8d14f8d55952d6671520cf30f13f",
+      "pr3746-clean": "6b4133c182a449412eca18a9f3016e0fdbcc89154aab32615262ac1ed42968be",
+      "pr4159": "f8a25833c3c2fa26485eab97717252900993f3022ece2b2803d27fb98df5cfc5",
+      "pr4160": "fcd67f6a8b9ea8ed427c531650ad19a2caf57b701489bb0e11e3914b3cfa2d4b",
+      "pr4164": "807db4f1fc0df507470dc67860c79e30fb43e73b7702e8a46a49c185a857c918",
+      "pr4285": "528cb2c1818d6f641d6b59f1b00b74ff9898d804cda13dcfab27cb3494ecc2b3",
+      "pr4311": "129e62f046a759f054e0a7ff3bad2cf95b5edc0e2865049b33436f57a422dea9",
+      "pr4324": "36c8511ba7e8e51a0c92a82304b6d7e27eaf1da3638d7f541306916694754432",
+      "pr4427-clean": "9635c1e08539f52c0804857f3c9691aebb24e1140a45fffe92c8297b9e18ae57",
+      "pr4490-clean": "12d6e3627593ee9d2c5f2a09a6c071d3f52cbecd9e4fdc950576e52d126566ea",
+      "pr4534-clean": "4119a2cf6f80d164347523dc2c8cfa74bec1df312ce15a352142505b02ee21b8",
+      "pr4567-clean": "315731fb5ace42377d77e7704e6cb54e453e069e83c5d8b3ded7ccaca9103c02",
+      "pr4570": "81541351103c7eea18513e6d2873ba8f177e80be00dac0b2f205b33520cd56f2",
+      "pr4575": "815639f9925bd634371c8c90c70744f9ccf77819283c8dd9ca5b41ecfaf03854",
+      "pr4596": "e823141fd324cce8d7454869f6c07b7c08a046b5338538958cfb8ad5c2cc6fa0",
+      "pr4606-clean": "0ef410e56bfb06d7e3564cc3158f1b29051b3bf947afa32bdcfc0074a7b37079",
+      "pr4609-clean": "85679c7ceed25909dc8718c81abbba2d1fd6e9346eb81b22446e3dfc478b048c",
+      "pr4653-clean": "029051b4142382c3a2c96bcee823d43cc0fe2bd4bed321dadbe49a7c66bf0b86"
+    },
+    "labels": {
+      "pr2692": {
+        "tags": [
+          "escaped",
+          "crash",
+          "high",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr2963": {
+        "tags": [
+          "escaped",
+          "calculation",
+          "state",
+          "medium",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr3189": {
+        "tags": [
+          "escaped",
+          "calculation",
+          "medium",
+          "not-knowable"
+        ],
+        "split": "dev"
+      },
+      "pr3266": {
+        "tags": [
+          "escaped",
+          "logic",
+          "low",
+          "not-knowable"
+        ],
+        "split": "dev"
+      },
+      "pr3280-clean": {
+        "tags": [
+          "clean",
+          "lines:1-200"
+        ],
+        "split": "dev"
+      },
+      "pr3285-clean": {
+        "tags": [
+          "clean",
+          "lines:1-200"
+        ],
+        "split": "dev"
+      },
+      "pr3321": {
+        "tags": [
+          "escaped",
+          "logic",
+          "low",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr3385-clean": {
+        "tags": [
+          "clean",
+          "lines:200-1000"
+        ],
+        "split": "dev"
+      },
+      "pr3442-clean": {
+        "tags": [
+          "clean",
+          "lines:1000-5000"
+        ],
+        "split": "dev"
+      },
+      "pr3444-clean": {
+        "tags": [
+          "clean",
+          "lines:1000-5000"
+        ],
+        "split": "dev"
+      },
+      "pr3459": {
+        "tags": [
+          "escaped",
+          "crash",
+          "calculation",
+          "ui",
+          "medium",
+          "high",
+          "low",
+          "partly-knowable"
+        ],
+        "split": "dev"
+      },
+      "pr3532": {
+        "tags": [
+          "escaped",
+          "calculation",
+          "high",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr3632-clean": {
+        "tags": [
+          "clean",
+          "lines:1000-5000"
+        ],
+        "split": "dev"
+      },
+      "pr3670": {
+        "tags": [
+          "escaped",
+          "state",
+          "medium",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr3722": {
+        "tags": [
+          "escaped",
+          "state",
+          "low",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr3746-clean": {
+        "tags": [
+          "clean",
+          "lines:1-200"
+        ],
+        "split": "dev"
+      },
+      "pr4159": {
+        "tags": [
+          "escaped",
+          "logic",
+          "medium",
+          "not-knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4160": {
+        "tags": [
+          "escaped",
+          "calculation",
+          "state",
+          "medium",
+          "high",
+          "partly-knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4164": {
+        "tags": [
+          "escaped",
+          "state",
+          "high",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4285": {
+        "tags": [
+          "escaped",
+          "calculation",
+          "high",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4311": {
+        "tags": [
+          "escaped",
+          "logic",
+          "low",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4324": {
+        "tags": [
+          "escaped",
+          "calculation",
+          "medium",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4427-clean": {
+        "tags": [
+          "clean",
+          "lines:200-1000"
+        ],
+        "split": "dev"
+      },
+      "pr4490-clean": {
+        "tags": [
+          "clean",
+          "lines:200-1000"
+        ],
+        "split": "dev"
+      },
+      "pr4534-clean": {
+        "tags": [
+          "clean",
+          "lines:200-1000"
+        ],
+        "split": "dev"
+      },
+      "pr4567-clean": {
+        "tags": [
+          "clean",
+          "lines:200-1000"
+        ],
+        "split": "dev"
+      },
+      "pr4570": {
+        "tags": [
+          "escaped",
+          "ui",
+          "low",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4575": {
+        "tags": [
+          "escaped",
+          "crash",
+          "high",
+          "knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4596": {
+        "tags": [
+          "escaped",
+          "calculation",
+          "medium",
+          "not-knowable"
+        ],
+        "split": "dev"
+      },
+      "pr4606-clean": {
+        "tags": [
+          "clean",
+          "lines:200-1000"
+        ],
+        "split": "dev"
+      },
+      "pr4609-clean": {
+        "tags": [
+          "clean",
+          "lines:1-200"
+        ],
+        "split": "dev"
+      },
+      "pr4653-clean": {
+        "tags": [
+          "clean",
+          "lines:5000-20000"
+        ],
+        "split": "dev"
+      }
+    }
+  },
+  "candidates": {
+    "v0": {
+      "id": "v0",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/review.mjs",
+          "prompts/v0-2026-09-11.md",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "trace": "claude-code",
+        "version_files": [
+          "agents/review.mjs",
+          "agents/bin/gh",
+          "prompts/v0-2026-09-11.md"
+        ],
+        "env": {
+          "CLAUDE_CODE_OAUTH_TOKEN": "${CLAUDE_CODE_OAUTH_TOKEN}"
+        },
+        "version_sha": "93786a18a2cbbe2075a43025e39fb2a3393baa4dcfce788dd34bbcb2ec73cdf4"
+      }
+    },
+    "pre-justesse": {
+      "id": "pre-justesse",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/review.mjs",
+          "prompts/pre-justesse-2026-10-01.md",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "trace": "claude-code",
+        "version_files": [
+          "agents/review.mjs",
+          "agents/bin/gh",
+          "prompts/pre-justesse-2026-10-01.md"
+        ],
+        "env": {
+          "CLAUDE_CODE_OAUTH_TOKEN": "${CLAUDE_CODE_OAUTH_TOKEN}"
+        },
+        "version_sha": "bed55902cb33c0886ce1c4b96a6d5e3ec0e01a7e2b8d94cd2602d9a2aa692dcf"
+      }
+    },
+    "head": {
+      "id": "head",
+      "adapter": "agent-cli",
+      "model": "anthropic/claude-sonnet-5.5",
+      "cli": {
+        "argv": [
+          "node",
+          "agents/review.mjs",
+          "prompts/head-2026-11-17.md",
+          "claude-sonnet-5-5",
+          "{{max_cost_usd}}"
+        ],
+        "trace": "claude-code",
+        "version_files": [
+          "agents/review.mjs",
+          "agents/bin/gh",
+          "prompts/head-2026-11-17.md"
+        ],
+        "env": {
+          "CLAUDE_CODE_OAUTH_TOKEN": "${CLAUDE_CODE_OAUTH_TOKEN}"
+        },
+        "version_sha": "881cfe92ae1833aab2d2b3e9a4bf01bbc87a79a2f1f3659097a4b262627cd1a0"
+      }
+    }
+  },
+  "control_candidate": "v0",
+  "judge": {
+    "model": "google/gemini-3.1-pro-preview",
+    "provider_route": "openrouter",
+    "methods": []
+  },
+  "evaluators": {
+    "required_checks": [
+      "caught"
+    ],
+    "check_version": "findings-match-3+opts-6db196e9",
+    "rubric_sha256": "82dfc70509966a845c37c3ce4b71671dbc3404c594288f9ffa07abcc52e4a2c7",
+    "check_description": "One judge call per PR (google/gemini-3.1-pro-preview) reads every posted comment against every known defect: a comment that names the fault catches it, wherever it sits. On a clean PR, the same judge says which comments claim a defect.",
+    "check_report": null,
+    "producer_template_sha256": "55362aba271c69fc9045bddda71c4f84becf85cbb0ec41243a9fd5a0b01c45b6",
+    "judge_template_sha256": "ad4196f1e904094f0c6e3f47684536db24ad56d3b89d69912ea14872f01c4395",
+    "score_template_sha256": "3fdd3f9080697ebd9edfb5b46f2b25cb4520bd165750795496fc93853a72b744"
+  },
+  "prompts": null,
+  "success_criteria": {
+    "mandatory_checks": "all"
+  },
+  "operating_mode": "highest-assurance",
+  "decision": "scorecard",
+  "eligibility": {
+    "minimum_reliability": null,
+    "minimum_required_check_pass_rate": null,
+    "minimum_all_trials_pass_rate": null,
+    "maximum_p95_ms": null,
+    "cost_ceiling_per_success_usd": null
+  },
+  "minimum_meaningful_difference": null,
+  "execution": {
+    "trials_per_case": 3,
+    "concurrency": 4,
+    "timeout_ms": 900000,
+    "benchmark_mode": "production-realistic",
+    "cache_mode": "cold",
+    "early_stop": false,
+    "outage_wait_seconds": 600,
+    "max_consecutive_provider_errors": 10,
+    "max_consecutive_timeouts": 10
+  },
+  "harness": {
+    "name": "@57block/agenteval",
+    "version": "0.4.0",
+    "git_sha": "52fd97d2",
+    "node": "v24.14.0"
+  },
+  "started_at": "2026-11-24T07:22:30.130Z",
+  "finished_at": "2026-11-24T07:30:29.858Z"
+}

@@ -1,0 +1,26 @@
+[
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 30,
+  "end_line": 30,
+  "message": "Si Redis est indisponible (avec `enableOfflineQueue: false`, `get` rejette tout de suite), `/evaluate` répond une 500 alors que le cache n’est qu’une optimisation. Je verrais bien un `try/catch` autour des accès Redis pour retomber sur `await next()`. Qu’en penses-tu ?"
+ },
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 29,
+  "end_line": 29,
+  "message": "La clé est le body seul, sans lien avec la version des règles : après un déploiement qui change `modele-social`, les usagers peuvent recevoir pendant 2 h un résultat calculé avec les anciennes règles. Je me demande si on ne devrait pas inclure une version (ou un hash des règles) dans la clé, et un préfixe du type `evaluate:` pour ne pas mélanger avec d’autres usages de Redis."
+ },
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 42,
+  "end_line": 42,
+  "message": "La première réponse (non cachée) n’a pas `responseCachedAt`, alors que les suivantes l’ont : le format de réponse diffère selon le passage. Est-ce voulu ? Par ailleurs, ce spread suppose que `ctx.body` est un objet ; qu’en est-il si la réponse est un tableau ?"
+ },
+ {
+  "file": "api/source/index.ts",
+  "start_line": 50,
+  "end_line": 50,
+  "message": "`plausibleMiddleware` passe désormais après le cache : les réponses servies depuis Redis ne sont plus comptées dans les stats. Le changement d’ordre est-il voulu ? Je me demande aussi si `apiRoutes` relit le body, déjà consommé par `koaBody()` dans le cache."
+ }
+]

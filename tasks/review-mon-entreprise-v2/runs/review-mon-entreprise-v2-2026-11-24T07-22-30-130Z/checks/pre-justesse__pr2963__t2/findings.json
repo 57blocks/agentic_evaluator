@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 92,
+  "end_line": 92,
+  "message": "Je me demande si cet `engine` est le bon pour la simulation comparateur : dans le `forEach` plus haut, `engine` est masqué par chaque copie de `engines`, donc ici on évalue sur le moteur d’origine, dont la situation n’est pas posée par ce middleware (seules les copies reçoivent `setSituation`). Pour une config comparateur, l’applicabilité des questions répondues ne serait alors pas évaluée sur la bonne situation. Est-ce voulu, ou faut-il évaluer sur `engines[0]` (ou sur chaque contexte) ?"
+ },
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 29,
+  "end_line": 32,
+  "message": "Ces quatre `let` au niveau du module sont de l’état caché partagé entre toutes les instances du middleware : un second store (tests, SSR Next, remontage du Provider) hérite du `lastSimulation` / `engines` du précédent et peut sauter le recalcul des questions suivantes. Je verrais bien les ranger dans la closure de `prendLaProchaineQuestionMiddleware(engine)`, pour que l’état vive et meure avec le store. Qu’en penses-tu ?"
+ }
+]

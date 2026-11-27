@@ -1,0 +1,33 @@
+{
+ "pr": 4285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 49,
+   "start_line": null,
+   "body": "Je me demande si cette référence ne vise pas l’ancienne règle. `réduction générale` se résout ici vers `exonérations . réduction générale`, qui existe toujours plus bas dans ce fichier avec l’ancienne formule (T / 0.6, 1.6 × Smic). Le plafond « DFS » de la RGDU serait alors calculé avec l’ancien coefficient et non avec le nouveau. Ne faudrait-il pas viser `RGDU` (avec le même `contexte`) ? Et, plus largement, que devient l’ancienne règle : si plus rien ne s’en sert (hormis JEI.publicodes:38 et `régularisation`), la garder ne risque-t-il pas de faire diverger les deux calculs ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 34,
+   "start_line": null,
+   "body": "Question : cette RGDU n’a pas de `imputation retraite complémentaire`, `imputation sécurité sociale` ni `imputation chômage`, et pas de majoration pour les caisses de congés payés, alors que l’ancienne règle les portait. Ces éléments sont-ils volontairement abandonnés (ou à venir dans une autre PR) ? Les bulletins/détails de cotisations qui les utilisaient pointent encore vers l’ancienne règle.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4284: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1702558,
+  "final_text": "J'ai posté deux commentaires inline sur la PR #4285, rien d'autre. Je n'ai exécuté ni build ni tests. Le check « Vérification PR » est vert.\n\n- **`réduction-générale.publicodes:49`** : dans la règle RGDU, le plafond DFS contient `valeur: réduction générale`. Cette référence me semble se résoudre vers l'ancienne règle `exonérations . réduction générale`, toujours présente plus bas avec l'ancienne formule. Dans ce cas, le plafond DFS serait calculé avec l'ancien coefficient. Je demande aussi ce que devient l'ancienne règle.\n- **`réduction-générale.publicodes:34`** : en question, la nouvelle règle n'a plus les règles d'imputation (retraite complémentaire, sécurité sociale, chômage) ni la majoration pour caisse de congés payés. Sont-elles abandonnées volontairement ou prévues dans une autre PR ?\n\nJe n'ai pas pu lire l'issue #4284 : l'API renvoie 404."
+ }
+}

@@ -1,0 +1,63 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+      "start_line": 24,
+      "end_line": 24,
+      "message": "Je me demande si retirer l'ACRE de cette condition est sans effet pour les indépendants hors auto-entrepreneur : le message ACRE plus bas ne parle que des auto-entrepreneurs, et l'ancien texte disait que le calcul des droits n'était pas implémenté avec l'ACRE. Les trimestres et points affichés sont-ils bien corrects dans ce cas ? Si oui, une source (ou un test) me rassurerait ; sinon l'affichage pourrait induire l'usager en erreur."
+    },
+    {
+      "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+      "start_line": 329,
+      "end_line": 329,
+      "message": "Je me demande ce qu'affiche cette somme quand certaines règles ne sont pas applicables (ex. un indépendant PL non-AE, pour qui DroitsRetraite affiche « non connue »). Si les règles non applicables comptent pour 0, la carte indiquerait « 0 point acquis par an », ce qui est différent de « non calculable ». Est-ce vérifié ?"
+    },
+    {
+      "file": "site/source/components/EngineValue/Condition.tsx",
+      "start_line": 27,
+      "end_line": 27,
+      "message": "nit: un TODO sans changement de comportement dans cette PR ; l'issue #4323 suffit à tracer le sujet, je retirerais le commentaire du code."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+          "start_line": 307,
+          "end_line": 307
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

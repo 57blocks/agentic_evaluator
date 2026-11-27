@@ -1,0 +1,43 @@
+{
+ "pr": 4285,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 32,
+   "start_line": null,
+   "body": "Je me demande si le `0.5` ne devrait pas être dans la puissance. Si je lis bien la formule du BOSS (que je n’ai pas pu rouvrir ici, à vérifier), c’est `Tmin + Tdelta × ((1/2) × (3 × Smic / rémunération − 1))^P`. Ici on calcule `0.5 × (x ** P)`. Au Smic les deux plafonnent à Tmax, mais ailleurs ils divergent : à 1,5 Smic, `x = 1`, donc `(0.5)^1.75 ≈ 0,30` d’un côté et `0,5` de l’autre. Qu’en penses-tu ? Un test unitaire avec une valeur de référence du simulateur Urssaf (par ex. à 1,5 Smic) lèverait le doute.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 49,
+   "start_line": null,
+   "body": "Cette référence pointe vers l’ancienne `réduction générale` (formule en `1.6 × Smic`), pas vers `RGDU`. Le plafond « DFS × 130 % » est donc calculé sur l’ancien allègement. Je pense que ça fausse le résultat pour les régimes DFS, mais je n’ai pas pu l’exécuter. Il faudrait peut-être `valeur: RGDU`, avec le contexte `régimes spécifiques . DFS: non`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "line": 54,
+   "start_line": null,
+   "body": "Je me demande pourquoi l’ancienne règle `réduction générale` reste à côté de `RGDU`. Elle est encore utilisée par `RGDU` (DFS), par `JEI` et par `site/source/utils/réductionDeCotisations.ts:18`. Les imputations retraite complémentaire, sécurité sociale et chômage et la majoration `caisse de congés payés` n’existent que sur l’ancienne règle. La majoration disparaît donc du calcul RGDU. Deux formules en parallèle risquent de diverger, et la question `caisse de congés payés` reste posée alors qu’elle n’agit plus sur le montant. Est-ce volontaire (migration en deux temps) ? Sinon, je migrerais ces éléments vers `RGDU`.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse : je n’ai trouvé aucun test (règle ou domaine) qui couvre le calcul RGDU. Seuls des snapshots ont été mis à jour, et ils figent le résultat sans le valider contre une valeur de référence. Un test avec 2 ou 3 valeurs officielles (Smic, 1,5 Smic, près de 3 Smic, effectif < 50 et ≥ 50, DFS) protégerait la formule. Le composant `AvertissementRéformeRGDUNonImplémentée` garde ce nom alors que la réforme est implémentée ; il reste utilisé dans `RéductionGénérale.tsx`, et je n’ai pas pu vérifier si ce simulateur passe par la nouvelle règle. L’historique est découpé en commits cohérents. Je n’ai pas lu le détail des snapshots ni le rendu visuel."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 11,
+  "cost_usd": 0.24563860000000004,
+  "final_text": "J'ai relu la PR #4285 et posté trois commentaires inline et une synthèse sur GitHub. Je n'ai exécuté ni le code ni les tests, et je n'ai pas relu les snapshots.\n\n**Commentaires inline** (tous sur `réduction-générale.publicodes`) :\n- **Ligne 32, formule RGDU :** le `0.5` est hors de la puissance (`0.5 * (x ** P)`). D'après ma lecture de la formule du BOSS, il devrait être dedans. Je n'ai pas pu rouvrir la source pour confirmer, donc je l'ai formulé comme une question. À 1,5 Smic, on obtiendrait environ 0,30 d'un côté et 0,5 de l'autre.\n- **Ligne 49, plafond DFS :** il référence encore l'ancienne règle `réduction générale` au lieu de `RGDU`. Le plafond « DFS × 130 % » serait donc calculé sur l'ancienne formule. Je n'ai pas pu l'exécuter pour le vérifier.\n- **Ligne 54, ancienne règle conservée :** `réduction générale` reste utilisée par `RGDU` (DFS), par `JEI` et par `réductionDeCotisations.ts`. La majoration `caisse de congés payés` et les imputations n'existent que sur l'ancienne règle, donc la majoration disparaît du calcul RGDU. Je demande si c'est voulu.\n\n**Synthèse :** aucun test ne couvre le calcul RGDU, seuls des snapshots ont changé. J'y suggère quelques valeurs officielles à tester. J'y signale aussi que `AvertissementRéformeRGDUNonImplémentée` garde son nom alors que la réforme est implémentée, et qu'il est encore utilisé dans `RéductionGénérale.tsx`.\n\nJ'avais préparé un commentaire inline sur ce composant, mais il n'est pas parti. J'ai reporté cette remarque dans la synthèse."
+ }
+}

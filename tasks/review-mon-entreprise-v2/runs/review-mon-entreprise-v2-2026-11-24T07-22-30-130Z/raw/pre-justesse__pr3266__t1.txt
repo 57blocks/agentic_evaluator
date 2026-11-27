@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Ici la clé est `réductionGénérale`, alors que `MonthState` porte `réduction`. Comme on étale `...monthData`, TypeScript ne le signale pas et l’ancienne `réduction` est conservée. Si l’utilisateur remet toutes les rémunérations à 0 après une saisie, je crois que les montants précédents resteraient affichés. Il s’agit peut-être d’un reste du renommage depuis la réduction générale. Qu’en penses-tu ?\n```suggestion\n\t\t\t\tréduction: {\n```"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3266,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/utils/réductionDeCotisations.ts",
+   "line": 267,
+   "start_line": null,
+   "body": "Ici la clé est `réductionGénérale`, alors que `MonthState` porte `réduction`. Comme on étale `...monthData`, TypeScript ne le signale pas et l’ancienne `réduction` est conservée. Si l’utilisateur remet toutes les rémunérations à 0 après une saisie, je crois que les montants précédents resteraient affichés. Il s’agit peut-être d’un reste du renommage depuis la réduction générale. Qu’en penses-tu ?\n```suggestion\n\t\t\t\tréduction: {\n```",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.1435635,
+  "final_text": "J'ai posté un seul commentaire inline sur la PR, dans `site/source/utils/réductionDeCotisations.ts`, ligne 267.\n\nDans `reevaluateRéductionMoisParMois`, le cas où la rémunération totale est nulle renvoie une clé `réductionGénérale` au lieu de `réduction`. `MonthState` ne porte que `réduction`, et comme `monthData` est étalé juste avant, TypeScript ne signale rien. L'ancienne réduction resterait donc en place, et les montants précédents resteraient affichés après une remise à zéro des rémunérations. Je l'ai posé en question, avec une suggestion d'une ligne pour corriger la clé.\n\nJe n'ai relevé aucun autre défaut qui vaille un commentaire. Je n'ai exécuté ni build ni test : le check « Vérification PR » est vert d'après `gh pr checks`."
+ }
+}
+
+```

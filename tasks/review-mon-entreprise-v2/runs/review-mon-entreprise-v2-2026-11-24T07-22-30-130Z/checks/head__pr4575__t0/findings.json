@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/vite.config.ts",
+  "start_line": 208,
+  "end_line": 208,
+  "message": "Je vois que `'next'` est remplacé par `'main'` dans la liste des branches de production, alors que le commit ne parle que d'adaptateur d'environnement. Si une branche `next` est encore déployée en production, elle passerait en `staging` (Sentry, Plausible sur `dev.mon-entreprise.fr`, logs de branche). Est-ce voulu ? Si oui, je le mettrais dans son propre commit avec une explication."
+ }
+]

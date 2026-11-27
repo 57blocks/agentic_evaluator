@@ -1,0 +1,52 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/storage/sanitizePersistedSituation.ts",
+  "start_line": 13,
+  "end_line": 13,
+  "message": "Les valeurs qui ne sont ni une chaîne, ni un nombre, ni `{ valeur, unité }` sont écartées sans trace. Je me demande si une situation légitime peut en contenir d'autres (une expression Publicodes plus riche, `null` pour désactiver une règle, un booléen) : l'usager perdrait alors silencieusement cette réponse à la restauration. Peut-on être sûr que `SituationPublicodes` ne couvre que ces trois formes ? Sinon, je garderais ces valeurs telles quelles et ne convertirais que le cas problématique."
+ },
+ {
+  "file": "site/source/domaine/searchParams.ts",
+  "start_line": 32,
+  "end_line": 32,
+  "message": "Avant, une valeur non encodable laissait au moins un `console.error` ; maintenant elle disparaît de l'URL sans aucun signal. Le lien partagé perd alors une réponse sans qu'on puisse le diagnostiquer. Qu'en penses-tu de conserver une trace pour ce cas (`else`) ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4427,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/storage/sanitizePersistedSituation.ts",
+   "line": 13,
+   "start_line": null,
+   "body": "Les valeurs qui ne sont ni une chaîne, ni un nombre, ni `{ valeur, unité }` sont écartées sans trace. Je me demande si une situation légitime peut en contenir d'autres (une expression Publicodes plus riche, `null` pour désactiver une règle, un booléen) : l'usager perdrait alors silencieusement cette réponse à la restauration. Peut-on être sûr que `SituationPublicodes` ne couvre que ces trois formes ? Sinon, je garderais ces valeurs telles quelles et ne convertirais que le cas problématique.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/domaine/searchParams.ts",
+   "line": 32,
+   "start_line": null,
+   "body": "Avant, une valeur non encodable laissait au moins un `console.error` ; maintenant elle disparaît de l'URL sans aucun signal. Le lien partagé perd alors une réponse sans qu'on puisse le diagnostiquer. Qu'en penses-tu de conserver une trace pour ce cas (`else`) ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1332988,
+  "final_text": "J'ai posté deux remarques inline sur la PR #4427. Elles portent toutes les deux sur des valeurs écartées sans aucun signal. Je n'ai rien exécuté, et `gh pr checks` est vert.\n\n- **`sanitizePersistedSituation.ts`, ligne 13 :** seules les chaînes, les nombres et les `{ valeur, unité }` sont conservés. Je demande si une situation légitime peut contenir autre chose, comme `null` ou un booléen. Si oui, l'usager perdrait cette réponse à la restauration depuis localStorage.\n- **`searchParams.ts`, ligne 32 :** une valeur non encodable disparaît maintenant de l'URL sans trace, alors qu'elle laissait avant un `console.error`. Je suggère de garder une trace dans un `else`.\n\nJe n'ai pas lu les tests ajoutés et je n'ai pas vérifié ce que `SituationPublicodes` autorise vraiment comme valeurs, d'où la formulation en question."
+ }
+}
+
+```

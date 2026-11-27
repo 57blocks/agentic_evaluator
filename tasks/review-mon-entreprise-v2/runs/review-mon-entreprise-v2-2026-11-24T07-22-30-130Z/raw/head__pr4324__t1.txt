@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 348,
+  "end_line": 348,
+  "message": "nit: cette URL et le bloc « Pour estimer le montant de votre future pension… » (lien + aria-label) sont dupliqués dans `DroitsRetraite.tsx` (l.157), avec deux clés de traduction différentes. Si l'Assurance retraite change l'adresse, il faudra penser aux deux endroits. Un petit composant partagé (ou au minimum une constante pour l'URL) éviterait que les deux divergent. Qu'en penses-tu ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4324,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 348,
+   "start_line": null,
+   "body": "nit: cette URL et le bloc « Pour estimer le montant de votre future pension… » (lien + aria-label) sont dupliqués dans `DroitsRetraite.tsx` (l.157), avec deux clés de traduction différentes. Si l'Assurance retraite change l'adresse, il faudra penser aux deux endroits. Un petit composant partagé (ou au minimum une constante pour l'URL) éviterait que les deux divergent. Qu'en penses-tu ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.1551887,
+  "final_text": "J'ai relu la PR #4324 et posté un seul commentaire inline, un nit sur `Détails.tsx` ligne 348. L'URL du simulateur de l'Assurance retraite et son bloc de texte sont dupliqués dans `DroitsRetraite.tsx` avec des clés de traduction différentes. Je n'ai rien trouvé d'autre qui vaille un commentaire, et `gh pr checks` est au vert."
+ }
+}
+
+```

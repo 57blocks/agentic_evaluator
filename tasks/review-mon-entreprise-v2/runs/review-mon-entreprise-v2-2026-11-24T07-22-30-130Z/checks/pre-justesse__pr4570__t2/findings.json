@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/locales/ui-en.yaml",
+  "start_line": 1962,
+  "end_line": 1962,
+  "message": "La traduction anglaise générée est cassée : `<0>&lt;/0>`, `&lt;/3>` et `&lt;/6>` échappent les balises fermantes, et « does not apply to male and female auto-entrepreneurs » est un contresens. Les usagers anglophones verraient les balises en clair. Je verrais bien une correction à la main :\n```suggestion\n        auto-entrepreneur: <0></0> This simulator <3>does not apply to auto-entrepreneurs</3>, who have their own <6>income simulator</6>.\n```"
+ },
+ {
+  "file": "site/source/pages/simulateurs/indépendant/IndépendantBase.tsx",
+  "start_line": 97,
+  "end_line": 97,
+  "message": "nit: la liste est recréée à chaque rendu, et `.includes(id)` se lit mieux que `indexOf(id) > -1`. Une constante de module avec `.includes` suffirait."
+ }
+]

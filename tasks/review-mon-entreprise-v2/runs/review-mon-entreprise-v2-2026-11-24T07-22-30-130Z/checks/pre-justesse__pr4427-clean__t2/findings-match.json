@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/storage/sanitizePersistedSituation.ts",
+      "start_line": 14,
+      "end_line": 14,
+      "message": "Je me demande si on ne perd pas des données en silence ici : toute valeur qui n’est ni une chaîne, ni un nombre, ni `{ valeur, unité }` (une expression `{ somme: … }`, un booléen, `null`…) est supprimée de la situation restaurée, sans trace. Si l’usager avait une telle réponse enregistrée, elle disparaît au rechargement et il ne sait pas pourquoi. Est-ce qu’on est certain qu’aucune situation légitime n’a d’autre forme ? Sinon, un `console.warn`/log Sentry sur les clés écartées aiderait au moins à le détecter."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

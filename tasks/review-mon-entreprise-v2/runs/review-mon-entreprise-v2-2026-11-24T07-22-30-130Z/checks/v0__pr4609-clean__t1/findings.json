@@ -1,0 +1,11 @@
+[
+ {
+  "file": "site/vite.config.ts",
+  "start_line": 67,
+  "end_line": 69,
+  "message": "nit: `sentryReleaseName(mode)` est évalué deux fois ici (et une troisième fois plus bas pour le plugin Sentry), ce qui relit l'env à chaque appel. Je verrais bien une constante `const releaseSentry = sentryReleaseName(mode)` en tête de la config, qu'en penses-tu ?\n\nJe me demande aussi si ce `...(cond ? {…} : {})` est utile. Sans lui, `JSON.stringify(undefined)` vaut `undefined`, donc Vite ne définirait probablement rien, et `typeof SENTRY_RELEASE_NAME !== 'undefined'` côté `environnement.ts` couvrirait déjà le cas. Je n'ai pas vérifié ce point dans Vite, donc ignore ce commentaire si tu l'as déjà testé."
+ },
+ {
+  "message": "Je n'ai pas pu vérifier le démarrage du serveur de dev (je n'exécute pas le code). Deux points :\n\n- **Tests** : il n'y a pas de test sur `environnement.ts`, alors que la correction porte sur un comportement qui a déjà régressé (`process` non défini sous Vite). Un test Vitest qui importe le module sous Vite sans `process` défini garderait ce bug de côté. Qu'en penses-tu ?\n- **Historique** : les deux commits sont autonomes et leurs messages respectent le format attendu. Je me demande seulement si le second ne relève pas plutôt de `fix(...)`, puisqu'il complète la même correction du plantage en dev. À ta appréciation.\n\nPour le reste, le garde `sousVite` est cohérent avec les autres champs de `environnement.ts`."
+ }
+]

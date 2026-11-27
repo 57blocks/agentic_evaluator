@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 348,
+  "end_line": 348,
+  "message": "nit: cette URL et le bloc « Pour estimer le montant de votre future pension… » (lien + aria-label) sont dupliqués dans `DroitsRetraite.tsx` (l.157), avec deux clés de traduction différentes. Si l'Assurance retraite change l'adresse, il faudra penser aux deux endroits. Un petit composant partagé (ou au minimum une constante pour l'URL) éviterait que les deux divergent. Qu'en penses-tu ?"
+ }
+]

@@ -1,0 +1,19 @@
+{
+ "pr": 4534,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "Quelques remarques, rien de bloquant :\n\n- **Périmètre / historique** : le commit mêle le correctif du taux salarial et une réécriture de la description de l'Acre (`exonérations.publicodes`, conditions d'éligibilité 2026) avec ses ~150 lignes de traductions. Je me demande si deux commits (ou deux PR) ne se reliraient pas plus facilement : la partie salariale est petite et se vérifie vite, la partie description demande une relecture métier à part.\n- **Tests** : seul le snapshot est mis à jour. Je n'ai pas vu de test qui fige le comportement avant/après le 01/2026 pour la part salariale (ni la continuité à la jonction des tranches). Qu'en penses-tu d'un cas dans `SASU.test.ts` avec une date en 2025 ? Je n'ai pas exécuté les tests, la CI est verte.\n- **Source** : le taux de 25 % sur les cotisations salariales n'a pas de référence dans le bloc `Acre . salarié` ni dans `références` de la règle. J'imagine que c'est la même page Urssaf que pour la part patronale, mais je n'ai pas pu vérifier que le texte confirme bien l'application aux cotisations salariales : une référence précise aiderait le prochain relecteur.\n- nit: `25%` et `date < 01/2026` sont répétés 4 fois dans le fichier (employeur, salarié, coefficient dégressif). Une règle nommée (par ex. un taux d'exonération avant/après 2026) éviterait qu'on corrige un endroit en oubliant l'autre, comme ici.\n- nit: dans la description, « dans l’ **une des situations suivantes** » semble une coquille (« dans l'une des situations »)."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.11486940000000001,
+  "final_text": "J'ai relu la PR #4534 et posté une seule synthèse sur GitHub, sans commentaire inline. Je n'ai exécuté ni build ni tests, et la CI « Vérification PR » est verte.\n\nJe n'ai trouvé aucun défaut bloquant. Voici les remarques postées :\n\n- **Périmètre :** le commit mélange le correctif salarial et la réécriture de la description de l'Acre avec ses traductions. Je me demande si deux commits ne se reliraient pas mieux.\n- **Tests :** seul le snapshot est mis à jour. Je n'ai pas vu de test qui fige le comportement avant et après 01/2026 pour la part salariale.\n- **Source :** le taux de 25 % sur les cotisations salariales n'a pas de référence propre. Je n'ai pas pu vérifier que le texte Urssaf cité confirme son application aux cotisations salariales.\n- **nit :** `25%` et `date < 01/2026` se répètent plusieurs fois dans `acre.publicodes`. Une règle nommée éviterait d'en corriger un en oubliant l'autre.\n- **nit :** la description contient une coquille : « dans l’ **une des situations suivantes** »."
+ }
+}

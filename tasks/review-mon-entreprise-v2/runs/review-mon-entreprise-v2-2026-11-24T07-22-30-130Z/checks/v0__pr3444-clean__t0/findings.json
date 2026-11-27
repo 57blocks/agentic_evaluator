@@ -1,0 +1,17 @@
+[
+ {
+  "file": "modele-social/règles/protection-sociale.publicodes",
+  "start_line": 132,
+  "end_line": 145,
+  "message": "Je me demande si ces liens vont fonctionner : la description est un bloc `|` YAML, donc les retours à la ligne sont conservés, y compris à l'intérieur des `href=\"…\"` (ex. l. 132-133 : `…/cotisations-et-contributions⏎/cotisations/répartition/…`). Je n'ai pas pu tester le rendu, mais je m'attendrais à des URLs cassées. De plus, `auto‑entrepreneur` (l. 132) et `micro‑entreprise` (l. 138) semblent contenir un tiret insécable (U+2011) au lieu de `-`, donc le chemin ne correspondrait pas aux règles. Je verrais bien des liens markdown `[texte](/documentation/…)` chacun sur une seule ligne. Qu'en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/protection-sociale.publicodes",
+  "start_line": 102,
+  "end_line": 102,
+  "message": "Coquille : `/q` devrait sans doute être `/` (« … Assurance retraite / durée d’assurance … »)."
+ },
+ {
+  "message": "Synthèse :\n- nit: le diff mélange le contenu des rubriques retraite, le remplacement des logos de références (PNG → SVG/JPG), le renommage Pôle emploi → France Travail et un reformatage de notes sans rapport (retour à la ligne, apostrophes typographiques). Je me demande si un découpage en 2-3 PR/commits serait envisageable : il n'y a ici qu'un seul commit dont le titre ne mentionne que les rubriques retraite.\n- Non vérifié : le rendu des logos et des liens de documentation, et le contenu métier (je n'ai relu que la présence de références)."
+ }
+]

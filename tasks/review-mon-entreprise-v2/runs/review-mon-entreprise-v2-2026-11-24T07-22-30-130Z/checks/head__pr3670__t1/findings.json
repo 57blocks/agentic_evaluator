@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/domaine/Montant.ts",
+  "start_line": 109,
+  "end_line": 173,
+  "message": "`toEurosParAn`, `toEurosParJour` et `toEurosParHeure` ne sont appelées nulle part (seule `toEurosParMois` l’est, dans `calcul.ts`), et aucun test n’a été ajouté dans `Montant.test.ts` pour ces conversions. Je les retirerais jusqu’à ce qu’un besoin apparaisse. Si tu les gardes, des tests seraient bienvenus, notamment pour `EuroParHeure` : l’arrondi au centime à chaque conversion perd de la précision (un montant annuel divisé par 8 760 h donne quelques centimes d’erreur), et la conversion horaire ×24×365 suppose une activité 24 h/24, ce qui n’a pas de sens pour un tarif horaire."
+ }
+]

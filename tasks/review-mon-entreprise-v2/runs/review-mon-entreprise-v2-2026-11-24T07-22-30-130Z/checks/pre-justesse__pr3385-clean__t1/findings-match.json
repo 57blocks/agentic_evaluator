@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/components/conversation/AnswerList.tsx",
+      "start_line": 321,
+      "end_line": 321,
+      "message": "Ce `showSuggestions={false}` mis en commentaire dans le JSX semble être un reste de test, et il n'a pas de lien avec la rubrique « charges ». Si c'est volontaire, un commit dédié en expliquerait la raison. Sinon, je le restaurerais.\n```suggestion\n\t\t\t\t\t\t\tshowSuggestions={false}\n```"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

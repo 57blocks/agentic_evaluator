@@ -1,0 +1,31 @@
+```file:findings.json
+[
+ {
+  "message": "J'ai bien relu, ça me paraît bon à merger."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4609,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 5,
+  "cost_usd": 0.0956543,
+  "final_text": "J'ai relu la PR 4609 et n'ai trouvé aucune remarque inline. J'ai posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger. » Le check « Vérification PR » est passé, et je n'ai exécuté ni le code ni les tests."
+ }
+}
+
+```

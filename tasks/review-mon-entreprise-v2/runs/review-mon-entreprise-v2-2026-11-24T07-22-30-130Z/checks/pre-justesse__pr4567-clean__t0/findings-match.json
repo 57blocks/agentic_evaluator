@@ -1,0 +1,23 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+      "start_line": 559,
+      "end_line": 559,
+      "message": "Je me demande si ce changement est voulu : en retirant la condition `exonérations . invalidité = non`, une personne qui cumule Acre et pension d'invalidité (sans exonération âge) paie maintenant l'invalidité-décès au taux Acre, alors qu'avant elle la payait sans exonération. C'est un changement de résultat pour les usagers métropolitains, pas seulement pour Mayotte. Le test qui couvrait ce cas (« est nulle lorsqu'il y a à la fois Acre et invalidité mais pas d'exonération âge ») a été supprimé plutôt que remplacé par un test du nouveau comportement. Si c'est voulu, quelle est la source (texte ou site officiel) ? Dans ce cas, je verrais bien un test qui fixe le nouveau comportement, et idéalement ce changement dans son propre commit, séparé de la réécriture des tests."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim"
+  ],
+  "claims": 1,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0
+    ]
+  }
+}

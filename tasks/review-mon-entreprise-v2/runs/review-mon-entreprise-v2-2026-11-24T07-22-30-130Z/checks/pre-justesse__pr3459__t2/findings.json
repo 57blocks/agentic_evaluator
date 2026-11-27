@@ -1,0 +1,14 @@
+[
+ {
+  "file": "site/source/SearchParamsAdapter.ts",
+  "start_line": 20,
+  "end_line": 20,
+  "message": "`encode` n'est appelé nulle part en production (seul `decode` l'est, dans `getSituationFromSearchParams`) : `getSearchParams` continue de passer par `serializeEvaluation`. Je me demande si on ne devrait pas soit le brancher dans `getSearchParams` pour que l'aller-retour soit réellement porté par l'adaptateur, soit le retirer pour ne pas garder du code qui n'est exercé que par ses tests."
+ },
+ {
+  "file": "site/source/hooks/useSearchParamsSimulationSharing.ts",
+  "start_line": 169,
+  "end_line": 169,
+  "message": "Je me demande ce que deviennent les liens déjà partagés : l'ancien code lisait les valeurs au format JSON (objet avec `valeur` et `unité`), et `getSearchParams` peut encore écrire ce format (`JSON.stringify(value)` en repli). `decode` ne le gère plus, donc une telle valeur serait renvoyée telle quelle comme string. Est-ce voulu ? Si non, un test sur ce cas aiderait."
+ }
+]

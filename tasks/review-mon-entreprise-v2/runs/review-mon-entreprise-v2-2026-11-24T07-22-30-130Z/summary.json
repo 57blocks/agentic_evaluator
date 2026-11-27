@@ -1,0 +1,504 @@
+{
+  "run": "review-mon-entreprise-v2-2026-11-24T07-22-30-130Z",
+  "step": "review",
+  "inputs": [
+    "pr2692",
+    "pr2963",
+    "pr3189",
+    "pr3266",
+    "pr3280-clean",
+    "pr3285-clean",
+    "pr3321",
+    "pr3385-clean",
+    "pr3442-clean",
+    "pr3444-clean",
+    "pr3459",
+    "pr3532",
+    "pr3632-clean",
+    "pr3670",
+    "pr3722",
+    "pr3746-clean",
+    "pr4159",
+    "pr4160",
+    "pr4164",
+    "pr4285",
+    "pr4311",
+    "pr4324",
+    "pr4427-clean",
+    "pr4490-clean",
+    "pr4534-clean",
+    "pr4567-clean",
+    "pr4570",
+    "pr4575",
+    "pr4596",
+    "pr4606-clean",
+    "pr4609-clean",
+    "pr4653-clean"
+  ],
+  "candidates": [
+    {
+      "candidate": "v0",
+      "valid_attempts": 96,
+      "classified": 96,
+      "task_success_rate": {
+        "value": 0.3020833333333333,
+        "numerator": 29,
+        "denominator": 96
+      },
+      "reliability": {
+        "value": 0.3020833333333333,
+        "numerator": 29,
+        "denominator": 96
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 96,
+        "denominator": 96
+      },
+      "required_check_pass_rate": {
+        "value": 0.3020833333333333,
+        "numerator": 29,
+        "denominator": 96
+      },
+      "required_check_score": null,
+      "required_check_measures": {
+        "caught": {
+          "mean": 0.2777777777777778,
+          "n": 18,
+          "trials": 54,
+          "low": 0.08705975027887591,
+          "high": 0.46849580527667967
+        },
+        "caught_on_location": {
+          "mean": 0.2962962962962963,
+          "n": 18,
+          "trials": 54,
+          "low": 0.1002375960060688,
+          "high": 0.49235499658652376
+        },
+        "defect_claims": {
+          "mean": 0.9523809523809523,
+          "n": 14,
+          "trials": 42,
+          "low": 0.53996455582957,
+          "high": 1.3647973489323346
+        },
+        "defects": {
+          "mean": 1.3333333333333333,
+          "n": 18,
+          "trials": 54,
+          "low": 0.9154910701971767,
+          "high": 1.7511755964694897
+        },
+        "findings": {
+          "mean": 2.6250000000000004,
+          "n": 32,
+          "trials": 96,
+          "low": 2.2355906804985666,
+          "high": 3.0144093195014343
+        },
+        "invalid_findings": {
+          "mean": 0,
+          "n": 32,
+          "trials": 96,
+          "low": 0,
+          "high": 0
+        },
+        "knowable_caught": {
+          "mean": 0.2592592592592593,
+          "n": 18,
+          "trials": 54,
+          "low": 0.06596858541247747,
+          "high": 0.45254993310604114
+        },
+        "knowable_defects": {
+          "mean": 1,
+          "n": 18,
+          "trials": 54,
+          "low": 0.6185639450021962,
+          "high": 1.3814360549978038
+        },
+        "matched_deterministic": {
+          "mean": 0,
+          "n": 18,
+          "trials": 54,
+          "low": 0,
+          "high": 0
+        },
+        "matched_llm": {
+          "mean": 0.2777777777777778,
+          "n": 18,
+          "trials": 54,
+          "low": 0.08705975027887591,
+          "high": 0.46849580527667967
+        },
+        "unmatched_findings": {
+          "mean": 2.685185185185185,
+          "n": 18,
+          "trials": 54,
+          "low": 2.214671026643486,
+          "high": 3.155699343726884
+        }
+      },
+      "all_trials_pass_rate": {
+        "value": 0.15625,
+        "numerator": 5,
+        "denominator": 32
+      },
+      "completion_states": {
+        "success": 96,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 29,
+        "failure": 67,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 29,
+        "fail": 67,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.512708,
+      "p50_ms": 33254,
+      "p95_ms": 57122
+    },
+    {
+      "candidate": "pre-justesse",
+      "valid_attempts": 96,
+      "classified": 96,
+      "task_success_rate": {
+        "value": 0.2916666666666667,
+        "numerator": 28,
+        "denominator": 96
+      },
+      "reliability": {
+        "value": 0.2916666666666667,
+        "numerator": 28,
+        "denominator": 96
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 96,
+        "denominator": 96
+      },
+      "required_check_pass_rate": {
+        "value": 0.2916666666666667,
+        "numerator": 28,
+        "denominator": 96
+      },
+      "required_check_score": null,
+      "required_check_measures": {
+        "caught": {
+          "mean": 0.2222222222222222,
+          "n": 18,
+          "trials": 54,
+          "low": 0.033635189288992146,
+          "high": 0.4108092551554523
+        },
+        "caught_on_location": {
+          "mean": 0.16666666666666669,
+          "n": 18,
+          "trials": 54,
+          "low": 0.003345505322156994,
+          "high": 0.3299878280111764
+        },
+        "defect_claims": {
+          "mean": 0.761904761904762,
+          "n": 14,
+          "trials": 42,
+          "low": 0.42076621203963505,
+          "high": 1.103043311769889
+        },
+        "defects": {
+          "mean": 1.3333333333333333,
+          "n": 18,
+          "trials": 54,
+          "low": 0.9154910701971767,
+          "high": 1.7511755964694897
+        },
+        "findings": {
+          "mean": 1.53125,
+          "n": 32,
+          "trials": 96,
+          "low": 1.3200813936047928,
+          "high": 1.7424186063952072
+        },
+        "invalid_findings": {
+          "mean": 0,
+          "n": 32,
+          "trials": 96,
+          "low": 0,
+          "high": 0
+        },
+        "knowable_caught": {
+          "mean": 0.2222222222222222,
+          "n": 18,
+          "trials": 54,
+          "low": 0.033635189288992146,
+          "high": 0.4108092551554523
+        },
+        "knowable_defects": {
+          "mean": 1,
+          "n": 18,
+          "trials": 54,
+          "low": 0.6185639450021962,
+          "high": 1.3814360549978038
+        },
+        "matched_deterministic": {
+          "mean": 0,
+          "n": 18,
+          "trials": 54,
+          "low": 0,
+          "high": 0
+        },
+        "matched_llm": {
+          "mean": 0.2222222222222222,
+          "n": 18,
+          "trials": 54,
+          "low": 0.033635189288992146,
+          "high": 0.4108092551554523
+        },
+        "unmatched_findings": {
+          "mean": 1.4814814814814818,
+          "n": 18,
+          "trials": 54,
+          "low": 1.2074708752754397,
+          "high": 1.755492087687524
+        }
+      },
+      "all_trials_pass_rate": {
+        "value": 0.21875,
+        "numerator": 7,
+        "denominator": 32
+      },
+      "completion_states": {
+        "success": 96,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 28,
+        "failure": 68,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 28,
+        "fail": 68,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.479785,
+      "p50_ms": 24332,
+      "p95_ms": 42558
+    },
+    {
+      "candidate": "head",
+      "valid_attempts": 96,
+      "classified": 96,
+      "task_success_rate": {
+        "value": 0.19791666666666666,
+        "numerator": 19,
+        "denominator": 96
+      },
+      "reliability": {
+        "value": 0.19791666666666666,
+        "numerator": 19,
+        "denominator": 96
+      },
+      "evaluation_coverage": {
+        "value": 1,
+        "numerator": 96,
+        "denominator": 96
+      },
+      "required_check_pass_rate": {
+        "value": 0.19791666666666666,
+        "numerator": 19,
+        "denominator": 96
+      },
+      "required_check_score": null,
+      "required_check_measures": {
+        "caught": {
+          "mean": 0.16666666666666663,
+          "n": 18,
+          "trials": 54,
+          "low": 0.024513841992593682,
+          "high": 0.3088194913407396
+        },
+        "caught_on_location": {
+          "mean": 0.24074074074074073,
+          "n": 18,
+          "trials": 54,
+          "low": 0.03726403517298657,
+          "high": 0.4442174463084949
+        },
+        "defect_claims": {
+          "mean": 0.9761904761904763,
+          "n": 14,
+          "trials": 42,
+          "low": 0.6793817037295984,
+          "high": 1.2729992486513542
+        },
+        "defects": {
+          "mean": 1.3333333333333333,
+          "n": 18,
+          "trials": 54,
+          "low": 0.9154910701971767,
+          "high": 1.7511755964694897
+        },
+        "findings": {
+          "mean": 1.7083333333333337,
+          "n": 32,
+          "trials": 96,
+          "low": 1.4763686669986729,
+          "high": 1.9402979996679945
+        },
+        "invalid_findings": {
+          "mean": 0,
+          "n": 32,
+          "trials": 96,
+          "low": 0,
+          "high": 0
+        },
+        "knowable_caught": {
+          "mean": 0.16666666666666663,
+          "n": 18,
+          "trials": 54,
+          "low": 0.024513841992593682,
+          "high": 0.3088194913407396
+        },
+        "knowable_defects": {
+          "mean": 1,
+          "n": 18,
+          "trials": 54,
+          "low": 0.6185639450021962,
+          "high": 1.3814360549978038
+        },
+        "matched_deterministic": {
+          "mean": 0,
+          "n": 18,
+          "trials": 54,
+          "low": 0,
+          "high": 0
+        },
+        "matched_llm": {
+          "mean": 0.16666666666666663,
+          "n": 18,
+          "trials": 54,
+          "low": 0.024513841992593682,
+          "high": 0.3088194913407396
+        },
+        "unmatched_findings": {
+          "mean": 1.7037037037037037,
+          "n": 18,
+          "trials": 54,
+          "low": 1.425787761303662,
+          "high": 1.9816196461037454
+        }
+      },
+      "all_trials_pass_rate": {
+        "value": 0.03125,
+        "numerator": 1,
+        "denominator": 32
+      },
+      "completion_states": {
+        "success": 96,
+        "refusal": 0,
+        "timeout": 0,
+        "malformed": 0,
+        "cancelled": 0,
+        "provider_error": 0
+      },
+      "outcomes": {
+        "success": 19,
+        "failure": 77,
+        "undetermined": 0
+      },
+      "check_states": {
+        "pass": 19,
+        "fail": 77,
+        "not_evaluated": 0,
+        "evaluator_error": 0
+      },
+      "generation_cost_per_success": 0.727929,
+      "p50_ms": 24458,
+      "p95_ms": 45533
+    }
+  ],
+  "directionality": {
+    "directional": true,
+    "reasons": [
+      "no minimum meaningful difference declared"
+    ]
+  },
+  "integrity": {
+    "events": 0,
+    "gaps_over_threshold": 0,
+    "longest_gap_ms": 0,
+    "threshold_ms": 300000,
+    "wall_ms": 0,
+    "in_flight_gaps": 0
+  },
+  "budget": {
+    "limit_usd": 60,
+    "spent_usd": 0,
+    "stopped_early": false,
+    "skipped": {
+      "generation": 0,
+      "judging": 0,
+      "scoring": 0
+    }
+  },
+  "early_stop": {
+    "enabled": false,
+    "stopped": []
+  },
+  "halt": {
+    "max_consecutive_provider_errors": 10,
+    "longest_provider_error_run": 0,
+    "max_consecutive_timeouts": 10,
+    "longest_timeout_run": 0,
+    "stopped": false,
+    "skipped": {
+      "generation": 0,
+      "judging": 0,
+      "scoring": 0
+    }
+  },
+  "transport": {
+    "pauses": 0,
+    "paused_ms": 0,
+    "gave_up": false
+  },
+  "judge_discrimination": {
+    "overall": {
+      "dimension": "overall",
+      "scored": 0,
+      "distinct": 0,
+      "min": null,
+      "max": null,
+      "saturated": false
+    },
+    "dimensions": [],
+    "saturated": [],
+    "discriminates": false
+  },
+  "evaluation_coverage": [
+    {
+      "evaluator": "caught",
+      "version": "findings-match-3+opts-6db196e9",
+      "pass": 76,
+      "fail": 212,
+      "not_evaluated": 0,
+      "evaluator_error": 0
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/domaine/Montant.ts",
+  "start_line": 109,
+  "end_line": 173,
+  "message": "`toEurosParAn`, `toEurosParJour` et `toEurosParHeure` ne sont appelées nulle part (seule `toEurosParMois` l’est, dans `calcul.ts`), et aucun test n’a été ajouté dans `Montant.test.ts` pour ces conversions. Je les retirerais jusqu’à ce qu’un besoin apparaisse. Si tu les gardes, des tests seraient bienvenus, notamment pour `EuroParHeure` : l’arrondi au centime à chaque conversion perd de la précision (un montant annuel divisé par 8 760 h donne quelques centimes d’erreur), et la conversion horaire ×24×365 suppose une activité 24 h/24, ce qui n’a pas de sens pour un tarif horaire."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 3670,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/domaine/Montant.ts",
+   "line": 173,
+   "start_line": 109,
+   "body": "`toEurosParAn`, `toEurosParJour` et `toEurosParHeure` ne sont appelées nulle part (seule `toEurosParMois` l’est, dans `calcul.ts`), et aucun test n’a été ajouté dans `Montant.test.ts` pour ces conversions. Je les retirerais jusqu’à ce qu’un besoin apparaisse. Si tu les gardes, des tests seraient bienvenus, notamment pour `EuroParHeure` : l’arrondi au centime à chaque conversion perd de la précision (un montant annuel divisé par 8 760 h donne quelques centimes d’erreur), et la conversion horaire ×24×365 suppose une activité 24 h/24, ce qui n’a pas de sens pour un tarif horaire.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 13,
+  "cost_usd": 0.18915389999999996,
+  "final_text": "J'ai relu la PR et posté un seul commentaire inline, sur `site/source/domaine/Montant.ts`. Je n'ai pas relu les composants React de `site/source/pages/assistants/cmg`, ni le détail des tests du domaine CMG.\n\nLe commentaire porte sur les conversions de `Montant.ts` :\n- **Code mort :** `toEurosParAn`, `toEurosParJour` et `toEurosParHeure` ne sont appelées nulle part. Seule `toEurosParMois` l'est, dans `calcul.ts`.\n- **Pas de tests :** `Montant.test.ts` n'a pas été modifié.\n- **Conversion horaire :** elle multiplie par 24×365, ce qui suppose une activité 24 h/24. L'arrondi au centime à chaque conversion perd aussi de la précision.\n\nLa vérification de la PR est au vert (`gh pr checks`).\n\nJe n'ai pas posté d'avis sur les taux et plafonds de `constantes.ts`, faute de source vérifiable pour les valider."
+ }
+}
+
+```

@@ -1,0 +1,31 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/storage/sanitizePersistedSituation.ts",
+      "start_line": 10,
+      "end_line": 15,
+      "message": "Je me demande si on ne perd pas des données en silence ici : toute valeur qui n’est ni string, ni number, ni `{ valeur, unité }` est supprimée (`null`, objets d’expression Publicodes comme `{ somme: [...] }`, booléens, etc.). Je n’ai pas vérifié si la situation persistée peut contenir ces formes, mais si c’est le cas l’usager retrouve une simulation amputée sans aucune trace. Est-ce qu’un `console.warn`/Sentry sur les clés écartées, ou une liste blanche des seules formes réellement observées, serait envisageable ?\n\nAutre point : `retrievePersistedCompanySituation` passe `JSON.parse(...)` directement ; si le localStorage contient `null` ou un scalaire, `Object.entries(null)` lève une exception. Vu que le but est justement de se protéger d’un localStorage corrompu, qu’en penses-tu de valider que l’entrée est un objet avant ?"
+    },
+    {
+      "file": "site/source/domaine/searchParams.ts",
+      "start_line": 26,
+      "end_line": 38,
+      "message": "Avant, une valeur non encodable était au moins loguée (`console.error`) ; maintenant les valeurs qui ne correspondent à aucune branche sont ignorées sans signal, et l’URL partagée est incomplète sans que personne le sache. Je verrais bien conserver un log (ou un retour explicite des clés non encodées) pour ce cas. Qu’en penses-tu ?\n\nnit: la conversion `{ valeur, unité }` → `\"valeur unité\"` est dupliquée avec `sanitizePersistedSituation` ; une petite fonction de domaine dans `ExpressionPublicodes.ts` éviterait que les deux divergent."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

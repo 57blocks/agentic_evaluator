@@ -1,0 +1,20 @@
+[
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Je me demande pourquoi l'assiette de la taxe sur les salaires change ici : elle passe de « assiette + prévoyances employeur » à l'assiette de base de la CSG-CRDS, qui applique un abattement de 1,75 % (et retire les heures supplémentaires défiscalisées). Je ne vois pas le lien avec les apprentis ni d'entrée dans le CHANGELOG ; est-ce voulu, et avec quelle source ? Sinon je la retirerais de cette PR."
+ },
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 210,
+  "end_line": 210,
+  "message": "Le seuil de 50 % s'applique aux contrats conclus à partir de mars 2025, alors que `date` est la date de la simulation. Un contrat signé en 2024 et simulé en 2026 passera donc à 50 % au lieu de 79 %, et c'est pareil pour la CSG-CRDS ligne 228. Je pense que la question « date de début du contrat » dont tu parles est nécessaire pour que le résultat soit juste pour ces usagers, ou au moins qu'il faut documenter explicitement cette limite. Qu'en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/salarié/exonérations/JEI.publicodes",
+  "start_line": 14,
+  "end_line": 14,
+  "message": "Le passage de 15 % à 20 % des charges en R&D est un changement de contenu qui n'apparaît ni dans le CHANGELOG ni dans le titre du commit (« critère JEI (description) »). Est-ce bien la description seule qui change, sans effet sur le calcul ? Un reformatage des autres paragraphes s'y est aussi glissé, ce qui noie le vrai changement."
+ }
+]

@@ -1,0 +1,31 @@
+{
+ "pr": 4324,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/components/simulationExplanation/DroitsRetraite.tsx",
+   "line": 32,
+   "start_line": null,
+   "body": "nit: les apostrophes typographiques (’) du texte d'origine sont devenues des apostrophes droites (') dans ce titre et dans les messages réécrits (l. 37, 46, 56). Les remettre garderait la typographie des autres textes du site, et éviterait de faire diverger les clés/valeurs par défaut de `Trans` de celles déjà traduites.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/EngineValue/Condition.tsx",
+   "line": 27,
+   "start_line": null,
+   "body": "Je me demande si ce TODO a sa place dans le code : le suivi est déjà dans #4323, et le commentaire ne dit pas ce qu'on attend de la personne qui le lira. Je le retirerais, quitte à garder la référence dans le commentaire de `DetailsRowCards` qui contourne le bug.",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.16133329999999999,
+  "final_text": "J'ai relu la PR #4324 et posté deux remarques inline sur GitHub. Aucune n'est bloquante, et le workflow « Vérification PR » est vert.\n\n- **`DroitsRetraite.tsx:32` (nit)** : les apostrophes typographiques (’) du texte d'origine sont devenues des apostrophes droites (') dans le titre et dans les messages réécrits.\n- **`Condition.tsx:27`** : j'ai suggéré de retirer le `TODO`. Le suivi existe déjà dans #4323, et je garderais la référence dans le commentaire de `DetailsRowCards`.\n\nJe n'ai pas pu lire l'issue #4268 : la commande `gh issue view` a demandé une approbation. Je n'ai donc pas vérifié que la PR traite tout ce que l'issue demandait."
+ }
+}

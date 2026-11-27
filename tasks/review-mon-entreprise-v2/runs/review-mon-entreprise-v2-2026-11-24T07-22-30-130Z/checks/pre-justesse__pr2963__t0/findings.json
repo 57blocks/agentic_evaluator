@@ -1,0 +1,20 @@
+[
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 92,
+  "end_line": 92,
+  "message": "Je me demande si l’applicabilité n’est pas évaluée sur le mauvais moteur : pour une config de comparateur, `engines` contient des `shallowCopy` de `engine` et c’est sur elles que `setSituation` est appelé (l. 77-79). Ici `engine` est le moteur d’origine, qui n’a donc pas la situation de la simulation. Dans ce cas `est applicable` serait évalué sans les réponses de l’usager. Est-ce voulu ? Sinon, `engines[0]` (ou le moteur du contexte concerné) me semblerait plus juste."
+ },
+ {
+  "file": "site/source/store/middlewares/prendLaProchaineQuestion.middleware.ts",
+  "start_line": 29,
+  "end_line": 32,
+  "message": "Ces quatre variables de module sont partagées par tous les stores créés dans le process (tests, remontage du Provider) : un second `createStore` hérite du `lastSimulation`/`engines` du premier, et la détection de changement (`simulation !== lastSimulation`) peut alors court-circuiter le calcul. Je verrais mieux cet état dans la closure de `(engine) => (store) => …`, ce qui reste un changement de quelques lignes. Qu’en penses-tu ?"
+ },
+ {
+  "file": "site/source/store/reducers/simulation.reducer.ts",
+  "start_line": 102,
+  "end_line": 111,
+  "message": "nit: ce bloc « ajoute la question à `questionsRépondues` si absente » est dupliqué avec `ENREGISTRE_LA_RÉPONSE` (l. 78-87). Une petite fonction `marqueCommeRépondue(questionsRépondues, règle)` éviterait que les deux divergent."
+ }
+]

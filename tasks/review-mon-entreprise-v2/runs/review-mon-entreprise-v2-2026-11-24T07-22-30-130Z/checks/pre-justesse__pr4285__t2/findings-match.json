@@ -1,0 +1,52 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+      "start_line": 49,
+      "end_line": 49,
+      "message": "Je me demande si le plafond DFS ne calcule pas ici le montant avec l'ancienne formule : `réduction générale` utilise toujours `1.6 * SMIC` et `T / 0.6`, pas `Tmin`/`Tdelta`/`3 * SMIC`. Pour un salarié en DFS, le plafond à 130 % serait alors celui de l'ancien dispositif, alors que la RGDU est calculée avec le nouveau. Est-ce voulu ? Il faudrait plutôt référencer le montant RGDU hors DFS, avec un test sur un cas DFS."
+    },
+    {
+      "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+      "start_line": 27,
+      "end_line": 27,
+      "message": "Le `coefficient de majoration` (caisse de congés payés, 100/90) et la question associée n'ont pas été repris dans la RGDU, alors qu'ils existent dans l'ancienne règle. Est-ce que la RGDU les supprime vraiment ? Sinon ce cas n'est plus pris en compte. Dans tous les cas, l'ancienne règle `réduction générale` reste dans le modèle avec ses imputations et sa régularisation. Je me demande si elle est encore utile, ou si c'est de la duplication qui va diverger."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+          "start_line": 32,
+          "end_line": 32
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

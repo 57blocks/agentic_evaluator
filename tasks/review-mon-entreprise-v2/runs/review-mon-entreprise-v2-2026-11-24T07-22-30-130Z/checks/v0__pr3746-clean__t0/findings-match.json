@@ -1,0 +1,35 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Résultat.tsx",
+      "start_line": 31,
+      "end_line": 31,
+      "message": "Je me demande si le `getOrElse(montantCT, () => euros(0))` ne va pas faire apparaître brièvement « 0 € » à l'usager avant la redirection (l'effet s'exécute après le premier rendu). Pour un résultat affiché à un usager, ça peut prêter à confusion. Une piste : garder le `return null` quand `montantCT` est absent ou nul (l'effet de navigation reste inchangé), plutôt que de fabriquer un montant. Qu'en penses-tu ?"
+    },
+    {
+      "file": "site/source/pages/assistants/cmg/pages/Déclarations.tsx",
+      "start_line": 40,
+      "end_line": 40,
+      "message": "nit: les `eslint-disable react-hooks/exhaustive-deps` avec `[]` (ici, dans NonÉligible et Résultat) masquent le fait que l'effet ne se rejoue pas si la situation change. Ça convient sans doute pour une garde à l'arrivée sur la page, mais je me demande si lister les dépendances (`navigate`, `situation`, …) ne serait pas plus sûr : la redirection est idempotente (`replace: true`). Qu'en penses-tu ?"
+    },
+    {
+      "message": "Pas de test ajouté pour ce correctif de navigation en iframe : un test de composant (rendu avec un routeur en mémoire, vérification de la redirection sans appel de `navigate` pendant le rendu) protégerait contre une régression. Je n'ai pas pu vérifier le comportement en iframe lui-même (rendu manuel). Dans `Enfants.tsx`, après une redirection l'effet appelle encore `set.nouvelEnfant()` si la liste est vide ; c'était déjà le cas avant, mais un `return` après `navigate` éviterait de modifier la situation d'une page qu'on quitte."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-no-claim",
+    "llm-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      2
+    ]
+  }
+}

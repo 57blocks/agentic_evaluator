@@ -1,0 +1,596 @@
+{
+ "what": "Second model pass over the 36 candidates the prototype pre-screen kept (2026-11-24). Readers saw the fix and introducing diffs, not the pre-screen label. Not a human confirmation; candidates.json is unchanged.",
+ "verdicts": {
+  "reviewable": "real bug, visible or inferable from the introducing PR",
+  "not_knowable": "real fix, but a reviewer could not have known at review time",
+  "not_defect": "the blamed commit did not introduce a bug (code move, requirement change, later commit)"
+ },
+ "entries": [
+  {
+   "id": "pr4596-fix6a6c48f",
+   "introducing_pr": 4596,
+   "verdict": "not_knowable",
+   "category": "calculation",
+   "severity": "high",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+   "description": "The commit deliberately disabled the floor and ceiling of the 26% abatement for Mayotte, following business feedback; the business later reversed this and asked for the floor/ceiling to apply with the metropolitan PASS. Nothing in the PR lets a reviewer know the requested rule was legally wrong.",
+   "reason": "Issue #4588 (closed by the introducing PR) lists 'Pas de plancher ni de plafond pour l'abattement de l'assiette sociale à Mayotte' and the commit adds tests asserting it; issue #4693 later says 'appliquer un plancher de 1,76% du Pass métropolitain' after business tests. Business rule changed its mind. Chain with pr4160-fixc14ee26 (that entry's fix is this entry's introducing commit).",
+   "confidence": 0.85,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "For Mayotte, the floor and ceiling on the 26% CSG-CRDS base abatement are switched off entirely, when they should still apply, bounded by the general PSS (plafond de la sécurité sociale)."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3303-fix741a8e3",
+   "introducing_pr": 3303,
+   "verdict": "not_defect",
+   "category": "logic",
+   "severity": "low",
+   "file": "site/source/components/TrackingProvider.tsx",
+   "description": "Waiting for navigator.serviceWorker.ready before injecting the Piano script was the deliberate purpose of PR #3303; the 'fix' 20 months later removes that wait as part of the Next.js home-page rebuild, where the environment changed. It is an adaptation, not a correction of a bug shipped by this commit.",
+   "reason": "At the introducing commit Provider.tsx renders <ServiceWorker /> whenever 'serviceWorker' in navigator, so `navigator.serviceWorker.ready.then(...)` did resolve in the Vite app; the fix sits in PR #4642 'Rebuild home page with Next'. The commit's real visible flaws (console.log calls, stale `injected` in the cleanup closure with [] deps) are not what the fix addresses.",
+   "confidence": 0.6,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "Script injection is gated on `navigator.serviceWorker.ready`, which never resolves when no service worker is registered or activated, so the Piano Analytics script may never load."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4160-fix0e053ea",
+   "introducing_pr": 4160,
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "file": "site/source/components/Simulation/index.tsx",
+   "description": "The fix is a product decision: hide the 'retrouver ma simulation précédente' banner on the Lodeom simulator via a new avecSimulationPrécédente prop (issue #4681: the feature is only partially working there, remove it). The blamed lines were only re-touched; the incidental `!!questionsPublicodes?.length` hardens a latent `length && <X/>` pattern that could render a literal 0 for an empty array.",
+   "reason": "Fix message 'fix(lodeom): masque le bouton retrouver ma simulation précédente' and issue #4681 'Ces 2 fonctionnalités ne sont que partiellement opérationnelles. Les supprimer.' The introducing line `{!showQuestions && questionsPublicodes?.length && (<PreviousSimulationBanner />)}` is a questionable pattern (callers pass a hook-produced array that may be empty) but no evidence a stray 0 was ever the reported problem.",
+   "confidence": 0.6,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "`{!entrepriseSelection && questionsPublicodes?.length && (...)}` makes React render a stray literal `0` when `questionsPublicodes` is an empty array; the length needs to be coerced to a boolean."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3266-fixcd46ba5",
+   "introducing_pr": 3266,
+   "verdict": "not_knowable",
+   "category": "crash",
+   "severity": "medium",
+   "file": "site/source/pages/simulateurs/lodeom/simulationConfig.ts",
+   "description": "The Lodeom config (copied from réduction générale) left the 'salarié . convention collective' question available as non-priority; choosing a convention (e.g. BTP) later crashes the simulator. The crash comes from rule interactions outside the config, and the fix is a workaround that blacklists the question.",
+   "reason": "Fix moves the name to 'liste noire' with the comment `'salarié . convention collective', // provoque un bug` (issue #4655, error page with convention BTP + zone un, 21 months later). Nothing in `'non prioritaires': ['salarié . convention collective']` reveals a problem at review time.",
+   "confidence": 0.7,
+   "prescreen": {
+    "verdict": "unsure",
+    "description": "The Lodeom simulator still asks the 'salarié . convention collective' question (as non-prioritaire), which can trigger a bug in this simulator."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4635-fixd7d9d60",
+   "introducing_pr": 4635,
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "medium",
+   "file": "modele-ti/règles/indépendant/revenus/rémunération.publicodes",
+   "description": "The blamed commit only added a default (CA - charges) to the IS gross-remuneration rule; the bug the fix addresses (no result when only dividends are entered) was reported before that commit existed, so the commit merely touched the line the fix later extended.",
+   "reason": "Fix closes issue #4474 'Aucun résultat affiché si on indique seulement un montant de dividendes', created 2026-04-16, while the introducing commit is dated 2026-05-12; the fix just wraps the blamed `par défaut: entreprise . chiffre d'affaires - entreprise . charges` line in a `dividendes > 0` variation (and the fix author notes she is unsure the calculation is right).",
+   "confidence": 0.7,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The new IS-branch default `par défaut: CA - charges` for `rémunération brute` also applies when the user enters only dividends, so a dividend-only scenario silently gets a gross salary equal to CA minus charges instead of 0."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4528-fix701add7",
+   "introducing_pr": 4528,
+   "verdict": "not_defect",
+   "category": "accessibility",
+   "severity": "low",
+   "file": "site/source/components/Simulateur/QuestionCourante.tsx",
+   "description": "The new QuestionCourante wraps every QuestionFournie in <fieldset>/<legend>, but that markup was carried over verbatim from the existing Simulation/Questions.tsx; the later change (label+htmlFor for single fields, fieldset only for radio groups) is an accessibility refinement made alongside new date questions, not the repair of something this commit introduced.",
+   "reason": "Simulation/Questions.tsx at the introducing commit already contains `<fieldset><QuestionTitle as=\"legend\">{QuestionCourante.libellé(t)}</QuestionTitle><QuestionCourante />`; the fix adds a new `typeRadioGroup` field and ids to the frontalier-suisse date questions, which did not exist at that time.",
+   "confidence": 0.7,
+   "prescreen": {
+    "verdict": "unsure",
+    "description": "QuestionFournie questions are always wrapped in a <fieldset>/<legend>, even when they hold a single input rather than a radio group, which leaves the input without a proper associated label."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4575-fix1a294df",
+   "introducing_pr": 4575,
+   "verdict": "reviewable",
+   "category": "crash",
+   "severity": "medium",
+   "file": "site/source/services/environnement/environnement.ts",
+   "description": "The adapter replaced the `sousVite ?` guard by `typeof X !== 'undefined' ? X : process.env.NEXT_PUBLIC_…` for ENVIRONNEMENT, BRANCH_NAME and SENTRY_RELEASE_NAME, so under Vite, whenever one of these build-time globals is not defined (SENTRY_RELEASE_NAME in local dev), the browser evaluates `process.env` and throws ReferenceError: process is not defined at module load.",
+   "reason": "`sentryRelease: typeof SENTRY_RELEASE_NAME !== 'undefined' ? SENTRY_RELEASE_NAME : process.env.NEXT_PUBLIC_SENTRY_RELEASE ?? ''` while every other field in the same file keeps `sousVite ? import.meta.env… : process.env…`; vite.config.ts defines SENTRY_RELEASE_NAME as JSON.stringify(undefined) without VITE_GITHUB_SHA. Fix PR #4609 'Le site plante en dev local (ReferenceError: process is not defined)'. Dev-only crash.",
+   "confidence": 0.8,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "Under Vite, when the ENVIRONNEMENT, BRANCH_NAME or SENTRY_RELEASE_NAME globals are not defined, the new `typeof X !== 'undefined'` guards fall through to `process.env.*`, which throws `ReferenceError: process is not defined` in the browser."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3459-fix8df0873",
+   "introducing_pr": 3459,
+   "verdict": "reviewable",
+   "category": "crash",
+   "severity": "medium",
+   "file": "site/source/pages/simulateurs/location-de-meublé/documentation/micro-bic.mdx",
+   "description": "The new micro-bic.mdx calls useEconomieCollaborative() inside ExempleCalculDynamique without importing it (and never uses the returned `situation`), so rendering that documentation page throws a ReferenceError.",
+   "reason": "The file's imports are only régime-général constants, design-system and Montant, yet it contains `const { situation } = useEconomieCollaborative()` and renders `<ExempleCalculDynamique />`; the sibling index.mdx in the same commit does import the hook. Fix: 'retire un appel de hook non importé dans la doc micro-BIC'.",
+   "confidence": 0.85,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The `ExempleCalculDynamique` component in the micro-BIC MDX doc calls `useEconomieCollaborative()` without importing it, so rendering it throws a ReferenceError."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4160-fixc14ee26",
+   "introducing_pr": 4160,
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "low",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+   "description": "The introducing commit wrote the general 26% abatement with its floor and ceiling; the 'fix' added a Mayotte exemption on business request, and that exemption was itself reverted three months later (floor and ceiling do apply in Mayotte). The original code was not wrong; this is a requirement change that was later withdrawn.",
+   "reason": "Fix adds `non applicable si: établissement . commune . département . outre-mer . Mayotte` per issue #4588 ('Retours métier'); commit 6a6c48f6a then removes it again ('applique le plafond d'abattement à Mayotte avec la Pass métropolitain'). Chain with pr4596-fix6a6c48f, which makes the opposite claim.",
+   "confidence": 0.85,
+   "prescreen": {
+    "verdict": "unsure",
+    "description": "The 26% abattement on the CSG-CRDS / assiette sociale always applies the floor (1.76% PASS) and ceiling (130% PASS), even for Mayotte, where no floor or ceiling should apply."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr2963-fix085e302",
+   "introducing_pr": 2963,
+   "verdict": "reviewable",
+   "category": "logic",
+   "severity": "medium",
+   "file": "site/source/domain/IndépendantContexte.ts",
+   "description": "The refactor replaced `'entreprise . imposition': situation['entreprise . imposition'] ?? \"'IS'\"` for the EI/indépendant engine by a constant context `'entreprise . imposition': \"'IS'\"` spread after `...situation`, so the user's imposition choice (still dispatched by ModifierOptions) is silently overridden and the EI is always computed under IS in the comparator.",
+   "reason": "Removed in comparaison-statuts/index.tsx: `situation['entreprise . imposition'] ?? \"'IS'\"`; added: `...situation, ...IndépendantContexte` with `'entreprise . imposition': \"'IS'\"` hardcoded, in a commit labelled refactor. Fix 'corrige l'imposition de l'EI' deletes that line from the context (and separately sets an IR default, a later domain choice). Long gap (2 years) and heavy intervening rework lower confidence.",
+   "confidence": 0.6,
+   "prescreen": {
+    "verdict": "unsure",
+    "description": "The comparator's independent (EI) context forces 'entreprise . imposition' to 'IS', so the EI is simulated under corporate tax instead of its default income-tax regime."
+   },
+   "description_differs_from_prescreen": true
+  },
+  {
+   "id": "pr2692-fixf960484",
+   "introducing_pr": 2692,
+   "verdict": "reviewable",
+   "category": "resource",
+   "severity": "medium",
+   "file": "api/source/redis-cache.ts",
+   "description": "The Redis cache middleware awaits redis.get/redis.set with no error handling while the client is created with enableOfflineQueue: false, so any Redis outage rejects the call and makes /evaluate fail instead of simply bypassing the cache.",
+   "reason": "`const cachedResponse = await redis.get(cacheKey)` and `await redis.set(...)` are unguarded; the fix adds `.catch(() => null)` / `.catch(() => undefined)` ('empêche une panne de Redis de bloquer les requêtes'). The rate-limiter.ts half of the fix (insuranceLimiter) is not code from this commit.",
+   "confidence": 0.65,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "redis.get/set are awaited without error handling, and with enableOfflineQueue: false any Redis outage or disconnect rejects immediately, so /evaluate requests fail instead of falling back to an uncached computation."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4570-fix1f338ce",
+   "introducing_pr": 4570,
+   "verdict": "reviewable",
+   "category": "crash",
+   "severity": "high",
+   "file": "site/source/pages/simulateurs/indépendant/components/AvertissementAutoEntrepreneur.tsx",
+   "description": "The warning puts the void <Emoji/> component as node 0 inside <Trans>, and the English translation added in the same PR is malformed (`<0>&lt;/0> This simulator <3>…&lt;/3>`), so in English the rest of the sentence is injected as children of the emoji element and the indépendant / EI / profession libérale simulators crash with an error page.",
+   "reason": "The PR's own ui-en.yaml hunk adds `auto-entrepreneur: <0>&lt;/0> This simulator <3>does not apply to male&lt;/3> and female auto-entrepreneurs…` (escaped closing tags, unclosed <0>), next to `<Emoji emoji=\"⚠️\" /> Ce simulateur` inside <Trans>. Issue #4576: English simulators show an error page; fix moves Emoji out of Trans and rewrites the key. The other &lt; cleanups in the fix are pre-existing noise.",
+   "confidence": 0.7,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "Placing the <Emoji> component inside <Trans> turns it into an indexed placeholder in the i18n string, so the warning emoji may not render correctly (or may be lost) in translated output."
+   },
+   "description_differs_from_prescreen": true
+  },
+  {
+   "id": "pr4160-fix31ef6c2",
+   "introducing_pr": 4160,
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "medium",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/début-activité.publicodes",
+   "description": "The blamed commit is a pure reorganisation: the rule 'début activité' and its condition 'applicable si: entreprise . date de création >= période . début d'année' were moved verbatim from 'dirigeant . indépendant . ...' to the new file. The fix (apply the flat-rate contributions during the first 2 years, done in a Mayotte exemption PR) corrects a condition that predates PR #4160.",
+   "reason": "Full diff of 7f93f320e removes the identical line under the old name ('-  applicable si: entreprise . date de création >= période . début d'année', rule 'dirigeant . indépendant . cotisations et contributions . début activité') and re-adds it unchanged; the commit is titled 'refactor: réorganisation des règles'.",
+   "confidence": 0.85,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The `applicable si: entreprise . date de création >= période . début d'année` condition limits the flat-rate start-of-activity contributions to the creation year only, while the rule (and the law) covers the first two years of activity."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4160-fix51af7e3",
+   "introducing_pr": 4160,
+   "verdict": "not_defect",
+   "category": "calculation",
+   "severity": "medium",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+   "description": "The 'Urssaf' sub-rule (total minus 'cotisations facultatives . montant' only) was moved verbatim by the refactor commit; the omission of the regulated-profession pension-fund contributions from the abatement existed before PR #4160 and is not introduced by it.",
+   "reason": "7f93f320e deletes the same block from the old file ('-    Urssaf: ... -      abattement: cotisations facultatives . montant') and adds it back identically; 'PL . cotisations caisse de retraite' is only renamed in this commit.",
+   "confidence": 0.8,
+   "prescreen": {
+    "verdict": "unsure",
+    "description": "The 'Urssaf' sub-rule removes only optional contributions (cotisations facultatives) from the total. It does not remove pension contributions collected by the regulated liberal professions' own retirement funds, so it may overstate the amount collected by the Urssaf for those professions."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr2143-fix4071b8f",
+   "introducing_pr": 2143,
+   "verdict": "not_defect",
+   "category": "data",
+   "severity": "medium",
+   "file": "modele-social/règles/salarié/cotisations.yaml",
+   "description": "In the 2022 refactor the AGS rule used 'branche: assurance chômage', the same value as the two other unemployment contributions in that commit; the 2026 payslip regression comes from a later change of the branch name elsewhere, not from this commit.",
+   "reason": "The 2022 diff adds 'branche: assurance chômage' three times (salarié . AGS, APEC, salarié . chômage) and no 'branche: chômage' anywhere, so the value was consistent when written; the fix arrives four years later in a SASU payslip PR.",
+   "confidence": 0.85,
+   "prescreen": {
+    "verdict": "unsure",
+    "description": "AGS cotisation is tagged with branche 'assurance chômage' instead of 'chômage', so it may be dropped or misgrouped in the per-branch breakdown of cotisations."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3321-fixc107c85",
+   "introducing_pr": 3321,
+   "verdict": "reviewable",
+   "category": "logic",
+   "severity": "medium",
+   "file": "modele-social/règles/salarié/exonérations/lodeom.publicodes",
+   "description": "The 'refactor' commit silently added an eligibility condition 'entreprise . chiffre d'affaires < 50000000' to three Lodeom scales (previously only 'effectif < 250'). The condition is legally correct, but 'entreprise . chiffre d'affaires' is computed by the engine from the salary instead of being asked, which is defined outside the PR; the fix comments the condition out with a TODO.",
+   "reason": "Removed lines in c98957fce only have '- entreprise . salariés . effectif < 250' while added lines have the extra '+ - entreprise . chiffre d'affaires < 50000000'; the fix says 'Le moteur se base donc sur le salaire renseigné pour déterminer le CA au lieu de poser la question', a behaviour of a rule not in the diff (a reviewer could at most flag a behaviour change hidden in a refactor).",
+   "confidence": 0.5,
+   "prescreen": {
+    "verdict": "unsure",
+    "description": "The Lodeom renforcée / innovation et croissance applicability conditions use `entreprise . chiffre d'affaires < 50000000`, which in the salarié context is derived from the entered salary instead of being asked, so the turnover criterion is not really evaluated."
+   },
+   "description_differs_from_prescreen": false,
+   "override_note": "Second reader said not_knowable (why the condition misbehaves lies outside the diff). Overridden, borderline: a commit titled refactor adds a new eligibility condition (chiffre d'affaires < 50000000) to three Lodeom scales, which is a visible behaviour change a reviewer should question. Needs someone who knows the repo."
+  },
+  {
+   "id": "pr4160-fixbb40ba9",
+   "introducing_pr": 4160,
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "high",
+   "file": "site/source/components/utils/EngineContext.tsx",
+   "description": "The blamed commit only reformatted the pre-existing throw for invalid company/config rules (nested ternary to if/else) in useSetupSafeSituation; the throw-then-empty-the-engine design predates it. The fix is a design change (omit the faulty rule instead of throwing) prompted by Sentry volumes.",
+   "reason": "In 20caa2015 the hunk (in EngineContext.tsx) replaces \"throw new Error('Bad ' + (faultyDottedName in configSituation ? 'config' : ...\" by an equivalent 'let errorMessage = `Bad unknow situation ...`; throw new Error(errorMessage)', and the catch already emptied the engine ('engine.setSituation()' -> 'setEngineSituation(nomModèle, {})'). The commit does start applying the shared company/config situation to per-simulator models, which may make the path fire more often, but which rules each model lacks is not visible in this diff.",
+   "confidence": 0.6,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "With one rule model per simulator, the shared company or config situation can hold rules that are missing from a given simulator's model; such a rule is not in simulatorSituation, so the hook throws and the whole engine situation is emptied instead of just dropping that rule."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4311-fixd88ef1a",
+   "introducing_pr": 4311,
+   "verdict": "reviewable",
+   "category": "logic",
+   "severity": "low",
+   "file": "site/source/lib/navigation/providers/ReactRouterNavigationProvider.tsx",
+   "description": "The new getHref() returns absolute paths unchanged, whereas the react-router useHref() it replaces prepends the router basename. With a non-empty basename (every non-production mode) the iframe preview src on the integration page points to the wrong URL.",
+   "reason": "Intro diff removes 'export function useHref(to) { return useRRHref(to) }' and adds 'if (to.startsWith('/')) { return to }', then Iframe.tsx switches 'useHref(`/iframes/...`)' to 'getHref(`/iframes/...`)'; the same diff shows 'basename={import.meta.env.MODE === 'production' ? '' : basename}', so only local/preview builds are affected.",
+   "confidence": 0.6,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The new getHref returns absolute paths unchanged instead of resolving them through react-router's useHref, so the router basename is dropped and the integration page's iframe src points to the wrong URL."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4160-fixae86a73",
+   "introducing_pr": 4160,
+   "verdict": "reviewable",
+   "category": "logic",
+   "severity": "high",
+   "file": "modele-ti/règles/indépendant/revenus/rémunération.publicodes",
+   "description": "Overriding 'impôt . foyer fiscal . situation de famille' in the contexte with 'applicable si: conjoint collaborateur' replaces the rule for everyone: when there is no conjoint collaborateur the override is non applicable instead of falling back to the question, so the marital-status question disappears and 'couple' can no longer be chosen (wrong income tax).",
+   "reason": "Added lines: 'impôt . foyer fiscal . situation de famille:\\n  applicable si: conjoint collaborateur\\n  valeur: \"'couple'\"' inside 'contexte'; a contexte entry substitutes the whole rule, and the fix has to introduce a separate 'paramètres . impôt . foyer fiscal . situation de famille' with an explicit 'sinon: question' fallback (issue #4440: question vanished for all independents). Note: this commit is dated 2026-03-02, pushed months after PR #4160 was opened (2025-12-16); the verdict holds only if the reviewer is shown this commit.",
+   "confidence": 0.7,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The contextual override targets `impôt . foyer fiscal . situation de famille` instead of `paramètres . impôt . foyer fiscal . situation de famille`, so the 'couple' family situation is not applied to the tax computation when there is a conjoint collaborateur."
+   },
+   "description_differs_from_prescreen": true
+  },
+  {
+   "id": "pr4160-fix9417442",
+   "introducing_pr": 4160,
+   "verdict": "reviewable",
+   "category": "logic",
+   "severity": "medium",
+   "file": "site/source/pages/assistants/choix-du-statut/home.tsx",
+   "description": "The commit's own diff flips choixStatutPath from relativeSitePaths to absoluteSitePaths, which makes the embedded choix-du-statut assistant leave the /iframes/ prefix (iframe mode lost, scroll broken). But this is a rebase artefact: main only became 'relative' with PR #4398 (merged 2026-03-19), and the long-lived #4160 branch was rebased over it and restored the old 'absolute' line. When PR #4160 was opened (2025-12-16) both main and the branch had 'absolute', so nothing was visible or wrong in the PR at that time.",
+   "reason": "PR #4398's patch on home.tsx is '-useSitePaths().absoluteSitePaths...' / '+useSitePaths().relativeSitePaths...'; fix message: 'a réintroduit absoluteSitePaths au lieu de relativeSitePaths ... lors d'un rebase, annulant le fix du PR #4398'. It would be reviewable only if the reviewer is shown the final rebased commit diff (the flip is unrelated to the stated refactor).",
+   "confidence": 0.65,
+   "override_note": "Second reader said not_knowable (a rebase artefact, not in the PR as opened). Overridden after checking the fixture: base..head of fixtures/pr4160 contains the flip from relativeSitePaths to absoluteSitePaths in choix-du-statut/home.tsx. The PR is 251 commits and 576 files, so it is a poor review item all the same.",
+   "prescreen": {
+    "verdict": "defect",
+    "description": "This refactor silently swaps relativeSitePaths for absoluteSitePaths. The 'Trouver le bon statut' button then navigates to an absolute /assistants/... path that leaves the /iframes/ prefix, which turns off iframe mode and breaks scrolling in the embedded assistant."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4160-fixa6bc84b",
+   "introducing_pr": 4160,
+   "verdict": "not_knowable",
+   "category": "crash",
+   "severity": "high",
+   "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "description": "The fix cures a 'too much recursion' crash when Acre is enabled under the micro-fiscal regime, mainly by making the Acre amount depend on 'maladie-maternité avant abattements' instead of re-evaluating 'cotisations . maladie-maternité' with 'contexte: Acre: non' (lines in Acre.publicodes not written by this commit). The blamed commit only turned 'le maximum de' into Acre/invalidité 'variations'; the cycle depends on rules outside its diff and on one specific configuration.",
+   "reason": "Issue #4434 is 'Page d'erreur \"too much recursion\"'; the fix's decisive hunk is in Acre.publicodes ('- valeur: cotisations . maladie-maternité / contexte: Acre: non' -> '+ cotisations . maladie-maternité avant abattements'), which the introducing commit did not touch; the commit's own tests and snapshots passed. One smell is visible (a variations mixing an amount 'montant maladie-maternité' and a rate 'taux maladie-maternité et indemnités journalières'), but that is not the reported failure. Acre.publicodes was last changed on 2026-03-05 (212c2dc07, 'corrige le calcul de l'Acre'), one day before this commit, so the cycle may equally come from that commit (then this would be not_defect). The commit is dated 2026-03-06, after the PR was opened.",
+   "confidence": 0.45,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The maladie-maternité abattement `variations` mixes a €/an amount (Acre montant) with a % rate (invalidité taux) without explicit units. Publicodes unit inference can then mis-apply one branch, giving a wrong maladie-maternité contribution, notably with Acre."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3459-fix9b9a4ea",
+   "introducing_pr": 3459,
+   "verdict": "not_defect",
+   "category": "state",
+   "severity": "low",
+   "file": "site/source/hooks/useQuestions.ts",
+   "description": "The blamed commit moved the question-orchestration logic verbatim from Questions.tsx into the useQuestions hook. The later change (jump to a newly appeared unanswered question placed before the active one) is a behaviour improvement to logic that predates the commit, made for the needs of PR #4160.",
+   "reason": "4e8374099 deletes from Questions.tsx the same 'useEffect(() => { if (activeQuestionId && !idsDesQuestions.includes(activeQuestionId)) { setActiveQuestionId(idsDesQuestions[0]) } }' and state code it adds to useQuestions.ts; commit title is 'refactor: migre la logique d'orchestration des questions dans useQuestions'.",
+   "confidence": 0.8,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The active question is only reset when it stops being applicable, and then it jumps back to idsDesQuestions[0], even if that question is already answered; a newly applicable higher-priority unanswered question inserted before the current one is never shown and gets skipped by index-based navigation."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4324-fixa3acffc",
+   "introducing_pr": 4324,
+   "verdict": "reviewable",
+   "category": "calculation",
+   "severity": "high",
+   "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "description": "A display label was put in the 'unit' prop ('€ cotisés par an'), which is the publicodes unit used to evaluate the rule; it is not a valid unit, so the €/mois to €/an conversion no longer happens and SASU monthly amounts are shown as yearly. The label belongs in 'displayedUnit', as on the neighbouring rows changed in the same commit.",
+   "reason": "Intro diff: '- unit=\"€/an\"' / '+ unit=\"€ cotisés par an\"' while the two sibling hunks edit 'displayedUnit={t(...)}'; fix restores 'unit=\"€/an\"' and adds 'displayedUnit=\"€ cotisés par an\"' (PR #4393: unit not recognised by publicodes, monthly value shown as annual).",
+   "confidence": 0.85,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "Changing the `unit` prop from \"€/an\" to \"€ cotisés par an\" passes an unparseable unit to publicodes, so the SASU value is no longer converted from €/mois to €/an and the monthly amount is shown as an annual one."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4285-fixfef7213",
+   "introducing_pr": 4285,
+   "verdict": "reviewable",
+   "category": "calculation",
+   "severity": "high",
+   "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+   "description": "The RGDU coefficient applies the exponent P before the 1/2 factor: '0.5 * ((3 * SMIC / assiette - 1) ** P)' instead of '(0.5 * (3 * SMIC / assiette - 1)) ** P' as in the official formula cited in the rule's references. The employer reduction is overstated for every salary between 1 and 3 SMIC. Checkable without the decree: at 1 SMIC the bracket gives 0.5 * 2^1.75 = 1.68 instead of 1, so the coefficient only stays at Tmin + Tdelta thanks to the plafond and remains flat up to about 1.2 SMIC, contradicting the 'dégressive' description.",
+   "reason": "Added line '- 0.5 * ((3 * temps de travail . SMIC / cotisations . assiette - 1) ** P)' with 'plafond: Tmin + Tdelta' and 'P: 1.75'; fix: '(0.5 * (3 * temps de travail . SMIC / cotisations . assiette - 1)) ** P'. Confidence is limited because a reviewer either needs the BOSS/decree formula (linked, not quoted in the diff) or must do the sanity check at 1 SMIC.",
+   "confidence": 0.55,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The RGDU coefficient applies the 1/2 factor outside the exponent (0.5 * (3*SMIC/R - 1)^P) instead of inside it ([0.5 * (3*SMIC/R - 1)]^P) as the regulatory formula requires."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr2436-fix5e17902",
+   "introducing_pr": 2436,
+   "verdict": "not_defect",
+   "category": "data",
+   "severity": "low",
+   "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.yaml",
+   "description": "The blamed commit only moved the dentist 'taux Urssaf' rule (unité: '', par défaut: 1) verbatim from modele-social/règles/profession-libérale.yaml into the new split file PAMC.yaml while reorganising modele-social; the unit choice predates this PR. The later fix changes the unit to '%' so the answer displays, which is unrelated to the 2023 health-rate update the PR is about.",
+   "reason": "In the introducing diff the lines \"unité: ''\" / \"par défaut: 1\" appear both as '-' (old file, line ~6543) and '+' (new PAMC.yaml, line ~5202): a pure file move, so SZZ blamed the mover, not the author.",
+   "confidence": 0.85,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The chirurgien-dentiste 'taux Urssaf' question is declared unitless (unité: '', par défaut: 1), so a user who types a percentage (e.g. 30) gets 30 instead of 30%, inflating the participation base."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4164-fix4f95f8c",
+   "introducing_pr": 4164,
+   "verdict": "reviewable",
+   "category": "state",
+   "severity": "high",
+   "file": "site/source/components/Simulation/SimulationGoal.tsx",
+   "description": "ObjectifSaisissableDeSimulation now renders the input as a component (<ChampSaisie />) whose type is a function recreated by useCallback inside SimulationGoal on every dependency change (handleChange, evaluation.missingVariables, currentUnit...). Each keystroke changes the situation, giving a new component identity, so React unmounts/remounts the input and focus is lost after every digit.",
+   "reason": "\"const RuleInputWrapper = useCallback(({ id, aria }: ChampSaisieProps) => (<RuleInput ...\" is passed as \"ChampSaisie={RuleInputWrapper}\" and rendered as \"<ChampSaisie .../>\" (previously \"{rendreChampSaisie()}\"); the fix goes back to calling it as a render function, and the issue is 'il faut recliquer sur le champ de saisie pour chaque nouveau chiffre'.",
+   "confidence": 0.9,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "`RuleInputWrapper` is recreated by `useCallback` whenever its deps change (e.g. `evaluation.missingVariables`, `currentUnit`), and it is rendered as a component type (`<ChampSaisie />`). React therefore unmounts and remounts the input on every situation update, losing focus and the value being typed."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr4159-fix588f379",
+   "introducing_pr": 4159,
+   "verdict": "not_knowable",
+   "category": "data",
+   "severity": "medium",
+   "file": "modele-social/règles/salarié/aides-employeur.publicodes",
+   "description": "The PR merged the question rule 'emploi franc . éligible' into its parent 'emploi franc', deleting a public rule name; evaluations that still referenced the old name (not in the repo code touched by the fix: persisted answers / external consumers of modele-social) then failed with 'référence introuvable'. A reviewer could at most have warned that removing a published rule is a breaking change; the failing references are outside the PR.",
+   "reason": "Intro diff deletes \"salarié . coût total employeur . aides . emploi franc . éligible:\" and updates the in-repo references visible in it (simulationConfig, regression tests, API snapshot); the fix PR body is only the Sentry error \"La référence ... emploi franc . éligible est introuvable\" in \"$EVALUATION\" and simply restores the rule. I could not find which caller still evaluated the old name (code search returned nothing), so it may be saved user answers/external consumers (not knowable) or a missed in-repo reference (would be reviewable): undecided between the two.",
+   "confidence": 0.45,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The 'Emploi franc' question entry was repointed from the boolean rule '… emploi franc . éligible' to the parent rule '… aides . emploi franc', so the question config no longer targets the rule that actually holds the yes/no answer."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3532-fixd86a66d",
+   "introducing_pr": 3532,
+   "verdict": "reviewable",
+   "category": "calculation",
+   "severity": "high",
+   "file": "modele-social/règles/salarié/contrat.publicodes",
+   "description": "The new apprentice CSG-CRDS rule does not actually apply the 50 % SMIC exemption: 'remplace: références à: cotisations . assiette dans: salarié . cotisations . CSG-CRDS' matches nothing effective (the CSG base is 'CSG-CRDS . assiette de base', built on 'cotisations . assiette . sans prévoyance'), so removing 'rend non applicable: cotisations . CSG-CRDS' makes apprentices pay CSG-CRDS on their full salary. The PR's own regression snapshot shows it.",
+   "reason": "Snapshot in the same commit: apprentissage 1500 € brut net goes \"1471\" -> \"1326\" (-145 €, i.e. ~9.7 % x 98.25 % of the whole 1500 €, no abatement of 50 % SMIC) and 2500 € goes 2358 -> 2118; the fix changelog says the rule \"ne s'appliquait pas correctement\" and retargets the replacement to \"cotisations . CSG-CRDS . assiette de base\". Seeing the cause needs cotisations.publicodes, but the wrong amounts are in the PR diff.",
+   "confidence": 0.65,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The apprentice CSG-CRDS replacement targets references to `cotisations . assiette` inside `salarié . cotisations . CSG-CRDS`. The real CSG-CRDS base goes through `assiette de base`, which uses `cotisations . assiette . sans prévoyance` and the 98.25% abatement, so the 50%-of-SMIC exemption is not applied to the right base."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3189-fix25c2fab",
+   "introducing_pr": 3189,
+   "verdict": "not_knowable",
+   "category": "calculation",
+   "severity": "medium",
+   "file": "modele-social/règles/dirigeant/professions-libérales/PAMC.publicodes",
+   "description": "The PR replaced the flat 3.25 % additional health contribution on non-conventioned income by a progressive rate (3.25 % to 9.75 %) for all PAMC, but sector-2 doctors keep the flat 3.25 %. Knowing that exception requires Urssaf regulatory knowledge that is not in the repo or the PR.",
+   "reason": "Intro: \"- 3.25%\" -> \"+ taux\" with a \"taux progressif\" for everyone; fix adds \"- si: métier . santé . médecin . secteur = 'S2'  alors: 3.25%\" citing the Urssaf rate page. Nothing in the introducing diff hints at a per-sector difference.",
+   "confidence": 0.8,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The new progressive rate (3.25% up to 40% PASS, rising to 9.75% at 110% PASS) is applied to every PAMC, including secteur 2 doctors, who should keep a flat 3.25% on non-conventionné income."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr2963-fix5832f80",
+   "introducing_pr": 2963,
+   "verdict": "reviewable",
+   "category": "logic",
+   "severity": "medium",
+   "file": "site/source/hooks/useStatefulRulesEdit.ts",
+   "description": "The refactor replaced reading the option defaults from the status-specific engines (auto-entrepreneur engine for versement libératoire, non-AE engine for imposition/ACRE) by a single engine.evaluate(rule) on the base engine in useStatefulRulesEdit. In the base situation 'dirigeant . auto-entrepreneur' is not set, so the AE options (versement libératoire, AE ACRE eligibility) are evaluated outside their context and the drawer shows wrong values.",
+   "reason": "Intro removes \"autoEntrepreneurEngine?.evaluate(DOTTEDNAME_SOCIETE_VERSEMENT_LIBERATOIRE).nodeValue\" and the namedEngines prop in favour of \"engine.evaluate(rule).nodeValue\" with useEngine(); the fix adds \"contexte\" = \"{ 'dirigeant . auto-entrepreneur': 'oui' }\" ('affiche les bonnes valeurs d'option AE'). The hook's history between the two commits shows only renames/refactors, nothing that would have introduced the problem later, but the fix has no issue describing when it started (14 months later).",
+   "confidence": 0.55,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The refactor reads the AE-only options (versement libératoire, ACRE eligibility for auto-entreprise) from the shared engine, which is not in the auto-entrepreneur context, instead of from the AE engine as before. The options drawer therefore shows wrong default values and can write them back on confirm."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3459-fix401bc6b",
+   "introducing_pr": 3459,
+   "verdict": "reviewable",
+   "category": "calculation",
+   "severity": "high",
+   "file": "site/source/components/ChiffreAffairesActivitéMixte.tsx",
+   "description": "useAdjustProportions now sums Montant objects by hand and hardcodes €/an: the edited value arrives in the simulator's current unit (€/mois when the user is in monthly mode) while the other revenue lines come from engine.evaluate in the rule's unit, and M.somme/M.plus just keep the first operand's unit. In monthly mode the mixed-activity turnover and the proportions are therefore wrong.",
+   "reason": "Intro: \"O.fromNullable((valeur as M.Montant | undefined) || M.eurosParAn(0))\" mixed with \"engine.evaluate(règleCA)\" values, then the new \"M.somme\" = \"montants.reduce((a, b) => plus(a, b))\" where plus ends with \"makeMontant({ valeur: valeurSomme, unité: a.unité })\" (the body of plus above that line is not in the diff, so mixed units give either a wrong sum or an error); the fix converts everything to targetUnitSelector's unit and makes somme return an Either on mixed units.",
+   "confidence": 0.65,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "useAdjustProportions sums CA amounts without converting them to a common unit, so when the simulator is in €/mois the entered value (€/mois) is added to the engine-evaluated values of other activities (€/an), giving a wrong total and wrong proportions."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3722-fix936ded7",
+   "introducing_pr": 3722,
+   "verdict": "reviewable",
+   "category": "state",
+   "severity": "medium",
+   "file": "site/source/contextes/cmg/hooks/useCMG.ts",
+   "description": "The PR adds a second piece of provider state (moisIdentiques) next to situation, but useCMG's set.reset still only resets the situation. Starting a new simulation keeps the previous 'mois identiques' checkboxes active (and the array out of sync with the reset salariées).",
+   "reason": "Intro adds \"const [moisIdentiques, setMoisIdentiques] = useState<MoisIdentiques>({ GED: [], AMA: [] })\" and updates nouvelleGED/nouvelleAMA in useCMG.ts, yet at that commit useCMG.ts still has \"reset: () => { updateSituation(() => initialSituationCMG) }\" (unchanged, so not shown in the diff hunks); the fix adds \"resetMoisIdentiques()\" there one week later.",
+   "confidence": 0.8,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "The new moisIdentiques state lives in the CMG context but is never reset when a new simulation starts, so the 'mois identiques' checkboxes stay checked from the previous simulation."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3670-fix4a3b026",
+   "introducing_pr": 3670,
+   "verdict": "not_defect",
+   "category": "ui",
+   "severity": "low",
+   "file": "site/source/pages/assistants/cmg/components/AMA/EnfantsGardésInput.tsx",
+   "description": "The defect fixed (enfant checkbox ids not unique per salariée) sits in the line id={`checkbox-enfant-${index}-${mois}`}, which was added after PR #3670 merged (b726fffc7 'add an explicit id prop in <Checkbox>', 2025-06-13 12:50, then 7733187da), not by the blamed commit, whose Checkbox had no id at all. The blamed idSuffix={`${index}`} lines in GED.tsx/AMA.tsx were only prefixed with GED-/AMA- as part of that later correction; GED and AMA are on separate pages in the merged PR.",
+   "reason": "Introducing diff renders \"<Checkbox key={index} label={enfant.prénom.value} .../>\" with no id; the fix's removed line \"id={`checkbox-enfant-${index}-${mois}`}\" comes from a commit dated after the PR's merge (merged 2025-06-13T10:58Z). Within commit aa4b0a55f alone GED and AMA did share ids on one page, but the same PR split them into pages.",
+   "confidence": 0.7,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "GED and AMA both pass `idSuffix={`${index}`}` to their per-employee inputs, so the first GED employee and the first AMA employee get identical ids for the hours, pay and CMG fields of each month (e.g. `0-mars`), producing duplicate DOM ids."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3670-fixce66697",
+   "introducing_pr": 3670,
+   "verdict": "reviewable",
+   "category": "state",
+   "severity": "medium",
+   "file": "site/source/pages/assistants/cmg/components/Navigation.tsx",
+   "description": "Navigation builds Précédent/Suivant links from absoluteSitePaths (/assistants/cmg/...), although the assistant is declared embeddable (iframePath: 'cmg'). In an iframe (/iframes/cmg/...) the first click leaves the iframe route, remounting the page and CMGProvider, so everything entered on the first page is lost.",
+   "reason": "Intro: \"const { absoluteSitePaths } = useSitePaths(); const cmgPaths = absoluteSitePaths.assistants.cmg\" used in \"to={cmgPaths[suivant]}\". PR #3670 itself declares the assistant embeddable (its commits 'configure l'assistant CMG' with \"iframePath: 'cmg'\" and 'masque le formulaire pour le CMG en iframe'), so iframe use is in the PR's scope; the fix PR names the root cause as 'liens absolus (/assistants/cmg/*) même en contexte iframe (/iframes/cmg/*)'. Still needs knowledge of the /iframes/ routing, and no helper existed (the fix created useGetPath).",
+   "confidence": 0.6,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "Navigation builds links from absoluteSitePaths (/assistants/cmg/*), so inside the iframe route (/iframes/cmg/*) clicking Précédent/Suivant leaves the iframe route tree, remounts CMGProvider and loses the data already entered."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3459-fixed2af5b",
+   "introducing_pr": 3459,
+   "verdict": "reviewable",
+   "category": "crash",
+   "severity": "high",
+   "file": "site/source/pages/assistants/declaration-revenus-pamc/components/LigneImpôts.tsx",
+   "description": "The refactor deleted the toOuiNon helper and now passes the raw boolean prop to the publicodes 'arrondi' mechanism in engine.evaluate; publicodes rejects true/false ('use oui/non'), so the PAMC declaration assistant crashes when the results are displayed.",
+   "reason": "Intro: \"- arrondi: toOuiNon(arrondi),\" -> \"+ arrondi,\"; fix: \"arrondi: arrondi ? 'oui' : 'non'\". Issue #3738: \"Les valeurs booléennes true / false ne sont acceptées. Utilisez leur contrepartie française : 'oui' / 'non'\".",
+   "confidence": 0.75,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "Removing toOuiNon passes a raw boolean as `arrondi` to engine.evaluate, which Publicodes cannot parse, so the PAMC assistant crashes when displaying results."
+   },
+   "description_differs_from_prescreen": false
+  },
+  {
+   "id": "pr3459-fix9429090",
+   "introducing_pr": 3459,
+   "verdict": "not_knowable",
+   "category": "ui",
+   "severity": "medium",
+   "file": "site/source/design-system/conversation/MontantField.tsx",
+   "description": "MontantField gained an avecCentimes option that sets minimumFractionDigits to 2 (previously always 0); forcing two decimals breaks typing in the custom number field (the 'centimes bug'). The option itself looks like a sensible, deliberate choice in the diff; the breakage comes from how useSimpleNumberFieldState reformats the value while typing, which is outside the PR diff.",
+   "reason": "Intro: \"minimumFractionDigits: avecCentimes ? 2 : 0, maximumFractionDigits: avecCentimes ? 2 : 0\" replacing \"minimumFractionDigits: 0\"; fix sets \"minimumFractionDigits: 0\" only. A careful reviewer could have asked why the minimum changed, but the fix commit gives no detail and the failure mode is not derivable from the diff.",
+   "confidence": 0.55,
+   "prescreen": {
+    "verdict": "defect",
+    "description": "When `avecCentimes` is true, setting `minimumFractionDigits: 2` makes the react-aria NumberField always force two decimal places, which breaks how amounts with cents are entered and displayed in the Montant field."
+   },
+   "description_differs_from_prescreen": false
+  }
+ ],
+ "needs_human": [
+  "pr4159-fix588f379",
+  "pr4160-fixa6bc84b",
+  "pr3321-fixc107c85",
+  "pr2963-fix5832f80",
+  "pr4285-fixfef7213",
+  "pr3459-fix9429090"
+ ]
+}

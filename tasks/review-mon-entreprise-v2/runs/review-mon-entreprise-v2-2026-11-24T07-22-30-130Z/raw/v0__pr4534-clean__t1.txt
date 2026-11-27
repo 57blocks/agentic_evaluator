@@ -1,0 +1,45 @@
+```file:findings.json
+[
+ {
+  "file": "modele-as/règles/exonérations.publicodes",
+  "start_line": 15,
+  "end_line": 16,
+  "message": "Deux points sur ce bloc de description :\n\n- Les lignes 15-16 donnent « dans l’ **une des situations suivantes** », ce qui se lit mal (« dans l’une des situations » est probablement visé). Cette coquille est recopiée telle quelle dans les traductions générées.\n- Les retours à la ligne en dur sont traités comme des paragraphes par la traduction : dans `rules-as-en.yaml`, on obtient par exemple « within / within 60 days » ou « 6 months in the last 18 months » coupé en deux paragraphes, et la liste à puces est découpée en morceaux. Écrire chaque puce et chaque paragraphe sur une seule ligne éviterait ça. Qu'en penses-tu ?\n\nPar ailleurs, la réécriture de la description et des références (ainsi que la ligne « principally » dans le JEI du fichier de traduction) est un autre changement que la correction de calcul : un commit séparé se relirait plus facilement."
+ },
+ {
+  "message": "Le correctif des cotisations salariales reprend bien le schéma déjà en place pour `employeur` (même variation `date < 01/2026`, 25 % du montant sur la première tranche).\n\nPoints transverses :\n- Je n'ai pas vu de test qui couvre le calcul avant 2026 ni la 2ᵉ tranche (assiette entre 75 % et 100 % du PSS) pour la part salariale : seul le snapshot existant a changé. Un cas dédié dans `SASU.test.ts` verrouillerait la correction, et il serait utile qu'il échoue avant le correctif. Je n'ai pas pu vérifier si ce cas existe ailleurs.\n- La valeur 25 % est déjà utilisée pour la part patronale ; je n'ai pas vérifié sa source dans les textes, je suppose qu'elle est la même.\n- Les modifs de description et de références relèvent d'un commit distinct du fix (cf. commentaire inline). Je n'ai pas pu vérifier le rendu visuel."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4534,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-as/règles/exonérations.publicodes",
+   "line": 16,
+   "start_line": 15,
+   "body": "Deux points sur ce bloc de description :\n\n- Les lignes 15-16 donnent « dans l’ **une des situations suivantes** », ce qui se lit mal (« dans l’une des situations » est probablement visé). Cette coquille est recopiée telle quelle dans les traductions générées.\n- Les retours à la ligne en dur sont traités comme des paragraphes par la traduction : dans `rules-as-en.yaml`, on obtient par exemple « within / within 60 days » ou « 6 months in the last 18 months » coupé en deux paragraphes, et la liste à puces est découpée en morceaux. Écrire chaque puce et chaque paragraphe sur une seule ligne éviterait ça. Qu'en penses-tu ?\n\nPar ailleurs, la réécriture de la description et des références (ainsi que la ligne « principally » dans le JEI du fichier de traduction) est un autre changement que la correction de calcul : un commit séparé se relirait plus facilement.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Le correctif des cotisations salariales reprend bien le schéma déjà en place pour `employeur` (même variation `date < 01/2026`, 25 % du montant sur la première tranche).\n\nPoints transverses :\n- Je n'ai pas vu de test qui couvre le calcul avant 2026 ni la 2ᵉ tranche (assiette entre 75 % et 100 % du PSS) pour la part salariale : seul le snapshot existant a changé. Un cas dédié dans `SASU.test.ts` verrouillerait la correction, et il serait utile qu'il échoue avant le correctif. Je n'ai pas pu vérifier si ce cas existe ailleurs.\n- La valeur 25 % est déjà utilisée pour la part patronale ; je n'ai pas vérifié sa source dans les textes, je suppose qu'elle est la même.\n- Les modifs de description et de références relèvent d'un commit distinct du fix (cf. commentaire inline). Je n'ai pas pu vérifier le rendu visuel."
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 10,
+  "cost_usd": 0.15843730000000003,
+  "final_text": "J'ai posté sur la PR #4534 un commentaire inline et une synthèse, sans rien exécuter ni lancer de tests.\n\n- **Calcul :** le correctif des cotisations salariales reprend le schéma déjà utilisé pour la part patronale (même variation `date < 01/2026`, 25 % du montant sur la première tranche). Je n'ai rien relevé à redire sur le code des règles.\n- **Description de l'Acre (inline, `exonérations.publicodes` lignes 15-16) :** la phrase « dans l’ **une des situations suivantes** » est mal formée, et la coquille est recopiée dans les traductions générées. Les retours à la ligne en dur sont aussi traités comme des paragraphes par la traduction. Dans `rules-as-en.yaml`, on obtient par exemple « within / within 60 days » et des puces découpées en morceaux.\n- **Historique git :** la réécriture de la description et des références, ainsi que la ligne « principally » du JEI, sont un autre changement que le correctif de calcul. Je propose un commit séparé.\n- **Tests :** je n'ai pas vu de test pour le calcul avant 2026 ni pour la 2ᵉ tranche (assiette entre 75 % et 100 % du plafond de la sécurité sociale) côté salarié. Seul le snapshot existant a changé. Je n'ai pas pu vérifier si un tel cas existe ailleurs.\n- **Non vérifié :** la source du taux de 25 % (je suppose qu'elle est la même que pour la part patronale) et le rendu visuel."
+ }
+}
+
+```

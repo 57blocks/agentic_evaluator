@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/components/conversation/AnswerList.tsx",
+  "start_line": 321,
+  "end_line": 321,
+  "message": "Je me demande si ce `// showSuggestions={false}` commenté est voulu : c'est du code mort, et sa disparition change le comportement (les suggestions s'affichent maintenant dans la modale « Modifier mes réponses » pour toutes les règles). Si c'est l'effet recherché (le test AE clique sur une suggestion dans la modale), je verrais bien la suppression pure de la prop, idéalement dans un commit dédié. Qu'en penses-tu ?"
+ },
+ {
+  "file": "modele-social/règles/entreprise/entreprise.publicodes",
+  "start_line": 25,
+  "end_line": 25,
+  "message": "Je crois que renommer cette suggestion en `Début d’année` (apostrophe typographique) casse le test Cypress : `simulateur-ae.ts:22` fait toujours `cy.contains(\"Début d'année\")` avec l'apostrophe droite, et je ne pense pas que `cy.contains` normalise les apostrophes. Je n'ai pas pu exécuter Cypress, donc à confirmer : peux-tu vérifier ?"
+ },
+ {
+  "file": "site/cypress/integration/mon-entreprise/simulateur-ae.ts",
+  "start_line": 70,
+  "end_line": 70,
+  "message": "nit: `cy.wait(500)` (avec désactivation du lint) rend le test dépendant du timing et potentiellement instable en CI. Y a-t-il une assertion sur laquelle attendre à la place ? Retirer `testIsolation: false` rend les tests indépendants, ce qui est plus robuste, mais cela réécrit beaucoup de tests AE sans lien direct avec la rubrique « Charges »."
+ },
+ {
+  "message": "Remarques transverses :\n\n- **Périmètre / historique** : la PR mêle le texte de la règle « charges », un changement d'UI (retrait de `small` sur les `SimulationGoal`), la conversion en apostrophes typographiques de tout `entreprise.publicodes` (beaucoup de bruit dans le diff et dans `rules-en.yaml`), et des remaniements Cypress (`.eq(0)` → `.first()` dans lodeom, réduction-générale, salarié) sans lien avec le sujet. Des PR ou commits séparés faciliteraient la relecture. Les commits « apostrophes » et « correction du test AE » rattrapent les précédents plutôt que d'être autonomes ; un fixup garderait un historique plus net.\n- **Non vérifié** : le contenu métier du nouveau texte (cotisations, CSG déductible), le rendu visuel après retrait de `small`, et le contenu des traductions régénérées."
+ }
+]

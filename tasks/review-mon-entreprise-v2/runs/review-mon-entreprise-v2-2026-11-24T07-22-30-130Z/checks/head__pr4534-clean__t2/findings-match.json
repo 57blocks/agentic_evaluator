@@ -1,0 +1,38 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "modele-as/règles/exonérations.publicodes",
+      "start_line": 15,
+      "end_line": 15,
+      "message": "La phrase est coupée : « dans l’ » puis « **une des situations suivantes** » donne « dans l’**une des situations** » une fois rendu. Peut-être « Vous ne pouvez bénéficier de l’Acre que si vous êtes dans **l’une des situations suivantes** au moment de la création de votre entreprise : » ?"
+    },
+    {
+      "file": "modele-as/règles/exonérations.publicodes",
+      "start_line": 7,
+      "end_line": 7,
+      "message": "Les retours à la ligne en milieu de phrase (ici et dans les items de la liste) se retrouvent dans `rules-as-en.yaml` : la traduction automatique traite chaque ligne séparément et produit des doublons (« within / within 60 days », « one of the following situations / **one of the following situations** », « allocation de / solidarité spécifique »). Je me demande si on ne gagnerait pas à écrire chaque paragraphe et chaque item de liste sur une seule ligne, puis à régénérer les traductions."
+    },
+    {
+      "file": "site/source/locales/rules-as-en.yaml",
+      "start_line": 988,
+      "end_line": 988,
+      "message": "nit: le changement « primarily » → « principally » sur la règle JEI n’a pas de rapport avec l’Acre ; il vient sans doute de la régénération. Tu peux l’écarter de la PR ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim",
+    "llm-no-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+[
+ {
+  "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations-et-contributions.publicodes",
+  "start_line": 111,
+  "end_line": 115,
+  "message": "nit: la condition Mayotte est répétée sur le plancher et sur le plafond. Je me demande si on ne gagnerait pas en lisibilité avec une seule règle (par ex. `abattement` en `variations` : `si: … Mayotte` → `26% * revenu brut`, `sinon` → version encadrée), ou une règle intermédiaire « abattement encadré ». Qu'en penses-tu ? Ce n'est pas bloquant, les deux tests Mayotte couvrent bien le comportement."
+ },
+ {
+  "message": "Synthèse :\n\n- Historique : le commit `637731e` (i18n: traductions manquantes) ajoute ~150 lignes à `rules-en.yaml` (description de `entreprise . imposition`) sans rapport avec Mayotte. Si ces traductions étaient déjà manquantes sur `master`, je me demande si elles ne seraient pas plus à leur place dans une PR à part, pour garder celle-ci centrée sur les retours Mayotte.\n- Commits : `doc(TI)` n’est pas dans la liste des scopes admis, et `doc` n’est pas un type Conventional Commits standard (`docs`). Le scope `mayotte` du premier commit est fonctionnel, donc OK. Les commits `fix:` du 2ᵉ au 4ᵉ ont en revanche des périmètres variés (Mayotte, PSS, RC/ID Cipav) alors que la PR s’intitule « Mayotte retours métier » : le titre du PSS et l’arrondi Cipav ne relèvent pas de Mayotte, une PR séparée se relirait plus facilement.\n- Traductions : les titres anglais générés pour le PSS (« PSS Metropolitan Area », « PSS Metropolitan Division N-1 ») sont marqués `[automatic]` mais sont peu justes (« Metropolitan Division »). Peut-être à corriger à la main ou à reformuler côté FR pour que la traduction automatique s’en sorte mieux.\n- Sources : je vois bien des tests pour chaque changement, mais je n’ai pas vérifié les références légales derrière l’absence de CSG-CRDS et de plancher/plafond à Mayotte ; je suppose que le ticket #4588 les porte. Le CI est vert."
+ }
+]

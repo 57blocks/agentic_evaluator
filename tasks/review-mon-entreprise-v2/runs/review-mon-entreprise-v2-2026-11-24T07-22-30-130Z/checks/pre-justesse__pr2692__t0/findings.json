@@ -1,0 +1,14 @@
+[
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 30,
+  "end_line": 30,
+  "message": "Si Redis est indisponible (ce que `enableOfflineQueue: false` fait échouer immédiatement), `redis.get` rejette et `/evaluate` répond une erreur alors que le calcul aurait pu se faire sans cache. Je me demande si un `try/catch` qui retombe sur `next()` (get comme set) ne serait pas plus sûr : le cache devient une optimisation qui ne peut pas casser l'API. Qu'en penses-tu ?"
+ },
+ {
+  "file": "api/source/index.ts",
+  "start_line": 50,
+  "end_line": 50,
+  "message": "`plausibleMiddleware` passe maintenant après le cache : une réponse servie depuis Redis ne rappelle pas `next()`, donc n'est plus comptée dans les stats. Est-ce voulu ? Sinon, le remettre avant `redisCacheMiddleware()` garderait le comptage des requêtes."
+ }
+]

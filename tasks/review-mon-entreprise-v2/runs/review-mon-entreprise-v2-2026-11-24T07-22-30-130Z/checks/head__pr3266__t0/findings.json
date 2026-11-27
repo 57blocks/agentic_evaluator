@@ -1,0 +1,11 @@
+[
+ {
+  "file": "site/source/utils/réductionDeCotisations.ts",
+  "start_line": 267,
+  "end_line": 267,
+  "message": "Reste du renommage `réductionGénérale` → `réduction` : ici la clé n'est plus lue par personne (`MonthState` n'a plus que `réduction`), donc quand la rémunération totale tombe à 0, le `...monthData` conserve l'ancienne `réduction` au lieu de la remettre à 0. Concrètement, si on vide tous les mois après avoir saisi des montants, je me demande si la réduction affichée ne reste pas celle d'avant. TypeScript ne le signale pas à cause du spread.\n```suggestion\n\t\t\t\tréduction: {\n```"
+ },
+ {
+  "message": "J'ai bien relu : un seul point à regarder, posé en commentaire inline sur le renommage `réductionGénérale` → `réduction`. Le reste me paraît bon."
+ }
+]

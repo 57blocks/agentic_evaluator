@@ -1,0 +1,19 @@
+{
+ "pr": 4609,
+ "findings": [
+  {
+   "kind": "global",
+   "body": "J'ai bien relu, ça me paraît bon à merger"
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.10587790000000001,
+  "final_text": "J'ai relu la PR #4609 et posté un seul commentaire global : « J'ai bien relu, ça me paraît bon à merger ». Je n'ai rien trouvé qui justifie un commentaire inline.\n\nLa vérification PR est au vert. Les deux changements sont cohérents : `environnement.ts` ne lit plus `process.env` sous Vite, et `vite.config.ts` ne définit `SENTRY_RELEASE_NAME` que lorsqu'une release est nommée. `BRANCH_NAME` reste défini dans `vite.config.ts`. Je n'ai ni exécuté le code ni lancé les tests."
+ }
+}

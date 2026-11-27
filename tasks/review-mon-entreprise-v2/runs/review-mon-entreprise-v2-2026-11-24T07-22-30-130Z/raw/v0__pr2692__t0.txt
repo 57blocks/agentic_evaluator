@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 30,
+  "end_line": 30,
+  "message": "Je me demande ce qui se passe quand Redis est indisponible : avec `enableOfflineQueue: false`, ioredis rejette les commandes tant que la connexion n'est pas établie, donc `redis.get` lèverait et l'appel `/evaluate` partirait en erreur alors que le calcul aurait pu se faire sans cache (je n'ai pas pu le vérifier en conditions réelles). Un `try/catch` autour de `get` et de `set` qui retombe sur `next()` garderait le cache comme optimisation, pas comme dépendance. Qu'en penses-tu ?\n\nDeuxième point : la clé est le JSON brut du body, sans préfixe ni version. Si l'instance Redis Scalingo sert un jour à autre chose, ou si les règles `modele-social` changent après un déploiement, des résultats périmés pourraient être servis jusqu'à 2h. Un préfixe incluant la version du modèle (ex. `evaluate:<version>:`) éviterait ça. Et l'ordre des clés du body change la clé, ce qui réduit un peu le taux de hit (nit)."
+ },
+ {
+  "file": "api/source/redis-cache.ts",
+  "start_line": 42,
+  "end_line": 42,
+  "message": "Le `responseCachedAt` n'est ajouté que dans la valeur stockée : la première réponse n'a pas ce champ, les suivantes l'ont. Est-ce voulu côté contrat de l'API (`openapi.json` n'est pas mis à jour) ? Par ailleurs, le spread suppose que `ctx.body` est un objet ; si la réponse était un tableau ou une chaîne, le résultat serait déformé. Pas de test non plus sur ce middleware (hit, miss, erreur Redis) : j'en verrais bien un pour verrouiller le comportement."
+ },
+ {
+  "file": "api/source/index.ts",
+  "start_line": 50,
+  "end_line": 50,
+  "message": "Le `plausibleMiddleware` passe après le cache : sur un hit, il n'est plus appelé, donc les statistiques d'usage de `/evaluate` ne compteront plus que les miss. Est-ce voulu ? Si non, le placer avant le cache. Autre question : `apiRoutes` relit-il le body après `koaBody()` ? Je n'ai pas vérifié que le body déjà consommé reste lisible en aval."
+ },
+ {
+  "message": "Synthèse : la PR mélange la montée de versions des dépendances et de prettier (≈ 90 fichiers de reformatage d'imports, `yarn.lock`) avec la fonctionnalité de cache, et le dernier commit « Fix prettier import order update » corrige le précédent. Séparer en deux PR (ou au moins des commits conformes à Conventional Commits, en français, avec scope) rendrait la revue du cache bien plus facile. Je n'ai pas pu vérifier le comportement en exécution."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 2692,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 30,
+   "start_line": null,
+   "body": "Je me demande ce qui se passe quand Redis est indisponible : avec `enableOfflineQueue: false`, ioredis rejette les commandes tant que la connexion n'est pas établie, donc `redis.get` lèverait et l'appel `/evaluate` partirait en erreur alors que le calcul aurait pu se faire sans cache (je n'ai pas pu le vérifier en conditions réelles). Un `try/catch` autour de `get` et de `set` qui retombe sur `next()` garderait le cache comme optimisation, pas comme dépendance. Qu'en penses-tu ?\n\nDeuxième point : la clé est le JSON brut du body, sans préfixe ni version. Si l'instance Redis Scalingo sert un jour à autre chose, ou si les règles `modele-social` changent après un déploiement, des résultats périmés pourraient être servis jusqu'à 2h. Un préfixe incluant la version du modèle (ex. `evaluate:<version>:`) éviterait ça. Et l'ordre des clés du body change la clé, ce qui réduit un peu le taux de hit (nit).",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/redis-cache.ts",
+   "line": 42,
+   "start_line": null,
+   "body": "Le `responseCachedAt` n'est ajouté que dans la valeur stockée : la première réponse n'a pas ce champ, les suivantes l'ont. Est-ce voulu côté contrat de l'API (`openapi.json` n'est pas mis à jour) ? Par ailleurs, le spread suppose que `ctx.body` est un objet ; si la réponse était un tableau ou une chaîne, le résultat serait déformé. Pas de test non plus sur ce middleware (hit, miss, erreur Redis) : j'en verrais bien un pour verrouiller le comportement.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "api/source/index.ts",
+   "line": 50,
+   "start_line": null,
+   "body": "Le `plausibleMiddleware` passe après le cache : sur un hit, il n'est plus appelé, donc les statistiques d'usage de `/evaluate` ne compteront plus que les miss. Est-ce voulu ? Si non, le placer avant le cache. Autre question : `apiRoutes` relit-il le body après `koaBody()` ? Je n'ai pas vérifié que le body déjà consommé reste lisible en aval.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse : la PR mélange la montée de versions des dépendances et de prettier (≈ 90 fichiers de reformatage d'imports, `yarn.lock`) avec la fonctionnalité de cache, et le dernier commit « Fix prettier import order update » corrige le précédent. Séparer en deux PR (ou au moins des commits conformes à Conventional Commits, en français, avec scope) rendrait la revue du cache bien plus facile. Je n'ai pas pu vérifier le comportement en exécution."
+  }
+ ],
+ "gh": {
+  "calls": 5,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 6,
+  "cost_usd": 0.12482389999999999,
+  "final_text": "J'ai posté ma revue de la PR #2692 sur GitHub : trois commentaires inline et une synthèse. Je n'ai exécuté ni le code ni les tests, donc aucun de ces points n'est vérifié en conditions réelles.\n\n**Commentaires inline**\n- **`api/source/redis-cache.ts`, ligne 30 :**\n  - Avec `enableOfflineQueue: false`, `redis.get` pourrait lever si Redis est indisponible, et `/evaluate` partirait alors en erreur. Je suggère un `try/catch` qui retombe sur `next()`.\n  - La clé de cache est le JSON brut du body, sans préfixe ni version du modèle. Après un déploiement, des résultats périmés pourraient être servis jusqu'à 2 h.\n- **`api/source/redis-cache.ts`, ligne 42 :**\n  - `responseCachedAt` n'est présent que dans les réponses servies depuis le cache, et `openapi.json` n'est pas mis à jour.\n  - Le spread de `ctx.body` suppose un objet.\n  - Le middleware n'a aucun test.\n- **`api/source/index.ts`, ligne 50 :**\n  - `plausibleMiddleware` passe désormais après le cache, donc il n'est plus appelé sur un hit.\n  - Je me demande si `apiRoutes` peut encore lire le body après `koaBody()`, que je n'ai pas vérifié.\n\n**Synthèse (commentaire de PR)**\n- La PR mélange la montée de versions (dépendances, prettier, environ 90 fichiers de reformatage, `yarn.lock`) avec le cache.\n- Le dernier commit, « Fix prettier import order update », corrige le précédent.\n- Je suggère de séparer en deux PR, avec des commits en Conventional Commits en français."
+ }
+}
+
+```

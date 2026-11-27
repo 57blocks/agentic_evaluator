@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+  "start_line": 18,
+  "end_line": 18,
+  "message": "`cotisations.ts` importe `régime-général.ts` et celui-ci importe `DEFAULTS` depuis `cotisations.ts` : on a un cycle d’imports. Il ne casse rien aujourd’hui parce que `DEFAULTS` n’est lu qu’à l’appel, mais l’ordre d’évaluation des modules devient fragile. Je verrais bien déplacer `DEFAULTS` dans `constantes.ts` (ou dans `situation.ts`), dont tous les régimes dépendent déjà. Qu’en penses-tu ?"
+ }
+]

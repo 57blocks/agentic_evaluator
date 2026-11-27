@@ -1,0 +1,25 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/pages/assistants/declaration-revenus-pamc/components/Résultats.tsx",
+      "start_line": 145,
+      "end_line": 145,
+      "message": "nit: les autres textes de ce fichier utilisent une clé hiérarchique (`pages.assistants.declaration-revenus-pamc.resultats.label.N`), alors qu'ici la clé est le texte lui-même (`t('Bénéfice', 'Bénéfice')`, idem pour « Déficit » aux lignes 152, 166 et 173). CONTRIBUTING demande une clé hiérarchique ; je me demande si tu préfères en ajouter deux (`resultats.label.bénéfice` / `resultats.label.déficit`) et les réutiliser aux quatre endroits. Je vois que `Bénéfice` existe déjà dans `ui-en.yaml`, donc c'est peut-être volontaire pour mutualiser ; dis-moi."
+    },
+    {
+      "message": "Je n'ai relu que le code du site (UI, traductions), pas le détail des règles Publicodes ni leurs sources. Je n'ai pas pu vérifier le rendu visuel : le `display: inline-flex` ajouté à `SpanBody` dans `Radio.tsx` touche tous les Radio du design-system, un coup d'œil sur les autres usages serait utile. Historique : le commit « fix: mise en forme de la doc » n'a pas de scope, un `docs` serait plus parlant ; sinon l'historique se lit bien."
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-no-claim",
+    "llm-no-claim"
+  ],
+  "claims": 0,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": []
+  }
+}

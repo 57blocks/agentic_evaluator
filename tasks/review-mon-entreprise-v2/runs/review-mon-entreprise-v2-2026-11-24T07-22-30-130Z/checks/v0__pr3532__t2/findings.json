@@ -1,0 +1,23 @@
+[
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 210,
+  "end_line": 210,
+  "message": "Les descriptions parlent de « contrats conclus depuis le 1er mars 2025 », mais `date >= 03/2025` compare la date de la simulation, pas la date de début du contrat. Un contrat signé en 2024 et simulé en 2026 passerait à 50 % au lieu de 79 %, alors que (si j’ai bien compris) l’ancien taux continue de s’appliquer à ce contrat : le résultat affiché serait faux pour cet usager. Tu évoquais l’idée d’une question sur la date de début de contrat : je pencherais pour la poser, ou au moins pour expliciter dans la description que la règle suppose un contrat récent. Qu’en penses-tu ? (Je n’ai pas vérifié le texte de loi.)"
+ },
+ {
+  "file": "modele-social/règles/salarié/contrat.publicodes",
+  "start_line": 228,
+  "end_line": 228,
+  "message": "Même remarque sur la date de simulation. Sur ta question de l’assiette, je ne peux pas trancher le fond, mais je me demande si ce `remplace` de `cotisations . assiette` atteint bien la CSG : `CSG-CRDS . assiette de base` part de `cotisations . assiette . sans prévoyance` et ajoute la prévoyance employeur, et je n’ai pas vérifié que le remplacement s’applique à ces références. Un test (apprenti en dessous et au-dessus de 50 % du Smic, avec et sans prévoyance) dirait ce qui est réellement abattu. Je n’en vois pas de nouveau dans la PR, seulement des snapshots mis à jour."
+ },
+ {
+  "file": "modele-social/règles/salarié/salarié.publicodes",
+  "start_line": 521,
+  "end_line": 521,
+  "message": "Cette modification de la taxe sur les salaires n’est ni dans le message du commit (CSG-CRDS apprentis) ni dans le CHANGELOG. L’assiette passe de « assiette + prévoyances employeur » à l’assiette CSG-CRDS, qui applique aussi l’abattement de 1,75 % et celui des heures supplémentaires défiscalisées. Est-ce voulu ? Si oui, sur quelle source ? Sinon je la sortirais de la PR, ou j’en ferais un commit à part avec une référence."
+ },
+ {
+  "message": "Synthèse : l’historique est propre (un changement logique par commit, messages conformes). Hors lignes du diff : je ne vois aucun test nouveau pour la bascule 79 % → 50 % ni pour la CSG des apprentis, seulement des snapshots ; un test avec des dates avant et après mars 2025 aiderait à valider les choix. Les plafonds 2,25 / 3,3 Smic et la description JEI ont chacun une référence, dont je n’ai pas vérifié le contenu. Je n’ai pas pu vérifier les calculs ni le rendu."
+ }
+]

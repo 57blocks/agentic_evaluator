@@ -1,0 +1,8 @@
+[
+ {
+  "file": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+  "start_line": 559,
+  "end_line": 559,
+  "message": "Cette ligne change une règle métier : avant, un travailleur indépendant avec Acre **et** pension d'invalidité n'avait aucun abattement Acre sur l'invalidité-décès (la condition `exonérations . invalidité = non`), désormais l'Acre s'y applique. Le test qui couvrait ce cas (« est nulle lorsqu'il y a à la fois Acre et invalidité mais pas d'exonération âge ») est supprimé dans le même temps, et le commit s'intitule `tests:`.\n\nQuelle est la source de ce changement (texte de loi, page Urssaf) ? Et est-ce voulu pour la métropole comme pour Mayotte ? Si oui, je verrais bien un commit `fix(indépendant): …` séparé, avec la référence ajoutée aux `références` de la règle et un test qui exprime le nouveau comportement (Acre + invalidité ⇒ abattement Acre) plutôt qu'une simple suppression."
+ }
+]

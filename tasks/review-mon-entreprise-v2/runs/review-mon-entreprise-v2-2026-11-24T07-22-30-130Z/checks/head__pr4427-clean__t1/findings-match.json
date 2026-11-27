@@ -1,0 +1,31 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "clean",
+  "findings": [
+    {
+      "file": "site/source/storage/sanitizePersistedSituation.ts",
+      "start_line": 13,
+      "end_line": 13,
+      "message": "Les valeurs qui ne sont ni une chaîne, ni un nombre, ni `{ valeur, unité }` sont écartées sans trace. Je me demande si une situation légitime peut en contenir d'autres (une expression Publicodes plus riche, `null` pour désactiver une règle, un booléen) : l'usager perdrait alors silencieusement cette réponse à la restauration. Peut-on être sûr que `SituationPublicodes` ne couvre que ces trois formes ? Sinon, je garderais ces valeurs telles quelles et ne convertirais que le cas problématique."
+    },
+    {
+      "file": "site/source/domaine/searchParams.ts",
+      "start_line": 32,
+      "end_line": 32,
+      "message": "Avant, une valeur non encodable laissait au moins un `console.error` ; maintenant elle disparaît de l'URL sans aucun signal. Le lien partagé perd alors une réponse sans qu'on puisse le diagnostiquer. Qu'en penses-tu de conserver une trace pour ce cas (`else`) ?"
+    }
+  ],
+  "invalid": [],
+  "bases": [
+    "llm-claim",
+    "llm-claim"
+  ],
+  "claims": 2,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "claims": [
+      0,
+      1
+    ]
+  }
+}

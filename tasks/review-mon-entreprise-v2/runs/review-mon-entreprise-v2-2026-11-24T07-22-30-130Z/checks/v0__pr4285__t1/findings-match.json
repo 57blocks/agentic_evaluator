@@ -1,0 +1,71 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+      "start_line": 54,
+      "end_line": 54,
+      "message": "Je me demande ce que devient l'ancienne règle `réduction générale` : elle n'est plus utilisée dans le cumul des exonérations, mais elle reste référencée par `JEI`, `site/source/utils/réductionDeCotisations.ts`, le simulateur `reduction-generale` (config + `simulationConfig.ts`, qui parle encore de 1,6 SMIC) et `T`. Du coup, le simulateur dédié continue d'afficher l'ancienne formule alors que le simulateur salarié applique la RGDU. Est-ce voulu (par ex. garder l'ancien calcul pour des années passées) ou est-ce un second temps de la migration ? Si c'est voulu, une mention dans la description m'aiderait ; sinon je verrais bien la suppression ou la migration de ces usages pour ne pas laisser de code mort."
+    },
+    {
+      "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+      "start_line": 20,
+      "end_line": 20,
+      "message": "Deux points à vérifier : (1) `plafond avec application de la DFS` est dupliqué à l'identique (ancienne règle + RGDU), je verrais bien le partager plutôt que de le copier. (2) L'ancienne règle applique un `coefficient de majoration` (×100/90 si caisse de congés payés) ; il n'a pas d'équivalent dans le coefficient RGDU. Je n'ai pas vérifié si la réforme le supprime : si oui, ce serait bien de le dire ; sinon ce cas n'est plus couvert. Qu'en penses-tu ?"
+    },
+    {
+      "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+      "start_line": 42,
+      "end_line": 42,
+      "message": "nit: `P` (exposant 1,75) n'a pas de source propre, et Tmin/Tdelta, paramètres de la même formule, vivent dans `exonérations.publicodes` alors que seule la RGDU les utilise. Je les regrouperais avec la RGDU, avec un nom plus explicite que `P`. Qu'en penses-tu ?"
+    },
+    {
+      "message": "Je n'ai pas pu vérifier les valeurs de la formule (Tmin, Tdelta, P) face aux textes. À noter aussi : la règle `RGDU` n'a pas de condition de date, donc une simulation avec une date en 2025 appliquerait quand même le nouveau barème ; est-ce un choix assumé ? Côté historique, le découpage en commits est lisible."
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "modele-social/règles/salarié/exonérations/réduction-générale.publicodes",
+          "start_line": 32,
+          "end_line": 32
+        }
+      ],
+      "caught_by": null,
+      "findings": []
+    }
+  ],
+  "finding_source": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    },
+    {
+      "finding": 2,
+      "defect": 0
+    },
+    {
+      "finding": 3,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": []
+  },
+  "on_location": []
+}

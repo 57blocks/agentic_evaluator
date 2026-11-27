@@ -1,0 +1,73 @@
+```file:findings.json
+[
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 329,
+  "end_line": 329,
+  "message": "Je me demande si additionner les points AGIRC-ARRCO, RCI et Cipav est pertinent pour l'usager : ce sont des régimes distincts, dont la valeur du point diffère. Une somme de « points acquis par an » comparée entre statuts pourrait laisser croire qu'un total plus élevé est meilleur, alors que les points ne sont pas commensurables. Je n'ai pas vérifié ce que donne la somme quand certaines règles sont non applicables selon le statut. Peut-être afficher une ligne par régime, ou avoir une source pour cette agrégation ? Qu'en penses-tu ?"
+ },
+ {
+  "file": "site/source/components/EngineValue/Condition.tsx",
+  "start_line": 27,
+  "end_line": 27,
+  "message": "nit: CONTRIBUTING.md demande d'éviter les TODO laissés dans le code. Le lien vers #4323 est utile, mais je verrais bien le garder uniquement dans l'issue et dans le commentaire de `DetailsRowCards`, et retirer celui-ci pour ne pas toucher à un composant partagé sans changement de comportement."
+ },
+ {
+  "file": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+  "start_line": 344,
+  "end_line": 344,
+  "message": "Ce bloc (message + lien + aria-label) est quasi identique à celui de `DroitsRetraite.tsx`, avec deux clés i18n différentes. Je verrais bien un petit composant partagé, ce qui évite aussi que les deux textes divergent. Je n'ai pas vérifié que le lien s'ouvre bien dans une nouvelle fenêtre : l'aria-label annonce « nouvelle fenêtre », donc je me demande si le composant `Link` le fait de lui-même ou s'il faut une prop dédiée."
+ },
+ {
+  "message": "Synthèse :\n- Historique : 16 commits, dont plusieurs « fix » qui défont des commits précédents de la même PR (ajout puis suppression du lien Cnav, de l'objectif retraite de base, etc.). Un squash ou un réordonnancement les rendrait plus lisibles. Les scopes fonctionnels (`comparateur`, `indépendant`) manquent sur plusieurs messages, et `doc(retraite)` n'est pas un scope listé.\n- Dans `DroitsRetraite.tsx`, les apostrophes typographiques (’) sont devenues des apostrophes droites ('), alors que le reste de l'app utilise ’. Je me demande si c'est voulu.\n- Je n'ai pas pu vérifier le rendu visuel, ni que les fichiers de traduction régénérés correspondent aux clés finales."
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4324,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 329,
+   "start_line": null,
+   "body": "Je me demande si additionner les points AGIRC-ARRCO, RCI et Cipav est pertinent pour l'usager : ce sont des régimes distincts, dont la valeur du point diffère. Une somme de « points acquis par an » comparée entre statuts pourrait laisser croire qu'un total plus élevé est meilleur, alors que les points ne sont pas commensurables. Je n'ai pas vérifié ce que donne la somme quand certaines règles sont non applicables selon le statut. Peut-être afficher une ligne par régime, ou avoir une source pour cette agrégation ? Qu'en penses-tu ?",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/components/EngineValue/Condition.tsx",
+   "line": 27,
+   "start_line": null,
+   "body": "nit: CONTRIBUTING.md demande d'éviter les TODO laissés dans le code. Le lien vers #4323 est utile, mais je verrais bien le garder uniquement dans l'issue et dans le commentaire de `DetailsRowCards`, et retirer celui-ci pour ne pas toucher à un composant partagé sans changement de comportement.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/source/pages/simulateurs/comparaison-statuts/components/Détails.tsx",
+   "line": 344,
+   "start_line": null,
+   "body": "Ce bloc (message + lien + aria-label) est quasi identique à celui de `DroitsRetraite.tsx`, avec deux clés i18n différentes. Je verrais bien un petit composant partagé, ce qui évite aussi que les deux textes divergent. Je n'ai pas vérifié que le lien s'ouvre bien dans une nouvelle fenêtre : l'aria-label annonce « nouvelle fenêtre », donc je me demande si le composant `Link` le fait de lui-même ou s'il faut une prop dédiée.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "global",
+   "body": "Synthèse :\n- Historique : 16 commits, dont plusieurs « fix » qui défont des commits précédents de la même PR (ajout puis suppression du lien Cnav, de l'objectif retraite de base, etc.). Un squash ou un réordonnancement les rendrait plus lisibles. Les scopes fonctionnels (`comparateur`, `indépendant`) manquent sur plusieurs messages, et `doc(retraite)` n'est pas un scope listé.\n- Dans `DroitsRetraite.tsx`, les apostrophes typographiques (’) sont devenues des apostrophes droites ('), alors que le reste de l'app utilise ’. Je me demande si c'est voulu.\n- Je n'ai pas pu vérifier le rendu visuel, ni que les fichiers de traduction régénérés correspondent aux clés finales."
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 9,
+  "cost_usd": 0.1958349,
+  "final_text": "J'ai relu la PR #4324 et posté ma revue sur GitHub : trois commentaires inline et une synthèse. Je n'ai ni lancé les tests ni vérifié le rendu visuel.\n\nCommentaires inline :\n- **`Détails.tsx:329`** : la somme des points AGIRC-ARRCO, RCI et Cipav me semble discutable. Ce sont des régimes distincts, avec des valeurs de point différentes. Je n'ai pas vérifié ce que donne la somme quand une règle n'est pas applicable pour un statut.\n- **`Condition.tsx:27`** (nit) : le `TODO` qui renvoie à #4323 contredit `CONTRIBUTING.md`. Je propose de le retirer d'un composant partagé qui ne change pas de comportement.\n- **`Détails.tsx:344`** : le bloc message, lien et `aria-label` est presque identique à celui de `DroitsRetraite.tsx`, d'où l'idée d'un composant partagé. Je n'ai pas vérifié si `Link` ouvre bien le lien dans une nouvelle fenêtre, comme l'annonce l'`aria-label`.\n\nDans la synthèse :\n- **Historique** : 16 commits dont plusieurs « fix » qui défont des commits précédents de la PR, et des scopes manquants sur plusieurs messages. `doc(retraite)` n'est pas un scope de la liste.\n- **Apostrophes** : dans `DroitsRetraite.tsx`, les apostrophes typographiques (’) sont devenues des apostrophes droites ('). Je demande si c'est voulu.\n- **Non vérifié** : le rendu visuel et la cohérence des fichiers de traduction régénérés."
+ }
+}
+
+```

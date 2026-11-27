@@ -1,0 +1,8 @@
+[
+ {
+  "file": "site/source/contextes/économie-collaborative/domaine/location-de-meublé/régime-général.ts",
+  "start_line": 18,
+  "end_line": 18,
+  "message": "Dépendance circulaire : `cotisations.ts` importe `calculeCotisationsRégimeGénéral` d’ici, et ce fichier importe `DEFAULTS` de `cotisations.ts` (idem pour les deux autres régimes, s’ils lisent `DEFAULTS`). Ça fonctionne aujourd’hui parce que `DEFAULTS` n’est lu qu’à l’appel, mais ça devient fragile dès qu’on en lit une valeur à l’initialisation du module. Je verrais bien `DEFAULTS` dans `constantes.ts`, déjà importé ici, pour que les régimes ne dépendent plus de l’orchestrateur. Qu’en penses-tu ?"
+ }
+]

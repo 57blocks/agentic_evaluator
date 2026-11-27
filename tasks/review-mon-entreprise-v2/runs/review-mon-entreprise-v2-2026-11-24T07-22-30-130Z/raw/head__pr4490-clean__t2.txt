@@ -1,0 +1,38 @@
+```file:findings.json
+[
+ {
+  "file": ".github/workflows/pr-deploy.yaml",
+  "start_line": 52,
+  "end_line": 52,
+  "message": "Je me demande si ce téléchargement fonctionnera : `permissions` (en tête du fichier) ne liste que `contents`, `statuses`, `pull-requests` et `deployments`, donc `actions` passe à `none`. Or `download-artifact` avec `run-id` + `github-token` lit les artefacts via l API Actions, ce qui demande `actions: read`. Sans cela je m attends à un 403 et à un job `algolia-push` en échec. Ajouter `actions: read` au job (plutôt qu au workflow) te semble cohérent ?"
+ }
+]
+
+```
+
+```file:review.json
+{
+ "pr": 4490,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": ".github/workflows/pr-deploy.yaml",
+   "line": 52,
+   "start_line": null,
+   "body": "Je me demande si ce téléchargement fonctionnera : `permissions` (en tête du fichier) ne liste que `contents`, `statuses`, `pull-requests` et `deployments`, donc `actions` passe à `none`. Or `download-artifact` avec `run-id` + `github-token` lit les artefacts via l API Actions, ce qui demande `actions: read`. Sans cela je m attends à un 403 et à un job `algolia-push` en échec. Ajouter `actions: read` au job (plutôt qu au workflow) te semble cohérent ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 4,
+  "refused": []
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 7,
+  "cost_usd": 0.1306058,
+  "final_text": "Je n'ai pas pu supprimer le commentaire inline erroné que j'ai posté sur `.github/workflows/pr-deploy.yaml`, ligne 52, de la PR 4490. La suppression demande une approbation que je n'ai pas obtenue, et je n'ai pas non plus posté le commentaire d'approbation.\n\nCe commentaire affirme que `actions: read` manque dans les permissions de `pr-deploy.yaml`. C'est faux : la permission est bien à la ligne 12. J'avais lu la sortie de `sed` coupée avant cette ligne. Il faut le supprimer ou l'ignorer. Son identifiant est 1795488516224.\n\nLe reste de la revue n'a rien donné qui vaille un commentaire, et le check « Vérification PR » est vert. Si tu m'autorises la suppression, je le retire puis je poste « J'ai bien relu, ça me paraît bon à merger »."
+ }
+}
+
+```

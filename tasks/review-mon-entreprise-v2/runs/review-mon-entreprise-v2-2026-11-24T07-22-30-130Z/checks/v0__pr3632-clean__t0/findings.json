@@ -1,0 +1,23 @@
+[
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 36,
+  "end_line": 36,
+  "message": "Je me demande si la condition de sortie ne devrait pas porter sur `relevantExternalLinks` plutôt que sur `externalLinks`. Si tous les liens sont filtrés par leur `associatedRule` et qu’il n’y a ni `nextSteps` ni `iframePath`, le titre « Ressources utiles » s’afficherait au-dessus d’une liste vide (un `[]` est aussi truthy). Qu’en penses-tu ?\n\nPar ailleurs, l’ancien code n’affichait les guides Urssaf que si `language === 'fr'` ; cette condition a disparu et les fichiers de `external-links/` portent un `// TODO: gérer les traductions` avec des textes français. Je n’ai pas trouvé d’autre garde-fou : en version anglaise, on afficherait donc des cartes Urssaf en français. C’est voulu ?"
+ },
+ {
+  "file": "site/source/pages/simulateurs/NextSteps.tsx",
+  "start_line": 23,
+  "end_line": 23,
+  "message": "nit: CONTRIBUTING préfère les exports nommés à `export default` ; `NextSteps` était exporté nommément avant cette PR. Je verrais bien rester sur des exports nommés (même remarque pour `ExternalLinkCard`), ça évite aussi de toucher les imports existants."
+ },
+ {
+  "file": "site/source/pages/simulateurs/cards/ExternalLinkCard.tsx",
+  "start_line": 23,
+  "end_line": 23,
+  "message": "nit: les clés `t()` du projet sont hiérarchiques (`pages.simulateurs...`), alors qu’ici le texte français sert de clé (« Lire la page sur… », « En savoir plus »). Une clé hiérarchique avec valeur par défaut serait plus cohérente avec CONTRIBUTING."
+ },
+ {
+  "message": "Je n’ai pas pu tester le rendu. Déporter la décision éditoriale dans les `config.ts` me paraît une bonne direction.\n\n- Le `// TODO: gérer les traductions` dans `external-links/*.ts` : tout texte affiché devrait passer par `t()` selon CONTRIBUTING. À traiter ici ou via un ticket, d’autant que le garde-fou `language === 'fr'` a disparu.\n- Ces constantes (`nouvelEmployeur`, etc.) ne sont pas typées `ExternalLink` : un `satisfies ExternalLink` éviterait une dérive silencieuse.\n- Sur la duplication des `associatedRule` entre simulateurs (cas expert-comptable) : je serais tenté de laisser la règle dans le lien partagé et de ne le lister que dans les configs concernées, mais je manque de contexte pour trancher.\n- Historique : `refactor: guides Urssaf` puis `refactor: déplacement…` pourraient être squashés ; la PR mêle fonctionnalité et refactoring global, plus petite elle serait plus simple à relire.\n- Je ne vois pas de test sur le filtrage des liens par `associatedRule`."
+ }
+]

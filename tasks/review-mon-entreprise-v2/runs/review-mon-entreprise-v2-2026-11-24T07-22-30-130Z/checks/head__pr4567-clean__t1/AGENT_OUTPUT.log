@@ -1,0 +1,33 @@
+{
+ "pr": 4567,
+ "findings": [
+  {
+   "kind": "inline",
+   "path": "modele-ti/règles/indépendant/cotisations-et-contributions/cotisations/cotisations.publicodes",
+   "line": 559,
+   "start_line": null,
+   "body": "Ce changement modifie le calcul pour tous les indépendants, pas seulement à Mayotte : avec Acre et pension d’invalidité (hors exonération âge), l’Acre ne s’appliquait pas avant à la cotisation invalidité-décès (condition invalidité = non), et désormais elle s’applique. Le test « est nulle lorsqu’il y a à la fois Acre et invalidité » qui figeait l’ancien comportement est supprimé. Est-ce voulu, et sur quelle source (texte ou page Urssaf) ? La notification « cumul Acre et invalidité » indique que ce cas n’est pas géré, et le commit s’annonce comme « tests ». Si c’est une correction, je la verrais dans son propre commit (fix) avec un test qui l’explique.",
+   "in_reply_to": null
+  },
+  {
+   "kind": "inline",
+   "path": "site/test/modele-ti/cotisations-et-contributions/exonérations/exonérations.test.ts",
+   "line": 316,
+   "start_line": null,
+   "body": "Pour la retraite complémentaire, ce cas « pension d’invalidité seule » fixe le taux de la retraite de base (copie du bloc précédent), alors que la règle utilise `taux retraite complémentaire` (voir plus haut dans le fichier). Le test passerait donc sans exercer l’exonération visée : `taux retraite complémentaire` plutôt ?",
+   "in_reply_to": null
+  }
+ ],
+ "gh": {
+  "calls": 6,
+  "refused": [
+   "api --method GET repos/betagouv/mon-entreprise/issues/4411: issue withheld"
+  ]
+ },
+ "result": {
+  "subtype": "success",
+  "turns": 13,
+  "cost_usd": 0.20722259999999998,
+  "final_text": "J'ai relu la PR et posté deux commentaires inline. Je n'ai pas pu lire l'issue #4411 (`gh api` renvoie 404), donc je ne sais pas ce que la PR devait traiter. La vérification PR est au vert.\n\n- **`cotisations.publicodes:559`** : la suppression de la condition `exonérations . invalidité = non` change le résultat pour tous les indépendants, pas seulement à Mayotte. Avec Acre et pension d'invalidité, l'Acre s'applique désormais à la cotisation invalidité-décès. Le test qui figeait l'ancien comportement est supprimé. Je demande si c'est voulu, sur quelle source, et si cela ne devrait pas être un commit `fix` séparé.\n- **`exonérations.test.ts:316`** : dans le cas « pension d'invalidité seule » de la retraite complémentaire, le test fixe `taux retraite de base` au lieu de `taux retraite complémentaire`. Il ne teste donc pas l'exonération visée. Je pose la question de la bonne clé."
+ }
+}

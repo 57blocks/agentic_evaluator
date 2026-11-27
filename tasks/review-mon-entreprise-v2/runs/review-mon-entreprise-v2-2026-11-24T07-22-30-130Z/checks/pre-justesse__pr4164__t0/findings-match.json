@@ -1,0 +1,69 @@
+{
+  "version": "findings-match-3+opts-6db196e9",
+  "kind": "defect",
+  "findings": [
+    {
+      "file": "site/source/components/Simulation/SimulationGoal.tsx",
+      "start_line": 85,
+      "end_line": 85,
+      "message": "Je me demande si `RuleInputWrapper` ne pose pas un souci de remontage : il est rendu comme composant (`<ChampSaisie />`), et son identité change dès qu'une dépendance du `useCallback` change (`handleChange`, `currentUnit`, `evaluation.missingVariables`…). Si `missingVariables` est un nouvel objet à chaque évaluation, React démonterait puis remonterait le champ à chaque frappe, avec perte du focus. Je n'ai pas pu le vérifier à l'exécution : peux-tu tester la saisie dans un objectif du simulateur salarié ? Si c'est le cas, une fonction de rendu recevant `id`/`aria` (comme avant avec `rendreChampSaisie`) évite le problème."
+    },
+    {
+      "file": "site/source/components/conversation/OuiNonInput.tsx",
+      "start_line": 47,
+      "end_line": 47,
+      "message": "Je ne suis pas sûr qu'un `aria-label=\"\"` soit une bonne façon de faire taire React Aria : une chaîne vide n'est pas un nom accessible, et le même hack est répété dans `CardChoiceGroup`, `ToggleChoiceGroup`… Quand `aria-labelledby` est présent, la valeur vide a-t-elle un effet autre que supprimer le warning ? Sinon, qu'en penses-tu de ne laisser que `aria-labelledby` ?"
+    }
+  ],
+  "invalid": [],
+  "defects": [
+    {
+      "places": [
+        {
+          "file": "site/source/components/Simulation/ObjectifSaisissableDeSimulation.tsx",
+          "start_line": 16,
+          "end_line": 102
+        },
+        {
+          "file": "site/source/components/Simulation/SimulationGoal.tsx",
+          "start_line": 160,
+          "end_line": 161
+        },
+        {
+          "file": "site/source/pages/simulateurs/location-de-meublé/objectifs/ObjectifRecettes.tsx",
+          "start_line": 18,
+          "end_line": 32
+        }
+      ],
+      "caught_by": "llm",
+      "findings": [
+        0
+      ]
+    }
+  ],
+  "finding_source": [
+    "llm",
+    null
+  ],
+  "ambiguous": [
+    {
+      "finding": 0,
+      "defect": 0
+    },
+    {
+      "finding": 1,
+      "defect": 0
+    }
+  ],
+  "judged": true,
+  "llm": {
+    "model": "google/gemini-3.1-pro-preview",
+    "matches": [
+      {
+        "finding": 0,
+        "defect": 0
+      }
+    ]
+  },
+  "on_location": []
+}
